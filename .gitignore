@@ -113,3 +113,9 @@ atlassian-ide-plugin.xml
 com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
+
+# Project specific
+bower_components/
+db.sqlite3
+dist/
+node_modules/
