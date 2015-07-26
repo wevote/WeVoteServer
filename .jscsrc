@@ -1,0 +1,10 @@
+{
+    "preset": "airbnb",
+    "fileExtensions": [".js", "jscs"],
+
+    "safeContextKeyword": "_this",
+    "maximumLineLength": 120,
+    "validateLineBreaks": "LF",
+    "validateIndentation": 4,
+    "disallowTrailingComma": true
+}
