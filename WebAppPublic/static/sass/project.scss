@@ -31,3 +31,63 @@
   background-color: #f2dede;
   border-color: #eed3d7;
 }
+
+// Search
+.search-padding {
+  padding: 20px;
+  width: 100%;
+}
+
+.search-query {
+  background-color: rgba(11, 137, 207, 1);
+  border: 10px solid rgba(11, 137, 207, 1);
+  box-shadow: none;
+  color: #fff !important;
+  padding: 10px 10px 10px 26px;
+}
+
+.form-search {
+  position: relative;
+  width: 100%;
+
+  &:before {
+    background-position: -48px 0;
+    color: #fff;
+    content: "\e003";
+    display: block;
+    font-family: 'Glyphicons Halflings';
+    height: 14px;
+    left: 10px;
+    opacity: .5;
+    position: absolute;
+    top: 10px;
+    width: 14px;
+    z-index: 1000;
+  }
+}
+
+// Input
+
+::-webkit-input-placeholder {
+    color: #fff;
+}
+
+::-moz-placeholder {
+    color: #fff;
+}
+
+:-moz-placeholder {
+    color: #fff;
+}
+
+:-ms-input-placeholder {
+    color: #fff;
+}
+
+// navbars
+.navbar-blue {
+    background-color: rgba(34, 167, 240, 1);
+    border-radius: 0;
+}
+
+
