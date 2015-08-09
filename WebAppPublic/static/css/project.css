@@ -32,3 +32,65 @@
   background-color: #f2dede;
   border-color: #eed3d7;
 }
+
+/* line 36, ../sass/project.scss */
+.search-padding {
+  padding: 20px;
+  width: 100%;
+}
+
+/* line 41, ../sass/project.scss */
+.search-query {
+  background-color: #0b89cf;
+  border: 10px solid #0b89cf;
+  box-shadow: none;
+  color: #fff !important;
+  padding: 10px 10px 10px 26px;
+}
+
+/* line 49, ../sass/project.scss */
+.form-search {
+  position: relative;
+  width: 100%;
+}
+/* line 53, ../sass/project.scss */
+.form-search:before {
+  background-position: -48px 0;
+  color: #fff;
+  content: "\e003";
+  display: block;
+  font-family: 'Glyphicons Halflings';
+  height: 14px;
+  left: 10px;
+  opacity: .5;
+  position: absolute;
+  top: 10px;
+  width: 14px;
+  z-index: 1000;
+}
+
+/* line 71, ../sass/project.scss */
+::-webkit-input-placeholder {
+  color: #fff;
+}
+
+/* line 75, ../sass/project.scss */
+::-moz-placeholder {
+  color: #fff;
+}
+
+/* line 79, ../sass/project.scss */
+:-moz-placeholder {
+  color: #fff;
+}
+
+/* line 83, ../sass/project.scss */
+:-ms-input-placeholder {
+  color: #fff;
+}
+
+/* line 88, ../sass/project.scss */
+.navbar-blue {
+  background-color: #22a7f0;
+  border-radius: 0;
+}

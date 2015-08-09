@@ -34,7 +34,7 @@
 
   <body>
 
-    <div class="navbar navbar-default">
+    <div class="navbar navbar-blue">
       <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -49,33 +49,28 @@
         <!-- Add the search box for the top -->
         <div class="row">
           <div class="col-lg-12">
-            <div class="input-group">
-              <input type="text" class="form-control" placeholder="Search ...">
-              <span class="input-group-btn">
-                <button class="btn btn-default" type="button">Go!</button>
-              </span>
-            </div><!-- /input-group -->
+            <div class="search-padding input-group">
+                <form class="form-search form-inline">
+                    <input type="text" class="form-control search-query" placeholder="Search ...">
+                </form>
+            </div>
           </div><!-- /.col-lg-12 -->
         </div><!-- /.row -->
-
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
-          <ul class="nav navbar-nav">
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'about' %}">About</a></li>
-          </ul>
-
-          <ul class="nav navbar-nav navbar-right">
-            {% if request.user.is_authenticated %}
-              <li><a href="{% url 'users:detail' request.user.username  %}">{% trans "My Profile" %}</a></li>
-              <li><a href="{% url 'account_logout' %}">{% trans "Logout" %}</a></li>
-            {% else %}
-              <li><a href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a></li>
-              <li><a href="{% url 'account_login' %}">{% trans "Log In" %}</a></li>
-            {% endif %}
-          </ul>
-        </div>
       </div>
+    </div>
+
+    <div class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li><a href="{% url 'home' %}">Engage Friends</a></li>
+                        <li><a href="{% url 'about' %}">Public Opinions</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="container">
