@@ -36,16 +36,6 @@
 
     <div class="navbar navbar-blue">
       <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse-1" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
-
         <!-- Add the search box for the top -->
         <div class="row">
           <div class="col-lg-12">
@@ -59,15 +49,15 @@
       </div>
     </div>
 
-    <div class="navbar navbar-default">
+    <div class="navbar-secondary">
         <div class="container-fluid">
             <div class="row">
                 <!-- Collect the nav links, forms, and other content for toggling -->
-                <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
-                    <ul class="nav navbar-nav">
-                        <li><a href="{% url 'home' %}">Engage Friends</a></li>
-                        <li><a href="{% url 'about' %}">Public Opinions</a></li>
-                    </ul>
+                <div class="col-xs-6 text-center right-border" id="bs-navbar-collapse-1">
+                  <a class="lead secondary-heading_color" href="{% url 'home' %}">Engage Friends</a>
+                </div>
+                <div class="col-xs-6 text-center">
+                  <a class="lead secondary-heading_color" href="{% url 'about' %}">Public Opinions</a>
                 </div>
             </div>
         </div>
@@ -82,10 +72,85 @@
       {% endif %}
 
       {% block content %}
-        <p>Use this document as a way to quick start any new project.</p>
+      <h3 class="text-center">US House, <small>District 12</small></h3>
       {% endblock content %}
 
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="col-xs-4">
+            <img src="../static/images/photos/pelosi.jpg" height="107" width="100" />
+          </div>
+          <div class="col-xs-6">
+            <h3>Nancy Pelosi</h3>
+            <img src="../static/images/votes.jpg" height="43" width="200" />
+            <p>See 22 other opinions</p>
+          </div>
+          <div class="col-xs-2">
+            <img src="../static/images/icons/info.jpg" height="32" width="38" />
+          </div>
+        </div>
+        <div class="panel-body panel-border_top panel-last">
+          <div class="col-xs-4">
+            <img src="../static/images/photos/pelosi.jpg" height="107" width="100" />
+          </div>
+          <div class="col-xs-6">
+            <h3>John Dennis</h3>
+            <img src="../static/images/votes.jpg" height="43" width="200" />
+            <p>See 22 other opinions</p>
+          </div>
+          <div class="col-xs-2">
+            <img src="../static/images/icons/info.jpg" height="32" width="38" />
+          </div>
+        </div>
+      </div><!-- /panel 1 -->
+      <p>Today 8:45PM</p>
+      <h3 class="text-center">Governor</h3>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="col-xs-4">
+            <img src="../static/images/photos/pelosi.jpg" height="107" width="100" />
+          </div>
+          <div class="col-xs-6">
+            <h3>Neel Kashkari</h3>
+            <img src="../static/images/votes.jpg" height="43" width="200" />
+            <p>See 22 other opinions</p>
+          </div>
+          <div class="col-xs-2">
+            <img src="../static/images/icons/info.jpg" height="32" width="38" />
+          </div>
+        </div>
+        <div class="panel-body panel-border_top panel-last">
+          <div class="col-xs-4">
+            <img src="../static/images/photos/pelosi.jpg" height="107" width="100" />
+          </div>
+          <div class="col-xs-6">
+            <h3>Jerry Brown</h3>
+            <img src="../static/images/votes.jpg" height="43" width="200" />
+            <p>See 22 other opinions</p>
+          </div>
+          <div class="col-xs-2">
+            <img src="../static/images/icons/info.jpg" height="32" width="38" />
+          </div>
+        </div>
+      </div><!-- /panel 1 -->
+
     </div> <!-- /container -->
+    <nav class="navbar navbar-default navbar-fixed-bottom">
+      <div class="container">
+        <div class="col-xs-3">
+          <img src="../static/images/icons/my-ballot.jpg" height="64" width="77" />
+        </div>
+        <div class="col-xs-3">
+          <img src="../static/images/icons/questions.jpg" height="64" width="81" />
+        </div>
+        <div class="col-xs-3">
+          <img src="../static/images/icons/news-feed.jpg" height="61" width="95" />
+        </div>
+        <div class="col-xs-3">
+          <img src="../static/images/icons/more.jpg" height="63" width="76" />
+        </div>
+      </div>
+    </nav>
 
     {% block modal %}{% endblock modal %}
 

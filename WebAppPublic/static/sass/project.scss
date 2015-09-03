@@ -1,5 +1,8 @@
 // project specific CSS goes here
-
+body {
+  background: rgba(247, 247, 247, 1);
+  padding-bottom: 70px;
+}
 // bootstrap alert CSS, translated to the django-standard levels of
 // debug, info, success, warning, error
 .alert-debug {
@@ -67,22 +70,15 @@
 }
 
 // Input
-
 ::-webkit-input-placeholder {
-    color: #fff;
-}
-
-::-moz-placeholder {
-    color: #fff;
-}
-
-:-moz-placeholder {
-    color: #fff;
-}
-
-:-ms-input-placeholder {
-    color: #fff;
-}
+    color: white !important;
+    opacity: .4;
+    font-size: 19px;
+    line-height: 20px;
+    font-family: sans-serif;
+    font-weight: 400;
+    letter-spacing: 1px;
+  }
 
 // navbars
 .navbar-blue {
@@ -90,4 +86,44 @@
     border-radius: 0;
 }
 
+.navbar {
+  margin-bottom: 0;
+}
 
+.navbar-secondary {
+  background: rgba(11, 114, 172, 1);
+  border-radius: 0;
+  padding: 15px 0;
+}
+
+.navbar-secondary > a {
+  color: rgba(189, 210, 227, 1);
+}
+
+.navbar-fixed-bottom {
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#faf8f8+0,faf8f8+100 */
+  background: #faf8f8; /* Old browsers */
+  background: -moz-linear-gradient(top,  #faf8f8 0%, #faf8f8 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#faf8f8), color-stop(100%,#faf8f8)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  #faf8f8 0%,#faf8f8 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  #faf8f8 0%,#faf8f8 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  #faf8f8 0%,#faf8f8 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  #faf8f8 0%,#faf8f8 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#faf8f8', endColorstr='#faf8f8',GradientType=0 ); /* IE6-9 */
+}
+
+.right-border {
+  border-right: 1px solid #fff;
+}
+
+.secondary-heading_color {
+  color: #fff;
+}
+
+.panel-border_top {
+  border-top: 1px solid rgba(213, 213, 213, 1);
+}
+
+.panel {
+  margin-bottom: 0;
+}
