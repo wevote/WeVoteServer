@@ -1,0 +1,9 @@
+{% load compress %}
+{% load staticfiles %}
+
+{% compress js %}
+	<script src="{%static 'assets/javascript/vendor/bootstrap/ui-bootstrap-tpls-0.13.3.min.js' %}"></script>
+	<script src="{%static 'assets/javascript/vendor/angular/angular.js' %}"></script>
+	<script src="{%static 'assets/javascript/vendor/angular/angular-ui-router.js' %}"></script>
+	<script src="{%static 'js/project.js' %}"></script>
+{% endcompress %}
