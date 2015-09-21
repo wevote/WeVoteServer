@@ -1,0 +1,11 @@
+{
+  "preset": "airbnb",
+  "fileExtensions": [ ".js", "jscs" ],
+
+  "requireParenthesesAroundIIFE": true,
+  "validateIndentation": 4,
+
+  "disallowSpacesInsideObjectBrackets":  null,
+
+  "safeContextKeyword": "_this"
+}
