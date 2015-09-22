@@ -13,12 +13,13 @@ module.exports = {
         filename: 'bundle.js'
     },
     module: {
-        loaders: {
+        loaders: [
             { test: /\.css$/, loader: 'style-loader!css-loader' },
             { test: /\.(png|jpg)$/, loader: 'url-loader?limit=8192' },
             { test: /\.js$/, loader: ['react-hot', 'babel-loader'] },
             { test: /\.scss$/, loader: 'style!css!sass' }
-        }
+        ]
     },
+    clearBeforeBuild: true,
     plugins: [definePlugin]
 };

@@ -4,9 +4,11 @@
   "description": "Mobile version of the site",
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server --hot --inline"
+    "start": "webpack-dev-server --hot --inline".
+    "build": "webpack"
   },
   "dependencies": {
+    "hjs-webpack": "^2.13.1",
     "react": "~0.13.3"
   },
   "devDependencies": {
