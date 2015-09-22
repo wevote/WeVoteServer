@@ -9,4 +9,4 @@
 
 ###Bootstrap
 
-[Yeti](https://bootswatch.com/yeti/)
+[Yeti](https://bootswatch.com/yeti/) - boostrap/yeti integration
