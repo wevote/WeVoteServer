@@ -27,9 +27,9 @@ Front end development of the application.
 
 Install [node.js](https://nodejs.org) or [io.js](https://iojs.org)
 
-Just clone this repo and change the `origin` git remote.
+Clone the repo to your local machine.
 
-``` text
+``` shell
 npm install
 ```
 
