@@ -1,4 +1,6 @@
-## WebAppPublic
+# WeVoteServer
+
+## Client
 
 ### Documentation
 
@@ -55,6 +57,17 @@ $ cd WeVoteServer
 $ npm install                   # Install Node.js components listed in ./package.json
 $ npm start                     # Compile and launch
 ```
+
+#### Prerequisites
+
+Install Homebrew for package management:
+
+    http://brew.sh/
+
+Install node.js -- for more info, Google search for "install node mac" (note: install takes some time):
+
+    $ brew install node
+    $ brew update
 
 ### How to Build
 
