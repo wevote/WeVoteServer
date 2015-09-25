@@ -50,9 +50,8 @@
 Just clone the repo and start hacking:
 
 ```shell
-$ git clone -o react-starter-kit -b master --single-branch \
-      https://github.com/kriasoft/react-starter-kit.git MyApp
-$ cd MyApp
+$ git clone https://github.com/wevote/WeVoteServer.git
+$ cd WeVoteServer
 $ npm install                   # Install Node.js components listed in ./package.json
 $ npm start                     # Compile and launch
 ```
