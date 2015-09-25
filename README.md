@@ -1,6 +1,6 @@
-# webpack/react-starter
+# WeVoteUSA Mobile Application
 
-Starter template for react and webpack.
+Front end development of the application.
 
 ## Features
 
