@@ -1,139 +1,160 @@
-# WeVoteServer
+# webpack/react-starter
 
-## Client
+Starter template for react and webpack.
 
-### Documentation
+## Features
 
-  * **General**
-    - [React Style Guide](./docs/react-style-guide.md)
-    - [How to configure text editors and IDEs](./docs/how-to-configure-text-editors.md)
-  * **Recipes**
-    - [How to Implement Routing and Navigation](./docs/recipes/how-to-implement-routing.md)
-    - [How to Integrate Disqus](./docs/recipes/how-to-integrate-disqus.md)
+* Compilation with webpack
+* React and jsx
+* react-router
+* Stylesheets can be CSS, LESS, SASS, Stylus or mixed
+* Embedded resources like images or fonts use DataUrls if appropriate
+* A simple flag loads a react component (and dependencies) on demand.
+* Development
+  * Development server
+  * Optionally Hot Module Replacement development server (LiveReload for Stylesheets and React components enabled)
+  * Uses SourceUrl for performance, but you may switch to SourceMaps easily
+* Production
+  * Server example for prerendering for React components
+  * Initial data inlined in page
+  * Long Term Caching through file hashes enabled
+  * Generate separate css file to avoid FOUC
+  * Minimized CSS and javascript
+* Also supports coffee-script files if you are more a coffee-script person.
+* You can also require markdown or text files for your content.
 
-### Directory Layout
+## Local Installation
 
-```
-.
-├── /build/                     # The folder for compiled output
-├── /docs/                      # Documentation files for the project
-├── /node_modules/              # 3rd-party libraries and utilities
-├── /src/                       # The source code of the application
-│   ├── /actions/               # Action creators that allow to trigger a dispatch to stores
-│   ├── /api/                   # REST API / Relay endpoints
-│   ├── /components/            # React components
-│   ├── /constants/             # Constants (action types etc.)
-│   ├── /content/               # Static content (plain HTML or Markdown, Jade, you name it)
-│   ├── /core/                  # Core components (Flux dispatcher, base classes, utilities)
-│   ├── /decorators/            # Higher-order React components
-│   ├── /public/                # Static files which are copied into the /build/public folder
-│   ├── /stores/                # Stores contain the application state and logic
-│   ├── /utils/                 # Utility classes and functions
-│   ├── /app.js                 # Client-side startup script
-│   ├── /config.js              # Global application settings
-│   ├── /routes.js              # Universal (isomorphic) application routes
-│   └── /server.js              # Server-side startup script
-├── /tools/                     # Build automation scripts and utilities
-│   ├── /lib/                   # Library for utility snippets
-│   ├── /build.js               # Builds the project from source to output (build) folder
-│   ├── /bundle.js              # Bundles the web resources into package(s) through Webpack
-│   ├── /clean.js               # Cleans up the output (build) folder
-│   ├── /config.js              # Webpack configuration for application bundles
-│   ├── /copy.js                # Copies static files to output (build) folder
-│   ├── /deploy.js              # Deploys your web application
-│   ├── /serve.js               # Launches the Node.js/Express web server
-│   └── /start.js               # Launches the development web server with "live reload"
-│── package.json                # The list of 3rd party libraries and utilities
-└── preprocessor.js             # ES6 transpiler settings for Jest
+Install [node.js](https://nodejs.org) or [io.js](https://iojs.org)
+
+Just clone this repo and change the `origin` git remote.
+
+``` text
+npm install
 ```
 
-### Getting Started
+## Installation via Vagrant
 
-Just clone the repo and start hacking:
+Install [vagrant](https://vagrantup.com)
 
-```shell
-$ git clone https://github.com/wevote/WeVoteServer.git
-$ cd WeVoteServer
-$ npm install                   # Install Node.js components listed in ./package.json
-$ npm start                     # Compile and launch
+``` text
+vagrant up
+vagrant ssh
+cd /vagrant
 ```
 
-#### Prerequisites
+## Development server
 
-Install Homebrew for package management:
+``` text
+# start the webpack-dev-server
+npm run dev-server
+# wait for the first compilation is successful
 
-    http://brew.sh/
+# in another terminal/console
+# start the node.js server in development mode
+npm run start-dev
 
-Install node.js -- for more info, Google search for "install node mac" (note: install takes some time):
-
-    $ brew install node
-    $ brew update
-
-### How to Build
-
-```shell
-$ npm run build                 # or, `npm run build -- release`
+# open this url in your browser
+http://localhost:8080/
 ```
 
-By default, it builds in a *debug* mode. If you need to build in a release
-mode, just add `-- release` flag. This will optimize the output bundle for
-production deployment.
+The configuration is `webpack-dev-server.config.js`.
 
-### How to Run
+It automatically recompiles and refreshes the page when files are changed.
 
-```shell
-$ npm start                     # or, `npm start -- release`
+Also check the [webpack-dev-server documentation](http://webpack.github.io/docs/webpack-dev-server.html).
+
+
+## Hot Module Replacement development server
+
+``` text
+# start the webpack-dev-server in HMR mode
+npm run hot-dev-server
+# wait for the first compilation is successful
+
+# in another terminal/console
+# start the node.js server in development mode
+npm run start-dev
+
+# open this url in your browser
+http://localhost:8080/
 ```
 
-This will start a lightweight development server with "live reload" and
-synchronized browsing across multiple devices and browsers.
+The configuration is `webpack-hot-dev-server.config.js`.
 
-### How to Deploy
+It automatically recompiles when files are changed. When a hot-replacement-enabled file is changed (i. e. stylesheets or React components) the module is hot-replaced. If Hot Replacement is not possible the page is refreshed.
 
-```shell
-$ npm run deploy                # or, `npm run deploy -- production`
+Hot Module Replacement has a performance impact on compilation.
+
+
+## Production compilation and server
+
+``` text
+# build the client bundle and the prerendering bundle
+npm run build
+
+# start the node.js server in production mode
+npm run start
+
+# open this url in your browser
+http://localhost:8080/
 ```
 
-For more information see `tools/deploy.js`.
+The configuration is `webpack-production.config.js`.
 
-### How to Update
+The server is at `lib/server.js`
 
-You can always fetch and merge the recent changes from this repo back into
-your own project:
+The production setting builds two configurations: one for the client (`build/public`) and one for the serverside prerendering (`build/prerender`).
 
-```shell
-$ git checkout master
-$ git fetch react-starter-kit
-$ git merge react-starter-kit/master
-$ npm install
-```
 
-### How to Test
+## Legacy static assets
 
-Run unit tests powered by [Jest](https://facebook.github.io/jest/) with the following
-[npm](https://www.npmjs.org/doc/misc/npm-scripts.html) command:
+Assets in `public` are also served.
 
-```shell
-$ npm test
-```
 
-Test any javascript module by creating a `__tests__/` directory where
-the file is. Name the test by appending `-test.js` to the js file.
-[Jest](https://facebook.github.io/jest/) will do the rest.
+## Build visualization
 
-### Learn More
+After a production build you may want to visualize your modules and chunks tree.
 
-  * [Getting Started with React.js](http://facebook.github.io/react/)
-  * [Getting Started with GraphQL and Relay](https://quip.com/oLxzA1gTsJsE)
-  * [React.js Questions on StackOverflow](http://stackoverflow.com/questions/tagged/reactjs)
-  * [React.js Discussion Board](https://discuss.reactjs.org/)
-  * [Flux Architecture for Building User Interfaces](http://facebook.github.io/flux/)
-  * [Jest - Painless Unit Testing](http://facebook.github.io/jest/)
-  * [Flow - A static type checker for JavaScript](http://flowtype.org/)
-  * [The Future of React](https://github.com/reactjs/react-future)
-  * [Learn ES6](https://babeljs.io/docs/learn-es6/), [ES6 Features](https://github.com/lukehoban/es6features#readme)
+Use the [analyse tool](http://webpack.github.io/analyse/) with the file at `build/stats.json`.
 
-### Guides for Tools Uses
 
-* [React Boostrap](https://react-bootstrap.github.io/)
+## Loaders and file types
+
+Many file types are preconfigured, but not every loader is installed. If you get an error like `Cannot find module "xxx-loader"`, you'll need to install the loader with `npm install xxx-loader --save` and restart the compilation.
+
+
+## Common changes to the configuration
+
+### Add more entry points
+
+(for a multi page app)
+
+1. Add an entry point to `make-webpack-config.js` (`var entry`).
+2. Add a new top-level react component in `app` (`xxxRoutes.js`, `xxxStoreDescriptions.js`, `xxxStores.js`).
+3. (Optional) Enable `commonsChunk` in `webpack-production.config.js` and add `<script src="COMMONS_URL"></script>` to `app/prerender.html`.
+4. Modify the server code to require, serve and prerender the other entry point.
+5. Restart compilation.
+
+### Switch devtool to SourceMaps
+
+Change `devtool` property in `webpack-dev-server.config.js` and `webpack-hot-dev-server.config.js` to `"source-map"` (better module names) or `"eval-source-map"` (faster compilation).
+
+SourceMaps have a performance impact on compilation.
+
+### Enable SourceMaps in production
+
+1. Uncomment the `devtool` line in `webpack-production.config.js`.
+2. Make sure that the folder `build\public\debugging` is access controlled, i. e. by password.
+
+SourceMaps have a performance impact on compilation.
+
+SourceMaps contains your unminimized source code, so you need to restrict access to `build\public\debugging`.
+
+### Coffeescript
+
+Coffeescript is not installed/enabled by default to not disturb non-coffee developer, but you can install it easily:
+
+1. `npm install coffee-redux-loader --save`
+2. In `make-webpack-config.js` add `".coffee"` to the `var extensions = ...` line.
 

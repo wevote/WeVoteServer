@@ -1,0 +1,24 @@
+body {
+	background: #eee;
+}
+
+.this {
+	opacity: 1;
+}
+
+.this.loading {
+	opacity: 0.2;
+	transition: opacity 600ms;
+}
+
+.this .loadingElement {
+	display: none;
+}
+
+.this.loading .loadingElement {
+	display: inherit;
+}
+
+.loadingElement {
+	float: right;
+}
