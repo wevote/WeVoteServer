@@ -1,10 +1,5 @@
 {
   "private": true,
-  "engines": {
-    "node": ">= 0.12",
-    "iojs": ">= 3.0",
-    "npm": ">= 2.1"
-  },
   "dependencies": {
     "babel": "5.8.23",
     "classnames": "2.1.3",
