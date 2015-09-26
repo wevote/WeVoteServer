@@ -38,17 +38,25 @@ Front end development of the application.
 
 ### Local Installation
 
-Install [node.js](https://nodejs.org) or [io.js](https://iojs.org)
+Install Homebrew for package management:
+
+    http://brew.sh/
+
+Install [node.js](https://nodejs.org) or [io.js](https://iojs.org) -- for more info, Google search for "install node mac" (note: install takes some time):
+
+    brew install node
+    brew update
 
 Clone the repo to your local machine.
 
 ``` shell
+cd WeVoteServer/web_app
 npm install
 ```
 
 ### Installation via Vagrant
 
-Install [vagrant](https://vagrantup.com)
+If you want to run a remote version of this server, install [vagrant](https://vagrantup.com)
 
 ``` text
 vagrant up
@@ -93,7 +101,7 @@ npm run start-dev
 http://localhost:8080/
 ```
 
-The configuration is `webpack-hot-dev-server.config.js`.
+The configuration is `/web_app/webpack-hot-dev-server.config.js`.
 
 It automatically recompiles when files are changed. When a hot-replacement-enabled file is changed (i. e. stylesheets or React components) the module is hot-replaced. If Hot Replacement is not possible the page is refreshed.
 
@@ -113,9 +121,9 @@ npm run start
 http://localhost:8080/
 ```
 
-The configuration is `webpack-production.config.js`.
+The configuration is `/web_app/webpack-production.config.js`.
 
-The server is at `lib/server.js`
+The server is at `/web_app/lib/server.js`
 
 The production setting builds two configurations: one for the client (`build/public`) and one for the serverside prerendering (`build/prerender`).
 
@@ -143,7 +151,7 @@ Many file types are preconfigured, but not every loader is installed. If you get
 
 (for a multi page app)
 
-1. Add an entry point to `make-webpack-config.js` (`var entry`).
+1. Add an entry point to `/web_app/make-webpack-config.js` (`var entry`).
 2. Add a new top-level react component in `app` (`xxxRoutes.js`, `xxxStoreDescriptions.js`, `xxxStores.js`).
 3. (Optional) Enable `commonsChunk` in `webpack-production.config.js` and add `<script src="COMMONS_URL"></script>` to `app/prerender.html`.
 4. Modify the server code to require, serve and prerender the other entry point.
@@ -151,14 +159,14 @@ Many file types are preconfigured, but not every loader is installed. If you get
 
 #### Switch devtool to SourceMaps
 
-Change `devtool` property in `webpack-dev-server.config.js` and `webpack-hot-dev-server.config.js` to `"source-map"` (better module names) or `"eval-source-map"` (faster compilation).
+Change `devtool` property in `/web_app/webpack-dev-server.config.js` and `/web_app/webpack-hot-dev-server.config.js` to `"source-map"` (better module names) or `"eval-source-map"` (faster compilation).
 
 SourceMaps have a performance impact on compilation.
 
 #### Enable SourceMaps in production
 
-1. Uncomment the `devtool` line in `webpack-production.config.js`.
-2. Make sure that the folder `build\public\debugging` is access controlled, i. e. by password.
+1. Uncomment the `devtool` line in `/web_app/webpack-production.config.js`.
+2. Make sure that the folder `/web_app/build/public/debugging` is access controlled, i. e. by password.
 
 SourceMaps have a performance impact on compilation.
 
