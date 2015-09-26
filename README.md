@@ -238,12 +238,12 @@ In pgadmin add a server. You can use your sign in name as the server name.
 
 ### Setup - Environment Variables Configuration - config/environment_variables.json
 
-WeVoteBase is currently configured (in manage.py) to look for a "config/local.py" file (configured in the
+WeVoteServer is currently configured (in manage.py) to look for a "config/local.py" file (configured in the
 "config/settings.py" file). When we run this on a production server, we will startup with a production settings
 file like "production_heroku.py".
 
 Copy "environment_variables-template.json" to "environment_variables.json". You will configure many variables for your
-local environment in this file. New variables needed by WeVoteBase will be added to
+local environment in this file. New variables needed by WeVoteServer will be added to
 "environment_variables-template.json" from time to time, so please check for updates by comparing your local version
 with the template file.
 
