@@ -1,3 +1,3 @@
 require("./server")({
-	defaultPort: 8080
+	defaultPort: 9090
 });

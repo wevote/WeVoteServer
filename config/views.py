@@ -12,4 +12,4 @@ def start_view(request):
     template_values = {
         'hello_world': "hello world",
     }
-    return render(request, 'templates/start.html', template_values)
+    return render(request, 'start.html', template_values)

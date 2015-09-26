@@ -68,15 +68,16 @@ cd /vagrant
 
 ``` text
 # start the webpack-dev-server
+cd WeVoteServer/web_app
 npm run dev-server
 # wait for the first compilation is successful
 
-# in another terminal/console
-# start the node.js server in development mode
+# In another terminal/console, start the node.js server in development mode
+cd WeVoteServer/web_app
 npm run start-dev
 
 # open this url in your browser
-http://localhost:8080/
+http://localhost:9090/
 ```
 
 The configuration is `webpack-dev-server.config.js`.
@@ -93,12 +94,11 @@ Also check the [webpack-dev-server documentation](http://webpack.github.io/docs/
 npm run hot-dev-server
 # wait for the first compilation is successful
 
-# in another terminal/console
-# start the node.js server in development mode
+# In another terminal/console, start the node.js server in development mode
 npm run start-dev
 
 # open this url in your browser
-http://localhost:8080/
+http://localhost:9090/
 ```
 
 The configuration is `/web_app/webpack-hot-dev-server.config.js`.
@@ -118,7 +118,7 @@ npm run build
 npm run start
 
 # open this url in your browser
-http://localhost:8080/
+http://localhost:9090/
 ```
 
 The configuration is `/web_app/webpack-production.config.js`.
@@ -294,30 +294,21 @@ If you are not prompted to create a superuser, run the following command:
 
 ### Setup - Heroku Configuration
 
-We use Heroku for publishing a public version anyone can play with (see "Live Demo" above), and you can publish a public version too. Here are the instructions:
+We use Heroku for publishing a public version anyone can play with , and you can publish a public version too. Here are the instructions:
 https://devcenter.heroku.com/articles/getting-started-with-django
 
 In the config/setting.py file, search for "Heroku". There are comments that tell you which parts of the settings file to comment or uncomment to get a version running on Heroku.
 
-### Import Test Data
+### Test that WeVoteServer is running
 
 Start up the webserver:
 
     python manage.py runserver
 
-Open your browser to login to the admin account so you can have access to the import_export tools:
-
-    http://localhost:8000/admin/login/?next=/admin/
-
 Visit the site here:
 
-    http://localhost:8000/import_export/
+    http://localhost:8000
 
-Click all the import links, going from top to bottom.
-
-Now go back to the root and you should be taken to a San Francisco ballot.
-
-     http://localhost:8000/
 
 ### Coding Standards
 
