@@ -143,7 +143,7 @@ node_modules/
 /geo/data/
 /**/migrations/*.py
 !/**/migrations/__init__.py
-wevoteserver/environment_variables.json
+config/environment_variables.json
 
 # Heroku Related #
 ##################

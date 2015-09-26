@@ -1,0 +1,47 @@
+{
+  "_comment":                       "local.py settings, including database",
+  "DATABASE_ENGINE":                "django.db.backends.postgresql_psycopg2",
+  "DATABASE_NAME":                  "WeVoteDB",
+  "DATABASE_USER":                  "postgres",
+  "DATABASE_PASSWORD":              "",
+  "DATABASE_HOST":                  "",
+  "DATABASE_PORT":                  "",
+
+  "_comment":                       "These are the levels of logging available: CRITICAL, ERROR, INFO, WARN, DEBUG",
+  "_comment":                       "*** LOG_STREAM turns on or off the messages to the command line: true or false",
+  "LOG_STREAM":                     true,
+  "_comment":                       "*** LOG_STREAM_LEVEL is the level of logging printed to the command line",
+  "LOG_STREAM_LEVEL":               "DEBUG",
+  "_comment":                       "*** LOG_FILE is the location on the disk of the log file",
+  "LOG_FILE":                       "/var/log/wevote/wevoteserver.log",
+  "_comment":                       "*** LOG_FILE_LEVEL is the level of logging written to the log file",
+  "LOG_FILE_LEVEL":                 "ERROR",
+
+  "_comment":                       "import_export",
+  "WE_VOTE_API_KEY":                "",
+  "ORGANIZATIONS_URL":              "http://my.wevoteusa.org/import_export/organizations/?format=json",
+  "ORGANIZATIONS_JSON_FILE":        "import_export/import_data/organizations_sample.json",
+  "CANDIDATE_CAMPAIGNS_URL":        "http://my.wevoteusa.org/import_export/candidate_campaigns/?format=json",
+  "CANDIDATE_CAMPAIGNS_JSON_FILE":  "import_export/import_data/candidate_campaigns_sample.json",
+  "POSITIONS_URL":                  "http://my.wevoteusa.org/import_export/positions/?format=json",
+  "POSITIONS_JSON_FILE":            "import_export/import_data/positions_sample.json",
+
+  "_comment":                       "import_export_google_civic",
+  "GOOGLE_CIVIC_API_KEY":           "",
+  "VOTER_INFO_URL":                 "https://www.googleapis.com/civicinfo/v2/voterinfo",
+  "VOTER_INFO_JSON_FILE":           "import_export_google_civic/import_data/voterinfo_sample.json",
+
+  "_comment":                       "import_export_theunitedstatesio",
+  "LEGISLATORS_CURRENT_CSV_FILE":   "import_export_theunitedstatesio/import_data/legislators-current.csv",
+
+  "_comment":                       "import_export_voting_info_project",
+  "VOTING_INFO_PROJECT_SAMPLE_XML_FILE": "import_export_voting_info_project/import_data/sample_feed.xml",
+
+  "SOCIAL_AUTH_FACEBOOK_KEY":       "",
+  "SOCIAL_AUTH_FACEBOOK_SECRET":    "",
+  "SOCIAL_AUTH_TWITTER_KEY":        "",
+  "SOCIAL_AUTH_TWITTER_SECRET":     "",
+  "SECRET_KEY":                     "(-ack%@p)$dpr-4*q$a@ir%64(_(q6!ve@=r&5i*@-fw6bjnqq",
+
+  "_comment":                       "End of json_environment_variables.json"
+}
