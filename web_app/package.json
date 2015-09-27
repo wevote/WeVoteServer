@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^3.0.1",
+    "browser-sync": "^2.9.6",
     "eslint": "^0.22.0",
     "eslint-plugin-react": "^2.2.0"
   }
