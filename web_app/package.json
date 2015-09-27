@@ -1,23 +1,8 @@
 {
-  "name": "react-starter",
-  "version": "0.0.0",
+  "name": "wevoteusa",
+  "version": "0.2.0",
   "description": "",
   "main": "app/app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev-server": "webpack-dev-server --config webpack-dev-server.config.js --progress --colors --port 2992 --inline",
-    "hot-dev-server": "webpack-dev-server --config webpack-hot-dev-server.config.js --hot --progress --colors --port 2992 --inline",
-    "build": "webpack --config webpack-production.config.js --progress --profile --colors",
-    "start-dev": "node lib/server-development",
-    "start": "node lib/server-production"
-  },
-  "keywords": [
-    "webpack",
-    "react",
-    "starter",
-    "boilerplate",
-    "hot"
-  ],
   "author": "Tobias Koppers @sokra",
   "license": "MIT",
   "dependencies": {
@@ -60,5 +45,13 @@
     "browser-sync": "^2.9.6",
     "eslint": "^0.22.0",
     "eslint-plugin-react": "^2.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev-server": "webpack-dev-server --config webpack-dev-server.config.js --progress --colors --port 2992 --inline",
+    "hot-dev-server": "webpack-dev-server --config webpack-hot-dev-server.config.js --hot --progress --colors --port 2992 --inline",
+    "build": "webpack --config webpack-production.config.js --progress --profile --colors",
+    "start-dev": "node lib/server-development",
+    "start": "node lib/server-production"
   }
 }
