@@ -64,6 +64,14 @@ vagrant ssh
 cd /vagrant
 ```
 
+NOTE:  
+
+```
+On Windows vagrant up should be run with administrative priviledges (e.g. from an elevated prompt opened via the right click 'Run as administrator' context menu action) to allow 
+symlinking. Otherwise the box will fail! The included vagrant.bat handles this automatically. If an ssh executable is not found on the system path, and git is installed, 
+vagrant.bat will attempt to fallback to the ssh executable installed with git via the included vagrant-bin/ssh.bat script.
+```
+
 ### Development server
 
 ``` text

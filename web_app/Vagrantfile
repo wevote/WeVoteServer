@@ -33,7 +33,7 @@ Vagrant.configure("2") do |config|
 
     # cpu/mem algorithm adapted from https://github.com/rdsubhas/vagrant-faster/blob/master/lib/vagrant/faster/action.rb
     # because 'vagrant-faster' is VirtualBox specific and unconditionally targets all virtual machines at time of writing
-    mem = 2048
+    mem = 2048k
     cpus = 1
     host = RbConfig::CONFIG['host_os']
     if host =~ /darwin/
