@@ -77,7 +77,7 @@ cd WeVoteServer/web_app
 npm run start-dev
 
 # open this url in your browser
-http://localhost:9090/
+http://127.0.0.1:9090/
 ```
 
 The configuration is `webpack-dev-server.config.js`.
@@ -98,7 +98,7 @@ npm run hot-dev-server
 npm run start-dev
 
 # open this url in your browser
-http://localhost:9090/
+http://127.0.0.1:9090/
 ```
 
 The configuration is `/web_app/webpack-hot-dev-server.config.js`.
@@ -118,7 +118,7 @@ npm run build
 npm run start
 
 # open this url in your browser
-http://localhost:9090/
+http://127.0.0.1:9090/
 ```
 
 The configuration is `/web_app/webpack-production.config.js`.

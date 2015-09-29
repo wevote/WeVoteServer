@@ -119,7 +119,7 @@ They end up affecting a store. See [How the stores work.](#how-the-stores-work)
 ## How the server DB works
 When you run `npm run start-dev` (or without `-dev` ofcourse) this will start the server, as you can see defined in `package.json`. This lets node execute `lib/server-development.js` which uses `lib/server.js` where the default data is loaded, and a server (package express) is thrown together that responds to GET POST and DELETE.
 
-This (REST API with JSON data format) server is accessible via `http://localhost:8080/_/list/mylist` for example, and this is what the application uses to fetch data for the stores.
+This (REST API with JSON data format) server is accessible via `http://127.0.0.1:8080/_/list/mylist` for example, and this is what the application uses to fetch data for the stores.
 
 
 ## How the 'Random fail!' works.
