@@ -6,7 +6,7 @@ export default class ReadmePage extends React.Component {
 		return {};
 	}
 	render() {
-		var readme = { __html: require("./../../README.md") };
+		var readme = { __html: require("../../../README.md") };
 		return <div className={styles.this} dangerouslySetInnerHTML={readme}></div>;
 	}
 }
