@@ -8,6 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "async": "^1.2.0",
+    "babel": "^5.0.12",
     "babel-core": "^5.0.12",
     "babel-loader": "^5.0.0",
     "body-parser": "^1.9.3",

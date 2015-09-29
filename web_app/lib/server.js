@@ -50,7 +50,7 @@ module.exports = function(options) {
 	// application
 	app.get("/*", function(req, res) {
 		renderer.render(
-			req,
+			req.path,
 			createPrerenderApi(req),
 			function(err, html) {
 				if(err) {
@@ -66,7 +66,7 @@ module.exports = function(options) {
 	});
 
 
-	var port = process.env.PORT || options.defaultPort || 8080;
+	var port = process.env.PORT || options.defaultPort || 9090;
 	app.listen(port, function() {
 		console.log("Server listening on port " + port);
 	});

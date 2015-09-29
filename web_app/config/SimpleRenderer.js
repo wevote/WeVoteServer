@@ -1,18 +1,13 @@
 var fs = require("fs");
 var path = require("path");
 var html = fs.readFileSync(path.resolve(__dirname, "../app/simple.html"), "utf-8");
-var URL = require("url");
 
 function SimpleRenderer(options) {
-  this.options = options;
-  this.html = html;
+  this.html = html.replace("SCRIPT_URL", options.scriptUrl);
 }
 
 SimpleRenderer.prototype.render = function(_path, _readItems, callback) {
-  urlObj = URL.parse(this.options.scriptUrl);
-  urlObj.host = null;
-  urlObj.hostname = req.hostname;
-  callback(null, this.html.replace("SCRIPT_URL", URL.format(urlObj)));
+  callback(null, this.html);
 };
 
 module.exports = SimpleRenderer;
