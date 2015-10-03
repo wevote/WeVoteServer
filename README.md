@@ -237,7 +237,7 @@ Install Postgres:
 
 #### METHOD 3 (linux Ubuntu)
 
-Follow these (instructions)[https://help.ubuntu.com/community/PostgreSQL] 
+Follow these [instructions](https://help.ubuntu.com/community/PostgreSQL)
 
 #### THEN 
 
