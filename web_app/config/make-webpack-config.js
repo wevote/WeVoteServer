@@ -2,18 +2,18 @@ var path = require("path");
 var webpack = require("webpack");
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 var StatsPlugin = require("stats-webpack-plugin");
-var loadersByExtension = require("./config/loadersByExtension");
+var loadersByExtension = require("./loadersByExtension");
 
 module.exports = function(options) {
 	var entry = {
 		main: options.prerender ? "./config/mainPrerenderer" : "./config/mainApp"
-		// second: options.prerender ? "./config/secondPrerenderer" : "./config/secondApp"
+		// second: options.prerender ? "./secondPrerenderer" : "./secondApp"
 	};
 	var loaders = {
 		"jsx": options.hotComponents ? ["react-hot-loader", "babel-loader?stage=0"] : "babel-loader?stage=0",
 		"js": {
 			loader: "babel-loader?stage=0",
-			include: path.join(__dirname, "app")
+			include: path.join(__dirname, "../app")
 		},
 		"json": "json-loader",
 		"coffee": "coffee-redux-loader",
@@ -47,7 +47,7 @@ module.exports = function(options) {
 	];
 	var modulesDirectories = ["web_modules", "node_modules"];
 	var extensions = ["", ".web.js", ".js", ".jsx"];
-	var root = path.join(__dirname, "app");
+	var root = path.join(__dirname, "..", "app");
 	var publicPath = options.devServer ?
 		"http://127.0.0.1:2992/_assets/" :
 		"/_assets/";
@@ -92,8 +92,8 @@ module.exports = function(options) {
 		plugins.push(new webpack.optimize.CommonsChunkPlugin("commons", "commons.js" + (options.longTermCaching && !options.prerender ? "?[chunkhash]" : "")));
 	}
 	var asyncLoader = {
-		test: require("./app/route-handlers/async").map(function(name) {
-			return path.join(__dirname, "app", "route-handlers", name);
+		test: require("../app/route-handlers/async").map(function(name) {
+			return path.join(__dirname, "../app", "route-handlers", name);
 		}),
 		loader: options.prerender ? "react-proxy-loader/unavailable" : "react-proxy-loader"
 	};
