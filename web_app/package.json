@@ -55,6 +55,7 @@
     "lint": "eslint app && jscs src",
     "load-assets": "webpack-dev-server --host 0.0.0.0 --config config/webpack-dev-server.config.js --progress --colors --port 2992 --inline",
     "serve-files": "node lib/server-development",
+    "prestart-dev": "npm i",
     "start-dev": "node node_modules/npm-parallel/bin/parallel.js load-assets serve-files",
     "hot-dev-server": "webpack-dev-server --host 0.0.0.0 --config config/webpack-hot-dev-server.config.js --hot --progress --colors --port 2992 --inline",
     "build": "webpack --config config/webpack-production.config.js --progress --profile --colors",
