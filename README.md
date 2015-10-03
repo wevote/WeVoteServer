@@ -313,9 +313,9 @@ Start up the webserver:
 
     python manage.py runserver
 
-Visit the site here:
+Find documentation for all of the APIs here:
 
-    http://localhost:8000
+    http://localhost:8000/apis/vi/docs
 
 
 ### Coding Standards

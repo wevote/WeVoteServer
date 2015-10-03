@@ -70,6 +70,7 @@ INSTALLED_APPS = (
     # 'crispy_forms',
 
     # project specific
+    'apis_v1',
     # 'election_office_measure',
     # 'exception',
     # 'follow',
