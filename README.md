@@ -230,13 +230,19 @@ Install Postgres:
     $ sudo port install postgresql94
     $ sudo port install postgresql94-server
 
-Next, follow these instructions:
+#### METHOD 3 (linux Ubuntu)
+
+Follow these (instructions)[https://help.ubuntu.com/community/PostgreSQL] 
+
+#### THEN 
+
+Follow these instructions:
 
     http://gknauth.blogspot.com/2014/01/postgresql-93-setup-after-initial.html
 
 #### FINALLY
 
-We also recommend installing pgAdmin3 as a WYSIWYG database administration tool.
+We recommend installing pgAdmin3 as a WYSIWYG database administration tool.
 NOTE: You may need to turn off the restriction in "Security & Privacy" on "unidentified developers"
 to allow this tool to be installed.
 See: http://blog.tcs.de/program-cant-be-opened-because-it-is-from-an-unidentified-developer/
