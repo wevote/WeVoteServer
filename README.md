@@ -203,7 +203,9 @@ Once you have cloned this repository to your local machine, set up a virtual env
 
 We recommend running this within your virtual environment:
 **NOTE: Before beginning on a Linux environment** 
+
 DO:
+
     sudo apt-get install python-psycopg2 
     sudo apt-get install python-dev
     pip install psycopg2 
