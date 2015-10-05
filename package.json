@@ -1,0 +1,12 @@
+{
+    "name": "WeVoteServer",
+    "version": "0.0.1",
+    "description": "We vote server backend and front end ui",
+    "scripts": {
+        "test": "echo \"no test\" && exit 0"
+    },
+    "repository":{
+        "type": "git",
+        "url": "https://www.github.com/wevote/WeVoteServer"
+    }
+}
