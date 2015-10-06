@@ -18,7 +18,17 @@
     <tr>
         <td><a href="{% url 'apis_v1:deviceIdGenerateDocs' %}">deviceIdGenerate</a></td>
         <td>GET</td>
-        <td></td>
+        <td>Generate a device_id (store in cookie) that can be linked to a voter_id</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterCreateDocs' %}">voterCreate</a></td>
+        <td>GET / POST ?</td>
+        <td>Create an empty voter entry attached to a voter_device_id</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve/?format=json</a></td>
+        <td>GET / POST ?</td>
+        <td>Export raw voter data to JSON format</td>
     </tr>
 
 </table>

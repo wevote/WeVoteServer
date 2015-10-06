@@ -5,7 +5,7 @@
 from django.shortcuts import render
 
 
-def apis_index(request):
+def apis_index_doc_view(request):
     """
     Show a list of available APIs
     """
@@ -15,7 +15,7 @@ def apis_index(request):
     return render(request, 'apis_v1/apis_index.html', template_values)
 
 
-def device_id_generate(request):
+def device_id_generate_doc_view(request):
     """
     Show documentation about deviceIdGenerate
     """
@@ -23,3 +23,23 @@ def device_id_generate(request):
         # 'key': value,
     }
     return render(request, 'apis_v1/deviceIdGenerate.html', template_values)
+
+
+def voter_create_doc_view(request):
+    """
+    Show documentation about voterGenerate
+    """
+    template_values = {
+        # 'key': value,
+    }
+    return render(request, 'apis_v1/voterCreate.html', template_values)
+
+
+def voter_retrieve_doc_view(request):
+    """
+    Show documentation about voterGenerate
+    """
+    template_values = {
+        # 'key': value,
+    }
+    return render(request, 'apis_v1/voterRetrieve.html', template_values)
