@@ -11,12 +11,14 @@ from . import views
 from . import views_docs
 
 urlpatterns = [
-    url(r'^deviceIdGenerate/$', views.device_id_generate_view, name='deviceIdGenerate'),
-    url(r'^voterCreate/', views.voter_create_view, name='voterCreate'),
-    url(r'^voterRetrieve/', views.voterRetrieveView.as_view(), name='voterRetrieve'),
+    url(r'^deviceIdGenerate/$', views.device_id_generate_view, name='deviceIdGenerateView'),
+    url(r'^voterCount/', views.voter_count_view, name='voterCountView'),
+    url(r'^voterCreate/', views.voter_create_view, name='voterCreateView'),
+    url(r'^voterRetrieve/', views.VoterRetrieveView.as_view(), name='voterRetrieveView'),
 
     url(r'^docs/$', views_docs.apis_index_doc_view, name='apisIndex'),
     url(r'^docs/deviceIdGenerate/$', views_docs.device_id_generate_doc_view, name='deviceIdGenerateDocs'),
+    url(r'^docs/voterCount/$', views_docs.voter_count_doc_view, name='voterCountDocs'),
     url(r'^docs/voterCreate/$', views_docs.voter_create_doc_view, name='voterCreateDocs'),
     url(r'^docs/voterRetrieve/$', views_docs.voter_retrieve_doc_view, name='voterRetrieveDocs'),
 ]

@@ -92,7 +92,7 @@ INSTALLED_APPS = (
     # 'twitter',
     # 'utils',
     'wevote_functions',
-    # 'wevote_social',
+    'wevote_social',
     'voter',  # See also AUTH_USER_MODEL in config/settings.py
 )
 
@@ -105,12 +105,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    # 'wevote_social.middleware.SocialMiddleware',
+    'wevote_social.middleware.SocialMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
-    # 'social.backends.facebook.FacebookOAuth2',
-    # 'social.backends.twitter.TwitterOAuth',
+    'social.backends.facebook.FacebookOAuth2',
+    'social.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -129,9 +129,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',  # Django Cookbook
                 'django.template.context_processors.static',  # Django Cookbook
-                # 'social.apps.django_app.context_processors.backends',
-                # 'social.apps.django_app.context_processors.login_redirect',
-                # 'wevote_social.context_processors.profile_photo',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
+                'wevote_social.context_processors.profile_photo',
             ],
         },
     },

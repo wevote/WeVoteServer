@@ -66,7 +66,39 @@ def voter_retrieve_list(voter_device_id):
     return results
 
 
+def voter_count():
+
+    voter_list = Voter.objects.all()
+    # Add a filter to only show voters who have actually done something
+    # voter_list = voter_list.filter(id=voter_id)
+
+    # TODO DALE We will want to cache a json file and only refresh it every couple of seconds (so it doesn't become
+    # a bottle neck as we have
+
+    if voter_list.count():
+        data = {
+            'success': True,
+            'voter_count': voter_list.count(),
+        }
+        return HttpResponse(json.dumps(data), content_type='application/json')
+    else:
+        data = {
+            'success': False,
+            'voter_count': 0,
+        }
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
+
 def voter_create(voter_device_id):
+    if not voter_device_id \
+            or len(voter_device_id) <= 70 \
+            or len(voter_device_id) >= 90:
+        data = {
+            'status': "VALID_VOTER_DEVICE_ID_MISSING",
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
     voter_id = 0
     # Make sure a voter record hasn't already been created for this
     existing_voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)

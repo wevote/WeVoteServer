@@ -25,9 +25,19 @@ def device_id_generate_doc_view(request):
     return render(request, 'apis_v1/deviceIdGenerate.html', template_values)
 
 
+def voter_count_doc_view(request):
+    """
+    Show documentation about voterCount
+    """
+    template_values = {
+        # 'key': value,
+    }
+    return render(request, 'apis_v1/voterCount.html', template_values)
+
+
 def voter_create_doc_view(request):
     """
-    Show documentation about voterGenerate
+    Show documentation about voterCreate
     """
     template_values = {
         # 'key': value,
@@ -37,7 +47,7 @@ def voter_create_doc_view(request):
 
 def voter_retrieve_doc_view(request):
     """
-    Show documentation about voterGenerate
+    Show documentation about voterRetrieve
     """
     template_values = {
         # 'key': value,

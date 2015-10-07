@@ -6,7 +6,7 @@ import json
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .controllers import voter_create, voter_retrieve_list
+from .controllers import voter_count, voter_create, voter_retrieve_list
 from .serializers import VoterSerializer
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id
 import wevote_functions.admin
@@ -22,7 +22,7 @@ def device_id_generate_view(request):
     :param request:
     :return: Unique device id that can be stored in a cookie
     """
-    voter_device_id = generate_voter_device_id()  # Stored in cookie below
+    voter_device_id = generate_voter_device_id()  # Stored in cookie elsewhere
     logger.debug("apis_v1/views.py, device_id_generate-voter_device_id: {voter_device_id}".format(
         voter_device_id=voter_device_id
         ))
@@ -33,11 +33,11 @@ def device_id_generate_view(request):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
-class voterRetrieveView(APIView):
+class VoterRetrieveView(APIView):
     """
     Export raw voter data to JSON format
     """
-    def get(self, request, format=None):
+    def get(self, request):  # Removed: , format=None
         voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
         results = voter_retrieve_list(voter_device_id)
 
@@ -50,12 +50,10 @@ class voterRetrieveView(APIView):
             return HttpResponse(json.dumps(data), content_type='application/json')
 
 
+def voter_count_view(request):
+    return voter_count()
+
+
 def voter_create_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    if not voter_device_id:
-        data = {
-            'status': "MISSING_VOTER_DEVICE_ID",
-        }
-        return HttpResponse(json.dumps(data), content_type='application/json')
-
     return voter_create(voter_device_id)
