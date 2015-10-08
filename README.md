@@ -42,7 +42,7 @@ Install Homebrew for package management:
 
     http://brew.sh/
 
-Install [node.js](https://nodejs.org) or [io.js](https://iojs.org) - Make sure you are using NodeJS v4.1.2 or higher.
+Install [node.js](https://nodejs.org) - Make sure you are using NodeJS v4.1.2 or higher.
 
     brew install node
     brew update
