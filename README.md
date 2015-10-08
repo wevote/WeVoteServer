@@ -1,6 +1,10 @@
 # WeVoteServer
 
-This repository includes a 1) web app client, as well as the 2) API server that powers this client. 
+This repository includes:  
+
+1) A web app client  
+2) API server that powers this client. 
+
 You can see our current wireframe mockup for a San Francisco ballot here:
 http://start.wevoteusa.org/
 
