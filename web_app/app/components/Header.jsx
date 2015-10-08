@@ -1,3 +1,7 @@
+let React = require("react");
+
+requre("stylesheets/bootstrap.3.3.1.min");
+
 let Header = React.createClass({
   render() {
     return (
