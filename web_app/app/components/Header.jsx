@@ -1,5 +1,5 @@
-var Header = React.createClass({
-  render: function () {
+let Header = React.createClass({
+  render() {
     return (
       <div className="navbar navbar-default">
         Top navbar starter
