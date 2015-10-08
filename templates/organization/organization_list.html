@@ -1,0 +1,18 @@
+{# organization/templates/organization/organization_list.html #}
+{% extends "we_vote_base.html" %}
+
+{% block title %}Endorsing Organizations{% endblock %}
+
+{%  block content %}
+<h1>Endorsing Organizations</h1>
+<p><a href="{% url 'organization:organization_new' %}">Add New Organization</a></p>
+
+{% if organization_list %}
+    {% for organization in organization_list %}
+        <h3>{{ organization.name }} <a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">(edit)</a></h3>
+        <a href="{% url 'organization:organization_position_list' organization.id %}">(view positions)</a>
+    {% endfor %}
+{% else %}
+    <p>(no organizations found)</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,95 @@
+{# organization/templates/organization/organization_position_edit.html #}
+{# This template is used to add (or edit) an organization's position on a CandidateCampaign or a MeasureCampaign #}
+{% extends "we_vote_base.html" %}
+
+{% block title %}{% if organization_position %}Edit Position{% else %}Add Position{% endif %}{% endblock %}
+
+{%  block content %}
+<!-- START organization/templates/organization/organization_position_edit.html //-->
+<h1>{% if not organization_position %}Enter Position for {% endif %}{{ organization.name }}{% if organization_position %}<br />
+Position on {{ organization_position.candidate_campaign.candidate_name }}{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url "organization:organization_position_edit_process" %}" method="post">
+{% csrf_token %}
+    <input type="hidden" name="organization_id" value="{{ organization.id }}">
+    <input type="hidden" name="position_id" value="{% if organization_position %}{{ organization_position.id }}{% else %}0{% endif %}">
+
+{% if not is_in_edit_mode %}Interface needed to switch between "select candidate" and "select measure"<br />{% endif %}
+
+{# Candidate Campaign #}
+{% if is_in_edit_mode %}
+    {# EDIT EXISTING: There is no need to display anything here #}
+    <input type="hidden" name="candidate_campaign_id" value="{{ organization_position.candidate_campaign.id }}">
+{% else %}
+    {# ADD NEW: Show the drop-down of campaigns this org can have enter a position for #}
+    <label for="candidate_campaign_id_id">Candidate:</label>
+    <select type="text" name="candidate_campaign_id" id="candidate_campaign_id_id" />
+    {% if candidate_campaigns_for_this_election_list %}
+        <option value="0">-- select candidate --</option>
+        {% for candidate_campaign_from_loop in candidate_campaigns_for_this_election_list %}
+        <option value="{{ candidate_campaign_from_loop.id }}"
+                {% if candidate_campaign_from_loop.id == organization_position.candidate_campaign.id %} selected="selected"
+                {% endif %}>{{ candidate_campaign_from_loop.candidate_name }}</option>
+        {% endfor %}
+    {% else %}
+    <option value="0">-- no candidates found --</option>
+    {% endif %}
+    </select>
+
+    <br />
+{% endif %}
+
+
+{# Measure Campaign #}
+{% if is_in_edit_mode %}
+    {# EDIT EXISTING: There is no need to display anything here #}
+    <input type="hidden" name="measure_campaign_id" value="{{ organization_position.measure_campaign.id }}">
+{% else %}
+    {# ADD NEW: Show the drop-down of campaigns this org can have enter a position for #}
+    <label for="measure_campaign_id_id">Measure (ID for now)</label>
+    {% if organization_position %}
+    Existing organization_position selected
+    <input type="text" name="measure_campaign_name" id="measure_campaign_id" value="{{ organization_position.measure_campaign.id }}" />
+    {% else %}
+    <input type="text" name="measure_campaign_id" id="measure_campaign_id_id" value="" />
+    {% endif %}
+
+    <br />
+{% endif %}
+
+{# Stance #}
+    <label for="stance_id">Your Stance:</label>
+    <select type="text" name="stance" id="stance_id" />
+    {% if possible_stances_list %}
+        {% for stance, stance_text in possible_stances_list %}
+        <option value="{{ stance }}"
+                {% if stance_selected == stance %} selected="selected"{% endif %}>{{ stance_text }}</option>
+        {% endfor %}
+    {% else %}
+    <option value="0">-- no stance choices found --</option>
+    {% endif %}
+    </select>
+    <br />
+
+{# Stance Text #}
+    <label for="statement_text_id"><span class="organization_position_label_title">Please explain your stance.</span>
+        <span class="organization_position_label_modifier">(Only the first 255 characters will display most places)</span></label>
+    <br />
+    <textarea name="statement_text" id="statement_text_id" class="organization_position_statement_text" >{{ organization_position.statement_text }}</textarea>
+    <br />
+
+{# URI for more details #}
+    <label for="more_info_url_id"><span class="organization_position_label_title">Voters can learn more at this web address.</span>
+        <span class="organization_position_label_modifier">(Also useful for verifying this position)</span>
+    </label>
+    <br />
+    {# TODO Create prompting text with "http..." that goes away when person clicks #}
+    <input type="text" name="more_info_url" id="more_info_url_id" value="{{ organization_position.more_info_url }}" class="organization_position_more_info_url" />
+    <br />
+
+    <p><a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>&nbsp;&nbsp;
+    <input type="submit" value="{% if organization_position %}Update Position{% else %}Save New Position{% endif %}" /></p>
+</form>
+
+{% endblock %}
