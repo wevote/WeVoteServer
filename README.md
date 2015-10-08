@@ -42,7 +42,7 @@ Install Homebrew for package management:
 
     http://brew.sh/
 
-Install [node.js](https://nodejs.org) or [io.js](https://iojs.org) -- for more info, Google search for "install node mac" (note: install takes some time):
+Install [node.js](https://nodejs.org) or [io.js](https://iojs.org) - Make sure you are using NodeJS v4.1.2 or higher.
 
     brew install node
     brew update
@@ -77,12 +77,12 @@ vagrant.bat will attempt to fallback to the ssh executable installed with git vi
 ``` text
 # start the webpack-dev-server
 cd WeVoteServer/web_app
-npm run dev-server
+npm run build:dev
 # wait for the first compilation is successful
 
 # In another terminal/console, start the node.js server in development mode
 cd WeVoteServer/web_app
-npm run start-dev
+npm run start:dev
 
 # open this url in your browser
 http://127.0.0.1:9090/
@@ -103,7 +103,7 @@ npm run hot-dev-server
 # wait for the first compilation is successful
 
 # In another terminal/console, start the node.js server in development mode
-npm run start-dev
+npm run start:dev
 
 # open this url in your browser
 http://127.0.0.1:9090/
@@ -120,10 +120,10 @@ Hot Module Replacement has a performance impact on compilation.
 
 ``` text
 # build the client bundle and the prerendering bundle
-npm run build
+npm run build:prod
 
 # start the node.js server in production mode
-npm run start
+npm run start:dev
 
 # open this url in your browser
 http://127.0.0.1:9090/
