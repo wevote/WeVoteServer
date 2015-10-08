@@ -47,17 +47,18 @@
     "browser-sync": "^2.9.6",
     "eslint": "^0.22.0",
     "eslint-plugin-react": "^2.2.0",
-    "npm-parallel": "^2.0.1",
-    "parallel": "^0.2.1"
+    "npm-parallel": "^2.0.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint app && jscs src",
     "load-assets": "webpack-dev-server --host 0.0.0.0 --config config/webpack-dev-server.config.js --progress --colors --port 2992 --inline",
     "serve-files": "node lib/server-development",
-    "start-dev": "node node_modules/npm-parallel/bin/parallel.js load-assets serve-files",
+    "prestart-dev": "npm i",
+    "start:dev": "node node_modules/npm-parallel/bin/parallel.js load-assets serve-files",
     "hot-dev-server": "webpack-dev-server --host 0.0.0.0 --config config/webpack-hot-dev-server.config.js --hot --progress --colors --port 2992 --inline",
-    "build": "webpack --config config/webpack-production.config.js --progress --profile --colors",
+    "build:prod": "webpack --config config/webpack-production.config.js --progress --profile --colors",
+    "build:dev": "webpack --config config/webpack-dev-server.config.js --progress --profile --colors",
     "start": "node lib/server-production"
   }
 }

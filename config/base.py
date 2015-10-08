@@ -16,11 +16,11 @@ DEBUG = False
 
 # Load JSON-based environment_variables if available
 json_environment_variables = {}
-##try:
-with open("config/environment_variables.json") as f:
+try:
+    with open("config/environment_variables.json") as f:
         json_environment_variables = json.loads(f.read())
-##except StandardError as e:
-##    print "base.py: environment_variables.json missing"  # Can't use logger in the settings file due to loading sequence
+except StandardError as e:
+    print "base.py: environment_variables.json missing"  # Can't use logger in the settings file due to loading sequence
 
 
 def get_environment_variable(var_name, json_environment_vars=json_environment_variables):
@@ -71,8 +71,9 @@ INSTALLED_APPS = (
 
     # project specific
     'apis_v1',
+    'config',
     # 'election_office_measure',
-    # 'exception',
+    'exception',
     # 'follow',
     # 'import_export',
     # 'import_export_azavea_cicero',
@@ -85,16 +86,13 @@ INSTALLED_APPS = (
     # 'politician',
     # 'position',
     # 'region_jurisdiction',
-    # 'rest_framework',
+    'rest_framework',
     # 'support_oppose_deciding',
     # 'tag',
     # 'twitter',
     # 'utils',
-    # 'ux_birch',
-    # 'ux_oak',  # The business logic for this particular version of We Vote
     'wevote_functions',
-    # 'wevote_settings',
-    # 'wevote_social',
+    'wevote_social',
     'voter',  # See also AUTH_USER_MODEL in config/settings.py
 )
 
@@ -107,12 +105,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    # 'wevote_social.middleware.SocialMiddleware',
+    'wevote_social.middleware.SocialMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
-    # 'social.backends.facebook.FacebookOAuth2',
-    # 'social.backends.twitter.TwitterOAuth',
+    'social.backends.facebook.FacebookOAuth2',
+    'social.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -131,9 +129,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',  # Django Cookbook
                 'django.template.context_processors.static',  # Django Cookbook
-                # 'social.apps.django_app.context_processors.backends',
-                # 'social.apps.django_app.context_processors.login_redirect',
-                # 'wevote_social.context_processors.profile_photo',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
+                'wevote_social.context_processors.profile_photo',
             ],
         },
     },

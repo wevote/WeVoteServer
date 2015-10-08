@@ -52,7 +52,7 @@ module.exports = function(options) {
 		"http://127.0.0.1:2992/_assets/" :
 		"/_assets/";
 	var output = {
-		path: path.join(__dirname, "build", options.prerender ? "prerender" : "public"),
+		path: path.join(__dirname, "../build", options.prerender ? "prerender" : "public"),
 		publicPath: publicPath,
 		filename: "[name].js" + (options.longTermCaching && !options.prerender ? "?[chunkhash]" : ""),
 		chunkFilename: (options.devServer ? "[id].js" : "[name].js") + (options.longTermCaching && !options.prerender ? "?[chunkhash]" : ""),
@@ -69,7 +69,7 @@ module.exports = function(options) {
 		new webpack.PrefetchPlugin("react/lib/ReactComponentBrowserEnvironment")
 	];
 	if(options.prerender) {
-		plugins.push(new StatsPlugin(path.join(__dirname, "build", "stats.prerender.json"), {
+		plugins.push(new StatsPlugin(path.join(__dirname, "..", "build", "stats.prerender.json"), {
 			chunkModules: true,
 			exclude: excludeFromStats
 		}));
@@ -83,7 +83,7 @@ module.exports = function(options) {
 		);
 		plugins.push(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }));
 	} else {
-		plugins.push(new StatsPlugin(path.join(__dirname, "build", "stats.json"), {
+		plugins.push(new StatsPlugin(path.join(__dirname, "..", "build", "stats.json"), {
 			chunkModules: true,
 			exclude: excludeFromStats
 		}));

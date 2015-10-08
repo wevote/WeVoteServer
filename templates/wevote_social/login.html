@@ -1,0 +1,12 @@
+{% extends "we_vote_base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h1>Login</h1>
+<div>
+    <ul>
+        <li><a href="{% url 'social:begin' 'facebook' %}?next={{ next }}">Login with Facebook</a></li>
+        <li><a href="{% url 'social:begin' 'twitter' %}?next={{ next }}">Login with Twitter</a></li>
+    </ul>
+</div>
+{% endblock %}

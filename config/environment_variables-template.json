@@ -1,7 +1,7 @@
 {
   "_comment":                       "local.py settings, including database",
   "DATABASE_ENGINE":                "django.db.backends.postgresql_psycopg2",
-  "DATABASE_NAME":                  "WeVoteDB",
+  "DATABASE_NAME":                  "WeVoteServerDB",
   "DATABASE_USER":                  "postgres",
   "DATABASE_PASSWORD":              "",
   "DATABASE_HOST":                  "",

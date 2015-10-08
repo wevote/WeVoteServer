@@ -84,6 +84,11 @@ def generate_random_string(string_length=88, chars=string.ascii_lowercase + stri
 
 
 def generate_voter_device_id():
+    """
+
+    :return:
+    :test: WeVoteAPIsV1TestsDeviceIdGenerate
+    """
     # We would like this device_id to be long so hackers can't cycle through all possible device ids to get access to
     # a voter's sign in session. As of this writing, all 8 digit strings can be cracked locally in 5.5 hours given the
     # right hardware:
@@ -97,8 +102,7 @@ def generate_voter_device_id():
     #  88(62) = 2.798279e+124
     new_device_id = generate_random_string(88)
 
-    # Check that this device_id isn't already in the database
-    # TODO Implement the check
+    # We do not currently check that this device_id is already in the database because it is such a large number space
     return new_device_id
 
 

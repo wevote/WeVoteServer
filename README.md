@@ -1,7 +1,12 @@
-changing README
+[![Build Status](https://travis-ci.org/wevote/WeVoteServer.svg?branch=master)](https://travis-ci.org/wevote/WeVoteServer) [![Coverage Status](https://coveralls.io/repos/wevote/WeVoteServer/badge.svg?branch=master&service=github)](https://coveralls.io/github/wevote/WeVoteServer?branch=master)
+
 # WeVoteServer
 
-This repository includes a 1) web app client, as well as the 2) API server that powers this client. 
+This repository includes:  
+
+1) A web app client  
+2) API server that powers this client. 
+
 You can see our current wireframe mockup for a San Francisco ballot here:
 http://start.wevoteusa.org/
 
@@ -43,7 +48,7 @@ Install Homebrew for package management:
 
     http://brew.sh/
 
-Install [node.js](https://nodejs.org) or [io.js](https://iojs.org) -- for more info, Google search for "install node mac" (note: install takes some time):
+Install [node.js](https://nodejs.org) - Make sure you are using NodeJS v4.1.2 or higher.
 
     brew install node
     brew update
@@ -78,12 +83,12 @@ vagrant.bat will attempt to fallback to the ssh executable installed with git vi
 ``` text
 # start the webpack-dev-server
 cd WeVoteServer/web_app
-npm run dev-server
+npm run build:dev
 # wait for the first compilation is successful
 
 # In another terminal/console, start the node.js server in development mode
 cd WeVoteServer/web_app
-npm run start-dev
+npm run start:dev
 
 # open this url in your browser
 http://127.0.0.1:9090/
@@ -104,7 +109,7 @@ npm run hot-dev-server
 # wait for the first compilation is successful
 
 # In another terminal/console, start the node.js server in development mode
-npm run start-dev
+npm run start:dev
 
 # open this url in your browser
 http://127.0.0.1:9090/
@@ -121,10 +126,10 @@ Hot Module Replacement has a performance impact on compilation.
 
 ``` text
 # build the client bundle and the prerendering bundle
-npm run build
+npm run build:prod
 
 # start the node.js server in production mode
-npm run start
+npm run start:dev
 
 # open this url in your browser
 http://127.0.0.1:9090/
@@ -181,14 +186,6 @@ SourceMaps have a performance impact on compilation.
 
 SourceMaps contains your un-minimized source code, so you need to restrict access to `build\public\debugging`.
 
-#### Coffeescript
-
-Coffeescript is not installed/enabled by default to not disturb non-coffee developer, but you can install it easily:
-
-1. `npm install coffee-redux-loader --save`
-2. In `make-webpack-config.js` add `".coffee"` to the `var extensions = ...` line.
-
-
 ## 2) Python API Server
 
 ### Setup - Dependencies
@@ -203,6 +200,16 @@ Once you have cloned this repository to your local machine, set up a virtual env
     source venv/bin/activate
 
 We recommend running this within your virtual environment:
+
+**NOTE: Before beginning on a Linux environment** 
+
+DO:
+
+    sudo apt-get install python-psycopg2 
+    sudo apt-get install python-dev
+    pip install psycopg2 
+
+THEN:
 
     pip install django-toolbelt
     pip install --upgrade pip
@@ -231,13 +238,19 @@ Install Postgres:
     $ sudo port install postgresql94
     $ sudo port install postgresql94-server
 
-Next, follow these instructions:
+#### METHOD 3 (linux Ubuntu)
+
+Follow these [instructions](https://help.ubuntu.com/community/PostgreSQL)
+
+#### THEN 
+
+Follow these instructions:
 
     http://gknauth.blogspot.com/2014/01/postgresql-93-setup-after-initial.html
 
 #### FINALLY
 
-We also recommend installing pgAdmin3 as a WYSIWYG database administration tool.
+We recommend installing pgAdmin3 as a WYSIWYG database administration tool.
 NOTE: You may need to turn off the restriction in "Security & Privacy" on "unidentified developers"
 to allow this tool to be installed.
 See: http://blog.tcs.de/program-cant-be-opened-because-it-is-from-an-unidentified-developer/
