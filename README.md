@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/wevote/WeVoteServer.svg?branch=master)](https://travis-ci.org/wevote/WeVoteServer)
+
 # WeVoteServer
 
 This repository includes:  
