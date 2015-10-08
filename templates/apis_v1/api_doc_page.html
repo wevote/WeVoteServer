@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<a href="{% url 'apis_v1:apisIndex'%}">< back to index</a>
+
+<h1>{{ api_name }}</h1>
+<p>
+    {{ api_introduction }}
+    <a href="{% url try_now_link %}{{ try_now_link_variables }}" target="_blank">Try it now</a>.
+    </p>
+
+
+<h2>HTTP request</h2>
+<p>{{ get_or_post }} {{ url_root }}/apis/v1/{{ api_slug }}</p>
+
+
+{% if required_query_parameter_list %}
+<h3>Required Parameters</h3>
+
+    <table border="0" cellpadding="5" cellspacing="1">
+        <tr>
+            <td>Parameter name</td>
+            <td>Value</td>
+            <td>Description</td>
+        </tr>
+        {% for query_parameter in required_query_parameter_list %}
+        <tr>
+            <td>{{ query_parameter.name }}</td>
+            <td>{{ query_parameter.value }}</td>
+            <td>{{ query_parameter.description }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+{% if optional_query_parameter_list %}
+<h3>Optional Parameters</h3>
+
+    <table border="0" cellpadding="5" cellspacing="1">
+        <tr>
+            <td>Parameter name</td>
+            <td>Value</td>
+            <td>Description</td>
+        </tr>
+        {% for query_parameter in optional_query_parameter_list %}
+        <tr>
+            <td>{{ query_parameter.name }}</td>
+            <td>{{ query_parameter.value }}</td>
+            <td>{{ query_parameter.description }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+
+
+
+{% if request_body %}
+<h3>Request body</h3>
+
+    {{ request_body }}
+{% endif %}
+
+
+<h2>Response</h2>
+<p>{{ api_response_notes }}</p>
+<pre>{{ api_response }}</pre>
+
+
+{% if potential_status_codes_list %}
+<h3>Response Status Codes</h3>
+
+    <table border="0" cellpadding="5" cellspacing="1">
+        <tr>
+            <td>Code</td>
+            <td>Description</td>
+        </tr>
+        {% for status_code in potential_status_codes_list %}
+        <tr>
+            <td>{{ status_code.code }}</td>
+            <td>{{ status_code.description }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+
+</body>
+</html>

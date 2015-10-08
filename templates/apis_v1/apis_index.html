@@ -7,32 +7,29 @@
 <body>
 
 <h1>We Vote APIs, v1</h1>
-<p>A list of available APIs</p>
+<p>A list of available APIs. See also our API design
+    <a href="https://docs.google.com/document/d/1HNAk5hA-aj1VRCXSH0est6kLbfBs0cGc4fCb7zwUvLI/edit#"
+       target="_blank">google document</a>.</p>
 
-<table border="1" cellpadding="1">
+<table border="1" cellpadding="5" cellspacing="1">
     <thead>
         <td>Method</td>
-        <td>HTTP request</td>
         <td>Description</td>
     </thead>
     <tr>
         <td><a href="{% url 'apis_v1:deviceIdGenerateDocs' %}">deviceIdGenerate</a></td>
-        <td>GET</td>
         <td>Generate a device_id (store in cookie) that can be linked to a voter_id</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterCountDocs' %}">voterCount</a></td>
-        <td>GET / POST ?</td>
         <td>Count the number of voters in the database.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterCreateDocs' %}">voterCreate</a></td>
-        <td>GET / POST ?</td>
         <td>Create an empty voter entry attached to a voter_device_id</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve/?format=json</a></td>
-        <td>GET / POST ?</td>
         <td>Export raw voter data to JSON format</td>
     </tr>
 

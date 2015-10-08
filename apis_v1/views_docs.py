@@ -3,6 +3,9 @@
 # -*- coding: UTF-8 -*-
 
 from django.shortcuts import render
+from documentation_source import device_id_generate_doc, voter_count_doc, voter_create_doc, voter_retrieve_doc
+
+LOCALHOST_URL_ROOT = 'http://localhost:8000'
 
 
 def apis_index_doc_view(request):
@@ -19,37 +22,33 @@ def device_id_generate_doc_view(request):
     """
     Show documentation about deviceIdGenerate
     """
-    template_values = {
-        # 'key': value,
-    }
-    return render(request, 'apis_v1/deviceIdGenerate.html', template_values)
+    url_root = LOCALHOST_URL_ROOT
+    template_values = device_id_generate_doc.device_id_generate_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
 def voter_count_doc_view(request):
     """
     Show documentation about voterCount
     """
-    template_values = {
-        # 'key': value,
-    }
-    return render(request, 'apis_v1/voterCount.html', template_values)
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_count_doc.voter_count_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
 def voter_create_doc_view(request):
     """
     Show documentation about voterCreate
     """
-    template_values = {
-        # 'key': value,
-    }
-    return render(request, 'apis_v1/voterCreate.html', template_values)
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_create_doc.voter_create_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
 def voter_retrieve_doc_view(request):
     """
     Show documentation about voterRetrieve
     """
-    template_values = {
-        # 'key': value,
-    }
-    return render(request, 'apis_v1/voterRetrieve.html', template_values)
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_retrieve_doc.voter_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)

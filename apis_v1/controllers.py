@@ -56,7 +56,7 @@ def voter_retrieve_list(voter_device_id):
     }
     data = {
         'error': error_package,
-        'status': "VOTER_ID_NOT_FOUND",
+        'status': "VOTER_ID_COULD_NOT_BE_RETRIEVED",
         'voter_device_id': voter_device_id,
     }
     results = {
