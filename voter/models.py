@@ -382,77 +382,189 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
 #     jurisdiction = models.ForeignKey(Jurisdiction,
 #                                      null=False, blank=False, verbose_name="jurisdiction this voter votes in")
 
+BALLOT_ADDRESS = 'B'
+MAILING_ADDRESS = 'M'
+FORMER_BALLOT_ADDRESS = 'F'
+ADDRESS_TYPE_CHOICES = (
+    (BALLOT_ADDRESS, 'Address Where Registered to Vote'),
+    (MAILING_ADDRESS, 'Mailing Address'),
+    (FORMER_BALLOT_ADDRESS, 'Prior Address'),
+)
 
-# # TODO DALE FINISH VoterAddress routines
-# class VoterAddress(models.Model):
-#     """
-#     An address of a registered voter for ballot purposes.
-#     """
-#     #
-#     author_handle = models.CharField(max_length=15, verbose_name='twitter handle of this tweet\'s author')
-#     # (stored quickly before we look up voter_id)
-#     # author_voter_id = models.ForeignKey(Voter, null=True, blank=True, related_name='we vote id of tweet author')
-#     is_retweet = models.BooleanField(default=False, verbose_name='is this a retweet?')
-#     # parent_tweet_id # If this is a retweet, what is the id of the originating tweet?
-#     body = models.CharField(blank=True, null=True, max_length=255, verbose_name='')
-#     date_published = models.DateTimeField(null=True, verbose_name='date published')
-#
-#
-# class VoterAddressManager(models.Model):
-#
-#     def __unicode__(self):
-#         return "VoterAddressManager"
-#
-#     def retrieve_address_from_voter_id(self, voter_id):
-#         organization_id = 0
-#         voter_id = 0
-#         candidate_campaign_id = 0
-#         measure_campaign_id = 0
-#         voter_address_manager = VoterAddressManager()
-#         return voter_address_manager.retrieve_position(
-#             position_id, organization_id, voter_id, candidate_campaign_id, measure_campaign_id)
-#
-#     def retrieve_address(self, position_id, organization_id, voter_id, candidate_campaign_id, measure_campaign_id):
-#         error_result = False
-#         exception_does_not_exist = False
-#         exception_multiple_object_returned = False
-#         voter_address_on_stage = VoterAddress()
-#
-#         try:
-#             if position_id > 0:
-#                 voter_address_on_stage = VoterAddress.objects.get(id=position_id)
-#                 position_id = voter_address_on_stage.id
-#             elif organization_id > 0 and candidate_campaign_id > 0:
-#                 voter_address_on_stage = VoterAddress.objects.get(
-#                     organization_id=organization_id, candidate_campaign_id=candidate_campaign_id)
-#                 # If still here, we found an existing position
-#                 position_id = voter_address_on_stage.id
-#             elif organization_id > 0 and measure_campaign_id > 0:
-#                 voter_address_on_stage = VoterAddress.objects.get(
-#                     organization_id=organization_id, measure_campaign_id=measure_campaign_id)
-#                 position_id = voter_address_on_stage.id
-#             elif voter_id > 0 and candidate_campaign_id > 0:
-#                 voter_address_on_stage = VoterAddress.objects.get(
-#                     voter_id=voter_id, candidate_campaign_id=candidate_campaign_id)
-#                 position_id = voter_address_on_stage.id
-#             elif voter_id > 0 and measure_campaign_id > 0:
-#                 voter_address_on_stage = VoterAddress.objects.get(
-#                     voter_id=voter_id, measure_campaign_id=measure_campaign_id)
-#                 position_id = voter_address_on_stage.id
-#         except VoterAddress.MultipleObjectsReturned as e:
-#             handle_record_found_more_than_one_exception(e, logger=logger)
-#             error_result = True
-#             exception_multiple_object_returned = True
-#         except VoterAddress.DoesNotExist:
-#             error_result = True
-#             exception_does_not_exist = True
-#
-#         results = {
-#             'error_result':             error_result,
-#             'DoesNotExist':             exception_does_not_exist,
-#             'MultipleObjectsReturned':  exception_multiple_object_returned,
-#             'position_found':           True if position_id > 0 else False,
-#             'voter_address_id':              position_id,
-#             'voter_address':                 voter_address_on_stage,
-#         }
-#         return results
+
+class VoterAddress(models.Model):
+    """
+    An address of a registered voter for ballot purposes.
+    """
+    #
+    # We are relying on built-in Python id field
+
+    # The voter_id that owns this address
+    voter_id = models.IntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
+    address_type = models.CharField(
+        verbose_name="type of address", max_length=1, choices=ADDRESS_TYPE_CHOICES, default=BALLOT_ADDRESS)
+
+    address = models.CharField(max_length=254, blank=False, null=False, verbose_name='address as entered')
+
+    latitude = models.CharField(max_length=254, blank=True, null=True, verbose_name='latitude returned from Google')
+    longitude = models.CharField(max_length=254, blank=True, null=True, verbose_name='longitude returned from Google')
+    normalized_line1 = models.CharField(max_length=254, blank=True, null=True,
+                                        verbose_name='normalized address line 1 returned from Google')
+    normalized_line2 = models.CharField(max_length=254, blank=True, null=True,
+                                        verbose_name='normalized address line 2 returned from Google')
+    normalized_city = models.CharField(max_length=254, blank=True, null=True,
+                                       verbose_name='normalized city returned from Google')
+    normalized_state = models.CharField(max_length=254, blank=True, null=True,
+                                        verbose_name='normalized state returned from Google')
+    normalized_zip = models.CharField(max_length=254, blank=True, null=True,
+                                      verbose_name='normalized zip returned from Google')
+
+    refreshed_from_google = models.BooleanField(
+        verbose_name="have normalized fields been updated from Google since address change?", default=False)
+
+
+class VoterAddressManager(models.Model):
+
+    def __unicode__(self):
+        return "VoterAddressManager"
+
+    def retrieve_ballot_address_from_voter_id(self, voter_id):
+        voter_address_id = 0
+        address_type = BALLOT_ADDRESS
+        voter_address_manager = VoterAddressManager()
+        return voter_address_manager.retrieve_address(voter_address_id, voter_id, address_type)
+
+    def retrieve_address(self, voter_address_id, voter_id, address_type):
+        error_result = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        voter_address_on_stage = VoterAddress()
+
+        try:
+            if voter_address_id > 0:
+                voter_address_on_stage = VoterAddress.objects.get(id=voter_address_id)
+                voter_address_id = voter_address_on_stage.id
+            elif voter_id > 0 and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
+                voter_address_on_stage = VoterAddress.objects.get(voter_id=voter_id, address_type=address_type)
+                # If still here, we found an existing address
+                voter_address_id = voter_address_on_stage.id
+        except VoterAddress.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            error_result = True
+            exception_multiple_object_returned = True
+        except VoterAddress.DoesNotExist:
+            error_result = True
+            exception_does_not_exist = True
+
+        results = {
+            'error_result':             error_result,
+            'DoesNotExist':             exception_does_not_exist,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'voter_address_found':      True if voter_address_id > 0 else False,
+            'voter_address_id':         voter_address_id,
+            'voter_address':            voter_address_on_stage,
+        }
+        return results
+
+    # # TODO TEST THIS
+    # def retrieve_addresses(self, voter_id):
+    #     error_result = False
+    #     exception_does_not_exist = False
+    #     # voter_addresses_on_stage = # How to typecast?
+    #     number_of_addresses = 0
+    #
+    #     try:
+    #         if voter_id > 0:
+    #             voter_addresses_on_stage = VoterAddress.objects.get(voter_id=voter_id)
+    #             number_of_addresses = len(voter_addresses_on_stage)
+    #     except VoterAddress.DoesNotExist:
+    #         error_result = True
+    #         exception_does_not_exist = True
+    #
+    #     results = {
+    #         'error_result':             error_result,
+    #         'DoesNotExist':             exception_does_not_exist,
+    #         'voter_addresses_found':    True if number_of_addresses > 0 else False,
+    #         'voter_addresses_on_stage': voter_addresses_on_stage,
+    #         'number_of_addresses':      number_of_addresses,
+    #     }
+    #     return results
+
+    # TODO TEST THIS
+    def update_or_create_from_voter(self, voter_id, address_type, raw_address_text):
+        """
+        NOTE: This approach won't support multiple FORMER_BALLOT_ADDRESS
+        :param voter_id:
+        :param address_type:
+        :param raw_address_text:
+        :return:
+        """
+        status = ''
+        exception_multiple_object_returned = False
+        new_address_created = False
+
+        if voter_id > 0 and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
+            try:
+                updated_values = {
+                    'address': raw_address_text,
+                }
+                new_address_created = VoterAddress.objects.update_or_create(
+                    voter_id=voter_id, address_type=address_type, defaults=updated_values)
+                success = True
+            except VoterAddress.MultipleObjectsReturned as e:
+                handle_record_found_more_than_one_exception(e, logger=logger)
+                success = False
+                status = 'MULTIPLE_MATCHING_ADDRESSES_FOUND'
+                exception_multiple_object_returned = True
+        else:
+            success = False
+            status = 'MISSING_VOTER_ID_OR_ADDRESS_TYPE'
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'voter_address_saved':      success,
+            'address_type':             address_type,
+            'new_address_created':      new_address_created,
+        }
+        return results
+
+    # TODO IMPLEMENT THIS
+    # def update_or_create_from_google(self, voter_id, address_type, address):
+    #     """
+    #     After we have called Google's voterInfoQuery, we want to save locally the normalized information returned
+    #     from Google.
+    #     :param voter_id:
+    #     :param address_type:
+    #     :param updated_values:
+    #     :return:
+    #     """
+    #     status = ''
+    #     exception_multiple_object_returned = False
+    #     voter_address_id = 0
+    #     voter_address_on_stage = VoterAddress()
+    #
+    #     if voter_id > 0 and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
+    #         try:
+    #             voter_address_on_stage, success = VoterAddress.objects.update_or_create(
+    #                 voter_id=voter_id, address_type=address_type, address=address)
+    #             voter_address_id = voter_address_on_stage.id
+    #         except VoterAddress.MultipleObjectsReturned as e:
+    #             handle_record_found_more_than_one_exception(e, logger=logger)
+    #             success = False
+    #             exception_multiple_object_returned = True
+    #     else:
+    #         success = False
+    #         status = 'MISSING_VOTER_ID_OR_ADDRESS_TYPE'
+    #
+    #     results = {
+    #         'success':                  success,
+    #         'status':                   status,
+    #         'MultipleObjectsReturned':  exception_multiple_object_returned,
+    #         'voter_address_saved':      True if voter_address_id > 0 else False,
+    #         'voter_address_id':         voter_address_id,
+    #         'address_type':             address_type,
+    #         'voter_address':            voter_address_on_stage,
+    #     }
+    #     return results

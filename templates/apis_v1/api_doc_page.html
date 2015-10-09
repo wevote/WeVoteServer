@@ -10,7 +10,24 @@
 <h1>{{ api_name }}</h1>
 <p>
     {{ api_introduction }}
-    <a href="{% url try_now_link %}{{ try_now_link_variables }}" target="_blank">Try it now</a>.
+    {% if get_or_post == "GET" %}
+        <a href="{% url try_now_link %}{{ try_now_link_variables }}" target="_blank">Try it now</a>.
+    {% elif get_or_post == "POST" %}
+        <form name="{{ api_name }}" method="post" action="{% url try_now_link %}" target="_blank">
+        {% csrf_token %}
+            {% for query_parameter in required_query_parameter_list %}
+                {% if query_parameter.name != 'voter_device_id' %}
+                    {% if query_parameter.value == 'string' or query_parameter.value == 'int' or query_parameter.value == 'long' %}
+                    {{ query_parameter.name }}: <input  type="text" name="{{ query_parameter.name }}" maxlength="50" size="30">
+                    {% elif query_parameter.value == 'boolean' %}
+                        <input type="radio" name="{{ query_parameter.name }}" value="true" checked> True<br />
+                        <input type="radio" name="{{ query_parameter.name }}" value="false"> False
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            <input type="submit" value="Try it now">
+        </form>
+    {% endif %}
     </p>
 
 

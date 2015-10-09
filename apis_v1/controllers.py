@@ -5,10 +5,208 @@
 from django.http import HttpResponse
 import json
 
-from voter.models import fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterDeviceLinkManager
+from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterAddress, \
+    VoterAddressManager, VoterDeviceLinkManager
+
+
+def is_voter_device_id_valid(voter_device_id):
+    if not voter_device_id \
+            or len(voter_device_id) <= 70 \
+            or len(voter_device_id) >= 90:
+        success = False
+        json_data = {
+            'status': "VALID_VOTER_DEVICE_ID_MISSING",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+    else:
+        success = True
+        json_data = {
+            'status': '',
+            'success': True,
+            'voter_device_id': voter_device_id,
+        }
+
+    results = {
+        'success': success,
+        'json_data': json_data,
+    }
+    return results
+
+
+# We are going to start retrieving only the ballot address
+# Eventually we will want to allow saving former addresses, and mailing addresses for overseas voters
+def voter_address_retrieve(voter_device_id):
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if voter_id < 0:
+        json_data = {
+            'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_address_manager = VoterAddressManager()
+    results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
+
+    if results['voter_address_found']:
+        voter_address = results['voter_address']
+        json_data = {
+            'voter_device_id': voter_device_id,
+            'address_type': voter_address.address_type if voter_address.address_type else '',
+            'address': voter_address.address if voter_address.address else '',
+            'latitude': voter_address.latitude if voter_address.latitude else '',
+            'longitude': voter_address.longitude if voter_address.longitude else '',
+            'normalized_line1': voter_address.normalized_line1 if voter_address.normalized_line1 else '',
+            'normalized_line2': voter_address.normalized_line2 if voter_address.normalized_line2 else '',
+            'normalized_city': voter_address.normalized_city if voter_address.normalized_city else '',
+            'normalized_state': voter_address.normalized_state if voter_address.normalized_state else '',
+            'normalized_zip': voter_address.normalized_zip if voter_address.normalized_zip else '',
+            'success': True,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        json_data = {
+            'status': "VOTER_ADDRESS_NOT_RETRIEVED",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_address_save(voter_device_id, address_raw_text, address_variable_exists):
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+
+    if not address_variable_exists:
+        json_data = {
+                'status': "MISSING_POST_VARIABLE-ADDRESS",
+                'success': False,
+                'voter_device_id': voter_device_id,
+            }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if voter_id < 0:
+        json_data = {
+            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    # At this point, we have a valid voter
+
+    voter_address_manager = VoterAddressManager()
+    address_type = BALLOT_ADDRESS
+
+    # We wrap get_or_create because we want to centralize error handling
+    results = voter_address_manager.update_or_create_from_voter(voter_id, address_type, address_raw_text.strip())
+    if results['success']:
+        json_data = {
+                'status': "VOTER_ADDRESS_SAVED",
+                'success': True,
+                'voter_device_id': voter_device_id,
+                'address': address_raw_text,
+            }
+    # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':
+        # delete all currently matching addresses and save again
+    else:
+        json_data = {
+                'status': results['status'],
+                'success': False,
+                'voter_device_id': voter_device_id,
+            }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_count():
+
+    voter_list = Voter.objects.all()
+    # In future, add a filter to only show voters who have actually done something
+    # voter_list = voter_list.filter(id=voter_id)
+
+    # We will want to cache a json file and only refresh it every couple of seconds (so it doesn't become
+    # a bottle neck as we grow)
+
+    if voter_list.count():
+        json_data = {
+            'success': True,
+            'voter_count': voter_list.count(),
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        json_data = {
+            'success': False,
+            'voter_count': 0,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_create(voter_device_id):
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+
+    voter_id = 0
+    # Make sure a voter record hasn't already been created for this
+    existing_voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if existing_voter_id:
+        json_data = {
+            'status': "VOTER_ALREADY_EXISTS",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    # Create a new voter and return the id
+    voter_manager = VoterManager()
+    results = voter_manager.create_voter()
+
+    if results['voter_created']:
+        voter = results['voter']
+
+        # Now save the voter_device_link
+        voter_device_link_manager = VoterDeviceLinkManager()
+        results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter.id)
+
+        if results['voter_device_link_created']:
+            voter_device_link = results['voter_device_link']
+            voter_id_found = True if voter_device_link.voter_id > 0 else False
+
+            if voter_id_found:
+                voter_id = voter_device_link.voter_id
+
+    if voter_id:
+        json_data = {
+            'status': "VOTER_CREATED",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'voter_id': voter_id,  # We may want to remove this after initial testing
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        json_data = {
+            'status': "VOTER_NOT_CREATED",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_retrieve_list(voter_device_id):
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        results2 = {
+            'success': False,
+            'json_data': results['json_data'],
+        }
+        return results2
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if voter_id > 0:
@@ -17,14 +215,15 @@ def voter_retrieve_list(voter_device_id):
         if results['voter_found']:
             voter_id = results['voter_id']
     else:
-        # If we are here, return an indication that this voter_device_id is not recognized
-        data = {
-            'status': "VOTER_ID_DOES_NOT_EXIST",
+        # If we are here, the voter_id could not be found from the voter_device_id
+        json_data = {
+            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'success': False,
             'voter_device_id': voter_device_id,
         }
         results = {
             'success': False,
-            'json_data': data,
+            'json_data': json_data,
         }
         return results
 
@@ -54,89 +253,14 @@ def voter_retrieve_list(voter_device_id):
         'code':     400,
         'message':  "Error message here",
     }
-    data = {
+    json_data = {
         'error': error_package,
         'status': "VOTER_ID_COULD_NOT_BE_RETRIEVED",
+        'success': False,
         'voter_device_id': voter_device_id,
     }
     results = {
         'success': False,
-        'json_data': data,
+        'json_data': json_data,
     }
     return results
-
-
-def voter_count():
-
-    voter_list = Voter.objects.all()
-    # Add a filter to only show voters who have actually done something
-    # voter_list = voter_list.filter(id=voter_id)
-
-    # TODO DALE We will want to cache a json file and only refresh it every couple of seconds (so it doesn't become
-    # a bottle neck as we have
-
-    if voter_list.count():
-        data = {
-            'success': True,
-            'voter_count': voter_list.count(),
-        }
-        return HttpResponse(json.dumps(data), content_type='application/json')
-    else:
-        data = {
-            'success': False,
-            'voter_count': 0,
-        }
-        return HttpResponse(json.dumps(data), content_type='application/json')
-
-
-def voter_create(voter_device_id):
-    if not voter_device_id \
-            or len(voter_device_id) <= 70 \
-            or len(voter_device_id) >= 90:
-        data = {
-            'status': "VALID_VOTER_DEVICE_ID_MISSING",
-            'voter_device_id': voter_device_id,
-        }
-        return HttpResponse(json.dumps(data), content_type='application/json')
-
-    voter_id = 0
-    # Make sure a voter record hasn't already been created for this
-    existing_voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if existing_voter_id:
-        data = {
-            'status': "VOTER_ALREADY_EXISTS",
-            'voter_device_id': voter_device_id,
-        }
-        return HttpResponse(json.dumps(data), content_type='application/json')
-
-    # Create a new voter and return the id
-    voter_manager = VoterManager()
-    results = voter_manager.create_voter()
-
-    if results['voter_created']:
-        voter = results['voter']
-
-        # Now save the voter_device_link
-        voter_device_link_manager = VoterDeviceLinkManager()
-        results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter.id)
-
-        if results['voter_device_link_created']:
-            voter_device_link = results['voter_device_link']
-            voter_id_found = True if voter_device_link.voter_id > 0 else False
-
-            if voter_id_found:
-                voter_id = voter_device_link.voter_id
-
-    if voter_id:
-        data = {
-            'status': "VOTER_CREATED",
-            'voter_device_id': voter_device_id,
-            'voter_id': voter_id,  # We may want to remove this after initial testing
-        }
-        return HttpResponse(json.dumps(data), content_type='application/json')
-    else:
-        data = {
-            'status': "VOTER_NOT_CREATED",
-            'voter_device_id': voter_device_id,
-        }
-        return HttpResponse(json.dumps(data), content_type='application/json')

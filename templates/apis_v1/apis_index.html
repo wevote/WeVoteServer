@@ -21,6 +21,14 @@
         <td>Generate a device_id (store in cookie) that can be linked to a voter_id</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:voterAddressRetrieveDocs' %}">voterAddressRetrieve</a></td>
+        <td>Retrieve an address for a voter</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterAddressSaveDocs' %}">voterAddressSave</a></td>
+        <td>Save or update address for an existing voter</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:voterCountDocs' %}">voterCount</a></td>
         <td>Count the number of voters in the database.</td>
     </tr>

@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/voter_create_doc.py
+# apis_v1/documentation_source/voter_address_retrieve_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def voter_create_doc_template_values(url_root):
+def voter_address_retrieve_doc_template_values(url_root):
     """
-    Show documentation about voterCreate
+    Show documentation about voterAddressRetrieve
     """
     required_query_parameter_list = [
         {
@@ -24,41 +24,47 @@ def voter_create_doc_template_values(url_root):
     ]
 
     api_response = '{\n' \
-                   '  "status": status string,\n' \
+                   '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
+                   '  "address": string (the value submitted and saved),\n' \
+                   '  "address_type": string (one char: B = Ballot address),\n' \
+                   '  "latitude": string (value from Google),\n' \
+                   '  "longitude": string (value from Google),\n' \
+                   '  "normalized_line1": string (value from Google),\n' \
+                   '  "normalized_line2": string (value from Google),\n' \
+                   '  "normalized_city": string (value from Google),\n' \
+                   '  "normalized_state": string (value from Google),\n' \
+                   '  "normalized_zip": string (value from Google),\n' \
                    '}'
-
     potential_status_codes_list = [
         {
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
             'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
         },
         {
-            'code':         'VOTER_ALREADY_EXISTS',
-            'description':  'A voter account is already linked with that voter_device_id',
+            'code':         'VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID',
+            'description':  'No voter could be found from the voter_device_id',
         },
         {
-            'code':         'VOTER_CREATED',
-            'description':  'A voter account was successfully created',
-        },
-        {
-            'code':         'VOTER_NOT_CREATED',
-            'description':  'A voter account could not be created',
+            'code':         'VOTER_ADDRESS_NOT_RETRIEVED',
+            'description':  'retrieve_ballot_address_from_voter_id failed.',
         },
     ]
 
     template_values = {
-        'api_name': 'voterCreate',
-        'api_slug': 'voterCreate',
+        'api_name': 'voterAddressRetrieve',
+        'api_slug': 'voterAddressRetrieve',
         'api_introduction':
-            "Generate a voter account for this voter_device_id",
-        'try_now_link': 'apis_v1:voterCreateView',
+            "Retrieve the voter address for voter using voter_device_id.",
+        'try_now_link': 'apis_v1:voterAddressRetrieveView',
         'try_now_link_variables': '',
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,
+        'api_response_notes':
+            "",
         'potential_status_codes_list': potential_status_codes_list,
     }
     return template_values

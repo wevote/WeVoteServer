@@ -10,14 +10,15 @@ def voter_retrieve_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
-            'description':  'An 88 character unique identifier linked to a voter record on the server',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'An 88 character unique identifier (from cookie - not URL variable) linked to '
+                            'a voter record on the server',
         },
     ]
     optional_query_parameter_list = [
         {
             'name':         'format',
-            'value':        'string (json)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'Although optional, We Vote is built using the json value',
         },
     ]
@@ -37,9 +38,12 @@ def voter_retrieve_doc_template_values(url_root):
 
     potential_status_codes_list = [
         {
-            'code':         'VOTER_ID_DOES_NOT_EXIST',
-            'description':  'There is no voter_id attached to that voter_device_id, or the voter_device_id parameter'
-                            ' was not included ',
+            'code':         'VALID_VOTER_DEVICE_ID_MISSING',
+            'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
+        },
+        {
+            'code':         'VOTER_NOT_FOUND_FROM_DEVICE_ID',
+            'description':  'There is no voter_id attached to that voter_device_id',
         },
         {
             'code':         'VOTER_ID_COULD_NOT_BE_RETRIEVED',

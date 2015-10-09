@@ -30,6 +30,10 @@ def PUT_NAME_HERE_doc_template_values(url_root):
                    '}'
 
     potential_status_codes_list = [
+        {
+            'code':         'VALID_VOTER_DEVICE_ID_MISSING',
+            'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
+        },
         # {
         #     'code':         '',
         #     'description':  '',
@@ -37,7 +41,7 @@ def PUT_NAME_HERE_doc_template_values(url_root):
     ]
 
     template_values = {
-        'api_name': 'voterRetrieve',
+        'api_name': 'voterRetrieve - TODO This documentation still in progress',
         'api_slug': 'voterRetrieve',
         'api_introduction':
             "",
