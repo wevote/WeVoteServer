@@ -1,19 +1,19 @@
 import React from "react";
 import { Link } from "react-router";
-import ReactLogo from "elements/ReactLogo";
 
+//TODO: break apart the number of components in here
 export default class MainMenu extends React.Component {
 	render() {
-		return <div>
-			<ReactLogo type="svg" /> <ReactLogo type="png" /> <ReactLogo type="jpg" />
-			<h2>MainMenu:</h2>
-			<ul>
-				<li>The <Link to="home">home</Link> page.</li>
-				<li>Do something on the <Link to="todo">todo page</Link>.</li>
-				<li>Switch to <Link to="some-page">some page</Link>.</li>
-				<li>Open the chat demo: <Link to="chat" params={{room: "home"}}>Chat</Link>.</li>
-				<li>Open the page that shows <Link to="readme">README.md</Link>.</li>
-			</ul>
+		return <div className="row">
+      <nav className="navbar navbar-main">
+        <div className="container-fluid">
+          <form className="navbar-form" role="search">
+            <div className="input-group input-group-lg">
+              <input type="text" className="form-control input-lg" placeholder="Search" />
+            </div>
+          </form>
+        </div>
+      </nav>
 		</div>;
 	}
 }
