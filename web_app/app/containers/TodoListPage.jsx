@@ -1,8 +1,8 @@
 import React from "react";
 import { Todo } from "actions";
 import { fetchTodoList } from "store-helpers/Todo";
-import TodoItem from "components/TodoItem";
-import NewTodoItemEditor from "components/NewTodoItemEditor";
+import TodoItem from "components/examples/TodoItem";
+import NewTodoItemEditor from "components/examples/NewTodoItemEditor";
 
 export default class TodoListPage extends React.Component {
 	static getProps(stores, params) {

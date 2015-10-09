@@ -1,5 +1,5 @@
 import React from "react";
-import ChatLineView from "components/ChatLineView";
+import ChatLineView from "components/examples/ChatLineView";
 import { fetchChatMessages } from "store-helpers/Chat";
 import styles from "./ChatList.css";
 

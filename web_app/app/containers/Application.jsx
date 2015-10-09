@@ -1,6 +1,6 @@
 import React from "react";
 import { RouteHandler } from "react-router";
-import MainMenu from "components/MainMenu";
+import MainMenu from "components/base/MainMenu";
 
 import styles from "./Application.css";
 

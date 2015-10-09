@@ -1,7 +1,7 @@
 import React from "react";
 import { Chat } from "actions";
 import ChatList from "containers/ChatList";
-import NewChatEditor from "components/NewChatEditor";
+import NewChatEditor from "components/examples/NewChatEditor";
 
 export default class ChatPage extends React.Component {
 	static getProps(stores, params) {
