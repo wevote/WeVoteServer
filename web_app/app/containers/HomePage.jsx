@@ -12,7 +12,7 @@ export default class HomePage extends React.Component {
         <li>Learn from friends</li>
         <li>Take to the polls</li>
       </ul>
-      <div className="">
+      <div>
         <div><span className="glyphicon glyphicon-ok-sign"></span>Neutral and private</div>
         <div><span className="glyphicon glyphicon-ok-sign"></span>123,456 voters</div>
         <div><span className="glyphicon glyphicon-ok-sign"></span>417 not-for-profit organizations</div>
