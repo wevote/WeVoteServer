@@ -3,8 +3,16 @@
   padding: 10px;
 }
 
+.container-top10 {
+  padding: 10px 0 0;
+}
+
 .navbar-main > li {
   padding: 0 30px;
+}
+
+.seperator-top {
+  border-top: 1px solid #c0c0c0;
 }
 
 /* App boostrap themes */

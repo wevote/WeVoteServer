@@ -5,7 +5,7 @@ export default class Footer extends React.Component {
   render() {
     return <div className="row">
         <div className="navbar navbar-default navbar-fixed-bottom">
-            <div className="container-fluid">
+            <div className="container-fluid container-top10 seperator-top">
                 <div className="col-xs-6 col-sm-3 center-block text-center">
                   <span className="glyphicon glyphicon-list-alt"></span><br />
                   <span className="text-center">My Ballot</span>
