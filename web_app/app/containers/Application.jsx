@@ -15,7 +15,7 @@ export default class Application extends React.Component {
 	render() {
 		var { loading } = this.props;
 		return <div className={styles.this + (loading ? " " + styles.loading : "")}>
-			<div className={styles.loadingElement}>loading...</div>
+			<div className={styles.loadingElement}>loading app...</div>
 			<MainMenu />
 			<RouteHandler />
       <Footer />
