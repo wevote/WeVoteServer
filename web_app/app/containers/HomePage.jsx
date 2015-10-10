@@ -5,10 +5,16 @@ export default class HomePage extends React.Component {
 		return {};
 	}
 	render() {
-		return <div>
-			<h2>Homepage</h2>
-			<p>This is the homepage.</p>
-			<p>Try to go to a todo list page.</p>
+		return <div className="container-fluid">
+      <div className="input-group">
+			  <input type="text" className="form-control" />
+      </div>
+      <div className="input-group">
+			  <input type="text" className="form-control" />
+      </div>
+      <div className="input-group">
+			  <input type="text" className="form-control" />
+      </div>
 		</div>;
 	}
 }

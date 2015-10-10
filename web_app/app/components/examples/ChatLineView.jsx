@@ -1,5 +1,5 @@
 import React from "react";
-import ChatUserView from "components/ChatUserView";
+import ChatUserView from "components/examples/ChatUserView";
 
 export default class ChatLineView extends React.Component {
 	render() {
