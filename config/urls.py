@@ -19,38 +19,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 
-from django.conf import settings
-from django.conf.urls import patterns, include, url
-from django.conf.urls.static import static  # Django cookbook
-from django.contrib.auth import views as auth_views
-from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns  # Django cookbook
+from django.conf.urls import include, url
 
 from config import startup
 from config import views
 
 
-urlpatterns = patterns(
-    url(r'^login/$', auth_views.login),  # This is configured with LOGIN_URL in base.py
-    # url(r'^admin/', include(admin.site.urls)),
-
-    url(r'^$', views.start_view),
+urlpatterns = [
+    url(r'^$', views.start_view),  # Default page if none of the other patterns work
     url(r'^admin/', include('admin_tools.urls', namespace="admin_tools")),
     url(r'^apis/v1/', include('apis_v1.urls', namespace="apis_v1")),
 
-    # url(r'^js-settings/$', 'config.views.render_js', {'template_name': 'settings.js'}, name="js_settings"),
-
     url(r'^c/', include('candidate.urls', namespace="candidate")),
     url(r'^e/', include('election.urls', namespace="election")),
-    # url(r'^import_export/', include('import_export.urls', namespace="import_export")),
     url(r'^import_export_google_civic/', include(
         'import_export_google_civic.urls', namespace="import_export_google_civic")),
-    # url(r'^import_export_maplight/', include(
-    #     'import_export_maplight.urls', namespace="import_export_maplight")),
-    # url(r'^import_export_theunitedstatesio/', include(
-    #     'import_export_theunitedstatesio.urls', namespace="import_export_theunitedstatesio")),
-    # url(r'^import_export_voting_info_project/', include(
-    #     'import_export_voting_info_project.urls', namespace="import_export_voting_info_project")),
     url(r'^m/', include('measure.urls', namespace="measure")),
     url(r'^o/', include('office.urls', namespace="office")),
     url(r'^org/', include('organization.urls', namespace="organization")),
@@ -59,15 +42,12 @@ urlpatterns = patterns(
     url(r'^pos/', include('position.urls', namespace="position")),
     url(r'^sod/', include('support_oppose_deciding.urls', namespace="support_oppose_deciding")),
     url(r'^tag/', include('tag.urls', namespace="tag")),
-    #
-    # # Social
-    url('', include('wevote_social.urls', namespace='wevote_social')),
-    url('social', include('social.apps.django_app.urls', namespace='social')),
-    url('', include('django.contrib.auth.urls', namespace='auth')),
-)
-
-urlpatterns += staticfiles_urlpatterns()  # Django Cookbook
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # Django Cookbook
+    # url('', include('wevote_social.urls', namespace='wevote_social')),
+    url('social', include('social.apps.django_app.urls', namespace="social")),
+    # Authentication
+    url('', include('django.contrib.auth.urls', namespace="auth")),  # This line provides all of the following patterns:
+    # login, logout, password_reset, password_reset_done, password_reset_confirm, password_reset_complete
+]
 
 # Execute start-up.
 startup.run()

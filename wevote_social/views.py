@@ -1,6 +1,3 @@
-
-from django.shortcuts import render
-
-def login_view(request):
-    next = request.GET.get('next', '/')
-    return render(request, 'wevote_social/login.html', {'next': next})
+# wevote_social/views.py
+# Brought to you by We Vote. Be good.
+# -*- coding: UTF-8 -*-

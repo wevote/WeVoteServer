@@ -14,3 +14,8 @@ def start_view(request):
         'hello_world': "hello world",
     }
     return render(request, 'start.html', template_values)
+
+
+def login_view(request):
+    next = request.GET.get('next', '/')
+    return render(request, 'wevote_social/login.html', {'next': next})
