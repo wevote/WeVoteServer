@@ -1,0 +1,35 @@
+{# templates/admin_home/index.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Admin Menu{% endblock %}
+
+{%  block content %}
+<h1>We Vote Admin Menu</h1>
+
+
+{# ################## #}
+<h2>Election Data</h2>
+    <p><a href="{% url 'election:election_list' %}">Elections</a></p>
+    <p><a href=""></a>Measures</p> {# NOTE: Move text into <a> tag when we have the page built #}
+    <p><a href=""></a>Offices</p>
+    <p><a href=""></a>Candidates</p>
+    <p><a href="{% url 'organization:organization_list' %}">Organizations</a></p>
+    <p><a href=""></a>Public Opinions</p>
+    <p><a href=""></a>One Ballot</p>
+    <p><a href=""></a>One Voter</p>
+    <p><a href=""></a>Polling Places</p>
+
+{# ################## #}
+<h2>Maintenance</h2>
+    <p><a href=""></a>Regions</p>
+    <p><a href=""></a>Translation Needed</p>
+    <p><a href=""></a>Quick Statistics</p>
+    <p>{# Move this to an integrations category? #}
+        {% if user and not user.is_anonymous %}
+            <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>
+            <a href="{% url 'auth:logout' %}?next={{ request.path }}">Logout</a>
+        {% else %}
+            <a href="{% url 'social:begin' 'facebook' %}?next={{ request.path }}">Login with Facebook</a>
+        {% endif %}
+    </p>
+{%  endblock %}

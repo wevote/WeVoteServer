@@ -106,7 +106,7 @@ def voter_address_save(voter_device_id, address_raw_text, address_variable_exist
     address_type = BALLOT_ADDRESS
 
     # We wrap get_or_create because we want to centralize error handling
-    results = voter_address_manager.update_or_create_from_voter(voter_id, address_type, address_raw_text.strip())
+    results = voter_address_manager.update_or_create_voter_address(voter_id, address_type, address_raw_text.strip())
     if results['success']:
         json_data = {
                 'status': "VOTER_ADDRESS_SAVED",

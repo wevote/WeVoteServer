@@ -1,0 +1,12 @@
+{# tag/templates/tag/tag_new.html #}
+
+<h1>Tag entry form</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url "tag:tag_new_process" %}" method="post">
+{% csrf_token %}
+    <label for="new_tag_id">{{ choice.choice_text }}</label>
+    <input type="text" name="new_tag" id="new_tag_id" />
+<input type="submit" value="Add Tag" />
+</form>

@@ -1,10 +1,10 @@
 {# organization/templates/organization/organization_list.html #}
-{% extends "we_vote_base.html" %}
+{% extends "template_base.html" %}
 
-{% block title %}Endorsing Organizations{% endblock %}
+{% block title %}Organizations{% endblock %}
 
 {%  block content %}
-<h1>Endorsing Organizations</h1>
+<h1>Organizations</h1>
 <p><a href="{% url 'organization:organization_new' %}">Add New Organization</a></p>
 
 {% if organization_list %}

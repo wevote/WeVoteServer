@@ -1,0 +1,1 @@
+{u'kind': u'civicinfo#electionsQueryResponse', u'elections': [{u'ocdDivisionId': u'ocd-division/country:us', u'electionDay': u'2017-06-06', u'id': u'2000', u'name': u'VIP Test Election'}, {u'ocdDivisionId': u'ocd-division/country:us/state:va', u'electionDay': u'2015-11-03', u'id': u'4162', u'name': u'Virginia General Election'}]}

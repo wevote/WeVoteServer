@@ -1,0 +1,9 @@
+{% extends "template_base.html" %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">We Vote administration::{{ site_header|default:_('We Vote administration') }}</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

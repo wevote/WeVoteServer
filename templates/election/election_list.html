@@ -1,0 +1,17 @@
+{# templates/election/election_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Elections{% endblock %}
+
+{%  block content %}
+<h1>Elections</h1>
+<p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections</a></p>
+
+{% if election_list %}
+    {% for election in election_list %}
+        <h3>{{ election.election_name }} <a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></h3>
+    {% endfor %}
+{% else %}
+    <p>(no elections found)</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,37 @@
+# politician/templates/politician/politician_tag_new.html
+{% extends "base.html" %}
+
+{%  block content %}
+<a href="{% url "politician:politician_detail" politician_on_stage.id %}">< {{ politician_on_stage.display_full_name }}</a>
+
+<h1>Add Tags</h1>
+    {% if messages_on_stage %}
+        <ul class="messages">
+            {% for message in messages_on_stage %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+Are there Twitter hashtags, usernames or search phrases that help us find content directly relating to this candidate? Add them here.<br />
+Ex/ @FictionalCandidate or #FictionalForMayor or "Fictional Candidate".
+
+<form action="{% url "politician:politician_tag_new_process" politician_on_stage.id %}" method="post">
+{% csrf_token %}
+    <label for="new_tag_id">{{ choice.choice_text }}</label>
+    <input type="text" name="new_tag" id="new_tag_id" />
+<input type="submit" value="Add Tag" />
+</form>
+
+<h2>Existing Tags</h2>
+{% if tag_link_list %}
+    <ul>
+    {% for tag in tag_link_list %}
+        <li><a href="{# {% url 'politician:add_tag' tag.id %} #}">{{ tag.hashtag_text }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No tags are available.</p>
+{% endif %}
+
+{% endblock %}

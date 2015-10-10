@@ -1,0 +1,9 @@
+<h1>Tags</h1>
+
+<ul>
+  {% for tag in tag_list %}
+    <li class="tag">{{ tag }}</li>
+  {% endfor %}
+</ul>
+
+<a href="{% url "tag:tag_new" %}">create new</a>

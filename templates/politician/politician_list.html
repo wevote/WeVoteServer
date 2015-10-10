@@ -1,0 +1,15 @@
+{% load staticfiles %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'politician/style.css' %}" />
+<h1>Politicians Imported</h1>
+
+
+{% if politician_list %}
+    <ul>
+    {% for politician in politician_list %}
+        <li><a href="{% url 'politician:politician_detail' politician.id %}">{{ politician.display_full_name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No politicians are available.</p>
+{% endif %}

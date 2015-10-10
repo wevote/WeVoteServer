@@ -1,0 +1,65 @@
+{% block doctype %}<!DOCTYPE html>{% endblock %}
+<html lang="{{ LANGUAGE_CODE }}">
+
+    {#  Load CSS and JavaScript #}
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    {# Display django.contrib.messages as Bootstrap alerts #}
+    {% bootstrap_messages %}
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{% endblock %}{#% trans "My Website" %#}</title>
+    {% load staticfiles %}
+    <link rel="icon" href="/templates/image_static/favicon.ico" type="image/png" />
+
+    {% block meta_tags %}{% endblock %}
+
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+    <link href="/templates/css/birch_style.css" rel="stylesheet" media="screen" type="text/css" />
+    
+    <!-- load google fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Alfa+Slab+One&effect=fire-animation' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Rock+Salt' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
+    {% block stylesheet %}{% endblock %}
+
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    {# IGNORE FOR NOW <script src="{% url "js_settings" %}"></script> #}
+
+    {% block js %}{% endblock %}
+    {% block extrahead %}{% endblock %}
+</head>
+<body class="{% block bodyclass %}{% endblock %}">
+    {% block page %}
+        <div class="wrapper">
+            <div id="header" class="container-fluid">
+                {% block header_navigation %}
+                    {% include "header_navigation.html" %}
+                {% endblock %}
+                {% block language_chooser %}
+                    {% include "language_chooser.html" %}
+                {% endblock %}
+            </div>
+            <div id="content" class="container">
+                {% block content %}
+                {% endblock %}
+            </div>
+            <div id="footer" class="clearfix container">
+                {% block footer_navigation %}
+                    {% include "footer_navigation.html" %}
+                {% endblock %}
+            </div>
+        </div>
+    {% endblock %}
+    {% block extrabody %}{% endblock %}
+</body>
+</html>

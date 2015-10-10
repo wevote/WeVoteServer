@@ -67,31 +67,34 @@ INSTALLED_APPS = (
     # third party
     'bootstrap3',
     'social.apps.django_app.default',
-    # 'crispy_forms',
 
     # project specific
+    'admin_tools',
     'apis_v1',
+    'candidate',
     'config',
-    # 'election_office_measure',
+    'election',
     'exception',
-    # 'follow',
+    'follow',
     # 'import_export',
     # 'import_export_azavea_cicero',
-    # 'import_export_google_civic',
+    'import_export_google_civic',
     # 'import_export_maplight',
     # 'import_export_theunitedstatesio',
     # 'import_export_twitter',
     # 'import_export_voting_info_project',
-    # 'organization',
-    # 'politician',
-    # 'position',
+    'measure',
+    'office',
+    'organization',
+    'politician',
+    'position',
     # 'region_jurisdiction',
     'rest_framework',
-    # 'support_oppose_deciding',
-    # 'tag',
-    # 'twitter',
-    # 'utils',
+    'support_oppose_deciding',
+    'tag',
+    'twitter',
     'wevote_functions',
+    'wevote_settings',
     'wevote_social',
     'voter',  # See also AUTH_USER_MODEL in config/settings.py
 )
@@ -225,6 +228,8 @@ BOOTSTRAP3 = {
         'inline': 'bootstrap3.renderers.InlineFieldRenderer',
     },
 }
+
+LOGIN_URL = '/login/'
 
 LOGIN_REDIRECT_URL = '/'
 SOCIAL_AUTH_FACEBOOK_KEY = get_environment_variable("SOCIAL_AUTH_FACEBOOK_KEY")

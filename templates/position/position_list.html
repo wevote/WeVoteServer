@@ -1,0 +1,67 @@
+{# position/templates/position/position_list.html #}
+{% extends "we_vote_base.html" %}
+
+{% block title %}Positions{% endblock %}
+
+{%  block content %}
+{% if position_list %}
+    {% for position in position_list %}
+        <div>
+            {% if position.organization.id %}
+            <div><span class="position_list_organization_name">{{ position.organization.name }}</span>
+                <input type="button" value="Following" id="following_organization_{{ position.organization.id }}"
+                       class="follow_toggle_link" name="/org/{{ position.organization.id }}/unfollow/" style="display:none;" />
+                <input type="button" value="+Follow" name="/org/{{ position.organization.id }}/follow/" id="not_following_organization_{{ position.organization.id }}"
+                       class="follow_toggle_link" />
+            </div>
+            {% else %}
+            <div><span class="position_list_organization_name">I Support</span></div>
+            {% endif %}
+            <div>{% if not position.statement_text %}
+                <span class="position_list_statement_text_empty"></span>
+            {% else %}
+                <span class="position_list_statement_text">{{ position.statement_text }}</span>{% endif %}</div>
+        </div>
+        <br />
+
+{% if position.organization.id in organizations_followed_by_voter %}
+<script>
+$(function() {
+        var following_organization_button = '#following_organization_{{ position.organization.id }}';
+        var not_following_organization_button = '#not_following_organization_{{ position.organization.id }}';
+        $(following_organization_button).toggle();
+        $(not_following_organization_button).toggle();
+      });
+</script>
+{% endif %}
+
+    {% endfor %}
+
+<script>
+$(function() {
+	  $(".follow_toggle_link").live("click", function() {
+	  		var url_from_href = this.name;
+	  		var organization_id_string = this.id;
+            var organization_id = organization_id_string.match(/\d+/)[0]; // Finds the first number and ignores the rest
+		  	var not_following_organization_button = '#not_following_organization_' + organization_id; {# oppose_candidate_campaign_13 #}
+		  	var following_organization_button = '#following_organization_' + organization_id;
+			var dataString = 'data=none';
+			//alert (dataString);return false;
+			$.ajax({
+              type: "GET",
+              url: url_from_href,
+              data: dataString,
+              success: function() {
+                $(following_organization_button).toggle();
+                $(not_following_organization_button).toggle();
+              }
+            });
+
+	    return false;
+		});
+	});
+</script>
+{% else %}
+    <p>(no positions found)</p>
+{% endif %}
+{% endblock %}

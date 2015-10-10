@@ -1,0 +1,17 @@
+<h1>Google Civic Ballot Information, cached in local db</h1>
+<p>This data has not been transferred to the We Vote live tables.</p>
+
+{{ json_from_google }}
+
+{% if legislator_list %}
+    <ul>
+    {% for legislatorcurrent in legislator_list %}
+        <li><a href="{% url 'import_export_theunitedstatesio:legislatorcurrent_detail' legislatorcurrent.id %}">{{ legislatorcurrent.first_name }} {{ legislatorcurrent.last_name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No legislators are available.</p>
+{% endif %}
+
+<br />
+<a href="{% url 'import_export:import_export_index'%}">back to index</a>

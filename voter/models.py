@@ -490,8 +490,7 @@ class VoterAddressManager(models.Model):
     #     }
     #     return results
 
-    # TODO TEST THIS
-    def update_or_create_from_voter(self, voter_id, address_type, raw_address_text):
+    def update_or_create_voter_address(self, voter_id, address_type, raw_address_text):
         """
         NOTE: This approach won't support multiple FORMER_BALLOT_ADDRESS
         :param voter_id:
