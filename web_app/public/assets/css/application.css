@@ -1,5 +1,10 @@
 .navbar-main {
   background-color: #22A7F0;
+  padding: 10px;
+}
+
+.navbar-main > li {
+  padding: 0 30px;
 }
 
 /* App boostrap themes */

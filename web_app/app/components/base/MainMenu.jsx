@@ -7,11 +7,7 @@ export default class MainMenu extends React.Component {
 		return <div className="row">
       <nav className="navbar navbar-main">
         <div className="container-fluid">
-          <form className="navbar-form" role="search">
-            <div className="input-group input-group-lg">
-              <input type="text" className="form-control input-lg" placeholder="Search" />
-            </div>
-          </form>
+          <input type="text" className="form-control input-lg" placeholder="Search" />
         </div>
       </nav>
 		</div>;

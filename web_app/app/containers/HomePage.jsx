@@ -5,15 +5,18 @@ export default class HomePage extends React.Component {
 		return {};
 	}
 	render() {
-		return <div className="container-fluid">
+		return <div className="container-fluid col-md-offset-5">
       <div className="input-group">
-			  <input type="text" className="form-control" />
+        <label for="first-name" class="sr-only">First Name</label>
+			  <input type="text" name="first-name" className="form-control" />
       </div>
       <div className="input-group">
-			  <input type="text" className="form-control" />
+        <label for="last-name" class="sr-only">Last Name</label>
+			  <input type="text" name="last-name" className="form-control" />
       </div>
       <div className="input-group">
-			  <input type="text" className="form-control" />
+        <label for="email" class="sr-only">Email address</label>
+			  <input type="text" name="email" className="form-control" />
       </div>
 		</div>;
 	}
