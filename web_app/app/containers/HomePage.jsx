@@ -5,18 +5,23 @@ export default class HomePage extends React.Component {
 		return {};
 	}
 	render() {
-		return <div className="container-fluid col-md-offset-5">
-      <div className="input-group">
-        <label for="first-name" class="sr-only">First Name</label>
-			  <input type="text" name="first-name" className="form-control" />
+    return <div className="container-fluid well">
+      <h2>We Vote Social Voter Guide</h2>
+      <ul>
+        <li>Research ballot items</li>
+        <li>Learn from friends</li>
+        <li>Take to the polls</li>
+      </ul>
+      <div className="">
+        <div><span className="glyphicon glyphicon-ok-sign"></span>Neutral and private</div>
+        <div><span className="glyphicon glyphicon-ok-sign"></span>123,456 voters</div>
+        <div><span className="glyphicon glyphicon-ok-sign"></span>417 not-for-profit organizations</div>
+        <div><span className="glyphicon glyphicon-ok-sign"></span>and you.</div>
       </div>
       <div className="input-group">
-        <label for="last-name" class="sr-only">Last Name</label>
+        <label for="last-name" class="sr-only">My Ballot Location</label><br />
+        <span>This is our best guess - feel free to change</span>
 			  <input type="text" name="last-name" className="form-control" />
-      </div>
-      <div className="input-group">
-        <label for="email" class="sr-only">Email address</label>
-			  <input type="text" name="email" className="form-control" />
       </div>
 		</div>;
 	}
