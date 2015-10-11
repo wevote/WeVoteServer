@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'measure',
     'office',
     'organization',
+    'polling_location',
     'politician',
     'position',
     # 'region_jurisdiction',

@@ -1,0 +1,43 @@
+{# templates/polling_location/polling_location_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Polling Locations{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Polling Locations</h1>
+
+{% if polling_location_list %}
+    <table border="0" cellpadding="10">
+    {% for polling_location in polling_location_list %}
+        <tr>
+            <td><a href="{% url 'election:election_summary' polling_location.id %}">
+            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}missing location name{% endif %}</a>
+{#                 <br /> #}
+{#                {% if polling_location.line1 %}{{ polling_location.line1 }},<br />{% endif %}#}
+{#                {% if polling_location.line2 %}{{ polling_location.line2 }},<br />{% endif %}#}
+{#                {% if polling_location.city or polling_location.state or polling_location.zip_long %}#}
+{#                    {% if polling_location.city %}{{ polling_location.city }},{% endif %}#}
+{#                    {% if polling_location.state %}{{ polling_location.state }} {% endif %}#}
+{#                    {% if polling_location.zip_long %}{{ polling_location.zip_long }}{% endif %}#}
+{#                {% endif %}#}
+            </td>
+            <td>
+                {% if polling_location.city %}{{ polling_location.city }},{% endif %}
+                {% if polling_location.state %}{{ polling_location.state }} {% endif %}
+            </td>
+            <td>
+            {% if polling_location.zip_long %}{{ polling_location.zip_long }}{% else %}{% endif %}
+            </td>
+            <td><a href="{% url 'election:election_edit' polling_location.id %}" style="font-size: .65em">(edit)</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no polling_locations found)</p>
+{% endif %}
+<br />
+    <p><a href="{% url 'polling_location:import_polling_locations_process' %}">Import Polling Locations File Now</a> (this can take 60-90 seconds)</p>
+
+{% endblock %}
