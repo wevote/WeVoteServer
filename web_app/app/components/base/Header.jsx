@@ -12,4 +12,4 @@ let Header = React.createClass({
   }
 });
 
-ReactDOM.render(<Header />, document.getElementById('content'));
+React.render(<Header />, document.getElementById('content'));
