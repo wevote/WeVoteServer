@@ -5,22 +5,23 @@ export default class HomePage extends React.Component {
 		return {};
 	}
 	render() {
-    return <div className="container-fluid well">
-      <h2>We Vote Social Voter Guide</h2>
-      <ul>
-        <li>Research ballot items</li>
-        <li>Learn from friends</li>
-        <li>Take to the polls</li>
+    return <div className="container-fluid well well-25">
+      <h2 className="text-center">We Vote Social Voter Guide</h2>
+      <ul className="list-group">
+        <li className="list-group-item">Research ballot items</li>
+        <li className="list-group-item">Learn from friends</li>
+        <li className="list-group-item">Take to the polls</li>
       </ul>
-      <div>
-        <div><span className="glyphicon glyphicon-ok-sign"></span>Neutral and private</div>
-        <div><span className="glyphicon glyphicon-ok-sign"></span>123,456 voters</div>
-        <div><span className="glyphicon glyphicon-ok-sign"></span>417 not-for-profit organizations</div>
-        <div><span className="glyphicon glyphicon-ok-sign"></span>and you.</div>
-      </div>
+
+      <ul className="list-group">
+          <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;Neutral and private</li>
+          <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;123,456 voters</li>
+          <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;417 not-for-profit organizations</li>
+          <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;and you.</li>
+      </ul>
       <div className="input-group">
-        <label for="last-name" class="sr-only">My Ballot Location</label><br />
-        <span>This is our best guess - feel free to change</span>
+        <label htmlFor="last-name">My Ballot Location</label><br />
+        <span className="small">This is our best guess - feel free to change</span>
 			  <input type="text" name="last-name" className="form-control" />
       </div>
 		</div>;
