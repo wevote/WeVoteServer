@@ -1,0 +1,56 @@
+{# templates/election/election_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if election %}{{ election.election_name  }}{% else %}No Election Found{% endif %}{% endblock %}
+
+{%  block content %}
+
+<a href="{% url 'election:election_list' %}">< Back to Elections</a>
+
+{% if election %}
+    <h1>Edit {{ election.election_name }}</h1>
+
+    <form action="{% url "election:election_edit_process" %}" method="post">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>Local ID:</td>
+            <td>{{ election.id }}</td>
+        </tr>
+        <tr>
+            <td>Election Name:</td>
+            <td>{{ election.election_name }}</td>
+        </tr>
+        <tr>
+            <td>Day of Election:</td>
+            <td>{{ election.election_date_text }}</td>
+        </tr>
+        <tr>
+            <td>Google Civic ID:</td>
+            <td>{{ election.google_civic_election_id }}</td>
+        </tr>
+        <tr>
+            <td>OCD Division ID:</td>
+            <td>{{ election.raw_ocd_division_id }}</td>
+        </tr>
+
+        {#<label for="election_name_id">Organization Name</label>#}
+        {#<input type="text" name="election_name" id="election_name_id" value="{{ election.name }}" />#}
+        </tr>
+    </table>
+
+    <input type="hidden" name="election_id" value="{{ election.id }}">
+    (There are no Election fields to edit at this time)
+
+    <p><a href="{% url 'election:election_list' %}">cancel</a>
+    {# <input type="submit" value="Update Organization" /> #}
+    </p>
+    </form>
+
+{% else %}
+     <h1>No Election Found</h1>
+
+    Please visit the <a href="{% url 'election:election_list' %}">Election List</a> page.
+{% endif %}
+
+{% endblock %}

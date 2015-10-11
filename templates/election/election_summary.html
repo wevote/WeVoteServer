@@ -1,0 +1,43 @@
+{# templates/election/election_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if election %}{{ election.election_name  }} Summary{% else %}No Election Found{% endif %}{% endblock %}
+
+{%  block content %}
+
+<a href="{% url 'election:election_list' %}">< Back to Elections</a>
+
+{% if election %}
+
+    <h1>{{ election.election_name }}</h1>
+    <table>
+        <tr>
+            <td>Day of Election:</td>
+            <td>{{ election.election_date_text }}</td>
+        </tr>
+        <tr>
+            <td>Google Civic Election ID:</td>
+            <td>{{ election.google_civic_election_id }}</td>
+        </tr>
+        <tr>
+            <td>OCD Division ID:</td>
+            <td>{{ election.raw_ocd_division_id }}</td>
+        </tr>
+    </table>
+
+    <p><a href="{% url 'election:election_edit' election.id %}">edit</a></p>
+
+    <p>
+    <a href="{% url 'election:election_list' %}">Retrieve Ballot Data for this Election</a><br />
+    Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
+    together the measures, races and candidates.
+    </p>
+
+{% else %}
+
+    <h1>No Election Found</h1>
+    Please visit the <a href="{% url 'election:election_list' %}">Election List</a> page.
+
+{% endif %}
+
+{% endblock %}

@@ -4,13 +4,21 @@
 {% block title %}Elections{% endblock %}
 
 {%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
 <h1>Elections</h1>
 <p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections</a></p>
 
 {% if election_list %}
+    <table border="1" cellpadding="10">
     {% for election in election_list %}
-        <h3>{{ election.election_name }} <a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></h3>
+        <tr>
+            <td><a href="{% url 'election:election_summary' election.id %}">{{ election.election_name }}</a></td>
+            <td>{{ election.election_date_text }}</td>
+            <td><a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></td>
+        </tr>
     {% endfor %}
+    </table>
 {% else %}
     <p>(no elections found)</p>
 {% endif %}

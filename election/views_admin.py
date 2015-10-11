@@ -20,15 +20,19 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required()
-def election_list_view(request):
-    messages_on_stage = get_messages(request)
-    election_list = Election.objects.order_by('election_name')
+def election_all_ballots_retrieve_view(request):
+    """
+    Reach out to Google and retrieve (for one election):
+    1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
+    2) Cycle through those polling locations
+    :param request:
+    :return:
+    """
+    structured_json = retrieve_from_google_civic_api_all_polling_places_for_one_election()
+    results = store_results_from_google_civic_api_all_ballots_query(structured_json)
 
-    template_values = {
-        'messages_on_stage': messages_on_stage,
-        'election_list': election_list,
-    }
-    return render(request, 'election/election_list.html', template_values)
+    messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Google Civic.')
+    return HttpResponseRedirect(reverse('election:election_list', args=()))
 
 
 @login_required()
@@ -98,6 +102,18 @@ def election_edit_process_view(request):
 
 
 @login_required()
+def election_list_view(request):
+    messages_on_stage = get_messages(request)
+    election_list = Election.objects.order_by('election_name')
+
+    template_values = {
+        'messages_on_stage': messages_on_stage,
+        'election_list': election_list,
+    }
+    return render(request, 'election/election_list.html', template_values)
+
+
+@login_required()
 def election_remote_retrieve_view(request):
     """
     Reach out to Google and retrieve the latest list of available elections
@@ -109,3 +125,29 @@ def election_remote_retrieve_view(request):
 
     messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Google Civic.')
     return HttpResponseRedirect(reverse('election:election_list', args=()))
+
+
+@login_required()
+def election_summary_view(request, election_id):
+    messages_on_stage = get_messages(request)
+    election_id = convert_to_int(election_id)
+    election_on_stage_found = False
+    try:
+        election_on_stage = Election.objects.get(id=election_id)
+        election_on_stage_found = True
+    except Election.MultipleObjectsReturned as e:
+        handle_record_found_more_than_one_exception(e, logger=logger)
+    except Election.DoesNotExist:
+        # This is fine, create new
+        pass
+
+    if election_on_stage_found:
+        template_values = {
+            'messages_on_stage': messages_on_stage,
+            'election': election_on_stage,
+        }
+    else:
+        template_values = {
+            'messages_on_stage': messages_on_stage,
+        }
+    return render(request, 'election/election_summary.html', template_values)
