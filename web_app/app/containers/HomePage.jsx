@@ -22,7 +22,7 @@ export default class HomePage extends React.Component {
       <div className="input-group">
         <label htmlFor="last-name">My Ballot Location</label><br />
         <span className="small">This is our best guess - feel free to change</span>
-			  <input type="text" name="last-name" className="form-control" />
+        <input type="text" name="last-name" className="form-control" />
       </div>
 		</div>;
 	}
