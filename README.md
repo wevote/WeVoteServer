@@ -329,7 +329,7 @@ Start up the webserver:
 
 Find documentation for all of the APIs here:
 
-    http://localhost:8000/apis/vi/docs
+    http://localhost:8000/apis/v1/docs
 
 
 ### Coding Standards
