@@ -1,0 +1,36 @@
+{# templates/polling_location/polling_location_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if polling_location %}{{ polling_location.polling_location_name }} Summary{% else %}No Polling Location Found{% endif %}{% endblock %}
+
+{%  block content %}
+
+<a href="{% url 'polling_location:polling_location_list' %}">< Back to Polling Locations</a>
+
+{% if polling_location %}
+
+    <h1>One Polling Location</h1>
+    <p><strong>{{ polling_location.location_name }}</strong><br />
+    {% if polling_location.line1 %}{{ polling_location.line1 }},<br />{% endif %}
+    {% if polling_location.line2 %}{{ polling_location.line2 }},<br />{% endif %}
+    {% if polling_location.city or polling_location.state or polling_location.zip_long %}
+        {% if polling_location.city %}{{ polling_location.city }},{% endif %}
+        {% if polling_location.state %}{{ polling_location.state }} {% endif %}
+        {% if polling_location.zip_long %}{{ polling_location.get_formatted_zip }}{% endif %}
+        <br />
+    {% endif %}
+    Hours: {{ polling_location.polling_hours_text }}<br />
+    VIP ID: {{ polling_location.polling_location_id }}
+    </p>
+
+{#    <p><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}">edit</a></p>#}
+
+
+{% else %}
+
+    <h1>No Polling Location Found</h1>
+    Please visit the <a href="{% url 'polling_location:polling_location_list' %}">Polling Location List</a> page.
+
+{% endif %}
+
+{% endblock %}

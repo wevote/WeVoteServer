@@ -1,7 +1,7 @@
 {# templates/election/election_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if election %}{{ election.election_name  }} Summary{% else %}No Election Found{% endif %}{% endblock %}
+{% block title %}{% if election %}{{ election.election_name }} Summary{% else %}No Election Found{% endif %}{% endblock %}
 
 {%  block content %}
 
@@ -13,7 +13,7 @@
     <table>
         <tr>
             <td>Day of Election:</td>
-            <td>{{ election.election_date_text }}</td>
+            <td>{{ election.election_day_text }}</td>
         </tr>
         <tr>
             <td>Google Civic Election ID:</td>
@@ -28,7 +28,7 @@
     <p><a href="{% url 'election:election_edit' election.id %}">edit</a></p>
 
     <p>
-    <a href="{% url 'election:election_list' %}">Retrieve Ballot Data for this Election</a><br />
+    <a href="{% url 'election:election_all_ballots_retrieve' election.id %}">Retrieve Ballot Data for this Election</a><br />
     Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
     together the measures, races and candidates.
     </p>

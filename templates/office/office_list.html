@@ -1,0 +1,36 @@
+{# templates/office/office_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Offices{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Offices</h1>
+<p><a href="{% url 'office:office_new' %}">Add New Office</a></p>
+
+{% if office_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>Office Name</td>
+            <td>State</td>
+            <td>&nbsp;</td>
+        </tr>
+    {% for office in office_list %}
+        <tr>
+            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
+            <td>{{ office.get_office_state }}</td>
+            <td><a href="{% url 'office:office_edit' office.id %}" style="font-size: .65em">(edit)</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+    <p>
+        <a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Offices</a>
+{#        <a href="{% url 'office:offices_import' %}" >Import Offices</a>#}
+    </p>
+{% else %}
+    <p>(no offices found)</p>
+{% endif %}
+{% endblock %}

@@ -12,7 +12,7 @@ from organization.models import Organization
 from twitter.models import TwitterUser
 from voter.models import Voter
 import wevote_functions.admin
-from wevote_settings.models import fetch_next_id_we_vote_last_position_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_last_position_integer, fetch_site_unique_id_prefix
 
 
 ANY = 'ANY'  # This is a way to indicate when we want to return any stance (support, oppose, no_stance)
@@ -41,12 +41,12 @@ class PositionEntered(models.Model):
     """
     # We are relying on built-in Python id field
 
-    # The id_we_vote identifier is unique across all We Vote sites, and allows us to share our org info with other
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our org info with other
     # organizations
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "pos", and then a sequential integer like "123".
-    # We keep the last value in WeVoteSetting.id_we_vote_last_position_integer
-    id_we_vote = models.CharField(
+    # We keep the last value in WeVoteSetting.we_vote_id_last_position_integer
+    we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
 
     # The id for the generated position that this PositionEntered entry influences
@@ -58,8 +58,11 @@ class PositionEntered(models.Model):
 
     # The voter expressing the opinion
     voter_id = models.BigIntegerField(null=True, blank=True)
-    # The election this position is for
-    election_id = models.BigIntegerField(verbose_name='election id', null=True, blank=True)
+    # # The election this position is for # TODO DEPRECATED
+    # election_id = models.BigIntegerField(verbose_name='election id', null=True, blank=True)
+    # The unique ID of the election containing this contest. (Provided by Google Civic)
+    google_civic_election_id = models.CharField(
+        verbose_name="google civic election id", max_length=254, null=True, blank=True)
 
     # The unique We Vote id of the tweet that is the source of the position
     tweet_source_id = models.BigIntegerField(null=True, blank=True)
@@ -120,20 +123,20 @@ class PositionEntered(models.Model):
     class Meta:
         ordering = ('date_entered',)
 
-    # We override the save function so we can auto-generate id_we_vote
+    # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
-        # Even if this organization came from another source we still need a unique id_we_vote
-        if self.id_we_vote:
-            self.id_we_vote = self.id_we_vote.strip()
-        if self.id_we_vote == "" or self.id_we_vote is None:  # If there isn't a value...
+        # Even if this organization came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_id_we_vote_last_position_integer()
+            next_local_integer = fetch_next_we_vote_id_last_position_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "pos" = tells us this is a unique id for an pos
             # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-            self.id_we_vote = "wv{site_unique_id_prefix}pos{next_integer}".format(
+            self.we_vote_id = "wv{site_unique_id_prefix}pos{next_integer}".format(
                 site_unique_id_prefix=site_unique_id_prefix,
                 next_integer=next_local_integer,
             )
@@ -188,29 +191,31 @@ class PositionEntered(models.Model):
             return
         return organization
 
-    def organization_id_we_vote(self):
+    def organization_we_vote_id(self):
         try:
             organization_on_stage = Organization.objects.get(id=self.organization_id)
-            if organization_on_stage.id_we_vote:
-                return organization_on_stage.id_we_vote
+            if organization_on_stage.we_vote_id:
+                return organization_on_stage.we_vote_id
         except StandardError:
             pass
         return ''
 
-    def candidate_campaign_id_we_vote(self):
+    def candidate_campaign_we_vote_id(self):
         try:
             candidate_campaign_on_stage = CandidateCampaign.objects.get(id=self.candidate_campaign_id)
-            if candidate_campaign_on_stage.id_we_vote:
-                return candidate_campaign_on_stage.id_we_vote
+            if candidate_campaign_on_stage.we_vote_id:
+                return candidate_campaign_on_stage.we_vote_id
         except StandardError:
             pass
         return ''
 
-    def measure_campaign_id_we_vote(self):
+    def measure_campaign_we_vote_id(self):
         try:
-            measure_campaign_on_stage = Organization.objects.get(id=self.measure_campaign_id)
-            if measure_campaign_on_stage.id_we_vote:
-                return measure_campaign_on_stage.id_we_vote
+            measure_campaign_on_stage = MeasureCampaign.objects.get(id=self.measure_campaign_id)
+            if measure_campaign_on_stage.we_vote_id:
+                return measure_campaign_on_stage.we_vote_id
+        except MeasureCampaign.DoesNotExist:
+            pass
         except StandardError:
             pass
         return ''
@@ -229,7 +234,10 @@ class Position(models.Model):
     # The organization this position is for
     organization_id = models.BigIntegerField(null=True, blank=True)
     # The election this position is for
-    election_id = models.BigIntegerField(verbose_name='election id', null=True, blank=True)
+    # election_id = models.BigIntegerField(verbose_name='election id', null=True, blank=True)  # DEPRECATED
+    # The unique ID of the election containing this contest. (Provided by Google Civic)
+    google_civic_election_id = models.CharField(
+        verbose_name="google civic election id", max_length=254, null=True, blank=True)
 
     candidate_campaign = models.ForeignKey(
         CandidateCampaign, verbose_name='candidate campaign', null=True, blank=True, related_name='position_candidate')

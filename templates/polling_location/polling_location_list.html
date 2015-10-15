@@ -12,25 +12,17 @@
     <table border="0" cellpadding="10">
     {% for polling_location in polling_location_list %}
         <tr>
-            <td><a href="{% url 'election:election_summary' polling_location.id %}">
+            <td><a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">
             {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}missing location name{% endif %}</a>
-{#                 <br /> #}
-{#                {% if polling_location.line1 %}{{ polling_location.line1 }},<br />{% endif %}#}
-{#                {% if polling_location.line2 %}{{ polling_location.line2 }},<br />{% endif %}#}
-{#                {% if polling_location.city or polling_location.state or polling_location.zip_long %}#}
-{#                    {% if polling_location.city %}{{ polling_location.city }},{% endif %}#}
-{#                    {% if polling_location.state %}{{ polling_location.state }} {% endif %}#}
-{#                    {% if polling_location.zip_long %}{{ polling_location.zip_long }}{% endif %}#}
-{#                {% endif %}#}
             </td>
             <td>
                 {% if polling_location.city %}{{ polling_location.city }},{% endif %}
                 {% if polling_location.state %}{{ polling_location.state }} {% endif %}
             </td>
             <td>
-            {% if polling_location.zip_long %}{{ polling_location.zip_long }}{% else %}{% endif %}
+            {% if polling_location.zip_long %}{{ polling_location.get_formatted_zip }}{% else %}{% endif %}
             </td>
-            <td><a href="{% url 'election:election_edit' polling_location.id %}" style="font-size: .65em">(edit)</a></td>
+{#            <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}" style="font-size: .65em">(edit)</a></td>#}
         </tr>
     {% endfor %}
     </table>

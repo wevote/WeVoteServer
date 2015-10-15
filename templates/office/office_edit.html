@@ -1,0 +1,35 @@
+{# templates/office/office_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if office %}{{ office.office_name  }}{% else %}New Office{% endif %}{% endblock %}
+
+{%  block content %}
+<h1>{% if office %}Edit {{ office.office_name }}{% else %}New Office{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+<form action="{% url "office:office_edit_process" %}" method="post">
+{% csrf_token %}
+    <input type="hidden" name="office_id" value="{% if office %}{{ office.id }}{% else %}0{% endif %}">
+
+{% if office %}
+<p><strong>Values from Google Civic API (do not edit)</strong></p>
+<p>Office Name: {{ office.office_name }}</p>
+<p>Twitter URL: {{ office.twitter_url }}</p>
+<p>Website: {{ office.office_url }}</p>
+
+{% else %}
+{#    <label for="office_name_id">Office Name</label>#}
+{#    <input type="text" name="office_name" id="office_name_id" value="{% if office %}{{ office.office_name }}{% endif %}" /><br />#}
+{##}
+{#    <label for="twitter_handle_id">Twitter </label>#}
+{#    <input type="text" name="twitter_handle" id="twitter_handle_id" value="{% if office %}{{ office.twitter_handle }}{% endif %}" /><br />#}
+{##}
+{#    <label for="office_website_id">Office Website</label>#}
+{#    <input type="text" name="office_website" id="office_website_id" value="{% if office %}{{ office.office_website }}{% endif %}" /><br />#}
+{% endif %}
+<p><a href="{% url 'office:office_list' %}">cancel</a>
+<input type="submit" value="{% if office %}Update Office{% else %}Save New Office{% endif %}" /></p>
+</form>
+
+{% endblock %}

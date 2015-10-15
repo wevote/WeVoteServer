@@ -13,4 +13,8 @@ urlpatterns = [
     # Processing incoming file with polling locations
     url(r'^import_polling_locations_process/$', views_admin.import_polling_locations_process_view,
         name='import_polling_locations_process'),
+    url(r'^(?P<polling_location_local_id>[0-9]+)/edit/$', views_admin.polling_location_edit_view,
+        name='polling_location_edit'),
+    url(r'^(?P<polling_location_local_id>[0-9]+)/summary/$', views_admin.polling_location_summary_view,
+        name='polling_location_summary'),
 ]

@@ -1,21 +1,25 @@
-{# organization/templates/organization/organization_edit.html #}
+{# templates/organization/organization_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if organization %}{{ organization.name  }}{% else %}New Organization{% endif %}{% endblock %}
+{% block title %}{% if organization %}{{ organization.organization_name  }}{% else %}New Organization{% endif %}{% endblock %}
 
 {%  block content %}
-<h1>{% if organization %}{{ organization.name }}{% else %}New Organization{% endif %}</h1>
+<h1>{% if organization %}{{ organization.organization_name }}{% else %}New Organization{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 <form action="{% url "organization:organization_edit_process" %}" method="post">
 {% csrf_token %}
     <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
+
     <label for="organization_name_id">Organization Name</label>
-{% if organization %}
-    <input type="text" name="organization_name" id="organization_name_id" value="{{ organization.name }}" />
-{% else %}
-    <input type="text" name="organization_name" id="organization_name_id" value="" />
-{% endif %}
+    <input type="text" name="organization_name" id="organization_name_id" value="{% if organization %}{{ organization.organization_name }}{% endif %}" /><br />
+
+    <label for="twitter_handle_id">Twitter Handle</label>
+    <input type="text" name="twitter_handle" id="twitter_handle_id" value="{% if organization %}{{ organization.twitter_handle }}{% endif %}" /><br />
+
+    <label for="organization_website_id">Organization Website</label>
+    <input type="text" name="organization_website" id="organization_website_id" value="{% if organization %}{{ organization.organization_website }}{% endif %}" /><br />
+
 <p><a href="{% url 'organization:organization_list' %}">cancel</a>
 <input type="submit" value="{% if organization %}Update Organization{% else %}Save New Organization{% endif %}" /></p>
 </form>

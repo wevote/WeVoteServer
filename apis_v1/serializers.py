@@ -3,11 +3,5 @@
 # -*- coding: UTF-8 -*-
 
 from rest_framework import serializers
-from voter.models import Voter
 
-
-class VoterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Voter
-        fields = ('id', 'first_name', 'last_name', 'email')
-
+# See /voter/serializers.py

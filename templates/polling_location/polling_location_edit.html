@@ -1,0 +1,57 @@
+{# templates/polling_location/polling_location_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if polling_location %}{{ polling_location.location_name }}{% else %}No Polling Location Found{% endif %}{% endblock %}
+
+{%  block content %}
+
+{% if polling_location.id %}
+    <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">< Back to Polling Location Summary</a>
+{% else %}
+    <a href="{% url 'polling_location:polling_location_list' %}">< Back to Polling Locations</a>
+{% endif %}
+
+{% if polling_location %}
+    <h1>Edit {{ polling_location.location_name }}</h1>
+
+{#    <form action="{% url "polling_location:polling_location_edit_process" polling_location.id %}" method="post">#}
+{#    {% csrf_token %}#}
+{#    <table>#}
+{#        <tr>#}
+{#            <td>Local ID:</td>#}
+{#            <td>{{ polling_location.id }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>Polling Location Name:</td>#}
+{#            <td>{{ polling_location.polling_location_name }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>Day of Polling Location:</td>#}
+{#            <td>{{ polling_location.polling_location_date_text }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>Google Civic ID:</td>#}
+{#            <td>{{ polling_location.google_civic_polling_location_id }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>OCD Division ID:</td>#}
+{#            <td>{{ polling_location.raw_ocd_division_id }}</td>#}
+{#        </tr>#}
+{#    </table>#}
+{##}
+{#    <input type="hidden" name="polling_location_id" value="{{ polling_location.id }}">#}
+{#    #}
+{##}
+{#    <p><a href="{% url 'polling_location:polling_location_list' %}">cancel</a>#}
+    {# <input type="submit" value="Update Organization" /> #}
+{#    </p>#}
+{#    </form>#}
+    (There are no Polling Location fields to edit at this time)
+
+{% else %}
+     <h1>No Polling Location Found</h1>
+
+    Please visit the <a href="{% url 'polling_location:polling_location_list' %}">Polling Location List</a> page.
+{% endif %}
+
+{% endblock %}

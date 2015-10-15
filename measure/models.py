@@ -3,8 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from wevote_settings.models import fetch_next_id_we_vote_last_contest_measure_integer, \
-    fetch_next_id_we_vote_last_measure_campaign_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_last_contest_measure_integer, \
+    fetch_next_we_vote_id_last_measure_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 
 
@@ -12,14 +12,14 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 class ContestMeasure(models.Model):
-    # The id_we_vote identifier is unique across all We Vote sites, and allows us to share our data with other
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
     # organizations
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "meas", and then a sequential integer like "123".
-    # We keep the last value in WeVoteSetting.id_we_vote_last_contest_measure_integer
-    id_we_vote = models.CharField(
+    # We keep the last value in WeVoteSetting.we_vote_id_last_contest_measure_integer
+    we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
-    id_maplight = models.CharField(verbose_name="maplight unique identifier",
+    maplight_id = models.CharField(verbose_name="maplight unique identifier",
                                    max_length=254, null=True, blank=True, unique=True)
     # The title of the measure (e.g. 'Proposition 42').
     measure_title = models.CharField(verbose_name="measure title", max_length=254, null=False, blank=False)
@@ -28,12 +28,10 @@ class ContestMeasure(models.Model):
                                         max_length=254, null=False, blank=False)
     # A link to the referendum. This field is only populated for contests of type 'Referendum'.
     measure_url = models.CharField(verbose_name="measure details url", max_length=254, null=True, blank=False)
-    # The We Vote unique id for the election
-    election_id = models.CharField(verbose_name="we vote election id", max_length=254, null=False, blank=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
-    google_civic_election_id = models.CharField(verbose_name="election id", max_length=254, null=False, blank=False)
-    # ballot_placement: NOTE - even though GoogleCivicContestOffice has this field, we store this value
-    #  in the BallotItem table instead because it is different for each voter
+    google_civic_election_id = models.CharField(
+        verbose_name="google civic election id", max_length=254, null=True, blank=True)
+    # ballot_placement: We store ballot_placement in the BallotItem table instead because it is different for each voter
     # If this is a partisan election, the name of the party it is for.
     primary_party = models.CharField(verbose_name="primary party", max_length=254, null=True, blank=True)
     # The name of the district.
@@ -46,20 +44,20 @@ class ContestMeasure(models.Model):
     # would have id "34" and a scope of stateUpper.
     district_ocd_id = models.CharField(verbose_name="open civic data id", max_length=254, null=False, blank=False)
 
-    # We override the save function so we can auto-generate id_we_vote
+    # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
-        # Even if this data came from another source we still need a unique id_we_vote
-        if self.id_we_vote:
-            self.id_we_vote = self.id_we_vote.strip()
-        if self.id_we_vote == "" or self.id_we_vote is None:  # If there isn't a value...
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_id_we_vote_last_contest_measure_integer()
+            next_local_integer = fetch_next_we_vote_id_last_contest_measure_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "meas" = tells us this is a unique id for a ContestMeasure
             # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-            self.id_we_vote = "wv{site_unique_id_prefix}meas{next_integer}".format(
+            self.we_vote_id = "wv{site_unique_id_prefix}meas{next_integer}".format(
                 site_unique_id_prefix=site_unique_id_prefix,
                 next_integer=next_local_integer,
             )
@@ -67,12 +65,12 @@ class ContestMeasure(models.Model):
 
 
 class MeasureCampaign(models.Model):
-    # The id_we_vote identifier is unique across all We Vote sites, and allows us to share our data with other
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
     # organizations
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "meascam", and then a sequential integer like "123".
-    # We keep the last value in WeVoteSetting.id_we_vote_last_measure_campaign_integer
-    id_we_vote = models.CharField(
+    # We keep the last value in WeVoteSetting.we_vote_id_last_measure_campaign_integer
+    we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
     # contest_measure link
     # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
@@ -109,20 +107,20 @@ class MeasureCampaign(models.Model):
     # The voice phone number for the campaign office.
     phone = models.CharField(verbose_name="campaign email", max_length=254, null=True, blank=True)
 
-    # We override the save function so we can auto-generate id_we_vote
+    # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
-        # Even if this data came from another source we still need a unique id_we_vote
-        if self.id_we_vote:
-            self.id_we_vote = self.id_we_vote.strip()
-        if self.id_we_vote == "" or self.id_we_vote is None:  # If there isn't a value...
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_id_we_vote_last_measure_campaign_integer()
+            next_local_integer = fetch_next_we_vote_id_last_measure_campaign_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "meascam" = tells us this is a unique id for a MeasureCampaign
             # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-            self.id_we_vote = "wv{site_unique_id_prefix}meascam{next_integer}".format(
+            self.we_vote_id = "wv{site_unique_id_prefix}meascam{next_integer}".format(
                 site_unique_id_prefix=site_unique_id_prefix,
                 next_integer=next_local_integer,
             )

@@ -1,0 +1,33 @@
+{# templates/position/position_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if position %}{{ position.position_name  }}{% else %}New Position{% endif %}{% endblock %}
+
+{%  block content %}
+<h1>{% if position %}Edit {{ position.position_name }}{% else %}New Position{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+<form action="{% url "position:position_edit_process" %}" method="post">
+{% csrf_token %}
+    <input type="hidden" name="position_id" value="{% if position %}{{ position.id }}{% else %}0{% endif %}">
+
+{% if position %}
+<p><strong>Values from Google Civic API (do not edit)</strong></p>
+<p>Position ID: {{ position.we_vote_id }}</p>
+
+{% else %}
+{#    <label for="position_name_id">Position Name</label>#}
+{#    <input type="text" name="position_name" id="position_name_id" value="{% if position %}{{ position.position_name }}{% endif %}" /><br />#}
+{##}
+{#    <label for="twitter_handle_id">Twitter </label>#}
+{#    <input type="text" name="twitter_handle" id="twitter_handle_id" value="{% if position %}{{ position.twitter_handle }}{% endif %}" /><br />#}
+{##}
+{#    <label for="position_website_id">Position Website</label>#}
+{#    <input type="text" name="position_website" id="position_website_id" value="{% if position %}{{ position.position_website }}{% endif %}" /><br />#}
+{% endif %}
+<p><a href="{% url 'position:position_list' %}">cancel</a>
+<input type="submit" value="{% if position %}Update Position{% else %}Save New Position{% endif %}" /></p>
+</form>
+
+{% endblock %}

@@ -1,0 +1,48 @@
+{# templates/voter/voter_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Voters{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Voters</h1>
+
+{% if voter_list %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <td>Who</td>
+            <td>Where</td>
+            <td>FB?</td>
+            <td>Tw?</td>
+            <td>Admin</td>
+        </tr>
+    {% for voter in voter_list %}
+        <tr>
+            <td><a href="{% url 'voter:voter_summary' voter.id %}">
+            {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }}{% endif %}</a>
+            </td>
+            <td>
+                &nbsp;
+            </td>
+            <!-- Facebook? //-->
+            <td>
+            {% if voter.fb_username %}Y{% else %}{% endif %}
+            </td>
+            <!-- Twitter? //-->
+            <td>
+            {% if voter.fb_username %}Y{% else %}{% endif %}
+            </td>
+            <!-- Is site administrator? //-->
+            <td>
+            {% if voter.is_admin %}Y{% else %}{% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no voters found)</p>
+{% endif %}
+<br />
+
+{% endblock %}

@@ -1,19 +1,23 @@
 # import_export_google_civic/controllers.py
 # Brought to you by We Vote. Be good.
-# https://developers.google.com/resources/api-libraries/documentation/civicinfo/v2/python/latest/civicinfo_v2.elections.html
+# Complete description of all Google Civic fields:
+# https://developers.google.com/resources/api-libraries/documentation/civicinfo/v2/python/latest/index.html
+# voterInfoQuery Details:
+# https://developers.google.com/
+#   resources/api-libraries/documentation/civicinfo/v2/python/latest/civicinfo_v2.elections.html#voterInfoQuery
+
 # -*- coding: UTF-8 -*-
 
 import json
 import requests
-from election.models import Election, ElectionManager
-from exception.models import handle_record_not_found_exception
-from import_export_google_civic.models import GoogleCivicContestOffice, GoogleCivicBallotItemManager, \
-    GoogleCivicCandidateCampaign, GoogleCivicContestReferendum, GoogleCivicElection
+from ballot.models import BallotItemManager
+from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
+from election.models import ElectionManager
+from exception.models import handle_record_not_found_exception
+from measure.models import ContestMeasure
+from office.models import ContestOfficeManager
 from wevote_functions.models import logger, value_exists
-
-# TODO DALE is it ok to import logger like above? the following line was saying it couldn't find admin.get_logger
-# logger = wevote_functions.admin.get_logger(__name__)
 
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 ELECTION_QUERY_URL = get_environment_variable("ELECTION_QUERY_URL")
@@ -21,178 +25,87 @@ VOTER_INFO_URL = get_environment_variable("VOTER_INFO_URL")
 VOTER_INFO_JSON_FILE = get_environment_variable("VOTER_INFO_JSON_FILE")
 
 
-# See import_data/election_query_sample.json
-def retrieve_from_google_civic_api_election_query():
-    # Request json file from Google servers
-    logger.info("Loading json data from Google servers, API call electionQuery")
-    request = requests.get(ELECTION_QUERY_URL, params={
-        "key": GOOGLE_CIVIC_API_KEY,  # This comes from an environment variable
-    })
-    return json.loads(request.text)
+# GoogleRepresentatives
+# https://developers.google.com/resources/api-libraries/documentation/civicinfo/v2/python/latest/civicinfo_v2.representatives.html
+def process_candidates_from_structured_json(
+        candidates_structured_json, google_civic_election_id, ocd_division_id, contest_office_id):
+    """
+    "candidates": [
+        {
+         "name": "Nancy Pelosi",
+         "party": "Democratic"
+        },
+        {
+         "name": "John Dennis",
+         "party": "Republican",
+         "candidateUrl": "http://www.johndennisforcongress.com/",
+         "channels": [
+          {
+           "type": "Facebook",
+           "id": "https://www.facebook.com/johndennis2010"
+          },
+          {
+           "type": "Twitter",
+           "id": "https://twitter.com/johndennis2012"
+    """
+    results = {}
+    for one_candidate in candidates_structured_json:
+        candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
+        party = one_candidate['party'] if 'party' in one_candidate else ''
+        order_on_ballot = one_candidate['orderOnBallot'] if 'orderOnBallot' in one_candidate else 0
+        candidate_url = one_candidate['candidateUrl'] if 'candidateUrl' in one_candidate else ''
+        email = one_candidate['email'] if 'email' in one_candidate else ''
+        phone = one_candidate['phone'] if 'phone' in one_candidate else ''
 
+        # set them to channel values to empty
+        facebook_url = ''
+        twitter_url = ''
+        google_plus_url = ''
+        youtube_url = ''
+        if 'channels' in one_candidate:
+            channels = one_candidate['channels']
+            for one_channel in channels:
+                if 'type' in one_channel:
+                    if one_channel['type'] == 'Facebook':
+                        facebook_url = one_channel['id'] if 'id' in one_channel else ''
+                    if one_channel['type'] == 'Twitter':
+                        twitter_url = one_channel['id'] if 'id' in one_channel else ''
+                    if one_channel['type'] == 'GooglePlus':
+                        google_plus_url = one_channel['id'] if 'id' in one_channel else ''
+                    if one_channel['type'] == 'YouTube':
+                        youtube_url = one_channel['id'] if 'id' in one_channel else ''
 
-def store_results_from_google_civic_api_election_query(structured_json):
-    elections_list_json = structured_json['elections']
-    for one_election in elections_list_json:
-        raw_ocd_division_id = one_election['ocdDivisionId']
-        election_date_text = one_election['electionDay']
-        google_civic_election_id = one_election['id']
-        election_name = one_election['name']
-
-        election_manager = ElectionManager()
-        results = election_manager.update_or_create_election(
-            google_civic_election_id, election_name, election_date_text, raw_ocd_division_id)
+        if google_civic_election_id and ocd_division_id and contest_office_id and candidate_name:
+            updated_candidate_campaign_values = {
+                # Values we search against
+                'google_civic_election_id': google_civic_election_id,
+                'ocd_division_id': ocd_division_id,
+                'contest_office_id': contest_office_id,
+                'candidate_name': candidate_name,
+                # The rest of the values
+                'party': party,
+                'email': email,
+                'phone': phone,
+                'order_on_ballot': order_on_ballot,
+                'candidate_url': candidate_url,
+                'facebook_url': facebook_url,
+                'twitter_url': twitter_url,
+                'google_plus_url': google_plus_url,
+                'youtube_url': youtube_url,
+                'google_civic_candidate_name': candidate_name,
+            }
+            candidate_campaign_manager = CandidateCampaignManager()
+            results = candidate_campaign_manager.update_or_create_candidate_campaign(
+                google_civic_election_id, ocd_division_id, contest_office_id, candidate_name,
+                updated_candidate_campaign_values)
 
     return results
 
 
-# Complete description of all Google Civic fields:
-# https://developers.google.com/resources/api-libraries/documentation/civicinfo/v2/python/latest/index.html
-# voterInfoQuery Details:
-# https://developers.google.com/resources/api-libraries/documentation/civicinfo/v2/python/latest/civicinfo_v2.elections.html#voterInfoQuery
-def import_voterinfo_from_json(save_to_db):
-    """
-    Get the json data, and call the sub functions that
-    :return:
-    """
-    load_from_google_servers = False
-    if load_from_google_servers:
-        # Request json file from Google servers
-        logger.info("Loading from Google servers")
-        request = requests.get(VOTER_INFO_URL, params={
-            "key": GOOGLE_CIVIC_API_KEY,  # This comes from an environment variable
-            "address": "254 Hartford Street San Francisco CA",
-            "electionId": "2000",
-        })
-        structured_json = json.loads(request.text)
-    else:
-        # Load saved json from local file
-        logger.info("Loading from local file")
-
-        with open(VOTER_INFO_JSON_FILE) as json_data:
-            structured_json = json.load(json_data)
-
-    # Process election and store in local db cache
-    # google_civic_election_id = The unique ID of the election containing this contest. (Provided by Google Civic)
-    google_civic_election_id = process_election_from_structured_json(structured_json['election'], save_to_db)
-
-    # Loop through all pollingLocations and store in local db cache
-    process_polling_locations_from_structured_json(structured_json['pollingLocations'], save_to_db)
-
-    # Loop through all contests and store in local db cache
-    process_contests_from_structured_json(structured_json['contests'], google_civic_election_id, save_to_db)
-
-    # We ignore "kind", "state", and "normalizedInput"
-    # "kind": "civicinfo#voterInfoResponse",
-
-    # "state" has information (including URLs) about the election adminstrators
-
-    # "normalizedInput": {
-    #   "line1": "254 hartford st",
-    #   "city": "san francisco",
-    #   "state": "CA",
-    #   "zip": "94114"
-    #  },
-    return
-
-
-def process_election_from_structured_json(election_structured_data, save_to_db):
-    """
-    "id": "4111",
-    "name": "MI Special Election",
-    "electionDay": "2015-05-05"
-    """
-    google_civic_election_id = election_structured_data['id']
-    name = election_structured_data['name']
-    election_day = election_structured_data['electionDay']
-    # DALE 2015-05-01 The election type is currently in the contests, and not in the election
-    # is_general_election = False  # Reset to false
-    # is_primary_election = False  # Reset to false
-    # is_runoff_election = False  # Reset to false
-    # for case in switch(election_structured_data['type']):
-    #     if case('Primary'):
-    #         is_primary_election = True
-    #         break
-    #     if case('Run-off'):
-    #         is_runoff_election = True
-    #         break
-    #     if case('General'): pass
-    #     if case():  # default
-    #         is_general_election = True
-
-    if save_to_db:
-        if google_civic_election_id and name and election_day:
-            try:
-                # Try to find earlier version based on Google's unique identifier google_civic_election_id
-                query1 = GoogleCivicContestOffice.objects.all()
-                query1 = query1.filter(google_civic_election_id__exact=google_civic_election_id)
-
-                # Was at least one existing entry found based on the above criteria?
-                if len(query1):
-                    google_civic_election_entry = query1[0]
-                # If no entries found previously, create a new entry
-                else:
-                    google_civic_election_entry \
-                        = GoogleCivicElection.objects.create(google_civic_election_id=google_civic_election_id,
-                                                             name=name,
-                                                             election_day=election_day,
-                                                             # is_general_election=is_general_election,
-                                                             # is_primary_election=is_primary_election,
-                                                             # is_runoff_election=is_runoff_election,
-                                                             )
-                # Return the google_civic_election_id so we can tie all of the Offices and Measures to this election
-            except Exception as e:
-                handle_record_not_found_exception(e, logger=logger)
-
-    return google_civic_election_id
-
-
-def process_polling_locations_from_structured_json(polling_location_structured_data, save_to_db):
-    """
-    "pollingLocations": [
-      {
-       "address": {
-        "locationName": "School-Harvey Milk",
-        "line1": "4235 19th Street",
-        "city": "San Francisco",
-        "state": "CA",
-        "zip": "94114-2415"
-       },
-       "notes": "Between Collingwood & Diamond",
-       "pollingHours": "07:00-20:00",
-    """
-    return
-
-
-def process_contests_from_structured_json(contests_structured_json, google_civic_election_id, save_to_db):
-    """
-    "type": 'General', 'Primary', 'Run-off'
-    or
-    "type": "Referendum",
-    """
-    local_ballot_order = 0
-    for one_contest in contests_structured_json:
-        local_ballot_order += 1
-        contest_type = one_contest['type']
-        # If the contest is for an elected office, we use the function:
-        #   process_contest_office_from_structured_json
-        if contest_type in ('General', 'Primary', 'Run-off'):
-            process_contest_office_from_structured_json(
-                one_contest, google_civic_election_id, local_ballot_order, save_to_db)
-
-        # If the contest is a referendum/initiative/measure, we use the function:
-        #   process_contest_referendum_from_structured_json
-        elif contest_type == 'Referendum':
-            process_contest_referendum_from_structured_json(
-                one_contest, google_civic_election_id, local_ballot_order, save_to_db)
-
-
 def process_contest_office_from_structured_json(
-        one_contest_office_structured_json, google_civic_election_id, local_ballot_order, save_to_db):
-    voter_id = 1  # TODO Temp
-
+        one_contest_office_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order, voter_id):
     logger.debug("General contest_type")
-    office = one_contest_office_structured_json['office']
+    office_name = one_contest_office_structured_json['office']
 
     # The number of candidates that a voter may vote for in this contest.
     if 'numberVotingFor' in one_contest_office_structured_json:
@@ -206,19 +119,25 @@ def process_contest_office_from_structured_json(
     else:
         number_elected = 1
 
+    # These are several fields that are shared in common between offices and measures
     results = process_contest_common_fields_from_structured_json(one_contest_office_structured_json)
-    ballot_placement = results['ballot_placement']  # A number specifying the position of this contest
-    # on the voter's ballot.
+
+    # ballot_placement: A number specifying the position of this contest on the voter's ballot.
+    google_ballot_placement = results['ballot_placement']
     primary_party = results['primary_party']  # If this is a partisan election, the name of the party it is for.
-    district_name = results['district_name']  # The name of the district.
-    district_scope = results['district_scope']   # The geographic scope of this district. If unspecified the
+
+    # district_scope: The geographic scope of this district. If unspecified the
     # district's geography is not known. One of: national, statewide, congressional, stateUpper, stateLower,
     # countywide, judicial, schoolBoard, cityWide, township, countyCouncil, cityCouncil, ward, special
-    district_ocd_id = results['district_ocd_id']
-    electorate_specifications = results['electorate_specifications']  # A description of any additional
-    # eligibility requirements for voting in this contest.
-    special = results['special']  # "Yes" or "No" depending on whether this a contest being held
-    # outside the normal election cycle.
+    district_scope = results['district_scope']
+    district_id = results['district_id']
+    district_name = results['district_name']  # The name of the district.
+
+    # electorate_specifications: A description of any additional eligibility requirements for voting in this contest.
+    electorate_specifications = results['electorate_specifications']
+
+    # special: "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
+    special = results['special']
 
     # We want to convert this from an array to three fields for the same table
     # levels: string, A list of office levels to filter by. Only offices that serve at least one of these levels
@@ -237,7 +156,8 @@ def process_contest_office_from_structured_json(
     # jurisdiction effectively acts at two different levels of government; for example, the mayor of the
     # District of Columbia acts at "locality" level, but also effectively at both "administrative-area-2"
     # and "administrative-area-1".
-    level_structured_json = one_contest_office_structured_json['level']
+    level_structured_json = \
+        one_contest_office_structured_json['level'] if 'level' in one_contest_office_structured_json else ''
     contest_level = []
     for one_level in level_structured_json:
         contest_level.append(one_level)
@@ -268,149 +188,255 @@ def process_contest_office_from_structured_json(
     #   legislatorUpperBody -
     #   schoolBoard -
     #   specialPurposeOfficer -
-    roles_structured_json = one_contest_office_structured_json['roles']
+    roles_structured_json = \
+        one_contest_office_structured_json['roles'] if 'roles' in one_contest_office_structured_json else ''
     # for one_role in roles_structured_json:
     # Figure out how we are going to use level info
 
-    candidates = one_contest_office_structured_json['candidates']
+    candidates_structured_json = \
+        one_contest_office_structured_json['candidates'] if 'candidates' in one_contest_office_structured_json else ''
 
-    internal_contest_office_id = 0  # Set to 0 in case a new one is not created
     # Note that all of the information saved here is independent of a particular voter
-    if save_to_db:
-        if office and district_name and district_scope and district_ocd_id and google_civic_election_id:
-            try:
-                # Try to find earlier version based on name of the office google_civic_election_id
-                query1 = GoogleCivicContestOffice.objects.all()
-                query1 = query1.filter(google_civic_election_id__exact=google_civic_election_id)
-                query1 = query1.filter(district_scope__exact=district_scope)
-                query1 = query1.filter(office__exact=office)
+    if google_civic_election_id and district_id and office_name:
+        updated_contest_office_values = {
+            # Values we search against
+            'google_civic_election_id': google_civic_election_id,
+            'district_id': district_id,
+            'office_name': office_name,
+            # The rest of the values
+            'number_voting_for': number_voting_for,
+            'number_elected': number_elected,
+            'contest_level0': contest_level0,
+            'contest_level1': contest_level1,
+            'contest_level2': contest_level2,
+            'primary_party': primary_party,
+            'district_name': district_name,
+            'district_scope': district_scope,
+            'electorate_specifications': electorate_specifications,
+            'special': special,
+        }
+        contest_office_manager = ContestOfficeManager()
+        update_or_create_contest_office_results = contest_office_manager.update_or_create_contest_office(
+            google_civic_election_id, district_id, office_name, updated_contest_office_values)
+    else:
+        update_or_create_contest_office_results = {
+            'success': False
+        }
 
-                # Was at least one existing entry found based on the above criteria?
-                if len(query1):
-                    google_civic_contest_office = query1[0]
-                # If no entries found previously, create a new entry
-                else:
-                    google_civic_contest_office = \
-                        GoogleCivicContestOffice.objects.create(office=office,
-                                                                google_civic_election_id=google_civic_election_id,
-                                                                number_voting_for=number_voting_for,
-                                                                number_elected=number_elected,
-                                                                contest_level0=contest_level0,
-                                                                contest_level1=contest_level1,
-                                                                contest_level2=contest_level2,
-                                                                ballot_placement=ballot_placement,
-                                                                primary_party=primary_party,
-                                                                district_name=district_name,
-                                                                district_scope=district_scope,
-                                                                district_ocd_id=district_ocd_id,
-                                                                electorate_specifications=electorate_specifications,
-                                                                special=special,
-                                                                )
-                # The internal id is needed since there isn't a ContestOffice google identifier
-                internal_contest_office_id = google_civic_contest_office.id
-            except Exception as e:
-                handle_record_not_found_exception(e, logger=logger)
+    if update_or_create_contest_office_results['success']:
+        contest_office = update_or_create_contest_office_results['contest_office']
+        contest_office_id = contest_office.id
+        ballot_item_label = contest_office.office_name
+    else:
+        contest_office_id = 0
+        ballot_item_label = ''
+    contest_measure_id = 0
 
-        if value_exists(voter_id) and value_exists(google_civic_election_id) and value_exists(district_ocd_id):
-            google_civic_ballot_item_manager = GoogleCivicBallotItemManager()
-            google_civic_ballot_item_manager.save_ballot_item_for_voter(
-                voter_id, google_civic_election_id, district_ocd_id, ballot_placement, local_ballot_order)
+    # If a voter_id was passed in, save an entry for this office for the voter's ballot
+    if value_exists(voter_id) and value_exists(google_civic_election_id) and value_exists(contest_office_id):
+        ballot_item_manager = BallotItemManager()
+        ballot_item_manager.update_or_create_ballot_item_for_voter(
+            voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label,
+            local_ballot_order, contest_measure_id, contest_office_id)
 
     process_candidates_from_structured_json(
-        candidates, google_civic_election_id, internal_contest_office_id, save_to_db)
+        candidates_structured_json, google_civic_election_id, ocd_division_id, contest_office_id)
 
     return
 
 
-# GoogleRepresentatives
-# https://developers.google.com/resources/api-libraries/documentation/civicinfo/v2/python/latest/civicinfo_v2.representatives.html
-def process_candidates_from_structured_json(
-        candidates_structured_json, google_civic_election_id, google_civic_contest_office_id, save_to_db):
+def extract_value_from_array(structured_json, index_key, default_value):
+    if index_key in structured_json:
+        return structured_json[index_key]
+    else:
+        return default_value
+
+
+def process_contest_common_fields_from_structured_json(one_contest_structured_json):
+    # These following fields exist for both candidates and referendum
+
+    results = {}
+    # A number specifying the position of this contest on the voter's ballot.
+    results['ballot_placement'] = extract_value_from_array(one_contest_structured_json, 'ballotPlacement', 0)
+
+    # If this is a partisan election, the name of the party it is for.
+    results['primary_party'] = extract_value_from_array(one_contest_structured_json, 'primaryParty', '')
+
+    if 'district' in one_contest_structured_json:
+        # The name of the district.
+        results['district_name'] = \
+            one_contest_structured_json['district']['name'] if 'name' in one_contest_structured_json['district'] else ''
+
+        # The geographic scope of this district. If unspecified the district's geography is not known.
+        # One of: national, statewide, congressional, stateUpper, stateLower, countywide, judicial, schoolBoard,
+        # cityWide, township, countyCouncil, cityCouncil, ward, special
+        results['district_scope'] = \
+            one_contest_structured_json['district']['scope'] \
+            if 'scope' in one_contest_structured_json['district'] else ''
+
+        # An identifier for this district, relative to its scope. For example, the 34th State Senate district
+        # would have id "34" and a scope of stateUpper.
+        results['district_id'] = \
+            one_contest_structured_json['district']['id'] if 'id' in one_contest_structured_json['district'] else ''
+
+    # A description of any additional eligibility requirements for voting in this contest.
+    results['electorate_specifications'] = \
+        one_contest_structured_json['electorateSpecifications'] \
+        if 'electorateSpecifications' in one_contest_structured_json else ''
+
+    # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
+    results['special'] = one_contest_structured_json['special'] if 'special' in one_contest_structured_json else ''
+
+    return results
+
+
+def process_contests_from_structured_json(contests_structured_json, google_civic_election_id, ocd_division_id, voter_id):
     """
-    "candidates": [
-        {
-         "name": "Nancy Pelosi",
-         "party": "Democratic"
-        },
-        {
-         "name": "John Dennis",
-         "party": "Republican",
-         "candidateUrl": "http://www.johndennisforcongress.com/",
-         "channels": [
-          {
-           "type": "Facebook",
-           "id": "https://www.facebook.com/johndennis2010"
-          },
-          {
-           "type": "Twitter",
-           "id": "https://twitter.com/johndennis2012"
+    Take in the portion of the json related to contests, and save to the database
+    "type": 'General', "House of Delegates", 'locality', 'Primary', 'Run-off', "State Senate"
+    or
+    "type": "Referendum",
     """
-    for one_candidate in candidates_structured_json:
-        name = one_candidate['name']
-        party = one_candidate['party']
-        if 'order_on_ballot' in one_candidate:
-            order_on_ballot = one_candidate['orderOnBallot']
+    local_ballot_order = 0
+    for one_contest in contests_structured_json:
+        local_ballot_order += 1  # Needed if ballotPlacement isn't provided by Google Civic
+        contest_type = one_contest['type']
+
+        # Is the contest is a referendum/initiative/measure?
+        if contest_type == 'Referendum':
+            process_contest_referendum_from_structured_json(
+                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, voter_id)
+
+        # All other contests are for an elected office
         else:
-            order_on_ballot = 0
-        if 'candidateUrl' in one_candidate:
-            candidate_url = one_candidate['candidateUrl']
-        else:
-            candidate_url = ''
+            process_contest_office_from_structured_json(
+                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, voter_id)
 
-        # set them to channel values to empty
-        facebook_url = ''
-        twitter_url = ''
-        google_plus_url = ''
-        youtube_url = ''
-        if 'channels' in one_candidate:
-            channels = one_candidate['channels']
-            for one_channel in channels:
-                if 'type' in one_channel:
-                    if one_channel['type'] == 'Facebook':
-                        facebook_url = one_channel['id']
-                    if one_channel['type'] == 'Twitter':
-                        twitter_url = one_channel['id']
-                    if one_channel['type'] == 'GooglePlus':
-                        google_plus_url = one_channel['id']
-                    if one_channel['type'] == 'YouTube':
-                        youtube_url = one_channel['id']
 
-        if save_to_db:
-            if name and google_civic_election_id and google_civic_contest_office_id:
-                try:
-                    # Try to find existing candidate (based on name, google_civic_election_id
-                    # and google_civic_contest_office_id
-                    query1 = GoogleCivicCandidateCampaign.objects.all()
-                    query1 = query1.filter(name__exact=name)
-                    query1 = query1.filter(google_civic_election_id__exact=google_civic_election_id)
-                    query1 = query1.filter(google_civic_contest_office_id__exact=google_civic_contest_office_id)
+def retrieve_one_ballot_from_google_civic_api(text_for_map_search, google_civic_election_id):
+    # Request json file from Google servers
+    logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
+    request = requests.get(VOTER_INFO_URL, params={
+        "key": GOOGLE_CIVIC_API_KEY,
+        "address": text_for_map_search,
+        "electionId": google_civic_election_id,
+    })
+    structured_json = json.loads(request.text)
 
-                    # Was at least one existing entry found based on the above criteria?
-                    if len(query1):
-                        google_civic_candidate_campaign = query1[0]
-                    # If no entries found previously, create a new entry
-                    else:
-                        google_civic_candidate_campaign = \
-                            GoogleCivicCandidateCampaign.objects.create(
-                                name=name,
-                                party=party,
-                                google_civic_contest_office_id=google_civic_contest_office_id,
-                                google_civic_election_id=google_civic_election_id,
-                                order_on_ballot=order_on_ballot,
-                                candidate_url=candidate_url,
-                                facebook_url=facebook_url,
-                                twitter_url=twitter_url,
-                                google_plus_url=google_plus_url,
-                                youtube_url=youtube_url,
-                                )
-                except Exception as e:
-                    handle_record_not_found_exception(e, logger=logger)
+    # # For internal testing. Write the json retrieved above into a local file
+    # with open('/Users/dalemcgrew/PythonProjects/WeVoteServer/'
+    #           'import_export_google_civic/import_data/voterInfoQuery_VA_sample.json', 'w') as f:
+    #     json.dump(structured_json, f)
+    #     f.closed
+    #
+    # # TEMP - FROM FILE (so we aren't hitting Google Civic API during development)
+    # with open("import_export_google_civic/import_data/voterInfoQuery_VA_sample.json") as json_data:
+    #     structured_json = json.load(json_data)
 
+    # TODO Add Google Civic API call counter so we can track the number of queries we are doing each day
+
+    # Verify that we got a ballot. (If you use an address in California for an election in New York,
+    #  you won't get a ballot for example.)
+    success = False
+    if 'contests' in structured_json:
+        if len(structured_json['contests']) > 0:
+            success = True
+
+    results = {
+        'success': success,
+        'structured_json': structured_json,
+    }
+    return results
+
+
+# See import_data/voterInfoQuery_VA_sample.json
+def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0):
+
+    #     "election": {
+    #     "electionDay": "2015-11-03",
+    #     "id": "4162",
+    #     "name": "Virginia General Election",
+    #     "ocdDivisionId": "ocd-division/country:us/state:va"
+    # },
+    google_civic_election_id = one_ballot_json['election']['id']
+    ocd_division_id = one_ballot_json['election']['ocdDivisionId']
+
+    # Loop through all contests and store in local db cache
+    process_contests_from_structured_json(one_ballot_json['contests'], google_civic_election_id,
+                                          ocd_division_id, voter_id)
+
+    if voter_id > 0:
+        print "TODO Update voter address"
+        voter_address = one_ballot_json['normalizedInput'] if 'normalizedInput' in one_ballot_json else {}
+        # When saving a ballot for an individual voter, use this data to update voter address
+        # "normalizedInput": {
+        #   "line1": "254 hartford st",
+        #   "city": "san francisco",
+        #   "state": "CA",
+        #   "zip": "94114"
+        #  },
+
+    # When saving a ballot for individual voter, loop through all pollingLocations and store in local db
+    # process_polling_locations_from_structured_json(one_ballot_json['pollingLocations'])
+
+    # TODO DALE
+    results = {
+        'success': True,
+    }
+    return results
+
+
+# See import_data/election_query_sample.json
+def retrieve_from_google_civic_api_election_query():
+    # Request json file from Google servers
+    logger.info("Loading json data from Google servers, API call electionQuery")
+    request = requests.get(ELECTION_QUERY_URL, params={
+        "key": GOOGLE_CIVIC_API_KEY,  # This comes from an environment variable
+    })
+    # TODO Add Google Civic API call counter so we can track the number of queries we are doing each day
+    return json.loads(request.text)
+
+
+def store_results_from_google_civic_api_election_query(structured_json):
+    elections_list_json = structured_json['elections']
+    results = {}
+    for one_election in elections_list_json:
+        raw_ocd_division_id = one_election['ocdDivisionId']
+        election_date_text = one_election['electionDay']
+        google_civic_election_id = one_election['id']
+        election_name = one_election['name']
+
+        election_manager = ElectionManager()
+        results = election_manager.update_or_create_election(
+            google_civic_election_id, election_name, election_date_text, raw_ocd_division_id)
+
+    return results
+
+
+###################################################
+# OLD BELOW
+###################################################
+
+
+def process_polling_locations_from_structured_json(polling_location_structured_data, save_to_db):
+    """
+    "pollingLocations": [
+      {
+       "address": {
+        "locationName": "School-Harvey Milk",
+        "line1": "4235 19th Street",
+        "city": "San Francisco",
+        "state": "CA",
+        "zip": "94114-2415"
+       },
+       "notes": "Between Collingwood & Diamond",
+       "pollingHours": "07:00-20:00",
+    """
     return
 
 
 def process_contest_referendum_from_structured_json(
-        one_contest_referendum_structured_json, google_civic_election_id, local_ballot_order, save_to_db):
+        one_contest_referendum_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order, save_to_db):
     """
     "referendumTitle": "Proposition 45",
     "referendumSubtitle": "Healthcare Insurance. Rate Changes. Initiative Statute.",
@@ -431,17 +457,17 @@ def process_contest_referendum_from_structured_json(
     district_scope = results['district_scope']   # The geographic scope of this district. If unspecified the
     # district's geography is not known. One of: national, statewide, congressional, stateUpper, stateLower,
     # countywide, judicial, schoolBoard, cityWide, township, countyCouncil, cityCouncil, ward, special
-    district_ocd_id = results['district_ocd_id']
+    district_id = results['district_id']
     electorate_specifications = results['electorate_specifications']  # A description of any additional
     #  eligibility requirements for voting in this contest.
     special = results['special']  # "Yes" or "No" depending on whether this a contest being held
     # outside the normal election cycle.
 
     if save_to_db:
-        if referendum_title and referendum_subtitle and district_name and district_scope and district_ocd_id \
+        if referendum_title and referendum_subtitle and district_name and district_scope and district_id \
                 and google_civic_election_id:
             try:
-                query1 = GoogleCivicContestReferendum.objects.all()
+                query1 = ContestMeasure.objects.all()
                 query1 = query1.filter(referendum_title__exact=referendum_title)
                 query1 = query1.filter(google_civic_election_id__exact=google_civic_election_id)
                 query1 = query1.filter(district_scope__exact=district_scope)
@@ -452,7 +478,7 @@ def process_contest_referendum_from_structured_json(
                 # If no entries found previously, create a new entry
                 else:
                     google_civic_contest_referendum = \
-                        GoogleCivicContestReferendum.objects.create(referendum_title=referendum_title,
+                        ContestMeasure.objects.create(referendum_title=referendum_title,
                                                                     referendum_subtitle=referendum_subtitle,
                                                                     google_civic_election_id=google_civic_election_id,
                                                                     referendum_url=referendum_url,
@@ -460,7 +486,7 @@ def process_contest_referendum_from_structured_json(
                                                                     primary_party=primary_party,
                                                                     district_name=district_name,
                                                                     district_scope=district_scope,
-                                                                    district_ocd_id=district_ocd_id,
+                                                                    district_id=district_id,
                                                                     electorate_specifications=electorate_specifications,
                                                                     special=special,
                                                                     )
@@ -485,45 +511,3 @@ def process_contest_referendum_from_structured_json(
 
 # Looks up representative information for a single geographic division.
 # https://developers.google.com/civic-information/docs/v2/representatives/representativeInfoByDivision
-
-def process_contest_common_fields_from_structured_json(one_contest_structured_json):
-    # These following fields exist for both candidates and referendum
-
-    results = {}
-    # A number specifying the position of this contest on the voter's ballot.
-    if 'ballotPlacement' in one_contest_structured_json:
-        results['ballot_placement'] = one_contest_structured_json['ballotPlacement']
-    else:
-        results['ballot_placement'] = 0
-
-    # If this is a partisan election, the name of the party it is for.
-    if 'primaryParty' in one_contest_structured_json:
-        results['primary_party'] = one_contest_structured_json['primaryParty']
-    else:
-        results['primary_party'] = ''
-
-    # The name of the district.
-    results['district_name'] = one_contest_structured_json['district']['name']
-
-    # The geographic scope of this district. If unspecified the district's geography is not known.
-    # One of: national, statewide, congressional, stateUpper, stateLower, countywide, judicial, schoolBoard,
-    # cityWide, township, countyCouncil, cityCouncil, ward, special
-    results['district_scope'] = one_contest_structured_json['district']['scope']
-
-    # An identifier for this district, relative to its scope. For example, the 34th State Senate district
-    # would have id "34" and a scope of stateUpper.
-    results['district_ocd_id'] = one_contest_structured_json['district']['id']
-
-    # A description of any additional eligibility requirements for voting in this contest.
-    if 'electorateSpecifications' in one_contest_structured_json:
-        results['electorate_specifications'] = one_contest_structured_json['electorateSpecifications']
-    else:
-        results['electorate_specifications'] = ''
-
-    # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
-    if 'special' in one_contest_structured_json:
-        results['special'] = one_contest_structured_json['special']
-    else:
-        results['special'] = ''
-
-    return results

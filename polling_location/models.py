@@ -5,6 +5,7 @@
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
+from wevote_functions.models import extract_zip_formatted_from_zip9
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -26,6 +27,27 @@ class PollingLocation(models.Model):
     state = models.CharField(max_length=254, blank=True, null=True, verbose_name='state returned from VIP')
     zip_long = models.CharField(max_length=254, blank=True, null=True,
                                 verbose_name='raw text zip returned from VIP, 9 characters')
+
+    def get_formatted_zip(self):
+        return extract_zip_formatted_from_zip9(self.zip_long)
+
+    def get_text_for_map_search(self):
+        text_for_map_search = ''
+        if self.line1:
+            text_for_map_search += self.line1
+        if self.city:
+            if len(text_for_map_search):
+                text_for_map_search += ", "
+            text_for_map_search += self.city
+        if self.state:
+            if len(text_for_map_search):
+                text_for_map_search += ", "
+            text_for_map_search += self.state
+        if self.zip_long:
+            if len(text_for_map_search):
+                text_for_map_search += " "
+            text_for_map_search += self.get_formatted_zip()
+        return text_for_map_search
 
 
 class PollingLocationManager(models.Model):
@@ -57,18 +79,21 @@ class PollingLocationManager(models.Model):
         else:
             try:
                 updated_values = {
+                    # Values we search against
+                    'polling_location_id': polling_location_id,
+                    'state': state,
+                    # The rest of the values
                     'location_name': location_name,
                     'polling_hours_text': polling_hours_text,
                     'line1': line1,
                     'line2': line2,
                     'city': city,
-                    'state': state,
                     'zip_long': zip_long,
                 }
                 # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's
                 #  are unique from state-to-state
                 new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
-                    polling_location_id=polling_location_id, state=state, defaults=updated_values)
+                    polling_location_id__exact=polling_location_id, state=state, defaults=updated_values)
                 success = True
                 status = 'POLLING_LOCATION_SAVED'
             except PollingLocation.MultipleObjectsReturned as e:

@@ -1,0 +1,38 @@
+{# templates/candidate/candidate_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Candidates{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Candidates</h1>
+<p><a href="{% url 'candidate:candidate_new' %}">Add New Candidate</a></p>
+
+{% if candidate_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>Candidate Name</td>
+            <td>State</td>
+            <td>Twitter URL</td>
+            <td>&nbsp;</td>
+        </tr>
+    {% for candidate in candidate_list %}
+        <tr>
+            <td><a href="{% url 'candidate:candidate_summary' candidate.id %}">{{ candidate.candidate_name }}</a></td>
+            <td>{{ candidate.get_candidate_state }}</td>
+            <td>{{ candidate.twitter_url }}</td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+    <p>
+        <a href="{% url 'candidate:candidates_export' %}?format=json" target="_blank" >Export Candidates</a>
+{#        <a href="{% url 'candidate:candidates_import' %}" >Import Candidates</a>#}
+    </p>
+{% else %}
+    <p>(no candidates found)</p>
+{% endif %}
+{% endblock %}

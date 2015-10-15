@@ -13,8 +13,8 @@ from .models import Politician
 class PoliticianAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ['first_name', 'middle_name', 'last_name', 'id_bioguide', 'id_thomas', 'id_lis', 'id_govtrack',
-                           'id_opensecrets', 'id_votesmart', 'id_fec', 'id_cspan', 'id_wikipedia',
-                           'id_ballotpedia', 'id_house_history', 'id_maplight', 'id_washington_post', 'id_icpsr',
+                           'id_opensecrets', 'id_votesmart', 'id_fec', 'id_cspan', 'wikipedia_id',
+                           'ballotpedia_id', 'id_house_history', 'maplight_id', 'id_washington_post', 'id_icpsr',
                            'name_official_full', 'gender', 'birth_date']}),
     ]
     list_display = ('id', 'first_name', 'last_name', 'id_bioguide')

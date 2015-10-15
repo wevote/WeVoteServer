@@ -1,0 +1,30 @@
+{# templates/voter/voter_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if voter %}
+    {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %} Summary
+{% else %}No Voter Found
+{% endif %}{% endblock %}
+
+{%  block content %}
+
+<a href="{% url 'voter:voter_list' %}">< Back to Voters</a>
+
+{% if voter %}
+
+    <h1>{% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}</h1>
+    <p>ID: {{ voter.id }}<br />
+    Admin?: {% if voter.is_admin %}Yes{% else %}No{% endif %}<br />
+    </p>
+
+    <p><a href="{% url 'voter:voter_edit' voter.id %}">edit</a></p>
+
+
+{% else %}
+
+    <h1>No Voter Found</h1>
+    Please visit the <a href="{% url 'voter:voter_list' %}">Voter List</a> page.
+
+{% endif %}
+
+{% endblock %}

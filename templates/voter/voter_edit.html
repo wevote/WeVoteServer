@@ -1,0 +1,59 @@
+{# templates/voter/voter_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if voter %}
+    {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}
+{% else %}No Voter Found{% endif %}{% endblock %}
+
+{%  block content %}
+
+{% if voter.id %}
+    <a href="{% url 'voter:voter_summary' voter.id %}">< Back to {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %} Summary</a>
+{% else %}
+    <a href="{% url 'voter:voter_list' %}">< Back to Voters</a>
+{% endif %}
+
+{% if voter %}
+    <h1>Edit {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}</h1>
+
+{#    <form action="{% url "voter:voter_edit_process" voter.id %}" method="post">#}
+{#    {% csrf_token %}#}
+{#    <table>#}
+{#        <tr>#}
+{#            <td>Local ID:</td>#}
+{#            <td>{{ voter.id }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>Polling Location Name:</td>#}
+{#            <td>{{ voter.voter_name }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>Day of Polling Location:</td>#}
+{#            <td>{{ voter.voter_date_text }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>Google Civic ID:</td>#}
+{#            <td>{{ voter.google_civic_voter_id }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>OCD Division ID:</td>#}
+{#            <td>{{ voter.raw_ocd_division_id }}</td>#}
+{#        </tr>#}
+{#    </table>#}
+{##}
+{#    <input type="hidden" name="voter_id" value="{{ voter.id }}">#}
+{#    #}
+{##}
+{#    <p><a href="{% url 'voter:voter_list' %}">cancel</a>#}
+    {# <input type="submit" value="Update Organization" /> #}
+{#    </p>#}
+{#    </form>#}
+    (There are no Voter fields to edit at this time)
+
+{% else %}
+     <h1>No Voter Found</h1>
+
+    Please visit the <a href="{% url 'voter:voter_list' %}">Voter List</a> page.
+{% endif %}
+
+{% endblock %}

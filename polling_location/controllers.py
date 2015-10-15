@@ -22,6 +22,16 @@ def return_polling_locations_data(state=''):
 
 def retrieve_polling_locations_data_from_xml(xml_file_location):
     # We parse the XML file, which can be quite large
+    # <polling_location id="80037">
+    #   <polling_hours>6:00 AM - 7:00 PM</polling_hours>
+    #   <address>
+    #     <city>HARRISONBURG</city>
+    #     <line1>400 MOUNTAIN VIEW DRIVE</line1>
+    #     <state>VA</state>
+    #     <location_name>SPOTSWOOD ELEMENTARY SCHOOL</location_name>
+    #     <zip>22801</zip>
+    #   </address>
+    # </polling_location>
     tree = MyElementTree.parse(xml_file_location)
     root = tree.getroot()
     polling_locations_list = []
@@ -40,17 +50,6 @@ def retrieve_polling_locations_data_from_xml(xml_file_location):
         polling_locations_list.append(one_entry)
     return polling_locations_list
 
-
-# <polling_location id="80037">
-#   <polling_hours>6:00 AM - 7:00 PM</polling_hours>
-#   <address>
-#     <city>HARRISONBURG</city>
-#     <line1>400 MOUNTAIN VIEW DRIVE</line1>
-#     <state>VA</state>
-#     <location_name>SPOTSWOOD ELEMENTARY SCHOOL</location_name>
-#     <zip>22801</zip>
-#   </address>
-# </polling_location>
 
 def save_polling_locations_from_list(polling_locations_list):
     polling_location_manager = PollingLocationManager()

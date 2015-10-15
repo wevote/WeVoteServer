@@ -1,0 +1,35 @@
+{# templates/candidate/candidate_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if candidate %}{{ candidate.candidate_name  }}{% else %}New Candidate{% endif %}{% endblock %}
+
+{%  block content %}
+<h1>{% if candidate %}Edit {{ candidate.candidate_name }}{% else %}New Candidate{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+<form action="{% url "candidate:candidate_edit_process" %}" method="post">
+{% csrf_token %}
+    <input type="hidden" name="candidate_id" value="{% if candidate %}{{ candidate.id }}{% else %}0{% endif %}">
+
+{% if candidate %}
+<p><strong>Values from Google Civic API (do not edit)</strong></p>
+<p>Candidate Name: {{ candidate.candidate_name }}</p>
+<p>Twitter URL: {{ candidate.twitter_url }}</p>
+<p>Website: {{ candidate.candidate_url }}</p>
+
+{% else %}
+{#    <label for="candidate_name_id">Candidate Name</label>#}
+{#    <input type="text" name="candidate_name" id="candidate_name_id" value="{% if candidate %}{{ candidate.candidate_name }}{% endif %}" /><br />#}
+{##}
+{#    <label for="twitter_handle_id">Twitter </label>#}
+{#    <input type="text" name="twitter_handle" id="twitter_handle_id" value="{% if candidate %}{{ candidate.twitter_handle }}{% endif %}" /><br />#}
+{##}
+{#    <label for="candidate_website_id">Candidate Website</label>#}
+{#    <input type="text" name="candidate_website" id="candidate_website_id" value="{% if candidate %}{{ candidate.candidate_website }}{% endif %}" /><br />#}
+{% endif %}
+<p><a href="{% url 'candidate:candidate_list' %}">cancel</a>
+<input type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
+</form>
+
+{% endblock %}

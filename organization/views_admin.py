@@ -11,9 +11,13 @@ from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
 from candidate.models import CandidateCampaign, CandidateCampaignList
+from .controllers import import_we_vote_organizations_from_json
 from .models import Organization
 from position.models import PositionEntered, PositionEnteredManager, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import OrganizationSerializer
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int
 
@@ -28,10 +32,39 @@ ORGANIZATION_STANCE_CHOICES = (
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-@login_required()
+def import_sample_organization_data_from_json_view(request):
+    """
+    This gives us sample organizations for testing
+    :return:
+    """
+    import_we_vote_organizations_from_json(request, False)
+
+    # We are importing candidate_campaigns data (and not politician data) because all we are doing is making sure we
+    #  sync to the same We Vote ID. This is critical so we can link Positions to Organization & Candidate Campaign.
+    # At this point (June 2015) we assume the politicians have been imported from Google Civic. We aren't assigning
+    # the politicians a We Vote id, but instead use their full name as the identifier
+    # import_we_vote_candidate_campaigns_from_json(request, False)
+    #
+    # import_we_vote_positions_from_json(request, False)
+
+    messages.add_message(request, messages.INFO, 'Organizations imported.')
+
+    return HttpResponseRedirect(reverse('organization:organization_list', args=()))
+
+
+# This page does not need to be protected.
+# NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.
+class ExportOrganizationDataView(APIView):
+    def get(self, request, format=None):
+        organization_list = Organization.objects.all()
+        serializer = OrganizationSerializer(organization_list, many=True)
+        return Response(serializer.data)
+
+
+# @login_required()  # Commented out while we are developing login process()
 def organization_list_view(request):
     messages_on_stage = get_messages(request)
-    organization_list = Organization.objects.order_by('name')
+    organization_list = Organization.objects.order_by('organization_name')
 
     template_values = {
         'messages_on_stage': messages_on_stage,
@@ -40,7 +73,7 @@ def organization_list_view(request):
     return render(request, 'organization/organization_list.html', template_values)
 
 
-@login_required()
+# @login_required()  # Commented out while we are developing login process()
 def organization_new_view(request):
     messages_on_stage = get_messages(request)
     template_values = {
@@ -49,7 +82,7 @@ def organization_new_view(request):
     return render(request, 'organization/organization_edit.html', template_values)
 
 
-@login_required()
+# @login_required()  # Commented out while we are developing login process()
 def organization_edit_view(request, organization_id):
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
@@ -75,7 +108,7 @@ def organization_edit_view(request, organization_id):
     return render(request, 'organization/organization_edit.html', template_values)
 
 
-@login_required()
+# @login_required()  # Commented out while we are developing login process()
 def organization_edit_process_view(request):
     """
     Process the new or edit organization forms
@@ -84,6 +117,8 @@ def organization_edit_process_view(request):
     """
     organization_id = convert_to_int(request.POST['organization_id'])
     organization_name = request.POST['organization_name']
+    twitter_handle = request.POST['twitter_handle']
+    organization_website = request.POST['organization_website']
 
     # Check to see if this organization is already being used anywhere
     organization_on_stage_found = False
@@ -98,13 +133,17 @@ def organization_edit_process_view(request):
     try:
         if organization_on_stage_found:
             # Update
-            organization_on_stage.name = organization_name
+            organization_on_stage.organization_name = organization_name
+            organization_on_stage.twitter_handle = twitter_handle
+            organization_on_stage.organization_website = organization_website
             organization_on_stage.save()
             messages.add_message(request, messages.INFO, 'Organization updated.')
         else:
             # Create new
             organization_on_stage = Organization(
-                name=organization_name,
+                organization_name=organization_name,
+                twitter_handle=twitter_handle,
+                organization_website=organization_website,
             )
             organization_on_stage.save()
             messages.add_message(request, messages.INFO, 'New organization saved.')
@@ -115,7 +154,7 @@ def organization_edit_process_view(request):
     return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
 
-@login_required()
+# @login_required()  # Commented out while we are developing login process()
 def organization_position_list_view(request, organization_id):
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
@@ -158,7 +197,7 @@ def organization_position_list_view(request, organization_id):
     return render(request, 'organization/organization_position_list.html', template_values)
 
 
-@login_required()
+# @login_required()  # Commented out while we are developing login process()
 def organization_add_new_position_form_view(request, organization_id):
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
@@ -195,7 +234,7 @@ def organization_add_new_position_form_view(request, organization_id):
     return render(request, 'organization/organization_position_edit.html', template_values)
 
 
-@login_required()
+# @login_required()  # Commented out while we are developing login process()
 def organization_delete_existing_position_process_form_view(request, organization_id, position_id):
     """
 
@@ -236,7 +275,7 @@ def organization_delete_existing_position_process_form_view(request, organizatio
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
 
 
-@login_required()
+# @login_required()  # Commented out while we are developing login process()
 def organization_edit_existing_position_form_view(request, organization_id, position_id):
     """
     In edit, you can only change your stance and comments, not who or what the position is about
@@ -292,13 +331,14 @@ def organization_edit_existing_position_form_view(request, organization_id, posi
     return render(request, 'organization/organization_position_edit.html', template_values)
 
 
-@login_required()
+# @login_required()  # Commented out while we are developing login process()
 def organization_save_new_or_edit_existing_position_process_form_view(request):
     """
 
     :param request:
     :return:
     """
+    google_civic_election_id = 4162  # TODO Temp election id during development, Virginia General Election
     organization_id = convert_to_int(request.POST['organization_id'])
     position_id = convert_to_int(request.POST['position_id'])
     candidate_campaign_id = convert_to_int(request.POST['candidate_campaign_id'])
@@ -406,6 +446,7 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             organization_position_on_stage = PositionEntered(
                 organization_id=organization_id,
                 candidate_campaign_id=candidate_campaign_on_stage.id,
+                google_civic_election_id=google_civic_election_id,
                 stance=stance,
                 statement_text=statement_text,
                 more_info_url=more_info_url,

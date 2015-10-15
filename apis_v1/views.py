@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .controllers import voter_address_save, voter_address_retrieve, voter_count, voter_create, voter_retrieve_list
-from .serializers import VoterSerializer
+from voter.serializers import VoterSerializer
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id
 import wevote_functions.admin
 

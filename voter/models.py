@@ -505,10 +505,14 @@ class VoterAddressManager(models.Model):
         if voter_id > 0 and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
             try:
                 updated_values = {
+                    # Values we search against
+                    'voter_id': voter_id,
+                    'address_type': address_type,
+                    # The rest of the values
                     'address': raw_address_text,
                 }
-                new_address_created = VoterAddress.objects.update_or_create(
-                    voter_id=voter_id, address_type=address_type, defaults=updated_values)
+                voter_address_on_stage, new_address_created = VoterAddress.objects.update_or_create(
+                    voter_id__exact=voter_id, address_type=address_type, defaults=updated_values)
                 success = True
             except VoterAddress.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)

@@ -1,4 +1,4 @@
-{# organization/templates/organization/organization_list.html #}
+{# templates/organization/organization_list.html #}
 {% extends "template_base.html" %}
 
 {% block title %}Organizations{% endblock %}
@@ -10,10 +10,21 @@
 <p><a href="{% url 'organization:organization_new' %}">Add New Organization</a></p>
 
 {% if organization_list %}
+    <table cellpadding="5" cellspacing="5">
     {% for organization in organization_list %}
-        <h3>{{ organization.name }} <a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">(edit)</a></h3>
-        <a href="{% url 'organization:organization_position_list' organization.id %}">(view positions)</a>
+        <tr>
+            <td><a href="{% url 'organization:organization_position_list' organization.id %}">{{ organization.organization_name }}</a></td>
+            <td>{{ organization.twitter_handle }}</td>
+            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">(edit)</a></td>
+        </tr>
     {% endfor %}
+    </table>
+
+    <p></p>
+    <p>
+        <a href="{% url 'organization:organizations_export' %}?format=json" target="_blank" >Export Organizations</a>,
+        <a href="{% url 'organization:organizations_import' %}" >Import Organizations</a>
+    </p>
 {% else %}
     <p>(no organizations found)</p>
 {% endif %}

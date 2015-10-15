@@ -1,11 +1,11 @@
-{# organization/templates/organization/organization_position_list.html #}
+{# templates/organization/organization_position_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{{ organization.name  }}{% endblock %}
+{% block title %}{{ organization.organization_name  }}{% endblock %}
 
 {%  block content %}
-<p><a href="{% url 'organization:organization_list' %}">Back to Organizations</a></p>
-<h1>{{ organization.name  }}</h1>
+<p><a href="{% url 'organization:organization_list' %}">< Back to Organizations</a></p>
+<h1>{{ organization.organization_name  }}</h1>
 <p><a href="{% url 'organization:organization_position_new' organization.id %}">Add New Position</a></p>
 
 {% if organization_position_list %}

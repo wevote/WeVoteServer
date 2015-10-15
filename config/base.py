@@ -71,6 +71,7 @@ INSTALLED_APPS = (
     # project specific
     'admin_tools',
     'apis_v1',
+    'ballot',
     'candidate',
     'config',
     'election',
@@ -86,18 +87,18 @@ INSTALLED_APPS = (
     'measure',
     'office',
     'organization',
-    'polling_location',
     'politician',
+    'polling_location',
     'position',
     # 'region_jurisdiction',
     'rest_framework',
     'support_oppose_deciding',
     'tag',
     'twitter',
+    'voter',  # See also AUTH_USER_MODEL in config/settings.py
     'wevote_functions',
     'wevote_settings',
     'wevote_social',
-    'voter',  # See also AUTH_USER_MODEL in config/settings.py
 )
 
 MIDDLEWARE_CLASSES = (

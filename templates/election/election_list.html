@@ -14,7 +14,7 @@
     {% for election in election_list %}
         <tr>
             <td><a href="{% url 'election:election_summary' election.id %}">{{ election.election_name }}</a></td>
-            <td>{{ election.election_date_text }}</td>
+            <td>{{ election.election_day_text }}</td>
             <td><a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}

@@ -1,0 +1,333 @@
+{
+    "contests": [
+        {
+            "ballotPlacement": "7",
+            "candidates": [
+                {
+                    "candidateUrl": "http://senatordeeds.com",
+                    "email": "rcdeeds@tds.net",
+                    "name": "R. Creigh Deeds",
+                    "party": "Democratic",
+                    "phone": "5408392473"
+                }
+            ],
+            "district": {
+                "id": "25",
+                "name": "25th District",
+                "scope": "stateUpper"
+            },
+            "office": "Member Senate of Virginia 25th District",
+            "sources": [
+                {
+                    "name": "Voting Information Project",
+                    "official": true
+                }
+            ],
+            "special": "no",
+            "type": "State Senate"
+        },
+        {
+            "ballotPlacement": "8",
+            "candidates": [
+                {
+                    "candidateUrl": "http://www.bellfordelegate.com",
+                    "email": "rbellcoach@comcast.net",
+                    "name": "Richard P. /Dickie/ Bell",
+                    "party": "Republican",
+                    "phone": "5404483999"
+                },
+                {
+                    "candidateUrl": "http://wmhammer.com",
+                    "email": "will@willhammer.com",
+                    "name": "William M. Hammer",
+                    "party": "Libertarian",
+                    "phone": "5402450281"
+                }
+            ],
+            "district": {
+                "id": "20",
+                "name": "20th District",
+                "scope": "stateLower"
+            },
+            "office": "Member House of Delegates 20th District",
+            "sources": [
+                {
+                    "name": "Voting Information Project",
+                    "official": true
+                }
+            ],
+            "special": "no",
+            "type": "House of Delegates"
+        },
+        {
+            "ballotPlacement": "9",
+            "candidates": [
+                {
+                    "name": "Judy Stevens Smythers",
+                    "party": "Independent"
+                }
+            ],
+            "district": {
+                "id": "125",
+                "name": "NELSON COUNTY"
+            },
+            "office": "Clerk of Court NELSON COUNTY",
+            "sources": [
+                {
+                    "name": "Voting Information Project",
+                    "official": true
+                }
+            ],
+            "special": "no",
+            "type": "locality"
+        },
+        {
+            "ballotPlacement": "10",
+            "candidates": [
+                {
+                    "candidateUrl": "http://www.martin4nelson.com",
+                    "email": "anthony@martin4nelson.com",
+                    "name": "Anthony D. Martin",
+                    "party": "Democratic",
+                    "phone": "4342636721"
+                }
+            ],
+            "district": {
+                "id": "125",
+                "name": "NELSON COUNTY"
+            },
+            "office": "Commonwealth's Attorney NELSON COUNTY",
+            "sources": [
+                {
+                    "name": "Voting Information Project",
+                    "official": true
+                }
+            ],
+            "special": "no",
+            "type": "locality"
+        },
+        {
+            "ballotPlacement": "11",
+            "candidates": [
+                {
+                    "candidateUrl": "http://vascowright.com/",
+                    "email": "vascowrightforsheriff@gmail.com",
+                    "name": "Vasco D. Wright, Sr.",
+                    "party": "Democratic",
+                    "phone": "4342634385"
+                },
+                {
+                    "candidateUrl": "http://thompson-for-sheriff.com",
+                    "email": "thompsonforsheriff@outlook.com",
+                    "name": "John D. /Mike/ Thompson, Jr.",
+                    "party": "Republican",
+                    "phone": "4343335155"
+                },
+                {
+                    "candidateUrl": "http://www.billymaysforsheriff.com",
+                    "email": "invbillymays@gmail.com",
+                    "name": "W. E. /Billy/ Mays, Jr.",
+                    "party": "Independent",
+                    "phone": "5404603345"
+                },
+                {
+                    "candidateUrl": "http://www.hillforsheriff.com",
+                    "email": "dwhillforsheriff@gmail.com",
+                    "name": "David W. Hill",
+                    "party": "Independent",
+                    "phone": "4349425746"
+                }
+            ],
+            "district": {
+                "id": "125",
+                "name": "NELSON COUNTY"
+            },
+            "office": "Sheriff NELSON COUNTY",
+            "sources": [
+                {
+                    "name": "Voting Information Project",
+                    "official": true
+                }
+            ],
+            "special": "no",
+            "type": "locality"
+        },
+        {
+            "ballotPlacement": "12",
+            "candidates": [
+                {
+                    "email": "pammy4355@gmail.com",
+                    "name": "Pamela C. Campbell",
+                    "party": "Democratic",
+                    "phone": "4342634939"
+                }
+            ],
+            "district": {
+                "id": "125",
+                "name": "NELSON COUNTY"
+            },
+            "office": "Commissioner of Revenue NELSON COUNTY",
+            "sources": [
+                {
+                    "name": "Voting Information Project",
+                    "official": true
+                }
+            ],
+            "special": "no",
+            "type": "locality"
+        },
+        {
+            "ballotPlacement": "13",
+            "candidates": [
+                {
+                    "email": "johnson4treasurer@gmail.com",
+                    "name": "Angela F. /Angi/ Johnson",
+                    "party": "Democratic",
+                    "phone": "4342635429"
+                },
+                {
+                    "email": "phillipsbc@hughes.net",
+                    "name": "Betty C. Phillips",
+                    "party": "Independent",
+                    "phone": "4342634291"
+                }
+            ],
+            "district": {
+                "id": "125",
+                "name": "NELSON COUNTY"
+            },
+            "office": "Treasurer NELSON COUNTY",
+            "sources": [
+                {
+                    "name": "Voting Information Project",
+                    "official": true
+                }
+            ],
+            "special": "no",
+            "type": "locality"
+        },
+        {
+            "ballotPlacement": "14",
+            "candidates": [
+                {
+                    "email": "hillsobrown@gmail.com",
+                    "name": "William C. Uhl",
+                    "party": "Independent",
+                    "phone": "4342778328"
+                },
+                {
+                    "name": "David L. Collins",
+                    "party": "Independent",
+                    "phone": "4343612244"
+                }
+            ],
+            "district": {
+                "id": "125",
+                "name": "NELSON COUNTY"
+            },
+            "office": "Soil and Water Conservation Director Thomas Jefferson District NELSON COUNTY",
+            "sources": [
+                {
+                    "name": "Voting Information Project",
+                    "official": true
+                }
+            ],
+            "special": "no",
+            "type": "locality"
+        }
+    ],
+    "election": {
+        "electionDay": "2015-11-03",
+        "id": "4162",
+        "name": "Virginia General Election",
+        "ocdDivisionId": "ocd-division/country:us/state:va"
+    },
+    "kind": "civicinfo#voterInfoResponse",
+    "normalizedInput": {
+        "city": "afton",
+        "line1": "11100 rockfish valley hwy",
+        "state": "VA",
+        "zip": "22920"
+    },
+    "pollingLocations": [
+        {
+            "address": {
+                "city": "AFTON",
+                "line1": "11100 ROCKFISH VALLEY HIGHWAY",
+                "locationName": "ROCKFISH VALLEY FIRE DEPT BLDG",
+                "state": "VA",
+                "zip": "22920"
+            },
+            "notes": "",
+            "pollingHours": "6:00 AM - 7:00 PM",
+            "sources": [
+                {
+                    "name": "Voting Information Project",
+                    "official": true
+                }
+            ]
+        }
+    ],
+    "state": [
+        {
+            "electionAdministrationBody": {
+                "absenteeVotingInfoUrl": "http://sbe.virginia.gov/index.php/casting-a-ballot/absentee-voting/",
+                "ballotInfoUrl": "https://www.voterinfo.sbe.virginia.gov/PublicSite/Public/FT2/PublicElections.aspx",
+                "correspondenceAddress": {
+                    "city": "Richmond",
+                    "line1": "1100 Bank St., 1st Floor",
+                    "state": "Virginia",
+                    "zip": "22319"
+                },
+                "electionInfoUrl": "http://sbe.virginia.gov",
+                "electionRegistrationConfirmationUrl": "https://www.voterinfo.sbe.virginia.gov/PublicSite/Public/FT2/PublicLookup.aspx",
+                "electionRegistrationUrl": "https://www.vote.virginia.gov/",
+                "electionRulesUrl": "http://elections.virginia.gov/",
+                "name": "Virginia State Board of Elections",
+                "votingLocationFinderUrl": "https://voterinfo.sbe.virginia.gov/PublicSite/Public/FT2/PublicPollingPlace.aspx"
+            },
+            "local_jurisdiction": {
+                "electionAdministrationBody": {
+                    "absenteeVotingInfoUrl": "http://www.vote.virginia.gov",
+                    "ballotInfoUrl": "http://www.vote.virginia.gov",
+                    "electionOfficials": [
+                        {
+                            "emailAddress": "jbritt@nelsoncounty.org",
+                            "name": "JACQUELINE CLARK BRITT",
+                            "officePhoneNumber": "4342634068",
+                            "title": "General Registrar Physical"
+                        }
+                    ],
+                    "electionRegistrationConfirmationUrl": "http://www.vote.virginia.gov",
+                    "electionRegistrationUrl": "http://www.vote.virginia.gov",
+                    "electionRulesUrl": "http://www.vote.virginia.gov",
+                    "hoursOfOperation": "9:00AM TO 5:00PM",
+                    "name": "NELSON COUNTY VOTER REGISTRATION",
+                    "physicalAddress": {
+                        "city": "LOVINGSTON",
+                        "line1": "571 FRONT STREET",
+                        "line2": "PO BOX 292",
+                        "locationName": "NELSON COUNTY VOTER REGISTRATION",
+                        "state": "VA",
+                        "zip": "22949-0292"
+                    },
+                    "votingLocationFinderUrl": "http://www.vote.virginia.gov"
+                },
+                "name": "NELSON COUNTY",
+                "sources": [
+                    {
+                        "name": "Voting Information Project",
+                        "official": true
+                    }
+                ]
+            },
+            "name": "Virginia",
+            "sources": [
+                {
+                    "name": "",
+                    "official": false
+                }
+            ]
+        }
+    ]
+}

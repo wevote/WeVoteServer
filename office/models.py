@@ -4,7 +4,7 @@
 
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
-from wevote_settings.models import fetch_next_id_we_vote_last_contest_office_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_last_contest_office_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 
 
@@ -12,64 +12,80 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 class ContestOffice(models.Model):
-    # The id_we_vote identifier is unique across all We Vote sites, and allows us to share our data with other
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
     # organizations
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "off", and then a sequential integer like "123".
-    # We keep the last value in WeVoteSetting.id_we_vote_last_contest_office_integer
-    id_we_vote = models.CharField(
+    # We keep the last value in WeVoteSetting.we_vote_id_last_contest_office_integer
+    we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
     # The name of the office for this contest.
     office_name = models.CharField(verbose_name="google civic office", max_length=254, null=False, blank=False)
-    # The We Vote unique id for the election
-    election_id = models.CharField(verbose_name="we vote election id", max_length=254, null=False, blank=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=254, null=False, blank=False)
-    id_cicero = models.CharField(
-        verbose_name="azavea cicero unique identifier", max_length=254, null=True, blank=True, unique=True)
-    id_maplight = models.CharField(
+    maplight_id = models.CharField(
         verbose_name="maplight unique identifier", max_length=254, null=True, blank=True, unique=True)
-    id_ballotpedia = models.CharField(
+    ballotpedia_id = models.CharField(
         verbose_name="ballotpedia unique identifier", max_length=254, null=True, blank=True)
-    id_wikipedia = models.CharField(verbose_name="wikipedia unique identifier", max_length=254, null=True, blank=True)
+    wikipedia_id = models.CharField(verbose_name="wikipedia unique identifier", max_length=254, null=True, blank=True)
     # vote_type (ranked choice, majority)
-
-    # ballot_placement: NOTE - even though GoogleCivicContestOffice has this field, we store this value
-    #  in the BallotItem table instead because it is different for each voter
-
+    # The internal We Vote unique ID of the election containing this contest, so we can check data-integrity of imports.
+    we_vote_contest_office_id = models.CharField(
+        verbose_name="we vote contest office id", max_length=254, null=True, blank=True)
     # The number of candidates that a voter may vote for in this contest.
-    number_voting_for = models.CharField(verbose_name="number of candidates to vote for",
+    number_voting_for = models.CharField(verbose_name="google civic number of candidates to vote for",
                                          max_length=254, null=True, blank=True)
     # The number of candidates that will be elected to office in this contest.
-    number_elected = models.CharField(verbose_name="number of candidates who will be elected",
+    number_elected = models.CharField(verbose_name="google civic number of candidates who will be elected",
                                       max_length=254, null=True, blank=True)
+
     # If this is a partisan election, the name of the party it is for.
-    primary_party = models.CharField(verbose_name="primary party", max_length=254, null=True, blank=True)
+    primary_party = models.CharField(verbose_name="google civic primary party", max_length=254, null=True, blank=True)
     # The name of the district.
-    district_name = models.CharField(verbose_name="district name", max_length=254, null=False, blank=False)
+    district_name = models.CharField(verbose_name="district name", max_length=254, null=True, blank=True)
     # The geographic scope of this district. If unspecified the district's geography is not known.
     # One of: national, statewide, congressional, stateUpper, stateLower, countywide, judicial, schoolBoard,
     # cityWide, township, countyCouncil, cityCouncil, ward, special
-    district_scope = models.CharField(verbose_name="district scope", max_length=254, null=False, blank=False)
+    district_scope = models.CharField(verbose_name="google civic district scope",
+                                      max_length=254, null=True, blank=True)
     # An identifier for this district, relative to its scope. For example, the 34th State Senate district
     # would have id "34" and a scope of stateUpper.
-    district_ocd_id = models.CharField(verbose_name="open civic data id", max_length=254, null=False, blank=False)
+    district_id = models.CharField(verbose_name="google civic district id", max_length=254, null=True, blank=True)
 
-    # We override the save function so we can auto-generate id_we_vote
+    # The levels of government of the office for this contest. There may be more than one in cases where a
+    # jurisdiction effectively acts at two different levels of government; for example, the mayor of the
+    # District of Columbia acts at "locality" level, but also effectively at both
+    # "administrative-area-2" and "administrative-area-1".
+    contest_level0 = models.CharField(verbose_name="google civic level, option 0",
+                                      max_length=254, null=True, blank=True)
+    contest_level1 = models.CharField(verbose_name="google civic level, option 1",
+                                      max_length=254, null=True, blank=True)
+    contest_level2 = models.CharField(verbose_name="google civic level, option 2",
+                                      max_length=254, null=True, blank=True)
+
+    # ballot_placement: We store ballot_placement in the BallotItem table instead because it is different for each voter
+
+    # A description of any additional eligibility requirements for voting in this contest.
+    electorate_specifications = models.CharField(verbose_name="google civic primary party",
+                                                 max_length=254, null=True, blank=True)
+    # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
+    special = models.CharField(verbose_name="google civic primary party", max_length=254, null=True, blank=True)
+
+    # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
-        # Even if this data came from another source we still need a unique id_we_vote
-        if self.id_we_vote:
-            self.id_we_vote = self.id_we_vote.strip()
-        if self.id_we_vote == "" or self.id_we_vote is None:  # If there isn't a value...
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_id_we_vote_last_contest_office_integer()
+            next_local_integer = fetch_next_we_vote_id_last_contest_office_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "off" = tells us this is a unique id for a ContestOffice
             # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-            self.id_we_vote = "wv{site_unique_id_prefix}off{next_integer}".format(
+            self.we_vote_id = "wv{site_unique_id_prefix}off{next_integer}".format(
                 site_unique_id_prefix=site_unique_id_prefix,
                 next_integer=next_local_integer,
             )
@@ -85,21 +101,62 @@ class ContestOfficeManager(models.Model):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id)
 
-    def retrieve_contest_office_from_id_maplight(self, id_maplight):
+    def retrieve_contest_office_from_maplight_id(self, maplight_id):
         contest_office_id = 0
         contest_office_manager = ContestOfficeManager()
-        return contest_office_manager.retrieve_contest_office(contest_office_id, id_maplight)
+        return contest_office_manager.retrieve_contest_office(contest_office_id, maplight_id)
 
-    def fetch_contest_office_id_from_id_maplight(self, id_maplight):
+    def fetch_contest_office_id_from_maplight_id(self, maplight_id):
         contest_office_id = 0
         contest_office_manager = ContestOfficeManager()
-        results = contest_office_manager.retrieve_contest_office(contest_office_id, id_maplight)
+        results = contest_office_manager.retrieve_contest_office(contest_office_id, maplight_id)
         if results['success']:
             return results['contest_office_id']
         return 0
 
+    def update_or_create_contest_office(self, google_civic_election_id, district_id, office_name,
+                                        updated_contest_office_values):
+        """
+        Either update or create an office entry.
+        """
+        exception_multiple_object_returned = False
+        new_office_created = False
+
+        if not google_civic_election_id:
+            success = False
+            status = 'MISSING_ELECTION_ID'
+        elif not district_id:
+            success = False
+            status = 'MISSING_DISTRICT_ID'
+        elif not office_name:
+            success = False
+            status = 'MISSING_OFFICE'
+        else:
+            try:
+                contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                    google_civic_election_id__exact=google_civic_election_id,
+                    district_id__exact=district_id,
+                    office_name__exact=office_name,
+                    defaults=updated_contest_office_values)
+                success = True
+                status = 'CONTEST_OFFICE_SAVED'
+            except ContestOffice.MultipleObjectsReturned as e:
+                handle_record_found_more_than_one_exception(e, logger=logger)
+                success = False
+                status = 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND'
+                exception_multiple_object_returned = True
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'new_office_created':       new_office_created,
+            'contest_office':           contest_office_on_stage,
+        }
+        return results
+
     # NOTE: searching by all other variables seems to return a list of objects
-    def retrieve_contest_office(self, contest_office_id, id_maplight=None):
+    def retrieve_contest_office(self, contest_office_id, maplight_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -109,8 +166,8 @@ class ContestOfficeManager(models.Model):
             if contest_office_id > 0:
                 contest_office_on_stage = ContestOffice.objects.get(id=contest_office_id)
                 contest_office_id = contest_office_on_stage.id
-            elif len(id_maplight) > 0:
-                contest_office_on_stage = ContestOffice.objects.get(id_maplight=id_maplight)
+            elif len(maplight_id) > 0:
+                contest_office_on_stage = ContestOffice.objects.get(maplight_id=maplight_id)
                 contest_office_id = contest_office_on_stage.id
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)

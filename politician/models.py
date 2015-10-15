@@ -63,13 +63,13 @@ class Politician(models.Model):
                               max_length=200, null=True, unique=True, blank=True)
     id_cspan = models.CharField(verbose_name="cspan unique identifier",
                                 max_length=200, null=True, blank=True, unique=False)
-    id_wikipedia = models.CharField(verbose_name="wikipedia url",
+    wikipedia_id = models.CharField(verbose_name="wikipedia url",
                                     max_length=500, default=None, null=True, blank=True)
-    id_ballotpedia = models.CharField(verbose_name="ballotpedia url",
+    ballotpedia_id = models.CharField(verbose_name="ballotpedia url",
                                       max_length=500, default=None, null=True, blank=True)
     id_house_history = models.CharField(verbose_name="house history unique identifier",
                                         max_length=200, null=True, blank=True)
-    id_maplight = models.CharField(verbose_name="maplight unique identifier",
+    maplight_id = models.CharField(verbose_name="maplight unique identifier",
                                    max_length=200, null=True, unique=True, blank=True)
     id_washington_post = models.CharField(verbose_name="washington post unique identifier",
                                           max_length=200, null=True, unique=False)
@@ -80,8 +80,8 @@ class Politician(models.Model):
     party = models.CharField(verbose_name="politician political party", max_length=254, null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
 
-    # id_bioguide, id_thomas, id_lis, id_govtrack, id_opensecrets, id_votesmart, id_fec, id_cspan, id_wikipedia,
-    # id_ballotpedia, id_house_history, id_maplight, id_washington_post, id_icpsr, first_name, middle_name,
+    # id_bioguide, id_thomas, id_lis, id_govtrack, id_opensecrets, id_votesmart, id_fec, id_cspan, wikipedia_id,
+    # ballotpedia_id, id_house_history, maplight_id, id_washington_post, id_icpsr, first_name, middle_name,
     # last_name, name_official_full, gender, birth_date
 
     def __unicode__(self):
@@ -138,7 +138,7 @@ class PoliticianManager(models.Model):
             return politician.fetch_photo_url()
         return ""
 
-    def retrieve_politician(self, politician_id):  # , id_we_vote=None
+    def retrieve_politician(self, politician_id):  # , we_vote_id=None
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -148,8 +148,8 @@ class PoliticianManager(models.Model):
             if politician_id > 0:
                 politician_on_stage = Politician.objects.get(id=politician_id)
                 politician_on_stage_id = politician_on_stage.id
-            # elif len(id_we_vote) > 0:
-            #     politician_on_stage = Politician.objects.get(id_we_vote=id_we_vote)
+            # elif len(we_vote_id) > 0:
+            #     politician_on_stage = Politician.objects.get(we_vote_id=we_vote_id)
             #     politician_on_stage_id = politician_on_stage.id
         except Politician.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)

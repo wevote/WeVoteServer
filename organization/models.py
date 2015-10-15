@@ -5,7 +5,7 @@
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_settings.models import fetch_next_id_we_vote_last_org_integer, fetch_site_unique_id_prefix
+from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -14,17 +14,17 @@ logger = wevote_functions.admin.get_logger(__name__)
 class Organization(models.Model):
     # We are relying on built-in Python id field
 
-    # The id_we_vote identifier is unique across all We Vote sites, and allows us to share our org info with other
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our org info with other
     # organizations
     # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
     # then the string "org", and then a sequential integer like "123".
-    # We keep the last value in WeVoteSetting.id_we_vote_last_org_integer
-    id_we_vote = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
-    name = models.CharField(
-        verbose_name="organization name", max_length=255, default=None, null=True, blank=True)
-    url = models.URLField(verbose_name='url of the endorsing organization', blank=True, null=True)
-    twitter_handle = models.CharField(max_length=15, null=True, unique=False, verbose_name='twitter handle')
+    # We keep the last value in WeVoteSetting.we_vote_id_last_org_integer
+    we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True)
+    organization_name = models.CharField(
+        verbose_name="organization name", max_length=255, null=False, blank=False)
+    organization_website = models.URLField(verbose_name='url of the endorsing organization', blank=True, null=True)
+    twitter_handle = models.CharField(max_length=15, null=True, unique=True, verbose_name='twitter handle')
 
     NONPROFIT_501C3 = '3'
     NONPROFIT_501C4 = '4'
@@ -48,29 +48,29 @@ class Organization(models.Model):
     # logo
 
     def __unicode__(self):
-        return self.name
+        return self.organization_name
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('organization_name',)
 
-    # We override the save function so we can auto-generate id_we_vote
+    # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
-        # Even if this organization came from another source we still need a unique id_we_vote
-        if self.id_we_vote:
-            self.id_we_vote = self.id_we_vote.strip()
-        if self.id_we_vote == "" or self.id_we_vote is None:  # If there isn't a value...
+        # Even if this organization came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
-            next_local_integer = fetch_next_id_we_vote_last_org_integer()
+            next_local_integer = fetch_next_we_vote_id_last_org_integer()
             # "wv" = We Vote
             # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
             # "org" = tells us this is a unique id for an org
             # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
-            self.id_we_vote = "wv{site_unique_id_prefix}org{next_integer}".format(
+            self.we_vote_id = "wv{site_unique_id_prefix}org{next_integer}".format(
                 site_unique_id_prefix=site_unique_id_prefix,
                 next_integer=next_local_integer,
             )
-            # TODO we need to deal with the situation where id_we_vote is NOT unique on save
+            # TODO we need to deal with the situation where we_vote_id is NOT unique on save
         super(Organization, self).save(*args, **kwargs)
 
     def is_nonprofit_501c3(self):
@@ -98,7 +98,7 @@ class OrganizationManager(models.Model):
     """
     A class for working with the Organization model
     """
-    def retrieve_organization(self, organization_id, id_we_vote=None):
+    def retrieve_organization(self, organization_id, we_vote_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -108,8 +108,8 @@ class OrganizationManager(models.Model):
             if organization_id > 0:
                 organization_on_stage = Organization.objects.get(id=organization_id)
                 organization_on_stage_id = organization_on_stage.id
-            elif len(id_we_vote) > 0:
-                organization_on_stage = Organization.objects.get(id_we_vote=id_we_vote)
+            elif len(we_vote_id) > 0:
+                organization_on_stage = Organization.objects.get(we_vote_id=we_vote_id)
                 organization_on_stage_id = organization_on_stage.id
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
@@ -133,11 +133,11 @@ class OrganizationManager(models.Model):
         }
         return results
 
-    def fetch_organization_id(self, id_we_vote):
+    def fetch_organization_id(self, we_vote_id):
         organization_id = 0
         organization_manager = OrganizationManager()
-        if len(id_we_vote) > 0:
-            results = organization_manager.retrieve_organization(organization_id, id_we_vote)  # TODO DALE
+        if len(we_vote_id) > 0:
+            results = organization_manager.retrieve_organization(organization_id, we_vote_id)  # TODO DALE
             if results['success']:
                 return results['organization_id']
         return 0
