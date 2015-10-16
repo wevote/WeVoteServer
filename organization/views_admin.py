@@ -143,13 +143,15 @@ def organization_edit_process_view(request):
             organization_on_stage = Organization(
                 organization_name=organization_name,
                 twitter_handle=twitter_handle,
-                organization_website=organization_website,
+                organization_website=organization_website
             )
             organization_on_stage.save()
             messages.add_message(request, messages.INFO, 'New organization saved.')
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save organization.')
+        messages.add_message(request, messages.ERROR, 'Could not save organization.'
+                                                      ' {error} [type: {error_type}]'.format(error=e.message,
+                                                                                             error_type=type(e)))
 
     return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 

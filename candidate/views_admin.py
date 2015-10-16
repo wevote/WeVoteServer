@@ -5,15 +5,12 @@
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+# from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
-from candidate.models import CandidateCampaign, CandidateCampaignList
+    handle_record_not_found_exception, handle_record_not_saved_exception
 from .models import CandidateCampaign
-from position.models import PositionEntered, PositionEnteredManager, INFORMATION_ONLY, OPPOSE, \
-    STILL_DECIDING, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import CandidateCampaignSerializer
@@ -27,7 +24,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 # This page does not need to be protected.
 # NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.
 class ExportCandidateCampaignDataView(APIView):
-    def get(self, request, format=None):
+    def get(self):
         candidate_campaign_list = CandidateCampaign.objects.all()
         serializer = CandidateCampaignSerializer(candidate_campaign_list, many=True)
         return Response(serializer.data)
@@ -59,6 +56,7 @@ def candidate_edit_view(request, candidate_id):
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
     candidate_on_stage_found = False
+    candidate_on_stage = CandidateCampaign()
     try:
         candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
         candidate_on_stage_found = True
@@ -94,6 +92,7 @@ def candidate_edit_process_view(request):
 
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
+    candidate_on_stage = CandidateCampaign()
     try:
         candidate_query = CandidateCampaign.objects.filter(id=candidate_id)
         if len(candidate_query):
@@ -131,6 +130,7 @@ def candidate_summary_view(request, candidate_id):
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
     candidate_on_stage_found = False
+    candidate_on_stage = CandidateCampaign()
     try:
         candidate_on_stage = CandidateCampaign.objects.get(id=candidate_id)
         candidate_on_stage_found = True

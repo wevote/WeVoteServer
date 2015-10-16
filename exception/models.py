@@ -27,8 +27,7 @@ def _log_exception(exception_message, logger, e):
     ))
 
 
-def handle_exception(e, logger=None):
-    exception_message = ""
+def handle_exception(e, logger=None, exception_message=""):
     _log_exception(exception_message, logger, e)
 
 

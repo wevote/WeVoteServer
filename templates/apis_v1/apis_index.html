@@ -17,6 +17,9 @@
         <td>Description</td>
     </thead>
     <tr>
+        <td colspan="2"><strong>Voter Basic Data</strong></td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:deviceIdGenerateDocs' %}">deviceIdGenerate</a></td>
         <td>Generate a device_id (store in cookie) that can be linked to a voter_id</td>
     </tr>
@@ -40,7 +43,34 @@
         <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve/?format=json</a></td>
         <td>Export raw voter data to JSON format</td>
     </tr>
-
+    <tr>
+        <td colspan="2"><strong>GeoLocation</strong></td>
+    </tr>
+    <tr>
+        <td colspan="2"><strong>Ballot Contest Data</strong></td>
+    </tr>
+    <tr>
+        <td colspan="2"><strong>Candidates &amp; Measures</strong></td>
+    </tr>
+    <tr>
+        <td colspan="2"><strong>Organizations &amp; People</strong></td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:organizationCountDocs' %}">organizationCount</a></td>
+        <td>Count the number of organizations in the database.</td>
+    </tr>
+    <tr>
+        <td colspan="2"><strong>Positions (Support, Oppose, Info Only) or Stars</strong></td>
+    </tr>
+    <tr>
+        <td colspan="2"><strong>Voter Friends</strong></td>
+    </tr>
+    <tr>
+        <td colspan="2"><strong>Voter Language</strong></td>
+    </tr>
+    <tr>
+        <td colspan="2"><strong>Messages</strong></td>
+    </tr>
 </table>
 
 </body>

@@ -3,10 +3,14 @@
 # -*- coding: UTF-8 -*-
 
 from django.http import HttpResponse
+from exception.models import handle_exception
 import json
-
-from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterAddress, \
+from organization.models import Organization
+from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterManager, \
     VoterAddressManager, VoterDeviceLinkManager
+import wevote_functions.admin
+
+logger = wevote_functions.admin.get_logger(__name__)
 
 
 def is_voter_device_id_valid(voter_device_id):
@@ -32,6 +36,27 @@ def is_voter_device_id_valid(voter_device_id):
         'json_data': json_data,
     }
     return results
+
+
+def organization_count():
+    organization_count_all = 0
+    try:
+        organization_list_all = Organization.objects.all()
+        organization_count_all = organization_list_all.count()
+        success = True
+
+        # We will want to cache a json file and only refresh it every couple of seconds (so it doesn't become
+        # a bottle neck as we grow)
+    except Exception as e:
+        exception_message = "organizationCount: Unable to count list of Organizations from db."
+        handle_exception(e, logger=logger, exception_message=exception_message)
+        success = False
+
+    json_data = {
+        'success': success,
+        'organization_count': organization_count_all,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 # We are going to start retrieving only the ballot address
@@ -126,26 +151,25 @@ def voter_address_save(voter_device_id, address_raw_text, address_variable_exist
 
 
 def voter_count():
+    try:
+        voter_list_all = Voter.objects.all()
+        # In future, add a filter to only show voters who have actually done something
+        # voter_list = voter_list.filter(id=voter_id)
+        voter_count_all = voter_list_all.count()
+        success = True
 
-    voter_list = Voter.objects.all()
-    # In future, add a filter to only show voters who have actually done something
-    # voter_list = voter_list.filter(id=voter_id)
+        # We will want to cache a json file and only refresh it every couple of seconds (so it doesn't become
+        # a bottle neck as we grow)
+    except Exception as e:
+        exception_message = "voterCount: Unable to count list of Voters from db."
+        handle_exception(e, logger=logger, exception_message=exception_message)
+        success = False
 
-    # We will want to cache a json file and only refresh it every couple of seconds (so it doesn't become
-    # a bottle neck as we grow)
-
-    if voter_list.count():
-        json_data = {
-            'success': True,
-            'voter_count': voter_list.count(),
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-    else:
-        json_data = {
-            'success': False,
-            'voter_count': 0,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    json_data = {
+        'success': success,
+        'voter_count': voter_count_all,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_create(voter_device_id):

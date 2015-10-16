@@ -1,12 +1,14 @@
 # apis_v1/views.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+
 from django.http import HttpResponse
 import json
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .controllers import voter_address_save, voter_address_retrieve, voter_count, voter_create, voter_retrieve_list
+from .controllers import organization_count, voter_address_save, voter_address_retrieve, voter_count, voter_create, \
+    voter_retrieve_list
 from voter.serializers import VoterSerializer
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id
 import wevote_functions.admin
@@ -31,6 +33,10 @@ def device_id_generate_view(request):
         'voter_device_id': voter_device_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def organization_count_view(request):
+    return organization_count()
 
 
 def voter_address_retrieve_view(request):
