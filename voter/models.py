@@ -13,7 +13,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
     handle_record_not_found_exception, handle_record_not_saved_exception
 # from region_jurisdiction.models import Jurisdiction
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, generate_voter_device_id
+from wevote_functions.models import convert_to_int, generate_voter_device_id, value_exists
 from validate_email import validate_email
 
 
@@ -86,6 +86,34 @@ class VoterManager(BaseUserManager):
             'password_not_valid':   password_not_valid,
             'voter_created':        True if voter_id > 0 else False,
             'voter':                voter,
+        }
+        return results
+
+    def delete_voter(self, email):
+        email = self.normalize_email(email)
+        voter_id = 0
+        voter_deleted = False
+
+        if value_exists(email) and validate_email(email):
+            email_valid = True
+        else:
+            email_valid = False
+
+        try:
+            if email_valid:
+                results = self.retrieve_voter(voter_id, email)
+                if results['voter_found']:
+                    voter = results['voter']
+                    voter_id = voter.id
+                    voter.delete()
+                    voter_deleted = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+
+        results = {
+            'email_not_valid':      True if not email_valid else False,
+            'voter_deleted':        voter_deleted,
+            'voter_id':             voter_id,
         }
         return results
 

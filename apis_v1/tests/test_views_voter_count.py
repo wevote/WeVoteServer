@@ -6,34 +6,86 @@ from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
 from django.http import SimpleCookie
 import json
+from voter.models import VoterManager
 
 
-class WeVoteAPIsV1TestsVoterCreate(TestCase):
+class WeVoteAPIsV1TestsVoterCount(TestCase):
 
     def setUp(self):
+        self.voter_count_url = reverse("apis_v1:voterCountView")
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
 
-    def test_create_with_no_cookie(self):
+    def test_count_with_no_cookie(self):
         """
-        If there isn't a voter_device_id cookie, do we get the expected error?
+        This API should work even if person isn't signed in
         :return:
         """
-        response = self.client.get(self.voter_create_url)
+        #######################################
+        # Check to see if there are 0 voters
+        response = self.client.get(self.voter_count_url)
         json_data = json.loads(response.content)
 
-        self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
-        self.assertEqual('voter_device_id' in json_data, True,
-                         "voter_device_id expected in the deviceIdGenerateView json response")
-
-        # Since we didn't pass the voter_device_id in,
+        self.assertEqual('success' in json_data, True, "'success' expected in the json response, and not found")
+        self.assertEqual('voter_count' in json_data, True,
+                         "'voter_count' expected in the voterCount json response")
         self.assertEqual(
-            json_data['status'], 'VALID_VOTER_DEVICE_ID_MISSING',
-            "A valid voter_device_id was not found ({voter_device_id}). "
-            "Instead, this status was returned: {status}".format(
-                status=json_data['status'], voter_device_id=json_data['voter_device_id']))
+            json_data['voter_count'], 0,
+            "success:  {success} (voter_count '0' expected), voter_count: {voter_count}".format(
+                success=json_data['success'], voter_count=json_data['voter_count']))
 
-    def test_create_with_cookie(self):
+        #######################################
+        # Add 3 voters so we can check count again
+        voter_manager = VoterManager()
+        email1 = "test@wevoteusa.org"
+        voter_manager.create_voter(
+            email=email1,
+            password="password123",
+        )
+        email2 = "test2@wevoteusa.org"
+        voter_manager.create_voter(
+            email=email2,
+            password="password123",
+        )
+        email3 = "test3@wevoteusa.org"
+        voter_manager.create_voter(
+            email=email3,
+            password="password123",
+        )
+
+        #######################################
+        # Check to see if there are 3 voters
+        response2 = self.client.get(self.voter_count_url)
+        json_data2 = json.loads(response2.content)
+
+        self.assertEqual('success' in json_data2, True, "'success' expected in the json response, and not found")
+        self.assertEqual('voter_count' in json_data2, True,
+                         "'voter_count' expected in the voterCount json response")
+        self.assertEqual(
+            json_data2['voter_count'], 3,
+            "success:  {success} (voter_count '3' expected), voter_count: {voter_count}".format(
+                success=json_data2['success'], voter_count=json_data2['voter_count']))
+
+        #######################################
+        # Remove data for 3 voters
+        voter_manager.delete_voter(email1)
+        voter_manager.delete_voter(email2)
+        voter_manager.delete_voter(email3)
+
+        #######################################
+        # Check to see if there are 0 voters
+        response3 = self.client.get(self.voter_count_url)
+        json_data3 = json.loads(response3.content)
+
+        self.assertEqual('success' in json_data, True, "'success' expected in the json response, and not found")
+        self.assertEqual('voter_count' in json_data3, True,
+                         "'voter_count' expected in the voterCount json response")
+        self.assertEqual(
+            json_data3['voter_count'], 0,
+            "success:  {success} (voter_count '0' expected - 2nd pass), voter_count: {voter_count}".format(
+                success=json_data3['success'], voter_count=json_data3['voter_count']))
+
+    def test_count_with_cookie(self):
         """
         Test the various cookie states
         :return:
@@ -41,46 +93,75 @@ class WeVoteAPIsV1TestsVoterCreate(TestCase):
 
         #######################################
         # Generate the voter_device_id cookie
-        response = self.client.get(self.generate_voter_device_id_url)
-        json_data = json.loads(response.content)
+        response0 = self.client.get(self.generate_voter_device_id_url)
+        json_data0 = json.loads(response0.content)
 
         # Make sure we got back a voter_device_id we can use
-        self.assertEqual('voter_device_id' in json_data, True,
+        self.assertEqual('voter_device_id' in json_data0, True,
                          "voter_device_id expected in the deviceIdGenerateView json response")
 
         # Now save the retrieved voter_device_id in a mock cookie
         cookies = SimpleCookie()
-        cookies["voter_device_id"] = json_data['voter_device_id']
+        cookies["voter_device_id"] = json_data0['voter_device_id']
         self.client = Client(HTTP_COOKIE=cookies.output(header='', sep='; '))
 
         #######################################
         # Test for status: VOTER_CREATED
-        response2 = self.client.get(self.voter_create_url)
-        json_data2 = json.loads(response2.content)
+        response02 = self.client.get(self.voter_create_url)
+        json_data02 = json.loads(response02.content)
 
-        self.assertEqual('status' in json_data2, True,
+        self.assertEqual('status' in json_data02, True,
                          "status expected in the voterCreateView json response but not found")
-        self.assertEqual('voter_device_id' in json_data2, True,
+        self.assertEqual('voter_device_id' in json_data02, True,
                          "voter_device_id expected in the voterCreateView json response but not found")
 
         # With a brand new voter_device_id, a new voter record should be created
         self.assertEqual(
-            json_data2['status'], 'VOTER_CREATED',
+            json_data02['status'], 'VOTER_CREATED',
             "status:  {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
-                status=json_data2['status'], voter_device_id=json_data2['voter_device_id']))
+                status=json_data02['status'], voter_device_id=json_data02['voter_device_id']))
 
         #######################################
-        # Test for status: VOTER_ALREADY_EXISTS
-        response3 = self.client.get(self.voter_create_url)
-        json_data3 = json.loads(response3.content)
+        # Check to see if there is 1 voter - i.e., the viewer
+        response11 = self.client.get(self.voter_count_url)
+        json_data11 = json.loads(response11.content)
 
-        self.assertEqual('status' in json_data3, True,
-                         "status expected in the voterCreateView json response but not found")
-        self.assertEqual('voter_device_id' in json_data3, True,
-                         "voter_device_id expected in the voterCreateView json response but not found")
-
-        # Try reusing the same voter_device_id
+        self.assertEqual('success' in json_data11, True, "'success' expected in the json response, and not found")
+        self.assertEqual('voter_count' in json_data11, True,
+                         "'voter_count' expected in the voterCount json response")
         self.assertEqual(
-            json_data3['status'], 'VOTER_ALREADY_EXISTS',
-            "status:  {status} (VOTER_ALREADY_EXISTS expected), voter_device_id: {voter_device_id}".format(
-                status=json_data3['status'], voter_device_id=json_data3['voter_device_id']))
+            json_data11['voter_count'], 1,
+            "success:  {success} (voter_count '1' expected), voter_count: {voter_count}".format(
+                success=json_data11['success'], voter_count=json_data11['voter_count']))
+
+        #######################################
+        # Add 3 voters so we can check count again
+        voter_manager = VoterManager()
+        email1 = "test@wevoteusa.org"
+        voter_manager.create_voter(
+            email=email1,
+            password="password123",
+        )
+        email2 = "test2@wevoteusa.org"
+        voter_manager.create_voter(
+            email=email2,
+            password="password123",
+        )
+        email3 = "test3@wevoteusa.org"
+        voter_manager.create_voter(
+            email=email3,
+            password="password123",
+        )
+
+        #######################################
+        # Check to see if there are 4 voters
+        response12 = self.client.get(self.voter_count_url)
+        json_data12 = json.loads(response12.content)
+
+        self.assertEqual('success' in json_data12, True, "'success' expected in the json response, and not found")
+        self.assertEqual('voter_count' in json_data12, True,
+                         "'voter_count' expected in the voterCount json response")
+        self.assertEqual(
+            json_data12['voter_count'], 4,
+            "success:  {success} (voter_count '4' expected), voter_count: {voter_count}".format(
+                success=json_data12['success'], voter_count=json_data12['voter_count']))
