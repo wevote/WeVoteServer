@@ -26,6 +26,7 @@ def PUT_NAME_HERE_doc_template_values(url_root):
 
     api_response = '{\n' \
                    '  "status": string,\n' \
+                   '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '}'
 
