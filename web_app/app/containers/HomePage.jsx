@@ -5,7 +5,7 @@ export default class HomePage extends React.Component {
 		return {};
 	}
 	render() {
-    return <div className="container-fluid well well-25">
+    return <div className="container-fluid well well-40">
       <h2 className="text-center">We Vote Social Voter Guide</h2>
       <ul className="list-group">
         <li className="list-group-item">Research ballot items</li>
