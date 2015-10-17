@@ -7,7 +7,7 @@ module.exports = function(options) {
 	// require the page rendering logic
 	var Renderer = options.prerender ?
 		require("../build/prerender/main.js") :
-		require("../config/SimpleRenderer.js");
+		require("../config/AppRenderer.js");
 
 	// load bundle information from stats
 	var stats = require("../build/stats.json");
