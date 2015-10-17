@@ -9,6 +9,11 @@ def voter_create_doc_template_values(url_root):
     """
     required_query_parameter_list = [
         {
+            'name':         'api_key',
+            'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
+            'description':  'The unique key provided to any organization using the WeVoteServer APIs',
+        },
+        {
             'name':         'voter_device_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier (from cookie - not URL variable) linked to '

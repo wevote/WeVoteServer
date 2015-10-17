@@ -15,6 +15,11 @@ def PUT_NAME_HERE_doc_template_values(url_root):
         #     'value':        'string (from cookie)',  # boolean, integer, long, string
         #     'description':  'An 88 character unique identifier linked to a voter record on the server',
         # },
+        # {
+        #     'name':         'api_key',
+        #     'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
+        #     'description':  'The unique key provided to any organization using the WeVoteServer APIs',
+        # },
     ]
     optional_query_parameter_list = [
         # {

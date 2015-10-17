@@ -7,8 +7,8 @@ import json
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .controllers import organization_count, voter_address_save, voter_address_retrieve, voter_count, voter_create, \
-    voter_retrieve_list
+from .controllers import organization_count, organization_retrieve, voter_address_save, voter_address_retrieve, \
+    voter_count, voter_create, voter_retrieve_list
 from voter.serializers import VoterSerializer
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id
 import wevote_functions.admin
@@ -37,6 +37,23 @@ def device_id_generate_view(request):
 
 def organization_count_view(request):
     return organization_count()
+
+
+def organization_retrieve_view(request):
+    """
+    Retrieve a single organization based on unique identifier
+    :param request:
+    :return:
+    """
+    try:
+        organization_id = request.GET['organization_id']
+    except KeyError:
+        organization_id = 0
+    try:
+        we_vote_id = request.GET['we_vote_id']
+    except KeyError:
+        we_vote_id = ''
+    return organization_retrieve(organization_id=organization_id, we_vote_id=we_vote_id)
 
 
 def voter_address_retrieve_view(request):

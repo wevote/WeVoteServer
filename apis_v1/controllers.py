@@ -5,10 +5,11 @@
 from django.http import HttpResponse
 from exception.models import handle_exception
 import json
-from organization.models import Organization
+from organization.models import Organization, OrganizationManager
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterManager, \
     VoterAddressManager, VoterDeviceLinkManager
 import wevote_functions.admin
+from wevote_functions.models import convert_to_int, value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -59,6 +60,47 @@ def organization_count():
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+# We retrieve from only one of the two possible variables
+
+def organization_retrieve(organization_id, we_vote_id):
+    organization_id = convert_to_int(organization_id)
+
+    we_vote_id = we_vote_id.strip()
+    if not value_exists(organization_id) and not value_exists(we_vote_id):
+        json_data = {
+            'status': "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING",
+            'success': False,
+            'organization_id': organization_id,
+            'we_vote_id': we_vote_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    organization_manager = OrganizationManager()
+    results = organization_manager.retrieve_organization(organization_id, we_vote_id)
+
+    if results['organization_found']:
+        organization = results['organization']
+        json_data = {
+            'organization_id': organization.id,
+            'we_vote_id': organization.we_vote_id,
+            'organization_name': organization.organization_name if value_exists(organization.organization_name) else '',
+            'organization_website': organization.organization_website if value_exists(
+                organization.organization_website) else '',
+            'organization_twitter': organization.twitter_handle if value_exists(organization.twitter_handle) else '',
+            'success': True,
+            'status': results['status'],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        json_data = {
+            'status': results['status'],
+            'success': False,
+            'organization_id': organization_id,
+            'we_vote_id': we_vote_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 # We are going to start retrieving only the ballot address
 # Eventually we will want to allow saving former addresses, and mailing addresses for overseas voters
 def voter_address_retrieve(voter_device_id):
@@ -67,7 +109,7 @@ def voter_address_retrieve(voter_device_id):
         return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if voter_id < 0:
+    if not voter_id > 0:
         json_data = {
             'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
             'success': False,

@@ -6,7 +6,7 @@ from django.db import models
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
 import wevote_functions.admin
-from wevote_functions.models import value_exists
+from wevote_functions.models import convert_to_int, value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
 
 
@@ -28,28 +28,39 @@ class OrganizationManager(models.Manager):
         exception_multiple_object_returned = False
         organization_on_stage = Organization()
         organization_on_stage_id = 0
+        status = "ERROR_ENTERING_RETRIEVE_ORGANIZATION"
         try:
             if organization_id > 0:
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_ID"
                 organization_on_stage = Organization.objects.get(id=organization_id)
                 organization_on_stage_id = organization_on_stage.id
+                status = "ORGANIZATION_FOUND_WITH_ID"
             elif len(we_vote_id) > 0:
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_WE_VOTE_ID"
                 organization_on_stage = Organization.objects.get(we_vote_id=we_vote_id)
                 organization_on_stage_id = organization_on_stage.id
+                status = "ORGANIZATION_FOUND_WITH_WE_VOTE_ID"
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
             exception_multiple_object_returned = True
-            logger.warn("Organization.MultipleObjectsReturned")
+            status = "ERROR_MORE_THAN_ONE_ORGANIZATION_FOUND"
+            # logger.warn("Organization.MultipleObjectsReturned")
         except Organization.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
-            logger.warn("Organization.DoesNotExist")
+            status += ", ORGANIZATION_NOT_FOUND"
+            # logger.warn("Organization.DoesNotExist")
 
         organization_on_stage_found = True if organization_on_stage_id > 0 else False
         results = {
             'success':                      True if organization_on_stage_found else False,
+            'status':                       status,
             'organization_found':           organization_on_stage_found,
-            'organization_id':              organization_on_stage_id,
+            'organization_id':
+                organization_on_stage.id if organization_on_stage.id else organization_on_stage_id,
+            'we_vote_id':
+                organization_on_stage.we_vote_id if organization_on_stage.we_vote_id else we_vote_id,
             'organization':                 organization_on_stage,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
@@ -80,10 +91,10 @@ class OrganizationManager(models.Manager):
         organization_on_stage_found = False
         new_organization_created = False
 
-        organization_id = organization_id.clean()
-        we_vote_id = we_vote_id.clean()
-        organization_website_search = organization_website_search.clean()  # TODO Do further cleanup
-        organization_twitter_search = organization_twitter_search.clean()  # TODO Do further cleanup
+        organization_id = organization_id.strip()
+        we_vote_id = we_vote_id.strip()
+        organization_website_search = organization_website_search.strip()  # TODO Do further cleanup
+        organization_twitter_search = organization_twitter_search.strip()  # TODO Do further cleanup
 
         # In order of authority
         # 1) organization_id exists? Find it with organization_id or fail
@@ -185,7 +196,7 @@ class OrganizationManager(models.Manager):
         return results
 
     def delete_organization(self, organization_id):
-        organization_id = int(organization_id)
+        organization_id = convert_to_int(organization_id)
         organization_deleted = False
 
         try:
