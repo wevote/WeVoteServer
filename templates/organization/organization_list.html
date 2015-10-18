@@ -19,13 +19,16 @@
         </tr>
     {% endfor %}
     </table>
-
     <p></p>
     <p>
-        <a href="{% url 'organization:organizations_export' %}?format=json" target="_blank" >Export Organizations</a>,
-        <a href="{% url 'organization:organizations_import' %}" >Import Organizations</a>
+        <a href="{% url 'organization:organizations_export' %}?format=json" target="_blank" >Export Organizations</a>
     </p>
 {% else %}
     <p>(no organizations found)</p>
 {% endif %}
+
+    <p></p>
+    <p>
+        <a href="{% url 'organization:organizations_import' %}" >Import Organizations</a>
+    </p>
 {% endblock %}
