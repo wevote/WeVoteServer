@@ -18,6 +18,8 @@ urlpatterns = [
     url(r'^voterAddressSave/', views.voter_address_save_view, name='voterAddressSaveView'),
     url(r'^voterCount/', views.voter_count_view, name='voterCountView'),
     url(r'^voterCreate/', views.voter_create_view, name='voterCreateView'),
+    url(r'^voterGuidesToFollowRetrieve/',
+        views.voter_guides_to_follow_retrieve_view, name='voterGuidesToFollowRetrieveView'),
     url(r'^voterRetrieve/', views.VoterRetrieveView.as_view(), name='voterRetrieveView'),
 
     url(r'^docs/$', views_docs.apis_index_doc_view, name='apisIndex'),
@@ -28,5 +30,7 @@ urlpatterns = [
     url(r'^docs/voterAddressSave/$', views_docs.voter_address_save_doc_view, name='voterAddressSaveDocs'),
     url(r'^docs/voterCount/$', views_docs.voter_count_doc_view, name='voterCountDocs'),
     url(r'^docs/voterCreate/$', views_docs.voter_create_doc_view, name='voterCreateDocs'),
+    url(r'^docs/voterGuidesToFollowRetrieve/$',
+        views_docs.voter_guides_to_follow_retrieve_doc_view, name='voterGuidesToFollowRetrieveDocs'),
     url(r'^docs/voterRetrieve/$', views_docs.voter_retrieve_doc_view, name='voterRetrieveDocs'),
 ]

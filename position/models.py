@@ -63,6 +63,8 @@ class PositionEntered(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
         verbose_name="google civic election id", max_length=254, null=True, blank=True)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=True, blank=True)
 
     # The unique We Vote id of the tweet that is the source of the position
     tweet_source_id = models.BigIntegerField(null=True, blank=True)
@@ -238,6 +240,8 @@ class Position(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
         verbose_name="google civic election id", max_length=254, null=True, blank=True)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=True, blank=True)
 
     candidate_campaign = models.ForeignKey(
         CandidateCampaign, verbose_name='candidate campaign', null=True, blank=True, related_name='position_candidate')

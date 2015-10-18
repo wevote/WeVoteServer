@@ -16,7 +16,7 @@ from position.models import PositionEntered
 import requests
 from config.base import get_environment_variable
 import wevote_functions.admin
-from wevote_functions.models import value_exists
+from wevote_functions.models import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

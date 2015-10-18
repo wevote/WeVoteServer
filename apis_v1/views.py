@@ -8,9 +8,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .controllers import organization_count, organization_retrieve, voter_address_save, voter_address_retrieve, \
-    voter_count, voter_create, voter_retrieve_list
+    voter_count, voter_create, voter_guides_to_follow_retrieve, voter_retrieve_list
 from voter.serializers import VoterSerializer
-from wevote_functions.models import generate_voter_device_id, get_voter_device_id
+from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
+    get_google_civic_election_id_from_cookie
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -90,6 +91,18 @@ def voter_count_view(request):
 def voter_create_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     return voter_create(voter_device_id)
+
+
+def voter_guides_to_follow_retrieve_view(request):
+    """
+    Retrieve a list of voter_guides that a voter might want to follow
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    # We look in the cookies for google_civic_election_id
+    google_civic_election_id = get_google_civic_election_id_from_cookie(request)
+    return voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id)
 
 
 class VoterRetrieveView(APIView):

@@ -15,6 +15,8 @@ class Election(models.Model):
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=20, null=True, unique=True)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google civic election id", null=True, unique=False)  # Make unique=True after data is migrated
     # A displayable name for the election.
     election_name = models.CharField(verbose_name="election name", max_length=254, null=False, blank=False)
     # Day of the election in YYYY-MM-DD format.

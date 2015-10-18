@@ -6,7 +6,7 @@ from django.db import models
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, value_exists
+from wevote_functions.models import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
 
 
@@ -103,7 +103,7 @@ class OrganizationManager(models.Manager):
         # 4) organization_twitter_search exists? Try to find it. If not, exit
 
         success = False
-        if value_exists(organization_id) or value_exists(we_vote_id):
+        if positive_value_exists(organization_id) or positive_value_exists(we_vote_id):
             # If here, we know we are updating
             status = "ATTEMPTING UPDATE WITH ORG_ID or WE_VOTE_ID"
             # 1) organization_id exists? Find it with organization_id or fail
@@ -128,7 +128,7 @@ class OrganizationManager(models.Manager):
         else:
             try:
                 # 3) organization_website_search exists? Try to find it. If not, go to step 4
-                if value_exists(organization_website_search):
+                if positive_value_exists(organization_website_search):
                     try:
                         organization_on_stage = Organization.objects.get(
                             organization_website=organization_website_search)
@@ -144,7 +144,7 @@ class OrganizationManager(models.Manager):
 
                 # 4) organization_twitter_search exists? Try to find it. If not, exit
                 if not organization_on_stage_found:
-                    if value_exists(organization_twitter_search):
+                    if positive_value_exists(organization_twitter_search):
                         try:
                             organization_on_stage = Organization.objects.get(
                                 twitter_handle=organization_twitter_search)

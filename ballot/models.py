@@ -6,7 +6,7 @@ from candidate.models import CandidateCampaign
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.models import value_exists
+from wevote_functions.models import positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -21,7 +21,9 @@ class BallotItem(models.Model):
     voter_id = models.IntegerField(verbose_name="the voter unique id", default=0, null=False, blank=False)
 
     # The unique ID of this election. (Provided by Google Civic)
-    google_civic_election_id = models.CharField(verbose_name="google civic election id", max_length=20, null=True)
+    google_civic_election_id = models.CharField(verbose_name="google civic election id", max_length=20, null=False)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=False)
 
     google_ballot_placement = models.SmallIntegerField(
         verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
@@ -138,9 +140,10 @@ class BallotItemManager(models.Model):
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         google_civic_ballot_item_on_stage = BallotItem()
+        google_civic_ballot_item_id = 0
 
-        if value_exists(voter_id) and value_exists(google_civic_election_id) and value_exists(
-                google_civic_district_ocd_id):
+        if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id) and \
+                positive_value_exists(google_civic_district_ocd_id):
             try:
                 google_civic_ballot_item_on_stage = BallotItem.objects.get(
                     voter_id__exact=voter_id,

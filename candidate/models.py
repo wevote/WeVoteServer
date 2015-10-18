@@ -58,6 +58,8 @@ class CandidateCampaign(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
         verbose_name="google civic election id", max_length=254, null=True, blank=True)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=254, null=True, blank=True)
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)

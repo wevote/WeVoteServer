@@ -96,6 +96,7 @@ INSTALLED_APPS = (
     'tag',
     'twitter',
     'voter',  # See also AUTH_USER_MODEL in config/settings.py
+    'voter_guide',
     'wevote_functions',
     'wevote_settings',
     'wevote_social',

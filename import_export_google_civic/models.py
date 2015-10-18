@@ -6,7 +6,7 @@
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.models import value_exists
+from wevote_functions.models import positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -26,6 +26,8 @@ class GoogleCivicContestReferendum(models.Model):
     # The unique ID of the election containing this referendum. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
         verbose_name="google civic election id", max_length=254, null=False, blank=False)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=False, blank=False)
     # The internal We Vote unique ID of the election containing this referendum, so we can check integrity of imports.
     we_vote_election_id = models.CharField(
         verbose_name="we vote election id", max_length=254, null=True, blank=True)

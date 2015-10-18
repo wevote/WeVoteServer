@@ -46,6 +46,7 @@ urlpatterns = [
     # url('', include('wevote_social.urls', namespace='wevote_social')),
     url('social', include('social.apps.django_app.urls', namespace="social")),
     url(r'^voter/', include('voter.urls', namespace="voter")),
+    url(r'^vg/', include('voter_guide.urls', namespace="voter_guide")),
     # Authentication
     url('', include('django.contrib.auth.urls', namespace="auth")),  # This line provides all of the following patterns:
     # login, logout, password_reset, password_reset_done, password_reset_confirm, password_reset_complete

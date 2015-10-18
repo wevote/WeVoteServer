@@ -17,7 +17,7 @@ from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from measure.models import ContestMeasure
 from office.models import ContestOfficeManager
-from wevote_functions.models import logger, value_exists
+from wevote_functions.models import logger, positive_value_exists
 
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 ELECTION_QUERY_URL = get_environment_variable("ELECTION_QUERY_URL")
@@ -233,7 +233,7 @@ def process_contest_office_from_structured_json(
     contest_measure_id = 0
 
     # If a voter_id was passed in, save an entry for this office for the voter's ballot
-    if value_exists(voter_id) and value_exists(google_civic_election_id) and value_exists(contest_office_id):
+    if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id) and positive_value_exists(contest_office_id):
         ballot_item_manager = BallotItemManager()
         ballot_item_manager.update_or_create_ballot_item_for_voter(
             voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label,

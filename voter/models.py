@@ -13,7 +13,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
     handle_record_not_found_exception, handle_record_not_saved_exception
 # from region_jurisdiction.models import Jurisdiction
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, generate_voter_device_id, value_exists
+from wevote_functions.models import convert_to_int, generate_voter_device_id, positive_value_exists
 from validate_email import validate_email
 
 
@@ -94,7 +94,7 @@ class VoterManager(BaseUserManager):
         voter_id = 0
         voter_deleted = False
 
-        if value_exists(email) and validate_email(email):
+        if positive_value_exists(email) and validate_email(email):
             email_valid = True
         else:
             email_valid = False
@@ -236,6 +236,10 @@ class Voter(AbstractBaseUser):
 #     password_reset_key
 #     password_reset_request_time
 #     last_activity
+
+    # The unique ID of the election this voter is currently looking at. (Provided by Google Civic)
+    current_google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", null=True, unique=False)
 
     objects = VoterManager()
 
@@ -401,6 +405,12 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
         voter_device_link = results['voter_device_link']
         return voter_device_link.voter_id
     return 0
+
+
+def fetch_google_civic_election_id_for_voter_id(voter_id):
+    google_civic_election_id = 4162
+    return google_civic_election_id
+
 
 # class VoterJurisdictionLink(models.Model):
 #     """

@@ -5,6 +5,7 @@
 import datetime
 import random
 import string
+import types
 import wevote_functions.admin
 
 
@@ -32,11 +33,21 @@ class switch(object):
             return False
 
 
+# This is how we make sure a variable is an integer
 def convert_to_int(value):
     try:
         new_value = int(value)
     except ValueError:
         new_value = 0
+    return new_value
+
+
+# This is how we make sure a variable is a string
+def convert_to_str(value):
+    try:
+        new_value = str(value)
+    except ValueError:
+        new_value = ''
     return new_value
 
 
@@ -160,11 +171,12 @@ def generate_voter_device_id():
     return new_device_id
 
 
-def value_exists(value):
+def positive_value_exists(value):
     """
     This is a test to see if a positive value exists. All of these return false:
         "" (an empty string)
         0 (0 as an integer)
+        -1
         0.0 (0 as a float)
         "0" (0 as a string)
         NULL
@@ -174,7 +186,29 @@ def value_exists(value):
     :return: bool
     """
     try:
-        value = float(value)
+        if isinstance(value, types.ListType):
+            return bool(len(value))
+        if isinstance(value, types.DictType):
+            return bool(len(value))
+        else:
+            value = float(value)
+            if value < 0:
+                return False
     except ValueError:
         pass
     return bool(value)
+
+
+def get_google_civic_election_id_from_cookie(request):
+    google_civic_election_id = 0
+    if 'google_civic_election_id' in request.COOKIES:
+        google_civic_election_id = request.COOKIES['google_civic_election_id']
+        logger.debug("from cookie, google_civic_election_id: {google_civic_election_id}".format(
+            google_civic_election_id=google_civic_election_id
+        ))
+    return google_civic_election_id
+
+
+def set_google_civic_election_id_cookie(request, response, google_civic_election_id):
+    set_cookie(response, 'google_civic_election_id', google_civic_election_id)
+

@@ -23,7 +23,9 @@ class ContestOffice(models.Model):
     office_name = models.CharField(verbose_name="google civic office", max_length=254, null=False, blank=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                max_length=254, null=False, blank=False)
+                                                    max_length=254, null=False, blank=False)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=False, blank=False)
     maplight_id = models.CharField(
         verbose_name="maplight unique identifier", max_length=254, null=True, blank=True, unique=True)
     ballotpedia_id = models.CharField(

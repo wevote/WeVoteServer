@@ -6,10 +6,11 @@ from django.http import HttpResponse
 from exception.models import handle_exception
 import json
 from organization.models import Organization, OrganizationManager
-from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterManager, \
-    VoterAddressManager, VoterDeviceLinkManager
+from voter.models import BALLOT_ADDRESS, fetch_google_civic_election_id_for_voter_id, \
+    fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterAddressManager, VoterDeviceLinkManager
+from voter_guide.models import VoterGuideList
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, value_exists
+from wevote_functions.models import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -66,7 +67,7 @@ def organization_retrieve(organization_id, we_vote_id):
     organization_id = convert_to_int(organization_id)
 
     we_vote_id = we_vote_id.strip()
-    if not value_exists(organization_id) and not value_exists(we_vote_id):
+    if not positive_value_exists(organization_id) and not positive_value_exists(we_vote_id):
         json_data = {
             'status': "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING",
             'success': False,
@@ -83,10 +84,10 @@ def organization_retrieve(organization_id, we_vote_id):
         json_data = {
             'organization_id': organization.id,
             'we_vote_id': organization.we_vote_id,
-            'organization_name': organization.organization_name if value_exists(organization.organization_name) else '',
-            'organization_website': organization.organization_website if value_exists(
+            'organization_name': organization.organization_name if positive_value_exists(organization.organization_name) else '',
+            'organization_website': organization.organization_website if positive_value_exists(
                 organization.organization_website) else '',
-            'organization_twitter': organization.twitter_handle if value_exists(organization.twitter_handle) else '',
+            'organization_twitter': organization.twitter_handle if positive_value_exists(organization.twitter_handle) else '',
             'success': True,
             'status': results['status'],
         }
@@ -263,6 +264,77 @@ def voter_create(voter_device_id):
             'voter_device_id': voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id=0):
+    # Get voter_device_id from the voter_device_id so we can figure out which voter_guides to offer
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        json_data = {
+            'status': 'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID',
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'voter_guides': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status': "ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'voter_guides': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    # If the google_civic_election_id was found cached in a cookie and passed in, use that
+    # If not, fetch it for this voter
+    if not positive_value_exists(google_civic_election_id):
+        google_civic_election_id = fetch_google_civic_election_id_for_voter_id(voter_id)
+
+    voter_guide_list = []
+    voter_guides = []
+    status = 'ERROR_RETRIEVING_VOTER_GUIDES'
+    try:
+        voter_guide_list_object = VoterGuideList()
+        results = voter_guide_list_object.retrieve_voter_guides_for_election(google_civic_election_id)
+        success = results['success']
+        status = results['status']
+        voter_guide_list = results['voter_guide_list']
+
+    except Exception as e:
+        status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                 '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+
+    if success:
+        for voter_guide in voter_guide_list:
+            one_voter_guide = {
+                'google_civic_election_id': voter_guide.google_civic_election_id,
+                'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
+                'organization_we_vote_id': voter_guide.organization_we_vote_id,
+                'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
+                'owner_voter_id': voter_guide.owner_voter_id,
+                'last_updated': voter_guide.last_updated,
+            }
+            voter_guides.append(one_voter_guide.copy())
+
+        json_data = {
+            'status': 'VOTER_GUIDES_TO_FOLLOW_RETRIEVED',
+            'success': True,
+            'voter_device_id': voter_device_id,
+            'voter_guides': voter_guides,
+        }
+    else:
+        json_data = {
+            'status': status,
+            'success': False,
+            'voter_guides': [],
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_retrieve_list(voter_device_id):

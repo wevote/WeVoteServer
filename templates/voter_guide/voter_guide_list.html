@@ -1,0 +1,60 @@
+{# templates/voter_guide/voter_guide_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Voter Guides{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Voter Guides</h1>
+
+    <p>Choose Election<br /></p>
+    <form name="voter_guide_choose_election" method="post" action="{% url 'voter_guide:voter_guide_list' %}">
+        {% csrf_token %}
+{% if election_list %}
+    <select id="google_civic_election_id">
+{% for election in election_list %}
+    <option value="{{ election.google_civic_election_id }}"
+            {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
+        {{ election.election_name }} - {{ election.election_day_text }}</option>
+{% endfor %}
+    </select>
+    </form>
+
+
+{% else %}
+    <p>(no elections found)</p>
+{% endif %}
+<p></p>
+{% if voter_guide_list %}
+    <table cellpadding="5" cellspacing="5">
+    {% for voter_guide in voter_guide_list %}
+        <tr>
+        {% if voter_guide_owner_type == ORGANIZATION %}
+            <td><a href="#">Organization</a></td>
+        {% elif voter_guide_owner_type == PUBLIC_FIGURE %}
+            <td><a href="#">Public Figure</a></td>
+        {% elif voter_guide_owner_type == VOTER %}
+            <td><a href="#">Voter</a></td>
+        {% endif %}
+            <td>{{ voter_guide.google_civic_election_id }}</td>
+            <td>{{ voter_guide.last_updated }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no voter guides found)</p>
+{% endif %}
+
+    <p></p>
+    <p>
+        <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>
+    </p>
+    <script>
+        $(function() {
+            $('#election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+{% endblock %}

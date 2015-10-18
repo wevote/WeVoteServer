@@ -31,6 +31,8 @@ class ContestMeasure(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
         verbose_name="google civic election id", max_length=254, null=True, blank=True)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google election id", default=0, null=False, blank=False)
     # ballot_placement: We store ballot_placement in the BallotItem table instead because it is different for each voter
     # If this is a partisan election, the name of the party it is for.
     primary_party = models.CharField(verbose_name="primary party", max_length=254, null=True, blank=True)
@@ -96,6 +98,8 @@ class MeasureCampaign(models.Model):
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google election id",
                                                 max_length=254, null=False, blank=False)
+    google_civic_election_id_new = models.PositiveIntegerField(
+        verbose_name="google election id", default=0, null=False, blank=False)
     # The URL for the candidate's campaign web site.
     url = models.URLField(verbose_name='website url of campaign', blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of campaign', blank=True, null=True)
