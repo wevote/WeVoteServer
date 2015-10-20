@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.7.0",
     "react": "^0.13.3",
     "react-router": "^0.13.4"
   },
