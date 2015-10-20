@@ -5,6 +5,7 @@
 from django.db import models
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
+from organization.models import Organization
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, convert_to_str, positive_value_exists
 
@@ -15,23 +16,130 @@ class VoterGuideManager(models.Manager):
     """
     A class for working with the VoterGuide model
     """
-    def create_voter_guide(self, google_civic_election_id, published_about_we_vote_id='', published_about_voter_id=0):
-        voter_guide = self.create(google_civic_election_id=google_civic_election_id,
-                                  published_about_we_vote_id=published_about_we_vote_id,
-                                  published_about_voter_id=published_about_voter_id,
-                                  )
-        return voter_guide
+    def update_or_create_organization_voter_guide(self, google_civic_election_id, organization_we_vote_id):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        new_voter_guide = VoterGuide()
+        voter_guide_owner_type = new_voter_guide.ORGANIZATION
+        exception_multiple_object_returned = False
+        status = ''
+        if not google_civic_election_id or not organization_we_vote_id:
+            status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE'
+        else:
+            try:
+                updated_values = {
+                    # Values we search against below
+                    'google_civic_election_id': google_civic_election_id,
+                    'voter_guide_owner_type': voter_guide_owner_type,
+                    'organization_we_vote_id': organization_we_vote_id,
+                    # The rest of the values
+                }
+                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
+                    google_civic_election_id__exact=google_civic_election_id,
+                    voter_guide_owner_type__exact=voter_guide_owner_type,
+                    organization_we_vote_id__exact=organization_we_vote_id,
+                    defaults=updated_values)
+                success = True
+                if new_voter_guide_created:
+                    status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION'
+                else:
+                    status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION'
+            except VoterGuide.MultipleObjectsReturned as e:
+                handle_record_found_more_than_one_exception(e, logger=logger)
+                success = False
+                status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION'
+                exception_multiple_object_returned = True
 
-    def create_organization_voter_guide(self, google_civic_election_id, published_about_we_vote_id):
-        return self.create_voter_guide(google_civic_election_id, published_about_we_vote_id)
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'voter_guide_saved':        success,
+            'new_voter_guide_created':  new_voter_guide_created,
+        }
+        return results
 
-    def create_public_figure_voter_guide(self, google_civic_election_id, published_about_we_vote_id):
-        return self.create_voter_guide(google_civic_election_id, published_about_we_vote_id)
+    def update_or_create_public_figure_voter_guide(self, google_civic_election_id, public_figure_we_vote_id):
+        new_voter_guide = VoterGuide()
+        voter_guide_owner_type = new_voter_guide.PUBLIC_FIGURE
+        exception_multiple_object_returned = False
+        status = ''
+        if not google_civic_election_id or not public_figure_we_vote_id:
+            status = 'ERROR_VARIABLES_MISSING_FOR_PUBLIC_FIGURE_VOTER_GUIDE'
+        else:
+            try:
+                updated_values = {
+                    # Values we search against below
+                    'google_civic_election_id': google_civic_election_id,
+                    'voter_guide_owner_type': voter_guide_owner_type,
+                    'public_figure_we_vote_id': public_figure_we_vote_id,
+                    # The rest of the values
+                }
+                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
+                    google_civic_election_id__exact=google_civic_election_id,
+                    voter_guide_owner_type__exact=voter_guide_owner_type,
+                    public_figure_we_vote_id__exact=public_figure_we_vote_id,
+                    defaults=updated_values)
+                success = True
+                if new_voter_guide_created:
+                    status = 'VOTER_GUIDE_CREATED_FOR_PUBLIC_FIGURE'
+                else:
+                    status = 'VOTER_GUIDE_UPDATED_FOR_PUBLIC_FIGURE'
+            except VoterGuide.MultipleObjectsReturned as e:
+                handle_record_found_more_than_one_exception(e, logger=logger)
+                success = False
+                status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_PUBLIC_FIGURE'
+                exception_multiple_object_returned = True
 
-    def create_voter_voter_guide(self, google_civic_election_id, published_about_voter_id):
-        published_about_voter_id = convert_to_int(published_about_voter_id)
-        published_about_we_vote_id = ''
-        return self.create_voter_guide(google_civic_election_id, published_about_we_vote_id, published_about_voter_id)
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'voter_guide_saved':        success,
+            'new_voter_guide_created':  new_voter_guide_created,
+        }
+        return results
+
+    def update_or_create_voter_voter_guide(self, google_civic_election_id, owner_voter_id):
+        new_voter_guide = VoterGuide()
+        voter_guide_owner_type = new_voter_guide.VOTER
+        owner_voter_id = convert_to_int(owner_voter_id)
+        exception_multiple_object_returned = False
+        status = 'ERROR_VARIABLES_MISSING_FOR_VOTER_VOTER_GUIDE'
+        if not google_civic_election_id or not owner_voter_id:
+            status = 'ERROR_VARIABLES_MISSING_FOR_VOTER_VOTER_GUIDE'
+        else:
+            try:
+                updated_values = {
+                    # Values we search against below
+                    'google_civic_election_id': google_civic_election_id,
+                    'voter_guide_owner_type': voter_guide_owner_type,
+                    'owner_voter_id': owner_voter_id,
+                    # The rest of the values
+                }
+                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
+                    google_civic_election_id__exact=google_civic_election_id,
+                    voter_guide_owner_type__exact=voter_guide_owner_type,
+                    owner_voter_id__exact=owner_voter_id,
+                    defaults=updated_values)
+                success = True
+                if new_voter_guide_created:
+                    status = 'VOTER_GUIDE_CREATED_FOR_VOTER'
+                else:
+                    status = 'VOTER_GUIDE_UPDATED_FOR_VOTER'
+            except VoterGuide.MultipleObjectsReturned as e:
+                handle_record_found_more_than_one_exception(e, logger=logger)
+                success = False
+                status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_VOTER'
+                exception_multiple_object_returned = True
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'voter_guide_saved':        success,
+            'new_voter_guide_created':  new_voter_guide_created,
+        }
+        return results
 
     def retrieve_voter_guide(self, voter_guide_id=0, google_civic_election_id=0,
                              published_about_we_vote_id=None, published_about_voter_id=0):
@@ -164,17 +272,17 @@ class VoterGuide(models.Model):
 
     objects = VoterGuideManager()
 
-    @classmethod
-    def create(cls, published_about_we_vote_id, published_about_voter_id, google_civic_election_id):
-        # If there is a value for *both* published_about_we_vote_id and published_about_voter_id,
-        #  then filter down to just the published_about_we_vote_id (for public figure or organization)
-        if positive_value_exists(published_about_we_vote_id):
-            published_about_voter_id = 0
-        voter_guide = cls(google_civic_election_id=google_civic_election_id,
-                          published_about_we_vote_id=published_about_we_vote_id,
-                          published_about_voter_id=published_about_voter_id,
-                          )
-        return voter_guide
+    def organization(self):
+        try:
+            organization = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
+        except Organization.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            logger.error("voter_guide.organization Found multiple")
+            return
+        except Organization.DoesNotExist:
+            logger.error("voter_guide.organization did not find")
+            return
+        return organization
 
 
 class VoterGuideList(models.Model):
@@ -185,11 +293,37 @@ class VoterGuideList(models.Model):
     def retrieve_voter_guides_for_election(self, google_civic_election_id):
         voter_guide_list = []
         voter_guide_list_found = False
-        status = 'ERROR_VOTER_GUIDE_LIST_START'
         try:
+            status = 'ERROR_VOTER_GUIDE_LIST_START'
             voter_guide_queryset = VoterGuide.objects.order_by('last_updated')
             voter_guide_list = voter_guide_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
+
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDE_FOUND'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND'
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success':                      True if voter_guide_list_found else False,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    def retrieve_all_voter_guides(self):
+        voter_guide_list = []
+        voter_guide_list_found = False
+        try:
+            status = 'ERROR_VOTER_GUIDE_LIST_START'
+            voter_guide_queryset = VoterGuide.objects.order_by('last_updated')
+            voter_guide_list = voter_guide_queryset
 
             if len(voter_guide_list):
                 voter_guide_list_found = True

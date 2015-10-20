@@ -6,7 +6,10 @@
 
 {%  block content %}
 <!-- START organization/templates/organization/organization_position_edit.html //-->
-<h1>{% if not organization_position %}Enter Position for {% endif %}{{ organization.name }}{% if organization_position %}<br />
+
+    <p><a href="{% url 'organization:organization_position_list' organization.id %}">< Back to Organization Positions</a></p>
+
+<h1>{% if not organization_position %}Enter Position for {% endif %}{{ organization.organization_name }}{% if organization_position %}<br />
 Position on {{ organization_position.candidate_campaign.candidate_name }}{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
@@ -21,7 +24,22 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
 {% if is_in_edit_mode %}
     {# EDIT EXISTING: There is no need to display anything here #}
     <input type="hidden" name="candidate_campaign_id" value="{{ organization_position.candidate_campaign.id }}">
+    <input type="hidden" name="google_civic_election_id" value="{{ organization_position.google_civic_election_id }}">
 {% else %}
+
+
+    {% if election_list %}
+    <label for="google_civic_election_id_id">Election:</label>
+    <select id="google_civic_election_id_id" name="google_civic_election_id">
+    {% for election in election_list %}
+    <option value="{{ election.google_civic_election_id }}"
+            {% if election.google_civic_election_id == organization_position.google_civic_election_id %} selected="selected"{% endif %}>
+        {{ election.election_name }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    {% endif %}
+    <br />
+
     {# ADD NEW: Show the drop-down of campaigns this org can have enter a position for #}
     <label for="candidate_campaign_id_id">Candidate:</label>
     <select type="text" name="candidate_campaign_id" id="candidate_campaign_id_id" />
@@ -36,7 +54,6 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
     <option value="0">-- no candidates found --</option>
     {% endif %}
     </select>
-
     <br />
 {% endif %}
 

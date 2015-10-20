@@ -2,24 +2,26 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .controllers import import_we_vote_organizations_from_json
+from .models import Organization
+from .serializers import OrganizationSerializer
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+# from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
 from candidate.models import CandidateCampaign, CandidateCampaignList
-from .controllers import import_we_vote_organizations_from_json
-from .models import Organization
+from election.models import Election
 from position.models import PositionEntered, PositionEnteredManager, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import OrganizationSerializer
+from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int
+from wevote_functions.models import convert_to_int, positive_value_exists
 
 
 ORGANIZATION_STANCE_CHOICES = (
@@ -124,7 +126,7 @@ def organization_edit_process_view(request):
     organization_on_stage_found = False
     try:
         organization_query = Organization.objects.filter(id=organization_id)
-        if len(organization_query):
+        if organization_query.count():
             organization_on_stage = organization_query[0]
             organization_on_stage_found = True
     except Exception as e:
@@ -160,11 +162,11 @@ def organization_edit_process_view(request):
 def organization_position_list_view(request, organization_id):
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
-    # election_id = 1  # TODO We will need to provide the election_id somehow, perhaps as a global variable?
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     organization_on_stage_found = False
     try:
         organization_query = Organization.objects.filter(id=organization_id)
-        if len(organization_query):
+        if organization_query.count():
             organization_on_stage = organization_query[0]
             organization_on_stage_found = True
     except Exception as e:
@@ -180,21 +182,30 @@ def organization_position_list_view(request, organization_id):
         try:
             organization_position_list = PositionEntered.objects.order_by('stance')
             organization_position_list = organization_position_list.filter(organization_id=organization_id)
+            if positive_value_exists(google_civic_election_id):
+                organization_position_list = organization_position_list.filter(
+                    google_civic_election_id=google_civic_election_id)
             if len(organization_position_list):
                 organization_position_list_found = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
+
+        election_list = Election.objects.order_by('-election_day_text')
 
         if organization_position_list_found:
             template_values = {
                 'messages_on_stage': messages_on_stage,
                 'organization': organization_on_stage,
                 'organization_position_list': organization_position_list,
+                'election_list': election_list,
+                'google_civic_election_id': google_civic_election_id,
             }
         else:
             template_values = {
                 'messages_on_stage': messages_on_stage,
                 'organization': organization_on_stage,
+                'election_list': election_list,
+                'google_civic_election_id': google_civic_election_id,
             }
     return render(request, 'organization/organization_position_list.html', template_values)
 
@@ -225,6 +236,7 @@ def organization_add_new_position_form_view(request, organization_id):
         = candidate_campaign_list.retrieve_candidate_campaigns_for_this_election_list()
 
     if all_is_well:
+        election_list = Election.objects.all()
         template_values = {
             'candidate_campaigns_for_this_election_list':   candidate_campaigns_for_this_election_list,
             'messages_on_stage':                            messages_on_stage,
@@ -232,6 +244,7 @@ def organization_add_new_position_form_view(request, organization_id):
             'organization_position_candidate_campaign_id':  0,
             'possible_stances_list':                        ORGANIZATION_STANCE_CHOICES,
             'stance_selected':                              SUPPORT,  # Default stance
+            'election_list':                                election_list,
         }
     return render(request, 'organization/organization_position_edit.html', template_values)
 
@@ -320,6 +333,8 @@ def organization_edit_existing_position_form_view(request, organization_id, posi
 
     # Note: We have access to the candidate campaign through organization_position_on_stage.candidate_campaign
 
+    election_list = Election.objects.all()
+
     if organization_position_on_stage_found:
         template_values = {
             'is_in_edit_mode':                              True,
@@ -328,6 +343,7 @@ def organization_edit_existing_position_form_view(request, organization_id, posi
             'organization_position':                        organization_position_on_stage,
             'possible_stances_list':                        ORGANIZATION_STANCE_CHOICES,
             'stance_selected':                              organization_position_on_stage.stance,
+            'election_list':                                election_list,
         }
 
     return render(request, 'organization/organization_position_edit.html', template_values)
@@ -340,7 +356,7 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
     :param request:
     :return:
     """
-    google_civic_election_id = 4162  # TODO Temp election id during development, Virginia General Election
+    google_civic_election_id = convert_to_int(request.POST['google_civic_election_id'])
     organization_id = convert_to_int(request.POST['organization_id'])
     position_id = convert_to_int(request.POST['position_id'])
     candidate_campaign_id = convert_to_int(request.POST['candidate_campaign_id'])
@@ -353,8 +369,8 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
     organization_on_stage_found = False
     try:
         organization_query = Organization.objects.filter(id=organization_id)
-        if len(organization_query):
-            # organization_on_stage = organization_query[0]
+        if organization_query.count():
+            organization_on_stage = organization_query[0]
             organization_on_stage_found = True
     except Exception as e:
         # If we can't retrieve the organization, we cannot proceed
@@ -432,13 +448,16 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             organization_position_on_stage = results['position']
 
     # Now save existing, or create new
+    success = False
     try:
         if organization_position_on_stage_found:
             # Update the position
             organization_position_on_stage.stance = stance
-            organization_position_on_stage.statement_text = statement_text
+            organization_position_on_stage.google_civic_election_id = google_civic_election_id
             organization_position_on_stage.more_info_url = more_info_url
+            organization_position_on_stage.statement_text = statement_text
             organization_position_on_stage.save()
+            success = True
             messages.add_message(
                 request, messages.INFO,
                 "Position on {candidate_name} updated.".format(
@@ -454,6 +473,7 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
                 more_info_url=more_info_url,
             )
             organization_position_on_stage.save()
+            success = True
             messages.add_message(
                 request, messages.INFO,
                 "New position on {candidate_name} saved.".format(
@@ -461,5 +481,12 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         logger.error("Problem saving PositionEntered for CandidateCampaign")
+
+    # If the position was saved, then update the voter_guide entry
+    if success:
+        voter_guide_manager = VoterGuideManager()
+        results = voter_guide_manager.update_or_create_organization_voter_guide(
+            google_civic_election_id, organization_on_stage.we_vote_id)
+        # if results['success']:
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))

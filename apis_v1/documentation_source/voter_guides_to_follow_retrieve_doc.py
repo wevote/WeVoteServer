@@ -31,24 +31,40 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '}'
+                   '  "voter_guides": list\n' \
+                   '   [\n' \
+                   '     "google_civic_election_id": integer,\n' \
+                   '     "voter_guide_owner_type": one character (O = Organization, P = Public Figure, V = Voter),\n' \
+                   '     "organization_we_vote_id": string (a unique We Vote ID if owner type is "O"),\n' \
+                   '     "public_figure_we_vote_id": string (a unique We Vote ID if owner type is "P"),\n' \
+                   '     "owner_voter_id": integer (a unique integer id if owner type is "V"),\n' \
+                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
+                   '   ],\n' \
+                   '}\n'
 
     potential_status_codes_list = [
         {
-            'code':         'VALID_VOTER_DEVICE_ID_MISSING',
+            'code':         'VOTER_GUIDES_TO_FOLLOW_RETRIEVED',
+            'description':  'At least one voter guide was returned.',
+        },
+        {
+            'code':         'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID',
             'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
         },
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
+        {
+            'code':         'NO_VOTER_GUIDES_FOUND',
+            'description':  'No voter guides exist in the database matching the search terms.',
+        },
     ]
 
     template_values = {
         'api_name': 'voterGuidesToFollowRetrieve',
         'api_slug': 'voterGuidesToFollowRetrieve',
         'api_introduction':
-            "",
+            "Look up the election and ballot items that this person is focused on. Return the organizations, "
+            "public figures, and voters that have shared voter guides available to follow. Take into consideration "
+            "which voter guides the voter has previously ignored. "
+            "Do not show voter guides the voter is already following.",
         'try_now_link': 'apis_v1:voterGuidesToFollowRetrieveView',
         'try_now_link_variables': '',
         'url_root': url_root,

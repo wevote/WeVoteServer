@@ -6,28 +6,30 @@ from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
 from django.http import SimpleCookie
 import json
+from organization.models import Organization
 
 
 class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
 
     def setUp(self):
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
+        self.organization_count_url = reverse("apis_v1:organizationCountView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
-        self.voter_guides_to_follow_retrieve_url = "%s?format=json" % reverse("apis_v1:voterRetrieveView")
+        self.voter_guides_to_follow_retrieve_url = reverse("apis_v1:voterGuidesToFollowRetrieveView")
 
     def test_retrieve_with_no_cookie(self):
+        #######################################
+        # Without a cookie, we don't expect valid response
         response = self.client.get(self.voter_guides_to_follow_retrieve_url)
         json_data = json.loads(response.content)
 
-        #######################################
-        # Without a cookie, we don't expect valid response
         self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data, True,
-                         "voter_device_id expected in the voterRetrieveView json response, and not found")
+                         "voter_device_id expected in the voterGuidesToFollowRetrieveView json response, and not found")
 
         self.assertEqual(
-            json_data['status'], 'VALID_VOTER_DEVICE_ID_MISSING',
-            "status:  {status} (VALID_VOTER_DEVICE_ID_MISSING expected), voter_device_id: {voter_device_id}".format(
+            json_data['status'], 'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID',
+            "status:  {status} (ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID expected), voter_device_id: {voter_device_id}".format(
                 status=json_data['status'], voter_device_id=json_data['voter_device_id']))
 
     def test_retrieve_with_cookie(self):
@@ -38,46 +40,121 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
 
         #######################################
         # Generate the voter_device_id cookie
-        response = self.client.get(self.generate_voter_device_id_url)
-        json_data = json.loads(response.content)
+        response01 = self.client.get(self.generate_voter_device_id_url)
+        json_data01 = json.loads(response01.content)
 
         # Make sure we got back a voter_device_id we can use
-        self.assertEqual('voter_device_id' in json_data, True,
+        self.assertEqual('voter_device_id' in json_data01, True,
                          "voter_device_id expected in the deviceIdGenerateView json response")
 
         # Now save the retrieved voter_device_id in a mock cookie
         cookies = SimpleCookie()
-        cookies["voter_device_id"] = json_data['voter_device_id']
+        cookies["voter_device_id"] = json_data01['voter_device_id']
         self.client = Client(HTTP_COOKIE=cookies.output(header='', sep='; '))
 
         #######################################
-        # Create a voter so we can test retrieve
-        response2 = self.client.get(self.voter_create_url)
-        json_data2 = json.loads(response2.content)
+        # With a cookie, but without a voter_id in the database, we don't expect valid response
+        response02 = self.client.get(self.voter_guides_to_follow_retrieve_url)
+        json_data02 = json.loads(response02.content)
 
-        self.assertEqual('status' in json_data2, True,
+        self.assertEqual('status' in json_data02, True, "status expected in the json response, and not found")
+        self.assertEqual('voter_device_id' in json_data02, True,
+                         "voter_device_id expected in the voterGuidesToFollowRetrieveView json response, and not found")
+
+        self.assertEqual(
+            json_data02['status'], 'ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID',
+            "status:  {status} (ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID expected), "
+            "voter_device_id: {voter_device_id}".format(
+                status=json_data02['status'], voter_device_id=json_data02['voter_device_id']))
+
+        #######################################
+        # Create a voter so we can test retrieve
+        response03 = self.client.get(self.voter_create_url)
+        json_data03 = json.loads(response03.content)
+
+        self.assertEqual('status' in json_data03, True,
                          "status expected in the voterCreateView json response but not found")
-        self.assertEqual('voter_device_id' in json_data2, True,
+        self.assertEqual('voter_device_id' in json_data03, True,
                          "voter_device_id expected in the voterCreateView json response but not found")
 
         # With a brand new voter_device_id, a new voter record should be created
         self.assertEqual(
-            json_data2['status'], 'VOTER_CREATED',
+            json_data03['status'], 'VOTER_CREATED',
             "status:  {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
-                status=json_data2['status'], voter_device_id=json_data2['voter_device_id']))
+                status=json_data03['status'], voter_device_id=json_data03['voter_device_id']))
 
         #######################################
-        # Test for id, first_name, last_name, email
-        response3 = self.client.get(self.voter_guides_to_follow_retrieve_url)
-        json_data3 = json.loads(response3.content)
+        # Test the response before any voter guides exist
+        response04 = self.client.get(self.voter_guides_to_follow_retrieve_url)
+        json_data04 = json.loads(response04.content)
 
-        for one_voter in json_data3:
-            self.assertEqual('id' in one_voter, True, "id expected in the voterRetrieveView json response but not found")
-            self.assertEqual('first_name' in one_voter, True,
-                             "first_name expected in the voterRetrieveView json response but not found")
-            self.assertEqual('last_name' in one_voter, True,
-                             "last_name expected in the voterRetrieveView json response but not found")
-            self.assertEqual('email' in one_voter, True,
-                             "email expected in the voterRetrieveView json response but not found")
+        self.assertEqual('status' in json_data04, True,
+                         "status expected in the voterGuidesToFollowRetrieveView json response but not found")
+        self.assertEqual('success' in json_data04, True,
+                         "success expected in the voterGuidesToFollowRetrieveView json response but not found")
+        self.assertEqual('voter_device_id' in json_data04, True,
+                         "voter_device_id expected in the voterGuidesToFollowRetrieveView json response but not found")
+        self.assertEqual('voter_guides' in json_data04, True,
+                         "voter_guides expected in the voterGuidesToFollowRetrieveView json response but not found")
+        self.assertEqual(
+            json_data04['status'], 'NO_VOTER_GUIDES_FOUND',
+            "status:  {status} (NO_VOTER_GUIDES_FOUND expected), voter_device_id: {voter_device_id}".format(
+                status=json_data04['status'], voter_device_id=json_data04['voter_device_id']))
 
 
+        #######################################
+        # Create organization
+        organization1 = Organization.objects.create_organization(
+            organization_name="Org1",
+            organization_website="www.org1.org",
+            organization_twitter="org1",
+        )
+
+        #######################################
+        # Check to make sure there is 1 organization
+        response10 = self.client.get(self.organization_count_url)
+        json_data10 = json.loads(response10.content)
+
+        self.assertEqual('success' in json_data10, True, "'success' expected in the json response, and not found")
+        self.assertEqual('organization_count' in json_data10, True,
+                         "'organization_count' expected in the organizationRetrieve json response")
+        self.assertEqual(
+            json_data10['organization_count'], 1,
+            "success:  {success} (organization_count '1' expected), organization_count: {organization_count}".format(
+                success=json_data10['success'], organization_count=json_data10['organization_count']))
+
+        #######################################
+        # Create candidate_campaign
+
+
+        #######################################
+        # Create position where organization is supporting candidate
+
+
+        #######################################
+        # Test the response with one voter guide
+        response40 = self.client.get(self.voter_guides_to_follow_retrieve_url)
+        json_data40 = json.loads(response40.content)
+
+        self.assertEqual('status' in json_data40, True,
+                         "status expected in the voterGuidesToFollowRetrieveView json response but not found")
+        self.assertEqual('success' in json_data40, True,
+                         "success expected in the voterGuidesToFollowRetrieveView json response but not found")
+        self.assertEqual('voter_device_id' in json_data40, True,
+                         "voter_device_id expected in the voterGuidesToFollowRetrieveView json response but not found")
+        self.assertEqual('voter_guides' in json_data40, True,
+                         "voter_guides expected in the voterGuidesToFollowRetrieveView json response but not found")
+        # Make sure all voter guides returned have the expected array keys
+        for one_voter_guide in json_data40['voter_guides']:
+            self.assertEqual('google_civic_election_id' in one_voter_guide, True,
+                             "google_civic_election_id expected in voterGuidesToFollowRetrieveView json but not found")
+            self.assertEqual('voter_guide_owner_type' in one_voter_guide, True,
+                             "voter_guide_owner_type expected in voterGuidesToFollowRetrieveView json but not found")
+            self.assertEqual('organization_we_vote_id' in one_voter_guide, True,
+                             "organization_we_vote_id expected in voterGuidesToFollowRetrieveView json but not found")
+            self.assertEqual('public_figure_we_vote_id' in one_voter_guide, True,
+                             "public_figure_we_vote_id expected in voterGuidesToFollowRetrieveView json but not found")
+            self.assertEqual('owner_voter_id' in one_voter_guide, True,
+                             "owner_voter_id expected in voterGuidesToFollowRetrieveView json but not found")
+            self.assertEqual('last_updated' in one_voter_guide, True,
+                             "last_updated expected in voterGuidesToFollowRetrieveView json but not found")

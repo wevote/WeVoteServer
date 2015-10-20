@@ -8,11 +8,12 @@
 
 <h1>Voter Guides</h1>
 
-    <p>Choose Election<br /></p>
-    <form name="voter_guide_choose_election" method="post" action="{% url 'voter_guide:voter_guide_list' %}">
+    <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_list' %}">
         {% csrf_token %}
 {% if election_list %}
-    <select id="google_civic_election_id">
+    Election: <select id="google_civic_election_id" name="google_civic_election_id">
+    <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+        -- Choose Election --</option>
 {% for election in election_list %}
     <option value="{{ election.google_civic_election_id }}"
             {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
@@ -27,14 +28,20 @@
 {% endif %}
 <p></p>
 {% if voter_guide_list %}
-    <table cellpadding="5" cellspacing="5">
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>Organization</td>
+            <td>Election</td>
+            <td>Last Updated</td>
+        </tr>
     {% for voter_guide in voter_guide_list %}
         <tr>
-        {% if voter_guide_owner_type == ORGANIZATION %}
-            <td><a href="#">Organization</a></td>
-        {% elif voter_guide_owner_type == PUBLIC_FIGURE %}
+        {% if voter_guide.voter_guide_owner_type == voter_guide.ORGANIZATION %}
+            <td><a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}">
+                {{ voter_guide.organization.organization_name }}</a></td>
+        {% elif voter_guide.voter_guide_owner_type == voter_guide.PUBLIC_FIGURE %}
             <td><a href="#">Public Figure</a></td>
-        {% elif voter_guide_owner_type == VOTER %}
+        {% elif voter_guide.voter_guide_owner_type == voter_guide.VOTER %}
             <td><a href="#">Voter</a></td>
         {% endif %}
             <td>{{ voter_guide.google_civic_election_id }}</td>
@@ -52,7 +59,7 @@
     </p>
     <script>
         $(function() {
-            $('#election_id').change(function() {
+            $('#google_civic_election_id').change(function() {
                 this.form.submit();
             });
         });

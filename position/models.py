@@ -3,11 +3,12 @@
 # -*- coding: UTF-8 -*-
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
-from django.db import models
 from candidate.models import CandidateCampaign
-from measure.models import MeasureCampaign
+from django.db import models
+from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
+from measure.models import MeasureCampaign
 from organization.models import Organization
 from twitter.models import TwitterUser
 from voter.models import Voter
@@ -181,15 +182,27 @@ class PositionEntered(models.Model):
             return
         return candidate_campaign
 
+    def election(self):
+        try:
+            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+        except Election.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            logger.error("position.election Found multiple")
+            return
+        except Election.DoesNotExist:
+            logger.error("position.election did not find")
+            return
+        return election
+
     def organization(self):
         try:
             organization = Organization.objects.get(id=self.organization_id)
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
-            logger.error("position.candidate_campaign Found multiple")
+            logger.error("position.organization Found multiple")
             return
         except Organization.DoesNotExist:
-            logger.error("position.candidate_campaign did not find")
+            logger.error("position.organization did not find")
             return
         return organization
 

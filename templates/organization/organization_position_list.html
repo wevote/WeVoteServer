@@ -1,20 +1,68 @@
 {# templates/organization/organization_position_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{{ organization.organization_name  }}{% endblock %}
+{% block title %}{% if organization %}{{ organization.organization_name  }}{% else %}Error: Name Missing{% endif %}{% endblock %}
 
 {%  block content %}
+
 <p><a href="{% url 'organization:organization_list' %}">< Back to Organizations</a></p>
+
+{% if organization %}
 <h1>{{ organization.organization_name  }}</h1>
-<p><a href="{% url 'organization:organization_position_new' organization.id %}">Add New Position</a></p>
+
+    <p>
+    We Vote ID: {{ organization.we_vote_id }}<br />
+    Website: {{ organization.organization_website }}<br />
+    Twitter: {{ organization.twitter_handle }}<br />
+    Organization Type: {{ organization.get_organization_type_display }}<br />
+    </p>
+
+    {% if election_list %}
+    <form name="organization_position_choose_election" method="get" action="{% url 'organization:organization_position_list' organization.id %}">
+        {% csrf_token %}
+
+    Election: <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+            -- Choose Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    </form>
+    {% endif %}
 
 {% if organization_position_list %}
+    <table border="1">
+    <tr>
+        <td>Candidate/Measure</td>
+        <td>Stance</td>
+        <td>Election</td>
+    </tr>
+
     {% for organization_position in organization_position_list %}
-        <h3>{{ organization_position.get_stance_display }} {{ organization_position.candidate_campaign.candidate_name }}</h3>
-        <a href="{% url 'organization:organization_position_edit' organization.id organization_position.id %}">(edit stance)</a><br />
-        <a href="{% url 'organization:organization_position_delete' organization.id organization_position.id %}">(delete stance)</a>
+    <tr>
+        <td><a href="{% url 'organization:organization_position_edit' organization.id organization_position.id %}">
+            {{ organization_position.candidate_campaign.candidate_name }}</a></td>
+        <td>{{ organization_position.get_stance_display }}</td>
+        <td>{{ organization_position.election.election_day_text }}</td>
+    </tr>
     {% endfor %}
+
+    </table>
 {% else %}
     <p>(no positions found)</p>
+{% endif %}
+    <p><a href="{% url 'organization:organization_position_new' organization.id %}">Add New Position</a></p>
+
+        <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
 {% endif %}
 {% endblock %}

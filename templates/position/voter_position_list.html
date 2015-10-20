@@ -8,7 +8,7 @@
     {% for position in position_list %}
         <div>
             {% if position.organization.id %}
-            <div><span class="position_list_organization_name">{{ position.organization.name }}</span>
+            <div><span class="position_list_organization_name">{{ position.organization.organization_name }}</span>
                 <input type="button" value="Following" id="following_organization_{{ position.organization.id }}"
                        class="follow_toggle_link" name="/org/{{ position.organization.id }}/unfollow/" style="display:none;" />
                 <input type="button" value="+Follow" name="/org/{{ position.organization.id }}/follow/" id="not_following_organization_{{ position.organization.id }}"

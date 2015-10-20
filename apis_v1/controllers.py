@@ -317,7 +317,7 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id=0)
                 'organization_we_vote_id': voter_guide.organization_we_vote_id,
                 'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
                 'owner_voter_id': voter_guide.owner_voter_id,
-                'last_updated': voter_guide.last_updated,
+                'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             voter_guides.append(one_voter_guide.copy())
 
@@ -331,6 +331,7 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id=0)
         json_data = {
             'status': status,
             'success': False,
+            'voter_device_id': voter_device_id,
             'voter_guides': [],
         }
 
