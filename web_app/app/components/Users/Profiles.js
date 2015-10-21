@@ -6,7 +6,7 @@ var Profiles = React.createClass({
   },
 
   render: function () {
-    var profiles = this.props.profiles.map(function(profile. index) {
+    var profiles = this.props.profiles.map((profile. index) => {
       return (
         <li className="list-group-item" key={index}>
           {profile.firstName && <p> {profile.firstName}</p>}
