@@ -4,6 +4,11 @@ var Location = React.createClass({
     propTypes: {
       location: React.PropTypes.string.isRequired
     },
+    handleInput() {
+      var newLocation = this.refs.getDOMNode().value;
+      this.refs.location.getDOMNode.value = '';
+      this.props.location(newLocation);
+    }
     render() {
       return (
         <div className="row">
