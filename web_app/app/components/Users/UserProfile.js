@@ -34,8 +34,8 @@ var UserProfile = React.createClass({
     render: function () {
         return (
           <div>
-            <img src={this.props.avatar} alt={this.props.firstName} {this.props.lastName} />
-            <h1>{this.props.firstName} {this.props.lastName}</h1>
+            { this.props.avatar && <li className="list-group-item"><img src={this.props.avatar} alt={this.props.firstName} {this.props.lastName} /></li> }
+            { this.props.firstName && this.props.lastName && <h1>{this.props.firstName} {this.props.lastName}</h1> }
           </div>
         )
     }
