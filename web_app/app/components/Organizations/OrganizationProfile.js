@@ -1,11 +1,11 @@
-var React = require('react');
+import React from 'react';
 
 var OrganizationProfile = React.createClass({
-    render: function () {
+    render() {
         return (
 
         )
     }
 });
 
-module.exports = OrganizationProfile;
+exports default OrganizationProfile;
