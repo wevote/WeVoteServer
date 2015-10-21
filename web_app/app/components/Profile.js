@@ -1,13 +1,28 @@
 var React = require('react');
 var Router = require('react-router');
+var UserProfile = require('/Users/UserProfile');
+var helpers = require('./utilities/helpers');
 
 var Profile = React.createClass({
     mixins: [Router.State],
+    init: function () {
+      // any ajax calls that are redundant put in here
+    },
     getInitialState: function () {
         return (
             name: {},
             bio: {}
         )
+    },
+    componentDidMount: function () {
+      this.init();
+    },
+    componentWillUnmount: function () {
+
+    },
+    componentwillReceiveProps: function () {
+        // route change?
+        this.init();
     },
     render: function () {
         var username = this.getParams().username;
