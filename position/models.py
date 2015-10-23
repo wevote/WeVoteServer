@@ -52,19 +52,21 @@ class PositionEntered(models.Model):
 
     # The id for the generated position that this PositionEntered entry influences
     position_id = models.BigIntegerField(null=True, blank=True)
+    test = models.BigIntegerField(null=True, blank=True)
 
     date_entered = models.DateTimeField(verbose_name='date entered', null=True)
     # The organization this position is for
     organization_id = models.BigIntegerField(null=True, blank=True)
+    organization_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for the organization", max_length=255, null=True,
+        blank=True, unique=False)
 
     # The voter expressing the opinion
     voter_id = models.BigIntegerField(null=True, blank=True)
     # # The election this position is for # TODO DEPRECATED
     # election_id = models.BigIntegerField(verbose_name='election id', null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
-    google_civic_election_id = models.CharField(
-        verbose_name="google civic election id", max_length=254, null=True, blank=True)
-    google_civic_election_id_new = models.PositiveIntegerField(
+    google_civic_election_id = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
 
     # The unique We Vote id of the tweet that is the source of the position
@@ -81,14 +83,27 @@ class PositionEntered(models.Model):
     #     CandidateCampaign, verbose_name='candidate campaign', null=True, blank=True,
     #     related_name='positionentered_candidate')
     candidate_campaign_id = models.BigIntegerField(verbose_name='id of candidate_campaign', null=True, blank=True)
+    candidate_campaign_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for the candidate_campaign", max_length=255, null=True,
+        blank=True, unique=False)
+    # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate if an import
+    # doesn't include a we_vote_id we recognize.
+    google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
+                                                   max_length=254, null=True, blank=True)
     # Useful for queries based on Politicians -- not the main table we use for ballot display though
     politician_id = models.BigIntegerField(verbose_name='', null=True, blank=True)
+    politician_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for politician", max_length=255, null=True,
+        blank=True, unique=False)
 
     # This is the measure/initiative/proposition that the position refers to.
     #  Either measure_campaign is filled OR candidate_campaign, but not both
     # measure_campaign = models.ForeignKey(
     #  MeasureCampaign, verbose_name='measure campaign', null=True, blank=True, related_name='positionentered_measure')
     measure_campaign_id = models.BigIntegerField(verbose_name='id of measure_campaign', null=True, blank=True)
+    measure_campaign_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for the measure_campaign", max_length=255, null=True,
+        blank=True, unique=False)
 
     # Strategic denormalization - this is redundant but will make generating the voter guide easier.
     # geo = models.ForeignKey(Geo, null=True, related_name='pos_geo')
@@ -206,34 +221,77 @@ class PositionEntered(models.Model):
             return
         return organization
 
-    def organization_we_vote_id(self):
+    def fetch_organization_we_vote_id(self):
         try:
             organization_on_stage = Organization.objects.get(id=self.organization_id)
             if organization_on_stage.we_vote_id:
                 return organization_on_stage.we_vote_id
+        except Organization.DoesNotExist:
+            logger.error("position.organization fetch_organization_we_vote_id did not find we_vote_id")
+            return
         except StandardError:
             pass
-        return ''
+        return
 
-    def candidate_campaign_we_vote_id(self):
+    def fetch_organization_id_from_we_vote_id(self):
+        try:
+            organization_on_stage = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
+            if organization_on_stage.id:
+                return organization_on_stage.id
+        except Organization.DoesNotExist:
+            logger.error("position.organization fetch_organization_id_from_we_vote_id did not find id")
+            return
+        except StandardError:
+            pass
+        return
+
+    def fetch_candidate_campaign_we_vote_id(self):
         try:
             candidate_campaign_on_stage = CandidateCampaign.objects.get(id=self.candidate_campaign_id)
             if candidate_campaign_on_stage.we_vote_id:
                 return candidate_campaign_on_stage.we_vote_id
+        except CandidateCampaign.DoesNotExist:
+            logger.error("position.candidate_campaign fetch_candidate_campaign_we_vote_id did not find we_vote_id")
+            return
         except StandardError:
             pass
-        return ''
+        return
 
-    def measure_campaign_we_vote_id(self):
+    def fetch_candidate_campaign_id_from_we_vote_id(self):
+        try:
+            candidate_campaign_on_stage = CandidateCampaign.objects.get(we_vote_id=self.candidate_campaign_we_vote_id)
+            if candidate_campaign_on_stage.id:
+                return candidate_campaign_on_stage.id
+        except CandidateCampaign.DoesNotExist:
+            logger.error("position.candidate_campaign fetch_candidate_campaign_id_from_we_vote_id did not find id")
+            return
+        except StandardError:
+            pass
+        return
+
+    def fetch_measure_campaign_we_vote_id(self):
         try:
             measure_campaign_on_stage = MeasureCampaign.objects.get(id=self.measure_campaign_id)
             if measure_campaign_on_stage.we_vote_id:
                 return measure_campaign_on_stage.we_vote_id
         except MeasureCampaign.DoesNotExist:
+            logger.error("position.measure_campaign fetch_measure_campaign_we_vote_id did not find we_vote_id")
             pass
         except StandardError:
             pass
-        return ''
+        return
+
+    def fetch_measure_campaign_id_from_we_vote_id(self):
+        try:
+            measure_campaign_on_stage = MeasureCampaign.objects.get(we_vote_id=self.measure_campaign_we_vote_id)
+            if measure_campaign_on_stage.id:
+                return measure_campaign_on_stage.id
+        except MeasureCampaign.DoesNotExist:
+            logger.error("position.measure_campaign fetch_measure_campaign_id_from_we_vote_id did not find id")
+            pass
+        except StandardError:
+            pass
+        return
 
 
 class Position(models.Model):

@@ -20,11 +20,8 @@
   "_comment":                       "import_export",
   "WE_VOTE_API_KEY":                "",
   "ORGANIZATIONS_URL":              "http://my.wevoteusa.org/import_export/organizations/?format=json",
-  "ORGANIZATIONS_JSON_FILE":        "organization/import_data/organizations_sample.json",
   "CANDIDATE_CAMPAIGNS_URL":        "http://my.wevoteusa.org/import_export/candidate_campaigns/?format=json",
-  "CANDIDATE_CAMPAIGNS_JSON_FILE":  "import_export/import_data/candidate_campaigns_sample.json",
   "POSITIONS_URL":                  "http://my.wevoteusa.org/import_export/positions/?format=json",
-  "POSITIONS_JSON_FILE":            "import_export/import_data/positions_sample.json",
 
   "_comment":                       "import_export_google_civic",
   "GOOGLE_CIVIC_API_KEY":           "",

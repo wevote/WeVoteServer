@@ -55,7 +55,7 @@ class ElectionManager(models.Model):
 
         if not google_civic_election_id:
             success = False
-            status = 'MISSING_ELECTION_ID'
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
         elif not election_name:
             success = False
             status = 'MISSING_ELECTION_NAME'

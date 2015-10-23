@@ -72,7 +72,7 @@ class OrganizationManager(models.Manager):
         organization_id = 0
         organization_manager = OrganizationManager()
         if len(we_vote_id) > 0:
-            results = organization_manager.retrieve_organization(organization_id, we_vote_id)  # TODO DALE
+            results = organization_manager.retrieve_organization(organization_id, we_vote_id)
             if results['success']:
                 return results['organization_id']
         return 0

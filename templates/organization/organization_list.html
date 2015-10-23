@@ -15,7 +15,7 @@
         <tr>
             <td><a href="{% url 'organization:organization_position_list' organization.id %}">{{ organization.organization_name }}</a></td>
             <td>{{ organization.twitter_handle }}</td>
-            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">(edit)</a></td>
+            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">edit</a></td>
         </tr>
     {% endfor %}
     </table>
@@ -28,7 +28,7 @@
 {% endif %}
 
     <p></p>
-    <p>
-        <a href="{% url 'organization:organizations_import' %}" >Import Organizations</a>
-    </p>
+{#    <p>#}
+{#        <a href="{% url 'organization:organizations_import' %}" >Import Organizations</a>#}
+{#    </p>#}
 {% endblock %}

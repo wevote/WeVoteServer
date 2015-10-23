@@ -2,9 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from . import views_admin
 from django.conf.urls import url
 
-from . import views_admin
 
 urlpatterns = [
     # views_admin
@@ -16,4 +16,5 @@ urlpatterns = [
         views_admin.election_all_ballots_retrieve_view,
         name='election_all_ballots_retrieve'),
     url(r'^election_remote_retrieve/$', views_admin.election_remote_retrieve_view, name='election_remote_retrieve'),
+    url(r'^export/', views_admin.ExportElectionDataView.as_view(), name='election_export'),
 ]

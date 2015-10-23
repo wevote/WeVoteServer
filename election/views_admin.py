@@ -2,7 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .controllers import election_remote_retrieve
 from .models import Election
+from .serializers import ElectionSerializer
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -14,16 +16,17 @@ from exception.models import handle_record_found_more_than_one_exception, handle
 from import_export_google_civic.controllers import retrieve_one_ballot_from_google_civic_api, \
     retrieve_from_google_civic_api_election_query, store_one_ballot_from_google_civic_api, \
     store_results_from_google_civic_api_election_query
-
 from polling_location.models import PollingLocation
+from rest_framework.views import APIView
+from rest_framework.response import Response
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int
+from wevote_functions.models import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 # @login_required()  # Commented out while we are developing login process()
-def election_all_ballots_retrieve_view(request, election_local_id):
+def election_all_ballots_retrieve_view(request, election_local_id=0):
     """
     Reach out to Google and retrieve (for one election):
     1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
@@ -31,13 +34,29 @@ def election_all_ballots_retrieve_view(request, election_local_id):
     :param request:
     :return:
     """
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     election_on_stage = Election()
+
+    # Testing
+    # messages.add_message(request, messages.INFO,
+    #                      'election_local_id: {election_local_id}, '
+    #                      'google_civic_election_id: {google_civic_election_id}.'.format(
+    #                          election_local_id=election_local_id,
+    #                          google_civic_election_id=google_civic_election_id,
+    #                      ))
+
     try:
-        election_on_stage = Election.objects.get(id=election_local_id)
+        if positive_value_exists(election_local_id):
+            election_on_stage = Election.objects.get(id=election_local_id)
+        else:
+            election_on_stage = Election.objects.get(google_civic_election_id=google_civic_election_id)
+            election_local_id = election_on_stage.id
     except Election.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
+        messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. More than one election found.')
+        return HttpResponseRedirect(reverse('election:election_list', args=()))
     except Election.DoesNotExist:
-        messages.add_message(request, messages.INFO, 'Could not retrieve ballot data. Election could not be found.')
+        messages.add_message(request, messages.ERROR, 'Could not retrieve ballot data. Election could not be found.')
         return HttpResponseRedirect(reverse('election:election_list', args=()))
 
     # Check to see if we have polling location data related to the region(s) covered by this election
@@ -68,7 +87,7 @@ def election_all_ballots_retrieve_view(request, election_local_id):
     ballots_retrieved = 0
     ballots_not_retrieved = 0
     # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
-    number_of_polling_locations_to_retrieve = int(.001 * number_of_polling_locations)
+    number_of_polling_locations_to_retrieve = int(.1 * number_of_polling_locations)
     for polling_location in polling_location_list:
         success = False
         # Get the address for this polling place, and then retrieve the ballot from Google Civic API
@@ -193,8 +212,7 @@ def election_remote_retrieve_view(request):
     :param request:
     :return:
     """
-    structured_json = retrieve_from_google_civic_api_election_query()
-    results = store_results_from_google_civic_api_election_query(structured_json)
+    results = election_remote_retrieve()
 
     messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Google Civic.')
     return HttpResponseRedirect(reverse('election:election_list', args=()))
@@ -224,3 +242,12 @@ def election_summary_view(request, election_local_id):
             'messages_on_stage': messages_on_stage,
         }
     return render(request, 'election/election_summary.html', template_values)
+
+
+# This page does not need to be protected.
+# NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
+class ExportElectionDataView(APIView):
+    def get(self, request, format=None):
+        contest_office_list = Election.objects.all()
+        serializer = ElectionSerializer(contest_office_list, many=True)
+        return Response(serializer.data)

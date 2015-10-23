@@ -2,10 +2,12 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.contrib import messages
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_office_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
+from wevote_functions.models import extract_state_from_ocd_division_id, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -18,7 +20,7 @@ class ContestOffice(models.Model):
     # then the string "off", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_contest_office_integer
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
+        verbose_name="we vote permanent id for this contest office", max_length=255, default=None, null=True, blank=True, unique=True)
     # The name of the office for this contest.
     office_name = models.CharField(verbose_name="google civic office", max_length=254, null=False, blank=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
@@ -26,15 +28,13 @@ class ContestOffice(models.Model):
                                                     max_length=254, null=False, blank=False)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, blank=False)
+    ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=254, null=True, blank=True)
     maplight_id = models.CharField(
         verbose_name="maplight unique identifier", max_length=254, null=True, blank=True, unique=True)
     ballotpedia_id = models.CharField(
         verbose_name="ballotpedia unique identifier", max_length=254, null=True, blank=True)
     wikipedia_id = models.CharField(verbose_name="wikipedia unique identifier", max_length=254, null=True, blank=True)
     # vote_type (ranked choice, majority)
-    # The internal We Vote unique ID of the election containing this contest, so we can check data-integrity of imports.
-    we_vote_contest_office_id = models.CharField(
-        verbose_name="we vote contest office id", max_length=254, null=True, blank=True)
     # The number of candidates that a voter may vote for in this contest.
     number_voting_for = models.CharField(verbose_name="google civic number of candidates to vote for",
                                          max_length=254, null=True, blank=True)
@@ -42,6 +42,8 @@ class ContestOffice(models.Model):
     number_elected = models.CharField(verbose_name="google civic number of candidates who will be elected",
                                       max_length=254, null=True, blank=True)
 
+    # State code
+    state_code = models.CharField(verbose_name="state this office serves", max_length=2, null=True, blank=True)
     # If this is a partisan election, the name of the party it is for.
     primary_party = models.CharField(verbose_name="google civic primary party", max_length=254, null=True, blank=True)
     # The name of the district.
@@ -73,6 +75,13 @@ class ContestOffice(models.Model):
                                                  max_length=254, null=True, blank=True)
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=254, null=True, blank=True)
+
+    def get_office_state(self):
+        if positive_value_exists(self.state_code):
+            return self.state_code
+        # Pull this from ocdDivisionId
+        ocd_division_id = self.ocd_division_id
+        return extract_state_from_ocd_division_id(ocd_division_id)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -116,7 +125,7 @@ class ContestOfficeManager(models.Model):
             return results['contest_office_id']
         return 0
 
-    def update_or_create_contest_office(self, google_civic_election_id, district_id, office_name,
+    def update_or_create_contest_office(self, we_vote_id, google_civic_election_id, district_id, office_name, state_code,
                                         updated_contest_office_values):
         """
         Either update or create an office entry.
@@ -126,20 +135,27 @@ class ContestOfficeManager(models.Model):
 
         if not google_civic_election_id:
             success = False
-            status = 'MISSING_ELECTION_ID'
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
         elif not district_id:
             success = False
             status = 'MISSING_DISTRICT_ID'
         elif not office_name:
             success = False
             status = 'MISSING_OFFICE'
-        else:
+        else:  # state_code not required due to some federal offices
             try:
-                contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    district_id__exact=district_id,
-                    office_name__exact=office_name,
-                    defaults=updated_contest_office_values)
+                if positive_value_exists(we_vote_id):
+                    contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        we_vote_id__exact=we_vote_id,
+                        defaults=updated_contest_office_values)
+                else:
+                    contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        district_id__exact=district_id,
+                        office_name__exact=office_name,
+                        state_code__exact=state_code,
+                        defaults=updated_contest_office_values)
                 success = True
                 status = 'CONTEST_OFFICE_SAVED'
             except ContestOffice.MultipleObjectsReturned as e:
@@ -187,3 +203,27 @@ class ContestOfficeManager(models.Model):
             'contest_office':           contest_office_on_stage,
         }
         return results
+
+    def fetch_contest_office_id_from_contest_office_we_vote_id(self, contest_office_we_vote_id):
+        """
+        Take in contest_office_we_vote_id and return internal/local-to-this-database contest_office_id
+        :param contest_office_we_vote_id:
+        :return:
+        """
+        contest_office_id = 0
+        try:
+            if positive_value_exists(contest_office_we_vote_id):
+                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+                contest_office_id = contest_office_on_stage.id
+            else:
+                logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id no contest_office_we_vote_id")
+
+        except ContestOffice.MultipleObjectsReturned as e:
+            logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id ContestOffice.MultipleObjectsReturned")
+            handle_record_found_more_than_one_exception(e, logger=logger)
+
+        except ContestOffice.DoesNotExist:
+            contest_office_id = 0
+            logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id ContestOffice.DoesNotExist")
+
+        return contest_office_id

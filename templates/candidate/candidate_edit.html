@@ -4,6 +4,8 @@
 {% block title %}{% if candidate %}{{ candidate.candidate_name  }}{% else %}New Candidate{% endif %}{% endblock %}
 
 {%  block content %}
+<a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
+
 <h1>{% if candidate %}Edit {{ candidate.candidate_name }}{% else %}New Candidate{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 

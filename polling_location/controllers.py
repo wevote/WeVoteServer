@@ -51,10 +51,23 @@ def retrieve_polling_locations_data_from_xml(xml_file_location):
     return polling_locations_list
 
 
+def import_and_save_all_polling_locations_data():
+    state = "va"
+    results = import_and_save_polling_locations_data_for_state(state)
+    return results
+
+
+def import_and_save_polling_locations_data_for_state(state):
+    polling_locations_list = return_polling_locations_data(state)
+    results = save_polling_locations_from_list(polling_locations_list)
+    return results
+
+
 def save_polling_locations_from_list(polling_locations_list):
     polling_location_manager = PollingLocationManager()
-    update_count = 0
-    create_count = 0
+    polling_locations_updated = 0
+    polling_locations_saved = 0
+    polling_locations_not_processed = 0
     for polling_location in polling_locations_list:
         results = polling_location_manager.update_or_create_polling_location(
             polling_location['polling_location_id'],
@@ -67,11 +80,14 @@ def save_polling_locations_from_list(polling_locations_list):
             polling_location['zip_long'])
         if results['success']:
             if results['new_polling_location_created']:
-                create_count += 1
+                polling_locations_saved += 1
             else:
-                update_count += 1
+                polling_locations_updated += 1
+        else:
+            polling_locations_not_processed += 1
     save_results = {
-        'update_count': update_count,
-        'create_count': create_count,
+        'updated': polling_locations_updated,
+        'saved': polling_locations_saved,
+        'not_processed': polling_locations_not_processed,
     }
     return save_results

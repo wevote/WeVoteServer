@@ -11,10 +11,50 @@
 
     <h1>{{ office.office_name }}</h1>
     <p>Office Website: <strong>{{ office.office_url }}</strong><br />
-
+    <a href="{% url 'office:office_edit' office.id %}">edit</a>
     </p>
 
-{#    <p><a href="{% url 'office:office_edit' office.id %}">edit</a></p>#}
+
+{% if election_list %}
+    <form name="office_choose_election" method="get" action="{% url 'office:office_summary' office.id %}">
+        {% csrf_token %}
+
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
+            {{ election.election_name }}, {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    </form>
+{% endif %}{# End of if election_list #}
+
+
+{% if candidate_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>Candidate Name</td>
+            <td>State</td>
+            <td colspan="2">Election</td>
+            <td>&nbsp;</td>
+        </tr>
+    {% for candidate in candidate_list %}
+        <tr>
+            <td><a href="{% url 'candidate:candidate_summary' candidate.id %}">{{ candidate.candidate_name }}</a></td>
+            <td>{{ candidate.get_candidate_state }}</td>
+            <td>{{ candidate.election.election_name }}</td>
+            <td>{{ candidate.election.election_day_text }}</td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    <p>(no candidates found)</p>
+{% endif %}
 
 
 {% else %}
@@ -24,4 +64,11 @@
 
 {% endif %}
 
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
 {% endblock %}

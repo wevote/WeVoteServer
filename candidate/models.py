@@ -3,10 +3,12 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from exception.models import handle_record_found_more_than_one_exception
+from election.models import Election
+from exception.models import handle_record_found_more_than_one_exception, print_to_log
+from office.models import ContestOffice
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.models import extract_state_from_ocd_division_id
+from wevote_functions.models import extract_state_from_ocd_division_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -33,15 +35,23 @@ class CandidateCampaign(models.Model):
     # then the string "cand", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_candidate_campaign_integer
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
+        verbose_name="we vote permanent id of this candidate campaign", max_length=255, default=None, null=True,
+        blank=True, unique=True)
     maplight_id = models.CharField(
         verbose_name="maplight candidate id", max_length=255, default=None, null=True, blank=True, unique=True)
-    # The internal We Vote id for the ContestOffice that this candidate is competing for.
-    # During setup we need to allow this to be null.
+    # The internal We Vote id for the ContestOffice that this candidate is competing for. During setup we need to allow
+    # this to be null.
     contest_office_id = models.CharField(
         verbose_name="contest_office_id id", max_length=254, null=True, blank=True)
-    # politician link to local We Vote Politician entry. During setup we need to allow this to be null.
+    # We want to link the candidate to the contest with permanent ids so we can export and import
+    contest_office_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for the office this candidate is running for", max_length=255, default=None,
+        null=True, blank=True, unique=False)
+    # politician (internal) link to local We Vote Politician entry. During setup we need to allow this to be null.
     politician_id = models.IntegerField(verbose_name="politician unique identifier", null=True, blank=True)
+    # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
+    politician_we_vote_id = models.CharField(
+        verbose_name="we vote politician id", max_length=254, null=True, blank=True)
     # The candidate's name.
     candidate_name = models.CharField(verbose_name="candidate name", max_length=254, null=False, blank=False)
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate even
@@ -61,6 +71,8 @@ class CandidateCampaign(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=254, null=True, blank=True)
+    # State code
+    state_code = models.CharField(verbose_name="state this candidate serves", max_length=2, null=True, blank=True)
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
@@ -71,9 +83,30 @@ class CandidateCampaign(models.Model):
     candidate_email = models.CharField(verbose_name="candidate campaign email", max_length=254, null=True, blank=True)
     # The voice phone number for the candidate's campaign office.
     candidate_phone = models.CharField(verbose_name="candidate campaign phone", max_length=254, null=True, blank=True)
-    # The internal We Vote unique ID of the Politician, so we can check data-integrity of imports.
-    we_vote_politician_id = models.CharField(
-        verbose_name="we vote politician id", max_length=254, null=True, blank=True)
+
+    def election(self):
+        try:
+            election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
+        except Election.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            logger.error("candidate.election Found multiple")
+            return
+        except Election.DoesNotExist:
+            logger.error("candidate.election did not find")
+            return
+        return election
+
+    def office(self):
+        try:
+            office = ContestOffice.objects.get(id=self.contest_office_id)
+        except ContestOffice.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            logger.error("candidate.election Found multiple")
+            return
+        except ContestOffice.DoesNotExist:
+            logger.error("candidate.election did not find")
+            return
+        return office
 
     def fetch_photo_url(self):
         if self.photo_url_from_maplight:
@@ -167,6 +200,15 @@ class CandidateCampaignManager(models.Model):
             return results['candidate_campaign_id']
         return 0
 
+    def fetch_google_civic_candidate_name_from_we_vote_id(self, we_vote_id):
+        candidate_campaign_id = 0
+        candidate_campaign_manager = CandidateCampaignManager()
+        results = candidate_campaign_manager.retrieve_candidate_campaign(candidate_campaign_id, we_vote_id)
+        if results['success']:
+            candidate_campaign = results['candidate_campaign']
+            return candidate_campaign.google_civic_candidate_name
+        return 0
+
     def retrieve_candidate_campaign_from_maplight_id(self, candidate_maplight_id):
         candidate_campaign_id = 0
         we_vote_id = ''
@@ -242,50 +284,69 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
-    def update_or_create_candidate_campaign(self, google_civic_election_id, ocd_division_id, contest_office_id,
-                                            candidate_name, updated_candidate_campaign_values):
+    def update_or_create_candidate_campaign(self, we_vote_id, google_civic_election_id, ocd_division_id,
+                                            contest_office_id, contest_office_we_vote_id, google_civic_candidate_name,
+                                            updated_candidate_campaign_values):
         """
         Either update or create a candidate_campaign entry.
         """
         exception_multiple_object_returned = False
-        new_candidate_campaign_created = False
+        new_candidate_created = False
         candidate_campaign_on_stage = CandidateCampaign()
 
-        if not google_civic_election_id:
+        if not positive_value_exists(google_civic_election_id):
             success = False
-            status = 'MISSING_ELECTION_ID'
-        elif not ocd_division_id:
-            success = False
-            status = 'MISSING_OCD_DIVISION_ID'
-        elif not contest_office_id:
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
+        # We are avoiding requiring ocd_division_id
+        # elif not positive_value_exists(ocd_division_id):
+        #     success = False
+        #     status = 'MISSING_OCD_DIVISION_ID'
+        elif not positive_value_exists(contest_office_we_vote_id):  # and not positive_value_exists(contest_office_id):
             success = False
             status = 'MISSING_CONTEST_OFFICE_ID'
-        elif not candidate_name:
+        elif not positive_value_exists(google_civic_candidate_name):
             success = False
-            status = 'MISSING_CANDIDATE_NAME'
+            status = 'MISSING_GOOGLE_CIVIC_CANDIDATE_NAME'
         else:
             try:
-                # TODO Strictly speaking we shouldn't update candidate_name so we can change it elsewhere
-                candidate_campaign_on_stage, new_candidate_campaign_created = \
-                    CandidateCampaign.objects.update_or_create(
-                        google_civic_election_id__exact=google_civic_election_id,
-                        ocd_division_id__exact=ocd_division_id,
-                        contest_office_id__exact=contest_office_id,
-                        google_civic_candidate_name__exact=candidate_name,
-                        defaults=updated_candidate_campaign_values)
+                # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
+                #  updating candidate_name via subsequent Google Civic imports
+
+                # If coming from a record that has already been in We Vote
+                if positive_value_exists(we_vote_id) and positive_value_exists(contest_office_we_vote_id):
+                    # If here we are using permanent public identifier contest_office_we_vote_id
+                    candidate_campaign_on_stage, new_candidate_created = \
+                        CandidateCampaign.objects.update_or_create(
+                            google_civic_election_id__exact=google_civic_election_id,
+                            we_vote_id__exact=we_vote_id,
+                            contest_office_we_vote_id__exact=contest_office_we_vote_id,
+                            defaults=updated_candidate_campaign_values)
+                # If coming (most likely) from a Google Civic import, or internal bulk update
+                else:
+                    # If here we are using internal contest_office_id
+                    candidate_campaign_on_stage, new_candidate_created = \
+                        CandidateCampaign.objects.update_or_create(
+                            google_civic_election_id__exact=google_civic_election_id,
+                            # ocd_division_id__exact=ocd_division_id,
+                            contest_office_we_vote_id__exact=contest_office_we_vote_id,
+                            google_civic_candidate_name__exact=google_civic_candidate_name,
+                            defaults=updated_candidate_campaign_values)
+
                 success = True
                 status = 'CANDIDATE_CAMPAIGN_SAVED'
             except CandidateCampaign.MultipleObjectsReturned as e:
-                handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
                 status = 'MULTIPLE_MATCHING_CANDIDATE_CAMPAIGNS_FOUND'
                 exception_multiple_object_returned = True
+                exception_message_optional = status
+                handle_record_found_more_than_one_exception(
+                    e, logger=logger, exception_message_optional=exception_message_optional)
 
         results = {
             'success':                          success,
             'status':                           status,
             'MultipleObjectsReturned':          exception_multiple_object_returned,
-            'new_candidate_campaign_created':   new_candidate_campaign_created,
+            'new_candidate_created':            new_candidate_created,
             'candidate_campaign':               candidate_campaign_on_stage,
         }
         return results

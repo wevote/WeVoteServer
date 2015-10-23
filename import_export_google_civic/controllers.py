@@ -17,7 +17,7 @@ from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from measure.models import ContestMeasure
 from office.models import ContestOfficeManager
-from wevote_functions.models import logger, positive_value_exists
+from wevote_functions.models import extract_state_from_ocd_division_id, logger, positive_value_exists
 
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 ELECTION_QUERY_URL = get_environment_variable("ELECTION_QUERY_URL")
@@ -28,7 +28,8 @@ VOTER_INFO_JSON_FILE = get_environment_variable("VOTER_INFO_JSON_FILE")
 # GoogleRepresentatives
 # https://developers.google.com/resources/api-libraries/documentation/civicinfo/v2/python/latest/civicinfo_v2.representatives.html
 def process_candidates_from_structured_json(
-        candidates_structured_json, google_civic_election_id, ocd_division_id, contest_office_id):
+        candidates_structured_json, google_civic_election_id, ocd_division_id, state_code, contest_office_id,
+        contest_office_we_vote_id):
     """
     "candidates": [
         {
@@ -51,9 +52,14 @@ def process_candidates_from_structured_json(
     results = {}
     for one_candidate in candidates_structured_json:
         candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
+        # For some reason Google Civic API violates the JSON standard and uses a
+        candidate_name = candidate_name.replace('/', "'")
+        # We want to save the name exactly as it comes from the Google Civic API
+        google_civic_candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
         party = one_candidate['party'] if 'party' in one_candidate else ''
         order_on_ballot = one_candidate['orderOnBallot'] if 'orderOnBallot' in one_candidate else 0
         candidate_url = one_candidate['candidateUrl'] if 'candidateUrl' in one_candidate else ''
+        photo_url = one_candidate['photoUrl'] if 'photoUrl' in one_candidate else ''
         email = one_candidate['email'] if 'email' in one_candidate else ''
         phone = one_candidate['phone'] if 'phone' in one_candidate else ''
 
@@ -75,35 +81,42 @@ def process_candidates_from_structured_json(
                     if one_channel['type'] == 'YouTube':
                         youtube_url = one_channel['id'] if 'id' in one_channel else ''
 
+        we_vote_id = ''
         if google_civic_election_id and ocd_division_id and contest_office_id and candidate_name:
             updated_candidate_campaign_values = {
                 # Values we search against
                 'google_civic_election_id': google_civic_election_id,
                 'ocd_division_id': ocd_division_id,
                 'contest_office_id': contest_office_id,
+                'contest_office_we_vote_id': contest_office_we_vote_id,
+                # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
+                #  updating candidate_name via subsequent Google Civic imports
                 'candidate_name': candidate_name,
                 # The rest of the values
+                'state_code': state_code,  # Not required due to federal candidates
                 'party': party,
-                'email': email,
-                'phone': phone,
+                'candidate_email': email,
+                'candidate_phone': phone,
                 'order_on_ballot': order_on_ballot,
                 'candidate_url': candidate_url,
+                'photo_url': photo_url,
                 'facebook_url': facebook_url,
                 'twitter_url': twitter_url,
                 'google_plus_url': google_plus_url,
                 'youtube_url': youtube_url,
-                'google_civic_candidate_name': candidate_name,
+                'google_civic_candidate_name': google_civic_candidate_name,
             }
             candidate_campaign_manager = CandidateCampaignManager()
             results = candidate_campaign_manager.update_or_create_candidate_campaign(
-                google_civic_election_id, ocd_division_id, contest_office_id, candidate_name,
-                updated_candidate_campaign_values)
+                we_vote_id, google_civic_election_id, ocd_division_id, contest_office_id, contest_office_we_vote_id,
+                google_civic_candidate_name, updated_candidate_campaign_values)
 
     return results
 
 
 def process_contest_office_from_structured_json(
-        one_contest_office_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order, voter_id):
+        one_contest_office_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order, state_code,
+        voter_id):
     logger.debug("General contest_type")
     office_name = one_contest_office_structured_json['office']
 
@@ -196,14 +209,17 @@ def process_contest_office_from_structured_json(
     candidates_structured_json = \
         one_contest_office_structured_json['candidates'] if 'candidates' in one_contest_office_structured_json else ''
 
+    we_vote_id = ''
     # Note that all of the information saved here is independent of a particular voter
     if google_civic_election_id and district_id and office_name:
         updated_contest_office_values = {
             # Values we search against
             'google_civic_election_id': google_civic_election_id,
+            'state_code': state_code.lower(),  # Not required for cases of federal offices
             'district_id': district_id,
             'office_name': office_name,
             # The rest of the values
+            'ocd_division_id': ocd_division_id,
             'number_voting_for': number_voting_for,
             'number_elected': number_elected,
             'contest_level0': contest_level0,
@@ -217,7 +233,7 @@ def process_contest_office_from_structured_json(
         }
         contest_office_manager = ContestOfficeManager()
         update_or_create_contest_office_results = contest_office_manager.update_or_create_contest_office(
-            google_civic_election_id, district_id, office_name, updated_contest_office_values)
+            we_vote_id, google_civic_election_id, district_id, office_name, state_code, updated_contest_office_values)
     else:
         update_or_create_contest_office_results = {
             'success': False
@@ -226,21 +242,25 @@ def process_contest_office_from_structured_json(
     if update_or_create_contest_office_results['success']:
         contest_office = update_or_create_contest_office_results['contest_office']
         contest_office_id = contest_office.id
+        contest_office_we_vote_id = contest_office.we_vote_id
         ballot_item_label = contest_office.office_name
     else:
         contest_office_id = 0
+        contest_office_we_vote_id = ''
         ballot_item_label = ''
     contest_measure_id = 0
 
     # If a voter_id was passed in, save an entry for this office for the voter's ballot
-    if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id) and positive_value_exists(contest_office_id):
+    if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id) \
+            and positive_value_exists(contest_office_id):
         ballot_item_manager = BallotItemManager()
         ballot_item_manager.update_or_create_ballot_item_for_voter(
             voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label,
-            local_ballot_order, contest_measure_id, contest_office_id)
+            local_ballot_order, contest_measure_id, contest_office_id)  # TODO Add contest_office_we_vote_id here
 
     process_candidates_from_structured_json(
-        candidates_structured_json, google_civic_election_id, ocd_division_id, contest_office_id)
+        candidates_structured_json, google_civic_election_id, ocd_division_id, state_code, contest_office_id,
+        contest_office_we_vote_id)
 
     return
 
@@ -290,7 +310,8 @@ def process_contest_common_fields_from_structured_json(one_contest_structured_js
     return results
 
 
-def process_contests_from_structured_json(contests_structured_json, google_civic_election_id, ocd_division_id, voter_id):
+def process_contests_from_structured_json(
+        contests_structured_json, google_civic_election_id, ocd_division_id, state_code, voter_id):
     """
     Take in the portion of the json related to contests, and save to the database
     "type": 'General', "House of Delegates", 'locality', 'Primary', 'Run-off', "State Senate"
@@ -304,13 +325,13 @@ def process_contests_from_structured_json(contests_structured_json, google_civic
 
         # Is the contest is a referendum/initiative/measure?
         if contest_type == 'Referendum':
-            process_contest_referendum_from_structured_json(
+            process_contest_referendum_from_structured_json(  # TODO Add state_code
                 one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, voter_id)
 
         # All other contests are for an elected office
         else:
             process_contest_office_from_structured_json(
-                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, voter_id)
+                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, state_code, voter_id)
 
 
 def retrieve_one_ballot_from_google_civic_api(text_for_map_search, google_civic_election_id):
@@ -360,10 +381,17 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0):
     # },
     google_civic_election_id = one_ballot_json['election']['id']
     ocd_division_id = one_ballot_json['election']['ocdDivisionId']
+    state_code = extract_state_from_ocd_division_id(ocd_division_id)
+    if not positive_value_exists(state_code):
+        # We have a backup method of looking up state from one_ballot_json['state']['name']
+        # in case the ocd state fails
+        if 'state' in one_ballot_json:
+            if 'name' in one_ballot_json['state']:
+                state_code = one_ballot_json['state']['name']
 
     # Loop through all contests and store in local db cache
     process_contests_from_structured_json(one_ballot_json['contests'], google_civic_election_id,
-                                          ocd_division_id, voter_id)
+                                          ocd_division_id, state_code, voter_id)
 
     if voter_id > 0:
         print "TODO Update voter address"
@@ -379,7 +407,6 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0):
     # When saving a ballot for individual voter, loop through all pollingLocations and store in local db
     # process_polling_locations_from_structured_json(one_ballot_json['pollingLocations'])
 
-    # TODO DALE
     results = {
         'success': True,
     }

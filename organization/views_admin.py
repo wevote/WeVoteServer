@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import import_we_vote_organizations_from_json
+from .controllers import organizations_import_from_sample_file
 from .models import Organization
 from .serializers import OrganizationSerializer
 from django.http import HttpResponseRedirect
@@ -33,25 +33,19 @@ ORGANIZATION_STANCE_CHOICES = (
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-
-def import_sample_organization_data_from_json_view(request):
-    """
-    This gives us sample organizations for testing
-    :return:
-    """
-    import_we_vote_organizations_from_json(request, False)
-
-    # We are importing candidate_campaigns data (and not politician data) because all we are doing is making sure we
-    #  sync to the same We Vote ID. This is critical so we can link Positions to Organization & Candidate Campaign.
-    # At this point (June 2015) we assume the politicians have been imported from Google Civic. We aren't assigning
-    # the politicians a We Vote id, but instead use their full name as the identifier
-    # import_we_vote_candidate_campaigns_from_json(request, False)
-    #
-    # import_we_vote_positions_from_json(request, False)
-
-    messages.add_message(request, messages.INFO, 'Organizations imported.')
-
-    return HttpResponseRedirect(reverse('organization:organization_list', args=()))
+# Right now we want to make sure these imports happen in a specific sequence from
+#   admin_tools:import_test_data
+# def organizations_import_from_sample_file_view(request):
+#     """
+#     This gives us sample organizations for testing
+#     :return:
+#     """
+#     load_from_uri = False
+#     organizations_import_from_sample_file(request, load_from_uri)
+#
+#     messages.add_message(request, messages.INFO, 'Organizations imported.')
+#
+#     return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
 
 # This page does not need to be protected.
@@ -139,7 +133,9 @@ def organization_edit_process_view(request):
             organization_on_stage.twitter_handle = twitter_handle
             organization_on_stage.organization_website = organization_website
             organization_on_stage.save()
+            organization_id = organization_on_stage.id
             messages.add_message(request, messages.INFO, 'Organization updated.')
+            return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
         else:
             # Create new
             organization_on_stage = Organization(
@@ -148,7 +144,9 @@ def organization_edit_process_view(request):
                 organization_website=organization_website
             )
             organization_on_stage.save()
+            organization_id = organization_on_stage.id
             messages.add_message(request, messages.INFO, 'New organization saved.')
+            return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save organization.'
@@ -456,6 +454,13 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             organization_position_on_stage.google_civic_election_id = google_civic_election_id
             organization_position_on_stage.more_info_url = more_info_url
             organization_position_on_stage.statement_text = statement_text
+            if not positive_value_exists(organization_position_on_stage.organization_we_vote_id):
+                organization_position_on_stage.organization_we_vote_id = organization_on_stage.we_vote_id
+            if not positive_value_exists(organization_position_on_stage.candidate_campaign_we_vote_id):
+                organization_position_on_stage.candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
+            if not positive_value_exists(organization_position_on_stage.google_civic_candidate_name):
+                organization_position_on_stage.google_civic_candidate_name = \
+                    candidate_campaign_on_stage.google_civic_candidate_name
             organization_position_on_stage.save()
             success = True
             messages.add_message(
@@ -466,7 +471,11 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             # Create new
             organization_position_on_stage = PositionEntered(
                 organization_id=organization_id,
+                organization_we_vote_id=organization_on_stage.we_vote_id,
                 candidate_campaign_id=candidate_campaign_on_stage.id,
+                candidate_campaign_we_vote_id=candidate_campaign_on_stage.we_vote_id,
+                # Save candidate_campaign_on_stage so we can re-link candidates to positions if we_vote_id is lost
+                google_civic_candidate_name=candidate_campaign_on_stage.google_civic_candidate_name,
                 google_civic_election_id=google_civic_election_id,
                 stance=stance,
                 statement_text=statement_text,
@@ -489,4 +498,4 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             google_civic_election_id, organization_on_stage.we_vote_id)
         # if results['success']:
 
-    return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
+    return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_on_stage.id,)))

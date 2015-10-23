@@ -7,7 +7,23 @@
 <a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 
 <h1>Offices</h1>
-<p><a href="{% url 'office:office_new' %}">Add New Office</a></p>
+
+{% if election_list %}
+    <form name="organization_position_choose_election" method="get" action="{% url 'office:office_list' %}">
+        {% csrf_token %}
+
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    </form>
+{% endif %}{# End of if election_list #}
+
 
 {% if office_list %}
     <table border="1" cellpadding="5" cellspacing="5">
@@ -19,8 +35,8 @@
     {% for office in office_list %}
         <tr>
             <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
-            <td>{{ office.get_office_state }}</td>
-            <td><a href="{% url 'office:office_edit' office.id %}" style="font-size: .65em">(edit)</a></td>
+            <td>{{ office.state_code }}</td>
+            <td><a href="{% url 'office:office_edit' office.id %}" style="font-size: .65em">edit</a></td>
         </tr>
     {% endfor %}
     </table>
@@ -33,4 +49,15 @@
 {% else %}
     <p>(no offices found)</p>
 {% endif %}
+
+<p><a href="{% url 'office:office_new' %}">Add New Office</a></p>
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
 {% endblock %}

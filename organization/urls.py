@@ -13,7 +13,7 @@ urlpatterns = [
     url(r'^$', views_admin.organization_list_view, name='organization_list',),
     url(r'^edit/$', views_admin.organization_edit_view, name='organization_edit'),
     url(r'^export/', views_admin.ExportOrganizationDataView.as_view(), name='organizations_export'),
-    url(r'^import/', views_admin.import_sample_organization_data_from_json_view, name='organizations_import'),
+    # url(r'^import/', views_admin.organizations_import_from_sample_file_view, name='organizations_import'),
     url(r'^new/$', views_admin.organization_new_view, name='organization_new'),
     url(r'^(?P<organization_id>[0-9]+)/pos/$', views_admin.organization_position_list_view,
         name='organization_position_list',),

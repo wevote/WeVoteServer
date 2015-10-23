@@ -2,20 +2,22 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .models import ContestOffice
+from .serializers import ContestOfficeSerializer
+from candidate.models import CandidateCampaign
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+# from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
-from .models import ContestOffice
+    handle_record_not_found_exception, handle_record_not_saved_exception
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import ContestOfficeSerializer
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int
+from wevote_functions.models import convert_to_int, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -33,11 +35,23 @@ class ExportContestOfficeDataView(APIView):
 # @login_required()  # Commented out while we are developing login process()
 def office_list_view(request):
     messages_on_stage = get_messages(request)
-    office_list = ContestOffice.objects.order_by('office_name')
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    try:
+        office_list = ContestOffice.objects.order_by('office_name')
+        if positive_value_exists(google_civic_election_id):
+            office_list = office_list.filter(google_civic_election_id=google_civic_election_id)
+    except ContestOffice.DoesNotExist:
+        # This is fine
+        pass
+
+    election_list = Election.objects.order_by('-election_day_text')
 
     template_values = {
         'messages_on_stage': messages_on_stage,
         'office_list': office_list,
+        'election_list': election_list,
+        'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'office/office_list.html', template_values)
 
@@ -128,6 +142,7 @@ def office_summary_view(request, office_id):
     messages_on_stage = get_messages(request)
     office_id = convert_to_int(office_id)
     office_on_stage_found = False
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     try:
         office_on_stage = ContestOffice.objects.get(id=office_id)
         office_on_stage_found = True
@@ -137,10 +152,24 @@ def office_summary_view(request, office_id):
         # This is fine, create new
         pass
 
+    try:
+        candidate_list = CandidateCampaign.objects.filter(contest_office_id=office_id)
+        if positive_value_exists(google_civic_election_id):
+            candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+        candidate_list = candidate_list.order_by('candidate_name')
+    except CandidateCampaign.DoesNotExist:
+        # This is fine, create new
+        pass
+
+    election_list = Election.objects.order_by('-election_day_text')
+
     if office_on_stage_found:
         template_values = {
             'messages_on_stage': messages_on_stage,
             'office': office_on_stage,
+            'candidate_list': candidate_list,
+            'election_list': election_list,
+            'google_civic_election_id': google_civic_election_id,
         }
     else:
         template_values = {

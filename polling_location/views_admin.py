@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import PollingLocation
-from .controllers import save_polling_locations_from_list, return_polling_locations_data
+from .controllers import import_and_save_all_polling_locations_data
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -30,8 +30,7 @@ def import_polling_locations_view(request):
 def import_polling_locations_process_view(request):
     # Pass a "state" variable into this view so we know which file to process
     state = 'va'  # Convert to get variable so we can control which state to process from the interface
-    polling_locations_list = return_polling_locations_data(state)
-    results = save_polling_locations_from_list(polling_locations_list)
+    results = import_and_save_all_polling_locations_data(state)
 
     messages.add_message(request, messages.INFO,
                          'Polling locations retrieved from file. '

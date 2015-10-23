@@ -186,6 +186,8 @@ def positive_value_exists(value):
     :return: bool
     """
     try:
+        if value is None:
+            return False
         if isinstance(value, types.ListType):
             return bool(len(value))
         if isinstance(value, types.DictType):

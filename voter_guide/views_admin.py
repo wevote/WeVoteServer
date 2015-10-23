@@ -88,11 +88,6 @@ def voter_guide_list_view(request):
             voter_guide_list = results['voter_guide_list']
 
     election_list = Election.objects.order_by('-election_day_text')
-    if election_list[0] and google_civic_election_id == 0:
-        google_civic_election_id = 0
-        # If we aren't currently using a google_civic_election_id to display on the page, set it to the first election
-        # in the drop down
-        # google_civic_election_id = election_list[0].google_civic_election_id
 
     messages_on_stage = get_messages(request)
     template_values = {

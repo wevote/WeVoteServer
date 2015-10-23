@@ -15,15 +15,16 @@
     Website: {{ organization.organization_website }}<br />
     Twitter: {{ organization.twitter_handle }}<br />
     Organization Type: {{ organization.get_organization_type_display }}<br />
+    <a href="{% url 'organization:organization_edit' organization.id %}">edit</a>
     </p>
 
     {% if election_list %}
     <form name="organization_position_choose_election" method="get" action="{% url 'organization:organization_position_list' organization.id %}">
         {% csrf_token %}
 
-    Election: <select id="google_civic_election_id" name="google_civic_election_id">
+    <select id="google_civic_election_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
-            -- Choose Election --</option>
+            -- Filter by Election --</option>
     {% for election in election_list %}
         <option value="{{ election.google_civic_election_id }}"
                 {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
@@ -31,7 +32,7 @@
     {% endfor %}
     </select>
     </form>
-    {% endif %}
+    {% endif %}{# End of if election_list #}
 
 {% if organization_position_list %}
     <table border="1">
@@ -56,7 +57,7 @@
 {% endif %}
     <p><a href="{% url 'organization:organization_position_new' organization.id %}">Add New Position</a></p>
 
-        <script>
+    <script>
         $(function() {
             $('#google_civic_election_id').change(function() {
                 this.form.submit();

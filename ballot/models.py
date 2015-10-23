@@ -96,7 +96,7 @@ class BallotItemManager(models.Model):
             status = 'MISSING_OFFICE_AND_MEASURE_IDS'
         elif not google_civic_election_id:
             success = False
-            status = 'MISSING_ELECTION_ID'
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
         elif not voter_id:
             success = False
             status = 'MISSING_VOTER_ID'

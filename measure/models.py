@@ -107,9 +107,9 @@ class MeasureCampaign(models.Model):
     google_plus_url = models.URLField(verbose_name='google plus url of campaign', blank=True, null=True)
     youtube_url = models.URLField(verbose_name='youtube url of campaign', blank=True, null=True)
     # The email address for the candidate's campaign.
-    email = models.CharField(verbose_name="campaign email", max_length=254, null=True, blank=True)
+    measure_email = models.CharField(verbose_name="measure email", max_length=254, null=True, blank=True)
     # The voice phone number for the campaign office.
-    phone = models.CharField(verbose_name="campaign email", max_length=254, null=True, blank=True)
+    measure_phone = models.CharField(verbose_name="measure phone", max_length=254, null=True, blank=True)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):

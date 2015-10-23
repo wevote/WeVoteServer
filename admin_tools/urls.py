@@ -7,5 +7,6 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.admin_home, name='admin_home',),
+    url(r'^$', views.admin_home_view, name='admin_home',),
+    url(r'^import_test_data/$', views.import_test_data_view, name='import_test_data'),
 ]
