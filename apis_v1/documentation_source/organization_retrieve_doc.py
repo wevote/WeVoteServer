@@ -70,7 +70,7 @@ def organization_retrieve_doc_template_values(url_root):
         'api_introduction':
             "Retrieve the organization using organization_id (first choice) or we_vote_id.",
         'try_now_link': 'apis_v1:organizationRetrieveView',
-        'try_now_link_variables': '?organization_id=1',
+        'try_now_link_variables': '?we_vote_id=wv85org1',
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,
