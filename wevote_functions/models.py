@@ -5,6 +5,7 @@
 import datetime
 import random
 import string
+import sys
 import types
 import wevote_functions.admin
 
@@ -188,14 +189,22 @@ def positive_value_exists(value):
     try:
         if value is None:
             return False
-        if isinstance(value, types.ListType):
-            return bool(len(value))
-        if isinstance(value, types.DictType):
-            return bool(len(value))
+        if sys.version_info > (3, 0):
+            # Python 3 code in this block
+            if isinstance(value, list):
+                return bool(len(value))
+            if isinstance(value, dict):
+                return bool(len(value))
         else:
-            value = float(value)
-            if value < 0:
-                return False
+            # Python 2 code in this block
+            if isinstance(value, types.ListType):
+                return bool(len(value))
+            if isinstance(value, types.DictType):
+                return bool(len(value))
+
+        value = float(value)
+        if value < 0:
+            return False
     except ValueError:
         pass
     return bool(value)
