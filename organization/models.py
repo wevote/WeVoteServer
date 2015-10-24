@@ -71,11 +71,19 @@ class OrganizationManager(models.Manager):
     def fetch_organization_id(self, we_vote_id):
         organization_id = 0
         organization_manager = OrganizationManager()
-        if len(we_vote_id) > 0:
+        if positive_value_exists(we_vote_id):
             results = organization_manager.retrieve_organization(organization_id, we_vote_id)
             if results['success']:
                 return results['organization_id']
         return 0
+
+    def fetch_we_vote_id_from_local_id(self, organization_id):
+        results = self.retrieve_organization(organization_id)
+        if results['organization_found']:
+            organization = results['organization']
+            return organization.we_vote_id
+        else:
+            return ''
 
     # We can use any of these four unique identifiers:
     #   organization.id, we_vote_id, organization_website, twitter_handle

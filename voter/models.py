@@ -6,15 +6,14 @@ from django.db import models
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser, PermissionsMixin
 )
-from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils import timezone
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception
-# from region_jurisdiction.models import Jurisdiction
+    handle_record_not_saved_exception
+from validate_email import validate_email
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, generate_voter_device_id, positive_value_exists
-from validate_email import validate_email
+from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fetch_site_unique_id_prefix
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -148,6 +147,14 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def fetch_we_vote_id_from_local_id(self, voter_id):
+        results = self.retrieve_voter_by_id(voter_id)
+        if results['voter_found']:
+            voter = results['voter']
+            return voter.we_vote_id
+        else:
+            return ''
+
     def retrieve_voter_by_id(self, voter_id):
         email = ''
         voter_manager = VoterManager()
@@ -212,6 +219,14 @@ class Voter(AbstractBaseUser):
     """
     alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
 
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our voter info with other
+    # organizations running the we_vote server
+    # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
+    # then the string "voter", and then a sequential integer like "123".
+    # We keep the last value in WeVoteSetting.we_vote_id_last_org_integer
+    we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True)
+
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=20, validators=[alphanumeric])  # Increase max_length to 255
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True, null=True, blank=True)
@@ -247,13 +262,28 @@ class Voter(AbstractBaseUser):
     REQUIRED_FIELDS = []  # Since we need to store a voter based solely on voter_device_id, no values are required
 
     # We override the save function to allow for the email field to be empty. If NOT empty, email must be unique.
+    # We also want to auto-generate we_vote_id
     def save(self, *args, **kwargs):
         if self.email:
             self.email = self.email.lower().strip()
             if not validate_email(self.email):  # ...make sure it is a valid email
                 # If it isn't a valid email, don't save the value as an email -- just save a blank field
                 self.email = None
-
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_last_voter_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "voter" = tells us this is a unique id for an org
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}voter{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+            # TODO we need to deal with the situation where we_vote_id is NOT unique on save
         super(Voter, self).save(*args, **kwargs)
 
     def get_full_name(self):

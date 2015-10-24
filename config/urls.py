@@ -32,6 +32,7 @@ urlpatterns = [
 
     url(r'^c/', include('candidate.urls', namespace="candidate")),
     url(r'^e/', include('election.urls', namespace="election")),
+    url(r'^follow/', include('follow.urls', namespace="follow")),
     url(r'^import_export_google_civic/', include(
         'import_export_google_civic.urls', namespace="import_export_google_civic")),
     url(r'^m/', include('measure.urls', namespace="measure")),

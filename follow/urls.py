@@ -4,11 +4,11 @@
 
 from django.conf.urls import url
 
-from . import views
+from . import views_admin
 
 # See also organization/urls.py for follow_organization-related urls
 
 
 urlpatterns = [
-    # url(r'^$', views.tag_list_view, name='tag_list',),
+    url(r'^export/', views_admin.ExportFollowOrganizationDataView.as_view(), name='follow_organization_export'),
 ]
