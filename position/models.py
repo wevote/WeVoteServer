@@ -66,7 +66,9 @@ class PositionEntered(models.Model):
     # # The election this position is for # TODO DEPRECATED
     # election_id = models.BigIntegerField(verbose_name='election id', null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
-    google_civic_election_id = models.PositiveIntegerField(
+    google_civic_election_id = models.CharField(verbose_name="google civic election id",
+                                                max_length=254, null=False, blank=False)
+    google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
 
     # The unique We Vote id of the tweet that is the source of the position
@@ -229,7 +231,7 @@ class PositionEntered(models.Model):
         except Organization.DoesNotExist:
             logger.error("position.organization fetch_organization_we_vote_id did not find we_vote_id")
             return
-        except StandardError:
+        except Exception:
             pass
         return
 
@@ -241,7 +243,7 @@ class PositionEntered(models.Model):
         except Organization.DoesNotExist:
             logger.error("position.organization fetch_organization_id_from_we_vote_id did not find id")
             return
-        except StandardError:
+        except Exception:
             pass
         return
 
@@ -253,7 +255,7 @@ class PositionEntered(models.Model):
         except CandidateCampaign.DoesNotExist:
             logger.error("position.candidate_campaign fetch_candidate_campaign_we_vote_id did not find we_vote_id")
             return
-        except StandardError:
+        except Exception:
             pass
         return
 
@@ -265,7 +267,7 @@ class PositionEntered(models.Model):
         except CandidateCampaign.DoesNotExist:
             logger.error("position.candidate_campaign fetch_candidate_campaign_id_from_we_vote_id did not find id")
             return
-        except StandardError:
+        except Exception:
             pass
         return
 
@@ -277,7 +279,7 @@ class PositionEntered(models.Model):
         except MeasureCampaign.DoesNotExist:
             logger.error("position.measure_campaign fetch_measure_campaign_we_vote_id did not find we_vote_id")
             pass
-        except StandardError:
+        except Exception:
             pass
         return
 
@@ -289,7 +291,7 @@ class PositionEntered(models.Model):
         except MeasureCampaign.DoesNotExist:
             logger.error("position.measure_campaign fetch_measure_campaign_id_from_we_vote_id did not find id")
             pass
-        except StandardError:
+        except Exception:
             pass
         return
 
