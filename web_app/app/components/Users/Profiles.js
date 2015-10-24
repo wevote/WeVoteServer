@@ -1,22 +1,44 @@
 var React = require('react');
+var Reflux = require('refulx');
 
-var Profiles = React.createClass({
-  propTypes: {
-    profiles: React.PropTypes.array
+var candidate = {
+  "firstName": "John",
+  "lastName": "Doe",
+  "party": "Republican",
+  "avatar": "find avatar to use"
+};
+
+var actions = Reflux.createActions(
+  ["updateParty"]
+)
+
+var candidateStore = Reflux.createStore({
+  listenables: [actions],
+
+  onUpdateParty() {
+    candidate.party = "add response party";
+    this.trigger({candidate});
   },
 
-  render: function () {
-    var profiles = this.props.profiles.map((profile. index) => {
-      return (
-        <li className="list-group-item" key={index}>
-          {profile.firstName && <p> {profile.firstName}</p>}
-        </li>
-      );
-    });
-    return (
-      <div className="well">
-        <p>{profiles}</p>
-      </div>
-    )
+  getInitialState() {
+    return {candidate};
   }
-})
+});
+
+var Candidate = React.createClass({
+  mixins: [Reflux.connect(store)],
+
+  render() {
+    var c = this.state.candidate;
+
+    return (<div>
+
+      <h2>{c.firstName} {c.lastName}</h2>
+      <h2>{c.party}</h2>
+      <img src={c.avatar} />
+
+      </div>);
+  }
+});
+
+module.exports = Candidate;
