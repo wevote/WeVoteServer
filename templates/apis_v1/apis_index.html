@@ -60,6 +60,18 @@
         <td>Count the number of organizations in the database.</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:organizationFollowDocs' %}">organizationFollow</a></td>
+        <td>Store that the voter wants to follow this organization.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:organizationFollowIgnoreDocs' %}">organizationFollowIgnore</a></td>
+        <td>Store that the voter wants to ignore this organization.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:organizationStopFollowingDocs' %}">organizationStopFollowing</a></td>
+        <td>Store that the voter wants to stop following this organization.</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:organizationRetrieveDocs' %}">organizationRetrieve</a></td>
         <td>Retrieve one organization based on unique identifier.</td>
     </tr>

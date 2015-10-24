@@ -4,8 +4,10 @@
 
 from django.http import HttpResponse
 from exception.models import handle_exception
+from follow.models import FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 import json
 from organization.models import Organization, OrganizationManager
+from organization.controllers import organization_follow_all
 from voter.models import BALLOT_ADDRESS, fetch_google_civic_election_id_for_voter_id, \
     fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterAddressManager, VoterDeviceLinkManager
 from voter_guide.models import VoterGuideList
@@ -61,8 +63,37 @@ def organization_count():
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-# We retrieve from only one of the two possible variables
+def organization_follow(voter_device_id, organization_id):
+    """
+    Save that the voter wants to follow this org
+    :param voter_device_id:
+    :param organization_id:
+    :return:
+    """
+    return organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOWING)
 
+
+def organization_stop_following(voter_device_id, organization_id):
+    """
+    Save that the voter wants to stop following this org
+    :param voter_device_id:
+    :param organization_id:
+    :return:
+    """
+    return organization_follow_all(voter_device_id, organization_id, follow_kind=STOP_FOLLOWING)
+
+
+def organization_follow_ignore(voter_device_id, organization_id):
+    """
+    Save that the voter wants to ignore this org
+    :param voter_device_id:
+    :param organization_id:
+    :return:
+    """
+    return organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOW_IGNORE)
+
+
+# We retrieve from only one of the two possible variables
 def organization_retrieve(organization_id, we_vote_id):
     organization_id = convert_to_int(organization_id)
 
@@ -84,10 +115,12 @@ def organization_retrieve(organization_id, we_vote_id):
         json_data = {
             'organization_id': organization.id,
             'we_vote_id': organization.we_vote_id,
-            'organization_name': organization.organization_name if positive_value_exists(organization.organization_name) else '',
+            'organization_name':
+                organization.organization_name if positive_value_exists(organization.organization_name) else '',
             'organization_website': organization.organization_website if positive_value_exists(
                 organization.organization_website) else '',
-            'organization_twitter': organization.twitter_handle if positive_value_exists(organization.twitter_handle) else '',
+            'organization_twitter':
+                organization.twitter_handle if positive_value_exists(organization.twitter_handle) else '',
             'success': True,
             'status': results['status'],
         }
@@ -194,6 +227,7 @@ def voter_address_save(voter_device_id, address_raw_text, address_variable_exist
 
 
 def voter_count():
+    voter_count_all = 0
     try:
         voter_list_all = Voter.objects.all()
         # In future, add a filter to only show voters who have actually done something
@@ -295,7 +329,6 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id=0)
 
     voter_guide_list = []
     voter_guides = []
-    status = 'ERROR_RETRIEVING_VOTER_GUIDES'
     try:
         voter_guide_list_object = VoterGuideList()
         results = voter_guide_list_object.retrieve_voter_guides_for_election(google_civic_election_id)

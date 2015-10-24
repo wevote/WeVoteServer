@@ -7,8 +7,9 @@ import json
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .controllers import organization_count, organization_retrieve, voter_address_save, voter_address_retrieve, \
-    voter_count, voter_create, voter_guides_to_follow_retrieve, voter_retrieve_list
+from .controllers import organization_count, organization_follow, organization_follow_ignore, organization_retrieve, \
+    organization_stop_following, voter_address_save, voter_address_retrieve, voter_count, voter_create, \
+    voter_guides_to_follow_retrieve, voter_retrieve_list
 from voter.serializers import VoterSerializer
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
     get_google_civic_election_id_from_cookie
@@ -38,6 +39,33 @@ def device_id_generate_view(request):
 
 def organization_count_view(request):
     return organization_count()
+
+
+def api_organization_follow_view(request):
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    try:
+        organization_id = request.GET['organization_id']
+    except KeyError:
+        organization_id = 0
+    return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id)
+
+
+def api_organization_stop_following_view(request):
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    try:
+        organization_id = request.GET['organization_id']
+    except KeyError:
+        organization_id = 0
+    return organization_stop_following(voter_device_id=voter_device_id, organization_id=organization_id)
+
+
+def api_organization_follow_ignore_view(request):
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    try:
+        organization_id = request.GET['organization_id']
+    except KeyError:
+        organization_id = 0
+    return organization_follow_ignore(voter_device_id=voter_device_id, organization_id=organization_id)
 
 
 def organization_retrieve_view(request):

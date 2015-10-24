@@ -33,6 +33,9 @@ urlpatterns = [
     url(r'^(?P<organization_id>[0-9]+)/follow/$', views.organization_follow_view,
         name='organization_follow_view',),
     # This is used for a voter to unfollow an organization
-    url(r'^(?P<organization_id>[0-9]+)/unfollow/$', views.organization_unfollow_view,
-        name='organization_unfollow_view',),
+    url(r'^(?P<organization_id>[0-9]+)/stop_following/$', views.organization_stop_following_view,
+        name='organization_stop_following_view',),
+    # # This is used for a voter to ignore an organization
+    # url(r'^(?P<organization_id>[0-9]+)/follow_ignore/$', views.organization_follow_ignore_view,
+    #     name='organization_follow_ignore_view',),
 ]

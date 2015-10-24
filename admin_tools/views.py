@@ -13,6 +13,7 @@ from office.controllers import offices_import_from_sample_file
 from organization.controllers import organizations_import_from_sample_file
 from polling_location.controllers import import_and_save_all_polling_locations_data
 from position.controllers import positions_import_from_sample_file
+from voter.models import Voter
 
 
 def admin_home_view(request):
@@ -25,6 +26,11 @@ def admin_home_view(request):
 # @login_required()  # Commented out while we are developing login process
 def import_test_data_view(request):
     # This routine works without requiring a Google Civic API key
+
+    # We want to make sure that all voters have been updated to have a we_vote_id
+    voter_list = Voter.objects.all()
+    for one_voter in voter_list:
+        one_voter.save()
 
     polling_locations_results = import_and_save_all_polling_locations_data()
 

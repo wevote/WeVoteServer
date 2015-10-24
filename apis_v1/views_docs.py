@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from django.shortcuts import render
-from documentation_source import device_id_generate_doc, organization_count_doc, organization_retrieve_doc, \
+from documentation_source import device_id_generate_doc, organization_count_doc, organization_follow_doc, \
+    organization_follow_ignore_doc, organization_stop_following_doc, organization_retrieve_doc, \
     voter_address_retrieve_doc, voter_address_save_doc, voter_count_doc, voter_create_doc, \
     voter_guides_to_follow_retrieve_doc, voter_retrieve_doc
 
@@ -35,6 +36,33 @@ def organization_count_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = organization_count_doc.organization_count_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organization_follow_doc_view(request):
+    """
+    Show documentation about organizationFollow
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = organization_follow_doc.organization_follow_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organization_follow_ignore_doc_view(request):
+    """
+    Show documentation about organizationFollowIgnore
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = organization_follow_ignore_doc.organization_follow_ignore_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organization_stop_following_doc_view(request):
+    """
+    Show documentation about organizationStopFollowing
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = organization_stop_following_doc.organization_stop_following_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
