@@ -314,18 +314,18 @@ If you are not prompted to create a superuser, run the following command:
 
         $ python manage.py update_geoip_data
 
-### Setup - Heroku Configuration
-
-We use Heroku for publishing a public version anyone can play with , and you can publish a public version too. Here are the instructions:
-https://devcenter.heroku.com/articles/getting-started-with-django
-
-In the config/setting.py file, search for "Heroku". There are comments that tell you which parts of the settings file to comment or uncomment to get a version running on Heroku.
-
 ### Test that WeVoteServer is running
 
 Start up the webserver:
 
+    cd WeVoteServer
+    source venv/bin/activate
+    pip install -r requirements.txt
     python manage.py runserver
+
+Find admin tools here:
+
+    http://localhost:8000/admin
 
 Find documentation for all of the APIs here:
 
@@ -340,3 +340,13 @@ Please use descriptive full word variable names.
 * Our goal is to create a code base that is easy to understand, making fixing bugs and maintaining current features as painless as possible. We will have many engineers working with this code, and we want to be welcoming to engineers who are new to the project.
 * Short variable names can often create confusion, where a new engineer needs to spend time figuring out what a short variable name actually means. (Ex/ “per” or “p” instead of “person”.) For this project please use descriptive full word variable names.
 * Fellow engineers should be able to zoom around the code and not get stopped with riddles created by short names.
+
+
+### Setup - Heroku Configuration
+
+NOTE: These instructions are in progress.
+
+We use Heroku for publishing a public version anyone can play with , and you can publish a public version too. Here are the instructions:
+https://devcenter.heroku.com/articles/getting-started-with-django
+
+In the config/setting.py file, search for "Heroku". There are comments that tell you which parts of the settings file to comment or uncomment to get a version running on Heroku.
