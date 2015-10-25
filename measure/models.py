@@ -20,31 +20,31 @@ class ContestMeasure(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
     maplight_id = models.CharField(verbose_name="maplight unique identifier",
-                                   max_length=254, null=True, blank=True, unique=True)
+                                   max_length=255, null=True, blank=True, unique=True)
     # The title of the measure (e.g. 'Proposition 42').
-    measure_title = models.CharField(verbose_name="measure title", max_length=254, null=False, blank=False)
+    measure_title = models.CharField(verbose_name="measure title", max_length=255, null=False, blank=False)
     # A brief description of the referendum. This field is only populated for contests of type 'Referendum'.
     measure_subtitle = models.CharField(verbose_name="google civic referendum subtitle",
-                                        max_length=254, null=False, blank=False)
+                                        max_length=255, null=False, blank=False)
     # A link to the referendum. This field is only populated for contests of type 'Referendum'.
-    measure_url = models.CharField(verbose_name="measure details url", max_length=254, null=True, blank=False)
+    measure_url = models.CharField(verbose_name="measure details url", max_length=255, null=True, blank=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
-        verbose_name="google civic election id", max_length=254, null=True, blank=True)
+        verbose_name="google civic election id", max_length=255, null=True, blank=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google election id", default=0, null=False, blank=False)
     # ballot_placement: We store ballot_placement in the BallotItem table instead because it is different for each voter
     # If this is a partisan election, the name of the party it is for.
-    primary_party = models.CharField(verbose_name="primary party", max_length=254, null=True, blank=True)
+    primary_party = models.CharField(verbose_name="primary party", max_length=255, null=True, blank=True)
     # The name of the district.
-    district_name = models.CharField(verbose_name="district name", max_length=254, null=False, blank=False)
+    district_name = models.CharField(verbose_name="district name", max_length=255, null=False, blank=False)
     # The geographic scope of this district. If unspecified the district's geography is not known.
     # One of: national, statewide, congressional, stateUpper, stateLower, countywide, judicial, schoolBoard,
     # cityWide, township, countyCouncil, cityCouncil, ward, special
-    district_scope = models.CharField(verbose_name="district scope", max_length=254, null=False, blank=False)
+    district_scope = models.CharField(verbose_name="district scope", max_length=255, null=False, blank=False)
     # An identifier for this district, relative to its scope. For example, the 34th State Senate district
     # would have id "34" and a scope of stateUpper.
-    district_ocd_id = models.CharField(verbose_name="open civic data id", max_length=254, null=False, blank=False)
+    district_ocd_id = models.CharField(verbose_name="open civic data id", max_length=255, null=False, blank=False)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -77,7 +77,7 @@ class MeasureCampaign(models.Model):
     # contest_measure link
     # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
     contest_measure_id = models.CharField(verbose_name="contest_measure unique id",
-                                          max_length=254, null=False, blank=False)
+                                          max_length=255, null=False, blank=False)
     # Is the campaign attempting to pass the measure, or stop it from passing?
     SUPPORT = 'S'
     NEUTRAL = 'N'
@@ -90,14 +90,14 @@ class MeasureCampaign(models.Model):
     stance = models.CharField("stance", max_length=1, choices=STANCE_CHOICES, default=NEUTRAL)
 
     # The candidate's name.
-    candidate_name = models.CharField(verbose_name="candidate name", max_length=254, null=False, blank=False)
+    candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False)
     # The full name of the party the candidate is a member of.
-    party = models.CharField(verbose_name="party", max_length=254, null=True, blank=True)
+    party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
     # A URL for a photo of the candidate.
-    photo_url = models.CharField(verbose_name="photoUrl", max_length=254, null=True, blank=True)
+    photo_url = models.CharField(verbose_name="photoUrl", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google election id",
-                                                max_length=254, null=False, blank=False)
+                                                max_length=255, null=False, blank=False)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google election id", default=0, null=False, blank=False)
     # The URL for the candidate's campaign web site.
@@ -107,9 +107,9 @@ class MeasureCampaign(models.Model):
     google_plus_url = models.URLField(verbose_name='google plus url of campaign', blank=True, null=True)
     youtube_url = models.URLField(verbose_name='youtube url of campaign', blank=True, null=True)
     # The email address for the candidate's campaign.
-    measure_email = models.CharField(verbose_name="measure email", max_length=254, null=True, blank=True)
+    measure_email = models.CharField(verbose_name="measure email", max_length=255, null=True, blank=True)
     # The voice phone number for the campaign office.
-    measure_phone = models.CharField(verbose_name="measure phone", max_length=254, null=True, blank=True)
+    measure_phone = models.CharField(verbose_name="measure phone", max_length=255, null=True, blank=True)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):

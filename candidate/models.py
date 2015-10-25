@@ -42,7 +42,7 @@ class CandidateCampaign(models.Model):
     # The internal We Vote id for the ContestOffice that this candidate is competing for. During setup we need to allow
     # this to be null.
     contest_office_id = models.CharField(
-        verbose_name="contest_office_id id", max_length=254, null=True, blank=True)
+        verbose_name="contest_office_id id", max_length=255, null=True, blank=True)
     # We want to link the candidate to the contest with permanent ids so we can export and import
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the office this candidate is running for", max_length=255, default=None,
@@ -51,26 +51,26 @@ class CandidateCampaign(models.Model):
     politician_id = models.IntegerField(verbose_name="politician unique identifier", null=True, blank=True)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
     politician_we_vote_id = models.CharField(
-        verbose_name="we vote politician id", max_length=254, null=True, blank=True)
+        verbose_name="we vote politician id", max_length=255, null=True, blank=True)
     # The candidate's name.
-    candidate_name = models.CharField(verbose_name="candidate name", max_length=254, null=False, blank=False)
+    candidate_name = models.CharField(verbose_name="candidate name", max_length=255, null=False, blank=False)
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate even
     # if we edit the candidate's name locally.
     google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
-                                                   max_length=254, null=False, blank=False)
+                                                   max_length=255, null=False, blank=False)
     # The full name of the party the candidate is a member of.
-    party = models.CharField(verbose_name="party", max_length=254, null=True, blank=True)
+    party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
     # A URL for a photo of the candidate.
-    photo_url = models.CharField(verbose_name="photoUrl", max_length=254, null=True, blank=True)
+    photo_url = models.CharField(verbose_name="photoUrl", max_length=255, null=True, blank=True)
     photo_url_from_maplight = models.URLField(verbose_name='candidate portrait url of candidate', blank=True, null=True)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
-    order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=254, null=True, blank=True)
+    order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
-        verbose_name="google civic election id", max_length=254, null=True, blank=True)
+        verbose_name="google civic election id", max_length=255, null=True, blank=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
-    ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=254, null=True, blank=True)
+    ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     # State code
     state_code = models.CharField(verbose_name="state this candidate serves", max_length=2, null=True, blank=True)
     # The URL for the candidate's campaign web site.
@@ -80,9 +80,9 @@ class CandidateCampaign(models.Model):
     google_plus_url = models.URLField(verbose_name='google plus url of candidate campaign', blank=True, null=True)
     youtube_url = models.URLField(verbose_name='youtube url of candidate campaign', blank=True, null=True)
     # The email address for the candidate's campaign.
-    candidate_email = models.CharField(verbose_name="candidate campaign email", max_length=254, null=True, blank=True)
+    candidate_email = models.CharField(verbose_name="candidate campaign email", max_length=255, null=True, blank=True)
     # The voice phone number for the candidate's campaign office.
-    candidate_phone = models.CharField(verbose_name="candidate campaign phone", max_length=254, null=True, blank=True)
+    candidate_phone = models.CharField(verbose_name="candidate campaign phone", max_length=255, null=True, blank=True)
 
     def election(self):
         try:

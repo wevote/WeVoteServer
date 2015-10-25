@@ -17,15 +17,15 @@ class PollingLocation(models.Model):
     """
     # We rely on the default internal id field too
     # The unique ID of this election from VIP. (It may not in fact be unique -- TBD.)
-    polling_location_id = models.CharField(max_length=254, verbose_name="vip polling_location id", null=False,
+    polling_location_id = models.CharField(max_length=255, verbose_name="vip polling_location id", null=False,
                                            unique=True)
-    location_name = models.CharField(max_length=254, verbose_name="location name", null=True, blank=True)
-    polling_hours_text = models.CharField(max_length=254, verbose_name="polling hours", null=True, blank=True)
-    line1 = models.CharField(max_length=254, blank=True, null=True, verbose_name='address line 1 returned from VIP')
-    line2 = models.CharField(max_length=254, blank=True, null=True, verbose_name='address line 2 returned from VIP')
-    city = models.CharField(max_length=254, blank=True, null=True, verbose_name='city returned from VIP')
-    state = models.CharField(max_length=254, blank=True, null=True, verbose_name='state returned from VIP')
-    zip_long = models.CharField(max_length=254, blank=True, null=True,
+    location_name = models.CharField(max_length=255, verbose_name="location name", null=True, blank=True)
+    polling_hours_text = models.CharField(max_length=255, verbose_name="polling hours", null=True, blank=True)
+    line1 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 1 returned from VIP')
+    line2 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 2 returned from VIP')
+    city = models.CharField(max_length=255, blank=True, null=True, verbose_name='city returned from VIP')
+    state = models.CharField(max_length=255, blank=True, null=True, verbose_name='state returned from VIP')
+    zip_long = models.CharField(max_length=255, blank=True, null=True,
                                 verbose_name='raw text zip returned from VIP, 9 characters')
 
     def get_formatted_zip(self):

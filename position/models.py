@@ -67,7 +67,7 @@ class PositionEntered(models.Model):
     # election_id = models.BigIntegerField(verbose_name='election id', null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                max_length=254, null=False, blank=False)
+                                                max_length=255, null=False, blank=False)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
 
@@ -91,7 +91,7 @@ class PositionEntered(models.Model):
     # The candidate's name as passed over by Google Civic. We save this so we can match to this candidate if an import
     # doesn't include a we_vote_id we recognize.
     google_civic_candidate_name = models.CharField(verbose_name="candidate name exactly as received from google civic",
-                                                   max_length=254, null=True, blank=True)
+                                                   max_length=255, null=True, blank=True)
     # Useful for queries based on Politicians -- not the main table we use for ballot display though
     politician_id = models.BigIntegerField(verbose_name='', null=True, blank=True)
     politician_we_vote_id = models.CharField(
@@ -312,7 +312,7 @@ class Position(models.Model):
     # election_id = models.BigIntegerField(verbose_name='election id', null=True, blank=True)  # DEPRECATED
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
-        verbose_name="google civic election id", max_length=254, null=True, blank=True)
+        verbose_name="google civic election id", max_length=255, null=True, blank=True)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
 

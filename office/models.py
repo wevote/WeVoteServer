@@ -22,59 +22,59 @@ class ContestOffice(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id for this contest office", max_length=255, default=None, null=True, blank=True, unique=True)
     # The name of the office for this contest.
-    office_name = models.CharField(verbose_name="google civic office", max_length=254, null=False, blank=False)
+    office_name = models.CharField(verbose_name="google civic office", max_length=255, null=False, blank=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
-                                                    max_length=254, null=False, blank=False)
+                                                max_length=255, null=False, blank=False)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False, blank=False)
-    ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=254, null=True, blank=True)
+    ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     maplight_id = models.CharField(
-        verbose_name="maplight unique identifier", max_length=254, null=True, blank=True, unique=True)
+        verbose_name="maplight unique identifier", max_length=255, null=True, blank=True, unique=True)
     ballotpedia_id = models.CharField(
-        verbose_name="ballotpedia unique identifier", max_length=254, null=True, blank=True)
-    wikipedia_id = models.CharField(verbose_name="wikipedia unique identifier", max_length=254, null=True, blank=True)
+        verbose_name="ballotpedia unique identifier", max_length=255, null=True, blank=True)
+    wikipedia_id = models.CharField(verbose_name="wikipedia unique identifier", max_length=255, null=True, blank=True)
     # vote_type (ranked choice, majority)
     # The number of candidates that a voter may vote for in this contest.
     number_voting_for = models.CharField(verbose_name="google civic number of candidates to vote for",
-                                         max_length=254, null=True, blank=True)
+                                         max_length=255, null=True, blank=True)
     # The number of candidates that will be elected to office in this contest.
     number_elected = models.CharField(verbose_name="google civic number of candidates who will be elected",
-                                      max_length=254, null=True, blank=True)
+                                      max_length=255, null=True, blank=True)
 
     # State code
     state_code = models.CharField(verbose_name="state this office serves", max_length=2, null=True, blank=True)
     # If this is a partisan election, the name of the party it is for.
-    primary_party = models.CharField(verbose_name="google civic primary party", max_length=254, null=True, blank=True)
+    primary_party = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
     # The name of the district.
-    district_name = models.CharField(verbose_name="district name", max_length=254, null=True, blank=True)
+    district_name = models.CharField(verbose_name="district name", max_length=255, null=True, blank=True)
     # The geographic scope of this district. If unspecified the district's geography is not known.
     # One of: national, statewide, congressional, stateUpper, stateLower, countywide, judicial, schoolBoard,
     # cityWide, township, countyCouncil, cityCouncil, ward, special
     district_scope = models.CharField(verbose_name="google civic district scope",
-                                      max_length=254, null=True, blank=True)
+                                      max_length=255, null=True, blank=True)
     # An identifier for this district, relative to its scope. For example, the 34th State Senate district
     # would have id "34" and a scope of stateUpper.
-    district_id = models.CharField(verbose_name="google civic district id", max_length=254, null=True, blank=True)
+    district_id = models.CharField(verbose_name="google civic district id", max_length=255, null=True, blank=True)
 
     # The levels of government of the office for this contest. There may be more than one in cases where a
     # jurisdiction effectively acts at two different levels of government; for example, the mayor of the
     # District of Columbia acts at "locality" level, but also effectively at both
     # "administrative-area-2" and "administrative-area-1".
     contest_level0 = models.CharField(verbose_name="google civic level, option 0",
-                                      max_length=254, null=True, blank=True)
+                                      max_length=255, null=True, blank=True)
     contest_level1 = models.CharField(verbose_name="google civic level, option 1",
-                                      max_length=254, null=True, blank=True)
+                                      max_length=255, null=True, blank=True)
     contest_level2 = models.CharField(verbose_name="google civic level, option 2",
-                                      max_length=254, null=True, blank=True)
+                                      max_length=255, null=True, blank=True)
 
     # ballot_placement: We store ballot_placement in the BallotItem table instead because it is different for each voter
 
     # A description of any additional eligibility requirements for voting in this contest.
     electorate_specifications = models.CharField(verbose_name="google civic primary party",
-                                                 max_length=254, null=True, blank=True)
+                                                 max_length=255, null=True, blank=True)
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
-    special = models.CharField(verbose_name="google civic primary party", max_length=254, null=True, blank=True)
+    special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
 
     def get_office_state(self):
         if positive_value_exists(self.state_code):

@@ -77,7 +77,7 @@ class Politician(models.Model):
                                 max_length=200, null=True, unique=False)
     tag_link = models.ManyToManyField(Tag, through='PoliticianTagLink')
     # The full name of the party the official belongs to.
-    party = models.CharField(verbose_name="politician political party", max_length=254, null=True)
+    party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
 
     # id_bioguide, id_thomas, id_lis, id_govtrack, id_opensecrets, id_votesmart, id_fec, id_cspan, wikipedia_id,
