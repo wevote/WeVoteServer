@@ -53,9 +53,11 @@ cd /vagrant
 NOTE:  
 
 ```
-On Windows vagrant up should be run with administrative priviledges (e.g. from an elevated prompt opened via the right click 'Run as administrator' context menu action) to allow 
-symlinking. Otherwise the box will fail! The included vagrant.bat handles this automatically. If an ssh executable is not found on the system path, and git is installed, 
-vagrant.bat will attempt to fallback to the ssh executable installed with git via the included vagrant-bin/ssh.bat script.
+On Windows vagrant up should be run with administrative priviledges (e.g. from an elevated prompt opened via the 
+right click 'Run as administrator' context menu action) to allow symlinking. Otherwise the box will fail! 
+The included vagrant.bat handles this automatically. If an ssh executable is not found on the system path, 
+and git is installed, vagrant.bat will attempt to fallback to the ssh executable installed with git 
+via the included vagrant-bin/ssh.bat script.
 ```
 
 ## Development server
@@ -97,7 +99,9 @@ http://127.0.0.1:9090/
 
 The configuration is `/web_app/webpack-hot-dev-server.config.js`.
 
-It automatically recompiles when files are changed. When a hot-replacement-enabled file is changed (i. e. stylesheets or React components) the module is hot-replaced. If Hot Replacement is not possible the page is refreshed.
+It automatically recompiles when files are changed. When a hot-replacement-enabled file is changed 
+(i. e. stylesheets or React components) the module is hot-replaced. If Hot Replacement is 
+not possible the page is refreshed.
 
 Hot Module Replacement has a performance impact on compilation.
 
@@ -119,7 +123,8 @@ The configuration is `/web_app/webpack-production.config.js`.
 
 The server is at `/web_app/lib/server.js`
 
-The production setting builds two configurations: one for the client (`build/public`) and one for the serverside prerendering (`build/prerender`).
+The production setting builds two configurations: one for the client (`build/public`) and 
+one for the serverside prerendering (`build/prerender`).
 
 
 ## Legacy static assets
@@ -136,7 +141,9 @@ Use the [analyse tool](http://webpack.github.io/analyse/) with the file at `buil
 
 ## Loaders and file types
 
-Many file types are preconfigured, but not every loader is installed. If you get an error like `Cannot find module "xxx-loader"`, you'll need to install the loader with `npm install xxx-loader --save` and restart the compilation.
+Many file types are preconfigured, but not every loader is installed. If you get an error like 
+`Cannot find module "xxx-loader"`, you'll need to install the loader with `npm install xxx-loader --save` and 
+restart the compilation.
 
 
 ## Common changes to the configuration
@@ -147,13 +154,15 @@ Many file types are preconfigured, but not every loader is installed. If you get
 
 1. Add an entry point to `/web_app/make-webpack-config.js` (`var entry`).
 2. Add a new top-level react component in `app` (`xxxRoutes.js`, `xxxStoreDescriptions.js`, `xxxStores.js`).
-3. (Optional) Enable `commonsChunk` in `webpack-production.config.js` and add `<script src="COMMONS_URL"></script>` to `app/prerender.html`.
+3. (Optional) Enable `commonsChunk` in `webpack-production.config.js` and add `<script src="COMMONS_URL"></script>` 
+to `app/prerender.html`.
 4. Modify the server code to require, serve and prerender the other entry point.
 5. Restart compilation.
 
 ### Switch devtool to SourceMaps
 
-Change `devtool` property in `/web_app/webpack-dev-server.config.js` and `/web_app/webpack-hot-dev-server.config.js` to `"source-map"` (better module names) or `"eval-source-map"` (faster compilation).
+Change `devtool` property in `/web_app/webpack-dev-server.config.js` and `/web_app/webpack-hot-dev-server.config.js` 
+to `"source-map"` (better module names) or `"eval-source-map"` (faster compilation).
 
 SourceMaps have a performance impact on compilation.
 
@@ -165,3 +174,5 @@ SourceMaps have a performance impact on compilation.
 SourceMaps have a performance impact on compilation.
 
 SourceMaps contains your un-minimized source code, so you need to restrict access to `build\public\debugging`.
+
+[Back to root README](README.md)

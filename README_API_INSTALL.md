@@ -1,5 +1,6 @@
 # README for API Installation
 [Back to root README](README.md)
+[Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
 ## Setup - Dependencies
 
@@ -13,9 +14,9 @@ Once you have cloned this repository to your local machine, set up a virtual env
     virtualenv venv
     source venv/bin/activate
 
-We recommend running this within your virtual environment:
-
-**NOTE: Before beginning on a Linux environment** 
+### Running Linux?
+If you are installing on a Linux environment, we recommend the following steps within your virtual environment. If you
+are installing on a Mac or Windows machine, you can skip these steps.
 
 DO:
 
@@ -33,7 +34,7 @@ THEN:
 ## Setup - Install the Postgres database
 
 ### METHOD 1
-For Mac, download the DMG from [http://postgresapp.com/](http://postgresapp.com/)
+For Mac, download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)
 
 Run this on your command line:
 
@@ -56,7 +57,7 @@ Install Postgres:
 
 Follow [these instructions](https://help.ubuntu.com/community/PostgreSQL)
 
-### FINALLY
+## Setup - Install PG Admin III
 
 We recommend installing pgAdmin3 as a WYSIWYG database administration tool.
 NOTE: You may need to turn off the restriction in "Security & Privacy" on "unidentified developers"
@@ -138,17 +139,8 @@ Find admin tools here:
 Find documentation for all of the APIs here:
 
     http://localhost:8000/apis/v1/docs
-
-
-## Coding Standards
-
-Please use descriptive full word variable names.
-
-* In the lifecycle of most projects, fixing bugs and maintaining current features end up taking 50%+ of total engineering time.
-* Our goal is to create a code base that is easy to understand, making fixing bugs and maintaining current features as painless as possible. We will have many engineers working with this code, and we want to be welcoming to engineers who are new to the project.
-* Short variable names can often create confusion, where a new engineer needs to spend time figuring out what a short variable name actually means. (Ex/ “per” or “p” instead of “person”.) For this project please use descriptive full word variable names.
-* Fellow engineers should be able to zoom around the code and not get stopped with riddles created by short names.
-
+    
+[Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
 ## Setup - Heroku Configuration
 
@@ -158,3 +150,5 @@ We use Heroku for publishing a public version anyone can play with , and you can
 https://devcenter.heroku.com/articles/getting-started-with-django
 
 In the config/setting.py file, search for "Heroku". There are comments that tell you which parts of the settings file to comment or uncomment to get a version running on Heroku.
+
+[Back to root README](README.md)
