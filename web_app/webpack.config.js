@@ -1,10 +1,15 @@
+import webpack from 'webpack';
+import path from 'path';
+
+const ENV = process.env.NODE_ENV;
+
 module.exports = {
   entry: './app/App.js',
-  contentBase: './build',
+  contentBase: './public',
   output: {
     filename: '[name]/bundle.js',
     publicPath: '/',
-    path: path.resolve(__dirname, 'build')
+    path: path.resolve(__dirname, 'public')
   },
   module: {
     preLoaders: [
@@ -19,8 +24,8 @@ module.exports = {
         test: /\.jsx?$/,
         loaders: ENV === 'development'
           ? ['react-hot', 'babel']
-          : ['babel']
-        exclude: /(node_modules|build)/,
+          : ['babel'],
+        exclude: /(node_modules|build)/
       }
     ]
   },
