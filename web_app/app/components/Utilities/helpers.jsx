@@ -2,9 +2,9 @@ import axios from 'axios';
 
 export function objectToGetParams(object) {
   return '?' + Object.keys(object)
-    .filter(key => !!object[key])
-    .map(key => `$key=${encodeURIComponent(object[key])}`)
-    .join('&');
+      .filter(key => !!object[key])
+      .map(key => `$key=${encodeURIComponent(object[key])}`)
+      .join('&');
 }
 
 export function windowOpen(url, name, height = 400, width = 550) {

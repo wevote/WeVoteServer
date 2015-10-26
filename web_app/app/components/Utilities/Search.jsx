@@ -13,11 +13,11 @@ const Search = React.createClass({
   },
   render() {
     return (<div className="col-sm-12">
-      <div className="input-group">
-        <input type="text" className="form-control" ref="search" placeholder="Search" onBlur={this.handleSearch} />
+        <div className="input-group">
+          <input type="text" className="form-control" ref="search" placeholder="Search" onBlur={this.handleSearch}/>
+        </div>
       </div>
-    </div>
-  );
+    );
   }
 });
 

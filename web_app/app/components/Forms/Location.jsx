@@ -11,8 +11,8 @@ const Location = React.createClass({
   },
   render() {
     return (<div className="row">
-      <input type="text" className="form-control" ref="location" placeholder="Oakland, CA" />
-    </div>
+        <input type="text" className="form-control" ref="location" placeholder="Oakland, CA"/>
+      </div>
     );
   }
 });

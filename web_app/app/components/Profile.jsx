@@ -6,9 +6,8 @@ import helpers from './utilities/helpers';
 const Profile = React.createClass({
   mixins: [Router.State],
   getInitialState() {
-    return (
-      name: {},
-      //bio: {}
+    return (name:{},
+            //bio: {}
     )
   },
   componentDidMount() {
@@ -21,18 +20,18 @@ const Profile = React.createClass({
 
   },
   componentwillReceiveProps() {
-      // route change?
-      this.init();
+    // route change?
+    this.init();
   },
   render() {
-      const username = this.getParams().username;
-      return (
-          <div className="row">
-              <div className="col-md-8">
-                  User Profile Component -- {username}
-              </div>
-          </div>
-      )
+    const username = this.getParams().username;
+    return (
+      <div className="row">
+        <div className="col-md-8">
+          User Profile Component -- {username}
+        </div>
+      </div>
+    )
   }
 });
 

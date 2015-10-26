@@ -1,6 +1,7 @@
 import React from 'react';
 
-class SubMenu extends React.Component (
+class SubMenu extends React.Component
+(
 
 );
 

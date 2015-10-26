@@ -1,11 +1,13 @@
 import React from 'react';
 
 var OrganizationProfile = React.createClass({
-    render() {
-        return (
+  render() {
+    return (
 
-        )
-    }
+    )
+  }
 });
 
-exports default OrganizationProfile;
+exports
+default
+OrganizationProfile;

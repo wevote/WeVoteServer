@@ -24,8 +24,9 @@ var candidateStore = Reflux.createStore({
       this.trigger(this.data);
     },
 
-    getInitialState() {
-     return {candidate};
+      getInitialState()
+    {
+      return {candidate};
     }
   }
 
@@ -36,10 +37,11 @@ var Candidate = React.createClass({
 
   render() {
     return (<div>
-     {this.state.candidate.map(person => {
+      {this.state.candidate.map(person => {
         return (<h2>{c.firstName} {c.lastName}</h2>
-          <h2>{c.party}</h2>
-          <img src={c.avatar} />
+        < h2 > {c.party
+      }</h2>
+        <img src={c.avatar} />
         )})}
     </div>);
   }
