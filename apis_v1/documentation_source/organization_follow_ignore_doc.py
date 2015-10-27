@@ -48,6 +48,10 @@ def organization_follow_ignore_doc_template_values(url_root):
             'description':  'A valid organization_id was not found. Cannot proceed.',
         },
         {
+            'code':         'ORGANIZATION_NOT_FOUND_ON_CREATE FOLLOW_IGNORE',
+            'description':  'An organization with that organization_id was not found. Cannot proceed.',
+        },
+        {
             'code':         'FOLLOW_IGNORE',
             'description':  'Successfully ignoring this organization',
         },

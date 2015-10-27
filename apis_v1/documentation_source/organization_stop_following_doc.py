@@ -48,6 +48,10 @@ def organization_stop_following_doc_template_values(url_root):
             'description':  'A valid organization_id was not found. Cannot proceed.',
         },
         {
+            'code':         'ORGANIZATION_NOT_FOUND_ON_CREATE STOP_FOLLOWING',
+            'description':  'An organization with that organization_id was not found. Cannot proceed.',
+        },
+        {
             'code':         'STOPPED_FOLLOWING',
             'description':  'Successfully stopped following this organization',
         },
