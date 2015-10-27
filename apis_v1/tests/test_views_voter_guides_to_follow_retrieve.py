@@ -29,7 +29,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
 
         self.assertEqual(
             json_data['status'], 'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID',
-            "status:  {status} (ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID expected), voter_device_id: {voter_device_id}".format(
+            "status: {status} (ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID expected), voter_device_id: {voter_device_id}".format(
                 status=json_data['status'], voter_device_id=json_data['voter_device_id']))
 
     def test_retrieve_with_cookie(self):
@@ -63,7 +63,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
 
         self.assertEqual(
             json_data02['status'], 'ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID',
-            "status:  {status} (ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID expected), "
+            "status: {status} (ERROR_GUIDES_TO_FOLLOW_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data02['status'], voter_device_id=json_data02['voter_device_id']))
 
@@ -80,7 +80,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         # With a brand new voter_device_id, a new voter record should be created
         self.assertEqual(
             json_data03['status'], 'VOTER_CREATED',
-            "status:  {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
+            "status: {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
                 status=json_data03['status'], voter_device_id=json_data03['voter_device_id']))
 
         #######################################
@@ -98,7 +98,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
                          "voter_guides expected in the voterGuidesToFollowRetrieveView json response but not found")
         self.assertEqual(
             json_data04['status'], 'NO_VOTER_GUIDES_FOUND',
-            "status:  {status} (NO_VOTER_GUIDES_FOUND expected), voter_device_id: {voter_device_id}".format(
+            "status: {status} (NO_VOTER_GUIDES_FOUND expected), voter_device_id: {voter_device_id}".format(
                 status=json_data04['status'], voter_device_id=json_data04['voter_device_id']))
 
 
@@ -120,7 +120,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
                          "'organization_count' expected in the organizationRetrieve json response")
         self.assertEqual(
             json_data10['organization_count'], 1,
-            "success:  {success} (organization_count '1' expected), organization_count: {organization_count}".format(
+            "success: {success} (organization_count '1' expected), organization_count: {organization_count}".format(
                 success=json_data10['success'], organization_count=json_data10['organization_count']))
 
         #######################################

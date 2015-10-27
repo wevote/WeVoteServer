@@ -31,7 +31,7 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
                          "'voter_count' expected in the voterCount json response")
         self.assertEqual(
             json_data['voter_count'], 0,
-            "success:  {success} (voter_count '0' expected), voter_count: {voter_count}".format(
+            "success: {success} (voter_count '0' expected), voter_count: {voter_count}".format(
                 success=json_data['success'], voter_count=json_data['voter_count']))
 
         #######################################
@@ -63,7 +63,7 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
                          "'voter_count' expected in the voterCount json response")
         self.assertEqual(
             json_data2['voter_count'], 3,
-            "success:  {success} (voter_count '3' expected), voter_count: {voter_count}".format(
+            "success: {success} (voter_count '3' expected), voter_count: {voter_count}".format(
                 success=json_data2['success'], voter_count=json_data2['voter_count']))
 
         #######################################
@@ -82,7 +82,7 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
                          "'voter_count' expected in the voterCount json response")
         self.assertEqual(
             json_data3['voter_count'], 0,
-            "success:  {success} (voter_count '0' expected - 2nd pass), voter_count: {voter_count}".format(
+            "success: {success} (voter_count '0' expected - 2nd pass), voter_count: {voter_count}".format(
                 success=json_data3['success'], voter_count=json_data3['voter_count']))
 
     def test_count_with_cookie(self):
@@ -118,7 +118,7 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
         # With a brand new voter_device_id, a new voter record should be created
         self.assertEqual(
             json_data02['status'], 'VOTER_CREATED',
-            "status:  {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
+            "status: {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
                 status=json_data02['status'], voter_device_id=json_data02['voter_device_id']))
 
         #######################################
@@ -131,7 +131,7 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
                          "'voter_count' expected in the voterCount json response")
         self.assertEqual(
             json_data11['voter_count'], 1,
-            "success:  {success} (voter_count '1' expected), voter_count: {voter_count}".format(
+            "success: {success} (voter_count '1' expected), voter_count: {voter_count}".format(
                 success=json_data11['success'], voter_count=json_data11['voter_count']))
 
         #######################################
@@ -163,5 +163,5 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
                          "'voter_count' expected in the voterCount json response")
         self.assertEqual(
             json_data12['voter_count'], 4,
-            "success:  {success} (voter_count '4' expected), voter_count: {voter_count}".format(
+            "success: {success} (voter_count '4' expected), voter_count: {voter_count}".format(
                 success=json_data12['success'], voter_count=json_data12['voter_count']))

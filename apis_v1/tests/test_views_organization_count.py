@@ -32,7 +32,7 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
                          "'organization_count' expected in the organizationCount json response")
         self.assertEqual(
             json_data['organization_count'], 0,
-            "success:  {success} (organization_count '0' expected), organization_count: {organization_count}".format(
+            "success: {success} (organization_count '0' expected), organization_count: {organization_count}".format(
                 success=json_data['success'], organization_count=json_data['organization_count']))
 
         #######################################
@@ -63,7 +63,7 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
                          "'organization_count' expected in the organizationCount json response")
         self.assertEqual(
             json_data2['organization_count'], 3,
-            "success:  {success} (organization_count '3' expected), organization_count: {organization_count}".format(
+            "success: {success} (organization_count '3' expected), organization_count: {organization_count}".format(
                 success=json_data2['success'], organization_count=json_data2['organization_count']))
 
         #######################################
@@ -82,7 +82,7 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
                          "'organization_count' expected in the organizationCount json response")
         self.assertEqual(
             json_data3['organization_count'], 0,
-            "success:  {success} (organization_count '0' expected - 2nd pass), "
+            "success: {success} (organization_count '0' expected - 2nd pass), "
             "organization_count: {organization_count}".format(
                 success=json_data3['success'], organization_count=json_data3['organization_count']))
 
@@ -119,7 +119,7 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
         # With a brand new voter_device_id, a new voter record should be created
         self.assertEqual(
             json_data02['status'], 'VOTER_CREATED',
-            "status:  {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
+            "status: {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
                 status=json_data02['status'], voter_device_id=json_data02['voter_device_id']))
 
         #######################################
@@ -132,7 +132,7 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
                          "'voter_count' expected in the organizationCount json response")
         self.assertEqual(
             json_data11['voter_count'], 1,
-            "success:  {success} (voter_count '1' expected), voter_count: {voter_count}".format(
+            "success: {success} (voter_count '1' expected), voter_count: {voter_count}".format(
                 success=json_data11['success'], voter_count=json_data11['voter_count']))
 
         #######################################
@@ -145,7 +145,7 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
                          "'organization_count' expected in the organizationCount json response")
         self.assertEqual(
             json_data12['organization_count'], 0,
-            "success:  {success} (organization_count '0' expected), organization_count: {organization_count}".format(
+            "success: {success} (organization_count '0' expected), organization_count: {organization_count}".format(
                 success=json_data12['success'], organization_count=json_data12['organization_count']))
 
         #######################################
@@ -176,7 +176,7 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
                          "'organization_count' expected in the organizationCount json response")
         self.assertEqual(
             json_data22['organization_count'], 3,
-            "success:  {success} (organization_count '3' expected), organization_count: {organization_count}".format(
+            "success: {success} (organization_count '3' expected), organization_count: {organization_count}".format(
                 success=json_data22['success'], organization_count=json_data22['organization_count']))
 
         #######################################
@@ -195,6 +195,6 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
                          "'organization_count' expected in the organizationCount json response")
         self.assertEqual(
             json_data23['organization_count'], 0,
-            "success:  {success} (organization_count '0' expected - 2nd pass), "
+            "success: {success} (organization_count '0' expected - 2nd pass), "
             "organization_count: {organization_count}".format(
                 success=json_data23['success'], organization_count=json_data23['organization_count']))

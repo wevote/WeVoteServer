@@ -28,7 +28,7 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
 
         self.assertEqual(
             json_data['status'], 'VALID_VOTER_DEVICE_ID_MISSING',
-            "status:  {status} (VALID_VOTER_DEVICE_ID_MISSING expected), voter_device_id: {voter_device_id}".format(
+            "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), voter_device_id: {voter_device_id}".format(
                 status=json_data['status'], voter_device_id=json_data['voter_device_id']))
 
     def test_retrieve_with_cookie(self):
@@ -64,7 +64,7 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
         # With a brand new voter_device_id, a new voter record should be created
         self.assertEqual(
             json_data2['status'], 'VOTER_CREATED',
-            "status:  {status} (VOTER_CREATED expected in voterAddressRetrieveView), "
+            "status: {status} (VOTER_CREATED expected in voterAddressRetrieveView), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data2['status'], voter_device_id=json_data2['voter_device_id']))
 
@@ -81,7 +81,7 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
         # First address save
         self.assertEqual(
             json_data3['status'], 'VOTER_ADDRESS_SAVED',
-            "status:  {status} (VOTER_ADDRESS_SAVED expected in voterAddressRetrieveView), "
+            "status: {status} (VOTER_ADDRESS_SAVED expected in voterAddressRetrieveView), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data3['status'], voter_device_id=json_data3['voter_device_id']))
 

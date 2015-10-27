@@ -66,7 +66,7 @@ class WeVoteAPIsV1TestsVoterCreate(TestCase):
         # With a brand new voter_device_id, a new voter record should be created
         self.assertEqual(
             json_data2['status'], 'VOTER_CREATED',
-            "status:  {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
+            "status: {status} (VOTER_CREATED expected), voter_device_id: {voter_device_id}".format(
                 status=json_data2['status'], voter_device_id=json_data2['voter_device_id']))
 
         #######################################
@@ -82,5 +82,5 @@ class WeVoteAPIsV1TestsVoterCreate(TestCase):
         # Try reusing the same voter_device_id
         self.assertEqual(
             json_data3['status'], 'VOTER_ALREADY_EXISTS',
-            "status:  {status} (VOTER_ALREADY_EXISTS expected), voter_device_id: {voter_device_id}".format(
+            "status: {status} (VOTER_ALREADY_EXISTS expected), voter_device_id: {voter_device_id}".format(
                 status=json_data3['status'], voter_device_id=json_data3['voter_device_id']))
