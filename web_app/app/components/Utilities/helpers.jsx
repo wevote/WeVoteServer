@@ -37,7 +37,7 @@ export function windowOpen(url, name, height = 400, width = 550) {
 }
 
 function getUserProfile(username) {
-  return axios.get(`http://localhost:8000/users/${username}/`);
+  return axios.get(`http://localhost:8000/profile/${username}/`);
 }
 
 const helpers = {

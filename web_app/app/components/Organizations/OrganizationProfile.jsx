@@ -8,6 +8,4 @@ var OrganizationProfile = React.createClass({
   }
 });
 
-exports
-default
-OrganizationProfile;
+exports default OrganizationProfile;

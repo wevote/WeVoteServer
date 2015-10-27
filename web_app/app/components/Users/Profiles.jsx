@@ -1,5 +1,5 @@
 var React = require('react');
-var Reflux = require('refulx');
+var Reflux = require('reflux');
 var request = require('superagent');
 
 var candidate = {
@@ -9,25 +9,24 @@ var candidate = {
   "avatar": "find avatar to use"
 };
 
-var actions = Reflux.createActions(
+let actions = Reflux.createActions(
   ["updateParty"]
 )
 
-var candidateStore = Reflux.createStore({
+let candidateStore = Reflux.createStore({
   data: {candidates: []},
 
   listenables: [actions],
 
   init() {
-    request('http://localhost:8000/api/v1'), res => {
+    request('http://localhost:8000/api/v1', res => {
       this.data.candidate = res.body;
       this.trigger(this.data);
-    },
+    });
+  },
 
-      getInitialState()
-    {
-      return {candidate};
-    }
+  getInitialState() {
+    return {candidate};
   }
 
 });
@@ -38,11 +37,12 @@ var Candidate = React.createClass({
   render() {
     return (<div>
       {this.state.candidate.map(person => {
-        return (<h2>{c.firstName} {c.lastName}</h2>
-        < h2 > {c.party
-      }</h2>
-        <img src={c.avatar} />
-        )})}
+        return (<div>
+          <h2>{person.firstName} {person.lastName}</h2>
+          <h2>{person.party}</h2>
+          <img src={person.avatar} />
+          </div>
+      )})}
     </div>);
   }
 });

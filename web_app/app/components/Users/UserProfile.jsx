@@ -1,7 +1,8 @@
-var React = require('react');
-var helpers = require('utilities/helpers');
+import React from 'react';
+import Router from 'react-router';
+import helpers from 'utilities/helpers';
 
-var UserProfile = React.createClass({
+const UserProfile = React.createClass({
   mixins: [Router.state],
   getInitialState: function () {
     return {
@@ -23,22 +24,19 @@ var UserProfile = React.createClass({
       .then(function (dataObj) {
         this.setState({
           avatar: dataObj.avatar,
-          firstName;
-        dataObj.firstName,
-          lastName
-        :
-        dataObj.lastName
+          firstName: dataObj.firstName,
+          lastName: dataObj.lastName
       });
   }.bind(this));
 },
 componentWillUnmount: function () {
   this.unbind();
-}
+},
 render: function () {
   return (
     <div>
       { this.props.avatar &&
-      <li className="list-group-item"><img src={this.props.avatar} alt={this.props.firstName} {this.props.lastName} />
+      <li className="list-group-item"><img src={this.props.avatar} alt={this.props.firstName} />
       </li> }
       { this.props.firstName && this.props.lastName && <h1>{this.props.firstName} {this.props.lastName}</h1> }
     </div>
