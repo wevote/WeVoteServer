@@ -28,8 +28,8 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
                          "voter_device_id expected in the voterBallotItemsRetrieve json response, and not found")
 
         self.assertEqual(
-            json_data['status'], 'ERROR_BALLOT_ITEMS_RETRIEVE_NO_VOTER_DEVICE_ID',
-            "status: {status} (ERROR_BALLOT_ITEMS_RETRIEVE_NO_VOTER_DEVICE_ID expected), "
+            json_data['status'], 'VALID_VOTER_DEVICE_ID_MISSING',
+            "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data['status'], voter_device_id=json_data['voter_device_id']))
 
@@ -63,8 +63,8 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
                          "voter_device_id expected in the voterBallotItemsRetrieve json response, and not found")
 
         self.assertEqual(
-            json_data02['status'], 'ERROR_BALLOT_ITEMS_RETRIEVE_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID',
-            "status: {status} (ERROR_BALLOT_ITEMS_RETRIEVE_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID expected), "
+            json_data02['status'], 'VALID_VOTER_ID_MISSING',
+            "status: {status} (VALID_VOTER_ID_MISSING expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data02['status'], voter_device_id=json_data02['voter_device_id']))
 
@@ -100,8 +100,8 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         self.assertEqual('ballot_item_list' in json_data04, True,
                          "ballot_item_list expected in the voterBallotItemsRetrieve json response but not found")
         self.assertEqual(
-            json_data04['status'], 'ERROR_BALLOT_ITEMS_RETRIEVE_GOOGLE_CIVIC_ELECTION_ID_MISSING',
-            "status: {status} (ERROR_BALLOT_ITEMS_RETRIEVE_GOOGLE_CIVIC_ELECTION_ID_MISSING expected), "
+            json_data04['status'], 'MISSING_GOOGLE_CIVIC_ELECTION_ID',
+            "status: {status} (MISSING_GOOGLE_CIVIC_ELECTION_ID expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data04['status'], voter_device_id=json_data04['voter_device_id']))
 

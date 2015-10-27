@@ -1,4 +1,4 @@
-# apis_v1/controllers.py
+# ballot/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
@@ -21,7 +21,7 @@ def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         json_data = {
-            'status': 'ERROR_BALLOT_ITEMS_RETRIEVE_NO_VOTER_DEVICE_ID',
+            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
             'success': False,
             'voter_id': 0,
             'voter_device_id': voter_device_id,
@@ -32,7 +32,7 @@ def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': "ERROR_BALLOT_ITEMS_RETRIEVE_VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'status': "VALID_VOTER_ID_MISSING",
             'success': False,
             'voter_id': voter_id,
             'voter_device_id': voter_device_id,
@@ -53,7 +53,7 @@ def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
 
     if not positive_value_exists(google_civic_election_id):
         # At this point if we don't have a google_civic_election_id, then we don't have an upcoming election
-        status = 'ERROR_BALLOT_ITEMS_RETRIEVE_GOOGLE_CIVIC_ELECTION_ID_MISSING'
+        status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
         json_data = {
             'status': status,
             'success': False,

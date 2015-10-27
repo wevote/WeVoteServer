@@ -31,14 +31,18 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "voter_ballot_items": list\n' \
+                   '  "voter_id": integer,\n' \
+                   '  "ballot_item_list": list\n' \
                    '   [\n' \
+                   '     "ballot_item_label": string,\n' \
+                   '     "voter_id": integer,\n' \
                    '     "google_civic_election_id": integer,\n' \
-                   '     "voter_guide_owner_type": one character (O = Organization, P = Public Figure, V = Voter),\n' \
-                   '     "organization_we_vote_id": string (a unique We Vote ID if owner type is "O"),\n' \
-                   '     "public_figure_we_vote_id": string (a unique We Vote ID if owner type is "P"),\n' \
-                   '     "owner_voter_id": integer (a unique integer id if owner type is "V"),\n' \
-                   '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
+                   '     "google_ballot_placement": integer,\n' \
+                   '     "local_ballot_order": integer,\n' \
+                   '     "contest_office_id": integer,\n' \
+                   '     "contest_office_we_vote_id": string,\n' \
+                   '     "contest_measure_id": integer,\n' \
+                   '     "contest_measure_we_vote_id": string,\n' \
                    '   ],\n' \
                    '}'
 
@@ -47,10 +51,18 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
             'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
         },
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
+        {
+            'code':         'VALID_VOTER_ID_MISSING',
+            'description':  'A valid voter_id was not found from voter_device_id. Cannot proceed.',
+        },
+        {
+            'code':         'MISSING_GOOGLE_CIVIC_ELECTION_ID',
+            'description':  'A valid google_civic_election_id not found. Cannot proceed.',
+        },
+        {
+            'code':         'VOTER_BALLOT_ITEMS_RETRIEVED',
+            'description':  'Ballot items were found.',
+        },
     ]
 
     template_values = {
