@@ -4,7 +4,7 @@ import path from 'path';
 const ENV = process.env.NODE_ENV;
 
 module.exports = {
-  entry: './app/App.js',
+  entry: './app/App.jsx',
   contentBase: './public',
   output: {
     filename: '[name]/bundle.js',
