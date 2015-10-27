@@ -438,7 +438,20 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
 
 
 def fetch_google_civic_election_id_for_voter_id(voter_id):
-    google_civic_election_id = 4162
+    # Is google_civic_election_id cached in the voter record?
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_by_id(voter_id)
+    if results['voter_found']:
+        voter_on_stage = results['voter']
+    else:
+        voter_on_stage = Voter()
+
+    if positive_value_exists(voter_on_stage.current_google_civic_election_id):
+        return voter_on_stage.current_google_civic_election_id
+
+    # Retrieve it from the VoterAddress class?
+
+    google_civic_election_id = 0
     return google_civic_election_id
 
 
@@ -472,19 +485,19 @@ class VoterAddress(models.Model):
     address_type = models.CharField(
         verbose_name="type of address", max_length=1, choices=ADDRESS_TYPE_CHOICES, default=BALLOT_ADDRESS)
 
-    address = models.CharField(max_length=254, blank=False, null=False, verbose_name='address as entered')
+    address = models.CharField(max_length=255, blank=False, null=False, verbose_name='address as entered')
 
-    latitude = models.CharField(max_length=254, blank=True, null=True, verbose_name='latitude returned from Google')
-    longitude = models.CharField(max_length=254, blank=True, null=True, verbose_name='longitude returned from Google')
-    normalized_line1 = models.CharField(max_length=254, blank=True, null=True,
+    latitude = models.CharField(max_length=255, blank=True, null=True, verbose_name='latitude returned from Google')
+    longitude = models.CharField(max_length=255, blank=True, null=True, verbose_name='longitude returned from Google')
+    normalized_line1 = models.CharField(max_length=255, blank=True, null=True,
                                         verbose_name='normalized address line 1 returned from Google')
-    normalized_line2 = models.CharField(max_length=254, blank=True, null=True,
+    normalized_line2 = models.CharField(max_length=255, blank=True, null=True,
                                         verbose_name='normalized address line 2 returned from Google')
-    normalized_city = models.CharField(max_length=254, blank=True, null=True,
+    normalized_city = models.CharField(max_length=255, blank=True, null=True,
                                        verbose_name='normalized city returned from Google')
-    normalized_state = models.CharField(max_length=254, blank=True, null=True,
+    normalized_state = models.CharField(max_length=255, blank=True, null=True,
                                         verbose_name='normalized state returned from Google')
-    normalized_zip = models.CharField(max_length=254, blank=True, null=True,
+    normalized_zip = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='normalized zip returned from Google')
 
     refreshed_from_google = models.BooleanField(
@@ -502,6 +515,36 @@ class VoterAddressManager(models.Model):
         voter_address_manager = VoterAddressManager()
         return voter_address_manager.retrieve_address(voter_address_id, voter_id, address_type)
 
+    def retrieve_ballot_map_text_from_voter_id(self, voter_id):
+        results = self.retrieve_ballot_address_from_voter_id(voter_id)
+
+        ballot_map_text = ''
+        if results['voter_address_found']:
+            voter_address = results['voter_address']
+            minimum_normalized_address_data_exists = positive_value_exists(
+                voter_address.normalized_city) or positive_value_exists(
+                    voter_address.normalized_state) or positive_value_exists(voter_address.normalized_zip)
+            if minimum_normalized_address_data_exists:
+                ballot_map_text += voter_address.normalized_line1 \
+                    if positive_value_exists(voter_address.normalized_line1) else ''
+                ballot_map_text += ", " \
+                    if positive_value_exists(voter_address.normalized_line1) \
+                    and positive_value_exists(voter_address.normalized_city) \
+                    else ''
+                ballot_map_text += voter_address.normalized_city \
+                    if positive_value_exists(voter_address.normalized_city) else ''
+                ballot_map_text += ", " \
+                    if positive_value_exists(voter_address.normalized_city) \
+                    and positive_value_exists(voter_address.normalized_state) \
+                    else ''
+                ballot_map_text += voter_address.normalized_state \
+                    if positive_value_exists(voter_address.normalized_state) else ''
+                ballot_map_text += " " + voter_address.normalized_zip \
+                    if positive_value_exists(voter_address.normalized_zip) else ''
+            elif positive_value_exists(voter_address.address):
+                ballot_map_text += voter_address.address
+        return ballot_map_text
+
     def retrieve_address(self, voter_address_id, voter_id, address_type):
         error_result = False
         exception_does_not_exist = False
@@ -509,10 +552,11 @@ class VoterAddressManager(models.Model):
         voter_address_on_stage = VoterAddress()
 
         try:
-            if voter_address_id > 0:
+            if positive_value_exists(voter_address_id):
                 voter_address_on_stage = VoterAddress.objects.get(id=voter_address_id)
                 voter_address_id = voter_address_on_stage.id
-            elif voter_id > 0 and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
+            elif positive_value_exists(voter_id) and \
+                            address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
                 voter_address_on_stage = VoterAddress.objects.get(voter_id=voter_id, address_type=address_type)
                 # If still here, we found an existing address
                 voter_address_id = voter_address_on_stage.id
@@ -525,6 +569,7 @@ class VoterAddressManager(models.Model):
             exception_does_not_exist = True
 
         results = {
+            'success':                  True if voter_address_id > 0 else False,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
@@ -601,41 +646,34 @@ class VoterAddressManager(models.Model):
         }
         return results
 
-    # TODO IMPLEMENT THIS
-    # def update_or_create_from_google(self, voter_id, address_type, address):
-    #     """
-    #     After we have called Google's voterInfoQuery, we want to save locally the normalized information returned
-    #     from Google.
-    #     :param voter_id:
-    #     :param address_type:
-    #     :param updated_values:
-    #     :return:
-    #     """
-    #     status = ''
-    #     exception_multiple_object_returned = False
-    #     voter_address_id = 0
-    #     voter_address_on_stage = VoterAddress()
-    #
-    #     if voter_id > 0 and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
-    #         try:
-    #             voter_address_on_stage, success = VoterAddress.objects.update_or_create(
-    #                 voter_id=voter_id, address_type=address_type, address=address)
-    #             voter_address_id = voter_address_on_stage.id
-    #         except VoterAddress.MultipleObjectsReturned as e:
-    #             handle_record_found_more_than_one_exception(e, logger=logger)
-    #             success = False
-    #             exception_multiple_object_returned = True
-    #     else:
-    #         success = False
-    #         status = 'MISSING_VOTER_ID_OR_ADDRESS_TYPE'
-    #
-    #     results = {
-    #         'success':                  success,
-    #         'status':                   status,
-    #         'MultipleObjectsReturned':  exception_multiple_object_returned,
-    #         'voter_address_saved':      True if voter_address_id > 0 else False,
-    #         'voter_address_id':         voter_address_id,
-    #         'address_type':             address_type,
-    #         'voter_address':            voter_address_on_stage,
-    #     }
-    #     return results
+    def update_voter_address_with_normalized_values(self, voter_id, voter_address_dict):
+        voter_address_id = 0
+        address_type = BALLOT_ADDRESS
+        results = self.retrieve_address(voter_address_id, voter_id, address_type)
+
+        if results['success']:
+            voter_address = results['voter_address']
+
+            try:
+                voter_address.normalized_line1 = voter_address_dict['line1']
+                voter_address.normalized_city = voter_address_dict['city']
+                voter_address.normalized_state = voter_address_dict['state']
+                voter_address.normalized_zip = voter_address_dict['zip']
+                voter_address.save()
+                status = "SAVED_VOTER_ADDRESS_WITH_NORMALIZED_VALUES"
+                success = True
+            except Exception as e:
+                status = "UNABLE_TO_SAVE_VOTER_ADDRESS_WITH_NORMALIZED_VALUES"
+                success = False
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        else:
+            # If here, we were unable to find pre-existing VoterAddress
+            voter_address = VoterAddress()  # TODO DALE Finish this for "create new"
+
+        results = {
+            'status':   status,
+            'success':  success,
+            'voter_address': voter_address,
+        }
+        return results

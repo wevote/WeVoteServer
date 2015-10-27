@@ -337,7 +337,7 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id=0)
         voter_guide_list = results['voter_guide_list']
 
     except Exception as e:
-        status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+        status = 'FAILED voter_guides_to_follow_retrieve, retrieve_voter_guides_for_election ' \
                  '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
         handle_exception(e, logger=logger, exception_message=status)
         success = False

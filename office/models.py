@@ -170,6 +170,9 @@ class ContestOfficeManager(models.Model):
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'new_office_created':       new_office_created,
             'contest_office':           contest_office_on_stage,
+            'saved':                    new_office_created,
+            'updated':                  True if success and not new_office_created else False,
+            'not_processed':            True if not success else False,
         }
         return results
 

@@ -5,8 +5,8 @@
 from django.shortcuts import render
 from documentation_source import device_id_generate_doc, organization_count_doc, organization_follow_doc, \
     organization_follow_ignore_doc, organization_stop_following_doc, organization_retrieve_doc, \
-    voter_address_retrieve_doc, voter_address_save_doc, voter_count_doc, voter_create_doc, \
-    voter_guides_to_follow_retrieve_doc, voter_retrieve_doc
+    voter_address_retrieve_doc, voter_address_save_doc, voter_ballot_items_retrieve_doc, voter_count_doc, \
+    voter_create_doc, voter_guides_to_follow_retrieve_doc, voter_retrieve_doc
 
 LOCALHOST_URL_ROOT = 'http://localhost:8000'
 
@@ -90,6 +90,15 @@ def voter_address_save_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = voter_address_save_doc.voter_address_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_ballot_items_retrieve_doc_view(request):
+    """
+    Show documentation about voterBallotItemsRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_ballot_items_retrieve_doc.voter_ballot_items_retrieve_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

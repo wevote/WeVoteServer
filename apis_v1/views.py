@@ -2,14 +2,14 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .controllers import organization_count, organization_follow, organization_follow_ignore, organization_retrieve, \
+    organization_stop_following, voter_address_save, voter_address_retrieve, voter_count, voter_create, \
+    voter_guides_to_follow_retrieve, voter_retrieve_list
+from ballot.controllers import voter_ballot_items_retrieve
 from django.http import HttpResponse
 import json
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from .controllers import organization_count, organization_follow, organization_follow_ignore, organization_retrieve, \
-    organization_stop_following, voter_address_save, voter_address_retrieve, voter_count, voter_create, \
-    voter_guides_to_follow_retrieve, voter_retrieve_list
 from voter.serializers import VoterSerializer
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
     get_google_civic_election_id_from_cookie
@@ -41,7 +41,7 @@ def organization_count_view(request):
     return organization_count()
 
 
-def api_organization_follow_view(request):
+def organization_follow_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     try:
         organization_id = request.GET['organization_id']
@@ -50,7 +50,7 @@ def api_organization_follow_view(request):
     return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id)
 
 
-def api_organization_stop_following_view(request):
+def organization_stop_following_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     try:
         organization_id = request.GET['organization_id']
@@ -59,7 +59,7 @@ def api_organization_stop_following_view(request):
     return organization_stop_following(voter_device_id=voter_device_id, organization_id=organization_id)
 
 
-def api_organization_follow_ignore_view(request):
+def organization_follow_ignore_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     try:
         organization_id = request.GET['organization_id']
@@ -110,6 +110,14 @@ def voter_address_save_view(request):
         address = ''
         address_variable_exists = False
     return voter_address_save(voter_device_id, address, address_variable_exists)
+
+
+def voter_ballot_items_retrieve_view(request):
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    # We look in the cookies for google_civic_election_id
+    google_civic_election_id = get_google_civic_election_id_from_cookie(request)
+    # This 'voter_ballot_items_retrieve' lives in ballot/controllers.py
+    return voter_ballot_items_retrieve(voter_device_id, google_civic_election_id)
 
 
 def voter_count_view(request):

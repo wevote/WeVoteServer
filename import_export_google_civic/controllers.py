@@ -17,6 +17,7 @@ from election.models import ElectionManager
 from exception.models import handle_record_not_found_exception
 from measure.models import ContestMeasure
 from office.models import ContestOfficeManager
+from voter.models import VoterAddressManager
 from wevote_functions.models import extract_state_from_ocd_division_id, logger, positive_value_exists
 
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
@@ -236,7 +237,10 @@ def process_contest_office_from_structured_json(
             we_vote_id, google_civic_election_id, district_id, office_name, state_code, updated_contest_office_values)
     else:
         update_or_create_contest_office_results = {
-            'success': False
+            'success': False,
+            'saved': 0,
+            'updated': 0,
+            'not_processed': 1,
         }
 
     if update_or_create_contest_office_results['success']:
@@ -256,13 +260,14 @@ def process_contest_office_from_structured_json(
         ballot_item_manager = BallotItemManager()
         ballot_item_manager.update_or_create_ballot_item_for_voter(
             voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label,
-            local_ballot_order, contest_measure_id, contest_office_id)  # TODO Add contest_office_we_vote_id here
+            local_ballot_order, contest_measure_id, contest_office_id, contest_office_we_vote_id)
 
+    # Note: We do not need to connect the candidates with the voter here for a ballot item
     process_candidates_from_structured_json(
         candidates_structured_json, google_civic_election_id, ocd_division_id, state_code, contest_office_id,
         contest_office_we_vote_id)
 
-    return
+    return update_or_create_contest_office_results
 
 
 def extract_value_from_array(structured_json, index_key, default_value):
@@ -319,22 +324,40 @@ def process_contests_from_structured_json(
     "type": "Referendum",
     """
     local_ballot_order = 0
+    contests_saved = 0
+    contests_updated = 0
+    contests_not_processed = 0
     for one_contest in contests_structured_json:
         local_ballot_order += 1  # Needed if ballotPlacement isn't provided by Google Civic
         contest_type = one_contest['type']
 
         # Is the contest is a referendum/initiative/measure?
         if contest_type == 'Referendum':
-            process_contest_referendum_from_structured_json(  # TODO Add state_code
-                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, voter_id)
+            process_contest_referendum_from_structured_json(
+                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, state_code, voter_id)
 
         # All other contests are for an elected office
         else:
-            process_contest_office_from_structured_json(
+            process_contest_results = process_contest_office_from_structured_json(
                 one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, state_code, voter_id)
+            if process_contest_results['saved']:
+                contests_saved += 1
+            elif process_contest_results['updated']:
+                contests_updated += 1
+            elif process_contest_results['not_processed']:
+                contests_not_processed += 1
+
+    results = {
+        'success': True,
+        'status': 'Contests saved: {saved}, '
+                  'contests updated: {updated}, '
+                  'contests not_processed: {not_processed}'.format(saved=contests_saved, updated=contests_updated,
+                                                                   not_processed=contests_not_processed),
+    }
+    return results
 
 
-def retrieve_one_ballot_from_google_civic_api(text_for_map_search, google_civic_election_id):
+def retrieve_one_ballot_from_google_civic_api(text_for_map_search, google_civic_election_id=0):
     # Request json file from Google servers
     logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
     request = requests.get(VOTER_INFO_URL, params={
@@ -379,6 +402,43 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0):
     #     "name": "Virginia General Election",
     #     "ocdDivisionId": "ocd-division/country:us/state:va"
     # },
+    if 'election' not in one_ballot_json:
+        results = {
+            'status': 'BALLOT_JSON_MISSING_ELECTION',
+            'success': False,
+            'google_civic_election_id': 0,
+        }
+        return results
+
+    if 'id' not in one_ballot_json['election']:
+        results = {
+            'status': 'BALLOT_JSON_MISSING_ELECTION_ID',
+            'success': False,
+            'google_civic_election_id': 0,
+        }
+        return results
+
+    if positive_value_exists(voter_id):
+        voter_address_dict = one_ballot_json['normalizedInput'] if 'normalizedInput' in one_ballot_json else {}
+        if positive_value_exists(voter_address_dict):
+            # When saving a ballot for an individual voter, use this data to update voter address with the
+            #  normalized address information returned from Google Civic
+            # "normalizedInput": {
+            #   "line1": "254 hartford st",
+            #   "city": "san francisco",
+            #   "state": "CA",
+            #   "zip": "94114"
+            #  },
+            voter_address_manager = VoterAddressManager()
+            voter_address_manager.update_voter_address_with_normalized_values(
+                voter_id, voter_address_dict)
+            # Note that neither success nor status set here because updating the voter_address with normalized values
+            #  isn't critical to the success of storing the ballot for a voter
+            # if update_address_results['success']:
+            #     status = 'VOTER_ADDRESS_UPDATED_WITH_NORMALIZED_VALUES'
+            # else:
+            #     status = update_address_results['status']
+
     google_civic_election_id = one_ballot_json['election']['id']
     ocd_division_id = one_ballot_json['election']['ocdDivisionId']
     state_code = extract_state_from_ocd_division_id(ocd_division_id)
@@ -390,25 +450,18 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0):
                 state_code = one_ballot_json['state']['name']
 
     # Loop through all contests and store in local db cache
-    process_contests_from_structured_json(one_ballot_json['contests'], google_civic_election_id,
-                                          ocd_division_id, state_code, voter_id)
+    results = process_contests_from_structured_json(one_ballot_json['contests'], google_civic_election_id,
+                                                    ocd_division_id, state_code, voter_id)
 
-    if voter_id > 0:
-        print "TODO Update voter address"
-        voter_address = one_ballot_json['normalizedInput'] if 'normalizedInput' in one_ballot_json else {}
-        # When saving a ballot for an individual voter, use this data to update voter address
-        # "normalizedInput": {
-        #   "line1": "254 hartford st",
-        #   "city": "san francisco",
-        #   "state": "CA",
-        #   "zip": "94114"
-        #  },
+    status = results['status']
 
     # When saving a ballot for individual voter, loop through all pollingLocations and store in local db
     # process_polling_locations_from_structured_json(one_ballot_json['pollingLocations'])
 
     results = {
-        'success': True,
+        'status': status,
+        'success': results['success'],
+        'google_civic_election_id': google_civic_election_id,
     }
     return results
 
@@ -440,12 +493,45 @@ def store_results_from_google_civic_api_election_query(structured_json):
     return results
 
 
-###################################################
-# OLD BELOW
-###################################################
+def retrieve_and_store_ballot_for_voter(voter_id, text_for_map_search=''):
+    google_civic_election_id = 0
+    if not positive_value_exists(text_for_map_search):
+        # Retrieve it from voter address
+        voter_address_manager = VoterAddressManager()
+        text_for_map_search = voter_address_manager.retrieve_ballot_map_text_from_voter_id(voter_id)
+
+    if positive_value_exists(text_for_map_search):
+        one_ballot_results = retrieve_one_ballot_from_google_civic_api(text_for_map_search)
+        if one_ballot_results['success']:
+            one_ballot_json = one_ballot_results['structured_json']
+
+            # We update VoterAddress with normalized address data in store_one_ballot_from_google_civic_api
+
+            store_one_ballot_results = store_one_ballot_from_google_civic_api(one_ballot_json, voter_id)
+            if store_one_ballot_results['success']:
+                status = 'RETRIEVED_AND_STORED_BALLOT_FOR_VOTER'
+                success = True
+                google_civic_election_id = store_one_ballot_results['google_civic_election_id']
+            else:
+                status = 'UNABLE_TO-store_one_ballot_from_google_civic_api'
+                success = False
+        else:
+            status = 'UNABLE_TO-retrieve_one_ballot_from_google_civic_api'
+            success = False
+    else:
+        status = 'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH'
+        success = False
+
+    results = {
+        'google_civic_election_id': google_civic_election_id,
+        'success': success,
+        'status': status,
+    }
+    return results
 
 
-def process_polling_locations_from_structured_json(polling_location_structured_data, save_to_db):
+# We will want to do this in the future
+def process_polling_locations_from_structured_json(polling_location_structured_data):
     """
     "pollingLocations": [
       {
@@ -463,7 +549,8 @@ def process_polling_locations_from_structured_json(polling_location_structured_d
 
 
 def process_contest_referendum_from_structured_json(
-        one_contest_referendum_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order, save_to_db):
+        one_contest_referendum_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order,
+        state_code, voter_id):
     """
     "referendumTitle": "Proposition 45",
     "referendumSubtitle": "Healthcare Insurance. Rate Changes. Initiative Statute.",
@@ -490,37 +577,36 @@ def process_contest_referendum_from_structured_json(
     special = results['special']  # "Yes" or "No" depending on whether this a contest being held
     # outside the normal election cycle.
 
-    if save_to_db:
-        if referendum_title and referendum_subtitle and district_name and district_scope and district_id \
-                and google_civic_election_id:
-            try:
-                query1 = ContestMeasure.objects.all()
-                query1 = query1.filter(referendum_title__exact=referendum_title)
-                query1 = query1.filter(google_civic_election_id__exact=google_civic_election_id)
-                query1 = query1.filter(district_scope__exact=district_scope)
+    if referendum_title and referendum_subtitle and district_name and district_scope and district_id \
+            and google_civic_election_id:
+        try:
+            query1 = ContestMeasure.objects.all()
+            query1 = query1.filter(referendum_title__exact=referendum_title)
+            query1 = query1.filter(google_civic_election_id__exact=google_civic_election_id)
+            query1 = query1.filter(district_scope__exact=district_scope)
 
-                # Was at least one existing entry found based on the above criteria?
-                if len(query1):
-                    google_civic_contest_referendum = query1[0]
-                # If no entries found previously, create a new entry
-                else:
-                    google_civic_contest_referendum = \
-                        ContestMeasure.objects.create(referendum_title=referendum_title,
-                                                                    referendum_subtitle=referendum_subtitle,
-                                                                    google_civic_election_id=google_civic_election_id,
-                                                                    referendum_url=referendum_url,
-                                                                    ballot_placement=ballot_placement,
-                                                                    primary_party=primary_party,
-                                                                    district_name=district_name,
-                                                                    district_scope=district_scope,
-                                                                    district_id=district_id,
-                                                                    electorate_specifications=electorate_specifications,
-                                                                    special=special,
-                                                                    )
+            # Was at least one existing entry found based on the above criteria?
+            if len(query1):
+                google_civic_contest_referendum = query1[0]
+            # If no entries found previously, create a new entry
+            else:
+                google_civic_contest_referendum = \
+                    ContestMeasure.objects.create(referendum_title=referendum_title,
+                                                  referendum_subtitle=referendum_subtitle,
+                                                  google_civic_election_id=google_civic_election_id,
+                                                  referendum_url=referendum_url,
+                                                  ballot_placement=ballot_placement,
+                                                  primary_party=primary_party,
+                                                  district_name=district_name,
+                                                  district_scope=district_scope,
+                                                  district_id=district_id,
+                                                  electorate_specifications=electorate_specifications,
+                                                  special=special,
+                                                  )
 
-                # Save information about this contest item on the voter's ballot from: ballot_placement
-            except Exception as e:
-                handle_record_not_found_exception(e, logger=logger)
+            # Save information about this contest item on the voter's ballot from: ballot_placement
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
 
     return
 

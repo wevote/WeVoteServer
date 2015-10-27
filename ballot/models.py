@@ -4,7 +4,8 @@
 
 from candidate.models import CandidateCampaign
 from django.db import models
-from exception.models import handle_record_found_more_than_one_exception
+from exception.models import handle_exception, handle_record_found_more_than_one_exception, \
+    handle_record_not_found_exception
 import wevote_functions.admin
 from wevote_functions.models import positive_value_exists
 
@@ -30,15 +31,24 @@ class BallotItem(models.Model):
     local_ballot_order = models.SmallIntegerField(
         verbose_name="locally calculated order this item should appear on the ballot", null=True, blank=True)
 
-    # The internal We Vote id for the ContestOffice that this candidate is competing for
-    # An identifier for this district, relative to its scope. For example, the 34th State Senate district
-    # would have id "34" and a scope of stateUpper.
-    contest_office_id = models.CharField(verbose_name="contest_office_id id", max_length=254, null=True, blank=True)
+    # The id for this contest office specific to this server.
+    # TODO contest_office_id should be positive integer as opposed to CharField
+    contest_office_id = models.CharField(verbose_name="local id for this contest office", max_length=255, null=True,
+                                         blank=True)
     # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
+    contest_office_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for this office", max_length=255, default=None, null=True,
+        blank=True, unique=True)
+    # The local database id for this measure, specific to this server.
+    # TODO contest_measure_id should be positive integer as opposed to CharField
     contest_measure_id = models.CharField(
-        verbose_name="contest_measure unique id", max_length=254, null=True, blank=True)
+        verbose_name="contest_measure unique id", max_length=255, null=True, blank=True)
+    # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
+    contest_measure_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for this measure", max_length=255, default=None, null=True,
+        blank=True, unique=True)
     # This is a sortable name
-    ballot_item_label = models.CharField(verbose_name="a label we can sort by", max_length=254, null=True, blank=True)
+    ballot_item_label = models.CharField(verbose_name="a label we can sort by", max_length=255, null=True, blank=True)
 
     def is_contest_office(self):
         if self.contest_office_id:
@@ -61,17 +71,6 @@ class BallotItem(models.Model):
 
 
 class BallotItemManager(models.Model):
-
-    def retrieve_all_ballot_items_for_voter(self, voter_id, google_civic_election_id=0):
-        ballot_item_list = BallotItem.objects.order_by('ballot_order')
-
-        results = {
-            'google_civic_election_id':      google_civic_election_id,
-            'voter_id':         voter_id,
-            'ballot_item_list': ballot_item_list,
-        }
-        return results
-
     # NOTE: This method only needs to hit the database at most once per day.
     # We should cache the results in a JSON file that gets cached on the server and locally in the
     # voter's browser for speed.
@@ -87,7 +86,7 @@ class BallotItemManager(models.Model):
 
     def update_or_create_ballot_item_for_voter(
             self, voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label,
-            local_ballot_order, contest_measure_id=0, contest_office_id=0):
+            local_ballot_order, contest_measure_id=0, contest_office_id=0, contest_office_we_vote_id=''):
         exception_multiple_object_returned = False
         new_ballot_item_created = False
 
@@ -112,6 +111,7 @@ class BallotItemManager(models.Model):
                     'google_ballot_placement': google_ballot_placement,
                     'local_ballot_order': local_ballot_order,
                     'ballot_item_label': ballot_item_label,
+                    'contest_office_we_vote_id': contest_office_we_vote_id,
                 }
                 ballot_item_on_stage, new_ballot_item_created = BallotItem.objects.update_or_create(
                     contest_measure_id__exact=contest_measure_id,
@@ -136,7 +136,6 @@ class BallotItemManager(models.Model):
         return results
 
     def retrieve_ballot_item_for_voter(self, voter_id, google_civic_election_id, google_civic_district_ocd_id):
-        error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         google_civic_ballot_item_on_stage = BallotItem()
@@ -170,3 +169,69 @@ class BallotItemManager(models.Model):
         # google_civic_contest_office_on_stage.district_ocd_id)
 
         return 3
+
+
+class BallotItemList(models.Model):
+    """
+    A way to retrieve a list of ballot_items
+    """
+    def retrieve_ballot_items_for_election(self, google_civic_election_id):
+        ballot_item_list = []
+        ballot_item_list_found = False
+        try:
+            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order')
+            ballot_item_list = ballot_item_queryset.filter(
+                google_civic_election_id=google_civic_election_id)
+
+            if positive_value_exists(ballot_item_list):
+                ballot_item_list_found = True
+                status = 'BALLOT_ITEMS_FOUND'
+            else:
+                status = 'NO_BALLOT_ITEMS_FOUND, not positive_value_exists'
+        except BallotItem.DoesNotExist as e:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_ITEMS_FOUND'
+            ballot_item_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_ballot_items_for_election ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success':                      True if ballot_item_list_found else False,
+            'status':                       status,
+            'ballot_item_list_found':       ballot_item_list_found,
+            'ballot_item_list':             ballot_item_list,
+        }
+        return results
+
+    def retrieve_all_ballot_items_for_voter(self, voter_id, google_civic_election_id):
+        ballot_item_list = []
+        ballot_item_list_found = False
+        try:
+            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order')
+            ballot_item_list = ballot_item_queryset
+
+            if len(ballot_item_list):
+                ballot_item_list_found = True
+                status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_voter'
+            else:
+                status = 'NO_BALLOT_ITEMS_FOUND_0'
+        except BallotItem.DoesNotExist as e:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist'
+            ballot_item_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_all_ballot_items_for_voter ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success':                      True if ballot_item_list_found else False,
+            'status':                       status,
+            'google_civic_election_id':     google_civic_election_id,
+            'voter_id':                     voter_id,
+            'ballot_item_list_found':       ballot_item_list_found,
+            'ballot_item_list':             ballot_item_list,
+        }
+        return results
