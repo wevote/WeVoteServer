@@ -7,7 +7,7 @@ module.exports = {
   entry: './app/App.jsx',
   contentBase: './public',
   output: {
-    filename: '[name]/bundle.js',
+    filename: 'bundle.js',
     publicPath: '/',
     path: path.resolve(__dirname, 'public')
   },
