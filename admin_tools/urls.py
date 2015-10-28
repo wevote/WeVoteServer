@@ -8,5 +8,5 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.admin_home_view, name='admin_home',),
-    url(r'^import_test_data/$', views.import_test_data_view, name='import_test_data'),
+    url(r'^import_sample_data/$', views.import_sample_data_view, name='import_sample_data'),
 ]

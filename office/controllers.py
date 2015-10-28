@@ -17,7 +17,7 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 # CANDIDATE_CAMPAIGNS_URL = get_environment_variable("CANDIDATE_CAMPAIGNS_URL")
 
 
-def offices_import_from_sample_file(request, load_from_uri=False):  # TODO FINISH BUILDING/TESTING THIS
+def offices_import_from_sample_file(request=None, load_from_uri=False):  # TODO FINISH BUILDING/TESTING THIS
     """
     Get the json data, and either create new entries or update existing
     :return:

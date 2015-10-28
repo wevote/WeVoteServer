@@ -6,6 +6,7 @@ from .controllers import organization_count, organization_follow, organization_f
     organization_stop_following, voter_address_save, voter_address_retrieve, voter_count, voter_create, \
     voter_guides_to_follow_retrieve, voter_retrieve_list
 from ballot.controllers import voter_ballot_items_retrieve
+from candidate.controllers import candidates_retrieve
 from django.http import HttpResponse
 import json
 from rest_framework.response import Response
@@ -16,6 +17,18 @@ from wevote_functions.models import generate_voter_device_id, get_voter_device_i
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+def candidates_retrieve_view(request):
+    try:
+        office_id = request.GET['office_id']
+    except KeyError:
+        office_id = 0
+    try:
+        office_we_vote_id = request.GET['office_we_vote_id']
+    except KeyError:
+        office_we_vote_id = ''
+    return candidates_retrieve(office_id, office_we_vote_id)
 
 
 def device_id_generate_view(request):

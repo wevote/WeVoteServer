@@ -91,7 +91,7 @@ def organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOW
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organizations_import_from_sample_file(request, load_from_uri=False):  # TODO FINISH BUILDING/TESTING THIS
+def organizations_import_from_sample_file(request=None, load_from_uri=False):  # TODO FINISH BUILDING/TESTING THIS
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -166,14 +166,15 @@ def organizations_import_from_sample_file(request, load_from_uri=False):  # TODO
                 #     organization_name=one_organization["organization_name"]))
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
-            messages.add_message(request, messages.ERROR,
-                                 "Could not save Organization, we_vote_id: {we_vote_id}, "
-                                 "organization_name: {organization_name}, "
-                                 "organization_website: {organization_website}".format(
-                                     we_vote_id=one_organization["we_vote_id"],
-                                     organization_name=one_organization["organization_name"],
-                                     organization_website=one_organization["organization_website"],
-                                 ))
+            if request is not None:
+                messages.add_message(request, messages.ERROR,
+                                     "Could not save Organization, we_vote_id: {we_vote_id}, "
+                                     "organization_name: {organization_name}, "
+                                     "organization_website: {organization_website}".format(
+                                         we_vote_id=one_organization["we_vote_id"],
+                                         organization_name=one_organization["organization_name"],
+                                         organization_website=one_organization["organization_website"],
+                                     ))
             organizations_not_processed += 1
 
     organizations_results = {

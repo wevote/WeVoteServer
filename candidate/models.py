@@ -4,7 +4,7 @@
 
 from django.db import models
 from election.models import Election
-from exception.models import handle_record_found_more_than_one_exception, print_to_log
+from exception.models import handle_exception, handle_record_found_more_than_one_exception, print_to_log
 from office.models import ContestOffice
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
@@ -19,6 +19,9 @@ class CandidateCampaignList(models.Model):
     """
 
     def retrieve_candidate_campaigns_for_this_election_list(self):
+        """
+        This is used by the admin tools to show CandidateCampaigns
+        """
         candidates_list_temp = CandidateCampaign.objects.all()
         # Order by candidate_name.
         # To order by last name we will need to make some guesses in some case about what the last name is.
@@ -26,6 +29,55 @@ class CandidateCampaignList(models.Model):
         # TODO Temp google_civic_election_id
         # candidates_list_temp = candidates_list_temp.filter(google_civic_election_id=1)
         return candidates_list_temp
+
+    def retrieve_all_candidates_for_office(self, office_id, office_we_vote_id):
+        candidate_list = []
+        candidate_list_found = False
+
+        if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
+            status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+            results = {
+                'success':              True if candidate_list_found else False,
+                'status':               status,
+                'office_id':            office_id,
+                'office_we_vote_id':    office_we_vote_id,
+                'candidate_list_found': candidate_list_found,
+                'candidate_list':       candidate_list,
+            }
+            return results
+
+        try:
+            candidate_queryset = CandidateCampaign.objects.all()
+            if positive_value_exists(office_id):
+                candidate_queryset = candidate_queryset.filter(contest_office_id=office_id)
+            elif positive_value_exists(office_we_vote_id):
+                candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id=office_we_vote_id)
+            candidate_queryset = candidate_queryset.order_by('candidate_name')
+            candidate_list = candidate_queryset
+
+            if len(candidate_list):
+                candidate_list_found = True
+                status = 'CANDIDATES_RETRIEVED'
+            else:
+                status = 'NO_CANDIDATES_RETRIEVED'
+        except CandidateCampaign.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_CANDIDATES_FOUND_DoesNotExist'
+            candidate_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_all_candidates_for_office ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success':              True if candidate_list_found else False,
+            'status':               status,
+            'office_id':            office_id,
+            'office_we_vote_id':    office_we_vote_id,
+            'candidate_list_found': candidate_list_found,
+            'candidate_list':       candidate_list,
+        }
+        return results
 
 
 class CandidateCampaign(models.Model):

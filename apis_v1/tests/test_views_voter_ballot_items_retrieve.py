@@ -1,4 +1,4 @@
-# apis_v1/test_views_voter_guides_to_follow_retrieve.py
+# apis_v1/test_views_voter_ballot_items_retrieve.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
@@ -6,7 +6,6 @@ from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
 from django.http import SimpleCookie
 import json
-from organization.models import Organization
 
 
 class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):

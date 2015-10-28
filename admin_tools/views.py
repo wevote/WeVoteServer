@@ -24,7 +24,7 @@ def admin_home_view(request):
 
 
 # @login_required()  # Commented out while we are developing login process
-def import_test_data_view(request):
+def import_sample_data_view(request):
     # This routine works without requiring a Google Civic API key
 
     # We want to make sure that all voters have been updated to have a we_vote_id

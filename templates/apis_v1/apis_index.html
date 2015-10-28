@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>We Vote APIs, v1</title>
 </head>
 <body>
 
@@ -55,6 +55,10 @@
     </tr>
     <tr>
         <td colspan="2"><strong>Candidates &amp; Measures</strong></td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:candidatesRetrieveDocs' %}">candidatesRetrieve</a></td>
+        <td>Retrieve a list of candidates competing for an office to display.</td>
     </tr>
     <tr>
         <td colspan="2"><strong>Organizations &amp; People</strong></td>

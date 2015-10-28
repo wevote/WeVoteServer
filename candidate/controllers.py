@@ -2,13 +2,13 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import CandidateCampaignManager
+from .models import CandidateCampaignList, CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages
-from exception.models import handle_record_not_found_exception, handle_record_not_saved_exception
+from django.http import HttpResponse
+from exception.models import handle_exception
 import json
 from office.models import ContestOfficeManager
-import requests
 import wevote_functions.admin
 from wevote_functions.models import positive_value_exists
 
@@ -18,7 +18,7 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 CANDIDATE_CAMPAIGNS_URL = get_environment_variable("CANDIDATE_CAMPAIGNS_URL")
 
 
-def candidates_import_from_sample_file(request, load_from_uri=False):
+def candidates_import_from_sample_file(request=None, load_from_uri=False):
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -113,7 +113,7 @@ def candidates_import_from_sample_file(request, load_from_uri=False):
                 candidates_updated += 1
         else:
             candidates_not_processed += 1
-            if candidates_not_processed < 5:
+            if candidates_not_processed < 5 and request is not None:
                 messages.add_message(request, messages.ERROR,
                                      results['status'] + "candidate_name: {candidate_name}"
                                                          ", google_civic_election_id: {google_civic_election_id}"
@@ -133,3 +133,88 @@ def candidates_import_from_sample_file(request, load_from_uri=False):
         'not_processed': candidates_not_processed,
     }
     return candidates_results
+
+
+def candidates_retrieve(office_id, office_we_vote_id):
+    """
+    Used by the api
+    :param office_id:
+    :param office_we_vote_id:
+    :return:
+    """
+    # NOTE: Candidates retrieve is independent of *who* wants to see the data. Candidates retrieve never triggers
+    #  a ballot data lookup from Google Civic, like voterBallotItems does
+
+    if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
+        # At this point if we don't have a google_civic_election_id, then we don't have an upcoming election
+        status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+        json_data = {
+            'status': status,
+            'success': False,
+            'office_id': office_id,
+            'office_we_vote_id': office_we_vote_id,
+            'google_civic_election_id': 0,
+            'candidate_list': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    candidate_list = []
+    candidates_to_display = []
+    google_civic_election_id = 0
+    try:
+        candidate_list_object = CandidateCampaignList()
+        results = candidate_list_object.retrieve_all_candidates_for_office(office_id, office_we_vote_id)
+        success = results['success']
+        status = results['status']
+        candidate_list = results['candidate_list']
+    except Exception as e:
+        status = 'FAILED candidates_retrieve. ' \
+                 '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+        handle_exception(e, logger=logger, exception_message=status)
+        success = False
+
+    if success:
+        # Reset office_we_vote_id and office_id so we are sure that it matches what we pull from the database
+        office_id = 0
+        office_we_vote_id = ''
+        for candidate in candidate_list:
+            one_candidate = {
+                'candidate_id':                 candidate.id,
+                'candidate_we_vote_id':         candidate.we_vote_id,
+                'candidate_display_name':       candidate.candidate_name,
+                'candidate_photo_url':          candidate.fetch_photo_url(),
+                'order_on_ballot':              candidate.order_on_ballot,
+            }
+            candidates_to_display.append(one_candidate.copy())
+            # Capture the office_we_vote_id and google_civic_election_id so we can return
+            if not positive_value_exists(office_id) and candidate.contest_office_id:
+                office_id = candidate.contest_office_id
+            if not positive_value_exists(office_we_vote_id) and candidate.contest_office_we_vote_id:
+                office_we_vote_id = candidate.contest_office_we_vote_id
+            if not positive_value_exists(google_civic_election_id) and candidate.google_civic_election_id:
+                google_civic_election_id = candidate.google_civic_election_id
+
+        if len(candidates_to_display):
+            status = 'CANDIDATES_RETRIEVED'
+        else:
+            status = 'NO_CANDIDATES_RETRIEVED'
+
+        json_data = {
+            'status':                   status,
+            'success':                  True,
+            'office_id':                office_id,
+            'office_we_vote_id':        office_we_vote_id,
+            'google_civic_election_id': google_civic_election_id,
+            'candidate_list':           candidates_to_display,
+        }
+    else:
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'office_id':                office_id,
+            'office_we_vote_id':        office_we_vote_id,
+            'google_civic_election_id': google_civic_election_id,
+            'candidate_list':           [],
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')

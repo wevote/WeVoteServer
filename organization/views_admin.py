@@ -33,20 +33,6 @@ ORGANIZATION_STANCE_CHOICES = (
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-# Right now we want to make sure these imports happen in a specific sequence from
-#   admin_tools:import_test_data
-# def organizations_import_from_sample_file_view(request):
-#     """
-#     This gives us sample organizations for testing
-#     :return:
-#     """
-#     load_from_uri = False
-#     organizations_import_from_sample_file(request, load_from_uri)
-#
-#     messages.add_message(request, messages.INFO, 'Organizations imported.')
-#
-#     return HttpResponseRedirect(reverse('organization:organization_list', args=()))
-
 
 # This page does not need to be protected.
 # NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.

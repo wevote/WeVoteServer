@@ -17,7 +17,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
-    # Get voter_device_id from the voter_device_id so we can figure out which ballot_items to offer
+    # Get voter_id from the voter_device_id so we can figure out which ballot_items to offer
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         json_data = {

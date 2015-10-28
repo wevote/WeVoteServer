@@ -18,7 +18,7 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POSITIONS_URL = get_environment_variable("POSITIONS_URL")
 
 
-def positions_import_from_sample_file(request, load_from_uri=False):
+def positions_import_from_sample_file(request=None, load_from_uri=False):
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -122,16 +122,18 @@ def positions_import_from_sample_file(request, load_from_uri=False):
                 #     we_vote_id=one_position["we_vote_id"]))
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
-            messages.add_message(request, messages.ERROR,
-                                 u"Could not save/update position, position_on_stage_found: {position_on_stage_found}, "
-                                 u"we_vote_id: {we_vote_id}, "
-                                 u"organization_we_vote_id: {organization_we_vote_id}, "
-                                 u"candidate_campaign_we_vote_id: {candidate_campaign_we_vote_id}".format(
-                                     position_on_stage_found=position_on_stage_found,
-                                     we_vote_id=one_position["we_vote_id"],
-                                     organization_we_vote_id=one_position["organization_we_vote_id"],
-                                     candidate_campaign_we_vote_id=one_position["candidate_campaign_we_vote_id"],
-                                 ))
+            if request is not None:
+                messages.add_message(request, messages.ERROR,
+                                     u"Could not save/update position, "
+                                     u"position_on_stage_found: {position_on_stage_found}, "
+                                     u"we_vote_id: {we_vote_id}, "
+                                     u"organization_we_vote_id: {organization_we_vote_id}, "
+                                     u"candidate_campaign_we_vote_id: {candidate_campaign_we_vote_id}".format(
+                                         position_on_stage_found=position_on_stage_found,
+                                         we_vote_id=one_position["we_vote_id"],
+                                         organization_we_vote_id=one_position["organization_we_vote_id"],
+                                         candidate_campaign_we_vote_id=one_position["candidate_campaign_we_vote_id"],
+                                     ))
             positions_not_processed += 1
 
     positions_results = {

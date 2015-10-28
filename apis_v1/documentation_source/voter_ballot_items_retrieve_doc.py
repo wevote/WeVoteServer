@@ -20,11 +20,12 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
+        {
+            'name':         'google_civic_election_id',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'The unique identifier for a particular election. If not provided, we look it up from the '
+                            'voter\'s record to see if it is stored',
+        },
     ]
 
     api_response = '{\n' \

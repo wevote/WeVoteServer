@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.contrib import messages
+# from django.contrib import messages
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_office_integer, fetch_site_unique_id_prefix
@@ -20,7 +20,8 @@ class ContestOffice(models.Model):
     # then the string "off", and then a sequential integer like "123".
     # We keep the last value in WeVoteSetting.we_vote_id_last_contest_office_integer
     we_vote_id = models.CharField(
-        verbose_name="we vote permanent id for this contest office", max_length=255, default=None, null=True, blank=True, unique=True)
+        verbose_name="we vote permanent id for this contest office", max_length=255, default=None, null=True,
+        blank=True, unique=True)
     # The name of the office for this contest.
     office_name = models.CharField(verbose_name="google civic office", max_length=255, null=False, blank=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
@@ -112,26 +113,35 @@ class ContestOfficeManager(models.Model):
         contest_office_manager = ContestOfficeManager()
         return contest_office_manager.retrieve_contest_office(contest_office_id)
 
-    def retrieve_contest_office_from_maplight_id(self, maplight_id):
+    def retrieve_contest_office_from_we_vote_id(self, contest_office_we_vote_id):
         contest_office_id = 0
         contest_office_manager = ContestOfficeManager()
-        return contest_office_manager.retrieve_contest_office(contest_office_id, maplight_id)
+        return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id)
+
+    def retrieve_contest_office_from_maplight_id(self, maplight_id):
+        contest_office_id = 0
+        contest_office_we_vote_id = ''
+        contest_office_manager = ContestOfficeManager()
+        return contest_office_manager.retrieve_contest_office(contest_office_id, contest_office_we_vote_id, maplight_id)
 
     def fetch_contest_office_id_from_maplight_id(self, maplight_id):
         contest_office_id = 0
+        contest_office_we_vote_id = ''
         contest_office_manager = ContestOfficeManager()
-        results = contest_office_manager.retrieve_contest_office(contest_office_id, maplight_id)
+        results = contest_office_manager.retrieve_contest_office(
+            contest_office_id, contest_office_we_vote_id, maplight_id)
         if results['success']:
             return results['contest_office_id']
         return 0
 
-    def update_or_create_contest_office(self, we_vote_id, google_civic_election_id, district_id, office_name, state_code,
-                                        updated_contest_office_values):
+    def update_or_create_contest_office(self, we_vote_id, google_civic_election_id, district_id, office_name,
+                                        state_code, updated_contest_office_values):
         """
         Either update or create an office entry.
         """
         exception_multiple_object_returned = False
         new_office_created = False
+        contest_office_on_stage = ContestOffice()
 
         if not google_civic_election_id:
             success = False
@@ -177,17 +187,20 @@ class ContestOfficeManager(models.Model):
         return results
 
     # NOTE: searching by all other variables seems to return a list of objects
-    def retrieve_contest_office(self, contest_office_id, maplight_id=None):
+    def retrieve_contest_office(self, contest_office_id, contest_office_we_vote_id='', maplight_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         contest_office_on_stage = ContestOffice()
 
         try:
-            if contest_office_id > 0:
+            if positive_value_exists(contest_office_id):
                 contest_office_on_stage = ContestOffice.objects.get(id=contest_office_id)
                 contest_office_id = contest_office_on_stage.id
-            elif len(maplight_id) > 0:
+            elif positive_value_exists(contest_office_we_vote_id):
+                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
+                contest_office_id = contest_office_on_stage.id
+            elif positive_value_exists(maplight_id):
                 contest_office_on_stage = ContestOffice.objects.get(maplight_id=maplight_id)
                 contest_office_id = contest_office_on_stage.id
         except ContestOffice.MultipleObjectsReturned as e:
@@ -197,13 +210,14 @@ class ContestOfficeManager(models.Model):
             exception_does_not_exist = True
 
         results = {
-            'success':                  True if contest_office_id > 0 else False,
-            'error_result':             error_result,
-            'DoesNotExist':             exception_does_not_exist,
-            'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'contest_office_found':     True if contest_office_id > 0 else False,
-            'contest_office_id':        contest_office_id,
-            'contest_office':           contest_office_on_stage,
+            'success':                      True if contest_office_id > 0 else False,
+            'error_result':                 error_result,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'contest_office_found':         True if contest_office_id > 0 else False,
+            'contest_office_id':            contest_office_id,
+            'contest_office_we_vote_id':    contest_office_we_vote_id,
+            'contest_office':               contest_office_on_stage,
         }
         return results
 
@@ -218,15 +232,15 @@ class ContestOfficeManager(models.Model):
             if positive_value_exists(contest_office_we_vote_id):
                 contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
                 contest_office_id = contest_office_on_stage.id
-            else:
-                logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id no contest_office_we_vote_id")
+            # else:
+            #     logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id no contest_office_we_vote_id")
 
         except ContestOffice.MultipleObjectsReturned as e:
-            logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id ContestOffice.MultipleObjectsReturned")
+            # logger.warn("fetch_contest_office_id_from_we_vote_id ContestOffice.MultipleObjectsReturned")
             handle_record_found_more_than_one_exception(e, logger=logger)
 
         except ContestOffice.DoesNotExist:
             contest_office_id = 0
-            logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id ContestOffice.DoesNotExist")
+            # logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id ContestOffice.DoesNotExist")
 
         return contest_office_id
