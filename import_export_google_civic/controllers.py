@@ -119,6 +119,21 @@ def process_contest_office_from_structured_json(
         one_contest_office_structured_json, google_civic_election_id, ocd_division_id, local_ballot_order, state_code,
         voter_id):
     logger.debug("General contest_type")
+
+    # Protect against the case where this is NOT an office
+    if 'candidates' not in one_contest_office_structured_json:
+        is_not_office = True
+    else:
+        is_not_office = False
+    if is_not_office:
+        update_or_create_contest_office_results = {
+            'success': False,
+            'saved': 0,
+            'updated': 0,
+            'not_processed': 1,
+        }
+        return update_or_create_contest_office_results
+
     office_name = one_contest_office_structured_json['office']
 
     # The number of candidates that a voter may vote for in this contest.
@@ -212,12 +227,13 @@ def process_contest_office_from_structured_json(
 
     we_vote_id = ''
     # Note that all of the information saved here is independent of a particular voter
-    if google_civic_election_id and district_id and office_name:
+    if google_civic_election_id and (district_id or district_name) and office_name:
         updated_contest_office_values = {
             # Values we search against
             'google_civic_election_id': google_civic_election_id,
             'state_code': state_code.lower(),  # Not required for cases of federal offices
             'district_id': district_id,
+            'district_name': district_name,
             'office_name': office_name,
             # The rest of the values
             'ocd_division_id': ocd_division_id,
@@ -227,14 +243,14 @@ def process_contest_office_from_structured_json(
             'contest_level1': contest_level1,
             'contest_level2': contest_level2,
             'primary_party': primary_party,
-            'district_name': district_name,
             'district_scope': district_scope,
             'electorate_specifications': electorate_specifications,
             'special': special,
         }
         contest_office_manager = ContestOfficeManager()
         update_or_create_contest_office_results = contest_office_manager.update_or_create_contest_office(
-            we_vote_id, google_civic_election_id, district_id, office_name, state_code, updated_contest_office_values)
+            we_vote_id, google_civic_election_id, district_id, district_name, office_name, state_code,
+            updated_contest_office_values)
     else:
         update_or_create_contest_office_results = {
             'success': False,
@@ -332,10 +348,10 @@ def process_contests_from_structured_json(
         contest_type = one_contest['type']
 
         # Is the contest is a referendum/initiative/measure?
-        if contest_type == 'Referendum':
-            process_contest_referendum_from_structured_json(
-                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, state_code, voter_id)
-
+        if contest_type.lower() == 'referendum':
+            # process_contest_referendum_from_structured_json(
+            #     one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, state_code, voter_id)
+            contests_not_processed += 1
         # All other contests are for an elected office
         else:
             process_contest_results = process_contest_office_from_structured_json(

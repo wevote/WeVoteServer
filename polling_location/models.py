@@ -21,6 +21,8 @@ class PollingLocation(models.Model):
                                            unique=True)
     location_name = models.CharField(max_length=255, verbose_name="location name", null=True, blank=True)
     polling_hours_text = models.CharField(max_length=255, verbose_name="polling hours", null=True, blank=True)
+    directions_text = models.CharField(
+        max_length=255, verbose_name="directions to get to polling location", null=True, blank=True)
     line1 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 1 returned from VIP')
     line2 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 2 returned from VIP')
     city = models.CharField(max_length=255, blank=True, null=True, verbose_name='city returned from VIP')
@@ -34,11 +36,11 @@ class PollingLocation(models.Model):
     def get_text_for_map_search(self):
         text_for_map_search = ''
         if self.line1:
-            text_for_map_search += self.line1
+            text_for_map_search += self.line1.strip()
         if self.city:
             if len(text_for_map_search):
                 text_for_map_search += ", "
-            text_for_map_search += self.city
+            text_for_map_search += self.city.strip()
         if self.state:
             if len(text_for_map_search):
                 text_for_map_search += ", "
@@ -53,13 +55,14 @@ class PollingLocation(models.Model):
 class PollingLocationManager(models.Model):
 
     def update_or_create_polling_location(self,
-                                          polling_location_id, location_name, polling_hours_text, line1, line2, city,
-                                          state, zip_long):
+                                          polling_location_id, location_name, polling_hours_text, directions_text,
+                                          line1, line2, city, state, zip_long):
         """
         Either update or create an polling_location entry.
         """
         exception_multiple_object_returned = False
         new_polling_location_created = False
+        new_polling_location = PollingLocation()
 
         if not polling_location_id:
             success = False
@@ -83,11 +86,12 @@ class PollingLocationManager(models.Model):
                     'polling_location_id': polling_location_id,
                     'state': state,
                     # The rest of the values
-                    'location_name': location_name,
-                    'polling_hours_text': polling_hours_text,
-                    'line1': line1,
+                    'location_name': location_name.strip(),
+                    'polling_hours_text': polling_hours_text.strip(),
+                    'directions_text': directions_text.strip(),
+                    'line1': line1.strip(),
                     'line2': line2,
-                    'city': city,
+                    'city': city.strip(),
                     'zip_long': zip_long,
                 }
                 # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's

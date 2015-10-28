@@ -1,0 +1,134 @@
+<?xml version="1.0" standalone="yes"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/vip_spec_v2.1.xsd" schemaVersion="2.1">
+  <state id="6">
+    <name>California</name>
+  </state>
+  <source id="0">
+    <name>Los Angeles County, California</name>
+    <vip_id>06037</vip_id>
+    <datetime>2015-08-21T15:19:00</datetime>
+    <organization_url>http://cityofcalabasas.com/election2015.html</organization_url>
+  </source>
+  <locality id="06037">
+    <name>Los Angeles</name>
+    <state_id>6</state_id>
+    <type>county</type>
+    <election_administration_id>6037001</election_administration_id>
+  </locality>
+  <election_administration id="6037001">
+    <name>City of Calabasas</name>
+    <eo_id>6037002</eo_id>
+    <ovc_id>6037003</ovc_id>
+    <physical_address>
+      <location_name>City of Calabasas</location_name>
+      <line1>100 Civic Center Way</line1>
+      <city>Calabasas</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </physical_address>
+    <mailing_address>
+      <line1>100 Civic Center Way</line1>
+      <city>Calabasas</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </mailing_address>
+    <elections_url>http://cityofcalabasas.com/election2015.html</elections_url>
+    <registration_url>http://registertovote.ca.gov/</registration_url>
+    <absentee_url>http://cityofcalabasas.com/elections/2015/vote-by-mail.html</absentee_url>
+    <where_do_i_vote_url>http://cityofcalabasas.com/election2015.html</where_do_i_vote_url>
+    <what_is_on_my_ballot_url>http://cityofcalabasas.com/elections/2015/sample-ballot-2015.pdf</what_is_on_my_ballot_url>    
+    <hours>Mon-Thu 7:30am-5:30pm, Fri 7:30am-4:30pm</hours>
+  </election_administration>
+  <election id="990097406037">
+    <date>2015-11-03</date>
+    <state_id>6</state_id>
+    <polling_hours>7am-8pm</polling_hours>
+  </election>
+  <polling_location id="190000005811830">
+    <address>
+      <location_name>BAY LAUREL ELEMENTARY SCHOOL</location_name>
+      <line1>24740 PASEO PRIMARIO</line1>
+      <city>CALABASAS</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </address>
+    <directions>MULTIPURPOSE ROOM</directions>
+    <polling_hours>7:00am-8:00pm</polling_hours>
+  </polling_location>
+  <polling_location id="190000005811916">
+    <address>
+      <location_name>CALABASAS VILLAGE MOBILE HOME PARK</location_name>
+      <line1>23777 MULHOLLAND HWY</line1>
+      <city>CALABASAS</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </address>
+    <directions>CLUBHOUSE</directions>
+    <polling_hours>7:00am-8:00pm</polling_hours>
+  </polling_location>
+  <polling_location id="190000005811925">
+    <address>
+      <location_name>LUPIN HILL ELEMENTARY SCHOOL</location_name>
+      <line1>26210 ADAMOR RD</line1>
+      <city>CALABASAS</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </address>
+    <directions>MULTIPURPOSE ROOM</directions>
+    <polling_hours>7:00am-8:00pm</polling_hours>
+  </polling_location>
+  <polling_location id="190000005811927">
+    <address>
+      <location_name>A C STELLE MIDDLE SCHOOL</location_name>
+      <line1>22450 MULHOLLAND HWY</line1>
+      <city>CALABASAS</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </address>
+    <directions>MULTIPURPOSE ROOM</directions>
+    <polling_hours>7:00am-8:00pm</polling_hours>
+  </polling_location>
+  <polling_location id="190000005811931">
+    <address>
+      <location_name>JUAN BAUTISTA DE ANZA PARK</location_name>
+      <line1>3701 LOST HILLS ROAD</line1>
+      <city>CALABASAS</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </address>
+    <directions>CONFERENCE ROOM</directions>
+    <polling_hours>7:00am-8:00pm</polling_hours>
+  </polling_location>
+  <polling_location id="190000005811935">
+    <address>
+      <location_name>PRIVATE RESIDENCE</location_name>
+      <line1>3733 Via Del Prado</line1>
+      <city>CALABASAS</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </address>
+    <polling_hours>7:00am-8:00pm</polling_hours>
+  </polling_location>
+  <polling_location id="190000005811939">
+    <address>
+      <location_name>CALABASAS TENNIS &amp; SWIM CENTER</location_name>
+      <line1>23400 PARK SORRENTO</line1>
+      <city>CALABASAS</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </address>
+    <directions>FIRESIDE ROOM</directions>
+    <polling_hours>7:00am-8:00pm</polling_hours>
+  </polling_location>
+  <polling_location id="1900996">
+    <address>
+      <location_name>THIS IS A VOTE BY MAIL PRECINCT</location_name>
+      <line1>100 Civic Center Way</line1>
+      <city>Calabasas</city>
+      <state>CA</state>
+      <zip>91302</zip>
+    </address>
+    <directions>THIS IS A VOTE BY MAIL PRECINCT. THERE IS NO POLLING PLACE FOR THIS ADDRESS IN THIS ELECTION.</directions>
+    <polling_hours>7:00am-8:00pm</polling_hours>
+  </polling_location>
+</vip_object>

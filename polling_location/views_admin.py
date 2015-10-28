@@ -7,12 +7,12 @@ from .controllers import import_and_save_all_polling_locations_data
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+# from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
-from wevote_functions.models import convert_to_int
+from wevote_functions.models import convert_to_int, positive_value_exists
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -28,15 +28,14 @@ def import_polling_locations_view(request):
 
 # @login_required()  # Commented out while we are developing login process()
 def import_polling_locations_process_view(request):
-    # Pass a "state" variable into this view so we know which file to process
-    state = 'va'  # Convert to get variable so we can control which state to process from the interface
-    results = import_and_save_all_polling_locations_data(state)
+    results = import_and_save_all_polling_locations_data()
 
     messages.add_message(request, messages.INFO,
                          'Polling locations retrieved from file. '
-                         '({create_count} added, {update_count} updated)'.format(
-                             create_count=results['create_count'],
-                             update_count=results['update_count']))
+                         '({saved} added, {updated} updated, {not_processed} not_processed)'.format(
+                             saved=results['saved'],
+                             updated=results['updated'],
+                             not_processed=results['not_processed'],))
     return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()))
 
 
@@ -104,12 +103,38 @@ def polling_location_edit_view(request, polling_location_local_id):
 
 # @login_required()  # Commented out while we are developing login process()
 def polling_location_list_view(request):
+    polling_location_state = request.GET.get('polling_location_state')
+    no_limit = False
+
+    polling_location_count_query = PollingLocation.objects.all()
+    if positive_value_exists(polling_location_state):
+        polling_location_count_query = polling_location_count_query.filter(state__iexact=polling_location_state)
+    polling_location_count = polling_location_count_query.count()
+    messages.add_message(request, messages.INFO, '{polling_location_count} polling locations found.'.format(
+        polling_location_count=polling_location_count))
+
+    polling_location_query = PollingLocation.objects.all()
+    if positive_value_exists(polling_location_state):
+        polling_location_query = polling_location_query.filter(state__iexact=polling_location_state)
+    if no_limit:
+        polling_location_query = polling_location_query.order_by('city')
+    else:
+        polling_location_query = polling_location_query.order_by('city')[:100]
+    polling_location_list = polling_location_query
+
+    state_list = {
+        'CA':   'CA',
+        'VA':   'VA',
+    }
+
     messages_on_stage = get_messages(request)
-    polling_location_list = PollingLocation.objects.order_by('city')
 
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'polling_location_list': polling_location_list,
+        'messages_on_stage':        messages_on_stage,
+        'polling_location_list':    polling_location_list,
+        'polling_location_count':   polling_location_count,
+        'polling_location_state':   polling_location_state,
+        'state_list':               state_list,
     }
     return render(request, 'polling_location/polling_location_list.html', template_values)
 

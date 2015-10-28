@@ -14,8 +14,7 @@ from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
 from import_export_google_civic.controllers import retrieve_one_ballot_from_google_civic_api, \
-    retrieve_from_google_civic_api_election_query, store_one_ballot_from_google_civic_api, \
-    store_results_from_google_civic_api_election_query
+    store_one_ballot_from_google_civic_api
 from polling_location.models import PollingLocation
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -38,12 +37,12 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     election_on_stage = Election()
 
     # Testing
-    # messages.add_message(request, messages.INFO,
-    #                      'election_local_id: {election_local_id}, '
-    #                      'google_civic_election_id: {google_civic_election_id}.'.format(
-    #                          election_local_id=election_local_id,
-    #                          google_civic_election_id=google_civic_election_id,
-    #                      ))
+    messages.add_message(request, messages.INFO,
+                         'election_local_id: {election_local_id}, '
+                         'google_civic_election_id: {google_civic_election_id}.'.format(
+                             election_local_id=election_local_id,
+                             google_civic_election_id=google_civic_election_id,
+                         ))
 
     try:
         if positive_value_exists(election_local_id):
@@ -63,9 +62,15 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     # We request the ballot data for each polling location as a way to build up our local data
     state = election_on_stage.get_election_state()
     try:
+        polling_location_count_query = PollingLocation.objects.all()
+        polling_location_count_query = polling_location_count_query.filter(state__iexact=state)
+        polling_location_count = polling_location_count_query.count()
+
         polling_location_list = PollingLocation.objects.all()
         polling_location_list = polling_location_list.filter(state__iexact=state)
-        polling_location_list = polling_location_list.order_by('location_name')  # Creates a bit of random order
+        # polling_location_list = polling_location_list.filter(city__iexact='san francisco')  # TODO DALE For testing
+        # Include a limit of 500 ballots to pull per election
+        polling_location_list = polling_location_list.order_by('location_name')[:500]  # Creates a bit of random order
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '
@@ -75,8 +80,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                                  state=state))
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
-    number_of_polling_locations = len(polling_location_list)
-    if number_of_polling_locations == 0:
+    if polling_location_count == 0:
         messages.add_message(request, messages.ERROR,
                              'Could not retrieve ballot data for the {election_name}. '
                              'No polling locations returned for the state \'{state}\'. (error 2)'.format(
@@ -87,7 +91,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     ballots_retrieved = 0
     ballots_not_retrieved = 0
     # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
-    number_of_polling_locations_to_retrieve = int(.1 * number_of_polling_locations)
+    number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
     for polling_location in polling_location_list:
         success = False
         # Get the address for this polling place, and then retrieve the ballot from Google Civic API
@@ -132,6 +136,8 @@ def election_edit_view(request, election_local_id):
     messages_on_stage = get_messages(request)
     election_local_id = convert_to_int(election_local_id)
     election_on_stage_found = False
+    election_on_stage = Election()
+
     try:
         election_on_stage = Election.objects.get(id=election_local_id)
         election_on_stage_found = True
@@ -162,6 +168,7 @@ def election_edit_process_view(request):
     """
     election_local_id = convert_to_int(request.POST['election_local_id'])
     election_name = request.POST['election_name']
+    election_on_stage = Election()
 
     # Check to see if this election is already being used anywhere
     election_on_stage_found = False
@@ -223,6 +230,8 @@ def election_summary_view(request, election_local_id):
     messages_on_stage = get_messages(request)
     election_local_id = convert_to_int(election_local_id)
     election_on_stage_found = False
+    election_on_stage = Election()
+
     try:
         election_on_stage = Election.objects.get(id=election_local_id)
         election_on_stage_found = True

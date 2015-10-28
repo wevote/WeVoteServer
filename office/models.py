@@ -134,8 +134,8 @@ class ContestOfficeManager(models.Model):
             return results['contest_office_id']
         return 0
 
-    def update_or_create_contest_office(self, we_vote_id, google_civic_election_id, district_id, office_name,
-                                        state_code, updated_contest_office_values):
+    def update_or_create_contest_office(self, we_vote_id, google_civic_election_id, district_id, district_name,
+                                        office_name, state_code, updated_contest_office_values):
         """
         Either update or create an office entry.
         """
@@ -146,7 +146,7 @@ class ContestOfficeManager(models.Model):
         if not google_civic_election_id:
             success = False
             status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
-        elif not district_id:
+        elif not (district_id or district_name):
             success = False
             status = 'MISSING_DISTRICT_ID'
         elif not office_name:
@@ -163,8 +163,9 @@ class ContestOfficeManager(models.Model):
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         district_id__exact=district_id,
-                        office_name__exact=office_name,
-                        state_code__exact=state_code,
+                        district_name__iexact=district_name,  # Case doesn't matter
+                        office_name__iexact=office_name,  # Case doesn't matter
+                        state_code__iexact=state_code,  # Case doesn't matter
                         defaults=updated_contest_office_values)
                 success = True
                 status = 'CONTEST_OFFICE_SAVED'

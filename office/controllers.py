@@ -63,6 +63,7 @@ def offices_import_from_sample_file(request=None, load_from_uri=False):  # TODO 
                 'we_vote_id': we_vote_id,
                 'google_civic_election_id': google_civic_election_id,
                 'district_id': district_id,
+                'district_name': district_name,
                 'office_name': office_name,
                 'state_code': state_code,
                 # The rest of the values
@@ -73,13 +74,12 @@ def offices_import_from_sample_file(request=None, load_from_uri=False):  # TODO 
                 'contest_level1': contest_level1,
                 'contest_level2': contest_level2,
                 'primary_party': primary_party,
-                'district_name': district_name,
                 'district_scope': district_scope,
                 'electorate_specifications': electorate_specifications,
                 'special': special,
             }
             results = office_manager.update_or_create_contest_office(
-                we_vote_id, google_civic_election_id, district_id, office_name,
+                we_vote_id, google_civic_election_id, district_id, district_name, office_name,
                 state_code, updated_contest_office_values)
         else:
             offices_not_processed += 1
