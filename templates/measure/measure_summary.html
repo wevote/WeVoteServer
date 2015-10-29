@@ -1,0 +1,34 @@
+{# templates/measure/measure_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if measure %}{{ measure.measure_title }} Summary{% else %}No Measure Found{% endif %}{% endblock %}
+
+{%  block content %}
+
+<a href="{% url 'measure:measure_list' %}">< Back to Measures</a>
+
+{% if measure %}
+
+    <h1>{{ measure.measure_title }}</h1>
+    <p>{{ measure.measure_subtitle }}</p>
+    <p>{{ measure.measure_text }}</p>
+    <p>Measure Website: <strong>{{ measure.measure_url }}</strong><br />
+    <a href="{% url 'measure:measure_edit' measure.id %}">edit</a>
+    </p>
+
+
+{% else %}
+
+    <h1>No Measure Found</h1>
+    Please visit the <a href="{% url 'measure:measure_list' %}">Measure List</a> page.
+
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+{% endblock %}

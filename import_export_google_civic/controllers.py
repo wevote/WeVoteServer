@@ -14,8 +14,7 @@ from ballot.models import BallotItemManager
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from election.models import ElectionManager
-from exception.models import handle_record_not_found_exception
-from measure.models import ContestMeasure
+from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from voter.models import VoterAddressManager
 from wevote_functions.models import extract_state_from_ocd_division_id, logger, positive_value_exists
@@ -217,8 +216,8 @@ def process_contest_office_from_structured_json(
     #   legislatorUpperBody -
     #   schoolBoard -
     #   specialPurposeOfficer -
-    roles_structured_json = \
-        one_contest_office_structured_json['roles'] if 'roles' in one_contest_office_structured_json else ''
+    # roles_structured_json = \
+    #     one_contest_office_structured_json['roles'] if 'roles' in one_contest_office_structured_json else ''
     # for one_role in roles_structured_json:
     # Figure out how we are going to use level info
 
@@ -335,7 +334,7 @@ def process_contests_from_structured_json(
         contests_structured_json, google_civic_election_id, ocd_division_id, state_code, voter_id):
     """
     Take in the portion of the json related to contests, and save to the database
-    "type": 'General', "House of Delegates", 'locality', 'Primary', 'Run-off', "State Senate"
+    "type": 'General', "House of Delegates", 'locality', 'Primary', 'Run-off', "State Senate", "Municipal"
     or
     "type": "Referendum",
     """
@@ -349,9 +348,14 @@ def process_contests_from_structured_json(
 
         # Is the contest is a referendum/initiative/measure?
         if contest_type.lower() == 'referendum':
-            # process_contest_referendum_from_structured_json(
-            #     one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, state_code, voter_id)
-            contests_not_processed += 1
+            process_contest_results = process_contest_referendum_from_structured_json(
+                one_contest, google_civic_election_id, ocd_division_id, local_ballot_order, state_code, voter_id)
+            if process_contest_results['saved']:
+                contests_saved += 1
+            elif process_contest_results['updated']:
+                contests_updated += 1
+            elif process_contest_results['not_processed']:
+                contests_not_processed += 1
         # All other contests are for an elected office
         else:
             process_contest_results = process_contest_office_from_structured_json(
@@ -547,21 +551,21 @@ def retrieve_and_store_ballot_for_voter(voter_id, text_for_map_search=''):
 
 
 # We will want to do this in the future
-def process_polling_locations_from_structured_json(polling_location_structured_data):
-    """
-    "pollingLocations": [
-      {
-       "address": {
-        "locationName": "School-Harvey Milk",
-        "line1": "4235 19th Street",
-        "city": "San Francisco",
-        "state": "CA",
-        "zip": "94114-2415"
-       },
-       "notes": "Between Collingwood & Diamond",
-       "pollingHours": "07:00-20:00",
-    """
-    return
+# def process_polling_locations_from_structured_json(polling_location_structured_data):
+#     """
+#     "pollingLocations": [
+#       {
+#        "address": {
+#         "locationName": "School-Harvey Milk",
+#         "line1": "4235 19th Street",
+#         "city": "San Francisco",
+#         "state": "CA",
+#         "zip": "94114-2415"
+#        },
+#        "notes": "Between Collingwood & Diamond",
+#        "pollingHours": "07:00-20:00",
+#     """
+#     return
 
 
 def process_contest_referendum_from_structured_json(
@@ -573,14 +577,16 @@ def process_contest_referendum_from_structured_json(
     "referendumUrl": "http://vig.cdn.sos.ca.gov/2014/general/en/pdf/proposition-45-title-summary-analysis.pdf",
     "district" <= this is an array
     """
-    logger.debug("Referendum contest_type")
     referendum_title = one_contest_referendum_structured_json['referendumTitle']
     referendum_subtitle = one_contest_referendum_structured_json['referendumSubtitle']
-    referendum_url = one_contest_referendum_structured_json['referendumUrl']
+    referendum_url = one_contest_referendum_structured_json['referendumUrl'] if \
+        'referendumUrl' in one_contest_referendum_structured_json else ''
+    referendum_text = one_contest_referendum_structured_json['referendumText'] if \
+        'referendumText' in one_contest_referendum_structured_json else ''
 
     # These following fields exist for both candidates and referendum
     results = process_contest_common_fields_from_structured_json(one_contest_referendum_structured_json)
-    ballot_placement = results['ballot_placement']  # A number specifying the position of this contest
+    google_ballot_placement = results['ballot_placement']  # A number specifying the position of this contest
     # on the voter's ballot.
     primary_party = results['primary_party']  # If this is a partisan election, the name of the party it is for.
     district_name = results['district_name']  # The name of the district.
@@ -593,38 +599,58 @@ def process_contest_referendum_from_structured_json(
     special = results['special']  # "Yes" or "No" depending on whether this a contest being held
     # outside the normal election cycle.
 
-    if referendum_title and referendum_subtitle and district_name and district_scope and district_id \
-            and google_civic_election_id:
-        try:
-            query1 = ContestMeasure.objects.all()
-            query1 = query1.filter(referendum_title__exact=referendum_title)
-            query1 = query1.filter(google_civic_election_id__exact=google_civic_election_id)
-            query1 = query1.filter(district_scope__exact=district_scope)
+    # Note that all of the information saved here is independent of a particular voter
+    we_vote_id = ''
+    if google_civic_election_id and (district_id or district_name) and referendum_title:
+        updated_contest_measure_values = {
+            # Values we search against
+            'google_civic_election_id': google_civic_election_id,
+            'state_code': state_code.lower(),  # Not required for cases of federal offices
+            'district_id': district_id,
+            'district_name': district_name,
+            'measure_title': referendum_title,
+            # The rest of the values
+            'measure_subtitle': referendum_subtitle,
+            'measure_url': referendum_url,
+            'measure_text': referendum_text,
+            'ocd_division_id': ocd_division_id,
+            'primary_party': primary_party,
+            'district_scope': district_scope,
+            # 'electorate_specifications': electorate_specifications,
+            # 'special': special,
+        }
+        contest_measure_manager = ContestMeasureManager()
+        update_or_create_contest_measure_results = contest_measure_manager.update_or_create_contest_measure(
+            we_vote_id, google_civic_election_id, district_id, district_name, referendum_title, state_code,
+            updated_contest_measure_values)
+    else:
+        update_or_create_contest_measure_results = {
+            'success': False,
+            'saved': 0,
+            'updated': 0,
+            'not_processed': 1,
+        }
 
-            # Was at least one existing entry found based on the above criteria?
-            if len(query1):
-                google_civic_contest_referendum = query1[0]
-            # If no entries found previously, create a new entry
-            else:
-                google_civic_contest_referendum = \
-                    ContestMeasure.objects.create(referendum_title=referendum_title,
-                                                  referendum_subtitle=referendum_subtitle,
-                                                  google_civic_election_id=google_civic_election_id,
-                                                  referendum_url=referendum_url,
-                                                  ballot_placement=ballot_placement,
-                                                  primary_party=primary_party,
-                                                  district_name=district_name,
-                                                  district_scope=district_scope,
-                                                  district_id=district_id,
-                                                  electorate_specifications=electorate_specifications,
-                                                  special=special,
-                                                  )
+    if update_or_create_contest_measure_results['success']:
+        contest_measure = update_or_create_contest_measure_results['contest_measure']
+        contest_measure_id = contest_measure.id
+        contest_measure_we_vote_id = contest_measure.we_vote_id
+        ballot_item_label = contest_measure.measure_title
+    else:
+        contest_measure_id = 0
+        contest_measure_we_vote_id = ''
+        ballot_item_label = ''
 
-            # Save information about this contest item on the voter's ballot from: ballot_placement
-        except Exception as e:
-            handle_record_not_found_exception(e, logger=logger)
+    # If a voter_id was passed in, save an entry for this office for the voter's ballot
+    if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id) \
+            and positive_value_exists(contest_measure_id):
+        ballot_item_manager = BallotItemManager()
+        contest_office_id = 0
+        ballot_item_manager.update_or_create_ballot_item_for_voter(
+            voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label,
+            local_ballot_order, contest_measure_id, contest_office_id, contest_measure_we_vote_id)
 
-    return
+    return update_or_create_contest_measure_results
 
 
 # GoogleDivisions  # Represents a political geographic division that matches the requested query.

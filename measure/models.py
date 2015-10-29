@@ -3,14 +3,17 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from exception.models import handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_measure_integer, \
     fetch_next_we_vote_id_last_measure_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
+from wevote_functions.models import extract_state_from_ocd_division_id, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+# The measure that is on the ballot (equivalent to ContestOffice)
 class ContestMeasure(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
     # organizations
@@ -26,13 +29,16 @@ class ContestMeasure(models.Model):
     # A brief description of the referendum. This field is only populated for contests of type 'Referendum'.
     measure_subtitle = models.CharField(verbose_name="google civic referendum subtitle",
                                         max_length=255, null=False, blank=False)
+    # The text of the measure. This field is only populated for contests of type 'Referendum'.
+    measure_text = models.TextField(verbose_name="measure text", null=True, blank=False)
     # A link to the referendum. This field is only populated for contests of type 'Referendum'.
     measure_url = models.CharField(verbose_name="measure details url", max_length=255, null=True, blank=False)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(
         verbose_name="google civic election id", max_length=255, null=True, blank=True)
     google_civic_election_id_new = models.PositiveIntegerField(
-        verbose_name="google election id", default=0, null=False, blank=False)
+        verbose_name="google civic election id new", default=0, null=False, blank=False)
+    ocd_division_id = models.CharField(verbose_name="ocd division id", max_length=255, null=True, blank=True)
     # ballot_placement: We store ballot_placement in the BallotItem table instead because it is different for each voter
     # If this is a partisan election, the name of the party it is for.
     primary_party = models.CharField(verbose_name="primary party", max_length=255, null=True, blank=True)
@@ -44,7 +50,16 @@ class ContestMeasure(models.Model):
     district_scope = models.CharField(verbose_name="district scope", max_length=255, null=False, blank=False)
     # An identifier for this district, relative to its scope. For example, the 34th State Senate district
     # would have id "34" and a scope of stateUpper.
-    district_ocd_id = models.CharField(verbose_name="open civic data id", max_length=255, null=False, blank=False)
+    district_id = models.CharField(verbose_name="google civic district id", max_length=255, null=True, blank=True)
+    # State code
+    state_code = models.CharField(verbose_name="state this measure affects", max_length=2, null=True, blank=True)
+
+    def get_measure_state(self):
+        if positive_value_exists(self.state_code):
+            return self.state_code
+        # Pull this from ocdDivisionId
+        ocd_division_id = self.ocd_division_id
+        return extract_state_from_ocd_division_id(ocd_division_id)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -66,6 +81,7 @@ class ContestMeasure(models.Model):
         super(ContestMeasure, self).save(*args, **kwargs)
 
 
+# The campaign that is supporting this Measure. Equivalent to CandidateCampaign
 class MeasureCampaign(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
     # organizations
@@ -108,7 +124,7 @@ class MeasureCampaign(models.Model):
     youtube_url = models.URLField(verbose_name='youtube url of campaign', blank=True, null=True)
     # The email address for the candidate's campaign.
     measure_email = models.CharField(verbose_name="measure email", max_length=255, null=True, blank=True)
-    # The voice phone number for the campaign office.
+    # The voice phone number for the campaign office for this measure.
     measure_phone = models.CharField(verbose_name="measure phone", max_length=255, null=True, blank=True)
 
     # We override the save function so we can auto-generate we_vote_id
@@ -129,3 +145,150 @@ class MeasureCampaign(models.Model):
                 next_integer=next_local_integer,
             )
         super(MeasureCampaign, self).save(*args, **kwargs)
+
+
+class ContestMeasureManager(models.Model):
+
+    def __unicode__(self):
+        return "ContestMeasureManager"
+
+    def retrieve_contest_measure_from_id(self, contest_measure_id):
+        contest_measure_manager = ContestMeasureManager()
+        return contest_measure_manager.retrieve_contest_measure(contest_measure_id)
+
+    def retrieve_contest_measure_from_we_vote_id(self, contest_measure_we_vote_id):
+        contest_measure_id = 0
+        contest_measure_manager = ContestMeasureManager()
+        return contest_measure_manager.retrieve_contest_measure(contest_measure_id, contest_measure_we_vote_id)
+
+    def retrieve_contest_measure_from_maplight_id(self, maplight_id):
+        contest_measure_id = 0
+        contest_measure_we_vote_id = ''
+        contest_measure_manager = ContestMeasureManager()
+        return contest_measure_manager.retrieve_contest_measure(contest_measure_id, contest_measure_we_vote_id,
+                                                                maplight_id)
+
+    def fetch_contest_measure_id_from_maplight_id(self, maplight_id):
+        contest_measure_id = 0
+        contest_measure_we_vote_id = ''
+        contest_measure_manager = ContestMeasureManager()
+        results = contest_measure_manager.retrieve_contest_measure(
+            contest_measure_id, contest_measure_we_vote_id, maplight_id)
+        if results['success']:
+            return results['contest_measure_id']
+        return 0
+
+    def update_or_create_contest_measure(self, we_vote_id, google_civic_election_id, district_id, district_name,
+                                         measure_title, state_code, updated_contest_measure_values):
+        """
+        Either update or create an office entry.
+        """
+        exception_multiple_object_returned = False
+        new_measure_created = False
+        contest_measure_on_stage = ContestMeasure()
+
+        if not google_civic_election_id:
+            success = False
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
+        elif not (district_id or district_name):
+            success = False
+            status = 'MISSING_DISTRICT_ID'
+        elif not state_code:
+            success = False
+            status = 'MISSING_STATE_CODE'
+        elif not measure_title:
+            success = False
+            status = 'MISSING_MEASURE_TITLE'
+        else:
+            try:
+                if positive_value_exists(we_vote_id):
+                    contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        we_vote_id__exact=we_vote_id,
+                        defaults=updated_contest_measure_values)
+                else:
+                    contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        district_id__exact=district_id,
+                        district_name__iexact=district_name,  # Case doesn't matter
+                        measure_title__iexact=measure_title,  # Case doesn't matter
+                        state_code__iexact=state_code,  # Case doesn't matter
+                        defaults=updated_contest_measure_values)
+                success = True
+                status = 'CONTEST_MEASURE_SAVED'
+            except ContestMeasure.MultipleObjectsReturned as e:
+                handle_record_found_more_than_one_exception(e, logger=logger)
+                success = False
+                status = 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND'
+                exception_multiple_object_returned = True
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'new_measure_created':      new_measure_created,
+            'contest_measure':          contest_measure_on_stage,
+            'saved':                    new_measure_created,
+            'updated':                  True if success and not new_measure_created else False,
+            'not_processed':            True if not success else False,
+        }
+        return results
+
+    # NOTE: searching by all other variables seems to return a list of objects
+    def retrieve_contest_measure(self, contest_measure_id, contest_measure_we_vote_id='', maplight_id=None):
+        error_result = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        contest_measure_on_stage = ContestMeasure()
+
+        try:
+            if positive_value_exists(contest_measure_id):
+                contest_measure_on_stage = ContestMeasure.objects.get(id=contest_measure_id)
+                contest_measure_id = contest_measure_on_stage.id
+            elif positive_value_exists(contest_measure_we_vote_id):
+                contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
+                contest_measure_id = contest_measure_on_stage.id
+            elif positive_value_exists(maplight_id):
+                contest_measure_on_stage = ContestMeasure.objects.get(maplight_id=maplight_id)
+                contest_measure_id = contest_measure_on_stage.id
+        except ContestMeasure.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            exception_multiple_object_returned = True
+        except ContestMeasure.DoesNotExist:
+            exception_does_not_exist = True
+
+        results = {
+            'success':                      True if contest_measure_id > 0 else False,
+            'error_result':                 error_result,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'contest_measure_found':         True if contest_measure_id > 0 else False,
+            'contest_measure_id':            contest_measure_id,
+            'contest_measure_we_vote_id':    contest_measure_we_vote_id,
+            'contest_measure':               contest_measure_on_stage,
+        }
+        return results
+
+    def fetch_contest_measure_id_from_contest_measure_we_vote_id(self, contest_measure_we_vote_id):
+        """
+        Take in contest_measure_we_vote_id and return internal/local-to-this-database contest_measure_id
+        :param contest_measure_we_vote_id:
+        :return:
+        """
+        contest_measure_id = 0
+        try:
+            if positive_value_exists(contest_measure_we_vote_id):
+                contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
+                contest_measure_id = contest_measure_on_stage.id
+            # else:
+            #     logger.warn("fetch_contest_measure_id_from_contest_measure_we_vote_id no contest_measure_we_vote_id")
+
+        except ContestMeasure.MultipleObjectsReturned as e:
+            # logger.warn("fetch_contest_measure_id_from_we_vote_id ContestMeasure.MultipleObjectsReturned")
+            handle_record_found_more_than_one_exception(e, logger=logger)
+
+        except ContestMeasure.DoesNotExist:
+            contest_measure_id = 0
+            # logger.warn("fetch_contest_measure_id_from_contest_measure_we_vote_id ContestMeasure.DoesNotExist")
+
+        return contest_measure_id

@@ -1,0 +1,63 @@
+{# templates/measure/measure_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Measures{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Measures</h1>
+
+{% if election_list %}
+    <form name="organization_position_choose_election" method="get" action="{% url 'measure:measure_list' %}">
+        {% csrf_token %}
+
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    </form>
+{% endif %}{# End of if election_list #}
+
+
+{% if measure_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>Measure Title</td>
+            <td>State</td>
+            <td>&nbsp;</td>
+        </tr>
+    {% for measure in measure_list %}
+        <tr>
+            <td><a href="{% url 'measure:measure_summary' measure.id %}">{{ measure.measure_title }}</a></td>
+            <td>{{ measure.state_code }}</td>
+            <td><a href="{% url 'measure:measure_edit' measure.id %}" style="font-size: .65em">edit</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+    <p>
+        <a href="{% url 'measure:measures_export' %}?format=json" target="_blank" >Export Measures</a>
+{#        <a href="{% url 'measure:measures_import' %}" >Import Measures</a>#}
+    </p>
+{% else %}
+    <p>(no measures found)</p>
+{% endif %}
+
+<p><a href="{% url 'measure:measure_new' %}">Add New Measure</a></p>
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

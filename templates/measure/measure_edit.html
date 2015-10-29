@@ -1,0 +1,36 @@
+{# templates/measure/measure_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if measure %}{{ measure.measure_title  }}{% else %}New Measure{% endif %}{% endblock %}
+
+{%  block content %}
+<h1>{% if measure %}Edit {{ measure.measure_title }}{% else %}New Measure{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+<form action="{% url "measure:measure_edit_process" %}" method="post">
+{% csrf_token %}
+    <input type="hidden" name="measure_id" value="{% if measure %}{{ measure.id }}{% else %}0{% endif %}">
+
+{% if measure %}
+<p><strong>Values from Google Civic API (do not edit)</strong></p>
+<p>Measure Title: {{ measure.measure_title }}</p>
+<p>Measure Subtitle: {{ measure.measure_subtitle }}</p>
+<p>{{ measure.measure_text }}</p>
+<p>Website: {{ measure.measure_url }}</p>
+
+{% else %}
+{#    <label for="measure_title_id">Measure Name</label>#}
+{#    <input type="text" name="measure_title" id="measure_title_id" value="{% if measure %}{{ measure.measure_title }}{% endif %}" /><br />#}
+{##}
+{#    <label for="twitter_handle_id">Twitter </label>#}
+{#    <input type="text" name="twitter_handle" id="twitter_handle_id" value="{% if measure %}{{ measure.twitter_handle }}{% endif %}" /><br />#}
+{##}
+{#    <label for="measure_website_id">Measure Website</label>#}
+{#    <input type="text" name="measure_website" id="measure_website_id" value="{% if measure %}{{ measure.measure_website }}{% endif %}" /><br />#}
+{% endif %}
+<p><a href="{% url 'measure:measure_list' %}">cancel</a>
+<input type="submit" value="{% if measure %}Update Measure{% else %}Save New Measure{% endif %}" /></p>
+</form>
+
+{% endblock %}

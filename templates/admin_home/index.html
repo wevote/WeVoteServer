@@ -10,7 +10,7 @@
 {# ################## #}
 <h2>Election Data</h2>
     <p><a href="{% url 'election:election_list' %}">Elections</a></p>
-    <p><a href=""></a>Measures</p> {# NOTE: Move text into <a> tag when we have the page built #}
+    <p><a href="{% url 'measure:measure_list' %}">Measures</a></p> {# NOTE: Move text into <a> tag when we have the page built #}
     <p><a href="{% url 'office:office_list' %}">Offices</a></p>
     <p><a href="{% url 'candidate:candidate_list' %}">Candidates</a></p>
     <p><a href="{% url 'organization:organization_list' %}">Organizations</a></p>
