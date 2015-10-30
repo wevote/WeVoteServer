@@ -2,10 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from ballot.models import BallotItemManager
 from django.db import models
-from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser, PermissionsMixin
-)
+from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
 from django.utils import timezone
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
@@ -253,8 +252,10 @@ class Voter(AbstractBaseUser):
 #     last_activity
 
     # The unique ID of the election this voter is currently looking at. (Provided by Google Civic)
-    current_google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", null=True, unique=False)
+    # DALE 2015-10-29 We are replacing this with looking up the value in the ballot_items table, and then
+    # storing in cookie
+    # current_google_civic_election_id = models.PositiveIntegerField(
+    #     verbose_name="google civic election id", null=True, unique=False)
 
     objects = VoterManager()
 
@@ -438,20 +439,14 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
 
 
 def fetch_google_civic_election_id_for_voter_id(voter_id):
-    # Is google_civic_election_id cached in the voter record?
-    voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_by_id(voter_id)
-    if results['voter_found']:
-        voter_on_stage = results['voter']
+    # Look to see if we have ballot_items stored for this voter and pull google_civic_election_id from that
+    ballot_item_manager = BallotItemManager()
+    results = ballot_item_manager.retrieve_google_civic_election_id_for_voter(voter_id)
+    if results['success']:
+        google_civic_election_id = results['google_civic_election_id']
     else:
-        voter_on_stage = Voter()
+        google_civic_election_id = 0
 
-    if positive_value_exists(voter_on_stage.current_google_civic_election_id):
-        return voter_on_stage.current_google_civic_election_id
-
-    # Retrieve it from the VoterAddress class?
-
-    google_civic_election_id = 0
     return google_civic_election_id
 
 
@@ -623,7 +618,16 @@ class VoterAddressManager(models.Model):
                     'address_type': address_type,
                     # The rest of the values
                     'address': raw_address_text,
+                    'latitude': '',
+                    'longitude': '',
+                    'normalized_line1': '',
+                    'normalized_line2': '',
+                    'normalized_city': '',
+                    'normalized_state': '',
+                    'normalized_zip': '',
+                    'refreshed_from_google': False,
                 }
+
                 voter_address_on_stage, new_address_created = VoterAddress.objects.update_or_create(
                     voter_id__exact=voter_id, address_type=address_type, defaults=updated_values)
                 success = True
@@ -659,6 +663,7 @@ class VoterAddressManager(models.Model):
                 voter_address.normalized_city = voter_address_dict['city']
                 voter_address.normalized_state = voter_address_dict['state']
                 voter_address.normalized_zip = voter_address_dict['zip']
+                voter_address.refreshed_from_google = True
                 voter_address.save()
                 status = "SAVED_VOTER_ADDRESS_WITH_NORMALIZED_VALUES"
                 success = True

@@ -215,6 +215,7 @@ def voter_address_save(voter_device_id, address_raw_text, address_variable_exist
                 'voter_device_id': voter_device_id,
                 'address': address_raw_text,
             }
+
     # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':
         # delete all currently matching addresses and save again
     else:
@@ -300,7 +301,7 @@ def voter_create(voter_device_id):
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id=0):
+def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id):
     # Get voter_id from the voter_device_id so we can figure out which voter_guides to offer
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -309,8 +310,14 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id=0)
             'success': False,
             'voter_device_id': voter_device_id,
             'voter_guides': [],
+            'google_civic_election_id': google_civic_election_id,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        results = {
+            'success': False,
+            'google_civic_election_id': 0,  # Force the reset of google_civic_election_id cookie
+            'json_data': json_data,
+        }
+        return results
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
@@ -319,11 +326,17 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id=0)
             'success': False,
             'voter_device_id': voter_device_id,
             'voter_guides': [],
+            'google_civic_election_id': google_civic_election_id,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        results = {
+            'success': False,
+            'google_civic_election_id': 0,  # Force the reset of google_civic_election_id cookie
+            'json_data': json_data,
+        }
+        return results
 
     # If the google_civic_election_id was found cached in a cookie and passed in, use that
-    # If not, fetch it for this voter
+    # If not, fetch it for this voter by looking in the BallotItem table
     if not positive_value_exists(google_civic_election_id):
         google_civic_election_id = fetch_google_civic_election_id_for_voter_id(voter_id)
 
@@ -359,16 +372,30 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id=0)
             'success': True,
             'voter_device_id': voter_device_id,
             'voter_guides': voter_guides,
+            'google_civic_election_id': google_civic_election_id,
         }
+
+        results = {
+            'success': success,
+            'google_civic_election_id': google_civic_election_id,
+            'json_data': json_data,
+        }
+        return results
     else:
         json_data = {
             'status': status,
             'success': False,
             'voter_device_id': voter_device_id,
             'voter_guides': [],
+            'google_civic_election_id': google_civic_election_id,
         }
 
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+        results = {
+            'success': False,
+            'google_civic_election_id': 0,  # Force the reset of google_civic_election_id cookie
+            'json_data': json_data,
+        }
+        return results
 
 
 def voter_retrieve_list(voter_device_id):

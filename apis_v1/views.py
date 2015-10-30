@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from voter.serializers import VoterSerializer
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
-    get_google_civic_election_id_from_cookie
+    get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -122,7 +122,14 @@ def voter_address_save_view(request):
     except KeyError:
         address = ''
         address_variable_exists = False
-    return voter_address_save(voter_device_id, address, address_variable_exists)
+
+    response = voter_address_save(voter_device_id, address, address_variable_exists)
+
+    # Reset google_civic_election_id whenever we save a new address
+    google_civic_election_id = 0
+    set_google_civic_election_id_cookie(request, response, google_civic_election_id)
+
+    return response
 
 
 def voter_ballot_items_retrieve_view(request):
@@ -130,7 +137,13 @@ def voter_ballot_items_retrieve_view(request):
     # We look in the cookies for google_civic_election_id
     google_civic_election_id = get_google_civic_election_id_from_cookie(request)
     # This 'voter_ballot_items_retrieve' lives in ballot/controllers.py
-    return voter_ballot_items_retrieve(voter_device_id, google_civic_election_id)
+    results = voter_ballot_items_retrieve(voter_device_id, google_civic_election_id)
+    response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+
+    # Save google_civic_election_id whenever we retrieve a new ballot
+    set_google_civic_election_id_cookie(request, response, results['google_civic_election_id'])
+
+    return response
 
 
 def voter_count_view(request):
@@ -151,7 +164,13 @@ def voter_guides_to_follow_retrieve_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     # We look in the cookies for google_civic_election_id
     google_civic_election_id = get_google_civic_election_id_from_cookie(request)
-    return voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id)
+    results = voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id)
+    response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+
+    # Save google_civic_election_id with fresh version that we retrieved from BallotItem table (if not passed in)
+    set_google_civic_election_id_cookie(request, response, results['google_civic_election_id'])
+
+    return response
 
 
 class VoterRetrieveView(APIView):

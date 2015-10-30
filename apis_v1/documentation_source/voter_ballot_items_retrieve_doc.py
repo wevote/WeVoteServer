@@ -23,8 +23,8 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
         {
             'name':         'google_civic_election_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique identifier for a particular election. If not provided, we look it up from the '
-                            'voter\'s record to see if it is stored',
+            'description':  'The unique identifier for a particular election. If not provided (from a cookie), '
+                            'we look it up from the BallotItem table.',
         },
     ]
 
@@ -45,6 +45,7 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '     "contest_measure_id": integer,\n' \
                    '     "contest_measure_we_vote_id": string,\n' \
                    '   ],\n' \
+                   '  "google_civic_election_id": integer,\n' \
                    '}'
 
     potential_status_codes_list = [
@@ -63,6 +64,10 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
         {
             'code':         'VOTER_BALLOT_ITEMS_RETRIEVED',
             'description':  'Ballot items were found.',
+        },
+        {
+            'code':         'NO_UPCOMING_ELECTION_FOR_ADDRESS',
+            'description':  'There isn\'t an election coming up for that voter address.',
         },
     ]
 

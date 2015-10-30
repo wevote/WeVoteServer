@@ -40,6 +40,7 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '     "owner_voter_id": integer (a unique integer id if owner type is "V"),\n' \
                    '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
                    '   ],\n' \
+                   '  "google_civic_election_id": integer,\n' \
                    '}\n'
 
     potential_status_codes_list = [

@@ -21,7 +21,6 @@ class VoterGuideManager(models.Manager):
         new_voter_guide = VoterGuide()
         voter_guide_owner_type = new_voter_guide.ORGANIZATION
         exception_multiple_object_returned = False
-        status = ''
         if not google_civic_election_id or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE'
         else:
@@ -294,7 +293,6 @@ class VoterGuideList(models.Model):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
-            status = 'ERROR_VOTER_GUIDE_LIST_START'
             voter_guide_queryset = VoterGuide.objects.order_by('last_updated')
             voter_guide_list = voter_guide_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
@@ -304,13 +302,15 @@ class VoterGuideList(models.Model):
                 status = 'VOTER_GUIDE_FOUND'
             else:
                 status = 'NO_VOTER_GUIDES_FOUND'
+            success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
 
         results = {
-            'success':                      True if voter_guide_list_found else False,
+            'success':                      success,
             'status':                       status,
             'voter_guide_list_found':       voter_guide_list_found,
             'voter_guide_list':             voter_guide_list,
@@ -321,7 +321,6 @@ class VoterGuideList(models.Model):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
-            status = 'ERROR_VOTER_GUIDE_LIST_START'
             voter_guide_queryset = VoterGuide.objects.order_by('last_updated')
             voter_guide_list = voter_guide_queryset
 
@@ -330,13 +329,15 @@ class VoterGuideList(models.Model):
                 status = 'VOTER_GUIDE_FOUND'
             else:
                 status = 'NO_VOTER_GUIDES_FOUND'
+            success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
 
         results = {
-            'success':                      True if voter_guide_list_found else False,
+            'success':                      success,
             'status':                       status,
             'voter_guide_list_found':       voter_guide_list_found,
             'voter_guide_list':             voter_guide_list,

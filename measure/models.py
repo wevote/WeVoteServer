@@ -179,7 +179,8 @@ class ContestMeasureManager(models.Model):
         return 0
 
     def update_or_create_contest_measure(self, we_vote_id, google_civic_election_id, district_id, district_name,
-                                         measure_title, state_code, updated_contest_measure_values):
+                                         measure_title, state_code,
+                                         update_contest_measure_values):  # , create_contest_measure_values
         """
         Either update or create an office entry.
         """
@@ -200,12 +201,18 @@ class ContestMeasureManager(models.Model):
             success = False
             status = 'MISSING_MEASURE_TITLE'
         else:
+            # We need to use one set of values when we are creating an entry, and another set of values when we
+            #  are updating an entry
             try:
+                # Use get_or_create with create_contest_measure_values  # TODO DALE UPDATE THIS
+
+                # if a contest_measure_on_stage is found, *then* update it with update_contest_measure_values
+
                 if positive_value_exists(we_vote_id):
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         we_vote_id__exact=we_vote_id,
-                        defaults=updated_contest_measure_values)
+                        defaults=update_contest_measure_values)
                 else:
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
@@ -213,7 +220,7 @@ class ContestMeasureManager(models.Model):
                         district_name__iexact=district_name,  # Case doesn't matter
                         measure_title__iexact=measure_title,  # Case doesn't matter
                         state_code__iexact=state_code,  # Case doesn't matter
-                        defaults=updated_contest_measure_values)
+                        defaults=update_contest_measure_values)
                 success = True
                 status = 'CONTEST_MEASURE_SAVED'
             except ContestMeasure.MultipleObjectsReturned as e:

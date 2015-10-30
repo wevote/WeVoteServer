@@ -4,8 +4,7 @@
 
 from candidate.models import CandidateCampaign
 from django.db import models
-from exception.models import handle_exception, handle_record_found_more_than_one_exception, \
-    handle_record_not_found_exception
+from exception.models import handle_exception, handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.models import positive_value_exists
 
@@ -38,7 +37,7 @@ class BallotItem(models.Model):
     # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for this office", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=False)
     # The local database id for this measure, specific to this server.
     # TODO contest_measure_id should be positive integer as opposed to CharField
     contest_measure_id = models.CharField(
@@ -46,7 +45,7 @@ class BallotItem(models.Model):
     # The internal We Vote id for the ContestMeasure that this campaign taking a stance on
     contest_measure_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for this measure", max_length=255, default=None, null=True,
-        blank=True, unique=True)
+        blank=True, unique=False)
     # This is a sortable name
     ballot_item_label = models.CharField(verbose_name="a label we can sort by", max_length=255, null=True, blank=True)
 
@@ -63,6 +62,9 @@ class BallotItem(models.Model):
     def display_ballot_item(self):
         return self.ballot_item_label
 
+    def fetch_ballot_order(self):
+        return 3
+
     def candidates_list(self):
         candidates_list_temp = CandidateCampaign.objects.all()
         candidates_list_temp = candidates_list_temp.filter(google_civic_election_id=self.google_civic_election_id)
@@ -71,28 +73,24 @@ class BallotItem(models.Model):
 
 
 class BallotItemManager(models.Model):
-    # NOTE: This method only needs to hit the database at most once per day.
-    # We should cache the results in a JSON file that gets cached on the server and locally in the
-    # voter's browser for speed.
-    def retrieve_my_ballot(self, voter_on_stage, election_on_stage):
-        # Retrieve all of the jurisdictions the voter is in
-        print voter_on_stage
-        print election_on_stage
-
-        # Retrieve all of the office_contests in each of those jurisdictions
-
-        # Retrieve all of the measure_contests in each of those jurisdictions
-        return True
-
     def update_or_create_ballot_item_for_voter(
-            self, voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label,
-            local_ballot_order, contest_measure_id=0, contest_office_id=0, contest_office_we_vote_id=''):
+            self, voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label, local_ballot_order,
+            contest_office_id=0, contest_office_we_vote_id='',
+            contest_measure_id=0, contest_measure_we_vote_id=''):
         exception_multiple_object_returned = False
         new_ballot_item_created = False
 
-        if not contest_measure_id and not contest_office_id:
+        # We require both contest_office_id and contest_office_we_vote_id
+        #  OR both contest_measure_id and contest_measure_we_vote_id
+        required_office_ids_found = positive_value_exists(contest_office_id) \
+            and positive_value_exists(contest_office_we_vote_id)
+        required_measure_ids_found = positive_value_exists(contest_measure_id) \
+            and positive_value_exists(contest_measure_we_vote_id)
+        contest_or_measure_identifier_found = required_office_ids_found or required_measure_ids_found
+        if not contest_or_measure_identifier_found:
             success = False
-            status = 'MISSING_OFFICE_AND_MEASURE_IDS'
+            status = 'MISSING_SUFFICIENT_OFFICE_OR_MEASURE_IDS'
+        # If here, then we know that there are sufficient office or measure ids
         elif not google_civic_election_id:
             success = False
             status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
@@ -101,26 +99,49 @@ class BallotItemManager(models.Model):
             status = 'MISSING_VOTER_ID'
         else:
             try:
-                updated_values = {
+                # Use get_or_create to see if a ballot item exists
+                create_values = {
                     # Values we search against
-                    'contest_measure_id': contest_measure_id,
-                    'contest_office_id': contest_office_id,
                     'google_civic_election_id': google_civic_election_id,
                     'voter_id': voter_id,
                     # The rest of the values
+                    'contest_office_id': contest_office_id,
+                    'contest_office_we_vote_id': contest_office_we_vote_id,
+                    'contest_measure_id': contest_measure_id,
+                    'contest_measure_we_vote_id': contest_measure_we_vote_id,
                     'google_ballot_placement': google_ballot_placement,
                     'local_ballot_order': local_ballot_order,
                     'ballot_item_label': ballot_item_label,
-                    'contest_office_we_vote_id': contest_office_we_vote_id,
                 }
-                ballot_item_on_stage, new_ballot_item_created = BallotItem.objects.update_or_create(
+                # We search with contest_measure_id and contest_office_id because they are (will be) integers,
+                #  which will be a faster search
+                ballot_item_on_stage, new_ballot_item_created = BallotItem.objects.get_or_create(
                     contest_measure_id__exact=contest_measure_id,
                     contest_office_id__exact=contest_office_id,
                     google_civic_election_id__exact=google_civic_election_id,
                     voter_id__exact=voter_id,
-                    defaults=updated_values)
-                success = True
-                status = 'BALLOT_ITEM_SAVED'
+                    defaults=create_values)
+
+                # if a ballot_item is found (instead of just created), *then* update it
+                # Note, we never update google_civic_election_id or voter_id
+                if not new_ballot_item_created:
+                    ballot_item_on_stage.contest_office_id = contest_office_id
+                    ballot_item_on_stage.contest_office_we_vote_id = contest_office_we_vote_id
+                    ballot_item_on_stage.contest_measure_id = contest_measure_id
+                    ballot_item_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
+                    ballot_item_on_stage.google_ballot_placement = google_ballot_placement
+                    ballot_item_on_stage.local_ballot_order = local_ballot_order
+                    ballot_item_on_stage.ballot_item_label = ballot_item_label
+                    ballot_item_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
+                    ballot_item_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
+                    ballot_item_on_stage.save()
+
+                    success = True
+                    status = 'BALLOT_ITEM_UPDATED'
+                else:
+                    success = True
+                    status = 'BALLOT_ITEM_CREATED'
+
             except BallotItemManager.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
@@ -153,7 +174,7 @@ class BallotItemManager(models.Model):
             except BallotItem.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 exception_multiple_object_returned = True
-            except BallotItem.DoesNotExist as e:
+            except BallotItem.DoesNotExist:
                 exception_does_not_exist = True
 
         results = {
@@ -164,17 +185,65 @@ class BallotItemManager(models.Model):
         }
         return results
 
-    def fetch_ballot_order(self, voter_id, google_civic_election_id, google_civic_district_ocd_id):
-        # voter_id, google_civic_contest_office_on_stage.google_civic_election_id,
-        # google_civic_contest_office_on_stage.district_ocd_id)
+    def retrieve_google_civic_election_id_for_voter(self, voter_id):
+        """
+        Grab the first ballot_item we can find for this voter and return the google_civic_election_id
+        """
+        google_civic_election_id = 0
+        success = False
 
-        return 3
+        if positive_value_exists(voter_id):
+            try:
+                ballot_item_query = BallotItem.objects.filter(
+                    voter_id__exact=voter_id,
+                )
+                ballot_item_list = list(ballot_item_query[:1])
+                if ballot_item_list:
+                    one_ballot_item = ballot_item_list[0]
+                    google_civic_election_id = one_ballot_item.google_civic_election_id
+                    success = True
+            except BallotItem.DoesNotExist:
+                pass
+
+        results = {
+            'success': success,
+            'google_civic_election_id': google_civic_election_id,
+        }
+        return results
 
 
-class BallotItemList(models.Model):
+class BallotItemListManager(models.Model):
     """
-    A way to retrieve a list of ballot_items
+    A way to work with a list of ballot_items
     """
+
+    def delete_all_ballot_items_for_voter(self, voter_id, google_civic_election_id):
+        ballot_item_list_deleted = False
+        try:
+            ballot_item_queryset = BallotItem.objects.filter(voter_id=voter_id)
+            if positive_value_exists(google_civic_election_id):
+                ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            ballot_item_queryset.delete()
+
+            ballot_item_list_deleted = True
+            status = 'BALLOT_ITEMS_DELETED'
+        except BallotItem.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_ITEMS_DELETED_DoesNotExist'
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED delete_all_ballot_items_for_voter ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+
+        results = {
+            'success':                      True if ballot_item_list_deleted else False,
+            'status':                       status,
+            'google_civic_election_id':     google_civic_election_id,
+            'voter_id':                     voter_id,
+            'ballot_item_list_deleted':     ballot_item_list_deleted,
+        }
+        return results
+
     def retrieve_ballot_items_for_election(self, google_civic_election_id):
         ballot_item_list = []
         ballot_item_list_found = False
@@ -188,7 +257,7 @@ class BallotItemList(models.Model):
                 status = 'BALLOT_ITEMS_FOUND'
             else:
                 status = 'NO_BALLOT_ITEMS_FOUND, not positive_value_exists'
-        except BallotItem.DoesNotExist as e:
+        except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
             status = 'NO_BALLOT_ITEMS_FOUND'
             ballot_item_list = []
@@ -210,6 +279,9 @@ class BallotItemList(models.Model):
         ballot_item_list_found = False
         try:
             ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order')
+            ballot_item_queryset = ballot_item_queryset.filter(voter_id=voter_id)
+            if positive_value_exists(google_civic_election_id):
+                ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
             ballot_item_list = ballot_item_queryset
 
             if len(ballot_item_list):
@@ -217,7 +289,7 @@ class BallotItemList(models.Model):
                 status = 'BALLOT_ITEMS_FOUND, retrieve_all_ballot_items_for_voter'
             else:
                 status = 'NO_BALLOT_ITEMS_FOUND_0'
-        except BallotItem.DoesNotExist as e:
+        except BallotItem.DoesNotExist:
             # No ballot items found. Not a problem.
             status = 'NO_BALLOT_ITEMS_FOUND_DoesNotExist'
             ballot_item_list = []
