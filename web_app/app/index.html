@@ -2,11 +2,33 @@
 <html>
 <head>
 	<meta charset="utf-8">
-  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-  <link rel="stylesheet" href="assets/css/application.css">
+	<title>WeVoteUSA</title>
+	<meta name="viewport" content="width=device-width">
 </head>
 <body>
-	<div id="content"></div>
+	<div id="content">
+
+		<style>
+			#initializing {
+				position: absolute;
+
+				top: 50%;
+				left: 50%;
+				height: 30%;
+				width: 50%;
+				margin: -10% 0 0 -10%;
+			}
+
+			#initializing i {
+				font-size: 15em;
+				color: #ccc;
+			}
+		</style>
+		<div id="initializing">
+			<i class="fa fa-cog fa-spin"></i>
+		</div>
+
+	</div>
 	<script src="SCRIPT_URL"></script>
 </body>
 </html>
