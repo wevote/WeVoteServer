@@ -8,7 +8,7 @@ from django.db import models
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
-from measure.models import MeasureCampaign
+from measure.models import ContestMeasure
 from organization.models import Organization
 from twitter.models import TwitterUser
 from voter.models import Voter
@@ -63,8 +63,6 @@ class PositionEntered(models.Model):
 
     # The voter expressing the opinion
     voter_id = models.BigIntegerField(null=True, blank=True)
-    # # The election this position is for # TODO DEPRECATED
-    # election_id = models.BigIntegerField(verbose_name='election id', null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=False, blank=False)
@@ -80,7 +78,7 @@ class PositionEntered(models.Model):
     # The Twitter user account that generated this position
     twitter_user_entered_position = models.ForeignKey(TwitterUser, null=True, verbose_name='')
     # This is the candidate/politician that the position refers to.
-    #  Either candidate_campaign is filled OR measure_campaign, but not both
+    #  Either candidate_campaign is filled OR contest_measure, but not both
     # candidate_campaign = models.ForeignKey(
     #     CandidateCampaign, verbose_name='candidate campaign', null=True, blank=True,
     #     related_name='positionentered_candidate')
@@ -99,12 +97,12 @@ class PositionEntered(models.Model):
         blank=True, unique=False)
 
     # This is the measure/initiative/proposition that the position refers to.
-    #  Either measure_campaign is filled OR candidate_campaign, but not both
-    # measure_campaign = models.ForeignKey(
-    #  MeasureCampaign, verbose_name='measure campaign', null=True, blank=True, related_name='positionentered_measure')
-    measure_campaign_id = models.BigIntegerField(verbose_name='id of measure_campaign', null=True, blank=True)
-    measure_campaign_we_vote_id = models.CharField(
-        verbose_name="we vote permanent id for the measure_campaign", max_length=255, null=True,
+    #  Either contest_measure is filled OR candidate_campaign, but not both
+    # contest_measure = models.ForeignKey(
+    #  ContestMeasure, verbose_name='measure campaign', null=True, blank=True, related_name='positionentered_measure')
+    contest_measure_id = models.BigIntegerField(verbose_name='id of contest_measure', null=True, blank=True)
+    contest_measure_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id for the contest_measure", max_length=255, null=True,
         blank=True, unique=False)
 
     # Strategic denormalization - this is redundant but will make generating the voter guide easier.
@@ -231,8 +229,6 @@ class PositionEntered(models.Model):
         except Organization.DoesNotExist:
             logger.error("position.organization fetch_organization_we_vote_id did not find we_vote_id")
             return
-        except Exception:
-            pass
         return
 
     def fetch_organization_id_from_we_vote_id(self):
@@ -243,8 +239,6 @@ class PositionEntered(models.Model):
         except Organization.DoesNotExist:
             logger.error("position.organization fetch_organization_id_from_we_vote_id did not find id")
             return
-        except Exception:
-            pass
         return
 
     def fetch_candidate_campaign_we_vote_id(self):
@@ -255,8 +249,6 @@ class PositionEntered(models.Model):
         except CandidateCampaign.DoesNotExist:
             logger.error("position.candidate_campaign fetch_candidate_campaign_we_vote_id did not find we_vote_id")
             return
-        except Exception:
-            pass
         return
 
     def fetch_candidate_campaign_id_from_we_vote_id(self):
@@ -267,31 +259,25 @@ class PositionEntered(models.Model):
         except CandidateCampaign.DoesNotExist:
             logger.error("position.candidate_campaign fetch_candidate_campaign_id_from_we_vote_id did not find id")
             return
-        except Exception:
-            pass
         return
 
-    def fetch_measure_campaign_we_vote_id(self):
+    def fetch_contest_measure_we_vote_id(self):
         try:
-            measure_campaign_on_stage = MeasureCampaign.objects.get(id=self.measure_campaign_id)
+            measure_campaign_on_stage = ContestMeasure.objects.get(id=self.contest_measure_id)
             if measure_campaign_on_stage.we_vote_id:
                 return measure_campaign_on_stage.we_vote_id
-        except MeasureCampaign.DoesNotExist:
-            logger.error("position.measure_campaign fetch_measure_campaign_we_vote_id did not find we_vote_id")
-            pass
-        except Exception:
+        except ContestMeasure.DoesNotExist:
+            logger.error("position.measure_campaign fetch_contest_measure_we_vote_id did not find we_vote_id")
             pass
         return
 
-    def fetch_measure_campaign_id_from_we_vote_id(self):
+    def fetch_contest_measure_id_from_we_vote_id(self):
         try:
-            measure_campaign_on_stage = MeasureCampaign.objects.get(we_vote_id=self.measure_campaign_we_vote_id)
-            if measure_campaign_on_stage.id:
-                return measure_campaign_on_stage.id
-        except MeasureCampaign.DoesNotExist:
-            logger.error("position.measure_campaign fetch_measure_campaign_id_from_we_vote_id did not find id")
-            pass
-        except Exception:
+            contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=self.contest_measure_we_vote_id)
+            if contest_measure_on_stage.id:
+                return contest_measure_on_stage.id
+        except ContestMeasure.DoesNotExist:
+            logger.error("position.contest_measure fetch_contest_measure_id_from_we_vote_id did not find id")
             pass
         return
 
@@ -324,7 +310,7 @@ class Position(models.Model):
     # This is the measure/initiative/proposition that the position refers to.
     #  Either measure_campaign is filled OR candidate_campaign, but not both
     measure_campaign = models.ForeignKey(
-        MeasureCampaign, verbose_name='measure campaign', null=True, blank=True, related_name='position_measure')
+        ContestMeasure, verbose_name='measure campaign', null=True, blank=True, related_name='position_measure')
 
     stance = models.CharField(max_length=15, choices=POSITION_CHOICES)  # supporting/opposing
 
@@ -429,6 +415,83 @@ class PositionListForCandidateCampaign(models.Model):
         return positions_not_followed_by_voter
 
 
+class PositionListForContestMeasure(models.Model):
+    """
+    A way to retrieve all of the positions stated about this ContestMeasure
+    """
+    def retrieve_all_positions_for_contest_measure(self, candidate_campaign_id, stance_we_are_looking_for):
+        # TODO Error check stance_we_are_looking_for
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
+        #  all stances
+
+        # Retrieve the support positions for this candidate_campaign_id
+        organization_position_list = PositionEntered()
+        organization_position_list_found = False
+        try:
+            organization_position_list = PositionEntered.objects.order_by('date_entered')
+            organization_position_list = organization_position_list.filter(candidate_campaign_id=candidate_campaign_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE
+            if stance_we_are_looking_for != ANY:
+                # If we passed in the stance "ANY" it means we want to not filter down the list
+                organization_position_list = organization_position_list.filter(stance=stance_we_are_looking_for)
+            # organization_position_list = organization_position_list.filter(election_id=election_id)
+            if len(organization_position_list):
+                organization_position_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        if organization_position_list_found:
+            return organization_position_list
+        else:
+            organization_position_list = {}
+            return organization_position_list
+
+    def calculate_positions_followed_by_voter(
+            self, voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter):
+        """
+        We need a list of positions that were made by an organization that this voter follows
+        :param all_positions_list_for_candidate_campaign:
+        :param organizations_followed_by_voter:
+        :return:
+        """
+
+        positions_followed_by_voter = []
+        # Only return the positions if they are from organizations the voter follows
+        for position in all_positions_list_for_candidate_campaign:
+            if position.voter_id == voter_id:  # We include the voter currently viewing the ballot in this list
+                positions_followed_by_voter.append(position)
+            # TODO Include a check against a list of "people_followed_by_voter" so we can include friends
+            elif position.organization_id in organizations_followed_by_voter:
+                logger.debug("position {position_id} followed by voter (org {org_id})".format(
+                    position_id=position.id, org_id=position.organization_id
+                ))
+                positions_followed_by_voter.append(position)
+
+        return positions_followed_by_voter
+
+    def calculate_positions_not_followed_by_voter(
+            self, all_positions_list_for_candidate_campaign, organizations_followed_by_voter):
+        """
+        We need a list of positions that were made by an organization that this voter follows
+        :param all_positions_list_for_candidate_campaign:
+        :param organizations_followed_by_voter:
+        :return:
+        """
+        positions_not_followed_by_voter = []
+        # Only return the positions if they are from organizations the voter follows
+        for position in all_positions_list_for_candidate_campaign:
+            # Some positions are for individual voters, so we want to filter those out
+            if position.organization_id \
+                    and position.organization_id not in organizations_followed_by_voter:
+                logger.debug("position {position_id} NOT followed by voter (org {org_id})".format(
+                    position_id=position.id, org_id=position.organization_id
+                ))
+                positions_not_followed_by_voter.append(position)
+
+        return positions_not_followed_by_voter
+
+
 class PositionEnteredManager(models.Model):
 
     def __unicode__(self):
@@ -443,29 +506,37 @@ class PositionEnteredManager(models.Model):
         """
         position_id = 0
         voter_id = 0
-        measure_campaign_id = 0
+        contest_measure_id = 0
         position_entered_manager = PositionEnteredManager()
         return position_entered_manager.retrieve_position(
-            position_id, organization_id, voter_id, candidate_campaign_id, measure_campaign_id)
+            position_id, organization_id, voter_id, candidate_campaign_id, contest_measure_id)
 
     def retrieve_voter_candidate_campaign_position(self, voter_id, candidate_campaign_id):
         organization_id = 0
         position_id = 0
-        measure_campaign_id = 0
+        contest_measure_id = 0
         position_entered_manager = PositionEnteredManager()
         return position_entered_manager.retrieve_position(
-            position_id, organization_id, voter_id, candidate_campaign_id, measure_campaign_id)
+            position_id, organization_id, voter_id, candidate_campaign_id, contest_measure_id)
+
+    def retrieve_voter_contest_measure_position(self, voter_id, contest_measure_id):
+        organization_id = 0
+        position_id = 0
+        candidate_campaign_id = 0
+        position_entered_manager = PositionEnteredManager()
+        return position_entered_manager.retrieve_position(
+            position_id, organization_id, voter_id, candidate_campaign_id, contest_measure_id)
 
     def retrieve_position_from_id(self, position_id):
         organization_id = 0
         voter_id = 0
         candidate_campaign_id = 0
-        measure_campaign_id = 0
+        contest_measure_id = 0
         position_entered_manager = PositionEnteredManager()
         return position_entered_manager.retrieve_position(
-            position_id, organization_id, voter_id, candidate_campaign_id, measure_campaign_id)
+            position_id, organization_id, voter_id, candidate_campaign_id, contest_measure_id)
 
-    def retrieve_position(self, position_id, organization_id, voter_id, candidate_campaign_id, measure_campaign_id):
+    def retrieve_position(self, position_id, organization_id, voter_id, candidate_campaign_id, contest_measure_id):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -480,17 +551,17 @@ class PositionEnteredManager(models.Model):
                     organization_id=organization_id, candidate_campaign_id=candidate_campaign_id)
                 # If still here, we found an existing position
                 position_id = position_on_stage.id
-            elif organization_id > 0 and measure_campaign_id > 0:
+            elif organization_id > 0 and contest_measure_id > 0:
                 position_on_stage = PositionEntered.objects.get(
-                    organization_id=organization_id, measure_campaign_id=measure_campaign_id)
+                    organization_id=organization_id, contest_measure_id=contest_measure_id)
                 position_id = position_on_stage.id
             elif voter_id > 0 and candidate_campaign_id > 0:
                 position_on_stage = PositionEntered.objects.get(
                     voter_id=voter_id, candidate_campaign_id=candidate_campaign_id)
                 position_id = position_on_stage.id
-            elif voter_id > 0 and measure_campaign_id > 0:
+            elif voter_id > 0 and contest_measure_id > 0:
                 position_on_stage = PositionEntered.objects.get(
-                    voter_id=voter_id, measure_campaign_id=measure_campaign_id)
+                    voter_id=voter_id, contest_measure_id=contest_measure_id)
                 position_id = position_on_stage.id
         except PositionEntered.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
@@ -544,12 +615,30 @@ class PositionEnteredManager(models.Model):
         position_entered_manager = PositionEnteredManager()
         results = position_entered_manager.retrieve_voter_candidate_campaign_position(voter_id, candidate_campaign_id)
 
-        voter_position_on_stage = PositionEntered()
+        if results['MultipleObjectsReturned']:
+            logger.warn("delete all but one and take it over?")
+            status = 'MultipleObjectsReturned-WORK_NEEDED'
+            voter_position_on_stage = PositionEntered
+            results = {
+                'status':       status,
+                'success':      False,
+                'position_id':  0,
+                'position':     voter_position_on_stage,
+            }
+            return results
+
+        voter_position_found = results['position_found']
+        voter_position_on_stage = results['position']
+        contest_measure_id = 0
+
+        return position_entered_manager.toggle_voter_position(voter_id, voter_position_found, voter_position_on_stage,
+                                                              stance, candidate_campaign_id, contest_measure_id)
+
+    def toggle_voter_position(self, voter_id, voter_position_found, voter_position_on_stage, stance,
+                              candidate_campaign_id, contest_measure_id):
         voter_position_on_stage_found = False
         position_id = 0
-        if results['position_found']:
-            voter_position_on_stage = results['position']
-
+        if voter_position_found:
             # Update this position with new values
             try:
                 voter_position_on_stage.stance = stance
@@ -557,29 +646,80 @@ class PositionEnteredManager(models.Model):
                 voter_position_on_stage.save()
                 position_id = voter_position_on_stage.id
                 voter_position_on_stage_found = True
+                status = 'STANCE_UPDATED'
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
-
-        elif results['MultipleObjectsReturned']:
-            logger.warn("delete all but one and take it over?")
-        elif results['DoesNotExist']:
+                status = 'STANCE_COULD_NOT_BE_UPDATED'
+        else:
             try:
                 # Create new
                 voter_position_on_stage = PositionEntered(
                     voter_id=voter_id,
                     candidate_campaign_id=candidate_campaign_id,
+                    contest_measure_id=contest_measure_id,
                     stance=stance,
                     #  statement_text=statement_text,
                 )
                 voter_position_on_stage.save()
                 position_id = voter_position_on_stage.id
                 voter_position_on_stage_found = True
+                status = 'NEW_STANCE_SAVED'
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
+                status = 'NEW_STANCE_COULD_NOT_BE_SAVED'
 
         results = {
-            'success':                  True if voter_position_on_stage_found else False,
-            'position_id':              position_id,
-            'position':                 voter_position_on_stage,
+            'status':       status,
+            'success':      True if voter_position_on_stage_found else False,
+            'position_id':  position_id,
+            'position':     voter_position_on_stage,
         }
         return results
+
+    def toggle_on_voter_support_for_contest_measure(self, voter_id, contest_measure_id):
+        stance = SUPPORT
+        position_entered_manager = PositionEnteredManager()
+        return position_entered_manager.toggle_on_voter_position_for_contest_measure(
+            voter_id, contest_measure_id, stance)
+
+    def toggle_off_voter_support_for_contest_measure(self, voter_id, contest_measure_id):
+        stance = NO_STANCE
+        position_entered_manager = PositionEnteredManager()
+        return position_entered_manager.toggle_on_voter_position_for_contest_measure(
+            voter_id, contest_measure_id, stance)
+
+    def toggle_on_voter_oppose_for_contest_measure(self, voter_id, contest_measure_id):
+        stance = OPPOSE
+        position_entered_manager = PositionEnteredManager()
+        return position_entered_manager.toggle_on_voter_position_for_contest_measure(
+            voter_id, contest_measure_id, stance)
+
+    def toggle_off_voter_oppose_for_contest_measure(self, voter_id, contest_measure_id):
+        stance = NO_STANCE
+        position_entered_manager = PositionEnteredManager()
+        return position_entered_manager.toggle_on_voter_position_for_contest_measure(
+            voter_id, contest_measure_id, stance)
+
+    def toggle_on_voter_position_for_contest_measure(self, voter_id, contest_measure_id, stance):
+        # Does a position from this voter already exist?
+        position_entered_manager = PositionEnteredManager()
+        results = position_entered_manager.retrieve_voter_contest_measure_position(voter_id, contest_measure_id)
+
+        if results['MultipleObjectsReturned']:
+            logger.warn("delete all but one and take it over?")
+            status = 'MultipleObjectsReturned-WORK_NEEDED'
+            voter_position_on_stage = PositionEntered
+            results = {
+                'status':       status,
+                'success':      False,
+                'position_id':  0,
+                'position':     voter_position_on_stage,
+            }
+            return results
+
+        voter_position_found = results['position_found']
+        voter_position_on_stage = results['position']
+        candidate_campaign_id = 0
+
+        return position_entered_manager.toggle_voter_position(voter_id, voter_position_found, voter_position_on_stage,
+                                                              stance, candidate_campaign_id, contest_measure_id)

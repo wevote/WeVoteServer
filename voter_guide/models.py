@@ -4,7 +4,7 @@
 
 from django.db import models
 from exception.models import handle_exception, handle_record_not_found_exception, \
-    handle_record_found_more_than_one_exception, handle_record_not_saved_exception
+    handle_record_found_more_than_one_exception
 from organization.models import Organization
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, convert_to_str, positive_value_exists
@@ -23,6 +23,8 @@ class VoterGuideManager(models.Manager):
         exception_multiple_object_returned = False
         if not google_civic_election_id or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE'
+            success = False
+            new_voter_guide_created = False
         else:
             try:
                 updated_values = {
@@ -47,6 +49,7 @@ class VoterGuideManager(models.Manager):
                 success = False
                 status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION'
                 exception_multiple_object_returned = True
+                new_voter_guide_created = False
 
         results = {
             'success':                  success,
@@ -61,9 +64,10 @@ class VoterGuideManager(models.Manager):
         new_voter_guide = VoterGuide()
         voter_guide_owner_type = new_voter_guide.PUBLIC_FIGURE
         exception_multiple_object_returned = False
-        status = ''
         if not google_civic_election_id or not public_figure_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_PUBLIC_FIGURE_VOTER_GUIDE'
+            new_voter_guide_created = False
+            success = False
         else:
             try:
                 updated_values = {
@@ -88,6 +92,7 @@ class VoterGuideManager(models.Manager):
                 success = False
                 status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_PUBLIC_FIGURE'
                 exception_multiple_object_returned = True
+                new_voter_guide_created = False
 
         results = {
             'success':                  success,
@@ -103,9 +108,10 @@ class VoterGuideManager(models.Manager):
         voter_guide_owner_type = new_voter_guide.VOTER
         owner_voter_id = convert_to_int(owner_voter_id)
         exception_multiple_object_returned = False
-        status = 'ERROR_VARIABLES_MISSING_FOR_VOTER_VOTER_GUIDE'
         if not google_civic_election_id or not owner_voter_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_VOTER_VOTER_GUIDE'
+            new_voter_guide_created = False
+            success = False
         else:
             try:
                 updated_values = {
@@ -130,6 +136,7 @@ class VoterGuideManager(models.Manager):
                 success = False
                 status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_VOTER'
                 exception_multiple_object_returned = True
+                new_voter_guide_created = False
 
         results = {
             'success':                  success,

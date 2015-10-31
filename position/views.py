@@ -18,45 +18,6 @@ from wevote_functions.models import convert_to_int, get_voter_device_id
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-def positions_count_for_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for,
-                                                show_followed_positions=True):
-    """
-    We want to return a JSON file with the support positions for a particular candidate's campaign
-    :param request:
-    :param candidate_campaign_id:
-    :return:
-    """
-    if stance_we_are_looking_for not in(ANY, SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECIDING, OPPOSE):
-        logger.debug(stance_we_are_looking_for)
-        return JsonResponse({0: "stance not recognized"})
-
-    # This implementation is built to make only two database calls. All other calculations are done here in the
-    #  application layer
-
-    position_list_manager = PositionListForCandidateCampaign()
-    all_positions_list_for_candidate_campaign = \
-        position_list_manager.retrieve_all_positions_for_candidate_campaign(
-            candidate_campaign_id, stance_we_are_looking_for)
-
-    voter_device_id = get_voter_device_id(request)
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-
-    follow_organization_list_manager = FollowOrganizationList()
-    organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_info_for_voter_simple_array(voter_id)
-
-    if show_followed_positions:
-        positions_followed = position_list_manager.calculate_positions_followed_by_voter(
-            voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
-        positions_followed_count = len(positions_followed)
-        return JsonResponse({0: positions_followed_count})
-    else:
-        positions_not_followed = position_list_manager.calculate_positions_not_followed_by_voter(
-            all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
-        positions_not_followed_count = len(positions_not_followed)
-        return JsonResponse({0: positions_not_followed_count})
-
-
 def positions_related_to_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for):
     """
     We want to return a JSON file with the support positions for a particular candidate's campaign
@@ -406,26 +367,26 @@ def positions_count_for_candidate_campaign_support_view(request, candidate_campa
     return positions_count_for_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-def positions_related_to_measure_campaign_oppose_view(request, measure_campaign_id):
+def positions_related_to_contest_measure_oppose_view(request, contest_measure_id):
     """
     We want to return a JSON file with the oppose positions for a particular measure's campaign
     :param request:
-    :param measure_campaign_id:
+    :param contest_measure_id:
     :return:
     """
-    print "TO BE IMPLEMENTED, positions_related_to_measure_campaign_oppose_view, measure_campaign_id: {}".format(
-        measure_campaign_id)
+    print "TO BE IMPLEMENTED, positions_related_to_contest_measure_oppose_view, contest_measure_id: {}".format(
+        contest_measure_id)
     return JsonResponse({0: "Sierra Club opposes"})
 
 
-def positions_related_to_measure_campaign_support_view(request, measure_campaign_id):
+def positions_related_to_contest_measure_support_view(request, contest_measure_id):
     """
     We want to return a JSON file with the support positions for a particular measure's campaign
     :param request:
-    :param measure_campaign_id:
+    :param contest_measure_id:
     :return:
     """
-    print "TO BE IMPLEMENTED, positions_related_to_measure_campaign_support_view, measure_campaign_id: {}".format(
-        measure_campaign_id)
+    print "TO BE IMPLEMENTED, positions_related_to_contest_measure_support_view, contest_measure_id: {}".format(
+        contest_measure_id)
     return JsonResponse({0: "Irvine Republican Club supports"})
 

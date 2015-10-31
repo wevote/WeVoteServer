@@ -121,13 +121,13 @@ def voter_stance_for_candidate_campaign_view(request, candidate_campaign_id):
     return JsonResponse({0: "failure"})
 
 
-def voter_stance_for_measure_campaign_view(request, measure_campaign_id):
+def voter_stance_for_contest_measure_view(request, contest_measure_id):
     logger.debug("voter_stance_for_candidate_campaign_view {candidate_campaign_id}".format(
-        measure_campaign_id=measure_campaign_id
+        contest_measure_id=contest_measure_id
     ))
     voter_device_id = get_voter_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    logger.debug("voter_stance_for_measure_campaign_view NOT BUILT YET, voter_id: {voter_id}".format(
+    logger.debug("voter_stance_for_contest_measure_view NOT BUILT YET, voter_id: {voter_id}".format(
         voter_id=voter_id
     ))
 

@@ -65,10 +65,10 @@ urlpatterns = [
     #     name='positions_display_list_related_to_candidate_campaign_deciders_view'),
     #
     # # Measures
-    # url(r'^ms/(?P<measure_campaign_id>[0-9]+)/oppose/$',
-    #     views.positions_related_to_measure_campaign_oppose_view,
-    #     name='positions_related_to_measure_campaign_oppose_view'),
-    # url(r'^ms/(?P<measure_campaign_id>[0-9]+)/support/$',
-    #     views.positions_related_to_measure_campaign_support_view,
-    #     name='positions_related_to_measure_campaign_support_view'),
+    # url(r'^ms/(?P<contest_measure_id>[0-9]+)/oppose/$',
+    #     views.positions_related_to_contest_measure_oppose_view,
+    #     name='positions_related_to_contest_measure_oppose_view'),
+    # url(r'^ms/(?P<contest_measure_id>[0-9]+)/support/$',
+    #     views.positions_related_to_contest_measure_support_view,
+    #     name='positions_related_to_contest_measure_support_view'),
 ]

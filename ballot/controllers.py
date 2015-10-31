@@ -3,12 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 from .models import BallotItemListManager
-from apis_v1.controllers import is_voter_device_id_valid
 from exception.models import handle_exception
 from import_export_google_civic.controllers import retrieve_and_store_ballot_for_voter
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
-from wevote_functions.models import positive_value_exists
+from wevote_functions.models import is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

@@ -6,7 +6,6 @@ from ballot.models import BallotItemManager
 from django.db import models
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
-from django.utils import timezone
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_saved_exception
 from validate_email import validate_email
@@ -36,7 +35,6 @@ class VoterManager(BaseUserManager):
         """
         Creates and saves a User with the given email and password.
         """
-        now = timezone.now()
         email = self.normalize_email(email)
         user = self.model(email=self.normalize_email(email))
 
@@ -304,18 +302,24 @@ class Voter(AbstractBaseUser):
         return self.email
 
     def has_perm(self, perm, obj=None):
-        "Does the user have a specific permission?"
+        """
+        Does the user have a specific permission?
+        """
         # Simplest possible answer: Yes, always
         return True
 
     def has_module_perms(self, app_label):
-        "Does the user have permissions to view the app `app_label`?"
+        """
+        Does the user have permissions to view the app `app_label`?
+        """
         # Simplest possible answer: Yes, always
         return True
 
     @property
     def is_staff(self):
-        "Is the user a member of staff?"
+        """
+        Is the user a member of staff?
+        """
         # Simplest possible answer: All admins are staff
         return self.is_admin
 
@@ -383,7 +387,7 @@ class VoterDeviceLinkManager(models.Model):
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
             exception_multiple_object_returned = True
-        except VoterDeviceLink.DoesNotExist as e:
+        except VoterDeviceLink.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
 
@@ -550,8 +554,8 @@ class VoterAddressManager(models.Model):
             if positive_value_exists(voter_address_id):
                 voter_address_on_stage = VoterAddress.objects.get(id=voter_address_id)
                 voter_address_id = voter_address_on_stage.id
-            elif positive_value_exists(voter_id) and \
-                            address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
+            elif positive_value_exists(voter_id) and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS,
+                                                                      FORMER_BALLOT_ADDRESS):
                 voter_address_on_stage = VoterAddress.objects.get(voter_id=voter_id, address_type=address_type)
                 # If still here, we found an existing address
                 voter_address_id = voter_address_on_stage.id
@@ -674,7 +678,9 @@ class VoterAddressManager(models.Model):
 
         else:
             # If here, we were unable to find pre-existing VoterAddress
-            voter_address = VoterAddress()  # TODO DALE Finish this for "create new"
+            status = "UNABLE_TO_FIND_VOTER_ADDRESS"
+            voter_address = VoterAddress()  # TODO Finish this for "create new" case
+            success = False
 
         results = {
             'status':   status,

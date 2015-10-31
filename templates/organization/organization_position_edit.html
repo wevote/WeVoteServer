@@ -61,15 +61,15 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
 {# Measure Campaign #}
 {% if is_in_edit_mode %}
     {# EDIT EXISTING: There is no need to display anything here #}
-    <input type="hidden" name="measure_campaign_id" value="{{ organization_position.measure_campaign.id }}">
+    <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">
 {% else %}
     {# ADD NEW: Show the drop-down of campaigns this org can have enter a position for #}
-    <label for="measure_campaign_id_id">Measure (ID for now)</label>
+    <label for="contest_measure_id_id">Measure (ID for now)</label>
     {% if organization_position %}
     Existing organization_position selected
-    <input type="text" name="measure_campaign_name" id="measure_campaign_id" value="{{ organization_position.measure_campaign.id }}" />
+    <input type="text" name="contest_measure_name" id="contest_measure_id" value="{{ organization_position.contest_measure.id }}" />
     {% else %}
-    <input type="text" name="measure_campaign_id" id="measure_campaign_id_id" value="" />
+    <input type="text" name="contest_measure_id" id="contest_measure_id_id" value="" />
     {% endif %}
 
     <br />

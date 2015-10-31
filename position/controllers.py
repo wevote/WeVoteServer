@@ -76,8 +76,8 @@ def positions_import_from_sample_file(request=None, load_from_uri=False):
             google_civic_candidate_name = candidate_campaign_manager.fetch_google_civic_candidate_name_from_we_vote_id(
                 one_position["candidate_campaign_we_vote_id"])
 
-        # TODO We need to look up measure_campaign_id
-        measure_campaign_id = 0
+        # TODO We need to look up contest_measure_id
+        contest_measure_id = 0
 
         try:
             if position_on_stage_found:
@@ -88,7 +88,7 @@ def positions_import_from_sample_file(request=None, load_from_uri=False):
                 position_on_stage.candidate_campaign_id = candidate_campaign_id
                 position_on_stage.candidate_campaign_we_vote_id = one_position["candidate_campaign_we_vote_id"]
                 position_on_stage.google_civic_candidate_name = google_civic_candidate_name
-                position_on_stage.measure_campaign_id = measure_campaign_id
+                position_on_stage.contest_measure_id = contest_measure_id
                 position_on_stage.date_entered = one_position["date_entered"]
                 position_on_stage.google_civic_election_id = one_position["google_civic_election_id"]
                 position_on_stage.stance = one_position["stance"]
@@ -108,7 +108,7 @@ def positions_import_from_sample_file(request=None, load_from_uri=False):
                     candidate_campaign_id=candidate_campaign_id,
                     candidate_campaign_we_vote_id=one_position["candidate_campaign_we_vote_id"],
                     google_civic_candidate_name=google_civic_candidate_name,
-                    measure_campaign_id=measure_campaign_id,
+                    contest_measure_id=contest_measure_id,
                     date_entered=one_position["date_entered"],
                     google_civic_election_id=one_position["google_civic_election_id"],
                     stance=one_position["stance"],
@@ -142,3 +142,4 @@ def positions_import_from_sample_file(request=None, load_from_uri=False):
         'not_processed': positions_not_processed,
     }
     return positions_results
+

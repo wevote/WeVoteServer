@@ -2,6 +2,5 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-# from django.db import models
+# Models for support_oppose_deciding methods are for the most part in 'position'
 
-# Create your models here.

@@ -38,7 +38,11 @@ def PUT_NAME_HERE_doc_template_values(url_root):
     potential_status_codes_list = [
         {
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
-            'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
+            'description':  'Cannot proceed. A valid voter_device_id parameter was not included.',
+        },
+        {
+            'code':         'VALID_VOTER_ID_MISSING',
+            'description':  'Cannot proceed. A valid voter_id was not found.',
         },
         # {
         #     'code':         '',

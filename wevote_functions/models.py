@@ -134,6 +134,31 @@ def get_voter_device_id(request, generate_if_no_cookie=False):
     return voter_device_id
 
 
+def is_voter_device_id_valid(voter_device_id):
+    if not voter_device_id \
+            or len(voter_device_id) <= 70 \
+            or len(voter_device_id) >= 90:
+        success = False
+        json_data = {
+            'status': "VALID_VOTER_DEVICE_ID_MISSING",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+    else:
+        success = True
+        json_data = {
+            'status': '',
+            'success': True,
+            'voter_device_id': voter_device_id,
+        }
+
+    results = {
+        'success': success,
+        'json_data': json_data,
+    }
+    return results
+
+
 def set_voter_device_id(request, response, voter_device_id):
     if 'voter_device_id' not in request.COOKIES:
         set_cookie(response, 'voter_device_id', voter_device_id)

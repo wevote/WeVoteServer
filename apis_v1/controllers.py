@@ -12,34 +12,9 @@ from voter.models import BALLOT_ADDRESS, fetch_google_civic_election_id_for_vote
     fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterAddressManager, VoterDeviceLinkManager
 from voter_guide.models import VoterGuideList
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
+from wevote_functions.models import convert_to_int, is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
-
-
-def is_voter_device_id_valid(voter_device_id):
-    if not voter_device_id \
-            or len(voter_device_id) <= 70 \
-            or len(voter_device_id) >= 90:
-        success = False
-        json_data = {
-            'status': "VALID_VOTER_DEVICE_ID_MISSING",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-    else:
-        success = True
-        json_data = {
-            'status': '',
-            'success': True,
-            'voter_device_id': voter_device_id,
-        }
-
-    results = {
-        'success': success,
-        'json_data': json_data,
-    }
-    return results
 
 
 def organization_count():
@@ -367,13 +342,22 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id):
             }
             voter_guides.append(one_voter_guide.copy())
 
-        json_data = {
-            'status': 'VOTER_GUIDES_TO_FOLLOW_RETRIEVED',
-            'success': True,
-            'voter_device_id': voter_device_id,
-            'voter_guides': voter_guides,
-            'google_civic_election_id': google_civic_election_id,
-        }
+        if len(voter_guides):
+            json_data = {
+                'status': 'VOTER_GUIDES_TO_FOLLOW_RETRIEVED',
+                'success': True,
+                'voter_device_id': voter_device_id,
+                'voter_guides': voter_guides,
+                'google_civic_election_id': google_civic_election_id,
+            }
+        else:
+            json_data = {
+                'status': 'NO_VOTER_GUIDES_FOUND',
+                'success': True,
+                'voter_device_id': voter_device_id,
+                'voter_guides': voter_guides,
+                'google_civic_election_id': google_civic_election_id,
+            }
 
         results = {
             'success': success,

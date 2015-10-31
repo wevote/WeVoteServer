@@ -3,10 +3,13 @@
 # -*- coding: UTF-8 -*-
 
 from django.shortcuts import render
-from documentation_source import candidates_retrieve_doc, device_id_generate_doc, organization_count_doc, \
+from documentation_source import candidates_retrieve_doc, device_id_generate_doc, oppose_count_doc, \
+    organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
-    organization_retrieve_doc, voter_address_retrieve_doc, voter_address_save_doc, voter_ballot_items_retrieve_doc, \
-    voter_count_doc, voter_create_doc, voter_guides_to_follow_retrieve_doc, voter_retrieve_doc
+    organization_retrieve_doc, support_count_doc, voter_address_retrieve_doc, voter_address_save_doc, \
+    voter_ballot_items_retrieve_doc, voter_count_doc, voter_create_doc, voter_guides_to_follow_retrieve_doc, \
+    voter_opposing_save_doc, voter_retrieve_doc, voter_stop_opposing_save_doc, \
+    voter_stop_supporting_save_doc, voter_supporting_save_doc
 
 LOCALHOST_URL_ROOT = 'http://localhost:8000'
 
@@ -84,6 +87,24 @@ def organization_retrieve_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def oppose_count_doc_view(request):
+    """
+    Show documentation about opposeCount
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = oppose_count_doc.oppose_count_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def support_count_doc_view(request):
+    """
+    Show documentation about supportCount
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = support_count_doc.support_count_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def voter_address_retrieve_doc_view(request):
     """
     Show documentation about voterAddressRetrieve
@@ -129,6 +150,33 @@ def voter_create_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def voter_guides_to_follow_retrieve_doc_view(request):
+    """
+    Show documentation about voterGuidesToFollowRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_guides_to_follow_retrieve_doc.voter_guides_to_follow_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_opposing_save_doc_view(request):
+    """
+    Show documentation about voterSupportingSave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_opposing_save_doc.voter_opposing_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_stop_opposing_save_doc_view(request):
+    """
+    Show documentation about voterStopSupportingSave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_stop_opposing_save_doc.voter_stop_opposing_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def voter_retrieve_doc_view(request):
     """
     Show documentation about voterRetrieve
@@ -138,10 +186,19 @@ def voter_retrieve_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def voter_guides_to_follow_retrieve_doc_view(request):
+def voter_stop_supporting_save_doc_view(request):
     """
-    Show documentation about voterGuidesToFollowRetrieve
+    Show documentation about voterStopSupportingSave
     """
     url_root = LOCALHOST_URL_ROOT
-    template_values = voter_guides_to_follow_retrieve_doc.voter_guides_to_follow_retrieve_doc_template_values(url_root)
+    template_values = voter_stop_supporting_save_doc.voter_stop_supporting_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_supporting_save_doc_view(request):
+    """
+    Show documentation about voterSupportingSave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_supporting_save_doc.voter_supporting_save_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)

@@ -204,7 +204,8 @@ class ContestMeasureManager(models.Model):
             # We need to use one set of values when we are creating an entry, and another set of values when we
             #  are updating an entry
             try:
-                # Use get_or_create with create_contest_measure_values  # TODO DALE UPDATE THIS
+                # Use get_or_create with create_contest_measure_values. It will be more elegent and less prone
+                #  to problems.
 
                 # if a contest_measure_on_stage is found, *then* update it with update_contest_measure_values
 

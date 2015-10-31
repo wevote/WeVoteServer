@@ -29,7 +29,8 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
 
         self.assertEqual(
             json_data['status'], 'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID',
-            "status: {status} (ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID expected), voter_device_id: {voter_device_id}".format(
+            "status: {status} (ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID expected), "
+            "voter_device_id: {voter_device_id}".format(
                 status=json_data['status'], voter_device_id=json_data['voter_device_id']))
 
     def test_retrieve_with_cookie(self):
@@ -101,10 +102,9 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
             "status: {status} (NO_VOTER_GUIDES_FOUND expected), voter_device_id: {voter_device_id}".format(
                 status=json_data04['status'], voter_device_id=json_data04['voter_device_id']))
 
-
         #######################################
         # Create organization
-        organization1 = Organization.objects.create_organization(
+        Organization.objects.create_organization(
             organization_name="Org1",
             organization_website="www.org1.org",
             organization_twitter="org1",
@@ -126,10 +126,8 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         #######################################
         # Create candidate_campaign
 
-
         #######################################
         # Create position where organization is supporting candidate
-
 
         #######################################
         # Test the response with one voter guide

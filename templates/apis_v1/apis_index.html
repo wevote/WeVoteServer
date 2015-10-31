@@ -61,6 +61,33 @@
         <td>Retrieve a list of candidates competing for an office to display.</td>
     </tr>
     <tr>
+        <td colspan="2"><strong>Positions (Support, Oppose, Info Only) or Stars</strong></td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:opposeCountDocs' %}">opposeCount</a></td>
+        <td>Return the number of organizations the voter follows + the voter's friends that oppose the specified candidate or measure</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterStopOpposingSaveDocs' %}">voterStopOpposingSave</a></td>
+        <td>Save or update one voter's lack of opposition for one candidate or measure</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterOpposingSaveDocs' %}">voterOpposingSave</a></td>
+        <td>Save or update one voter's opposition for one candidate or measure</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:supportCountDocs' %}">supportCount</a></td>
+        <td>Return the number of organizations the voter follows + the voter's friends that support the specified candidate or measure</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterStopSupportingSaveDocs' %}">voterStopSupportingSave</a></td>
+        <td>Save or update one voter's lack of support for one candidate or measure</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterSupportingSaveDocs' %}">voterSupportingSave</a></td>
+        <td>Save or update one voter's support for one candidate or measure</td>
+    </tr>
+    <tr>
         <td colspan="2"><strong>Organizations &amp; People</strong></td>
     </tr>
     <tr>
@@ -86,9 +113,6 @@
     <tr>
         <td><a href="{% url 'apis_v1:voterGuidesToFollowRetrieveDocs' %}">voterGuidesToFollowRetrieve</a></td>
         <td>Retrieve a list of voter guides that a voter might want to follow.</td>
-    </tr>
-    <tr>
-        <td colspan="2"><strong>Positions (Support, Oppose, Info Only) or Stars</strong></td>
     </tr>
     <tr>
         <td colspan="2"><strong>Voter Friends</strong></td>

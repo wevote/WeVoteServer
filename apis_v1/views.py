@@ -11,6 +11,8 @@ from django.http import HttpResponse
 import json
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from support_oppose_deciding.controllers import oppose_count_for_api, support_count_for_api, \
+    voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save
 from voter.serializers import VoterSerializer
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
     get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie
@@ -98,6 +100,30 @@ def organization_retrieve_view(request):
     return organization_retrieve(organization_id=organization_id, we_vote_id=we_vote_id)
 
 
+def oppose_count_view(request):
+    """
+    Retrieve the number of orgs and friends that oppose this (opposeCount)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    return oppose_count_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+
+
+def support_count_view(request):
+    """
+    Retrieve the number of orgs and friends that support this (supportCount)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    return support_count_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+
+
 def voter_address_retrieve_view(request):
     """
     Retrieve an address for this voter so we can figure out which ballot to display
@@ -173,6 +199,18 @@ def voter_guides_to_follow_retrieve_view(request):
     return response
 
 
+def voter_opposing_save_view(request):
+    """
+    Save support for a single measure or candidate for one voter (voterOpposingSave)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    return voter_opposing_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+
+
 class VoterRetrieveView(APIView):
     """
     Export raw voter data to JSON format
@@ -191,3 +229,39 @@ class VoterRetrieveView(APIView):
             voter_list = results['voter_list']
             serializer = VoterSerializer(voter_list, many=True)
             return Response(serializer.data)
+
+
+def voter_stop_opposing_save_view(request):
+    """
+    Save support for a single measure or candidate for one voter (voterStopOpposingSave)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    return voter_stop_opposing_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+
+
+def voter_stop_supporting_save_view(request):
+    """
+    Save support for a single measure or candidate for one voter (voterStopSupportingSave)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    return voter_stop_supporting_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+
+
+def voter_supporting_save_view(request):
+    """
+    Save support for a single measure or candidate for one voter (voterSupportingSave)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    return voter_supporting_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)

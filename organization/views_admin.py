@@ -344,7 +344,7 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
     organization_id = convert_to_int(request.POST['organization_id'])
     position_id = convert_to_int(request.POST['position_id'])
     candidate_campaign_id = convert_to_int(request.POST['candidate_campaign_id'])
-    measure_campaign_id = convert_to_int(request.POST['measure_campaign_id'])
+    contest_measure_id = convert_to_int(request.POST['contest_measure_id'])
     stance = request.POST.get('stance', SUPPORT)  # Set a default if stance comes in empty
     statement_text = request.POST.get('statement_text', '')  # Set a default if stance comes in empty
     more_info_url = request.POST.get('more_info_url', '')
@@ -366,8 +366,8 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             "Could not find the organization when trying to create or edit a new position.")
         return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
-    # Now retrieve the CandidateCampaign or the MeasureCampaign so we can save it with the Position
-    # We need either candidate_campaign_id or measure_campaign_id
+    # Now retrieve the CandidateCampaign or the ContestMeasure so we can save it with the Position
+    # We need either candidate_campaign_id or contest_measure_id
     if candidate_campaign_id:
         try:
             candidate_campaign_on_stage = CandidateCampaign.objects.get(id=candidate_campaign_id)
@@ -389,11 +389,11 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
                 return HttpResponseRedirect(
                     reverse('organization:organization_position_new', args=([organization_id]))
                 )
-    elif measure_campaign_id:
-        logger.warn("measure_campaign_id FOUND. Look for MeasureCampaign here.")
+    elif contest_measure_id:
+        logger.warn("contest_measure_id FOUND. Look for ContestMeasure here.")
 
     else:
-        logger.warn("Neither candidate_campaign_id nor measure_campaign_id found")
+        logger.warn("Neither candidate_campaign_id nor contest_measure_id found")
         messages.add_message(
             request, messages.ERROR,
             "Unable to find either Candidate or Measure.")
