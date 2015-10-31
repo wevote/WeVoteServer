@@ -4,15 +4,17 @@
 
 from django.http import HttpResponse
 from exception.models import handle_exception
+from import_export_google_civic.models import fetch_google_civic_election_id_for_voter_id
 from follow.models import FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 import json
 from organization.models import Organization, OrganizationManager
 from organization.controllers import organization_follow_all
-from voter.models import BALLOT_ADDRESS, fetch_google_civic_election_id_for_voter_id, \
+from voter.models import BALLOT_ADDRESS, \
     fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterAddressManager, VoterDeviceLinkManager
 from voter_guide.models import VoterGuideList
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, is_voter_device_id_valid, positive_value_exists
+from wevote_functions.models import convert_to_int, \
+    is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

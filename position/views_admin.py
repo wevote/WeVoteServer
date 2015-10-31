@@ -2,8 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PositionEntered, PositionListForCandidateCampaign, ANY, INFORMATION_ONLY, OPPOSE, \
-    STILL_DECIDING, SUPPORT
+from .models import PositionEntered
 from .serializers import PositionSerializer
 from candidate.models import CandidateCampaign
 from django.http import HttpResponseRedirect

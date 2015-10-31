@@ -11,6 +11,7 @@
 {% if voter_list %}
     <table border="1" cellpadding="10">
         <tr>
+            <td>ID</td>
             <td>Who</td>
             <td>Where</td>
             <td>FB?</td>
@@ -19,6 +20,7 @@
         </tr>
     {% for voter in voter_list %}
         <tr>
+            <td>{{ voter.id }}</td>
             <td><a href="{% url 'voter:voter_summary' voter.id %}">
             {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }}{% endif %}</a>
             </td>

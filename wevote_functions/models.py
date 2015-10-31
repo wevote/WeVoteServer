@@ -247,4 +247,3 @@ def get_google_civic_election_id_from_cookie(request):
 
 def set_google_civic_election_id_cookie(request, response, google_civic_election_id):
     set_cookie(response, 'google_civic_election_id', google_civic_election_id)
-

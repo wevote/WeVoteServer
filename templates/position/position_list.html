@@ -37,8 +37,10 @@
     {% for position in position_list %}
         <tr>
             <td>{{ position.we_vote_id }}</td>
-            <td>{{ position.organization.organization_name }}</td>
-            <td><a href="{% url 'organization:organization_position_edit' position.organization.id position.id %}">
+            <td>{% if position.organization %}{{ position.organization.organization_name }}{% endif %}</td>
+            <td>{% if position.organization %}
+                <a href="{% url 'organization:organization_position_edit' position.organization.id position.id %}">
+            {% endif %}
                 {{ position.get_stance_display }}</a></td>
             <td>{{ position.candidate_campaign.candidate_name }}</td>
             <td>{{ position.election.election_day_text }}</td>

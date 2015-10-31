@@ -2,7 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from ballot.models import BallotItemManager
 from django.db import models
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
@@ -10,7 +9,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
     handle_record_not_saved_exception
 from validate_email import validate_email
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, generate_voter_device_id, positive_value_exists
+from wevote_functions.models import convert_to_int, generate_voter_device_id, get_voter_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fetch_site_unique_id_prefix
 
 
@@ -442,18 +441,6 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
     return 0
 
 
-def fetch_google_civic_election_id_for_voter_id(voter_id):
-    # Look to see if we have ballot_items stored for this voter and pull google_civic_election_id from that
-    ballot_item_manager = BallotItemManager()
-    results = ballot_item_manager.retrieve_google_civic_election_id_for_voter(voter_id)
-    if results['success']:
-        google_civic_election_id = results['google_civic_election_id']
-    else:
-        google_civic_election_id = 0
-
-    return google_civic_election_id
-
-
 # class VoterJurisdictionLink(models.Model):
 #     """
 #     All of the jurisdictions the Voter is in
@@ -688,3 +675,47 @@ class VoterAddressManager(models.Model):
             'voter_address': voter_address,
         }
         return results
+
+
+def voter_setup(request):
+    generate_voter_device_id_if_needed = True
+    voter_device_id = get_voter_device_id(request, generate_voter_device_id_if_needed)
+    voter_id_found = False
+    store_new_voter_device_id_in_cookie = True
+
+    voter_device_link_manager = VoterDeviceLinkManager()
+    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+    if results['voter_device_link_found']:
+        voter_device_link = results['voter_device_link']
+        voter_id = voter_device_link.voter_id
+        voter_id_found = True if positive_value_exists(voter_id) else False
+        store_new_voter_device_id_in_cookie = False if positive_value_exists(voter_id_found) else True
+
+    # If existing voter not found, create a new voter
+    if not voter_id_found:
+        # Create a new voter and return the id
+        voter_manager = VoterManager()
+        results = voter_manager.create_voter()
+
+        if results['voter_created']:
+            voter = results['voter']
+            voter_id = voter.id
+
+            # Now save the voter_device_link
+            results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter_id)
+
+            if results['voter_device_link_created']:
+                voter_device_link = results['voter_device_link']
+                voter_id = voter_device_link.voter_id
+                voter_id_found = True if voter_id > 0 else False
+            else:
+                voter_id = 0
+                voter_id_found = False
+
+    final_results = {
+        'voter_id':                 voter_id,
+        'voter_device_id':          voter_device_id,
+        'voter_id_found':           voter_id_found,
+        'store_new_voter_device_id_in_cookie':   store_new_voter_device_id_in_cookie,
+    }
+    return final_results

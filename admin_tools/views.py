@@ -13,14 +13,23 @@ from office.controllers import offices_import_from_sample_file
 from organization.controllers import organizations_import_from_sample_file
 from polling_location.controllers import import_and_save_all_polling_locations_data
 from position.controllers import positions_import_from_sample_file
-from voter.models import Voter
+from voter.models import Voter, voter_setup
+from wevote_functions.models import positive_value_exists, set_voter_device_id
 
 
 def admin_home_view(request):
-
+    results = voter_setup(request)
+    voter_device_id = results['voter_device_id']
+    store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
     template_values = {
     }
-    return render(request, 'admin_home/index.html', template_values)
+    response = render(request, 'admin_home/index.html', template_values)
+
+    # We want to store the voter_device_id cookie if it is new
+    if positive_value_exists(voter_device_id) and positive_value_exists(store_new_voter_device_id_in_cookie):
+        set_voter_device_id(request, response, voter_device_id)
+
+    return response
 
 
 # @login_required()  # Commented out while we are developing login process

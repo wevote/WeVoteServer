@@ -185,32 +185,6 @@ class BallotItemManager(models.Model):
         }
         return results
 
-    def retrieve_google_civic_election_id_for_voter(self, voter_id):
-        """
-        Grab the first ballot_item we can find for this voter and return the google_civic_election_id
-        """
-        google_civic_election_id = 0
-        success = False
-
-        if positive_value_exists(voter_id):
-            try:
-                ballot_item_query = BallotItem.objects.filter(
-                    voter_id__exact=voter_id,
-                )
-                ballot_item_list = list(ballot_item_query[:1])
-                if ballot_item_list:
-                    one_ballot_item = ballot_item_list[0]
-                    google_civic_election_id = one_ballot_item.google_civic_election_id
-                    success = True
-            except BallotItem.DoesNotExist:
-                pass
-
-        results = {
-            'success': success,
-            'google_civic_election_id': google_civic_election_id,
-        }
-        return results
-
 
 class BallotItemListManager(models.Model):
     """

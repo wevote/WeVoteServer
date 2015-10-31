@@ -3,8 +3,6 @@
 # -*- coding: UTF-8 -*-
 
 from django.http import JsonResponse
-from django.shortcuts import render
-from django.contrib.messages import get_messages
 from candidate.models import CandidateCampaignManager
 from follow.models import FollowOrganizationList
 from organization.models import OrganizationManager
@@ -297,8 +295,10 @@ def positions_count_for_candidate_campaign_any_view(request, candidate_campaign_
     :return:
     """
     stance_we_are_looking_for = ANY
-    return positions_count_for_candidate_campaign_view(
-        request, candidate_campaign_id, stance_we_are_looking_for, show_followed_positions)
+    # TODO Isn't working -- needs some code from wevotebase
+    # return positions_count_for_candidate_campaign_view(
+    #     request, candidate_campaign_id, stance_we_are_looking_for, show_followed_positions)
+    return
 
 
 def positions_related_to_candidate_campaign_oppose_view(request, candidate_campaign_id):
@@ -320,7 +320,9 @@ def positions_count_for_candidate_campaign_oppose_view(request, candidate_campai
     :return:
     """
     stance_we_are_looking_for = OPPOSE
-    return positions_count_for_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for)
+    # TODO Isn't working -- needs some code from wevotebase
+    #return positions_count_for_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for)
+    return
 
 
 def positions_related_to_candidate_campaign_information_only_view(request, candidate_campaign_id):
@@ -364,7 +366,9 @@ def positions_count_for_candidate_campaign_support_view(request, candidate_campa
     :return:
     """
     stance_we_are_looking_for = SUPPORT
-    return positions_count_for_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for)
+    # TODO This isn't working -- needs some code from wevotebase
+    #return positions_count_for_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for)
+    return
 
 
 def positions_related_to_contest_measure_oppose_view(request, contest_measure_id):
