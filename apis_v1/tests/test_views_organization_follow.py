@@ -247,10 +247,10 @@ class WeVoteAPIsV1TestsOrganizationFollow(TestCase):
 
         #######################################
         # Add an organization so we can test all of the 'follow' states
-        organization1 = Organization.objects.create_organization(
+        organization1 = Organization.objects.create_organization_simple(
             organization_name="Org1",
             organization_website="www.org1.org",
-            organization_twitter="org1",
+            organization_twitter_handle="org1",
         )
 
         #######################################

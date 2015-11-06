@@ -99,7 +99,7 @@ def organization_edit_process_view(request):
     """
     organization_id = convert_to_int(request.POST['organization_id'])
     organization_name = request.POST['organization_name']
-    twitter_handle = request.POST['twitter_handle']
+    organization_twitter_handle = request.POST['organization_twitter_handle']
     organization_website = request.POST['organization_website']
 
     # Check to see if this organization is already being used anywhere
@@ -116,7 +116,7 @@ def organization_edit_process_view(request):
         if organization_on_stage_found:
             # Update
             organization_on_stage.organization_name = organization_name
-            organization_on_stage.twitter_handle = twitter_handle
+            organization_on_stage.organization_twitter_handle = organization_twitter_handle
             organization_on_stage.organization_website = organization_website
             organization_on_stage.save()
             organization_id = organization_on_stage.id
@@ -126,7 +126,7 @@ def organization_edit_process_view(request):
             # Create new
             organization_on_stage = Organization(
                 organization_name=organization_name,
-                twitter_handle=twitter_handle,
+                organization_twitter_handle=organization_twitter_handle,
                 organization_website=organization_website
             )
             organization_on_stage.save()

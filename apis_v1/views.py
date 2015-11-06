@@ -3,12 +3,14 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import organization_count, organization_follow, organization_follow_ignore, organization_retrieve, \
+    organization_save_for_api, \
     organization_stop_following, voter_address_save, voter_address_retrieve, voter_count, voter_create, \
     voter_guides_to_follow_retrieve, voter_retrieve_list
 from ballot.controllers import voter_ballot_items_retrieve
 from candidate.controllers import candidates_retrieve
 from django.http import HttpResponse
 import json
+from organization.controllers import organization_search_controller
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from support_oppose_deciding.controllers import oppose_count_for_api, support_count_for_api, \
@@ -22,14 +24,8 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 def candidates_retrieve_view(request):
-    try:
-        office_id = request.GET['office_id']
-    except KeyError:
-        office_id = 0
-    try:
-        office_we_vote_id = request.GET['office_we_vote_id']
-    except KeyError:
-        office_we_vote_id = ''
+    office_id = request.GET.get('office_id', 0)
+    office_we_vote_id = request.GET.get('office_we_vote_id', '')
     return candidates_retrieve(office_id, office_we_vote_id)
 
 
@@ -58,28 +54,19 @@ def organization_count_view(request):
 
 def organization_follow_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    try:
-        organization_id = request.GET['organization_id']
-    except KeyError:
-        organization_id = 0
+    organization_id = request.GET.get('organization_id', 0)
     return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id)
 
 
 def organization_stop_following_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    try:
-        organization_id = request.GET['organization_id']
-    except KeyError:
-        organization_id = 0
+    organization_id = request.GET.get('organization_id', 0)
     return organization_stop_following(voter_device_id=voter_device_id, organization_id=organization_id)
 
 
 def organization_follow_ignore_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    try:
-        organization_id = request.GET['organization_id']
-    except KeyError:
-        organization_id = 0
+    organization_id = request.GET.get('organization_id', 0)
     return organization_follow_ignore(voter_device_id=voter_device_id, organization_id=organization_id)
 
 
@@ -89,15 +76,51 @@ def organization_retrieve_view(request):
     :param request:
     :return:
     """
-    try:
-        organization_id = request.GET['organization_id']
-    except KeyError:
-        organization_id = 0
-    try:
-        we_vote_id = request.GET['we_vote_id']
-    except KeyError:
-        we_vote_id = ''
-    return organization_retrieve(organization_id=organization_id, we_vote_id=we_vote_id)
+    organization_id = request.GET.get('organization_id', 0)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    return organization_retrieve(organization_id=organization_id, organization_we_vote_id=organization_we_vote_id)
+
+
+def organization_save_view(request):
+    """
+    Retrieve a single organization based on unique identifier
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    organization_id = request.POST.get('organization_id', 0)
+    organization_we_vote_id = request.POST.get('organization_we_vote_id', '')
+    organization_name = request.POST.get('organization_name', False)
+    organization_email = request.POST.get('organization_email', False)
+    organization_website = request.POST.get('organization_website', False)
+    organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
+    organization_facebook = request.POST.get('organization_facebook', False)
+    organization_image = request.POST.get('organization_image', False)
+
+    results = organization_save_for_api(
+        voter_device_id=voter_device_id, organization_id=organization_id,
+        organization_we_vote_id=organization_we_vote_id,
+        organization_name=organization_name, organization_email=organization_email,
+        organization_website=organization_website, organization_twitter_handle=organization_twitter_handle,
+        organization_facebook=organization_facebook, organization_image=organization_image)
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
+
+
+def organization_search_view(request):
+    """
+    Search for organizations based on a few search terms
+    :param request:
+    :return:
+    """
+    organization_name = request.GET.get('organization_name', '')
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
+    organization_website = request.GET.get('organization_website', '')
+    organization_email = request.GET.get('organization_email', '')
+    return organization_search_controller(organization_name=organization_name,
+                                          organization_twitter_handle=organization_twitter_handle,
+                                          organization_website=organization_website,
+                                          organization_email=organization_email)
 
 
 def oppose_count_view(request):

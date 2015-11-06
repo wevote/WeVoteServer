@@ -9,4 +9,4 @@ from rest_framework import serializers
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ('we_vote_id', 'organization_name', 'organization_website', 'twitter_handle', 'organization_type')
+        fields = ('we_vote_id', 'organization_name', 'organization_website', 'organization_twitter_handle', 'organization_type')

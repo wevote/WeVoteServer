@@ -104,10 +104,10 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
 
         #######################################
         # Create organization
-        Organization.objects.create_organization(
+        Organization.objects.create_organization_simple(
             organization_name="Org1",
             organization_website="www.org1.org",
-            organization_twitter="org1",
+            organization_twitter_handle="org1",
         )
 
         #######################################

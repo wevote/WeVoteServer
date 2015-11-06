@@ -6,7 +6,8 @@ from django.shortcuts import render
 from documentation_source import candidates_retrieve_doc, device_id_generate_doc, oppose_count_doc, \
     organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
-    organization_retrieve_doc, support_count_doc, voter_address_retrieve_doc, voter_address_save_doc, \
+    organization_retrieve_doc, organization_save_doc, organization_search_doc, \
+    support_count_doc, voter_address_retrieve_doc, voter_address_save_doc, \
     voter_ballot_items_retrieve_doc, voter_count_doc, voter_create_doc, voter_guides_to_follow_retrieve_doc, \
     voter_opposing_save_doc, voter_retrieve_doc, voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc
@@ -83,7 +84,26 @@ def organization_retrieve_doc_view(request):
     Show documentation about organizationRetrieve
     """
     url_root = LOCALHOST_URL_ROOT
+
     template_values = organization_retrieve_doc.organization_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organization_save_doc_view(request):
+    """
+    Show documentation about organizationSave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = organization_save_doc.organization_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organization_search_doc_view(request):
+    """
+    Show documentation about organizationSave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = organization_search_doc.organization_search_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

@@ -37,20 +37,20 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
 
         #######################################
         # Add 3 organizations so we can check count again
-        organization1 = Organization.objects.create_organization(
+        organization1 = Organization.objects.create_organization_simple(
             organization_name="Org1",
             organization_website="www.org1.org",
-            organization_twitter="org1",
+            organization_twitter_handle="org1",
         )
-        organization2 = Organization.objects.create_organization(
+        organization2 = Organization.objects.create_organization_simple(
             organization_name="Org2",
             organization_website="www.org2.org",
-            organization_twitter="org2",
+            organization_twitter_handle="org2",
         )
-        organization3 = Organization.objects.create_organization(
+        organization3 = Organization.objects.create_organization_simple(
             organization_name="Org3",
             organization_website="www.org3.org",
-            organization_twitter="org3",
+            organization_twitter_handle="org3",
         )
 
         #######################################
@@ -75,8 +75,8 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
                          "'success' variable expected in the organizationRetrieve json response, and not found")
         self.assertEqual('organization_id' in json_data3, True,
                          "'organization_id' variable expected in the organizationRetrieve json response")
-        self.assertEqual('we_vote_id' in json_data3, True,
-                         "'we_vote_id' variable expected in the organizationRetrieve json response")
+        self.assertEqual('organization_we_vote_id' in json_data3, True,
+                         "'organization_we_vote_id' variable expected in the organizationRetrieve json response")
         self.assertEqual('status' in json_data3, True,
                          "'status' variable expected in the organizationRetrieve json response")
         self.assertEqual(
@@ -97,8 +97,8 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
                          "'success' variable expected in the organizationRetrieve json response, and not found")
         self.assertEqual('organization_id' in json_data4, True,
                          "'organization_id' variable expected in the organizationRetrieve json response")
-        self.assertEqual('we_vote_id' in json_data4, True,
-                         "'we_vote_id' variable expected in the organizationRetrieve json response")
+        self.assertEqual('organization_we_vote_id' in json_data4, True,
+                         "'organization_we_vote_id' variable expected in the organizationRetrieve json response")
         self.assertEqual('status' in json_data4, True,
                          "'status' variable expected in the organizationRetrieve json response")
         self.assertEqual(
@@ -111,16 +111,16 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
                 success=json_data4['success'], status=json_data4['status']))
 
         #######################################
-        # Retrieve 1 organization with required we_vote_id
-        response5 = self.client.get(self.organization_retrieve_url, {'we_vote_id': organization1.we_vote_id})
+        # Retrieve 1 organization with required organization_we_vote_id
+        response5 = self.client.get(self.organization_retrieve_url, {'organization_we_vote_id': organization1.we_vote_id})
         json_data5 = json.loads(response5.content)
 
         self.assertEqual('success' in json_data5, True,
                          "'success' variable expected in the organizationRetrieve json response, and not found")
         self.assertEqual('organization_id' in json_data5, True,
                          "'organization_id' variable expected in the organizationRetrieve json response")
-        self.assertEqual('we_vote_id' in json_data5, True,
-                         "'we_vote_id' variable expected in the organizationRetrieve json response")
+        self.assertEqual('organization_we_vote_id' in json_data5, True,
+                         "'organization_we_vote_id' variable expected in the organizationRetrieve json response")
         self.assertEqual('status' in json_data5, True,
                          "'status' variable expected in the organizationRetrieve json response")
         self.assertEqual(
@@ -133,17 +133,17 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
                 success=json_data5['success'], status=json_data5['status']))
 
         #######################################
-        # Retrieve 1 organization with required organization_id even if we_vote_id passed in
+        # Retrieve 1 organization with required organization_id even if organization_we_vote_id passed in
         response6 = self.client.get(self.organization_retrieve_url, {'organization_id': organization1.id,
-                                                                     'we_vote_id': organization1.we_vote_id})
+                                                                     'organization_we_vote_id': organization1.we_vote_id})
         json_data6 = json.loads(response6.content)
 
         self.assertEqual('success' in json_data6, True,
                          "'success' variable expected in the organizationRetrieve json response, and not found")
         self.assertEqual('organization_id' in json_data6, True,
                          "'organization_id' variable expected in the organizationRetrieve json response")
-        self.assertEqual('we_vote_id' in json_data6, True,
-                         "'we_vote_id' variable expected in the organizationRetrieve json response")
+        self.assertEqual('organization_we_vote_id' in json_data6, True,
+                         "'organization_we_vote_id' variable expected in the organizationRetrieve json response")
         self.assertEqual('status' in json_data6, True,
                          "'status' variable expected in the organizationRetrieve json response")
         self.assertEqual(
@@ -164,8 +164,8 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
                          "'success' variable expected in the organizationRetrieve json response, and not found")
         self.assertEqual('organization_id' in json_data7, True,
                          "'organization_id' variable expected in the organizationRetrieve json response")
-        self.assertEqual('we_vote_id' in json_data7, True,
-                         "'we_vote_id' variable expected in the organizationRetrieve json response")
+        self.assertEqual('organization_we_vote_id' in json_data7, True,
+                         "'organization_we_vote_id' variable expected in the organizationRetrieve json response")
         self.assertEqual('status' in json_data7, True,
                          "'status' variable expected in the organizationRetrieve json response")
         self.assertEqual(
@@ -180,15 +180,15 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
 
         #######################################
         # FAIL: Try to retrieve 1 organization with required organization_id that is wrong
-        response8 = self.client.get(self.organization_retrieve_url, {'we_vote_id': 'WV_Wrong'})
+        response8 = self.client.get(self.organization_retrieve_url, {'organization_we_vote_id': 'WV_Wrong'})
         json_data8 = json.loads(response8.content)
 
         self.assertEqual('success' in json_data8, True,
                          "'success' variable expected in the organizationRetrieve json response, and not found")
         self.assertEqual('organization_id' in json_data8, True,
                          "'organization_id' variable expected in the organizationRetrieve json response")
-        self.assertEqual('we_vote_id' in json_data8, True,
-                         "'we_vote_id' variable expected in the organizationRetrieve json response")
+        self.assertEqual('organization_we_vote_id' in json_data8, True,
+                         "'organization_we_vote_id' variable expected in the organizationRetrieve json response")
         self.assertEqual('status' in json_data8, True,
                          "'status' variable expected in the organizationRetrieve json response")
         self.assertEqual(

@@ -14,7 +14,7 @@
     {% for organization in organization_list %}
         <tr>
             <td><a href="{% url 'organization:organization_position_list' organization.id %}">{{ organization.organization_name }}</a></td>
-            <td>{{ organization.twitter_handle }}</td>
+            <td>{{ organization.organization_twitter_handle }}</td>
             <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">edit</a></td>
         </tr>
     {% endfor %}

@@ -13,7 +13,7 @@
     <p>
     We Vote ID: {{ organization.we_vote_id }}<br />
     Website: {{ organization.organization_website }}<br />
-    Twitter: {{ organization.twitter_handle }}<br />
+    Twitter: {{ organization.organization_twitter_handle }}<br />
     Organization Type: {{ organization.get_organization_type_display }}<br />
     <a href="{% url 'organization:organization_edit' organization.id %}">edit</a>
     </p>

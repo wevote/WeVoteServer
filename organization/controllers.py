@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .models import OrganizationListManager, OrganizationManager
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
@@ -138,6 +139,9 @@ def organizations_import_from_sample_file(request=None, load_from_uri=False):  #
                 if len(organization_query):
                     organization_on_stage = organization_query[0]
                     organization_on_stage_found = True
+        except Organization.DoesNotExist:
+            # No problem that we aren't finding existing organization
+            pass
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
@@ -147,7 +151,7 @@ def organizations_import_from_sample_file(request=None, load_from_uri=False):  #
                 organization_on_stage.we_vote_id = one_organization["we_vote_id"]
                 organization_on_stage.organization_name = one_organization["organization_name"]
                 organization_on_stage.organization_website = one_organization["organization_website"]
-                organization_on_stage.twitter_handle = one_organization["twitter_handle"]
+                organization_on_stage.organization_twitter_handle = one_organization["organization_twitter_handle"]
                 organization_on_stage.save()
                 # messages.add_message(request, messages.INFO, u"Organization updated: {organization_name}".format(
                 #     organization_name=one_organization["organization_name"]))
@@ -157,8 +161,14 @@ def organizations_import_from_sample_file(request=None, load_from_uri=False):  #
                 organization_on_stage = Organization(
                     we_vote_id=one_organization["we_vote_id"],
                     organization_name=one_organization["organization_name"],
-                    twitter_handle=one_organization["twitter_handle"],
+                    organization_twitter_handle=one_organization["organization_twitter_handle"],
                     organization_website=one_organization["organization_website"],
+                    organization_email=one_organization["organization_email"] if 'organization_email' in
+                                                                                 one_organization else '',
+                    organization_facebook=one_organization["organization_facebook"] if 'organization_facebook' in
+                                                                                       one_organization else '',
+                    organization_image=one_organization["organization_image"] if 'organization_image' in
+                                                                                 one_organization else '',
                 )
                 organization_on_stage.save()
                 organizations_saved += 1
@@ -183,3 +193,77 @@ def organizations_import_from_sample_file(request=None, load_from_uri=False):  #
         'not_processed': organizations_not_processed,
     }
     return organizations_results
+
+
+def organization_save(organization_id, organization_we_vote_id,
+                      organization_name, organization_email,
+                      organization_website, organization_twitter_handle,
+                      organization_facebook, organization_image):
+
+    organization_manager = OrganizationManager()
+    results = organization_manager.update_or_create_organization(
+        organization_id=organization_id, we_vote_id=organization_we_vote_id,
+        organization_website_search=organization_website, organization_twitter_search=organization_twitter_handle,
+        organization_name=organization_name, organization_website=organization_website,
+        organization_twitter_handle=organization_twitter_handle, organization_email=organization_email,
+        organization_facebook=organization_facebook, organization_image=organization_image)
+
+    organizations_save_results = {
+        'success': results['success'],
+        'status': results['status'],
+        'organization': results['organization'],
+        'new_organization_created': results['new_organization_created'],
+    }
+    return organizations_save_results
+
+
+def organization_search_controller(organization_name, organization_twitter_handle, organization_website,
+                                   organization_email):
+    organization_name = organization_name.strip()
+    organization_twitter_handle = organization_twitter_handle.strip()
+    organization_website = organization_website.strip()
+    organization_email = organization_email.strip()
+
+    # We need at least one term to search for
+    if not positive_value_exists(organization_name) \
+            and not positive_value_exists(organization_twitter_handle)\
+            and not positive_value_exists(organization_website)\
+            and not positive_value_exists(organization_email):
+        json_data = {
+            'status':               "ORGANIZATION_SEARCH_ALL_TERMS_MISSING",
+            'success':              False,
+            'organization_name':    organization_name,
+            'organization_twitter_handle': organization_twitter_handle,
+            'organization_website': organization_website,
+            'organization_email':   organization_email,
+            'organizations_list':   [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    organization_list_manager = OrganizationListManager()
+    results = organization_list_manager.organization_search_find_any_possibilities(
+        organization_name, organization_twitter_handle, organization_website, organization_email)
+
+    if results['organizations_found']:
+        organizations_list = results['organizations_list']
+        json_data = {
+            'status': results['status'],
+            'success': True,
+            'organization_name':    organization_name,
+            'organization_twitter_handle': organization_twitter_handle,
+            'organization_website': organization_website,
+            'organization_email':   organization_email,
+            'organizations_list':   organizations_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        json_data = {
+            'status':               results['status'],
+            'success':              False,
+            'organization_name':    organization_name,
+            'organization_twitter_handle': organization_twitter_handle,
+            'organization_website': organization_website,
+            'organization_email':   organization_email,
+            'organizations_list':   [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
