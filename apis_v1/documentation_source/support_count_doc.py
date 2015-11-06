@@ -39,12 +39,6 @@ def support_count_doc_template_values(url_root):
         # },
     ]
 
-    api_response = '{\n' \
-                   '  "status": string,\n' \
-                   '  "success": boolean,\n' \
-                   '  "count": integer,\n' \
-                   '}'
-
     potential_status_codes_list = [
         {
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
@@ -68,6 +62,16 @@ def support_count_doc_template_values(url_root):
         },
     ]
 
+    try_now_link_variables_dict = {
+        'candidate_id': '5655',
+    }
+
+    api_response = '{\n' \
+                   '  "status": string,\n' \
+                   '  "success": boolean,\n' \
+                   '  "count": integer,\n' \
+                   '}'
+
     template_values = {
         'api_name': 'supportCount',
         'api_slug': 'supportCount',
@@ -75,7 +79,7 @@ def support_count_doc_template_values(url_root):
             "How many of the organizations that the voter follows, plus the friends of the voter, "
             "support this candidate or measure?",
         'try_now_link': 'apis_v1:supportCountView',
-        'try_now_link_variables': '?candidate_id=5655&measure_id=0',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

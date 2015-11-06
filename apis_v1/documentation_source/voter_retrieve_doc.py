@@ -28,19 +28,6 @@ def voter_retrieve_doc_template_values(url_root):
         },
     ]
 
-    api_response = 'SUCCESS:\n'\
-                   '[{\n' \
-                   '  "id": integer,\n' \
-                   '  "first_name": string,\n' \
-                   '  "last_name": string,\n' \
-                   '  "email": string,\n' \
-                   '}]\n'\
-                   'FAILURE:\n'\
-                   '{\n' \
-                   '  "status": string,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '}'
-
     potential_status_codes_list = [
         {
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
@@ -56,13 +43,30 @@ def voter_retrieve_doc_template_values(url_root):
         },
     ]
 
+    try_now_link_variables_dict = {
+        'format': 'json',
+    }
+
+    api_response = 'SUCCESS:\n'\
+                   '[{\n' \
+                   '  "id": integer,\n' \
+                   '  "first_name": string,\n' \
+                   '  "last_name": string,\n' \
+                   '  "email": string,\n' \
+                   '}]\n'\
+                   'FAILURE:\n'\
+                   '{\n' \
+                   '  "status": string,\n' \
+                   '  "voter_device_id": string (88 characters long),\n' \
+                   '}'
+
     template_values = {
         'api_name': 'voterRetrieve',
         'api_slug': 'voterRetrieve/?format=json',
         'api_introduction':
             "Export the raw voter data to JSON format",
         'try_now_link': 'apis_v1:voterRetrieveView',
-        'try_now_link_variables': '?format=json',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

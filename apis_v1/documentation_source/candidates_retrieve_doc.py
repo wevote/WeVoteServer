@@ -26,22 +26,6 @@ def candidates_retrieve_doc_template_values(url_root):
     optional_query_parameter_list = [
     ]
 
-    api_response = '{\n' \
-                   '  "status": string,\n' \
-                   '  "success": boolean,\n' \
-                   '  "office_id": integer,\n' \
-                   '  "office_we_vote_id": string,\n' \
-                   '  "google_civic_election_id": integer,\n' \
-                   '  "candidate_list": list\n' \
-                   '   [\n' \
-                   '     "candidate_id": integer,\n' \
-                   '     "candidate_we_vote_id": string,\n' \
-                   '     "candidate_display_name": string,\n' \
-                   '     "candidate_photo_url": string,\n' \
-                   '     "order_on_ballot": integer,\n' \
-                   '   ],\n' \
-                   '}'
-
     potential_status_codes_list = [
         {
             'code':         'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING',
@@ -58,13 +42,33 @@ def candidates_retrieve_doc_template_values(url_root):
         },
     ]
 
+    try_now_link_variables_dict = {
+        'office_we_vote_id': 'wv01off922',
+    }
+
+    api_response = '{\n' \
+                   '  "status": string,\n' \
+                   '  "success": boolean,\n' \
+                   '  "office_id": integer,\n' \
+                   '  "office_we_vote_id": string,\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "candidate_list": list\n' \
+                   '   [\n' \
+                   '     "candidate_id": integer,\n' \
+                   '     "candidate_we_vote_id": string,\n' \
+                   '     "candidate_display_name": string,\n' \
+                   '     "candidate_photo_url": string,\n' \
+                   '     "order_on_ballot": integer,\n' \
+                   '   ],\n' \
+                   '}'
+
     template_values = {
         'api_name': 'candidatesRetrieve',
         'api_slug': 'candidatesRetrieve',
         'api_introduction':
             "Retrieve all of the candidates competing for a particular office.",
         'try_now_link': 'apis_v1:candidatesRetrieveView',
-        'try_now_link_variables': '?office_we_vote_id=wv01off922',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

@@ -1,0 +1,12 @@
+# apis_v1/templatetags/template_filters.py
+# Brought to you by We Vote. Be good.
+# -*- coding: UTF-8 -*-
+
+from django import template
+
+register = template.Library()
+
+
+@register.filter(name="get_value_from_dict")
+def get_value_from_dict(dict_variable, dict_key):
+    return dict_variable[dict_key]

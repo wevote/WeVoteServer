@@ -34,13 +34,6 @@ def voter_address_save_doc_template_values(url_root):
         # },
     ]
 
-    api_response = '{\n' \
-                   '  "status": string (description of what happened),\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '  "address": string (the value just saved),\n' \
-                   '  "success": boolean (did the save happen?),\n' \
-                   '}'
-
     potential_status_codes_list = [
         {
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
@@ -64,13 +57,24 @@ def voter_address_save_doc_template_values(url_root):
         },
     ]
 
+    try_now_link_variables_dict = {
+        # 'organization_we_vote_id': 'wv85org1',
+    }
+
+    api_response = '{\n' \
+                   '  "status": string (description of what happened),\n' \
+                   '  "voter_device_id": string (88 characters long),\n' \
+                   '  "address": string (the value just saved),\n' \
+                   '  "success": boolean (did the save happen?),\n' \
+                   '}'
+
     template_values = {
         'api_name': 'voterAddressSave',
         'api_slug': 'voterAddressSave',
         'api_introduction':
             "Save or create an address for the current voter.",
         'try_now_link': 'apis_v1:voterAddressSaveView',
-        'try_now_link_variables': '',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'POST',
         'required_query_parameter_list': required_query_parameter_list,

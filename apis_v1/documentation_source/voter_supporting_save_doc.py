@@ -39,11 +39,6 @@ def voter_supporting_save_doc_template_values(url_root):
         # },
     ]
 
-    api_response = '{\n' \
-                   '  "status": string (description of what happened),\n' \
-                   '  "success": boolean (did the save happen?),\n' \
-                   '}'
-
     potential_status_codes_list = [
         {
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
@@ -91,13 +86,22 @@ def voter_supporting_save_doc_template_values(url_root):
         },
     ]
 
+    try_now_link_variables_dict = {
+        'candidate_id': '5655',
+    }
+
+    api_response = '{\n' \
+                   '  "status": string (description of what happened),\n' \
+                   '  "success": boolean (did the save happen?),\n' \
+                   '}'
+
     template_values = {
         'api_name': 'voterSupportingSave',
         'api_slug': 'voterSupportingSave',
         'api_introduction':
             "Save or create support stance for the current voter for either a measure or candidate.",
         'try_now_link': 'apis_v1:voterSupportingSaveView',
-        'try_now_link_variables': '?candidate_id=5655&measure_id=0',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

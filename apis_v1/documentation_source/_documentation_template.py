@@ -29,12 +29,6 @@ def PUT_NAME_HERE_doc_template_values(url_root):
         # },
     ]
 
-    api_response = '{\n' \
-                   '  "status": string,\n' \
-                   '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '}'
-
     potential_status_codes_list = [
         {
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
@@ -50,13 +44,23 @@ def PUT_NAME_HERE_doc_template_values(url_root):
         # },
     ]
 
+    try_now_link_variables_dict = {
+        # 'organization_we_vote_id': 'wv85org1',
+    }
+
+    api_response = '{\n' \
+                   '  "status": string,\n' \
+                   '  "success": boolean,\n' \
+                   '  "voter_device_id": string (88 characters long),\n' \
+                   '}'
+
     template_values = {
         'api_name': 'voterRetrieve - TODO This documentation still in progress',
         'api_slug': 'voterRetrieve',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:voterRetrieveView',
-        'try_now_link_variables': '',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

@@ -27,6 +27,10 @@ def device_id_generate_doc_template_values(url_root):
         # },
     ]
 
+    try_now_link_variables_dict = {
+        # 'organization_we_vote_id': 'wv85org1',
+    }
+
     api_response = '{\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '}'
@@ -38,6 +42,7 @@ def device_id_generate_doc_template_values(url_root):
             "Generate a transient unique identifier (device_id - stored on client) "
             "which ties the device to a persistent voter_id (mapped together and stored on the server).",
         'try_now_link': 'apis_v1:deviceIdGenerateView',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

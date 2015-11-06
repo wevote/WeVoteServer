@@ -20,6 +20,7 @@ def voter_address_retrieve_doc_template_values(url_root):
                             'a voter record on the server',
         },
     ]
+
     optional_query_parameter_list = [
         # {
         #     'name':         '',
@@ -28,19 +29,6 @@ def voter_address_retrieve_doc_template_values(url_root):
         # },
     ]
 
-    api_response = '{\n' \
-                   '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '  "address": string (the value submitted and saved),\n' \
-                   '  "address_type": string (one char: B = Ballot address),\n' \
-                   '  "latitude": string (value from Google),\n' \
-                   '  "longitude": string (value from Google),\n' \
-                   '  "normalized_line1": string (value from Google),\n' \
-                   '  "normalized_line2": string (value from Google),\n' \
-                   '  "normalized_city": string (value from Google),\n' \
-                   '  "normalized_state": string (value from Google),\n' \
-                   '  "normalized_zip": string (value from Google),\n' \
-                   '}'
     potential_status_codes_list = [
         {
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
@@ -56,13 +44,31 @@ def voter_address_retrieve_doc_template_values(url_root):
         },
     ]
 
+    try_now_link_variables_dict = {
+        # 'organization_we_vote_id': 'wv85org1',
+    }
+
+    api_response = '{\n' \
+                   '  "success": boolean,\n' \
+                   '  "voter_device_id": string (88 characters long),\n' \
+                   '  "address": string (the value submitted and saved),\n' \
+                   '  "address_type": string (one char: B = Ballot address),\n' \
+                   '  "latitude": string (value from Google),\n' \
+                   '  "longitude": string (value from Google),\n' \
+                   '  "normalized_line1": string (value from Google),\n' \
+                   '  "normalized_line2": string (value from Google),\n' \
+                   '  "normalized_city": string (value from Google),\n' \
+                   '  "normalized_state": string (value from Google),\n' \
+                   '  "normalized_zip": string (value from Google),\n' \
+                   '}'
+
     template_values = {
         'api_name': 'voterAddressRetrieve',
         'api_slug': 'voterAddressRetrieve',
         'api_introduction':
             "Retrieve the voter address for voter using voter_device_id.",
         'try_now_link': 'apis_v1:voterAddressRetrieveView',
-        'try_now_link_variables': '',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

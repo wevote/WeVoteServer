@@ -27,11 +27,6 @@ def voter_count_doc_template_values(url_root):
         # },
     ]
 
-    api_response = '{\n' \
-                   '  "voter_count": integer,\n' \
-                   '  "success": boolean,\n' \
-                   '}'
-
     potential_status_codes_list = [
         # {
         #     'code':         '',
@@ -39,13 +34,22 @@ def voter_count_doc_template_values(url_root):
         # },
     ]
 
+    try_now_link_variables_dict = {
+        # 'organization_we_vote_id': 'wv85org1',
+    }
+
+    api_response = '{\n' \
+                   '  "voter_count": integer,\n' \
+                   '  "success": boolean,\n' \
+                   '}'
+
     template_values = {
         'api_name': 'voterCount',
         'api_slug': 'voterCount',
         'api_introduction':
             "Return the number of voters in the database.",
         'try_now_link': 'apis_v1:voterCountView',
-        'try_now_link_variables': '',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

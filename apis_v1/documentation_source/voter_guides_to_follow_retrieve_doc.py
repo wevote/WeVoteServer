@@ -27,6 +27,25 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
         # },
     ]
 
+    potential_status_codes_list = [
+        {
+            'code':         'VOTER_GUIDES_TO_FOLLOW_RETRIEVED',
+            'description':  'At least one voter guide was returned.',
+        },
+        {
+            'code':         'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID',
+            'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
+        },
+        {
+            'code':         'NO_VOTER_GUIDES_FOUND',
+            'description':  'No voter guides exist in the database matching the search terms.',
+        },
+    ]
+
+    try_now_link_variables_dict = {
+        # 'organization_we_vote_id': 'wv85org1',
+    }
+
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
@@ -43,21 +62,6 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '  "google_civic_election_id": integer,\n' \
                    '}\n'
 
-    potential_status_codes_list = [
-        {
-            'code':         'VOTER_GUIDES_TO_FOLLOW_RETRIEVED',
-            'description':  'At least one voter guide was returned.',
-        },
-        {
-            'code':         'ERROR_GUIDES_TO_FOLLOW_NO_VOTER_DEVICE_ID',
-            'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
-        },
-        {
-            'code':         'NO_VOTER_GUIDES_FOUND',
-            'description':  'No voter guides exist in the database matching the search terms.',
-        },
-    ]
-
     template_values = {
         'api_name': 'voterGuidesToFollowRetrieve',
         'api_slug': 'voterGuidesToFollowRetrieve',
@@ -67,7 +71,7 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
             "which voter guides the voter has previously ignored. "
             "Do not show voter guides the voter is already following.",
         'try_now_link': 'apis_v1:voterGuidesToFollowRetrieveView',
-        'try_now_link_variables': '',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

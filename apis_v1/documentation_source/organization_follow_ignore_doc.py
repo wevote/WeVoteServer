@@ -27,13 +27,6 @@ def organization_follow_ignore_doc_template_values(url_root):
     optional_query_parameter_list = [
     ]
 
-    api_response = '{\n' \
-                   '  "status": string,\n' \
-                   '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '  "organization_id": integer,\n' \
-                   '}'
-
     potential_status_codes_list = [
         {
             'code':         'VALID_VOTER_DEVICE_ID_MISSING',
@@ -57,13 +50,24 @@ def organization_follow_ignore_doc_template_values(url_root):
         },
     ]
 
+    try_now_link_variables_dict = {
+        'organization_id': '1',
+    }
+
+    api_response = '{\n' \
+                   '  "status": string,\n' \
+                   '  "success": boolean,\n' \
+                   '  "voter_device_id": string (88 characters long),\n' \
+                   '  "organization_id": integer,\n' \
+                   '}'
+
     template_values = {
         'api_name': 'organizationFollowIgnore',
         'api_slug': 'organizationFollowIgnore',
         'api_introduction':
             "Call this to save that the voter is ignoring this organization.",
         'try_now_link': 'apis_v1:organizationFollowIgnoreView',
-        'try_now_link_variables': '?organization_id=1',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,

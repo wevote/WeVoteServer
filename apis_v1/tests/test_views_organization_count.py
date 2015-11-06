@@ -37,20 +37,20 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
 
         #######################################
         # Add 3 organizations so we can check count again
-        organization1 = Organization.objects.create_organization(
+        organization1 = Organization.objects.create_organization_simple(
             organization_name="Org1",
             organization_website="www.org1.org",
-            organization_twitter="org1",
+            organization_twitter_handle="org1",
         )
-        organization2 = Organization.objects.create_organization(
+        organization2 = Organization.objects.create_organization_simple(
             organization_name="Org2",
             organization_website="www.org2.org",
-            organization_twitter="org2",
+            organization_twitter_handle="org2",
         )
-        organization3 = Organization.objects.create_organization(
+        organization3 = Organization.objects.create_organization_simple(
             organization_name="Org3",
             organization_website="www.org3.org",
-            organization_twitter="org3",
+            organization_twitter_handle="org3",
         )
 
         #######################################
@@ -150,20 +150,20 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
 
         #######################################
         # Add 3 organizations so we can check count again
-        organization1 = Organization.objects.create_organization(
+        organization1 = Organization.objects.create_organization_simple(
             organization_name="Org1",
             organization_website="www.org1.org",
-            organization_twitter="org1",
+            organization_twitter_handle="org1",
         )
-        organization2 = Organization.objects.create_organization(
+        organization2 = Organization.objects.create_organization_simple(
             organization_name="Org2",
             organization_website="www.org2.org",
-            organization_twitter="org2",
+            organization_twitter_handle="org2",
         )
-        organization3 = Organization.objects.create_organization(
+        organization3 = Organization.objects.create_organization_simple(
             organization_name="Org3",
             organization_website="www.org3.org",
-            organization_twitter="org3",
+            organization_twitter_handle="org3",
         )
 
         #######################################

@@ -14,12 +14,13 @@ def organization_retrieve_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
-            'name':         'id',
+            'name':         'organization_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'Internal database unique identifier (one identifier required, either id or we_vote_id)',
+            'description':  'Internal database unique identifier (one identifier required, '
+                            'either organization_id or organization_we_vote_id)',
         },
         {
-            'name':         'we_vote_id',
+            'name':         'organization_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'We Vote unique identifier so we can move organizations from server-to-server '
                             '(one identifier required, either id or we_vote_id)',
@@ -33,14 +34,6 @@ def organization_retrieve_doc_template_values(url_root):
         # },
     ]
 
-    api_response = '{\n' \
-                   '  "success": boolean,\n' \
-                   '  "organization_id": integer (the id of the organization found),\n' \
-                   '  "we_vote_id": string (the organization identifier that moves server-to-server),\n' \
-                   '  "organization_name": string (value from Google),\n' \
-                   '  "organization_website": string (website address),\n' \
-                   '  "organization_twitter": string (twitter address),\n' \
-                   '}'
     potential_status_codes_list = [
         {
             'code':         'ORGANIZATION_FOUND_WITH_ID',
@@ -63,6 +56,20 @@ def organization_retrieve_doc_template_values(url_root):
             'description':  'An internal description of what error prevented the retrieve of the organization.',
         },
     ]
+    try_now_link_variables_dict = {
+        'organization_we_vote_id': 'wv85org1',
+    }
+
+    api_response = '{\n' \
+                   '  "success": boolean,\n' \
+                   '  "organization_id": integer (the id of the organization found),\n' \
+                   '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
+                   '  "organization_name": string (value from Google),\n' \
+                   '  "organization_website": string (website address),\n' \
+                   '  "organization_twitter_handle": string (twitter address),\n' \
+                   '  "organization_email": string,\n' \
+                   '  "organization_facebook": string,\n' \
+                   '}'
 
     template_values = {
         'api_name': 'organizationRetrieve',
@@ -70,7 +77,7 @@ def organization_retrieve_doc_template_values(url_root):
         'api_introduction':
             "Retrieve the organization using organization_id (first choice) or we_vote_id.",
         'try_now_link': 'apis_v1:organizationRetrieveView',
-        'try_now_link_variables': '?we_vote_id=wv85org1',
+        'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,
