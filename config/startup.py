@@ -14,3 +14,5 @@ def run():
         stream_level=settings.LOG_STREAM_LEVEL,
         file_level=settings.LOG_FILE_LEVEL
     )
+
+    print('Running')

@@ -25,5 +25,7 @@ DATABASES = {
     }
 }
 
+ALLOWED_HOSTS = ['localhost']
+
 # ########## Logging configurations ###########
 # Logging is configured in the config/environment_variables.json file

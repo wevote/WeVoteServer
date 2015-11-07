@@ -54,12 +54,16 @@ PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SECRET_KEY = get_environment_variable("SECRET_KEY")
 
 # Comment out when running Heroku
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost'
+]
 
 
 # Application definition
 
 INSTALLED_APPS = (
+
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -69,6 +73,7 @@ INSTALLED_APPS = (
 
     # third party
     'bootstrap3',
+    'corsheaders', # cross origin requests
     'social.apps.django_app.default',
 
     # project specific
@@ -103,10 +108,12 @@ INSTALLED_APPS = (
     'wevote_functions',
     'wevote_settings',
     'wevote_social',
+
 )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -234,6 +241,8 @@ BOOTSTRAP3 = {
         'inline': 'bootstrap3.renderers.InlineFieldRenderer',
     },
 }
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 LOGIN_URL = '/login/'
 
