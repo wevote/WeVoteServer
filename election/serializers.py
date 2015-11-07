@@ -9,4 +9,5 @@ from rest_framework import serializers
 class ElectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Election
-        fields = ('google_civic_election_id', 'election_name', 'election_day_text', 'ocd_division_id')
+        fields = ('google_civic_election_id', 'election_name', 'election_day_text', 'ocd_division_id',
+                  'get_election_state')

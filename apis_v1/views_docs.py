@@ -2,8 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .documentation_source import candidates_retrieve_doc, device_id_generate_doc, oppose_count_doc, \
-    organization_count_doc, \
+from .documentation_source import candidates_retrieve_doc, device_id_generate_doc, elections_retrieve_doc, \
+    oppose_count_doc, organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
     support_count_doc, voter_address_retrieve_doc, voter_address_save_doc, \
@@ -40,6 +40,15 @@ def device_id_generate_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = device_id_generate_doc.device_id_generate_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def elections_retrieve_doc_view(request):
+    """
+    Show documentation about electionsRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = elections_retrieve_doc.elections_retrieve_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

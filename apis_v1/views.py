@@ -5,16 +5,19 @@
 from .controllers import organization_count, organization_follow, organization_follow_ignore, organization_retrieve, \
     organization_save_for_api, \
     organization_stop_following, voter_address_save, voter_address_retrieve, voter_count, voter_create, \
-    voter_guides_to_follow_retrieve, voter_retrieve_list
+    voter_guides_to_follow_retrieve
 from ballot.controllers import voter_ballot_items_retrieve
 from candidate.controllers import candidates_retrieve
 from django.http import HttpResponse
+from election.controllers import elections_retrieve_list_for_api
+from election.serializers import ElectionSerializer
 import json
 from organization.controllers import organization_search_controller
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from support_oppose_deciding.controllers import oppose_count_for_api, support_count_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save
+from voter.controllers import voter_retrieve_list_for_api
 from voter.serializers import VoterSerializer
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
     get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie
@@ -46,6 +49,26 @@ def device_id_generate_view(request):
         'voter_device_id': voter_device_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+class ElectionsRetrieveView(APIView):
+    """
+    Export raw voter data to JSON format
+    """
+    def get(self, request):  # Removed: , format=None
+        voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+        results = elections_retrieve_list_for_api(voter_device_id)
+
+        if 'success' not in results:
+            json_data = results['json_data']
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
+        elif not results['success']:
+            json_data = results['json_data']
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
+        else:
+            election_list = results['election_list']
+            serializer = ElectionSerializer(election_list, many=True)
+            return Response(serializer.data)
 
 
 def organization_count_view(request):
@@ -240,7 +263,7 @@ class VoterRetrieveView(APIView):
     """
     def get(self, request):  # Removed: , format=None
         voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-        results = voter_retrieve_list(voter_device_id)
+        results = voter_retrieve_list_for_api(voter_device_id)
 
         if 'success' not in results:
             json_data = results['json_data']

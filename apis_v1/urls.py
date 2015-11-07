@@ -14,6 +14,7 @@ urlpatterns = [
     # Actual API Calls
     url(r'^candidatesRetrieve/', views.candidates_retrieve_view, name='candidatesRetrieveView'),
     url(r'^deviceIdGenerate/$', views.device_id_generate_view, name='deviceIdGenerateView'),
+    url(r'^electionsRetrieve/', views.ElectionsRetrieveView.as_view(), name='electionsRetrieveView'),
     url(r'^organizationCount/', views.organization_count_view, name='organizationCountView'),
     url(r'^organizationFollow/', views.organization_follow_api_view, name='organizationFollowView'),
     url(r'^organizationFollowIgnore/', views.organization_follow_ignore_api_view, name='organizationFollowIgnoreView'),
@@ -40,6 +41,7 @@ urlpatterns = [
     url(r'^docs/$', views_docs.apis_index_doc_view, name='apisIndex'),
     url(r'^docs/candidatesRetrieve/$', views_docs.candidates_retrieve_doc_view, name='candidatesRetrieveDocs'),
     url(r'^docs/deviceIdGenerate/$', views_docs.device_id_generate_doc_view, name='deviceIdGenerateDocs'),
+    url(r'^docs/electionsRetrieve/$', views_docs.elections_retrieve_doc_view, name='electionsRetrieveDocs'),
     url(r'^docs/organizationCount/$', views_docs.organization_count_doc_view, name='organizationCountDocs'),
     url(r'^docs/organizationFollow/', views_docs.organization_follow_doc_view, name='organizationFollowDocs'),
     url(r'^docs/organizationFollowIgnore/',
