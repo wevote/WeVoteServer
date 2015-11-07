@@ -2,17 +2,51 @@
 [Back to root README](README.md)
 [Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
-## Setup - Dependencies
-
 NOTE: We are running Django version 1.8
 
-NOTE: We are running Python version 2.7.6 and in the process of upgrading to Python 3
+NOTE: WeVoteServer is built for Python 3.4. It currently still works with Python version 2.7.6.
+(tests still have issues with Python 3.4, but everything else works)
 
-Once you have cloned this repository to your local machine, set up a virtual environment:
+## Clone WeVoteServer from github
 
-    cd /path_to_dev_environment/WeVoteServer/
-    virtualenv venv
-    source venv/bin/activate
+Create a place to put all of the code from Github:
+
+    $ mkdir /Users/<YOUR NAME HERE>/PythonProjects/
+
+Retrieve “WeVoteServer” into that folder.
+
+## Installing Python 3
+
+Mac instructions (Based on [this](http://joebergantine.com/blog/2015/apr/30/installing-python-2-and-python-3-alongside-each-ot/))
+
+Install Python 3 from package: https://www.python.org/downloads/ 
+This allows you to run python3 and pip3. 
+(Software gets installed into /Library/Frameworks/Python.framework/Versions/3.4/bin/.)
+
+    $ pip3 install --user virtualenv
+    $ vim ~/.bash_profile
+
+Add the following to .bash_profile, save and quit:
+
+    alias virtualenv3='~/Library/Python/3.4/bin/virtualenv'
+
+Update the current Terminal window to use the alias you just saved:
+
+    $ source ~/.bash_profile
+
+Create a place for the virtual environment to live on your hard drive. We recommend installing it 
+outside of "PythonProjects" folder:
+
+    $ mkdir /Users/<YOUR NAME HERE>/PythonEnvironments/
+    $ cd /Users/<YOUR NAME HERE>/PythonEnvironments/
+    $ virtualenv3 WeVoteServer3.4
+
+Now activate this new virtual environment for WeVoteServer:
+
+    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    $ pip install -r requirements.txt
+    $ python manage.py runserver
 
 ### Running Linux?
 If you are installing on a Linux environment, we recommend the following steps within your virtual environment. If you
@@ -30,10 +64,9 @@ THEN:
     pip install --upgrade pip
     pip install -r requirements.txt
 
-
 ## Setup - Install the Postgres database
 
-### METHOD 1
+### METHOD 1 (Mac)
 For Mac, download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)
 
 Run this on your command line:
@@ -46,7 +79,7 @@ Run these commands:
     create role postgres;
     alter role postgres with login;
 
-### METHOD 2
+### METHOD 2 (Windows)
 
 Install Postgres:
 
@@ -119,18 +152,18 @@ If you are not prompted to create a superuser, run the following command:
 
     python manage.py createsuperuser
 
-    Import GeoIP data:
+Import GeoIP data (optional):
 
-        $ python manage.py update_geoip_data
+    $ python manage.py update_geoip_data
 
 ## Test that WeVoteServer is running
 
 Start up the webserver:
 
-    cd WeVoteServer
-    source venv/bin/activate
-    pip install -r requirements.txt
-    python manage.py runserver
+    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    $ pip install -r requirements.txt
+    $ python manage.py runserver
 
 Find admin tools here:
 

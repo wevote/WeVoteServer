@@ -6,11 +6,11 @@ If you are returning to work on WeVoteServer after a few weeks or months, these 
 
 Pull the latest code from the repository. Then:
 
-    source venv/bin/activate
-    cd WeVoteServer
-    pip install -r requirements.txt
-    python manage.py makemigrations
-    python manage.py migrate
+    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    $ pip install -r requirements.txt
+    $ python manage.py makemigrations
+    $ python manage.py migrate
     
 Compare your local version of "config/environment_variables.json" with the master template version 
 "[config/environment_variables-template.json](config/environment_variables-template.json)" and add or remove entries.
@@ -21,9 +21,9 @@ Compare your local version of "config/environment_variables.json" with the maste
 
 Here are some commands we use quite a lot:
 
-    cd WeVoteServer
-    source venv/bin/activate
-    python manage.py runserver
+    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    $ python manage.py runserver
 
 Find API admin tools here [http://localhost:8000/admin](http://localhost:8000/admin)
 
@@ -72,7 +72,7 @@ Before checking in your code:
 
 Request access to the We Vote team so you can check in code. Email: Dale.McGrew@WeVoteUSA.org
 
-Please make sure to run our tests before checking in any code.
+Please make sure to run our tests before checking in any code (Still not working in Python3 yet):
 
     source venv/bin/activate
     cd WeVoteServer
