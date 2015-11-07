@@ -4,7 +4,7 @@
 
 """Social middleware"""
 
-from facebook import FacebookAPI
+from wevote_social.facebook import FacebookAPI
 
 
 class SocialMiddleware(object):

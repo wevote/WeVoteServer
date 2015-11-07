@@ -2,8 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.shortcuts import render
-from documentation_source import candidates_retrieve_doc, device_id_generate_doc, oppose_count_doc, \
+from .documentation_source import candidates_retrieve_doc, device_id_generate_doc, oppose_count_doc, \
     organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
@@ -11,6 +10,7 @@ from documentation_source import candidates_retrieve_doc, device_id_generate_doc
     voter_ballot_items_retrieve_doc, voter_count_doc, voter_create_doc, voter_guides_to_follow_retrieve_doc, \
     voter_opposing_save_doc, voter_retrieve_doc, voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc
+from django.shortcuts import render
 
 LOCALHOST_URL_ROOT = 'http://localhost:8000'
 

@@ -378,8 +378,8 @@ def positions_related_to_contest_measure_oppose_view(request, contest_measure_id
     :param contest_measure_id:
     :return:
     """
-    print "TO BE IMPLEMENTED, positions_related_to_contest_measure_oppose_view, contest_measure_id: {}".format(
-        contest_measure_id)
+    # TODO "TO BE IMPLEMENTED, positions_related_to_contest_measure_oppose_view, contest_measure_id: {}".format(
+    #     contest_measure_id)
     return JsonResponse({0: "Sierra Club opposes"})
 
 
@@ -390,7 +390,7 @@ def positions_related_to_contest_measure_support_view(request, contest_measure_i
     :param contest_measure_id:
     :return:
     """
-    print "TO BE IMPLEMENTED, positions_related_to_contest_measure_support_view, contest_measure_id: {}".format(
-        contest_measure_id)
+    # TODO "TO BE IMPLEMENTED, positions_related_to_contest_measure_support_view, contest_measure_id: {}".format(
+    #     contest_measure_id)
     return JsonResponse({0: "Irvine Republican Club supports"})
 

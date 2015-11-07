@@ -13,9 +13,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 try:
-    from local import *
+    from config.local import *
 except ImportError as e:
     try:
-        from production_heroku import *
+        from config.production_heroku import *
     except ImportError as e:
         pass

@@ -19,8 +19,10 @@ json_environment_variables = {}
 try:
     with open("config/environment_variables.json") as f:
         json_environment_variables = json.loads(f.read())
-except StandardError as e:
-    print "base.py: environment_variables.json missing"  # Can't use logger in the settings file due to loading sequence
+except Exception as e:
+    pass
+    # print "base.py: environment_variables.json missing"
+    # Can't use logger in the settings file due to loading sequence
 
 
 def get_environment_variable(var_name, json_environment_vars=json_environment_variables):
@@ -32,7 +34,8 @@ def get_environment_variable(var_name, json_environment_vars=json_environment_va
         return json_environment_vars[var_name]  # Loaded from array above
     except KeyError:
         # variable wasn't found in the JSON environment variables file, so now look in the server environment variables
-        print "base.py: failed to load {} from JSON file".format(var_name)  # Can't use logger in the settings file
+        pass
+        # print "base.py: failed to load {} from JSON file".format(var_name)  # Can't use logger in the settings file
 
     try:
         # Environment variables can be set with this for example: export GOOGLE_CIVIC_API_KEY=<API KEY HERE>
@@ -304,6 +307,6 @@ LOG_FILE_LEVEL = lookup_logging_level(get_environment_variable("LOG_FILE_LEVEL")
 
 # Using conventions from django.contrib:
 # https://docs.djangoproject.com/en/1.8/ref/contrib/gis/geoip/#geoip-settings
-GEOIP_PATH=os.path.join(BASE_DIR, 'geo', 'data')
-GEOIP_COUNTRY='GeoIP.dat'
-GEOIP_CITY='GeoLiteCity.dat'
+GEOIP_PATH = os.path.join(BASE_DIR, 'geo', 'data')
+GEOIP_COUNTRY = 'GeoIP.dat'
+GEOIP_CITY = 'GeoLiteCity.dat'

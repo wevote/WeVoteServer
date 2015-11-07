@@ -2,7 +2,12 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import urllib2
+from future.standard_library import install_aliases
+install_aliases()
+
+# from urllib.parse import urlparse, urlencode
+from urllib.request import urlopen, Request
+# from urllib.error import HTTPError
 import logging
 import json
 import wevote_functions.admin
@@ -22,8 +27,8 @@ class FacebookAPI(object):
         friends = []
 
         try:
-            friends = json.loads(urllib2.urlopen(request).read()).get('data')
-        except Exception, err:
+            friends = json.loads(urlopen(request).read()).get('data')
+        except Exception as err:
             logger.error(err)
 
         return friends
@@ -40,5 +45,5 @@ class FacebookAPI(object):
                   self.social_user.extra_data['access_token'],
               )
 
-        request = urllib2.Request(url)
+        request = Request(url)
         return request
