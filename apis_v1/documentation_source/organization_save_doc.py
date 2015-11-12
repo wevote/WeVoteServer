@@ -2,8 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-# This is a template (starting point) for creating documentation for individual APIs
-
 
 def organization_save_doc_template_values(url_root):
     """

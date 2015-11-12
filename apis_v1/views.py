@@ -2,8 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import organization_count, organization_follow, organization_follow_ignore, organization_retrieve, \
-    organization_save_for_api, \
+from .controllers import organization_count, organization_follow, organization_follow_ignore, \
     organization_stop_following, voter_count, voter_create, \
     voter_guides_to_follow_retrieve
 from ballot.controllers import ballot_item_options_retrieve_for_api, voter_ballot_items_retrieve
@@ -12,7 +11,8 @@ from django.http import HttpResponse
 from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
 import json
-from organization.controllers import organization_search_controller
+from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
+    organization_search_for_api
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from support_oppose_deciding.controllers import oppose_count_for_api, support_count_for_api, \
@@ -109,7 +109,8 @@ def organization_retrieve_view(request):
     """
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
-    return organization_retrieve(organization_id=organization_id, organization_we_vote_id=organization_we_vote_id)
+    return organization_retrieve_for_api(
+        organization_id=organization_id, organization_we_vote_id=organization_we_vote_id)
 
 
 def organization_save_view(request):
@@ -148,10 +149,10 @@ def organization_search_view(request):
     organization_twitter_handle = request.GET.get('organization_twitter_handle', '')
     organization_website = request.GET.get('organization_website', '')
     organization_email = request.GET.get('organization_email', '')
-    return organization_search_controller(organization_name=organization_name,
-                                          organization_twitter_handle=organization_twitter_handle,
-                                          organization_website=organization_website,
-                                          organization_email=organization_email)
+    return organization_search_for_api(organization_name=organization_name,
+                                       organization_twitter_handle=organization_twitter_handle,
+                                       organization_website=organization_website,
+                                       organization_email=organization_email)
 
 
 def oppose_count_view(request):
