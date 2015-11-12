@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from exception.models import handle_record_found_more_than_one_exception
+from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_measure_integer, \
     fetch_next_we_vote_id_last_measure_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
@@ -300,3 +300,65 @@ class ContestMeasureManager(models.Model):
             # logger.warn("fetch_contest_measure_id_from_contest_measure_we_vote_id ContestMeasure.DoesNotExist")
 
         return contest_measure_id
+
+
+class ContestMeasureList(models.Model):
+    """
+    This is a class to make it easy to retrieve lists of Measures
+    """
+
+    def __unicode__(self):
+        return "ContestMeasureList"
+
+    def retrieve_all_measures_for_upcoming_election(self, google_civic_election_id=0,
+                                                    return_list_of_objects=False):
+        measure_list_objects = []
+        measure_list_light = []
+        measure_list_found = False
+
+        try:
+            measure_queryset = ContestMeasure.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
+            else:
+                # TODO Limit this search to upcoming_elections only
+                pass
+            measure_list_objects = measure_queryset
+
+            if len(measure_list_objects):
+                measure_list_found = True
+                status = 'MEASURES_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_MEASURES_RETRIEVED'
+                success = True
+        except ContestMeasure.DoesNotExist:
+            # No measures found. Not a problem.
+            status = 'NO_MEASURES_FOUND_DoesNotExist'
+            measure_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_all_measures_for_upcoming_election ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        if measure_list_found:
+            for measure in measure_list_objects:
+                one_measure = {
+                    'ballot_item_label':    measure.measure_title,
+                    'measure_we_vote_id':   measure.we_vote_id,
+                    'office_we_vote_id':    '',
+                    'candidate_we_vote_id': '',
+                }
+                measure_list_light.append(one_measure.copy())
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'measure_list_found':       measure_list_found,
+            'measure_list_objects':     measure_list_objects if return_list_of_objects else [],
+            'measure_list_light':       measure_list_light,
+        }
+        return results

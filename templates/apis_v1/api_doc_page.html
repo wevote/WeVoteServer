@@ -30,7 +30,7 @@
             {% endfor %}
             {% for query_parameter in optional_query_parameter_list %}
                 {% if query_parameter.name != 'voter_device_id' and query_parameter.name != 'api_key' %}
-                    {% if query_parameter.value == 'string' or query_parameter.value == 'int' or query_parameter.value == 'long' %}
+                    {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
                     {{ query_parameter.name }}: <input  type="text" name="{{ query_parameter.name }}" maxlength="50" size="30"
                         {% if query_parameter.name in try_now_link_variables_dict %}
                               value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"

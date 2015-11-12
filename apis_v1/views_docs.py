@@ -2,12 +2,15 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .documentation_source import candidates_retrieve_doc, device_id_generate_doc, elections_retrieve_doc, \
+from .documentation_source import ballot_item_options_retrieve_doc, candidates_retrieve_doc, device_id_generate_doc, \
+    elections_retrieve_doc, \
     oppose_count_doc, organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
     support_count_doc, voter_address_retrieve_doc, voter_address_save_doc, \
-    voter_ballot_items_retrieve_doc, voter_count_doc, voter_create_doc, voter_guides_to_follow_retrieve_doc, \
+    voter_ballot_items_retrieve_doc, voter_count_doc, voter_create_doc, \
+    voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
+    voter_guides_to_follow_retrieve_doc, \
     voter_opposing_save_doc, voter_retrieve_doc, voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc
 from django.shortcuts import render
@@ -23,6 +26,15 @@ def apis_index_doc_view(request):
         # 'key': value,
     }
     return render(request, 'apis_v1/apis_index.html', template_values)
+
+
+def ballot_item_options_retrieve_doc_view(request):
+    """
+    Show documentation about ballotItemOptionsRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = ballot_item_options_retrieve_doc.ballot_item_options_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
 def candidates_retrieve_doc_view(request):
@@ -176,6 +188,24 @@ def voter_create_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = voter_create_doc.voter_create_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_guide_possibility_retrieve_doc_view(request):
+    """
+    Show documentation about voterGuidePossibilityRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_guide_possibility_retrieve_doc.voter_guide_possibility_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_guide_possibility_save_doc_view(request):
+    """
+    Show documentation about voterGuidePossibilitySave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_guide_possibility_save_doc.voter_guide_possibility_save_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
