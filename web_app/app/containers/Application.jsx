@@ -18,7 +18,7 @@ export default class Application extends React.Component {
 			<div className={styles.loadingElement}>loading app...</div>
 			<MainMenu />
 			<RouteHandler />
-      <Footer />
+      		<Footer />
 		</div>;
 	}
 }
