@@ -1,6 +1,14 @@
 import React from "react";
 import axios from 'axios';
 
+import {get} from '../../lib/service/calls.js'
+
+get('voterCount', function (res) {
+	console.log(res);
+});
+
+import docCookies from 'cookies';
+
 export default class HomePage extends React.Component {
 	constructor(props) {
 		super(props);
@@ -15,17 +23,48 @@ export default class HomePage extends React.Component {
 	}
 
 	componentDidMount() {
-		axios
-			.get('http://localhost:8000/apis/v1/voterCount')
-			.then( function(response) {
+		this.getVoterCount()
+
+		// if user does not have a device id set already then set one
+		if (docCookies.getItem('deviceId') === null) {
+			new Promise( function(resolve, reject) {
+				this.generateDeviceId()
+					.then( function(response) {
+						resolve(response.data['voter_device_id']);
+					});
+			}.bind(this))
+			.then( function(deviceId) {
+				docCookies.setItem('deviceId', deviceId);
+				this.createVoter(deviceId);
+			}.bind(this))
+		} else {
+			console.log('cookie is already set')
+		}
+
+
+	}
+
+	getVoterCount() {
+		axios.get('http://localhost:8000/apis/v1/voterCount')
+			.then(function (response) {
 				let voterCount = response.data['voter_count'];
 				this.setState({
-				  	voterCount: voterCount,
+					voterCount: voterCount,
 				});
-			}.bind(this))
-			.catch( function(response) {
-				console.error('Error');
 			}.bind(this));
+	}
+
+	generateDeviceId() {
+		return axios.get('http://localhost:8000/apis/v1/deviceIdGenerate');
+	}
+
+	createVoter(deviceId) {
+		return axios.get('http://localhost:8000/apis/v1/voterCreate', {
+				voter_device_id: deviceId
+			})
+			.then( function (response) {
+				console.log(response)
+			});
 	}
 
 	render() {
