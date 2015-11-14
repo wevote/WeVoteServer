@@ -16,6 +16,7 @@
         <td>Method</td>
         <td>Description</td>
     </thead>
+    {###  ###}
     <tr>
         <td colspan="2"><strong>Voter Basic Data</strong></td>
     </tr>
@@ -43,9 +44,13 @@
         <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve/?format=json</a></td>
         <td>Export raw voter data to JSON format</td>
     </tr>
+
+    {###  ###}
     <tr>
         <td colspan="2"><strong>GeoLocation</strong></td>
     </tr>
+
+    {###  ###}
     <tr>
         <td colspan="2"><strong>Ballot Contest Data</strong></td>
     </tr>
@@ -61,6 +66,8 @@
         <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveDocs' %}">voterBallotItemsRetrieve</a></td>
         <td>Retrieve a list of ballot items to display.</td>
     </tr>
+
+    {###  ###}
     <tr>
         <td colspan="2"><strong>Candidates &amp; Measures</strong></td>
     </tr>
@@ -68,12 +75,22 @@
         <td><a href="{% url 'apis_v1:candidatesRetrieveDocs' %}">candidatesRetrieve</a></td>
         <td>Retrieve a list of candidates competing for an office to display.</td>
     </tr>
+
+    {###  ###}
     <tr>
         <td colspan="2"><strong>Positions (Support, Oppose, Info Only) or Stars</strong></td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:opposeCountDocs' %}">opposeCount</a></td>
         <td>Return the number of organizations the voter follows + the voter's friends that oppose the specified candidate or measure</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionRetrieveDocs' %}">positionRetrieve</a></td>
+        <td>Retrieve one position based on unique identifier.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionSaveDocs' %}">positionSave</a></td>
+        <td>Save a new position or update an existing position.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterStopOpposingSaveDocs' %}">voterStopOpposingSave</a></td>
@@ -95,6 +112,8 @@
         <td><a href="{% url 'apis_v1:voterSupportingSaveDocs' %}">voterSupportingSave</a></td>
         <td>Save or update one voter's support for one candidate or measure</td>
     </tr>
+
+    {###  ###}
     <tr>
         <td colspan="2"><strong>Organizations, People &amp; Voter Guides</strong></td>
     </tr>
@@ -138,12 +157,18 @@
         <td><a href="{% url 'apis_v1:voterGuidesToFollowRetrieveDocs' %}">voterGuidesToFollowRetrieve</a></td>
         <td>Retrieve a list of voter guides that a voter might want to follow.</td>
     </tr>
+
+    {###  ###}
     <tr>
         <td colspan="2"><strong>Voter Friends</strong></td>
     </tr>
+
+    {###  ###}
     <tr>
         <td colspan="2"><strong>Voter Language</strong></td>
     </tr>
+
+    {###  ###}
     <tr>
         <td colspan="2"><strong>Messages</strong></td>
     </tr>

@@ -13,6 +13,7 @@ from election.serializers import ElectionSerializer
 import json
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api
+from position.controllers import position_retrieve_for_api, position_save_for_api
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from support_oppose_deciding.controllers import oppose_count_for_api, support_count_for_api, \
@@ -153,6 +154,63 @@ def organization_search_view(request):
                                        organization_twitter_handle=organization_twitter_handle,
                                        organization_website=organization_website,
                                        organization_email=organization_email)
+
+
+def position_retrieve_view(request):
+    """
+    Retrieve a single position based on unique identifier
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    position_id = request.GET.get('position_id', 0)
+    position_we_vote_id = request.GET.get('position_we_vote_id', '')
+    return position_retrieve_for_api(
+        position_id=position_id,
+        position_we_vote_id=position_we_vote_id,
+        voter_device_id=voter_device_id
+    )
+
+
+def position_save_view(request):
+    """
+    Save a single position
+    :param request:
+    :return:
+    """
+    # We set values that aren't passed in, to False so we know to treat them as null or unchanged. This allows us to
+    #  only change the values we want to
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    position_id = request.POST.get('position_id', False)
+    position_we_vote_id = request.POST.get('position_we_vote_id', False)
+    organization_we_vote_id = request.POST.get('organization_we_vote_id', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', False)
+    ballot_item_label = request.POST.get('ballot_item_label', False)
+    office_we_vote_id = request.POST.get('office_we_vote_id', False)
+    candidate_we_vote_id = request.POST.get('candidate_we_vote_id', False)
+    measure_we_vote_id = request.POST.get('measure_we_vote_id', False)
+    stance = request.POST.get('stance', False)
+    statement_text = request.POST.get('statement_text', False)
+    statement_html = request.POST.get('statement_html', False)
+    more_info_url = request.POST.get('more_info_url', False)
+
+    results = position_save_for_api(
+        voter_device_id=voter_device_id,
+        position_id=position_id,
+        position_we_vote_id=position_we_vote_id,
+        organization_we_vote_id=organization_we_vote_id,
+        google_civic_election_id=google_civic_election_id,
+        ballot_item_label=ballot_item_label,
+        office_we_vote_id=office_we_vote_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_we_vote_id=measure_we_vote_id,
+        stance=stance,
+        statement_text=statement_text,
+        statement_html=statement_html,
+        more_info_url=more_info_url,
+    )
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
 
 def oppose_count_view(request):

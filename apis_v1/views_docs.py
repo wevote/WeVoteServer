@@ -7,6 +7,7 @@ from .documentation_source import ballot_item_options_retrieve_doc, candidates_r
     oppose_count_doc, organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
+    position_retrieve_doc, position_save_doc, \
     support_count_doc, voter_address_retrieve_doc, voter_address_save_doc, \
     voter_ballot_items_retrieve_doc, voter_count_doc, voter_create_doc, \
     voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
@@ -128,6 +129,25 @@ def organization_search_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def position_retrieve_doc_view(request):
+    """
+    Show documentation about positionRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+
+    template_values = position_retrieve_doc.position_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def position_save_doc_view(request):
+    """
+    Show documentation about positionSave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = position_save_doc.position_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def oppose_count_doc_view(request):
     """
     Show documentation about opposeCount
@@ -196,7 +216,8 @@ def voter_guide_possibility_retrieve_doc_view(request):
     Show documentation about voterGuidePossibilityRetrieve
     """
     url_root = LOCALHOST_URL_ROOT
-    template_values = voter_guide_possibility_retrieve_doc.voter_guide_possibility_retrieve_doc_template_values(url_root)
+    template_values = \
+        voter_guide_possibility_retrieve_doc.voter_guide_possibility_retrieve_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

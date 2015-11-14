@@ -248,7 +248,7 @@ class OrganizationManager(models.Manager):
                 handle_record_not_saved_exception(e, logger=logger)
 
         if not organization_on_stage_found:
-            try:  # TODO DALE
+            try:
                 # If here, create new organization
                 results = Organization.objects.create_organization(organization_name, organization_website,
                                                                    organization_twitter_handle, organization_email,
