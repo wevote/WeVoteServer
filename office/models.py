@@ -4,7 +4,7 @@
 
 # from django.contrib import messages
 from django.db import models
-from exception.models import handle_record_found_more_than_one_exception
+from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_office_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.models import extract_state_from_ocd_division_id, positive_value_exists
@@ -245,3 +245,65 @@ class ContestOfficeManager(models.Model):
             # logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id ContestOffice.DoesNotExist")
 
         return contest_office_id
+
+
+class ContestOfficeList(models.Model):
+    """
+    This is a class to make it easy to retrieve lists of Offices
+    """
+
+    def __unicode__(self):
+        return "ContestOfficeList"
+
+    def retrieve_all_offices_for_upcoming_election(self, google_civic_election_id=0,
+                                                   return_list_of_objects=False):
+        office_list_objects = []
+        office_list_light = []
+        office_list_found = False
+
+        try:
+            office_queryset = ContestOffice.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+            else:
+                # TODO Limit this search to upcoming_elections only
+                pass
+            office_list_objects = office_queryset
+
+            if len(office_list_objects):
+                office_list_found = True
+                status = 'OFFICES_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_OFFICES_RETRIEVED'
+                success = True
+        except ContestOffice.DoesNotExist:
+            # No offices found. Not a problem.
+            status = 'NO_OFFICES_FOUND_DoesNotExist'
+            office_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_all_offices_for_upcoming_election ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        if office_list_found:
+            for office in office_list_objects:
+                one_office = {
+                    'ballot_item_label':    office.office_name,
+                    'measure_we_vote_id':   '',
+                    'office_we_vote_id':    office.we_vote_id,
+                    'candidate_we_vote_id': '',
+                }
+                office_list_light.append(one_office.copy())
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'office_list_found':        office_list_found,
+            'office_list_objects':      office_list_objects if return_list_of_objects else [],
+            'office_list_light':        office_list_light,
+        }
+        return results

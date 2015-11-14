@@ -50,6 +50,10 @@
         <td colspan="2"><strong>Ballot Contest Data</strong></td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:ballotItemOptionsRetrieveDocs' %}">ballotItemOptionsRetrieve</a></td>
+        <td>Retrieve a list of candidates or measures in the specified election(s).</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:electionsRetrieveDocs' %}">electionsRetrieve</a></td>
         <td>Retrieve a list of elections.</td>
     </tr>
@@ -92,7 +96,7 @@
         <td>Save or update one voter's support for one candidate or measure</td>
     </tr>
     <tr>
-        <td colspan="2"><strong>Organizations &amp; People</strong></td>
+        <td colspan="2"><strong>Organizations, People &amp; Voter Guides</strong></td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:organizationCountDocs' %}">organizationCount</a></td>
@@ -121,6 +125,14 @@
     <tr>
         <td><a href="{% url 'apis_v1:organizationSearchDocs' %}">organizationSearch</a></td>
         <td>Search for organizations to find any organization that contains any of the search terms.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterGuidePossibilityRetrieveDocs' %}">voterGuidePossibilityRetrieve</a></td>
+        <td>Has a volunteer marked this URL as a voter guide?</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterGuidePossibilitySaveDocs' %}">voterGuidePossibilitySave</a></td>
+        <td>Mark this URL as a voter guide.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterGuidesToFollowRetrieveDocs' %}">voterGuidesToFollowRetrieve</a></td>

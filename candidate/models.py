@@ -79,6 +79,59 @@ class CandidateCampaignList(models.Model):
         }
         return results
 
+    def retrieve_all_candidates_for_upcoming_election(self, google_civic_election_id=0,
+                                                      return_list_of_objects=False):
+        candidate_list_objects = []
+        candidate_list_light = []
+        candidate_list_found = False
+
+        try:
+            candidate_queryset = CandidateCampaign.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            else:
+                # TODO Limit this search to upcoming_elections only
+                pass
+            candidate_list_objects = candidate_queryset
+
+            if len(candidate_list_objects):
+                candidate_list_found = True
+                status = 'CANDIDATES_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_CANDIDATES_RETRIEVED'
+                success = True
+        except CandidateCampaign.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_CANDIDATES_FOUND_DoesNotExist'
+            candidate_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_all_candidates_for_office ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
+
+        if candidate_list_found:
+            for candidate in candidate_list_objects:
+                one_candidate = {
+                    'ballot_item_label':    candidate.candidate_name,
+                    'candidate_we_vote_id': candidate.we_vote_id,
+                    'office_we_vote_id':    candidate.contest_office_we_vote_id,
+                    'measure_we_vote_id':   '',
+                }
+                candidate_list_light.append(one_candidate.copy())
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'candidate_list_found':     candidate_list_found,
+            'candidate_list_objects':   candidate_list_objects if return_list_of_objects else [],
+            'candidate_list_light':     candidate_list_light,
+        }
+        return results
+
 
 class CandidateCampaign(models.Model):
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other

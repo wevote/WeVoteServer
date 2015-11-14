@@ -7,10 +7,9 @@ from exception.models import handle_exception
 from import_export_google_civic.models import fetch_google_civic_election_id_for_voter_id
 from follow.models import FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 import json
-from organization.models import Organization, OrganizationListManager, OrganizationManager
-from organization.controllers import organization_follow_all, organization_save
-from voter.models import BALLOT_ADDRESS, \
-    fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterAddressManager, VoterDeviceLinkManager
+from organization.models import Organization, OrganizationManager
+from organization.controllers import organization_follow_all
+from voter.models import fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterDeviceLinkManager
 from voter_guide.models import VoterGuideList
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, \
@@ -68,241 +67,6 @@ def organization_follow_ignore(voter_device_id, organization_id):
     :return:
     """
     return organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOW_IGNORE)
-
-
-# We retrieve from only one of the two possible variables
-def organization_retrieve(organization_id, organization_we_vote_id):
-    organization_id = convert_to_int(organization_id)
-
-    we_vote_id = organization_we_vote_id.strip()
-    if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
-        json_data = {
-            'status': "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING",
-            'success': False,
-            'organization_id': organization_id,
-            'organization_we_vote_id': organization_we_vote_id,
-            'organization_name': '',
-            'organization_email': '',
-            'organization_website': '',
-            'organization_twitter_handle': '',
-            'organization_facebook': '',
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    organization_manager = OrganizationManager()
-    results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
-
-    if results['organization_found']:
-        organization = results['organization']
-        json_data = {
-            'success': True,
-            'status': results['status'],
-            'organization_id': organization.id,
-            'organization_we_vote_id': organization.we_vote_id,
-            'organization_name':
-                organization.organization_name if positive_value_exists(organization.organization_name) else '',
-            'organization_website': organization.organization_website if positive_value_exists(
-                organization.organization_website) else '',
-            'organization_twitter_handle':
-                organization.organization_twitter_handle if positive_value_exists(
-                    organization.organization_twitter_handle) else '',
-            'organization_email':
-                organization.organization_email if positive_value_exists(organization.organization_email) else '',
-            'organization_facebook':
-                organization.organization_facebook if positive_value_exists(organization.organization_facebook) else '',
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-    else:
-        json_data = {
-            'status': results['status'],
-            'success': False,
-            'organization_id': organization_id,
-            'organization_we_vote_id': we_vote_id,
-            'organization_name': '',
-            'organization_email': '',
-            'organization_website': '',
-            'organization_twitter_handle': '',
-            'organization_facebook': '',
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def organization_save_for_api(voter_device_id, organization_id, organization_we_vote_id, organization_name,
-                              organization_email, organization_website,
-                              organization_twitter_handle, organization_facebook, organization_image):
-    organization_id = convert_to_int(organization_id)
-    organization_we_vote_id = organization_we_vote_id.strip()
-
-    existing_unique_identifier_found = positive_value_exists(organization_id) \
-        or positive_value_exists(organization_we_vote_id)
-    new_unique_identifier_found = positive_value_exists(organization_twitter_handle) \
-        or positive_value_exists(organization_website)
-    unique_identifier_found = existing_unique_identifier_found or new_unique_identifier_found
-    # We must have one of these: twitter_handle or website, AND organization_name
-    required_variables_for_new_entry = positive_value_exists(organization_twitter_handle) \
-        or positive_value_exists(organization_website) and positive_value_exists(organization_name)
-    if not unique_identifier_found:
-        results = {
-            'status': "ORGANIZATION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
-            'success': False,
-            'organization_id': organization_id,
-            'organization_we_vote_id': organization_we_vote_id,
-            'new_organization_created': False,
-            'organization_name': organization_name,
-            'organization_email': organization_email,
-            'organization_website': organization_website,
-            'organization_twitter_handle': organization_twitter_handle,
-            'organization_facebook': organization_facebook,
-        }
-        return results
-    elif not existing_unique_identifier_found and not required_variables_for_new_entry:
-        results = {
-            'status': "NEW_ORGANIZATION_REQUIRED_VARIABLES_MISSING",
-            'success': False,
-            'organization_id': organization_id,
-            'organization_we_vote_id': organization_we_vote_id,
-            'new_organization_created': False,
-            'organization_name': organization_name,
-            'organization_email': organization_email,
-            'organization_website': organization_website,
-            'organization_twitter_handle': organization_twitter_handle,
-            'organization_facebook': organization_facebook,
-        }
-        return results
-
-    save_results = organization_save(organization_id, organization_we_vote_id, organization_name, organization_email,
-                                     organization_website, organization_twitter_handle, organization_facebook,
-                                     organization_image)
-
-    if save_results['success']:
-        organization = save_results['organization']
-        results = {
-            'success':                      True,
-            'status':                       save_results['status'],
-            'voter_device_id':              voter_device_id,
-            'organization_id':              organization.id,
-            'organization_we_vote_id':      organization.we_vote_id,
-            'new_organization_created':     save_results['new_organization_created'],
-            'organization_name':
-                organization.organization_name if positive_value_exists(organization.organization_name) else '',
-            'organization_email':
-                organization.organization_email if positive_value_exists(organization.organization_email) else '',
-            'organization_website':
-                organization.organization_website if positive_value_exists(organization.organization_website) else '',
-            'organization_twitter_handle':
-                organization.organization_twitter_handle if positive_value_exists(
-                    organization.organization_twitter_handle) else '',
-            'organization_facebook':
-                organization.organization_facebook if positive_value_exists(organization.organization_facebook) else '',
-        }
-        return results
-    else:
-        results = {
-            'success':                  False,
-            'status':                   save_results['status'],
-            'voter_device_id':          voter_device_id,
-            'organization_id':          organization_id,
-            'organization_we_vote_id':  organization_we_vote_id,
-            'new_organization_created': save_results['new_organization_created'],
-            'organization_name':        organization_name,
-            'organization_email':       organization_email,
-            'organization_website':     organization_website,
-            'organization_twitter_handle': organization_twitter_handle,
-            'organization_facebook':    organization_facebook,
-        }
-        return results
-
-
-# We are going to start retrieving only the ballot address
-# Eventually we will want to allow saving former addresses, and mailing addresses for overseas voters
-def voter_address_retrieve(voter_device_id):
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
-
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not voter_id > 0:
-        json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    voter_address_manager = VoterAddressManager()
-    results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
-
-    if results['voter_address_found']:
-        voter_address = results['voter_address']
-        json_data = {
-            'voter_device_id': voter_device_id,
-            'address_type': voter_address.address_type if voter_address.address_type else '',
-            'address': voter_address.address if voter_address.address else '',
-            'latitude': voter_address.latitude if voter_address.latitude else '',
-            'longitude': voter_address.longitude if voter_address.longitude else '',
-            'normalized_line1': voter_address.normalized_line1 if voter_address.normalized_line1 else '',
-            'normalized_line2': voter_address.normalized_line2 if voter_address.normalized_line2 else '',
-            'normalized_city': voter_address.normalized_city if voter_address.normalized_city else '',
-            'normalized_state': voter_address.normalized_state if voter_address.normalized_state else '',
-            'normalized_zip': voter_address.normalized_zip if voter_address.normalized_zip else '',
-            'success': True,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-    else:
-        json_data = {
-            'status': "VOTER_ADDRESS_NOT_RETRIEVED",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def voter_address_save(voter_device_id, address_raw_text, address_variable_exists):
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
-
-    if not address_variable_exists:
-        json_data = {
-                'status': "MISSING_POST_VARIABLE-ADDRESS",
-                'success': False,
-                'voter_device_id': voter_device_id,
-            }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if voter_id < 0:
-        json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    # At this point, we have a valid voter
-
-    voter_address_manager = VoterAddressManager()
-    address_type = BALLOT_ADDRESS
-
-    # We wrap get_or_create because we want to centralize error handling
-    results = voter_address_manager.update_or_create_voter_address(voter_id, address_type, address_raw_text.strip())
-    if results['success']:
-        json_data = {
-                'status': "VOTER_ADDRESS_SAVED",
-                'success': True,
-                'voter_device_id': voter_device_id,
-                'address': address_raw_text,
-            }
-
-    # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':
-        # delete all currently matching addresses and save again
-    else:
-        json_data = {
-                'status': results['status'],
-                'success': False,
-                'voter_device_id': voter_device_id,
-            }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_count():
@@ -429,7 +193,7 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id):
 
     except Exception as e:
         status = 'FAILED voter_guides_to_follow_retrieve, retrieve_voter_guides_for_election ' \
-                 '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         handle_exception(e, logger=logger, exception_message=status)
         success = False
 
@@ -483,3 +247,70 @@ def voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id):
             'json_data': json_data,
         }
         return results
+
+
+def voter_retrieve_list_for_api(voter_device_id):
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        results2 = {
+            'success': False,
+            'json_data': results['json_data'],
+        }
+        return results2
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if voter_id > 0:
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_id(voter_id)
+        if results['voter_found']:
+            voter_id = results['voter_id']
+    else:
+        # If we are here, the voter_id could not be found from the voter_device_id
+        json_data = {
+            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        results = {
+            'success': False,
+            'json_data': json_data,
+        }
+        return results
+
+    if voter_id:
+        voter_list = Voter.objects.all()
+        voter_list = voter_list.filter(id=voter_id)
+
+        if len(voter_list):
+            results = {
+                'success': True,
+                'voter_list': voter_list,
+            }
+            return results
+
+    # Trying to mimic the Google Civic error codes scheme
+    errors_list = [
+        {
+            'domain':  "TODO global",
+            'reason':  "TODO reason",
+            'message':  "TODO Error message here",
+            'locationType':  "TODO Error message here",
+            'location':  "TODO location",
+        }
+    ]
+    error_package = {
+        'errors':   errors_list,
+        'code':     400,
+        'message':  "Error message here",
+    }
+    json_data = {
+        'error': error_package,
+        'status': "VOTER_ID_COULD_NOT_BE_RETRIEVED",
+        'success': False,
+        'voter_device_id': voter_device_id,
+    }
+    results = {
+        'success': False,
+        'json_data': json_data,
+    }
+    return results

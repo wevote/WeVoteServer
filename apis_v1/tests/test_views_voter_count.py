@@ -7,13 +7,20 @@ from django.test import Client, TestCase
 from django.http import SimpleCookie
 import json
 from voter.models import VoterManager
+from future.standard_library import install_aliases
+# from urllib.parse import urlparse, urlencode
+# from urllib.request import urlopen, Request, build_opener, ProxyHandler
+# from urllib.error import HTTPError
+install_aliases()
 
 
 class WeVoteAPIsV1TestsVoterCount(TestCase):
 
     def setUp(self):
+        # self.voter_count_url = "http://localhost:8000%s" % reverse("apis_v1:voterCountView")  # Python3?
         self.voter_count_url = reverse("apis_v1:voterCountView")
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
+        # self.voter_create_url = "http://localhost:8000%s" % reverse("apis_v1:voterCreateView")  # Python3?
         self.voter_create_url = reverse("apis_v1:voterCreateView")
 
     def test_count_with_no_cookie(self):
@@ -25,6 +32,11 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
         # Check to see if there are 0 voters
         response = self.client.get(self.voter_count_url)
         json_data = json.loads(response.content)
+
+        # Python3 solution? Problem is refused connection
+        # req = Request(self.voter_count_url)
+        # response = urlopen(req)
+        # json_data = response.read()
 
         self.assertEqual('success' in json_data, True, "'success' expected in the json response, and not found")
         self.assertEqual('voter_count' in json_data, True,

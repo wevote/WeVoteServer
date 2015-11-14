@@ -55,6 +55,7 @@
     "webpack-stream": "^2.1.1"
   },
   "devDependencies": {
+    "axios": "^0.7.0",
     "babel-eslint": "^3.0.1",
     "browser-sync": "^2.9.6",
     "eslint": "^0.22.0",
