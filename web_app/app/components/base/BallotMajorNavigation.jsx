@@ -1,7 +1,5 @@
 import React from "react";
-import Router from "react-router";
-
-var Link = Router.Link;
+import { Router, Link } from "react-router";
 
 export default class BallotMajorNavigation extends React.Component {
   render() {
