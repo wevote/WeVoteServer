@@ -23,3 +23,7 @@ body {
 .loadingElement {
 	float: right;
 }
+
+.icon_connect {
+    background: url('../../assets/fonts/icon-connect1_3-42x42.png') no-repeat;
+}

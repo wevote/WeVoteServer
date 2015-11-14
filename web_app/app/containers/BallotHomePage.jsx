@@ -1,7 +1,7 @@
 import React from "react";
 import axios from 'axios';
 import MainMenu from "components/base/MainMenu";
-import Footer from "components/base/Footer";
+import BallotMajorNavigation from "components/base/BallotMajorNavigation";
 
 export default class BallotHomePage extends React.Component {
 	constructor(props) {
@@ -54,7 +54,7 @@ export default class BallotHomePage extends React.Component {
 						<input type="text" name="last-name" className="form-control" />
 					</div>
 				</div>
-                <Footer />
+                <BallotMajorNavigation />
 			</div>
 		);
 	}

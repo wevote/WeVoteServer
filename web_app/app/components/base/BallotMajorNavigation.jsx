@@ -3,7 +3,7 @@ import Router from "react-router";
 
 var Link = Router.Link;
 
-export default class Footer extends React.Component {
+export default class BallotMajorNavigation extends React.Component {
   render() {
     return <div className="row">
         <div className="navbar navbar-default navbar-fixed-bottom">
@@ -15,11 +15,11 @@ export default class Footer extends React.Component {
                     </div>
                 </Link>
                 <div className="col-xs-6 col-sm-3 center-block text-center">
-                  <span className="glyphicon glyphicon-question-sign"></span><br />
+                  <span className="glyphicon glyphicon-inbox"></span><br />
                   <span className="text-center">Requests</span>
                 </div>
-                <div className="col-xs-6 col-sm-3 center-block text-center">
-                  <span className="glyphicon glyphicon-question-sign"></span><br />
+                <div className="col-xs-6 col-sm-3 center-block text-center icon_connect">
+                  <span className="icon_connect"></span><br />
                   <span className="text-center">Connect</span>
                 </div>
                 {/*<div className="col-xs-6 col-sm-3 center-block text-center">
@@ -28,7 +28,7 @@ export default class Footer extends React.Component {
                 </div>*/}
                 <Link to="more">
                     <div className="col-xs-6 col-sm-3 center-block text-center">
-                      <span className="glyphicon glyphicon-tasks"></span><br />
+                      <span className="glyphicon glyphicon-menu-hamburger"></span><br />
                       <span className="text-center">More</span>
                     </div>
                 </Link>
