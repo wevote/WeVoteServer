@@ -26,3 +26,11 @@ body {
 .icon_connect {
     background: url('../../assets/fonts/icon-connect1_3-42x42.png') no-repeat;
 }
+
+.icon_organization {
+    background: url('../../assets/fonts/icon-org_placeholder-6_2-112x112.png') no-repeat;
+}
+
+.icon_person {
+    background: url('../../assets/fonts/icon-person_placeholder-6_1-112x112.png') no-repeat;
+}
