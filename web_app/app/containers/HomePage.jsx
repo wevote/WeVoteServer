@@ -27,16 +27,16 @@ export default class HomePage extends React.Component {
 
 		// if user does not have a device id set already then set one
 		if (docCookies.getItem('deviceId') === null) {
-			new Promise( function(resolve, reject) {
+			new Promise( (resolve, reject) => {
 				this.generateDeviceId()
 					.then( function(response) {
 						resolve(response.data['voter_device_id']);
 					});
-			}.bind(this))
-			.then( function(deviceId) {
+			})
+			.then( (deviceId) => {
 				docCookies.setItem('deviceId', deviceId);
 				this.createVoter(deviceId);
-			}.bind(this))
+			})
 		} else {
 			console.log('cookie is already set')
 		}
