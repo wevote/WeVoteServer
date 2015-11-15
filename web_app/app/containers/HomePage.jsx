@@ -1,6 +1,10 @@
 import React from "react";
 import axios from 'axios';
-
+// TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
+//import ReactDOM from 'react-dom';
+//import {IntlProvider, FormattedNumber, FormattedPlural} from 'react-intl';
+// Example code here: https://github.com/yahoo/react-intl
+// npm install react-intl@next
 import {get} from '../../lib/service/calls.js'
 
 get('voterCount', function (res) {
@@ -80,6 +84,13 @@ export default class HomePage extends React.Component {
 				<ul className="list-group">
 				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;Neutral and private</li>
 				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;{this.state.voterCount} voters</li>
+                    {/* TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
+                    <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;
+                <FormattedNumber value={this.state.voterCount} /> {' '}
+                <FormattedPlural value={this.state.voterCount}
+                    one="voter"
+                    other="voters"
+                /></li>*/}
 				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;417 not-for-profit organizations</li>
 				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;and you.</li>
 				</ul>
@@ -92,3 +103,11 @@ export default class HomePage extends React.Component {
 		);
 	}
 }
+
+// TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
+//ReactDOM.render(
+//    <IntlProvider locale="en">
+//        <App />
+//    </IntlProvider>,
+//    document.getElementById('container')
+//);
