@@ -1,7 +1,6 @@
 import axios from 'axios';
-import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotReturnNavigation from "components/base/BallotReturnNavigation";
 import { Link } from "react-router";
-import MainMenu from "components/base/MainMenu";
 import React from "react";
 
 export default class BallotOpinionsPage extends React.Component {
@@ -16,7 +15,7 @@ export default class BallotOpinionsPage extends React.Component {
 	render() {
 	    return (
 			<div>
-                <MainMenu />
+                <BallotReturnNavigation />
 				<div className="container-fluid well well-90">
 					<h2 className="text-center">More Opinions I Can Follow</h2>
 
@@ -27,7 +26,6 @@ export default class BallotOpinionsPage extends React.Component {
 					  opposes</li>
 					</ul>
 				</div>
-                <BallotMajorNavigation />
 			</div>
 		);
 	}
