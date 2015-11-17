@@ -20,10 +20,10 @@ export default class BallotMajorNavigation extends React.Component {
                   <span className="icon_connect"></span><br />
                   <span className="text-center">Connect</span>
                 </div>
-                {/*<div className="col-xs-6 col-sm-3 center-block text-center">
-                  <span className="glyphicon glyphicon-globe"></span><br />
+                <div className="col-xs-6 col-sm-3 center-block text-center">
+                  <span className="glyphicon glyphicon-fire"></span><br />
                   <span className="text-center">Activity Feed</span>
-                </div>*/}
+                </div>
                 <Link to="more">
                     <div className="col-xs-6 col-sm-3 center-block text-center">
                       <span className="glyphicon glyphicon-menu-hamburger"></span><br />
