@@ -184,6 +184,8 @@ def position_save_view(request):
     position_id = request.POST.get('position_id', False)
     position_we_vote_id = request.POST.get('position_we_vote_id', False)
     organization_we_vote_id = request.POST.get('organization_we_vote_id', False)
+    public_figure_we_vote_id = request.POST.get('public_figure_we_vote_id', False)
+    voter_we_vote_id = request.POST.get('voter_we_vote_id', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', False)
     ballot_item_label = request.POST.get('ballot_item_label', False)
     office_we_vote_id = request.POST.get('office_we_vote_id', False)
@@ -199,6 +201,8 @@ def position_save_view(request):
         position_id=position_id,
         position_we_vote_id=position_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
+        public_figure_we_vote_id=public_figure_we_vote_id,
+        voter_we_vote_id=voter_we_vote_id,
         google_civic_election_id=google_civic_election_id,
         ballot_item_label=ballot_item_label,
         office_we_vote_id=office_we_vote_id,

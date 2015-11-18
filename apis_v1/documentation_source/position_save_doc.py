@@ -19,11 +19,6 @@ def position_save_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
-            'name':         'organization_we_vote_id',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'The organization that is taking the position.',
-        },
-        {
             'name':         'google_civic_election_id',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'ID of the election this position is related to.',
@@ -54,22 +49,43 @@ def position_save_doc_template_values(url_root):
             'name':         'office_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for the office that the position is commenting on. '
-                            '(One of these is required: '
+                            '(One and only one of these is required: '
                             'office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)',
         },
         {
             'name':         'candidate_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for the candidate that the position is commenting on. '
-                            '(One of these is required: '
+                            '(One and only one of these is required: '
                             'office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)',
         },
         {
             'name':         'measure_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for the measure that the position is commenting on. '
-                            '(One of these is required: '
+                            '(One and only one of these is required: '
                             'office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)',
+        },
+        {
+            'name':         'organization_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The organization that is taking the position.'
+                            ' (One and only one of these is required: '
+                            'organization_we_vote_id, public_figure_we_vote_id, voter_we_vote_id)',
+        },
+        {
+            'name':         'public_figure_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The public figure (or voter) that is publicly taking the position.'
+                            ' (One and only one of these is required: '
+                            'organization_we_vote_id, public_figure_we_vote_id, voter_we_vote_id)',
+        },
+        {
+            'name':         'voter_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The voter that is privately taking the position.'
+                            ' (One and only one of these is required: '
+                            'organization_we_vote_id, public_figure_we_vote_id, voter_we_vote_id)',
         },
         {
             'name':         'stance',
@@ -166,6 +182,8 @@ def position_save_doc_template_values(url_root):
                    '  "is_oppose": boolean,\n' \
                    '  "is_information_only": boolean,\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
+                   '  "public_figure_we_vote_id": string,\n' \
+                   '  "voter_we_vote_id": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "voter_id": integer,\n' \
                    '  "office_we_vote_id": string,\n' \

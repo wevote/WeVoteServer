@@ -830,6 +830,8 @@ class PositionEnteredManager(models.Model):
     def update_or_create_position(
             self, position_id, position_we_vote_id,
             organization_we_vote_id=False,
+            public_figure_we_vote_id=False,
+            voter_we_vote_id=False,
             google_civic_election_id=False,
             ballot_item_label=False,
             office_we_vote_id=False,
@@ -844,16 +846,20 @@ class PositionEnteredManager(models.Model):
         """
         exception_does_not_exist = False
         exception_multiple_object_returned = False
+        failed_saving_existing_position = False
         position_on_stage_found = False
         new_position_created = False
+        too_many_unique_actor_variables_received = False
+        too_many_unique_ballot_item_variables_received = False
         position_on_stage = PositionEntered()
         status = "ENTERING_UPDATE_OR_CREATE_POSITION"
 
         # In order of authority
         # 1) position_id exists? Find it with position_id or fail
         # 2) we_vote_id exists? Find it with we_vote_id or fail
-        # 3) position_website_search exists? Try to find it. If not, go to step 4
-        # 4) position_twitter_search exists? Try to find it. If not, exit
+        # 3-5) organization_we_vote_id related position?
+        # 6-8) public_figure_we_vote_id related position?
+        # 9-11) voter_we_vote_id related position?
 
         success = False
         if positive_value_exists(position_id) or positive_value_exists(position_we_vote_id):
@@ -933,81 +939,264 @@ class PositionEnteredManager(models.Model):
                         status = "NO_POSITION_CHANGES_SAVED"
             else:
                 status = "POSITION_COULD_NOT_BE_FOUND_WITH_POSITION_ID_OR_WE_VOTE_ID"
+        # else for this: if positive_value_exists(position_id) or positive_value_exists(position_we_vote_id):
         else:
-            # TODO Support the following unique combinations to find/save an entry
             # We also want to retrieve a position with the following sets of variables:
-            # organization_we_vote_id, google_civic_election_id, office_we_vote_id
-            # organization_we_vote_id, google_civic_election_id, candidate_we_vote_id
-            # organization_we_vote_id, google_civic_election_id, measure_we_vote_id
-            # public_figure_we_vote_id, google_civic_election_id, office_we_vote_id
-            # public_figure_we_vote_id, google_civic_election_id, candidate_we_vote_id
-            # public_figure_we_vote_id, google_civic_election_id, measure_we_vote_id
-            # NOTE: With voter we need ability to store private version and public version - maybe distinction between
-            #   private and public is voter_we_vote_id vs. public_figure_we_vote_id?
-            # voter_we_vote_id, google_civic_election_id, office_we_vote_id
-            # voter_we_vote_id, google_civic_election_id, candidate_we_vote_id
-            # voter_we_vote_id, google_civic_election_id, measure_we_vote_id
-            pass
-            # try:
-            #     found_with_status = ''
-            #
-            #     # 3) position_website_search exists? Try to find it. If not, go to step 4
-            #     if positive_value_exists(position_website_search):
-            #         try:
-            #             position_on_stage = Organization.objects.get(
-            #                 position_website=position_website_search)
-            #             position_on_stage_found = True
-            #             found_with_status = "FOUND_WITH_WEBSITE"
-            #         except Organization.MultipleObjectsReturned as e:
-            #             handle_record_found_more_than_one_exception(e, logger)
-            #             exception_multiple_object_returned = True
-            #             logger.warn("Organization.MultipleObjectsReturned")
-            #         except Organization.DoesNotExist as e:
-            #             # Not a problem -- an position matching this twitter handle wasn't found
-            #             exception_does_not_exist = True
-            #
-            #     # 4) position_twitter_search exists? Try to find it. If not, exit
-            #     if not position_on_stage_found:
-            #         if positive_value_exists(position_twitter_search):
-            #             try:
-            #                 position_on_stage = Organization.objects.get(
-            #                     position_twitter_handle=position_twitter_search)
-            #                 position_on_stage_found = True
-            #                 found_with_status = "FOUND_WITH_TWITTER"
-            #             except Organization.MultipleObjectsReturned as e:
-            #                 handle_record_found_more_than_one_exception(e, logger)
-            #                 exception_multiple_object_returned = True
-            #                 logger.warn("Organization.MultipleObjectsReturned")
-            #             except Organization.DoesNotExist as e:
-            #                 # Not a problem -- an position matching this twitter handle wasn't found
-            #                 exception_does_not_exist = True
-            #
-            #     # 3 & 4) Save values entered in steps 3 & 4
-            #     if position_on_stage_found:
-            #         if position_name or position_website or position_twitter_handle \
-            #                 or position_email or position_facebook or position_image:
-            #             if position_name:
-            #                 position_on_stage.position_name = position_name
-            #             if position_website:
-            #                 position_on_stage.position_website = position_website
-            #             if position_twitter_handle:
-            #                 position_on_stage.position_twitter_handle = position_twitter_handle
-            #             if position_email:
-            #                 position_on_stage.position_email = position_email
-            #             if position_facebook:
-            #                 position_on_stage.position_facebook = position_facebook
-            #             if position_image:
-            #                 position_on_stage.position_image = position_image
-            #             position_on_stage.save()
-            #             success = True
-            #             status = found_with_status + " SAVED"
-            #         else:
-            #             success = True
-            #             status = found_with_status + " NO_CHANGES_SAVED"
-            # except Exception as e:
-            #     handle_record_not_saved_exception(e, logger=logger)
+            # 3) organization_we_vote_id, google_civic_election_id, candidate_we_vote_id: DONE
+            # 4) organization_we_vote_id, google_civic_election_id, measure_we_vote_id: DONE
+            # 5) organization_we_vote_id, google_civic_election_id, office_we_vote_id: DONE
+            # 6) TODO public_figure_we_vote_id, google_civic_election_id, office_we_vote_id
+            # 7) TODO public_figure_we_vote_id, google_civic_election_id, candidate_we_vote_id
+            # 8) TODO public_figure_we_vote_id, google_civic_election_id, measure_we_vote_id
+            # NOTE: Voters storing a public version of their voter guides store it as a public_figure_we_vote_id
+            # 9) TODO voter_we_vote_id, google_civic_election_id, office_we_vote_id
+            # 10) TODO voter_we_vote_id, google_civic_election_id, candidate_we_vote_id
+            # 11) TODO voter_we_vote_id, google_civic_election_id, measure_we_vote_id
+            found_with_status = ''
 
-        if not position_on_stage_found:
+            # Make sure that too many ballot item identifier variables weren't passed in
+            number_of_unique_ballot_item_identifiers = 0
+            if positive_value_exists(candidate_we_vote_id):
+                number_of_unique_ballot_item_identifiers += 1
+            if positive_value_exists(measure_we_vote_id):
+                number_of_unique_ballot_item_identifiers += 1
+            if positive_value_exists(office_we_vote_id):
+                number_of_unique_ballot_item_identifiers += 1
+
+            if number_of_unique_ballot_item_identifiers > 1:
+                too_many_unique_ballot_item_variables_received = True
+                status = "FAILED-TOO_MANY_UNIQUE_BALLOT_ITEM_VARIABLES"
+                success = False
+
+            # Make sure that too many "actor" identifier variables weren't passed in
+            number_of_unique_actor_identifiers = 0
+            if positive_value_exists(organization_we_vote_id):
+                number_of_unique_actor_identifiers += 1
+            if positive_value_exists(public_figure_we_vote_id):
+                number_of_unique_actor_identifiers += 1
+            if positive_value_exists(voter_we_vote_id):
+                number_of_unique_actor_identifiers += 1
+
+            if number_of_unique_actor_identifiers > 1:
+                too_many_unique_actor_variables_received = True
+                status = "FAILED-TOO_MANY_UNIQUE_ACTOR_VARIABLES"
+                success = False
+
+            # Only proceed if the correct number of unique identifiers was received
+            if not too_many_unique_ballot_item_variables_received and not too_many_unique_actor_variables_received:
+                # 3-5: Organization-related cases
+                # 3) candidate_we_vote_id + organization_we_vote_id exists? Try to find it. If not, go to step 4
+                if positive_value_exists(candidate_we_vote_id) and \
+                        positive_value_exists(organization_we_vote_id) and \
+                        positive_value_exists(google_civic_election_id):
+                    try:
+                        position_on_stage = PositionEntered.objects.get(
+                            candidate_campaign_we_vote_id=candidate_we_vote_id,
+                            organization_we_vote_id=organization_we_vote_id,
+                            google_civic_election_id=google_civic_election_id
+                        )
+                        position_on_stage_found = True
+                        found_with_status = "FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID"
+                    except PositionEntered.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status = "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_ORGANIZATION_WE_VOTE_ID"
+                    except PositionEntered.DoesNotExist as e:
+                        # Not a problem -- a position matching this candidate_we_vote_id wasn't found
+                        pass
+
+                # 4) measure_we_vote_id + organization_we_vote_id exists? Try to find it. If not, go to step 5
+                if positive_value_exists(measure_we_vote_id) and \
+                        positive_value_exists(organization_we_vote_id) and \
+                        positive_value_exists(google_civic_election_id):
+                    try:
+                        position_on_stage = PositionEntered.objects.get(
+                            contest_measure_we_vote_id=measure_we_vote_id,
+                            organization_we_vote_id=organization_we_vote_id,
+                            google_civic_election_id=google_civic_election_id
+                        )
+                        position_on_stage_found = True
+                        found_with_status = "FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID"
+                    except PositionEntered.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status = "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_ORGANIZATION_WE_VOTE_ID"
+                    except PositionEntered.DoesNotExist as e:
+                        # Not a problem -- a position matching this candidate_we_vote_id wasn't found
+                        pass
+
+                # 5) office_we_vote_id + organization_we_vote_id exists? Try to find it. If not, go to step 6
+                if positive_value_exists(office_we_vote_id) and \
+                        positive_value_exists(organization_we_vote_id) and \
+                        positive_value_exists(google_civic_election_id):
+                    try:
+                        position_on_stage = PositionEntered.objects.get(
+                            contest_office_we_vote_id=office_we_vote_id,
+                            organization_we_vote_id=organization_we_vote_id,
+                            google_civic_election_id=google_civic_election_id
+                        )
+                        position_on_stage_found = True
+                        found_with_status = "FOUND_WITH_OFFICE_AND_ORGANIZATION_WE_VOTE_ID"
+                    except PositionEntered.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status = "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_ORGANIZATION_WE_VOTE_ID"
+                    except PositionEntered.DoesNotExist as e:
+                        # Not a problem -- a position matching this office_we_vote_id wasn't found
+                        pass
+
+                # TODO Test public_figure (6-8) and voter (9-11) related cases
+                # 6-8: Public-Figure-related cases
+                # 6) candidate_we_vote_id + public_figure_we_vote_id exists? Try to find it. If not, go to step 7
+                if positive_value_exists(candidate_we_vote_id) and \
+                        positive_value_exists(public_figure_we_vote_id) and \
+                        positive_value_exists(google_civic_election_id):
+                    try:
+                        position_on_stage = PositionEntered.objects.get(
+                            candidate_campaign_we_vote_id=candidate_we_vote_id,
+                            public_figure_we_vote_id=public_figure_we_vote_id,
+                            google_civic_election_id=google_civic_election_id
+                        )
+                        position_on_stage_found = True
+                        found_with_status = "FOUND_WITH_CANDIDATE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
+                    except PositionEntered.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status = "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
+                    except PositionEntered.DoesNotExist as e:
+                        # Not a problem -- a position matching this candidate_we_vote_id wasn't found
+                        pass
+
+                # 7) measure_we_vote_id + public_figure_we_vote_id exists? Try to find it. If not, go to step 8
+                if positive_value_exists(measure_we_vote_id) and \
+                        positive_value_exists(public_figure_we_vote_id) and \
+                        positive_value_exists(google_civic_election_id):
+                    try:
+                        position_on_stage = PositionEntered.objects.get(
+                            contest_measure_we_vote_id=measure_we_vote_id,
+                            public_figure_we_vote_id=public_figure_we_vote_id,
+                            google_civic_election_id=google_civic_election_id
+                        )
+                        position_on_stage_found = True
+                        found_with_status = "FOUND_WITH_MEASURE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
+                    except PositionEntered.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status = "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_PUBLIC_FIGURE_WE_VOTE_ID"
+                    except PositionEntered.DoesNotExist as e:
+                        # Not a problem -- a position matching this candidate_we_vote_id wasn't found
+                        pass
+
+                # 8) office_we_vote_id + public_figure_we_vote_id exists? Try to find it. If not, go to step 9
+                if positive_value_exists(office_we_vote_id) and \
+                        positive_value_exists(public_figure_we_vote_id) and \
+                        positive_value_exists(google_civic_election_id):
+                    try:
+                        position_on_stage = PositionEntered.objects.get(
+                            contest_office_we_vote_id=office_we_vote_id,
+                            public_figure_we_vote_id=public_figure_we_vote_id,
+                            google_civic_election_id=google_civic_election_id
+                        )
+                        position_on_stage_found = True
+                        found_with_status = "FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
+                    except PositionEntered.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status = "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
+                    except PositionEntered.DoesNotExist as e:
+                        # Not a problem -- a position matching this office_we_vote_id wasn't found
+                        pass
+
+                # 9-11: Voter-related cases
+                # 9) candidate_we_vote_id + organization_we_vote_id exists? Try to find it. If not, go to step 10
+                if positive_value_exists(candidate_we_vote_id) and \
+                        positive_value_exists(voter_we_vote_id) and \
+                        positive_value_exists(google_civic_election_id):
+                    try:
+                        position_on_stage = PositionEntered.objects.get(
+                            candidate_campaign_we_vote_id=candidate_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            google_civic_election_id=google_civic_election_id
+                        )
+                        position_on_stage_found = True
+                        found_with_status = "FOUND_WITH_CANDIDATE_AND_VOTER_WE_VOTE_ID"
+                    except PositionEntered.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status = "FAILED-MULTIPLE_FOUND_WITH_CANDIDATE_AND_VOTER_WE_VOTE_ID"
+                    except PositionEntered.DoesNotExist as e:
+                        # Not a problem -- a position matching this candidate_we_vote_id wasn't found
+                        pass
+
+                # 10) measure_we_vote_id + voter_we_vote_id exists? Try to find it. If not, go to step 11
+                if positive_value_exists(measure_we_vote_id) and \
+                        positive_value_exists(voter_we_vote_id) and \
+                        positive_value_exists(google_civic_election_id):
+                    try:
+                        position_on_stage = PositionEntered.objects.get(
+                            contest_measure_we_vote_id=measure_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            google_civic_election_id=google_civic_election_id
+                        )
+                        position_on_stage_found = True
+                        found_with_status = "FOUND_WITH_MEASURE_AND_VOTER_WE_VOTE_ID"
+                    except PositionEntered.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status = "FAILED-MULTIPLE_FOUND_WITH_MEASURE_AND_VOTER_WE_VOTE_ID"
+                    except PositionEntered.DoesNotExist as e:
+                        # Not a problem -- a position matching this candidate_we_vote_id wasn't found
+                        pass
+
+                # 11) office_we_vote_id + organization_we_vote_id exists? Try to find it.
+                if positive_value_exists(office_we_vote_id) and \
+                        positive_value_exists(voter_we_vote_id) and \
+                        positive_value_exists(google_civic_election_id):
+                    try:
+                        position_on_stage = PositionEntered.objects.get(
+                            contest_office_we_vote_id=office_we_vote_id,
+                            voter_we_vote_id=voter_we_vote_id,
+                            google_civic_election_id=google_civic_election_id
+                        )
+                        position_on_stage_found = True
+                        found_with_status = "FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
+                    except PositionEntered.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        status = "FAILED-MULTIPLE_FOUND_WITH_OFFICE_AND_VOTER_WE_VOTE_ID"
+                    except PositionEntered.DoesNotExist as e:
+                        # Not a problem -- a position matching this office wasn't found
+                        pass
+
+                # Save values entered in steps 3-11
+                if position_on_stage_found:
+                    try:
+                        if ballot_item_label or stance or statement_text or statement_html or more_info_url:
+                            if ballot_item_label:
+                                position_on_stage.ballot_item_label = ballot_item_label
+                            if stance:
+                                position_on_stage.stance = stance
+                            if statement_text:
+                                position_on_stage.statement_text = statement_text
+                            if statement_html:
+                                position_on_stage.statement_html = statement_html
+                            if more_info_url:
+                                position_on_stage.more_info_url = more_info_url
+
+                            position_on_stage.save()
+                            success = True
+                            status = found_with_status + " SAVED"
+                        else:
+                            success = True
+                            status = found_with_status + " NO_CHANGES_SAVED"
+                    except Exception as e:
+                        handle_record_not_saved_exception(e, logger=logger)
+                        failed_saving_existing_position = True
+
+        if not position_on_stage_found \
+                and not exception_multiple_object_returned \
+                and not failed_saving_existing_position \
+                and not too_many_unique_ballot_item_variables_received and not too_many_unique_actor_variables_received:
             try:
                 # If here, create new position
                 if organization_we_vote_id:

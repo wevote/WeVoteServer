@@ -125,6 +125,8 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
 def position_save_for_api(
         voter_device_id, position_id, position_we_vote_id,
         organization_we_vote_id,
+        public_figure_we_vote_id,
+        voter_we_vote_id,
         google_civic_election_id,
         ballot_item_label,
         office_we_vote_id,
@@ -210,6 +212,8 @@ def position_save_for_api(
         position_id=position_id,
         position_we_vote_id=position_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
+        public_figure_we_vote_id=public_figure_we_vote_id,
+        voter_we_vote_id=voter_we_vote_id,
         google_civic_election_id=google_civic_election_id,
         ballot_item_label=ballot_item_label,
         office_we_vote_id=office_we_vote_id,
