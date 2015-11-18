@@ -16,7 +16,7 @@ export default class BallotMeasurePage extends React.Component {
 	render() {
 	    return (
 			<div>
-                <BallotItemNavigation />
+                <BallotItemNavigation back_to_ballot={true} is_measure={true} />
 				<div className="container-fluid well well-90">
 					<h2 className="text-center">Measure AA</h2>
 					<ul className="list-group">
