@@ -9,7 +9,20 @@ export default class BallotItemNavigation extends React.Component {
                 <div className="container-fluid">
                     <div className="left-inner-addon">
                         {/* Create switch between "Back" and "Back to My Ballot" */}
-                        <p className="text-left"><Link to="ballot">&lt; Back to My Ballot</Link></p>
+                        <p className="text-left">
+                          {(() => {
+                            switch (this.props.back_to_ballot) {
+                              case 'True':
+                                  return <div>
+                                      <Link to="ballot">&lt; Back to My Ballot</Link>
+                                  </div>;
+                              default:
+                                  return <div>
+                                      <Link to="ballot">&lt; Back</Link>
+                                  </div>;
+                            }
+                          })()}
+                            </p>
                         {/* Create switch between ballot_candidate_opinions and ballot_measure_opinions */}
                         <p className="text-right"><Link to="ballot_candidate_opinions"><span className="icon_more_opinions"></span>&nbsp;More Opinions</Link></p>
                     </div>
