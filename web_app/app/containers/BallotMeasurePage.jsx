@@ -20,7 +20,7 @@ export default class BallotMeasurePage extends React.Component {
 				<div className="container-fluid well well-90">
 					<h2 className="text-center">Measure AA</h2>
 					<ul className="list-group">
-					  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;<Link to="ballot_measure_one_position">Organization Name</Link><br />
+					  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;<Link to="ballot_measure_one_position" params={{id: 2, org_id: 7}}>Organization Name</Link><br />
 					  supports</li>
 					  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;Another Organization<br />
 					  opposes</li>

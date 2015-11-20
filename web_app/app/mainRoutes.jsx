@@ -31,12 +31,12 @@ module.exports = (
 	<Route name="app" path="/" handler={Application}>
 		<Route name="ballot" path="/ballot" handler={BallotHomePage} />
 		<Route name="ballot_add_friends" path="/ballot/addfriends" handler={BallotAddFriendsPage} />
-		<Route name="ballot_candidate" path="/ballot/candidate" handler={BallotCandidatePage} />
-		<Route name="ballot_candidate_one_position" path="/ballot/candidate/position" handler={BallotCandidateOnePositionPage} />
-		<Route name="ballot_candidate_opinions" path="/ballot/candidate/opinions" handler={BallotCandidateOpinionsPage} />
-		<Route name="ballot_measure" path="/ballot/measure" handler={BallotMeasurePage} />
-		<Route name="ballot_measure_one_position" path="/ballot/measure/position" handler={BallotMeasureOnePositionPage} />
-		<Route name="ballot_measure_opinions" path="/ballot/measure/opinions" handler={BallotMeasureOpinionsPage} />
+		<Route name="ballot_candidate" path="/ballot/candidate/:id" handler={BallotCandidatePage} />
+		<Route name="ballot_candidate_one_org_position" path="/ballot/candidate/:id/org/:org_id" handler={BallotCandidateOnePositionPage} />
+		<Route name="ballot_candidate_opinions" path="/ballot/candidate/:id/opinions" handler={BallotCandidateOpinionsPage} />
+		<Route name="ballot_measure" path="/ballot/measure/:id" handler={BallotMeasurePage} />
+		<Route name="ballot_measure_one_position" path="/ballot/measure/:id/org/:org_id" handler={BallotMeasureOnePositionPage} />
+		<Route name="ballot_measure_opinions" path="/ballot/measure/:id/opinions/" handler={BallotMeasureOpinionsPage} />
 		<Route name="ballot_opinions" path="/ballot/opinions" handler={BallotOpinionsPage} />
 		<Route name="home" path="/home" handler={HomePage} />
 		<Route name="more" path="/more" handler={MorePage} />

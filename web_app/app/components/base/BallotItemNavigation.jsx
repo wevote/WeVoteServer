@@ -1,6 +1,9 @@
 import React from "react";
 import { Link } from "react-router";
 
+// TODO DALE I would like to try to use this here https://github.com/svenanders/react-breadcrumbs, but this requires
+//  react-router@^1.0.0
+
 // This navigation is for returns to prior page, combined with the option to select "More Opinions".
 export default class BallotItemNavigation extends React.Component {
 	render() {
@@ -8,13 +11,14 @@ export default class BallotItemNavigation extends React.Component {
         if (this.props.back_to_ballot) {
             back_to_link = <Link to="ballot">&lt; Back to My Ballot</Link>;
         } else {
+            {/* TODO Add a way to pass in the return url */}
             back_to_link = <Link to="ballot">&lt; Back</Link>;
         }
         var more_opinions_link;
         if (this.props.is_measure) {
-            more_opinions_link = <Link to="ballot_measure_opinions"><span className="icon_more_opinions"></span>&nbsp;More Opinions</Link>;
+            more_opinions_link = <Link to="ballot_measure_opinions" params={{id: 4}}><span className="icon_more_opinions"></span>&nbsp;More Opinions</Link>;
         } else {
-            more_opinions_link = <Link to="ballot_candidate_opinions"><span className="icon_more_opinions"></span>&nbsp;More Opinions</Link>;
+            more_opinions_link = <Link to="ballot_candidate_opinions" params={{id: 4}}><span className="icon_more_opinions"></span>&nbsp;More Opinions</Link>;
         }
 		return <div className="row">
             <nav className="navbar navbar-main navbar-fixed-top">

@@ -16,7 +16,7 @@ export default class BallotCandidateOnePositionPage extends React.Component {
 	render() {
 	    return (
 			<div>
-                <BallotItemNavigation />
+                <BallotItemNavigation back_to_ballot={false} is_measure={false} />
 				<div className="container-fluid well well-90">
 					<h2 className="text-center">Fictional Candidate</h2>
 
