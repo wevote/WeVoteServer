@@ -40,13 +40,13 @@ database with initial data that will help you do development. Visit the Admin Me
 
 Open a new terminal/console, and do the following:
 
-    cd WeVoteServer/web_app
+    cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/web_app
     npm run build:dev
 
 Wait for the first compilation is successful, then in another terminal/console, start the 
 node.js server in development mode.
 
-    cd WeVoteServer/web_app
+    cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/web_app
     npm run start:dev
 
 Visit the Web App in a browser

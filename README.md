@@ -24,7 +24,9 @@ https://groups.google.com/forum/#!forum/electiondata
 ## 1) Python API Server
 
 The models and controllers that power the API Endpoints used by the front end applications. We recommend you install
-this first. Initial installation instructions for the 
+this first. 
+
+Initial installation instructions for the 
 [Python/Django API server can be found here](README_API_INSTALL.md).
 
 [Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
@@ -32,6 +34,7 @@ this first. Initial installation instructions for the
 ## 2) We Vote Mobile Web Application
 
 Front end development of the application. 
+
 Initial installation instructions for the [Web App can be found here](README_WEB_APP_INSTALL.md).
 
 [Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)

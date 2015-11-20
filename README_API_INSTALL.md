@@ -125,11 +125,6 @@ specify the level assigned to each message. You can change this to info items by
 
     LOG_FILE_LEVEL = logging.INFO
 
-### GOOGLE_CIVIC_API_KEY
-If you are going to connect to Google Civic API, add your key to this variable.
-TODO: Describe the process of getting a Google Civic API Key
-
-
 ## Setup - Database Creation
 
 If you would like to match the local database settings from the "config/environment_variables.json" file,
@@ -172,6 +167,14 @@ Find admin tools here:
 Find documentation for all of the APIs here:
 
     http://localhost:8000/apis/v1/docs
+    
+## Sample data and the GOOGLE_CIVIC_API_KEY
+Sample data is provided. You can load this data by clicking the "Import Test Data" link on this page (in the "Maintenance" section):
+
+    http://localhost:8000/admin
+ 
+If you need to retrieve fresh ballot data, you will need to sign up for a Google Civic API key.
+TODO: Describe the process of getting a Google Civic API Key
     
 [Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
