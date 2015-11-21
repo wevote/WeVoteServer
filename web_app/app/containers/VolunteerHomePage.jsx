@@ -1,6 +1,7 @@
-import React from "react";
 import axios from 'axios';
-import MainMenu from "components/base/MainMenu";
+import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import React from "react";
+import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
 
 export default class VolunteerHomePage extends React.Component {
@@ -15,7 +16,7 @@ export default class VolunteerHomePage extends React.Component {
 	render() {
 	    return (
 			<div>
-                <MainMenu />
+                <BallotReturnNavigation back_to_ballot={false} />
                 <div className="container-fluid well well-90">
 					<h4 className="text-left">Volunteer With We Vote</h4>
                     <p>Do you have 2 minutes right now?<br />
@@ -23,11 +24,11 @@ export default class VolunteerHomePage extends React.Component {
                         easier for all of us to vote!
                     </p>
 
-                    <Link to="volunteer">Help Now ></Link><br />
+                    <Link to="volunteer"><Button bsStyle="primary">Help Now ></Button></Link><br />
                         <br />
                     <p>Do you have a favorite volunteer task?</p>
 
-                    <Link to="volunteer_choose_task">Find Task Now ></Link><br />
+                    <Link to="volunteer_choose_task"><Button bsStyle="primary">Find Task Now ></Button></Link><br />
                         <br />
                 </div>
 			</div>
