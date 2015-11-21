@@ -69,7 +69,7 @@ export default class BallotCandidateOnePositionPage extends React.Component {
               est fermentum. Mauris interdum dolor lacus, euismod convallis dui molestie id.</li>
 		  <li className="list-group-item">
             {like_item}
-            <AskOrShareAction />
+            <AskOrShareAction link_text={"Share"} />
               <br />
               23 people like this.
           </li>
