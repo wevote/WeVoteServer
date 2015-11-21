@@ -21,7 +21,7 @@ export default class BallotHomePage extends React.Component {
 <div>
 <BallotFeedNavigation />
   <div className="well well-sm split-top-skinny">
-    <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;<span class="small">US House - District 12</span>
+    <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;<span className="small">US House - District 12</span>
   </div>
 	<ul className="list-group">
 	  <li className="list-group-item">

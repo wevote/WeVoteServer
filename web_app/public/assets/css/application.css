@@ -65,6 +65,14 @@ body {
     font-size: 20px;
 }
 
+.icon-light {
+    color: #919191;
+}
+
+.icon-medium {
+    font-size: 26px;
+}
+
 .well-90 {
     width: 90%;
 }
@@ -87,7 +95,7 @@ body {
 }
 
 .box-skinny {
-  padding: 0.96em;
+  padding: 0.5em;
 }
 
 .no-space {
@@ -97,6 +105,10 @@ body {
 
 .split-top-skinny {
   margin-top: .75em;
+}
+
+.fluff-left-narrow {
+  padding-left: .25em;
 }
 
 .navbar.bottom-separator, .bottom-separator {
