@@ -8,27 +8,27 @@ export default class BallotMajorNavigation extends React.Component {
             <div className="container-fluid container-top10 seperator-top">
               <div class="row">
                 <Link to="ballot">
-                    <div className="col-xs-3 center-block text-center">
-                      <span className="glyphicon glyphicon-list-alt"></span><br />
-                      <span className="text-center">My Ballot</span>
+                    <div className="col-xs-2 center-block text-center">
+                      <span className="glyphicon glyphicon-list-alt glyphicon-line-adjustment"></span><br />
+                      <span className="text-center small">Ballot</span>
                     </div>
                 </Link>
                 <div className="col-xs-2 center-block text-center">
-                  <span className="glyphicon glyphicon-inbox"></span><br />
-                  <span className="text-center">Requests</span>
+                  <span className="glyphicon glyphicon-inbox glyphicon-line-adjustment"></span><br />
+                  <span className="text-center small">Requests</span>
                 </div>
                 <div className="col-xs-2 center-block text-center">
                   <span className="glyphicon icon-icon-connect-1-3"></span><br />
-                  <span className="text-center">Connect</span>
+                  <span className="text-center small">Connect</span>
                 </div>
                 <div className="col-xs-3 center-block text-center">
                   <span className="glyphicon icon-icon-activity-1-4"></span><br />
-                  <span className="text-center">Activity Feed</span>
+                  <span className="text-center small">Activity</span>
                 </div>
                 <Link to="more">
                     <div className="col-xs-2 center-block text-center">
-                      <span className="glyphicon glyphicon-menu-hamburger"></span><br />
-                      <span className="text-center">More</span>
+                      <span className="glyphicon glyphicon-menu-hamburger glyphicon-line-adjustment"></span><br />
+                      <span className="text-center small">More</span>
                     </div>
                 </Link>
               </div>
