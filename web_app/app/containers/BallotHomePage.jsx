@@ -20,14 +20,10 @@ export default class BallotHomePage extends React.Component {
 	    return (
 <div>
 <BallotFeedNavigation />
-<div className="container-fluid well well-90">
-    <p>&nbsp;</p>
-    <p>&nbsp;</p>
+  <div className="well well-sm split-top-skinny">
+    <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;<span class="small">US House - District 12</span>
+  </div>
 	<ul className="list-group">
-	  <li className="list-group-item">
-		  <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;US House - District 12
-          <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
-      </li>
 	  <li className="list-group-item">
           <Link to="ballot_candidate" params={{id: 2}}>
 		    <span className="icon_person"></span>&nbsp;Fictional Candidate
@@ -60,7 +56,6 @@ export default class BallotHomePage extends React.Component {
           <BallotFeedItemActionBar />
       </li>
 	</ul>
-</div>
 <BallotMajorNavigation />
 </div>
 		);

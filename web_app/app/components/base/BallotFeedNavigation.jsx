@@ -15,11 +15,11 @@ export default class BallotFeedNavigation extends React.Component {
                     </div>
                 </div>
             </nav>
-            <div>
-              <ul>
-                <li><Link to="add_friends">Add Friends</Link></li>
-                <li><Link to="ballot_opinions">More Opinions</Link></li>
-              </ul>
+            <div className="container-fluid bg-light box-skinny bottom-separator">
+              <div className="row">
+                <div className="col-xs-6 col-md-6 text-center"><i className="glyphicons-500-family"></i><Link to="add_friends" className="font-darkest">Add Friends</Link></div>
+                <div className="col-xs-6 col-md-6 text-center"><Link to="ballot_opinions" className="font-darkest">More Opinions</Link></div>
+              </div>
             </div>
 		</div>;
 	}

@@ -1,6 +1,6 @@
 body {
-  /*TODO: find out why there is inline style on body */
-    padding-top: 90px !important;
+    background: #fff !important;
+    padding-top: 60px !important;
     padding-bottom: 70px !important;
 }
 
@@ -53,7 +53,7 @@ body {
 /* App boostrap themes */
 
 .glyphicon {
-    color: #ccc;
+    color: #919191;
     font-size: 32px;
 }
 
@@ -78,12 +78,28 @@ body {
   color: #BEBEBE;
 }
 
+.font-darkest {
+  color: #000;
+}
+
+.bg-light {
+  background: #fff;
+}
+
+.box-skinny {
+  padding: 0.96em;
+}
+
 .no-space {
   padding: 0;
   margin: 0;
 }
 
-.navbar.bottom-separator {
+.split-top-skinny {
+  margin-top: .75em;
+}
+
+.navbar.bottom-separator, .bottom-separator {
   border-bottom: 1px solid #C7C7C7;
 }
 
