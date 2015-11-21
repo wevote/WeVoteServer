@@ -54,7 +54,7 @@ body {
 
 .glyphicon {
     color: #919191;
-    font-size: 32px;
+    font-size: 28px;
 }
 
 .glyphicon-small {
@@ -71,6 +71,10 @@ body {
 
 .icon-medium {
     font-size: 26px;
+}
+
+.icon-large {
+    font-size: 32px;
 }
 
 .well-90 {
