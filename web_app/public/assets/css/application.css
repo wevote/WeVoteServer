@@ -1,10 +1,11 @@
 body {
-    padding-top: 90px;
-    padding-bottom: 70px;
+  /*TODO: find out why there is inline style on body */
+    padding-top: 90px !important;
+    padding-bottom: 70px !important;
 }
 
 .navbar-main {
-    background-color: #22A7F0;
+    background-color: #FFF;
     padding: 10px;
 }
 
@@ -70,4 +71,22 @@ body {
 
 .iconConnect {
   background: url('../fonts/icon-connect1_3-42x42.png') no-repeat;
+}
+
+/*------------------- App Styling ----------------------------------*/
+.font-lightest {
+  color: #BEBEBE;
+}
+
+.no-space {
+  padding: 0;
+  margin: 0;
+}
+
+.navbar.bottom-separator {
+  border-bottom: 1px solid #C7C7C7;
+}
+
+.bold {
+  font-weight: bold;
 }
