@@ -9,8 +9,8 @@ export default class BallotFeedNavigation extends React.Component {
                     <div className="left-inner-addon">
 					<h2 className="text-left">My Ballot</h2>
                     <p className="text-right">
-                        <Link to="more_change_location">Change Location</Link>&nbsp;&nbsp;&nbsp;
-                        <Link to="ballot_add_friends">Add Friends</Link>&nbsp;&nbsp;&nbsp;
+                        <Link to="more_change_location">Oakland, CA (change)</Link>&nbsp;&nbsp;&nbsp;
+                        <Link to="add_friends">Add Friends</Link>&nbsp;&nbsp;&nbsp;
                         <Link to="ballot_opinions">More Opinions</Link></p>
                     </div>
                 </div>

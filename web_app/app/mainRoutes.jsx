@@ -3,8 +3,11 @@ import { Route, DefaultRoute, NotFoundRoute } from "react-router";
 
 /* eslint-disable no-multi-spaces */
 // Only import from `route-handlers/*`
+import AddFriendsPage			    	from "route-handlers/AddFriendsPage";
+import AddFriendsConfirmedPage			from "route-handlers/AddFriendsConfirmedPage";
+import AddFriendsFromAddressPage		from "route-handlers/AddFriendsFromAddressPage";
+import AddFriendsMessagePage			from "route-handlers/AddFriendsMessagePage";
 import Application  					from "route-handlers/Application";
-import BallotAddFriendsPage			    from "route-handlers/BallotAddFriendsPage";
 import BallotCandidatePage				from "route-handlers/BallotCandidatePage";
 import BallotCandidateOnePositionPage	from "route-handlers/BallotCandidateOnePositionPage";
 import BallotCandidateOpinionsPage		from "route-handlers/BallotCandidateOpinionsPage";
@@ -29,8 +32,11 @@ if(!Object.assign)
 // export routes
 module.exports = (
 	<Route name="app" path="/" handler={Application}>
+		<Route name="add_friends" path="/addfriends" handler={AddFriendsPage} />
+		<Route name="add_friends_confirmed" path="/addfriends/confirmed" handler={AddFriendsConfirmedPage} />
+		<Route name="add_friends_from_address" path="/addfriends/from" handler={AddFriendsFromAddressPage} />
+		<Route name="add_friends_message" path="/addfriends/message" handler={AddFriendsMessagePage} />
 		<Route name="ballot" path="/ballot" handler={BallotHomePage} />
-		<Route name="ballot_add_friends" path="/ballot/addfriends" handler={BallotAddFriendsPage} />
 		<Route name="ballot_candidate" path="/ballot/candidate/:id" handler={BallotCandidatePage} />
 		<Route name="ballot_candidate_one_org_position" path="/ballot/candidate/:id/org/:org_id" handler={BallotCandidateOnePositionPage} />
 		<Route name="ballot_candidate_opinions" path="/ballot/candidate/:id/opinions" handler={BallotCandidateOpinionsPage} />
