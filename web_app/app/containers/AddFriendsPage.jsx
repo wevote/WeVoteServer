@@ -1,7 +1,7 @@
 import axios from 'axios';
 import BallotReturnNavigation from "components/base/BallotReturnNavigation";
 import React from "react";
-import { Button, ButtonToolbar } from "react-bootstrap";
+import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
 
 export default class AddFriendsPage extends React.Component {
@@ -20,8 +20,8 @@ export default class AddFriendsPage extends React.Component {
 				<div className="container-fluid well well-90">
 					<h2 className="text-center">Add Friends</h2>
 					<div>
-						<input type="text" name="email_address" className="form-control" defaultValue="Enter email address of friend here" /><br />
-						<span>+ Add more email addresses</span><br />
+						<Input type="text" addonBefore="@" name="email_address" className="form-control" defaultValue="Enter email address(es) of friend(s) here" />
+						<span>Separate email addresses with commas. We never sell email addresses.</span><br />
 						<br />
 						<br />
 						<br />

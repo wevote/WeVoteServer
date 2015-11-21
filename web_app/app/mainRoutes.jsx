@@ -8,6 +8,7 @@ import AddFriendsConfirmedPage			from "route-handlers/AddFriendsConfirmedPage";
 import AddFriendsFromAddressPage		from "route-handlers/AddFriendsFromAddressPage";
 import AddFriendsMessagePage			from "route-handlers/AddFriendsMessagePage";
 import Application  					from "route-handlers/Application";
+import AskOrSharePage			    	from "route-handlers/AskOrSharePage";
 import BallotCandidatePage				from "route-handlers/BallotCandidatePage";
 import BallotCandidateOnePositionPage	from "route-handlers/BallotCandidateOnePositionPage";
 import BallotCandidateOpinionsPage		from "route-handlers/BallotCandidateOpinionsPage";
@@ -36,6 +37,7 @@ module.exports = (
 		<Route name="add_friends_confirmed" path="/addfriends/confirmed" handler={AddFriendsConfirmedPage} />
 		<Route name="add_friends_from_address" path="/addfriends/from" handler={AddFriendsFromAddressPage} />
 		<Route name="add_friends_message" path="/addfriends/message" handler={AddFriendsMessagePage} />
+		<Route name="ask_or_share" path="/ask" handler={AskOrSharePage} />
 		<Route name="ballot" path="/ballot" handler={BallotHomePage} />
 		<Route name="ballot_candidate" path="/ballot/candidate/:id" handler={BallotCandidatePage} />
 		<Route name="ballot_candidate_one_org_position" path="/ballot/candidate/:id/org/:org_id" handler={BallotCandidateOnePositionPage} />

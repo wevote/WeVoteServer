@@ -1,7 +1,7 @@
 import axios from 'axios';
 import BallotReturnNavigation from "components/base/BallotReturnNavigation";
 import React from "react";
-import { Button, ButtonToolbar } from "react-bootstrap";
+import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
 
 export default class AddFriendsFromAddressPage extends React.Component {
@@ -21,7 +21,7 @@ export default class AddFriendsFromAddressPage extends React.Component {
 					<h2 className="text-center">Add Friends</h2>
 					<div>
 						<label htmlFor="last-name">Please enter 'From' email address.</label><br />
-						<input type="text" name="add_friends_message" className="form-control" defaultValue="Enter your email address" /><br />
+						<Input type="text" addonBefore="@" name="add_friends_message" className="form-control" defaultValue="Enter your email address" />
 						This is the email where your friends can reply to you. We will never sell your email address.
 						See <Link to="ballot">privacy policy</Link>.
 						<br />

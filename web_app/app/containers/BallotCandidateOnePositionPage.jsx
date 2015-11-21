@@ -1,3 +1,4 @@
+import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
 import BallotItemNavigation from "components/base/BallotItemNavigation";
 import BallotMajorNavigation from "components/base/BallotMajorNavigation";
@@ -47,7 +48,7 @@ export default class BallotCandidateOnePositionPage extends React.Component {
                 Running for US House - District 12&nbsp;<span className="glyphicon glyphicon-small glyphicon-info-sign"></span><br />
                 {support_item}&nbsp;&nbsp;&nbsp;
                 {oppose_item}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <Link to="ballot"><span className="glyphicon glyphicon-small glyphicon-share-alt"></span>&nbsp;Ask/Share Publicly &nbsp;</Link>
+                <AskOrShareAction />
                 <br />
  				<div>
 					<input type="text" name="address" className="form-control" defaultValue="What do you think?" />
@@ -68,7 +69,7 @@ export default class BallotCandidateOnePositionPage extends React.Component {
               est fermentum. Mauris interdum dolor lacus, euismod convallis dui molestie id.</li>
 		  <li className="list-group-item">
             {like_item}
-            <Link to="ballot"><span className="glyphicon glyphicon-small glyphicon-share-alt"></span>&nbsp;Share</Link>
+            <AskOrShareAction />
               <br />
               23 people like this.
           </li>

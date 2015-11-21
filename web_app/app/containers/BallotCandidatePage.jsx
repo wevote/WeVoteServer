@@ -1,8 +1,9 @@
+import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
 import BallotItemNavigation from "components/base/BallotItemNavigation";
 import BallotMajorNavigation from "components/base/BallotMajorNavigation";
 import React from "react";
-import { Button, ButtonToolbar } from "react-bootstrap";
+import { Button, ButtonToolbar, DropdownButton, MenuItem } from "react-bootstrap";
 import { Link } from "react-router";
 
 export default class BallotCandidatePage extends React.Component {
@@ -28,13 +29,6 @@ export default class BallotCandidatePage extends React.Component {
         } else {
             oppose_item = <Link to="ballot">3 <span className="glyphicon glyphicon-small glyphicon-arrow-down"></span></Link>;
         }
-
-        var ask_item;
-        if (this.props.ask_on) {
-            ask_item = <Link to="ballot"><span className="glyphicon glyphicon-small glyphicon-share-alt"></span>&nbsp;Ask/Share Publicly &nbsp;</Link>;
-        } else {
-            ask_item = <Link to="ballot"><span className="glyphicon glyphicon-small glyphicon-share-alt"></span>&nbsp;Ask/Share Publicly &nbsp;</Link>;
-        }
 	    return (
 <div>
     <BallotItemNavigation back_to_ballot={true} is_measure={false} />
@@ -52,7 +46,7 @@ export default class BallotCandidatePage extends React.Component {
                 Running for US House - District 12&nbsp;<span className="glyphicon glyphicon-small glyphicon-info-sign"></span><br />
                 {support_item}&nbsp;&nbsp;&nbsp;
                 {oppose_item}&nbsp;&nbsp;&nbsp;
-                {ask_item}
+                <AskOrShareAction />
                 <br />
  				<div>
 					<input type="text" name="address" className="form-control" defaultValue="What do you think?" />

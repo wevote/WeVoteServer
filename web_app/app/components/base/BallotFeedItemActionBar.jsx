@@ -1,4 +1,6 @@
+import AskOrShareAction from "components/base/AskOrShareAction";
 import React from "react";
+import { DropdownButton, MenuItem } from "react-bootstrap";
 import { Link } from "react-router";
 
 // This is the Support, Oppose, Comment and Ask bar under each ballot item
@@ -25,7 +27,7 @@ export default class BallotFeedItemActionBar extends React.Component {
             {support_item}
             {oppose_item}
             <Link to="ballot_candidate" params={{id: 2}}><span className="glyphicon glyphicon-small glyphicon-comment"></span>&nbsp;Comment &nbsp;</Link>
-            <Link to="ballot"><span className="glyphicon glyphicon-small glyphicon-share-alt"></span>&nbsp;Ask &nbsp;</Link>
+            <AskOrShareAction />
         </div>
     </div>
 </div>
