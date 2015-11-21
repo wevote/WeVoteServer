@@ -1,6 +1,7 @@
-import React from "react";
 import axios from 'axios';
-import MainMenu from "components/base/MainMenu";
+import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import React from "react";
+import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
 
 export default class VolunteerChooseTask extends React.Component {
@@ -15,13 +16,13 @@ export default class VolunteerChooseTask extends React.Component {
 	render() {
 	    return (
 			<div>
-                <MainMenu />
+                <BallotReturnNavigation back_to_ballot={false} />
                 <div className="container-fluid well well-90">
 					<h4 className="text-left">Choose a Volunteer Task</h4>
                     <ul className="list-group">
-                        <li className="list-group-item"><Link to="volunteer">Find Voter Guides</Link> (2 minutes)</li>
-                        <li className="list-group-item"><Link to="volunteer">Verify Voter Guides</Link> (2 minutes)</li>
-                        <li className="list-group-item"><Link to="volunteer">Enter Voter Guides</Link> (5-10 minutes)</li>
+                        <li className="list-group-item">Find Voter Guides (2 minutes) <Link to="volunteer"><Button bsStyle="primary" bsSize="small">Start ></Button></Link></li>
+                        <li className="list-group-item">Verify Voter Guides (2 minutes) <Link to="volunteer"><Button bsStyle="primary" bsSize="small">Start ></Button></Link></li>
+                        <li className="list-group-item">Enter Voter Guides (5-10 minutes) <Link to="volunteer"><Button bsStyle="primary" bsSize="small">Start ></Button></Link></li>
                     </ul>
                 </div>
 			</div>
