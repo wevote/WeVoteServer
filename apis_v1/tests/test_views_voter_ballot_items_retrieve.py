@@ -86,7 +86,7 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         #######################################
         # Test the response before a google_civic_election_id has been specified
         # In the case of no google_civic_election_id, we want to reach out to Google Civic API. BUT an address isn't
-        # set, so we expect NO_UPCOMING_ELECTION_FOR_ADDRESS
+        # set, so we expect MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH
         response04 = self.client.get(self.voter_ballot_items_retrieve_url)
         json_data04 = json.loads(response04.content)
 
@@ -101,8 +101,8 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         self.assertEqual('ballot_item_list' in json_data04, True,
                          "ballot_item_list expected in the voterBallotItemsRetrieve json response but not found")
         self.assertEqual(
-            json_data04['status'], 'NO_UPCOMING_ELECTION_FOR_ADDRESS',
-            "status: {status} (NO_UPCOMING_ELECTION_FOR_ADDRESS expected), "
+            json_data04['status'], 'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH',
+            "status: {status} (MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data04['status'], voter_device_id=json_data04['voter_device_id']))
 
