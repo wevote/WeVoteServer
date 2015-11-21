@@ -101,6 +101,7 @@ INSTALLED_APPS = (
     # 'region_jurisdiction',
     'rest_framework',
     'support_oppose_deciding',
+    'star',
     'tag',
     'twitter',
     'voter',  # See also AUTH_USER_MODEL in config/settings.py
