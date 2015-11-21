@@ -4,6 +4,7 @@
 
 from .models import BallotItemListManager
 from candidate.models import CandidateCampaignList
+from config.base import get_environment_variable
 from exception.models import handle_exception
 from import_export_google_civic.controllers import retrieve_and_store_ballot_for_voter
 from measure.models import ContestMeasureList
@@ -13,6 +14,8 @@ import wevote_functions.admin
 from wevote_functions.models import is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 
 
 def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
@@ -57,17 +60,53 @@ def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
         pass
     else:
         # We need to reach out to Google Civic to get this voter's ballot
-        # NOTE: We remove prior ballot_items within retrieve_and_store_ballot_for_voter
-        results = retrieve_and_store_ballot_for_voter(voter_id)
-        # We come back from retrieving the ballot with a google_civic_election_id and the data stored in the BallotItem
-        # table
-        google_civic_election_id = results['google_civic_election_id']
+
+        # Confirm that we have a Google Civic API Key (GOOGLE_CIVIC_API_KEY)
+        if positive_value_exists(GOOGLE_CIVIC_API_KEY):
+            # NOTE: We remove prior ballot_items within retrieve_and_store_ballot_for_voter
+            results = retrieve_and_store_ballot_for_voter(voter_id)
+
+            if results['success']:
+                # We come back from retrieving the ballot with a google_civic_election_id and the data
+                # stored in the BallotItem table
+                google_civic_election_id = results['google_civic_election_id']
+            else:
+                json_data = {
+                    'status': "GOOGLE_CIVIC_API_ERROR: " + results['status'],
+                    'success': False,
+                    'voter_id': voter_id,
+                    'voter_device_id': voter_device_id,
+                    'ballot_item_list': [],
+                    'google_civic_election_id': 0,
+                }
+                results = {
+                    'success': False,
+                    'json_data': json_data,
+                    'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
+                }
+                return results
+
+        else:
+            json_data = {
+                'status': 'NO_GOOGLE_CIVIC_API_KEY',
+                'success': False,
+                'voter_id': voter_id,
+                'voter_device_id': voter_device_id,
+                'ballot_item_list': [],
+                'google_civic_election_id': 0,
+            }
+            results = {
+                'success': False,
+                'json_data': json_data,
+                'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
+            }
+            return results
 
     if not positive_value_exists(google_civic_election_id):
         # At this point if we don't have a google_civic_election_id, then we don't have an upcoming election
         #  for that address
         json_data = {
-            'status': 'NO_UPCOMING_ELECTION_FOR_ADDRESS',
+            'status': 'NO_UPCOMING_ELECTION_ID_FOUND',
             'success': True,
             'voter_id': voter_id,
             'voter_device_id': voter_device_id,

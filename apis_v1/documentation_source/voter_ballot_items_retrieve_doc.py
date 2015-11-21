@@ -46,8 +46,12 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
             'description':  'Ballot items were found.',
         },
         {
-            'code':         'NO_UPCOMING_ELECTION_FOR_ADDRESS',
+            'code':         'NO_UPCOMING_ELECTION_ID_FOUND',
             'description':  'There isn\'t an election coming up for that voter address.',
+        },
+        {
+            'code':         'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH',
+            'description':  'A voter address was not passed in.',
         },
     ]
 
