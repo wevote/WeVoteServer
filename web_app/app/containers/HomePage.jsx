@@ -1,4 +1,3 @@
-import React from "react";
 import axios from 'axios';
 // TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
 //import ReactDOM from 'react-dom';
@@ -6,6 +5,10 @@ import axios from 'axios';
 // Example code here: https://github.com/yahoo/react-intl
 // npm install react-intl@next
 import {get} from '../../lib/service/calls.js'
+import LanguageSwitchNavigation from "components/base/LanguageSwitchNavigation";
+import React from "react";
+import { Button, ButtonToolbar, Input } from "react-bootstrap";
+import { Link } from "react-router";
 
 get('voterCount', function (res) {
 	console.log(res);
@@ -97,8 +100,11 @@ export default class HomePage extends React.Component {
 				<div>
 					<label htmlFor="last-name">My Ballot Location</label><br />
 					<span className="small">This is our best guess - feel free to change</span>
-					<input type="text" name="address" className="form-control" />
+					<Input type="text" name="address" className="form-control" defaultValue="Oakland, CA" />
+                    <Link to="intro_opinions"><Button bsStyle="primary">Go</Button></Link>
 				</div>
+                <br />
+				<LanguageSwitchNavigation />
 			</div>
 		);
 	}

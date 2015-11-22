@@ -18,6 +18,7 @@ import BallotMeasureOpinionsPage		from "route-handlers/BallotMeasureOpinionsPage
 import BallotOpinionsPage				from "route-handlers/BallotOpinionsPage";
 import BallotHomePage					from "route-handlers/BallotHomePage";
 import HomePage     					from "route-handlers/HomePage";
+import IntroOpinionsPage				from "route-handlers/IntroOpinionsPage";
 import MorePage							from "route-handlers/MorePage";
 import MoreChangeLocationPage			from "route-handlers/MoreChangeLocationPage";
 import NotFoundPage 					from "route-handlers/NotFoundPage";
@@ -48,6 +49,7 @@ module.exports = (
 		<Route name="ballot_measure_opinions" path="/ballot/measure/:id/opinions/" handler={BallotMeasureOpinionsPage} />
 		<Route name="ballot_opinions" path="/ballot/opinions" handler={BallotOpinionsPage} />
 		<Route name="home" path="/home" handler={HomePage} />
+		<Route name="intro_opinions" path="/intro/opinions" handler={IntroOpinionsPage} />
 		<Route name="org_endorsements" path="/org/:org_id" handler={OrgEndorsementsPage} />
 		<Route name="more" path="/more" handler={MorePage} />
 		<Route name="more_change_location" path="/change_location" handler={MoreChangeLocationPage} />
