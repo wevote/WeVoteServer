@@ -20,11 +20,19 @@ export default class BallotCandidateOpinionsPage extends React.Component {
 					<h2 className="text-center">More Opinions I Can Follow</h2>
 
 					<ul className="list-group">
-					  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;Fictional Candidate</li>
-					  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;<Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 3}}>Organization Name</Link><br />
-					  supports</li>
-					  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;Another Organization<br />
-					  opposes</li>
+					  <li className="list-group-item">
+						  <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;Fictional Candidate
+                      </li>
+					  <li className="list-group-item">
+                          <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 3}}>
+                              <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
+					            supports
+                          </Link>
+                      </li>
+					  <li className="list-group-item">
+                          <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Another Organization<br />{/* TODO icon-org-placeholder */}
+					        opposes
+                      </li>
 					</ul>
 				</div>
 			</div>

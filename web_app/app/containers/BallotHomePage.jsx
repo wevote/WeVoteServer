@@ -26,7 +26,7 @@ export default class BallotHomePage extends React.Component {
 	<ul className="list-group">
 	  <li className="list-group-item">
           <Link to="ballot_candidate" params={{id: 2}}>
-		    <span className="icon_person"></span>&nbsp;Fictional Candidate
+		    <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Fictional Candidate{/* TODO icon-person-placeholder */}
           </Link>
           <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
           <br />
@@ -35,7 +35,7 @@ export default class BallotHomePage extends React.Component {
           <BallotFeedItemActionBar />
       </li>
 	  <li className="list-group-item">
-          <span className="icon_person"></span>&nbsp;Another Candidate
+          <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Another Candidate{/* TODO icon-person-placeholder */}
           <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
           <br />
           1 support (more)<br />

@@ -35,7 +35,7 @@ export default class BallotCandidatePage extends React.Component {
     <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">
-                <span className="icon_person"></span>&nbsp;Fictional Candidate
+                <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Fictional Candidate{/* TODO icon-person-placeholder */}
                 <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
                 <br />
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur posuere vulputate massa ut efficitur.
@@ -57,7 +57,7 @@ export default class BallotCandidatePage extends React.Component {
         <ul className="list-group">
           <li className="list-group-item">
               <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}>
-                  <span className="icon_organization"></span>&nbsp;Organization Name<br />
+                  <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
                   <span>supports</span> <span>Yesterday at 7:18 PM</span><br />
                   Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
                   Duis a eros fringilla, dictum leo vitae, vulputate mi. Nunc vitae neque nec erat fermentum... (more)
@@ -66,7 +66,7 @@ export default class BallotCandidatePage extends React.Component {
               23 Likes<br />
           </li>
           <li className="list-group-item">
-              <span className="icon_organization"></span>&nbsp;Another Organization<br />
+              <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Another Organization<br />{/* TODO icon-org-placeholder */}
               <span>opposes</span> <span>Yesterday at 2:34 PM</span><br />
               Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
               Duis a eros fringilla, dictum leo vitae, vulputate mi. Nunc vitae neque nec erat fermentum... (more)<br />

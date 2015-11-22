@@ -32,9 +32,11 @@ export default class BallotOpinionsPage extends React.Component {
 
 		<ul className="list-group">
 		  <li className="list-group-item">
-            <Link to="org_endorsements" params={{org_id: 27}}><span className="icon_organization"></span>&nbsp;Organization Name<br />
-            @OrgName1<br />
-            (read more)</Link>
+            <Link to="org_endorsements" params={{org_id: 27}}>
+                <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
+                @OrgName1<br />
+                (read more)
+            </Link>
             <span>
                 <ButtonToolbar>
                     <Button bsStyle="info">Follow</Button>
@@ -43,9 +45,11 @@ export default class BallotOpinionsPage extends React.Component {
             </span>
           </li>
 		  <li className="list-group-item">
-              <Link to="org_endorsements" params={{org_id: 27}}><span className="icon_organization"></span>&nbsp;Another Organization<br />
-              @OrgName2<br />
-              (read more)</Link>
+              <Link to="org_endorsements" params={{org_id: 27}}>
+                <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Another Organization<br />{/* TODO icon-org-placeholder */}
+                  @OrgName2<br />
+                  (read more)
+              </Link>
             <span>
                 <ButtonToolbar>
                     <Button bsStyle="info">Follow</Button>

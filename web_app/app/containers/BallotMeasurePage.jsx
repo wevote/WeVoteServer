@@ -15,19 +15,25 @@ export default class BallotMeasurePage extends React.Component {
 
 	render() {
 	    return (
-			<div>
-                <BallotItemNavigation back_to_ballot={true} is_measure={true} />
-				<div className="container-fluid well well-90">
-					<h2 className="text-center">Measure AA</h2>
-					<ul className="list-group">
-					  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;<Link to="ballot_measure_one_position" params={{id: 2, org_id: 7}}>Organization Name</Link><br />
-					  supports</li>
-					  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;Another Organization<br />
-					  opposes</li>
-					</ul>
-				</div>
-                <BallotMajorNavigation />
-			</div>
+<div>
+	<BallotItemNavigation back_to_ballot={true} is_measure={true} />
+	<div className="container-fluid well well-90">
+		<h2 className="text-center">Measure AA</h2>
+		<ul className="list-group">
+		  <li className="list-group-item">
+			  <Link to="ballot_measure_one_position" params={{id: 2, org_id: 7}}>
+				<span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
+				supports
+			  </Link>
+		  </li>
+		  <li className="list-group-item">
+              <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Another Organization<br />{/* TODO icon-org-placeholder */}
+		        opposes
+          </li>
+		</ul>
+	</div>
+	<BallotMajorNavigation />
+</div>
 		);
 	}
 }

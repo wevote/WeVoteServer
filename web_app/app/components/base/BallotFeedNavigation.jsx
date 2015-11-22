@@ -1,4 +1,3 @@
-//TODO: Break apart the add friends and more opinions list
 import React from "react";
 import { Link } from "react-router";
 

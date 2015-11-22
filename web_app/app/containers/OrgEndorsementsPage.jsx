@@ -21,7 +21,8 @@ export default class OrgEndorsementsPage extends React.Component {
     <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">
-                <span className="icon_organization"></span>&nbsp;Organization Name <span><Button bsStyle="info" bsSize="xsmall">Follow</Button></span><br />
+                <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
+                <span><Button bsStyle="info" bsSize="xsmall">Follow</Button></span><br />
                 @OrgName1&nbsp;&nbsp;&nbsp;See Website<br />
                 5 of your friends follow Organization Name<br />
                 22,452 people follow<br />

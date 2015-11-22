@@ -1,7 +1,7 @@
 import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import BallotItemNavigation from "components/base/BallotItemNavigation";
 import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotReturnNavigation from "components/base/BallotReturnNavigation";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -38,11 +38,11 @@ export default class BallotCandidateOnePositionPage extends React.Component {
         }
 	    return (
 <div>
-	<BallotItemNavigation back_to_ballot={false} is_measure={false} />
+	<BallotReturnNavigation back_to_ballot={false} />
 	<div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">
-                <span className="icon_person"></span>&nbsp;Fictional Candidate
+                <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Fictional Candidate{/* TODO icon-person-placeholder */}
                 <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
                 <br />
                 Running for US House - District 12&nbsp;<span className="glyphicon glyphicon-small glyphicon-info-sign"></span><br />
@@ -58,9 +58,11 @@ export default class BallotCandidateOnePositionPage extends React.Component {
         </ul>
 
 		<ul className="list-group">
-		  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;Organization Name<br />
-		  supports<br />
-		  3 minutes ago</li>
+		  <li className="list-group-item">
+              <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
+              supports<br />
+              3 minutes ago
+          </li>
 		  <li className="list-group-item">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis tempor vel
               mauris non convallis. Etiam vulputate libero vitae enim pretium, et lobortis nulla ultrices.
               Quisque at mi finibus, ullamcorper nulla et, bibendum nisl. Class aptent taciti sociosqu ad litora
@@ -75,7 +77,6 @@ export default class BallotCandidateOnePositionPage extends React.Component {
           </li>
 		</ul>
 	</div>
-	<BallotMajorNavigation />
 </div>
 		);
 	}

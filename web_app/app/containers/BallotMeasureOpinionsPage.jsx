@@ -21,10 +21,14 @@ export default class BallotMeasureOpinionsPage extends React.Component {
 
 					<ul className="list-group">
 					  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;Measure AA</li>
-					  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;<Link to="ballot_measure_one_position" params={{id: 2, org_id: 7}}>Organization Name</Link><br />
-					  supports</li>
-					  <li className="list-group-item"><span className="icon_organization"></span>&nbsp;Another Organization<br />
-					  opposes</li>
+					  <li className="list-group-item">
+                          <Link to="ballot_measure_one_position" params={{id: 2, org_id: 3}}><span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name</Link><br />{/* TODO icon-org-placeholder */}
+					  		supports
+					  </li>
+					  <li className="list-group-item">
+                          <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Another Organization<br />{/* TODO icon-org-placeholder */}
+					  		opposes
+					  </li>
 					</ul>
 				</div>
 			</div>
