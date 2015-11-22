@@ -1,5 +1,6 @@
 import axios from 'axios';
 import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import FollowOrIgnoreAction from "components/base/FollowOrIgnoreAction";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -37,12 +38,7 @@ export default class BallotOpinionsPage extends React.Component {
                 @OrgName1<br />
                 (read more)
             </Link>
-            <span>
-                <ButtonToolbar>
-                    <Button bsStyle="info">Follow</Button>
-                    <Button bsStyle="danger" bsSize="xsmall">Ignore</Button>
-                </ButtonToolbar>
-            </span>
+            <FollowOrIgnoreAction />
           </li>
 		  <li className="list-group-item">
               <Link to="org_endorsements" params={{org_id: 27}}>
@@ -50,12 +46,7 @@ export default class BallotOpinionsPage extends React.Component {
                   @OrgName2<br />
                   (read more)
               </Link>
-            <span>
-                <ButtonToolbar>
-                    <Button bsStyle="info">Follow</Button>
-                    <Button bsStyle="danger" bsSize="xsmall">Ignore</Button>
-                </ButtonToolbar>
-            </span>
+            <FollowOrIgnoreAction />
           </li>
 		</ul>
 	</div>
