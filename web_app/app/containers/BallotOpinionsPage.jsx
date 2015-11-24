@@ -25,11 +25,8 @@ export default class BallotOpinionsPage extends React.Component {
 			<input type="text" name="search_opinions" className="form-control"
 				   defaultValue="Search by name or twitter handle." /><br />
 
-		<ul className="list-group">
-		  <li className="list-group-item">These organizations and public figures have opinions about items on your
-              ballot. Click the 'Follow' to pay attention to them.
-          </li>
-		</ul>
+		These organizations and public figures have opinions about items on your
+              ballot. Click the 'Follow' button to pay attention to them.
 
 		<OrganizationsToFollowList />
 	</div>

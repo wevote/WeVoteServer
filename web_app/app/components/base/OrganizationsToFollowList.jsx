@@ -14,16 +14,18 @@ export default class OrganizationsToFollowList extends React.Component {
 		<FollowOrIgnoreAction />
 		<Link to="org_endorsements" params={{org_id: 27}}>
 			<span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
-			@OrgName1<br />
-			(read more)
+				<span className="small">
+					@OrgName1 (read more)
+				</span>
 		</Link>
 	  </li>
 	  <li className="list-group-item">
 		<FollowOrIgnoreAction />
 		  <Link to="org_endorsements" params={{org_id: 27}}>
 			<span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Another Organization<br />{/* TODO icon-org-placeholder */}
-			  @OrgName2<br />
-			  (read more)
+			  	<span className="small">
+					@OrgName2 (read more)
+				</span>
 		  </Link>
 	  </li>
 	</ul>

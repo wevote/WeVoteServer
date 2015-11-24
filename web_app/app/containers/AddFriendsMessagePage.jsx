@@ -14,6 +14,9 @@ export default class AddFriendsMessagePage extends React.Component {
 	}
 
 	render() {
+        var floatRight = {
+            float: 'right'
+        };
 	    return (
 			<div>
                 <BallotReturnNavigation back_to_ballot={false} />
@@ -24,7 +27,9 @@ export default class AddFriendsMessagePage extends React.Component {
 						<input type="text" name="add_friends_message" className="form-control"
 							   defaultValue="Please join me in preparing for the upcoming election." /><br />
 						<br />
-						<Link to="add_friends_from_address"><Button bsStyle="primary">Next ></Button></Link>
+						<span  style={floatRight}>
+							<Link to="add_friends_from_address"><Button bsStyle="primary">Next ></Button></Link>
+						</span>
 					</div>
 				</div>
 			</div>

@@ -3,6 +3,7 @@ import { Route, DefaultRoute, NotFoundRoute } from "react-router";
 
 /* eslint-disable no-multi-spaces */
 // Only import from `route-handlers/*`
+import ActivityPage						from "route-handlers/ActivityPage";
 import AddFriendsPage			    	from "route-handlers/AddFriendsPage";
 import AddFriendsConfirmedPage			from "route-handlers/AddFriendsConfirmedPage";
 import AddFriendsFromAddressPage		from "route-handlers/AddFriendsFromAddressPage";
@@ -17,6 +18,7 @@ import BallotMeasureOnePositionPage		from "route-handlers/BallotMeasureOnePositi
 import BallotMeasureOpinionsPage		from "route-handlers/BallotMeasureOpinionsPage";
 import BallotOpinionsPage				from "route-handlers/BallotOpinionsPage";
 import BallotHomePage					from "route-handlers/BallotHomePage";
+import ConnectPage						from "route-handlers/ConnectPage";
 import HomePage     					from "route-handlers/HomePage";
 import IntroBallotContestsPage			from "route-handlers/IntroBallotContestsPage";
 import IntroOpinionsPage				from "route-handlers/IntroOpinionsPage";
@@ -25,6 +27,7 @@ import MoreChangeLocationPage			from "route-handlers/MoreChangeLocationPage";
 import NotFoundPage 					from "route-handlers/NotFoundPage";
 import OrgEndorsementsPage 				from "route-handlers/OrgEndorsementsPage";
 import ReadmePage   					from "route-handlers/ReadmePage";
+import RequestsPage						from "route-handlers/RequestsPage";
 import VolunteerChooseTask				from "route-handlers/VolunteerChooseTask";
 import VolunteerHomePage				from "route-handlers/VolunteerHomePage";
 /* eslint-enable */
@@ -36,6 +39,7 @@ if(!Object.assign)
 // export routes
 module.exports = (
 	<Route name="app" path="/" handler={Application}>
+		<Route name="activity" path="/activity" handler={ActivityPage} />
 		<Route name="add_friends" path="/addfriends" handler={AddFriendsPage} />
 		<Route name="add_friends_confirmed" path="/addfriends/confirmed" handler={AddFriendsConfirmedPage} />
 		<Route name="add_friends_from_address" path="/addfriends/from" handler={AddFriendsFromAddressPage} />
@@ -49,6 +53,7 @@ module.exports = (
 		<Route name="ballot_measure_one_position" path="/ballot/measure/:id/org/:org_id" handler={BallotMeasureOnePositionPage} />
 		<Route name="ballot_measure_opinions" path="/ballot/measure/:id/opinions/" handler={BallotMeasureOpinionsPage} />
 		<Route name="ballot_opinions" path="/ballot/opinions" handler={BallotOpinionsPage} />
+		<Route name="connect" path="/connect" handler={ConnectPage} />
 		<Route name="home" path="/home" handler={HomePage} />
 		<Route name="intro_contests" path="/intro/contests" handler={IntroBallotContestsPage} />
 		<Route name="intro_opinions" path="/intro/opinions" handler={IntroOpinionsPage} />
@@ -56,6 +61,7 @@ module.exports = (
 		<Route name="more" path="/more" handler={MorePage} />
 		<Route name="more_change_location" path="/change_location" handler={MoreChangeLocationPage} />
 		<Route name="readme" path="/readme" handler={ReadmePage} />
+		<Route name="requests" path="/requests" handler={RequestsPage} />
 		<Route name="volunteer" path="/volunteer" handler={VolunteerHomePage} />
 		<Route name="volunteer_choose_task" path="/volunteer/tasks" handler={VolunteerChooseTask} />
 		<DefaultRoute handler={HomePage} />

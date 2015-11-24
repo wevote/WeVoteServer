@@ -9,10 +9,16 @@ export default class FollowOrIgnoreAction extends React.Component {
         var floatRight = {
             float: 'right'
         };
+        var action_text;
+        if (this.props.action_text) {
+            action_text = this.props.action_text;
+        } else {
+            action_text = 'Follow';
+        }
 		return (
 <span style={floatRight}>
     <ButtonToolbar>
-        <Button bsStyle="info">Follow</Button>
+        <Button bsStyle="info">{action_text}</Button>
         <Button bsStyle="danger" bsSize="xsmall">Ignore</Button>
     </ButtonToolbar>
 </span>
