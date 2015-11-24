@@ -22,7 +22,7 @@ export default class BallotHomePage extends React.Component {
 <BallotFeedNavigation />
   <div className="well well-sm split-top-skinny">
     <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;<span className="small">US House - District 12</span>
-  </div>
+      <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
 	<ul className="list-group">
 	  <li className="list-group-item">
           <Link to="ballot_candidate" params={{id: 2}}>
@@ -43,19 +43,21 @@ export default class BallotHomePage extends React.Component {
           <BallotFeedItemActionBar />
       </li>
 	</ul>
+  </div>
 
-	<ul className="list-group">
+  <div className="well well-sm split-top-skinny">
+      <Link to="ballot_measure" params={{id: 2}}>
+          <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;<span className="small">Measure AA</span>
+      </Link>
+      <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
+      <ul className="list-group">
 	  <li className="list-group-item">
-          <Link to="ballot_measure" params={{id: 2}}>
-              <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;Measure AA
-          </Link>
-          <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
-          <br />
           1 support (more)<br />
           8 oppose<br />
           <BallotFeedItemActionBar />
       </li>
 	</ul>
+  </div>
 
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam rutrum sem eu leo rutrum condimentum.
         Maecenas nibh odio, auctor eget arcu et, auctor vehicula odio. Sed mollis id odio et volutpat.</p>

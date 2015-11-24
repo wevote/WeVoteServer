@@ -1,5 +1,6 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import BottomContinueNavigation from "components/base/BottomContinueNavigation";
+import ListTitleNavigation from "components/base/ListTitleNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
@@ -29,9 +30,8 @@ export default class AskOrSharePage extends React.Component {
         }
 	    return (
 <div>
-	<BallotReturnNavigation back_to_ballot={false} />
+    <ListTitleNavigation header_text={"Ask or Share"} back_to_on={true} back_to_text={"Cancel"} />
 	<div className="container-fluid well well-90">
-		<h2 className="text-center">Ask or Share</h2>
 		<div>
 			<input type="text" name="ask_message" className="form-control"
 				   defaultValue="Say or ask something about this..." /><br />
@@ -44,20 +44,31 @@ export default class AskOrSharePage extends React.Component {
 					{support_item}&nbsp;&nbsp;&nbsp;
 					{oppose_item}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					<br />
-			 </li>
+			 	</li>
+			</ul>
+			<Input type="text" addonBefore="@" name="email_address" className="form-control" defaultValue="Enter email address(es) of friend(s) here" />
+			<span>Separate email addresses with commas. We never sell email addresses. These friends will see what you support, oppose, and which opinions you follow.</span><br />
+			<br />
+			<ul className="list-group">
+				<li className="list-group-item">
+					<i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Friend Name{/* TODO icon-person-placeholder */}
+			 	</li>
+				<li className="list-group-item">
+					<i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Friend Name{/* TODO icon-person-placeholder */}
+			 	</li>
+				<li className="list-group-item">
+					<i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Friend Name{/* TODO icon-person-placeholder */}
+			 	</li>
+				<li className="list-group-item">
+					<i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Friend Name{/* TODO icon-person-placeholder */}
+			 	</li>
 			</ul>
 			<br />
 			<br />
-			<Input type="text" addonBefore="@" name="email_address" className="form-control" defaultValue="Enter email address(es) of friend(s) here" />
-			<span>Separate email addresses with commas. We never sell email addresses.</span><br />
 			<br />
-			<br />
-			<br />
-			<br />
-			These friends will see what you support, oppose, and which opinions you follow.<br />
-			<Link to="ballot"><Button bsStyle="primary">Send</Button></Link>
 		</div>
 	</div>
+    <BottomContinueNavigation link_route={'ballot'} continue_text={'Send'} cancel_text={"cancel"} />
 </div>
 		);
 	}

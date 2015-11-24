@@ -1,12 +1,15 @@
+"use strict";
+
 import axios from 'axios';
 import BallotReturnNavigation from "components/base/BallotReturnNavigation";
 import BottomContinueNavigation from "components/base/BottomContinueNavigation";
+import ListTitleNavigation from "components/base/ListTitleNavigation";
 import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
 
-{/* VISUAL DESIGN HERE: https://invis.io/TR4A1NYAQ */}
+{/* VISUAL DESIGN HERE: https://invis.io/W8439I423 */}
 
 export default class IntroOpinionsPage extends React.Component {
 	constructor(props) {
@@ -18,26 +21,37 @@ export default class IntroOpinionsPage extends React.Component {
 	}
 
 	render() {
+        var floatRight = {
+            float: 'right'
+        };
 	    return (
 <div>
-	<BallotReturnNavigation back_to_ballot={false} />
-	<div className="container-fluid well well-90">
-		<h4 className="text-center">Here's the idea - Learn from Community</h4>
+    <ListTitleNavigation header_text={"Here's the idea - Learn from Community"} back_to_on={false} />
 
-		<ul className="list-group">
-		  <li className="list-group-item">You have organizations and friends you trust when it comes time to
-              vote. Follow them so you can see what they endorse on your ballot.<br />
-              <br />
-          Or skip this. <Link to="ballot"><Button bsStyle="primary">Start on My Own ></Button></Link>
-          </li>
-		</ul>
+    <ul className="list-group">
+        <li className="list-group-item">You have organizations and friends you trust when it comes time to
+          vote. Follow them so you can see what they endorse on your ballot.<br />
+          <br />
+        Or skip this.
+            <span style={floatRight}><Link to="intro_contests">
+                <Button bsStyle="primary">Start on My Own ></Button>
+            </Link></span>
+            <br />
+            <br />
+        </li>
+    </ul>
 
-		<input type="text" name="search_opinions" className="form-control"
-				   defaultValue="Search by name or twitter handle." /><br />
+    <ul className="list-group">
+        <li className="list-group-item">
+            <label htmlFor="search_opinions">Follow Like-Minded Organizations</label><br />
+            <input type="text" name="search_opinions" className="form-control"
+               defaultValue="Search by name or twitter handle." /><br />
 
-		<OrganizationsToFollowList />
-        <BottomContinueNavigation />
-	</div>
+            <OrganizationsToFollowList />
+        </li>
+    </ul>
+    <BottomContinueNavigation link_route={'intro_contests'} />
+
 </div>
 		);
 	}

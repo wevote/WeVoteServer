@@ -1,3 +1,5 @@
+"use strict";
+
 import React from "react";
 import { Link } from "react-router";
 
@@ -7,7 +9,7 @@ export default class BallotFeedNavigation extends React.Component {
             <nav className="navbar navbar-main navbar-fixed-top bottom-separator">
                 <div className="container-fluid">
                     <div className="left-inner-addon">
-                      <h2 className="pull-left no-space bold">My Ballot</h2>
+                      <h4 className="pull-left no-space bold">My Ballot</h4>
                       <ul className="nav nav-pills pull-right">
                         <li><Link to="more_change_location" className="font-lightest">Oakland, CA (change)</Link></li>
                       </ul>

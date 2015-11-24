@@ -6,7 +6,7 @@ export default class BallotMajorNavigation extends React.Component {
     return <div className="row">
         <div className="navbar navbar-default navbar-fixed-bottom">
             <div className="container-fluid container-top10 seperator-top">
-              <div class="row">
+              <div className="row">
                 <Link to="ballot">
                     <div className="col-xs-2 center-block text-center">
                       <span className="glyphicon glyphicon-list-alt glyphicon-line-adjustment"></span><br />
