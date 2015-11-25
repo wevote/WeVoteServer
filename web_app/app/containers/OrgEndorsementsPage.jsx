@@ -15,14 +15,18 @@ export default class OrgEndorsementsPage extends React.Component {
 	}
 
 	render() {
+        var floatRight = {
+            float: 'right'
+        };
 	    return (
 <div>
     <BallotReturnNavigation back_to_ballot={false} />
     <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">
-                <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
-                <span><Button bsStyle="info" bsSize="xsmall">Follow</Button></span><br />
+                <span style={floatRight}><Button bsStyle="info" bsSize="xsmall">Follow</Button></span>
+                <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
+                Organization Name<br />{/* TODO icon-org-placeholder */}
                 @OrgName1&nbsp;&nbsp;&nbsp;See Website<br />
                 5 of your friends follow Organization Name<br />
                 22,452 people follow<br />
@@ -38,7 +42,8 @@ export default class OrgEndorsementsPage extends React.Component {
         <ul className="list-group">
           <li className="list-group-item">
               <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}></Link>{/* Implement later */}
-              <span className="icon_candidate"></span>&nbsp;<span>supports</span> Fictional Candidate<br />
+              <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
+              <span>supports</span> Fictional Candidate<br />
               for US House - District 12&nbsp;<br />
                   Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
                   Duis a eros fringilla, dictum leo vitae, vulputate mi. Nunc vitae neque nec erat fermentum... (more)
@@ -48,14 +53,16 @@ export default class OrgEndorsementsPage extends React.Component {
         <ul className="list-group">
           <li className="list-group-item">
               <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}></Link>{/* Implement later */}
-              <span className="icon_candidate"></span>&nbsp;<span>supports</span> Politician Name<br />
+              <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
+              <span>supports</span> Politician Name<br />
               for Governor<br />
           </li>
         </ul>
         <ul className="list-group">
           <li className="list-group-item">
               <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}></Link>{/* Implement later */}
-              <span className="icon_candidate"></span>&nbsp;<span>opposes</span> Another Candidate<br />
+              <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
+              <span>opposes</span> Another Candidate<br />
               for Judge<br />
           </li>
         </ul>

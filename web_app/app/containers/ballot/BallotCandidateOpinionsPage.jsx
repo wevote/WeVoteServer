@@ -1,6 +1,7 @@
 import axios from 'axios';
 import BallotReturnNavigation from "../../components/base/BallotReturnNavigation";
 import FollowOrIgnoreAction from "../../components/base/FollowOrIgnoreAction";
+import MoreInfoIconAction from "components/base/MoreInfoIconAction";
 import OrganizationsToFollowList from "../../components/base/OrganizationsToFollowList";
 import { Link } from "react-router";
 import React from "react";
@@ -23,7 +24,8 @@ export default class BallotCandidateOpinionsPage extends React.Component {
 
         <ul className="list-group">
             <li className="list-group-item">
-              <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>&nbsp;Fictional Candidate
+                <MoreInfoIconAction we_vote_id={'wvcand001'} />
+				Fictional Candidate
             </li>
         </ul>
 		<OrganizationsToFollowList />

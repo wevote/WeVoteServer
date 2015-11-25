@@ -2,6 +2,7 @@ import AskOrShareAction from "../../components/base/AskOrShareAction";
 import axios from 'axios';
 import BallotItemNavigation from "../../components/base/BallotItemNavigation";
 import BallotMajorNavigation from "../../components/base/BallotMajorNavigation";
+import MoreInfoIconAction from "components/base/MoreInfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar, DropdownButton, MenuItem } from "react-bootstrap";
 import { Link } from "react-router";
@@ -43,7 +44,8 @@ export default class BallotCandidatePage extends React.Component {
                 viverra. Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
                 Duis a eros fringilla, dictum leo vitae, vulputate mi. Nunc vitae neque nec erat fermentum... (more)<br />
                 Courtesy of Ballotpedia.org<br />
-                Running for US House - District 12&nbsp;<span className="glyphicon glyphicon-small glyphicon-info-sign"></span><br />
+                <MoreInfoIconAction we_vote_id={'wvcand001'} />
+                Running for US House - District 12<br />
                 {support_item}&nbsp;&nbsp;&nbsp;
                 {oppose_item}&nbsp;&nbsp;&nbsp;
                 <AskOrShareAction />

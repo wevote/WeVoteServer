@@ -5,6 +5,7 @@ import BottomContinueNavigation from "components/base/BottomContinueNavigation";
 import BallotFeedItemActionBar from "components/base/BallotFeedItemActionBar";
 import BallotMajorNavigation from "components/base/BallotMajorNavigation";
 import ListTitleNavigation from "components/base/ListTitleNavigation";
+import MoreInfoIconAction from "components/base/MoreInfoIconAction";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
 import React from "react";
@@ -46,9 +47,8 @@ export default class IntroBallotContestsPage extends React.Component {
         <a href="#measures">Jump to Measures</a>
         <ul className="list-group">
             <li className="list-group-item">
+                <MoreInfoIconAction we_vote_id={'wvcand001'} />
                 <Link to="ballot">US House - District 12</Link>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>{/* Right align */}
                 <br />
                 You will choose one candidate from among three that are running for this office.<br />
                 <span style={floatRight}><Link to="ballot">
@@ -58,9 +58,8 @@ export default class IntroBallotContestsPage extends React.Component {
             </li>
 
             <li className="list-group-item">
+                <MoreInfoIconAction we_vote_id={'wvcand001'} />
                 <Link to="ballot">Governor</Link>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>{/* Right align */}
                 <br />
                 You will rank your top two choices from among three that are running for this office.<br />
                 <span style={floatRight}><Link to="ballot">
@@ -70,9 +69,8 @@ export default class IntroBallotContestsPage extends React.Component {
             </li>
 
             <li className="list-group-item">
+                <MoreInfoIconAction we_vote_id={'wvcand001'} />
                 <Link to="ballot">Mayor</Link>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>{/* Right align */}
                 <br />
                 You will rank your top three choices from among seven that are running for this office.<br />
                 <span style={floatRight}><Link to="ballot">
@@ -87,9 +85,8 @@ export default class IntroBallotContestsPage extends React.Component {
         <a href="#candidates">Jump to Candidates</a>
         <ul className="list-group">
             <li className="list-group-item">
+                <MoreInfoIconAction we_vote_id={'wvcand001'} />
                 <Link to="ballot">Measure AA</Link>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>{/* Right align */}
                 <br />
                 You will vote Yes or No on this Measure.<br />
                 <span style={floatRight}><Link to="ballot">
@@ -99,9 +96,8 @@ export default class IntroBallotContestsPage extends React.Component {
             </li>
 
             <li className="list-group-item">
+                <MoreInfoIconAction we_vote_id={'wvcand001'} />
                 <Link to="ballot">Measure BB</Link>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>{/* Right align */}
                 <br />
                 You will vote Yes or No on this Measure.<br />
                 <span style={floatRight}><Link to="ballot">
@@ -111,9 +107,8 @@ export default class IntroBallotContestsPage extends React.Component {
             </li>
 
             <li className="list-group-item">
+                <MoreInfoIconAction we_vote_id={'wvcand001'} />
                 <Link to="ballot">Measure CC</Link>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>{/* Right align */}
                 <br />
                 You will vote Yes or No on this Measure.<br />
                 <span style={floatRight}><Link to="ballot">

@@ -2,6 +2,7 @@ import AskOrShareAction from "../../components/base/AskOrShareAction";
 import axios from 'axios';
 import BallotMajorNavigation from "../../components/base/BallotMajorNavigation";
 import BallotReturnNavigation from "../../components/base/BallotReturnNavigation";
+import MoreInfoIconAction from "components/base/MoreInfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -45,7 +46,8 @@ export default class BallotCandidateOnePositionPage extends React.Component {
                 <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Fictional Candidate{/* TODO icon-person-placeholder */}
                 <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
                 <br />
-                Running for US House - District 12&nbsp;<span className="glyphicon glyphicon-small glyphicon-info-sign"></span><br />
+                <MoreInfoIconAction we_vote_id={'wvcand001'} />
+                Running for US House - District 12<br />
                 {support_item}&nbsp;&nbsp;&nbsp;
                 {oppose_item}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <AskOrShareAction />
