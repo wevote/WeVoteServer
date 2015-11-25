@@ -1,12 +1,12 @@
-import AskOrShareAction from "components/base/AskOrShareAction";
+import AskOrShareAction from "../../components/base/AskOrShareAction";
 import axios from 'axios';
-import BallotItemNavigation from "components/base/BallotItemNavigation";
-import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotItemNavigation from "../../components/base/BallotItemNavigation";
+import BallotMajorNavigation from "../../components/base/BallotMajorNavigation";
 import React from "react";
 import { Button, ButtonToolbar, DropdownButton, MenuItem } from "react-bootstrap";
 import { Link } from "react-router";
 
-export default class BallotMeasurePage extends React.Component {
+export default class BallotCandidatePage extends React.Component {
 	constructor(props) {
 		super(props);
 	}
@@ -31,11 +31,11 @@ export default class BallotMeasurePage extends React.Component {
         }
 	    return (
 <div>
-	<BallotItemNavigation back_to_ballot={true} is_measure={true} />
-	<div className="container-fluid well well-90">
+    <BallotItemNavigation back_to_ballot={true} is_measure={false} />
+    <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">
-                Measure AA
+                <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Fictional Candidate{/* TODO icon-person-placeholder */}
                 <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
                 <br />
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur posuere vulputate massa ut efficitur.
@@ -43,6 +43,7 @@ export default class BallotMeasurePage extends React.Component {
                 viverra. Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
                 Duis a eros fringilla, dictum leo vitae, vulputate mi. Nunc vitae neque nec erat fermentum... (more)<br />
                 Courtesy of Ballotpedia.org<br />
+                Running for US House - District 12&nbsp;<span className="glyphicon glyphicon-small glyphicon-info-sign"></span><br />
                 {support_item}&nbsp;&nbsp;&nbsp;
                 {oppose_item}&nbsp;&nbsp;&nbsp;
                 <AskOrShareAction />
@@ -51,12 +52,11 @@ export default class BallotMeasurePage extends React.Component {
 					<input type="text" name="address" className="form-control" defaultValue="What do you think?" />
                     <Link to="ballot_candidate" params={{id: 2}}><Button bsSize="small">Post Privately</Button></Link>
 				</div>
-            </li>
+         </li>
         </ul>
-
         <ul className="list-group">
           <li className="list-group-item">
-              <Link to="ballot_measure_one_position" params={{id: 2, org_id: 27}}>
+              <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}>
                   <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
                   <span>supports</span> <span>Yesterday at 7:18 PM</span><br />
                   Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
@@ -73,8 +73,8 @@ export default class BallotMeasurePage extends React.Component {
               5 Likes<br />
           </li>
         </ul>
-	</div>
-	<BallotMajorNavigation />
+    </div>
+    <BallotMajorNavigation />
 </div>
 		);
 	}

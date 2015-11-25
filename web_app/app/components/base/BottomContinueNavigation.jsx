@@ -12,17 +12,23 @@ export default class BottomContinueNavigation extends React.Component {
         } else {
             continue_text = 'Continue >';
         }
+        var link_route_cancel;
+        if (this.props.link_route_cancel) {
+            link_route_cancel = this.props.link_route_cancel;
+        } else {
+            link_route_cancel = 'ballot';
+        }
         var cancel_button;
         if (this.props.cancel_text) {
-            cancel_button = <Button bsStyle="default">{this.props.cancel_text}</Button>;
+            cancel_button = <Link to={ link_route_cancel }><Button bsStyle="default">{this.props.cancel_text}</Button></Link>;
         } else {
             cancel_button = '';
         }
-        var link_route;
-        if (this.props.link_route) {
-            link_route = this.props.link_route;
+        var link_route_continue;
+        if (this.props.link_route_continue) {
+            link_route_continue = this.props.link_route_continue;
         } else {
-            link_route = 'ballot';
+            link_route_continue = 'ballot';
         }
         var alignCenter = {
             margin: 'auto',
@@ -32,14 +38,14 @@ export default class BottomContinueNavigation extends React.Component {
 <div className="row">
     <div className="navbar navbar-default navbar-fixed-bottom">
         <div className="container-fluid container-top10 seperator-top">
-            <Link to={ link_route }>
-                <div className="row">
-                    <div className="col-xs-2 center-block text-center" style={alignCenter}>
-                        {cancel_button}&nbsp;
+            <div className="row">
+                <div className="col-xs-2 center-block text-center" style={alignCenter}>
+                    {cancel_button}
+                    <Link to={ link_route_continue } params={ this.props.params }>
                         <Button bsStyle="primary">{continue_text}</Button>
-                    </div>
+                    </Link>
                 </div>
-            </Link>
+            </div>
         </div>
     </div>
 </div>

@@ -3,33 +3,47 @@ import { Route, DefaultRoute, NotFoundRoute } from "react-router";
 
 /* eslint-disable no-multi-spaces */
 // Only import from `route-handlers/*`
-import ActivityPage						from "route-handlers/ActivityPage";
-import AddFriendsPage			    	from "route-handlers/AddFriendsPage";
-import AddFriendsConfirmedPage			from "route-handlers/AddFriendsConfirmedPage";
-import AddFriendsFromAddressPage		from "route-handlers/AddFriendsFromAddressPage";
-import AddFriendsMessagePage			from "route-handlers/AddFriendsMessagePage";
-import Application  					from "route-handlers/Application";
-import AskOrSharePage			    	from "route-handlers/AskOrSharePage";
-import BallotCandidatePage				from "route-handlers/BallotCandidatePage";
-import BallotCandidateOnePositionPage	from "route-handlers/BallotCandidateOnePositionPage";
-import BallotCandidateOpinionsPage		from "route-handlers/BallotCandidateOpinionsPage";
-import BallotMeasurePage				from "route-handlers/BallotMeasurePage";
-import BallotMeasureOnePositionPage		from "route-handlers/BallotMeasureOnePositionPage";
-import BallotMeasureOpinionsPage		from "route-handlers/BallotMeasureOpinionsPage";
-import BallotOpinionsPage				from "route-handlers/BallotOpinionsPage";
-import BallotHomePage					from "route-handlers/BallotHomePage";
-import ConnectPage						from "route-handlers/ConnectPage";
-import HomePage     					from "route-handlers/HomePage";
-import IntroBallotContestsPage			from "route-handlers/IntroBallotContestsPage";
-import IntroOpinionsPage				from "route-handlers/IntroOpinionsPage";
-import MorePage							from "route-handlers/MorePage";
-import MoreChangeLocationPage			from "route-handlers/MoreChangeLocationPage";
-import NotFoundPage 					from "route-handlers/NotFoundPage";
-import OrgEndorsementsPage 				from "route-handlers/OrgEndorsementsPage";
-import ReadmePage   					from "route-handlers/ReadmePage";
-import RequestsPage						from "route-handlers/RequestsPage";
-import VolunteerChooseTask				from "route-handlers/VolunteerChooseTask";
-import VolunteerHomePage				from "route-handlers/VolunteerHomePage";
+import ActivityPage								from "route-handlers/ActivityPage";
+import AddFriendsPage			    			from "route-handlers/AddFriendsPage";
+import AddFriendsConfirmedPage					from "route-handlers/AddFriendsConfirmedPage";
+import AddFriendsFromAddressPage				from "route-handlers/AddFriendsFromAddressPage";
+import AddFriendsMessagePage					from "route-handlers/AddFriendsMessagePage";
+import Application  							from "route-handlers/Application";
+import AskOrSharePage			    			from "route-handlers/AskOrSharePage";
+import BallotCandidatePage						from "route-handlers/BallotCandidatePage";
+import BallotCandidateOnePositionPage			from "route-handlers/BallotCandidateOnePositionPage";
+import BallotCandidateOpinionsPage				from "route-handlers/BallotCandidateOpinionsPage";
+import BallotMeasurePage						from "route-handlers/BallotMeasurePage";
+import BallotMeasureOnePositionPage				from "route-handlers/BallotMeasureOnePositionPage";
+import BallotMeasureOpinionsPage				from "route-handlers/BallotMeasureOpinionsPage";
+import BallotOpinionsPage						from "route-handlers/BallotOpinionsPage";
+import BallotHomePage							from "route-handlers/BallotHomePage";
+import ConnectPage								from "route-handlers/ConnectPage";
+import GuidesAddOrganizationPage				from "route-handlers/GuidesAddOrganizationPage";
+import GuidesAddOrganizationSearchPage			from "route-handlers/GuidesAddOrganizationSearchPage";
+import GuidesAddOrganizationResultsPage			from "route-handlers/GuidesAddOrganizationResultsPage";
+import GuidesOrganizationAddExistingLinkPage	from "route-handlers/GuidesOrganizationAddExistingLinkPage";
+import GuidesOrganizationChooseElectionPage		from "route-handlers/GuidesOrganizationChooseElectionPage";
+import GuidesOrganizationDisplayPage			from "route-handlers/GuidesOrganizationDisplayPage";
+import GuidesOrganizationEditPage				from "route-handlers/GuidesOrganizationEditPage";
+import GuidesOrganizationEmailVerifyPage		from "route-handlers/GuidesOrganizationEmailVerifyPage";
+import GuidesOrganizationBallotAddItemsPage		from "route-handlers/GuidesOrganizationBallotAddItemsPage";
+import GuidesOrganizationBallotResultsPage		from "route-handlers/GuidesOrganizationBallotResultsPage";
+import GuidesOrganizationBallotSearchPage		from "route-handlers/GuidesOrganizationBallotSearchPage";
+import GuidesOrganizationPersonalEmailPage		from "route-handlers/GuidesOrganizationPersonalEmailPage";
+import GuidesVoterAddExistingLinkPage			from "route-handlers/GuidesVoterAddExistingLinkPage";
+import GuidesVoterHomePage						from "route-handlers/GuidesVoterHomePage";
+import HomePage     							from "route-handlers/HomePage";
+import IntroBallotContestsPage					from "route-handlers/IntroBallotContestsPage";
+import IntroOpinionsPage						from "route-handlers/IntroOpinionsPage";
+import MorePage									from "route-handlers/MorePage";
+import MoreChangeLocationPage					from "route-handlers/MoreChangeLocationPage";
+import NotFoundPage 							from "route-handlers/NotFoundPage";
+import OrgEndorsementsPage 						from "route-handlers/OrgEndorsementsPage";
+import ReadmePage   							from "route-handlers/ReadmePage";
+import RequestsPage								from "route-handlers/RequestsPage";
+import VolunteerChooseTask						from "route-handlers/VolunteerChooseTask";
+import VolunteerHomePage						from "route-handlers/VolunteerHomePage";
 /* eslint-enable */
 
 // polyfill
@@ -54,6 +68,20 @@ module.exports = (
 		<Route name="ballot_measure_opinions" path="/ballot/measure/:id/opinions/" handler={BallotMeasureOpinionsPage} />
 		<Route name="ballot_opinions" path="/ballot/opinions" handler={BallotOpinionsPage} />
 		<Route name="connect" path="/connect" handler={ConnectPage} />
+		<Route name="guides_organization_add_search" path="/guides/org/add/search" handler={GuidesAddOrganizationSearchPage} />
+		<Route name="guides_organization_add_results" path="/guides/org/add/results" handler={GuidesAddOrganizationResultsPage} />
+		<Route name="guides_organization_add" path="/guides/org/add/details" handler={GuidesAddOrganizationPage} />
+		<Route name="guides_organization_add_existing_link" path="/guides/org/add/link" handler={GuidesOrganizationAddExistingLinkPage} />
+		<Route name="guides_organization_ballot_add_items" path="/guides/org/:guide_id/additems" handler={GuidesOrganizationBallotAddItemsPage} />
+		<Route name="guides_organization_ballot_search" path="/guides/org/add/ballotsearch" handler={GuidesOrganizationBallotSearchPage} />
+		<Route name="guides_organization_ballot_results" path="/guides/org/add/ballotresults" handler={GuidesOrganizationBallotResultsPage} />
+		<Route name="guides_organization_choose_election" path="/guides/org/add/election" handler={GuidesOrganizationChooseElectionPage} />
+		<Route name="guides_organization_display" path="/guides/org/:guide_id" handler={GuidesOrganizationDisplayPage} />
+		<Route name="guides_organization_edit" path="/guides/org/:guide_id/edit" handler={GuidesOrganizationEditPage} />
+		<Route name="guides_organization_email_verify" path="/guides/org/add/emailverify" handler={GuidesOrganizationEmailVerifyPage} />
+		<Route name="guides_organization_email" path="/guides/org/add/email" handler={GuidesOrganizationPersonalEmailPage} />
+		<Route name="guides_voter" path="/guides/voter/" handler={GuidesVoterHomePage} />
+		<Route name="guides_voter_add_existing_link" path="/guides/voter/add/link" handler={GuidesVoterAddExistingLinkPage} />
 		<Route name="home" path="/home" handler={HomePage} />
 		<Route name="intro_contests" path="/intro/contests" handler={IntroBallotContestsPage} />
 		<Route name="intro_opinions" path="/intro/opinions" handler={IntroOpinionsPage} />

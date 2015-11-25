@@ -1,7 +1,7 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
-import FollowOrIgnoreAction from "components/base/FollowOrIgnoreAction";
-import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
+import BallotReturnNavigation from "../../components/base/BallotReturnNavigation";
+import FollowOrIgnoreAction from "../../components/base/FollowOrIgnoreAction";
+import OrganizationsToFollowList from "../../components/base/OrganizationsToFollowList";
 import { Link } from "react-router";
 import React from "react";
 

@@ -21,8 +21,8 @@ export default class MorePage extends React.Component {
         <h4 className="text-left">My Ballot</h4>
         <ul className="list-group">
             <li className="list-group-item">Print, Save or Email Ballot</li>
-            <li className="list-group-item">Share with Friends</li>
-            <li className="list-group-item">My Voter Guides</li>
+            <li className="list-group-item"><Link to="ask_or_share">Share with Friends</Link></li>
+            <li className="list-group-item"><Link to="guides_voter">My Voter Guides</Link></li>
             <li className="list-group-item"><Link to="more_change_location">My Ballot Location</Link></li>
             <li className="list-group-item">Public Opinions I Follow</li>
         </ul>

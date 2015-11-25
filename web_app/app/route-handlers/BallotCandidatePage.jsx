@@ -1,4 +1,4 @@
 import { createContainer } from "items-store";
-import BallotCandidatePage from "containers/BallotCandidatePage";
+import BallotCandidatePage from "../containers/ballot/BallotCandidatePage";
 
 export default createContainer(BallotCandidatePage);

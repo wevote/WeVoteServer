@@ -123,7 +123,7 @@ export default class IntroBallotContestsPage extends React.Component {
             </li>
         </ul>
     </div>
-    <BottomContinueNavigation link_route={'ballot'} continue_text={'Show me My Ballot'} />
+    <BottomContinueNavigation  link_route_continue={'ballot'} continue_text={'Show me My Ballot'} />
 </div>
 		);
 	}

@@ -26,9 +26,9 @@ export default class ConnectPage extends React.Component {
 		<h4 className="text-left">Add Friends</h4>
         <p>Friends can see what you support and oppose.</p>
         <Input type="text" addonBefore="@" name="email_address" className="form-control"
-               defaultValue="Enter email address(es) of friend(s) here" />
+               placeholder="Enter email address(es) of friend(s) here" />
         <span style={floatRight}>
-            <Link to="add_friends_message"><Button bsStyle="primary">Next &gt;</Button></Link>
+            <Link to="add_friends"><Button bsStyle="primary">Next &gt;</Button></Link>
         </span>
         <span className="small">Separate email addresses with commas. We never sell emails.</span>
         <br />
@@ -36,15 +36,15 @@ export default class ConnectPage extends React.Component {
 
 		<h4 className="text-left">Follow More Opinions</h4>
 		<input type="text" name="search_opinions" className="form-control"
-			   defaultValue="Search by name or twitter handle." />
+			   placeholder="Search by name or twitter handle." />
         <Link to="add_friends_message"><Button bsStyle="primary">Select from those I Follow on Twitter &gt;</Button></Link>
 		<OrganizationsToFollowList />
 
 		<h4 className="text-left">Create Voter Guide</h4>
         <p>To share your opinions publicly, create a voter guide.</p>
-        <Link to="add_friends_message"><Button bsStyle="primary">Create Public Voter Guide &gt;</Button></Link>
-
-
+        <Link to="guides_voter"><Button bsStyle="primary">Create Public Voter Guide &gt;</Button></Link>
+        <br />
+        <br />
 	</div>
     <BallotMajorNavigation />
 </div>

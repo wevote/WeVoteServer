@@ -1,6 +1,6 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
-import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
+import BallotReturnNavigation from "../../components/base/BallotReturnNavigation";
+import OrganizationsToFollowList from "../../components/base/OrganizationsToFollowList";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -23,7 +23,7 @@ export default class BallotOpinionsPage extends React.Component {
 	<div className="container-fluid well well-90">
 		<h2 className="text-center">More Opinions I Can Follow</h2>
 			<input type="text" name="search_opinions" className="form-control"
-				   defaultValue="Search by name or twitter handle." /><br />
+				   placeholder="Search by name or twitter handle." /><br />
 
 		These organizations and public figures have opinions about items on your
               ballot. Click the 'Follow' button to pay attention to them.

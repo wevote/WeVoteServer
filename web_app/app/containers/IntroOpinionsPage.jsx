@@ -45,12 +45,12 @@ export default class IntroOpinionsPage extends React.Component {
         <li className="list-group-item">
             <label htmlFor="search_opinions">Follow Like-Minded Organizations</label><br />
             <input type="text" name="search_opinions" className="form-control"
-               defaultValue="Search by name or twitter handle." /><br />
+               placeholder="Search by name or twitter handle." /><br />
 
             <OrganizationsToFollowList />
         </li>
     </ul>
-    <BottomContinueNavigation link_route={'intro_contests'} />
+    <BottomContinueNavigation link_route_continue={'intro_contests'} />
 
 </div>
 		);

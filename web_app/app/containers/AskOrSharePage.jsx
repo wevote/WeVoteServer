@@ -34,7 +34,7 @@ export default class AskOrSharePage extends React.Component {
 	<div className="container-fluid well well-90">
 		<div>
 			<input type="text" name="ask_message" className="form-control"
-				   defaultValue="Say or ask something about this..." /><br />
+				   placeholder="Say or ask something about this..." /><br />
 			<ul className="list-group">
 				<li className="list-group-item">
 					<i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Fictional Candidate{/* TODO icon-person-placeholder */}
@@ -46,8 +46,8 @@ export default class AskOrSharePage extends React.Component {
 					<br />
 			 	</li>
 			</ul>
-			<Input type="text" addonBefore="@" name="email_address" className="form-control" defaultValue="Enter email address(es) of friend(s) here" />
-			<span>Separate email addresses with commas. We never sell email addresses. These friends will see what you support, oppose, and which opinions you follow.</span><br />
+			<Input type="text" addonBefore="@" name="email_address" className="form-control" placeholder="Enter email address(es) of friend(s) here" />
+			<span>These friends will see what you support, oppose, and which opinions you follow.</span><br />
 			<br />
 			<ul className="list-group">
 				<li className="list-group-item">
@@ -68,7 +68,7 @@ export default class AskOrSharePage extends React.Component {
 			<br />
 		</div>
 	</div>
-    <BottomContinueNavigation link_route={'ballot'} continue_text={'Send'} cancel_text={"cancel"} />
+    <BottomContinueNavigation link_route_continue={'ballot'} continue_text={'Send'} link_route_cancel={'ballot'} cancel_text={"cancel"} />
 </div>
 		);
 	}
