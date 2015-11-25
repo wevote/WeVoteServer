@@ -24,7 +24,7 @@
   "rules": {
     "consistent-return": [0],
     "key-spacing": [0],
-    "quotes": [0, "single", "avoid-escpae"],
+    "quotes": [0, "single", "avoid-escape"],
     "quote-props": [1, "as-needed"],
     "new-cap": [0],
     "no-multi-spaces": [0],
@@ -35,10 +35,10 @@
     "no-trailing-spaces": [2],
     "eol-last": [0],
     "no-labels": [2],
-    "indent": 2,
+    //"indent": 2,
     "no-mixed-spaces-and-tabs": 0,
     "vars-on-top": 2,
-    "camcelcase": [2, {"properties": "never"}],
+    "camelcase": [2, {"properties": "never"}],
     "semi": [2, "always"],
 
     "react/jsx-no-undef": 2,

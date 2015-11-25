@@ -5,20 +5,15 @@ import axios from 'axios';
 //import {IntlProvider, FormattedNumber, FormattedPlural} from 'react-intl';
 // Example code here: https://github.com/yahoo/react-intl
 // npm install react-intl@next
-import {get} from '../../lib/service/calls.js'
 
-get('voterCount', function (res) {
-	console.log(res);
-});
-
-import docCookies from 'cookies';
+import {voterCount, organizationCount} from '../service/api';
 
 export default class HomePage extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			voterCount: null,
-			organizations: null
+			voter_count: null,
+			organization_count: null
 		};
 	}
 
@@ -27,49 +22,27 @@ export default class HomePage extends React.Component {
 	}
 
 	componentDidMount() {
-		this.getVoterCount()
-
-		// if user does not have a device id set already then set one
-		if (docCookies.getItem('deviceId') === null) {
-			new Promise( (resolve, reject) => {
-				this.generateDeviceId()
-					.then( function(response) {
-						resolve(response.data['voter_device_id']);
-					});
-			})
-			.then( (deviceId) => {
-				docCookies.setItem('deviceId', deviceId);
-				this.createVoter(deviceId);
-			})
-		} else {
-			console.log('cookie is already set')
-		}
-
-
+        this.getOrganizationCount();
+		this.getVoterCount();
 	}
 
 	getVoterCount() {
-		axios.get('http://localhost:8000/apis/v1/voterCount')
-			.then(function (response) {
-				let voterCount = response.data['voter_count'];
-				this.setState({
-					voterCount: voterCount,
-				});
-			}.bind(this));
+		voterCount()
+			.then(
+                (count) => this.setState({
+	               voter_count: count
+                })
+            );
 	}
 
-	generateDeviceId() {
-		return axios.get('http://localhost:8000/apis/v1/deviceIdGenerate');
-	}
-
-	createVoter(deviceId) {
-		return axios.get('http://localhost:8000/apis/v1/voterCreate', {
-				voter_device_id: deviceId
-			})
-			.then( function (response) {
-				console.log(response)
-			});
-	}
+    getOrganizationCount() {
+        organizationCount()
+            .then(
+                (count) => this.setState({
+                    organization_count: count
+                })
+            );
+    }
 
 	render() {
 	    return (
@@ -83,7 +56,7 @@ export default class HomePage extends React.Component {
 
 				<ul className="list-group">
 				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;Neutral and private</li>
-				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;{this.state.voterCount} voters</li>
+				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;{this.state.voter_count} voters</li>
                     {/* TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
                     <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;
                 <FormattedNumber value={this.state.voterCount} /> {' '}
@@ -91,7 +64,7 @@ export default class HomePage extends React.Component {
                     one="voter"
                     other="voters"
                 /></li>*/}
-				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;417 not-for-profit organizations</li>
+				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;{this.state.organization_count} not-for-profit organizations</li>
 				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;and you.</li>
 				</ul>
 				<div>
