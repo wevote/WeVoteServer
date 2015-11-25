@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 import axios from 'axios';
 // TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
@@ -6,16 +6,15 @@ import axios from 'axios';
 //import {IntlProvider, FormattedNumber, FormattedPlural} from 'react-intl';
 // Example code here: https://github.com/yahoo/react-intl
 // npm install react-intl@next
-<<<<<<< HEAD
-=======
 import {get} from '../../lib/service/calls.js'
 import LanguageSwitchNavigation from "components/base/LanguageSwitchNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
->>>>>>> f3431c9b377cb86f21f1293f92f58a7324461ad9
 
 import {voterCount, organizationCount} from '../service/api';
+
+import docCookies from 'cookies';
 
 export default class HomePage extends React.Component {
 	constructor(props) {
@@ -31,11 +30,8 @@ export default class HomePage extends React.Component {
 	}
 
 	componentDidMount() {
-<<<<<<< HEAD
-        this.getOrganizationCount();
+		this.getOrganizationCount();
 		this.getVoterCount();
-=======
-		this.getVoterCount()
 
 		// if user does not have a device id set already then set one
 		if (docCookies.getItem('deviceId') === null) {
@@ -52,7 +48,6 @@ export default class HomePage extends React.Component {
 		} else {
 			console.log('cookie is already set')
 		}
->>>>>>> f3431c9b377cb86f21f1293f92f58a7324461ad9
 	}
 
 	getVoterCount() {
@@ -87,30 +82,9 @@ export default class HomePage extends React.Component {
     <li className="list-group-item">Take to the polls</li>
     </ul>
 
-<<<<<<< HEAD
-				<ul className="list-group">
-				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;Neutral and private</li>
-				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;{this.state.voter_count} voters</li>
-                    {/* TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
-                    <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;
-                <FormattedNumber value={this.state.voterCount} /> {' '}
-                <FormattedPlural value={this.state.voterCount}
-                    one="voter"
-                    other="voters"
-                /></li>*/}
-				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;{this.state.organization_count} not-for-profit organizations</li>
-				  <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;and you.</li>
-				</ul>
-				<div>
-					<label htmlFor="last-name">My Ballot Location</label><br />
-					<span className="small">This is our best guess - feel free to change</span>
-					<input type="text" name="address" className="form-control" />
-				</div>
-			</div>
-=======
     <ul className="list-group">
       <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;Neutral and private</li>
-      <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;{this.state.voterCount} voters</li>
+      <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;{this.state.voter_count} voters</li>
         {/* TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
         <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;
     <FormattedNumber value={this.state.voterCount} /> {' '}
@@ -118,10 +92,10 @@ export default class HomePage extends React.Component {
         one="voter"
         other="voters"
     /></li>*/}
-      <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;417 not-for-profit organizations</li>
+      <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;{this.state.organization_count} not-for-profit organizations</li>
       <li className="list-group-item"><span className="glyphicon glyphicon-small glyphicon-ok-sign"></span>&nbsp;and you.</li>
     </ul>
-    <label htmlFor="last-name">My Ballot Location</label><br />
+    <label htmlFor="address">My Ballot Location</label><br />
     <span className="small">This is our best guess - feel free to change</span>
     <Input type="text" name="address" className="form-control" defaultValue="Oakland, CA" />
     <Link to="intro_opinions">
@@ -131,7 +105,6 @@ export default class HomePage extends React.Component {
     <br />
     <LanguageSwitchNavigation />
 </div>
->>>>>>> f3431c9b377cb86f21f1293f92f58a7324461ad9
 		);
 	}
 }
