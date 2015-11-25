@@ -14,6 +14,9 @@ export default class AddFriendsPage extends React.Component {
 	}
 
 	render() {
+        var floatRight = {
+            float: 'right'
+        };
 	    return (
 			<div>
                 <BallotReturnNavigation back_to_ballot={true} />
@@ -27,7 +30,9 @@ export default class AddFriendsPage extends React.Component {
 						<br />
 						<br />
 						These friends will see what you support, oppose, and which opinions you follow.<br />
-						<Link to="add_friends_message"><Button bsStyle="primary">Next ></Button></Link>
+						<span  style={floatRight}>
+							<Link to="add_friends_message"><Button bsStyle="primary">Next ></Button></Link>
+						</span>
 					</div>
 				</div>
 			</div>

@@ -16,21 +16,44 @@ export default class BallotItemNavigation extends React.Component {
         }
         var more_opinions_link;
         if (this.props.is_measure) {
-            more_opinions_link = <Link to="ballot_measure_opinions" params={{id: 4}}><span className="icon_more_opinions"></span>&nbsp;More Opinions</Link>;
+            more_opinions_link = <span><i className="icon-icon-more-opinions-2-2 icon-light icon-medium"></i><Link to="ballot_measure_opinions" className="font-darkest fluff-left-narrow" params={{id: 4}}>More Opinions</Link></span>;
         } else {
-            more_opinions_link = <Link to="ballot_candidate_opinions" params={{id: 4}}><span className="icon_more_opinions"></span>&nbsp;More Opinions</Link>;
+            more_opinions_link = <span><i className="icon-icon-more-opinions-2-2 icon-light icon-medium"></i><Link to="ballot_candidate_opinions" className="font-darkest fluff-left-narrow" params={{id: 4}}>More Opinions</Link></span>;
         }
 		return <div className="row">
-            <nav className="navbar navbar-main navbar-fixed-top">
+            <nav className="navbar navbar-main navbar-fixed-top bottom-separator">
                 <div className="container-fluid">
                     <div className="left-inner-addon">
                         {/* We switch between "Back" and "Back to My Ballot" */}
-                        <p className="text-left">{back_to_link}</p>
+                        <div className="col-xs-6 col-md-6 text-center">{back_to_link}</div>
                         {/* We switch between ballot_candidate_opinions and ballot_measure_opinions */}
-                        <p className="text-right">{more_opinions_link}</p>
+                        <div className="col-xs-6 col-md-6 text-center">{more_opinions_link}</div>
                     </div>
                 </div>
             </nav>
 		</div>;
 	}
 }
+
+//// This navigation is for simple returns to prior page. Does NOT include other options like "More Opinions".
+//export class BallotReturnNavigation extends React.Component {
+//	render() {
+//        var back_to_link;
+//        if (this.props.back_to_ballot) {
+//            back_to_link = <Link to="ballot">&lt; Back to My Ballot</Link>;
+//        } else {
+//            {/* TODO Add a way to pass in the return url */}
+//            back_to_link = <Link to="ballot">&lt; Back</Link>;
+//        }
+//		return <div className="row">
+//            <nav className="navbar navbar-main navbar-fixed-top">
+//                <div className="container-fluid">
+//                    <div className="left-inner-addon">
+//                        {/* Switch between "Back" and "Back to My Ballot" */}
+//                        <p className="text-left">{back_to_link}</p>
+//                    </div>
+//                </div>
+//            </nav>
+//		</div>;
+//	}
+//}

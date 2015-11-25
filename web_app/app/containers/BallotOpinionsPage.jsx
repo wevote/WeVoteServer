@@ -1,5 +1,6 @@
 import axios from 'axios';
 import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -24,36 +25,10 @@ export default class BallotOpinionsPage extends React.Component {
 			<input type="text" name="search_opinions" className="form-control"
 				   defaultValue="Search by name or twitter handle." /><br />
 
-		<ul className="list-group">
-		  <li className="list-group-item">These organizations and public figures have opinions about items on your
-              ballot. Click the 'Follow' to pay attention to them.
-          </li>
-		</ul>
+		These organizations and public figures have opinions about items on your
+              ballot. Click the 'Follow' button to pay attention to them.
 
-		<ul className="list-group">
-		  <li className="list-group-item">
-            <Link to="org_endorsements" params={{org_id: 27}}><span className="icon_organization"></span>&nbsp;Organization Name<br />
-            @OrgName1<br />
-            (read more)</Link>
-            <span>
-                <ButtonToolbar>
-                    <Button bsStyle="info">Follow</Button>
-                    <Button bsStyle="danger" bsSize="xsmall">Ignore</Button>
-                </ButtonToolbar>
-            </span>
-          </li>
-		  <li className="list-group-item">
-              <Link to="org_endorsements" params={{org_id: 27}}><span className="icon_organization"></span>&nbsp;Another Organization<br />
-              @OrgName2<br />
-              (read more)</Link>
-            <span>
-                <ButtonToolbar>
-                    <Button bsStyle="info">Follow</Button>
-                    <Button bsStyle="danger" bsSize="xsmall">Ignore</Button>
-                </ButtonToolbar>
-            </span>
-          </li>
-		</ul>
+		<OrganizationsToFollowList />
 	</div>
 </div>
 		);
