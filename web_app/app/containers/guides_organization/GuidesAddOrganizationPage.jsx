@@ -1,6 +1,6 @@
 import axios from 'axios';
-import BottomContinueNavigation from "../../components/base/BottomContinueNavigation";
-import ListTitleNavigation from "../../components/base/ListTitleNavigation";
+import BottomContinueNavigation from "components/base/BottomContinueNavigation";
+import ListTitleNavigation from "components/base/ListTitleNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input, ProgressBar } from "react-bootstrap";
 import { Link } from "react-router";

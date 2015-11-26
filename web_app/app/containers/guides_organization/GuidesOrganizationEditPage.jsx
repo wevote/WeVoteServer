@@ -1,5 +1,5 @@
 import axios from 'axios';
-import ListTitleNavigation from "../../components/base/ListTitleNavigation";
+import ListTitleNavigation from "components/base/ListTitleNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input, Navbar } from "react-bootstrap";
 import { Link } from "react-router";

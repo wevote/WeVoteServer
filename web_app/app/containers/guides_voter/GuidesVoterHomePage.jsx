@@ -1,6 +1,6 @@
 import axios from 'axios';
-import ElectionsListNavigation from "../../components/base/ElectionsListNavigation";
-import ListTitleNavigation from "../../components/base/ListTitleNavigation";
+import ElectionsListNavigation from "components/base/ElectionsListNavigation";
+import ListTitleNavigation from "components/base/ListTitleNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";

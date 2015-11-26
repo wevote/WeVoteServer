@@ -1,12 +1,12 @@
-import AskOrShareAction from "../../components/base/AskOrShareAction";
+import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import BallotMajorNavigation from "../../components/base/BallotMajorNavigation";
-import BallotReturnNavigation from "../../components/base/BallotReturnNavigation";
+import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotReturnNavigation from "components/base/BallotReturnNavigation";
 import InfoIconAction from "components/base/InfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
-import StarAction from "../../components/base/StarAction";
+import StarAction from "components/base/StarAction";
 
 export default class BallotCandidateOnePositionPage extends React.Component {
 	constructor(props) {

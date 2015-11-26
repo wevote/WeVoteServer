@@ -1,8 +1,8 @@
 import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import CopyLinkNavigation from "../../components/base/CopyLinkNavigation";
-import InfoIconAction from "../../components/base/InfoIconAction";
-import ListTitleNavigation from "../../components/base/ListTitleNavigation";
+import CopyLinkNavigation from "components/base/CopyLinkNavigation";
+import InfoIconAction from "components/base/InfoIconAction";
+import ListTitleNavigation from "components/base/ListTitleNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input, Navbar } from "react-bootstrap";
 import { Link } from "react-router";
