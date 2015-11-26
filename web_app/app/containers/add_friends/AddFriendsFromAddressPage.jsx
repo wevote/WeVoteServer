@@ -31,10 +31,11 @@ export default class AddFriendsFromAddressPage extends React.Component {
 						</Link><br />
                         <br />
                         <br />
-                        <br />
                         OR<br />
+                        <br />
 						<Link to="add_friends_confirmed">
-							<Button bsStyle="primary">Sign in with Facebook</Button>
+							<Button bsStyle="primary">Sign in with Facebook</Button><br />
+							<Button bsStyle="primary">Sign in with Twitter</Button>
 						</Link><br />
 					</div>
 				</div>

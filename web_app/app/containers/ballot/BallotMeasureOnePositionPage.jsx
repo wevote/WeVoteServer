@@ -1,10 +1,12 @@
-import AskOrShareAction from "../../components/base/AskOrShareAction";
+import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import BallotMajorNavigation from "../../components/base/BallotMajorNavigation";
-import BallotReturnNavigation from "../../components/base/BallotReturnNavigation";
+import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import InfoIconAction from "components/base/InfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
+import StarAction from "components/base/StarAction";
 
 export default class BallotMeasureOnePositionPage extends React.Component {
 	constructor(props) {
@@ -42,8 +44,9 @@ export default class BallotMeasureOnePositionPage extends React.Component {
     <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">
+                <StarAction we_vote_id={'wvcand001'} />
                 Measure AA
-                <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
+                <InfoIconAction we_vote_id={'wvcand001'} />
                 <br />
                 {support_item}&nbsp;&nbsp;&nbsp;
                 {oppose_item}&nbsp;&nbsp;&nbsp;

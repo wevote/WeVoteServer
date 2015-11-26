@@ -1,9 +1,11 @@
 import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
 import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import InfoIconAction from "components/base/InfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar, DropdownButton, MenuItem } from "react-bootstrap";
 import { Link } from "react-router";
+import StarAction from "components/base/StarAction";
 
 export default class OrgEndorsementsPage extends React.Component {
 	constructor(props) {
@@ -41,10 +43,17 @@ export default class OrgEndorsementsPage extends React.Component {
         </ul>
         <ul className="list-group">
           <li className="list-group-item">
+              <StarAction we_vote_id={'wvcand001'} />
               <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}></Link>{/* Implement later */}
               <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
-              <span>supports</span> Fictional Candidate<br />
-              for US House - District 12&nbsp;<br />
+              <span>supports</span> Fictional Candidate
+              <InfoIconAction we_vote_id={'wvcand001'} />
+              <br />
+
+              <StarAction we_vote_id={'wvcand001'} />
+              for US House - District 12
+              <InfoIconAction we_vote_id={'wvcand001'} />
+              <br />
                   Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
                   Duis a eros fringilla, dictum leo vitae, vulputate mi. Nunc vitae neque nec erat fermentum... (more)
               <br />
@@ -52,18 +61,32 @@ export default class OrgEndorsementsPage extends React.Component {
         </ul>
         <ul className="list-group">
           <li className="list-group-item">
+              <StarAction we_vote_id={'wvcand001'} />
               <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}></Link>{/* Implement later */}
               <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
-              <span>supports</span> Politician Name<br />
-              for Governor<br />
+              <span>supports</span> Politician Name
+              <InfoIconAction we_vote_id={'wvcand001'} />
+              <br />
+
+              <StarAction we_vote_id={'wvcand001'} />
+              for Governor
+              <InfoIconAction we_vote_id={'wvcand001'} />
+              <br />
           </li>
         </ul>
         <ul className="list-group">
           <li className="list-group-item">
+              <StarAction we_vote_id={'wvcand001'} />
               <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}></Link>{/* Implement later */}
               <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
-              <span>opposes</span> Another Candidate<br />
-              for Judge<br />
+              <span>opposes</span> Another Candidate
+              <InfoIconAction we_vote_id={'wvcand001'} />
+              <br />
+
+              <StarAction we_vote_id={'wvcand001'} />
+              for Judge
+              <InfoIconAction we_vote_id={'wvcand001'} />
+              <br />
           </li>
         </ul>
     </div>

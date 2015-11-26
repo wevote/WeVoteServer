@@ -1,11 +1,12 @@
 import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
 import CopyLinkNavigation from "../../components/base/CopyLinkNavigation";
+import InfoIconAction from "../../components/base/InfoIconAction";
 import ListTitleNavigation from "../../components/base/ListTitleNavigation";
-import MoreInfoIconAction from "../../components/base/MoreInfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar, Input, Navbar } from "react-bootstrap";
 import { Link } from "react-router";
+import StarAction from "components/base/StarAction";
 
 export default class GuidesOrganizationDisplayPagePage extends React.Component {
 	constructor(props) {
@@ -35,8 +36,9 @@ export default class GuidesOrganizationDisplayPagePage extends React.Component {
                 5 of your friends follow Organization Name<br />
                 22,452 people follow<br />
 
-                <MoreInfoIconAction we_vote_id={'wvcand001'} />
-                <strong>2016 General Election, November 2nd</strong><br />
+                <strong>2016 General Election, November 2nd</strong>
+                <InfoIconAction we_vote_id={'wvcand001'} />
+                <br />
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur posuere vulputate massa ut efficitur.
                 Phasellus rhoncus hendrerit ultricies. Fusce hendrerit vel elit et euismod. Etiam bibendum ultricies
                 viverra. Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
@@ -47,12 +49,17 @@ export default class GuidesOrganizationDisplayPagePage extends React.Component {
         </ul>
         <ul className="list-group">
             <li className="list-group-item">
-                <MoreInfoIconAction we_vote_id={'wvcand001'} />
+                <StarAction we_vote_id={'wvcand001'} />
                 <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}></Link>{/* Implement later */}
                 <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
-                <span>supports</span> Fictional Candidate<br />
-                <MoreInfoIconAction we_vote_id={'wvcand001'} />
-                Running for US House - District 12&nbsp;<br />
+                &nbsp;<span>supports</span> Fictional Candidate
+                <InfoIconAction we_vote_id={'wvcand001'} />
+                <br />
+
+                <StarAction we_vote_id={'wvcand001'} />
+                Running for US House - District 12
+                <InfoIconAction we_vote_id={'wvcand001'} />
+                <br />
                   Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
                   Duis a eros fringilla, dictum leo vitae, vulputate mi. Nunc vitae neque nec erat fermentum... (more)
                 <br />
@@ -60,22 +67,32 @@ export default class GuidesOrganizationDisplayPagePage extends React.Component {
         </ul>
         <ul className="list-group">
             <li className="list-group-item">
-                <MoreInfoIconAction we_vote_id={'wvcand001'} />
+                <StarAction we_vote_id={'wvcand001'} />
                 <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}></Link>{/* Implement later */}
                 <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
-                <span>supports</span> Politician Name<br />
-                <MoreInfoIconAction we_vote_id={'wvcand001'} />
-                Running for Governor<br />
+                &nbsp;<span>supports</span> Politician Name
+                <InfoIconAction we_vote_id={'wvcand001'} />
+                <br />
+
+                <StarAction we_vote_id={'wvcand001'} />
+                Running for Governor
+                <InfoIconAction we_vote_id={'wvcand001'} />
+                <br />
             </li>
         </ul>
         <ul className="list-group">
             <li className="list-group-item">
-                <MoreInfoIconAction we_vote_id={'wvcand001'} />
+                <StarAction we_vote_id={'wvcand001'} />
                 <Link to="ballot_candidate_one_org_position" params={{id: 2, org_id: 27}}></Link>{/* Implement later */}
                 <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>{/* TODO icon-person-placeholder */}
-                <span>opposes</span> Another Candidate<br />
-                <MoreInfoIconAction we_vote_id={'wvcand001'} />
-                Running for Judge<br />
+                &nbsp;<span>opposes</span> Another Candidate
+                <InfoIconAction we_vote_id={'wvcand001'} />
+                <br />
+
+                <StarAction we_vote_id={'wvcand001'} />
+                Running for Judge
+                <InfoIconAction we_vote_id={'wvcand001'} />
+                <br />
             </li>
         </ul>
     </div>

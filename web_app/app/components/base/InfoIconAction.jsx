@@ -21,8 +21,8 @@ export default class MoreInforIconAction extends React.Component {
             </Link>;
         }
 		return (
-<span style={floatRight}>
-    <span className="glyphicon glyphicon-small glyphicon-info-sign"></span>
+<span>
+    &nbsp;&nbsp;&nbsp;<span className="glyphicon glyphicon-small glyphicon-info-sign"></span>
 </span>
         );
 	}

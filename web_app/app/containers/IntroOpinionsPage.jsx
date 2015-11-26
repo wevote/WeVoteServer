@@ -39,9 +39,6 @@ export default class IntroOpinionsPage extends React.Component {
             <br />
             <br />
         </li>
-    </ul>
-
-    <ul className="list-group">
         <li className="list-group-item">
             <label htmlFor="search_opinions">Follow Like-Minded Organizations</label><br />
             <input type="text" name="search_opinions" className="form-control"

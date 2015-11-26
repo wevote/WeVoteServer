@@ -1,11 +1,12 @@
-import AskOrShareAction from "../../components/base/AskOrShareAction";
+import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import BallotItemNavigation from "../../components/base/BallotItemNavigation";
-import BallotMajorNavigation from "../../components/base/BallotMajorNavigation";
-import MoreInfoIconAction from "components/base/MoreInfoIconAction";
+import BallotItemNavigation from "components/base/BallotItemNavigation";
+import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import InfoIconAction from "components/base/InfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar, DropdownButton, MenuItem } from "react-bootstrap";
 import { Link } from "react-router";
+import StarAction from "components/base/StarAction";
 
 export default class BallotCandidatePage extends React.Component {
 	constructor(props) {
@@ -36,16 +37,18 @@ export default class BallotCandidatePage extends React.Component {
     <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">
+                <StarAction we_vote_id={'wvcand001'} />
                 <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Fictional Candidate{/* TODO icon-person-placeholder */}
-                <span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* Right align */}
                 <br />
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur posuere vulputate massa ut efficitur.
                 Phasellus rhoncus hendrerit ultricies. Fusce hendrerit vel elit et euismod. Etiam bibendum ultricies
                 viverra. Integer ut bibendum ex. Suspendisse eleifend mi accumsan, euismod enim at, malesuada nibh.
                 Duis a eros fringilla, dictum leo vitae, vulputate mi. Nunc vitae neque nec erat fermentum... (more)<br />
                 Courtesy of Ballotpedia.org<br />
-                <MoreInfoIconAction we_vote_id={'wvcand001'} />
-                Running for US House - District 12<br />
+                <StarAction we_vote_id={'wvcand001'} />
+                Running for US House - District 12
+                <InfoIconAction we_vote_id={'wvcand001'} />
+                <br />
                 {support_item}&nbsp;&nbsp;&nbsp;
                 {oppose_item}&nbsp;&nbsp;&nbsp;
                 <AskOrShareAction />
