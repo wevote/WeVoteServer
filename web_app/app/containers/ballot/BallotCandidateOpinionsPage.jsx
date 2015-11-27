@@ -26,8 +26,8 @@ export default class BallotCandidateOpinionsPage extends React.Component {
         <ul className="list-group">
             <li className="list-group-item">
                 <StarAction we_vote_id={'wvcand001'} />
-                <InfoIconAction we_vote_id={'wvcand001'} />
 				Fictional Candidate
+                <InfoIconAction we_vote_id={'wvcand001'} />
             </li>
         </ul>
 		<OrganizationsToFollowList />

@@ -15,19 +15,19 @@ export default class AddFriendsConfirmedPage extends React.Component {
 
 	render() {
 	    return (
-			<div>
-                <BallotReturnNavigation back_to_ballot={true} />
-				<div className="container-fluid well well-90">
-					<h2 className="text-center">Add Friends</h2>
-					<div>
-						<span>Your email has been sent.</span><br />
-						<br />
-						<br />
-						<br />
-						<Link to="ballot"><Button bsStyle="primary">Return to My Ballot</Button></Link>
-					</div>
-				</div>
-			</div>
+<div>
+	<BallotReturnNavigation back_to_ballot={true} />
+	<div className="container-fluid well well-90">
+		<h2 className="text-center">Add Friends</h2>
+		<div>
+			<span>Your email has been sent.</span><br />
+			<br />
+			<br />
+			<br />
+			<Link to="ballot"><Button bsStyle="primary">Return to My Ballot</Button></Link>
+		</div>
+	</div>
+</div>
 		);
 	}
 }

@@ -32,7 +32,7 @@ export default class GuidesAddOrganizationResultsPage extends React.Component {
           <li className="list-group-item">
             <span style={floatRight}>
                 <ButtonToolbar>
-                    <Button bsStyle="info">Choose</Button>
+                    <Link to="guides_confirm_ownership"><Button bsStyle="info">Choose</Button></Link>
                 </ButtonToolbar>
             </span>
             <Link to="org_endorsements" params={{org_id: 27}}>
@@ -46,7 +46,7 @@ export default class GuidesAddOrganizationResultsPage extends React.Component {
           <li className="list-group-item">
             <span style={floatRight}>
                 <ButtonToolbar>
-                    <Button bsStyle="info">Choose</Button>
+                    <Link to="guides_confirm_ownership"><Button bsStyle="info">Choose</Button></Link>
                 </ButtonToolbar>
             </span>
               <Link to="org_endorsements" params={{org_id: 27}}>

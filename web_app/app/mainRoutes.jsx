@@ -3,6 +3,8 @@ import { Route, DefaultRoute, NotFoundRoute } from "react-router";
 
 /* eslint-disable no-multi-spaces */
 // Only import from `route-handlers/*`
+import AboutPage								from "route-handlers/AboutPage";
+import AccountSettingsPage						from "route-handlers/AccountSettingsPage";
 import ActivityPage								from "route-handlers/ActivityPage";
 import AddFriendsPage			    			from "route-handlers/AddFriendsPage";
 import AddFriendsConfirmedPage					from "route-handlers/AddFriendsConfirmedPage";
@@ -19,9 +21,13 @@ import BallotMeasureOpinionsPage				from "route-handlers/BallotMeasureOpinionsPa
 import BallotOpinionsPage						from "route-handlers/BallotOpinionsPage";
 import BallotHomePage							from "route-handlers/BallotHomePage";
 import ConnectPage								from "route-handlers/ConnectPage";
+import DonatePage								from "route-handlers/DonatePage";
+import EmailBallotPage							from "route-handlers/EmailBallotPage";
 import GuidesAddOrganizationPage				from "route-handlers/GuidesAddOrganizationPage";
 import GuidesAddOrganizationSearchPage			from "route-handlers/GuidesAddOrganizationSearchPage";
 import GuidesAddOrganizationResultsPage			from "route-handlers/GuidesAddOrganizationResultsPage";
+import GuidesConfirmOwnershipPage				from "route-handlers/GuidesConfirmOwnershipPage";
+import GuidesConfirmOwnershipEmailSentPage		from "route-handlers/GuidesConfirmOwnershipEmailSentPage";
 import GuidesOrganizationAddExistingLinkPage	from "route-handlers/GuidesOrganizationAddExistingLinkPage";
 import GuidesOrganizationChooseElectionPage		from "route-handlers/GuidesOrganizationChooseElectionPage";
 import GuidesOrganizationDisplayPage			from "route-handlers/GuidesOrganizationDisplayPage";
@@ -31,6 +37,7 @@ import GuidesOrganizationBallotAddItemsPage		from "route-handlers/GuidesOrganiza
 import GuidesOrganizationBallotResultsPage		from "route-handlers/GuidesOrganizationBallotResultsPage";
 import GuidesOrganizationBallotSearchPage		from "route-handlers/GuidesOrganizationBallotSearchPage";
 import GuidesOrganizationPersonalEmailPage		from "route-handlers/GuidesOrganizationPersonalEmailPage";
+import GuidesOwnershipConfirmedPage				from "route-handlers/GuidesOwnershipConfirmedPage";
 import GuidesVoterAddExistingLinkPage			from "route-handlers/GuidesVoterAddExistingLinkPage";
 import GuidesVoterHomePage						from "route-handlers/GuidesVoterHomePage";
 import HomePage     							from "route-handlers/HomePage";
@@ -38,10 +45,13 @@ import IntroBallotContestsPage					from "route-handlers/IntroBallotContestsPage"
 import IntroOpinionsPage						from "route-handlers/IntroOpinionsPage";
 import MorePage									from "route-handlers/MorePage";
 import MoreChangeLocationPage					from "route-handlers/MoreChangeLocationPage";
+import MyFriendsPage							from "route-handlers/MyFriendsPage";
 import NotFoundPage 							from "route-handlers/NotFoundPage";
+import OpinionsFollowedPage 					from "route-handlers/OpinionsFollowedPage";
 import OrgEndorsementsPage 						from "route-handlers/OrgEndorsementsPage";
 import ReadmePage   							from "route-handlers/ReadmePage";
 import RequestsPage								from "route-handlers/RequestsPage";
+import TermsAndPoliciesPage 					from "route-handlers/TermsAndPoliciesPage";
 import VolunteerChooseTask						from "route-handlers/VolunteerChooseTask";
 import VolunteerHomePage						from "route-handlers/VolunteerHomePage";
 /* eslint-enable */
@@ -53,6 +63,8 @@ if(!Object.assign)
 // export routes
 module.exports = (
 	<Route name="app" path="/" handler={Application}>
+		<Route name="about" path="/more/about" handler={AboutPage} />
+		<Route name="account_settings" path="/more/account/settings" handler={AccountSettingsPage} />
 		<Route name="activity" path="/activity" handler={ActivityPage} />
 		<Route name="add_friends" path="/addfriends" handler={AddFriendsPage} />
 		<Route name="add_friends_confirmed" path="/addfriends/confirmed" handler={AddFriendsConfirmedPage} />
@@ -68,6 +80,10 @@ module.exports = (
 		<Route name="ballot_measure_opinions" path="/ballot/measure/:id/opinions/" handler={BallotMeasureOpinionsPage} />
 		<Route name="ballot_opinions" path="/ballot/opinions" handler={BallotOpinionsPage} />
 		<Route name="connect" path="/connect" handler={ConnectPage} />
+		<Route name="donate" path="/more/donate" handler={DonatePage} />
+		<Route name="email_ballot" path="/more/emailballot" handler={EmailBallotPage} />
+		<Route name="guides_confirm_ownership" path="/guides/org/add/confirm" handler={GuidesConfirmOwnershipPage} />
+		<Route name="guides_confirm_ownership_email_sent" path="/guides/org/add/confirmemailsent" handler={GuidesConfirmOwnershipEmailSentPage} />
 		<Route name="guides_organization_add_search" path="/guides/org/add/search" handler={GuidesAddOrganizationSearchPage} />
 		<Route name="guides_organization_add_results" path="/guides/org/add/results" handler={GuidesAddOrganizationResultsPage} />
 		<Route name="guides_organization_add" path="/guides/org/add/details" handler={GuidesAddOrganizationPage} />
@@ -80,16 +96,20 @@ module.exports = (
 		<Route name="guides_organization_edit" path="/guides/org/:guide_id/edit" handler={GuidesOrganizationEditPage} />
 		<Route name="guides_organization_email_verify" path="/guides/org/add/emailverify" handler={GuidesOrganizationEmailVerifyPage} />
 		<Route name="guides_organization_email" path="/guides/org/add/email" handler={GuidesOrganizationPersonalEmailPage} />
+		<Route name="guides_ownership_confirmed" path="/guides/org/add/ownershipconfirmed" handler={GuidesOwnershipConfirmedPage} />
 		<Route name="guides_voter" path="/guides/voter/" handler={GuidesVoterHomePage} />
 		<Route name="guides_voter_add_existing_link" path="/guides/voter/add/link" handler={GuidesVoterAddExistingLinkPage} />
 		<Route name="home" path="/home" handler={HomePage} />
 		<Route name="intro_contests" path="/intro/contests" handler={IntroBallotContestsPage} />
 		<Route name="intro_opinions" path="/intro/opinions" handler={IntroOpinionsPage} />
-		<Route name="org_endorsements" path="/org/:org_id" handler={OrgEndorsementsPage} />
 		<Route name="more" path="/more" handler={MorePage} />
 		<Route name="more_change_location" path="/change_location" handler={MoreChangeLocationPage} />
+		<Route name="my_friends" path="/friends" handler={MyFriendsPage} />
+		<Route name="opinions_followed" path="/opinions" handler={OpinionsFollowedPage} />
+		<Route name="org_endorsements" path="/org/:org_id" handler={OrgEndorsementsPage} />
 		<Route name="readme" path="/readme" handler={ReadmePage} />
 		<Route name="requests" path="/requests" handler={RequestsPage} />
+		<Route name="privacy" path="/privacy" handler={TermsAndPoliciesPage} />
 		<Route name="volunteer" path="/volunteer" handler={VolunteerHomePage} />
 		<Route name="volunteer_choose_task" path="/volunteer/tasks" handler={VolunteerChooseTask} />
 		<DefaultRoute handler={HomePage} />

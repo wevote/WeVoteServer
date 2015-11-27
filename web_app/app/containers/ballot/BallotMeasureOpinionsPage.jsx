@@ -5,6 +5,7 @@ import InfoIconAction from "components/base/InfoIconAction";
 import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
 import { Link } from "react-router";
 import React from "react";
+import StarAction from "components/base/StarAction";
 
 export default class BallotMeasureOpinionsPage extends React.Component {
 	constructor(props) {
@@ -24,8 +25,9 @@ export default class BallotMeasureOpinionsPage extends React.Component {
 
         <ul className="list-group">
             <li className="list-group-item">
-                <InfoIconAction we_vote_id={'wvcand001'} />
+                <StarAction we_vote_id={'wvcand001'} />
 				Measure AA
+                <InfoIconAction we_vote_id={'wvcand001'} />
 			</li>
         </ul>
 		<OrganizationsToFollowList />

@@ -24,15 +24,11 @@ export default class ConnectPage extends React.Component {
 <div>
 	<div className="container-fluid well well-90">
 		<h4 className="text-left">Add Friends</h4>
-        <p>Friends can see what you support and oppose.</p>
-        <Input type="text" addonBefore="@" name="email_address" className="form-control"
-               placeholder="Enter email address(es) of friend(s) here" />
         <span style={floatRight}>
             <Link to="add_friends"><Button bsStyle="primary">Next &gt;</Button></Link>
         </span>
-        <span className="small">Separate email addresses with commas. We never sell emails.</span>
-        <br />
-        <br />
+        <p>Friends can see what you support and oppose. We never sell emails.<br />
+        <br /></p>
 
 		<h4 className="text-left">Follow More Opinions</h4>
 		<input type="text" name="search_opinions" className="form-control"
