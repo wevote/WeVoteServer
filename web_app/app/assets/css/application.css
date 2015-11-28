@@ -4,7 +4,7 @@ body {
 }
 
 .navbar-main {
-    background-color: #22A7F0;
+    background-color: #FFF;
     padding: 10px;
 }
 
@@ -25,7 +25,7 @@ body {
 }
 
 .left-inner-addon input {
-    padding-left: 38px;    
+    padding-left: 38px;
 }
 
 .left-inner-addon i {

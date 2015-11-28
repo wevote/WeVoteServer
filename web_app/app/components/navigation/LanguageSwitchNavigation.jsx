@@ -1,6 +1,7 @@
 import React from "react";
 import { DropdownButton, MenuItem } from "react-bootstrap";
 import { Link } from "react-router";
+import styles from "./LanguageSwitchNavigation.css";
 
 export default class LanguageSwitchNavigation extends React.Component {
 	render() {
@@ -38,14 +39,15 @@ export default class LanguageSwitchNavigation extends React.Component {
         } else {
             choose_vietnamese_html = <Link to="home">tiếng Việt</Link>;
         }
+
 		return (
-<span>
+<div className={styles.bufferTop}>
     {choose_chinese_html}&nbsp;&nbsp;&nbsp;
     {choose_english_html}&nbsp;&nbsp;&nbsp;
     {choose_spanish_html}&nbsp;&nbsp;&nbsp;
     {choose_tagalog_html}&nbsp;&nbsp;&nbsp;
     {choose_vietnamese_html}&nbsp;&nbsp;&nbsp;
-</span>
+</div>
         );
 	}
 }

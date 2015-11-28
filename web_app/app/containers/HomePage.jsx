@@ -7,7 +7,7 @@ import axios from 'axios';
 // Example code here: https://github.com/yahoo/react-intl
 // npm install react-intl@next
 import {get} from '../../lib/service/calls.js'
-import LanguageSwitchNavigation from "components/base/LanguageSwitchNavigation";
+import LanguageSwitchNavigation from "components/navigation/LanguageSwitchNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
@@ -101,8 +101,6 @@ export default class HomePage extends React.Component {
     <Link to="intro_opinions">
         <Button bsStyle="primary">Go</Button>
     </Link>
-    <br />
-    <br />
     <LanguageSwitchNavigation />
 </div>
 		);

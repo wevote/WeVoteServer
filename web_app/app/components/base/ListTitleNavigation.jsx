@@ -4,7 +4,7 @@ import React from "react";
 import { Link } from "react-router";
 
 export default class ListTitleNavigation extends React.Component {
-	render() {
+    render() {
         var back_to_text;
         if (this.props.back_to_text) {
             back_to_text = this.props.back_to_text;
@@ -31,7 +31,7 @@ export default class ListTitleNavigation extends React.Component {
         } else {
             header_text = '';
         }
-		return (
+        return (
 <div className="row">
     <nav className="navbar navbar-main navbar-fixed-top">
         <div className="container-fluid">
@@ -41,5 +41,5 @@ export default class ListTitleNavigation extends React.Component {
     </nav>
 </div>
         );
-	}
+    }
 }
