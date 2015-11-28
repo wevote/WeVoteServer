@@ -23,6 +23,7 @@ import BallotHomePage							from "route-handlers/BallotHomePage";
 import ConnectPage								from "route-handlers/ConnectPage";
 import DonatePage								from "route-handlers/DonatePage";
 import EmailBallotPage							from "route-handlers/EmailBallotPage";
+import FramedContentPage						from "route-handlers/FramedContentPage";
 import GuidesAddOrganizationPage				from "route-handlers/GuidesAddOrganizationPage";
 import GuidesAddOrganizationSearchPage			from "route-handlers/GuidesAddOrganizationSearchPage";
 import GuidesAddOrganizationResultsPage			from "route-handlers/GuidesAddOrganizationResultsPage";
@@ -82,6 +83,7 @@ module.exports = (
 		<Route name="connect" path="/connect" handler={ConnectPage} />
 		<Route name="donate" path="/more/donate" handler={DonatePage} />
 		<Route name="email_ballot" path="/more/emailballot" handler={EmailBallotPage} />
+		<Route name="framed_content" path="/framed" handler={FramedContentPage} />
 		<Route name="guides_confirm_ownership" path="/guides/org/add/confirm" handler={GuidesConfirmOwnershipPage} />
 		<Route name="guides_confirm_ownership_email_sent" path="/guides/org/add/confirmemailsent" handler={GuidesConfirmOwnershipEmailSentPage} />
 		<Route name="guides_organization_add_search" path="/guides/org/add/search" handler={GuidesAddOrganizationSearchPage} />

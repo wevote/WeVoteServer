@@ -1,7 +1,7 @@
 import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import BallotMajorNavigation from "components/base/BallotMajorNavigation";
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import BallotMajorNavigation from "components/navigation/BallotMajorNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import InfoIconAction from "components/base/InfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
@@ -40,7 +40,7 @@ export default class BallotMeasureOnePositionPage extends React.Component {
         }
 	    return (
 <div>
-    <BallotReturnNavigation back_to_ballot={false} />
+    <HeaderBackNavigation />
     <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">

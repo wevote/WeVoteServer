@@ -1,5 +1,5 @@
 import axios from 'axios';
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Alert, Button, ButtonToolbar, Input, ProgressBar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -19,7 +19,7 @@ export default class GuidesConfirmOwnershipPage extends React.Component {
         };
 	    return (
 <div>
-    <ListTitleNavigation header_text={"Create Voter Guide"} back_to_on={true} back_to_text={"< Back"} link_route={'guides_organization_add_results'} />
+    <HeaderBackNavigation header_text={"Create Voter Guide"} back_to_text={"< Back"} link_route={'guides_organization_add_results'} />
 	<div className="container-fluid well well-90">
         <h4>Confirm You Speak for this Organization</h4>
         <ProgressBar striped bsStyle="success" now={70} label="%(percent)s% Complete" />

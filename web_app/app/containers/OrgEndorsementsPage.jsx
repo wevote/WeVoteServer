@@ -1,6 +1,6 @@
 import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import InfoIconAction from "components/base/InfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar, DropdownButton, MenuItem } from "react-bootstrap";
@@ -22,7 +22,7 @@ export default class OrgEndorsementsPage extends React.Component {
         };
 	    return (
 <div>
-    <BallotReturnNavigation back_to_ballot={false} />
+    <HeaderBackNavigation />
     <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">

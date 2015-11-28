@@ -1,5 +1,5 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
@@ -19,7 +19,7 @@ export default class BallotOpinionsPage extends React.Component {
 	render() {
 	    return (
 <div>
-	<BallotReturnNavigation back_to_ballot={true} />
+	<HeaderBackNavigation back_to_text={"< Back to My Ballot"} />
 	<div className="container-fluid well well-90">
 		<h2 className="text-center">More Opinions I Can Follow</h2>
 			<input type="text" name="search_opinions" className="form-control"

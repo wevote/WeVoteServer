@@ -1,6 +1,6 @@
 import axios from 'axios';
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
@@ -17,7 +17,7 @@ export default class GuidesVoterAddExistingLinkPage extends React.Component {
 	render() {
 	    return (
 <div>
-    <ListTitleNavigation header_text={"Existing Voter Guide?"} back_to_on={true} back_to_text={"Cancel"} link_route={'guides_voter'} />
+    <HeaderBackNavigation header_text={"Existing Voter Guide?"} back_to_text={"Cancel"} link_route={'guides_voter'} />
 	<div className="container-fluid well well-90">
 		<div>
             <label htmlFor="existing_link">Do you already publish a voter guide on the web?</label><br />

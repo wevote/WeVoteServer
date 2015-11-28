@@ -1,5 +1,5 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import FriendsNavigation from "components/base/FriendsNavigation";
 import MainMenu from "components/base/MainMenu";
 import React from "react";
@@ -18,7 +18,7 @@ export default class RequestsPage extends React.Component {
 	render() {
 	    return (
 <div>
-	<BallotReturnNavigation back_to_ballot={false} link_route={'more'} />
+	<HeaderBackNavigation link_route={'more'} />
 	<FriendsNavigation />
 	<div className="container-fluid well well-90">
 		<h4 className="text-left">My Friends</h4>

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotMajorNavigation from "components/navigation/BallotMajorNavigation";
 import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";

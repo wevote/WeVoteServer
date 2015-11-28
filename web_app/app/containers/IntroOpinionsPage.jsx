@@ -1,9 +1,8 @@
 "use strict";
 
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
@@ -26,7 +25,7 @@ export default class IntroOpinionsPage extends React.Component {
         };
 	    return (
 <div>
-    <ListTitleNavigation header_text={"Here's the idea - Learn from Community"} back_to_on={false} />
+    <HeaderBackNavigation header_text={"Here's the idea - Learn from Community"} back_to_off={true} />
 
     <ul className="list-group">
         <li className="list-group-item">You have organizations and friends you trust when it comes time to

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
@@ -16,7 +16,7 @@ export default class VolunteerHomePage extends React.Component {
 	render() {
 	    return (
 			<div>
-                <BallotReturnNavigation back_to_ballot={false} />
+                <HeaderBackNavigation />
                 <div className="container-fluid well well-90">
 					<h4 className="text-left">Volunteer With We Vote</h4>
                     <p>Do you have 2 minutes right now?<br />
