@@ -6,6 +6,7 @@ import InfoIconAction from "components/base/InfoIconAction";
 import { Link } from "react-router";
 import React from "react";
 import StarAction from "components/base/StarAction";
+import styles from "./BallotHomePage.css";
 
 {/* VISUAL DESIGN HERE: https://invis.io/V33KV2GBR */}
 
@@ -30,7 +31,7 @@ export default class BallotHomePage extends React.Component {
 	  <li className="list-group-item">
           <StarAction we_vote_id={'wvcand001'} />
           <Link to="ballot_candidate" params={{id: 2}}>
-		    <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>&nbsp;Fictional Candidate{/* TODO icon-person-placeholder */}
+		    <i className={styles.iconXlarge + " icon-icon-person-placeholder-6-1 icon-light"}></i>&nbsp;Fictional Candidate{/* TODO icon-person-placeholder */}
           </Link>
           <InfoIconAction we_vote_id={'wvcand001'} />
           <br />

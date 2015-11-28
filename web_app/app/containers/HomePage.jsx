@@ -97,10 +97,14 @@ export default class HomePage extends React.Component {
     </ul>
     <label htmlFor="address">My Ballot Location</label><br />
     <span className="small">This is our best guess - feel free to change</span>
-    <Input type="text" name="address" className="form-control" defaultValue="Oakland, CA" />
-    <Link to="intro_opinions">
-        <Button bsStyle="primary">Go</Button>
-    </Link>
+    <div className="form-group">
+        <input type="text" name="address" className="form-control" defaultValue="Oakland, CA" />
+    </div>
+    <div className="form-group">
+        <Link to="intro_opinions">
+            <Button bsStyle="primary">Go</Button>
+        </Link>
+    </div>
     <LanguageSwitchNavigation />
 </div>
 		);
