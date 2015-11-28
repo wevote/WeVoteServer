@@ -1,11 +1,8 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
-import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
-import UnfollowAction from "components/base/UnfollowAction";
 
 {/* VISUAL DESIGN HERE:  */}
 
@@ -21,30 +18,28 @@ export default class AboutPage extends React.Component {
 	render() {
 	    return (
 <div>
-	<BallotReturnNavigation back_to_ballot={false} link_route={'more'} />
+	<HeaderBackNavigation link_route={'more'} />
 	<div className="container-fluid well well-90">
-		<h2 className="text-center">About We Vote</h2>
+		<h4>About We Vote</h4>
 
-        <ul className="list-group">
-          <li className="list-group-item">
-            <UnfollowAction />
-            <Link to="org_endorsements" params={{org_id: 27}}>
-                <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Organization Name<br />{/* TODO icon-org-placeholder */}
-                    <span className="small">
-                        @OrgName1 (read more)
-                    </span>
+        <p>We Vote USA is a nonprofit, nonpartisan, volunteer-driven movement, dedicated to helping you make voting decisions.
+            We are volunteer designers, engineers, thought leaders, political junkies, and good citizens.
+            We contribute our time and passion because we feel political decisions should be made following
+            clear-headed conversations as opposed to through epic media battles, cast in terms of good versus evil.
+        </p>
+
+        <span>
+            <Link to="framed_content" >
+                <Button bsStyle="primary">Vision Video</Button>&nbsp;&nbsp;
             </Link>
-          </li>
-          <li className="list-group-item">
-            <UnfollowAction />
-              <Link to="org_endorsements" params={{org_id: 27}}>
-                <span className="glyphicon glyphicon-small glyphicon-tower"></span>&nbsp;Another Organization<br />{/* TODO icon-org-placeholder */}
-                    <span className="small">
-                        @OrgName2 (read more)
-                    </span>
-              </Link>
-          </li>
-        </ul>
+            <Link to="framed_content" >
+                <Button bsStyle="primary">Meet the Team</Button>&nbsp;&nbsp;
+            </Link>
+            <Link to="framed_content" >
+                <Button bsStyle="primary">Our Values</Button>
+            </Link>
+        </span>
+
     </div>
 </div>
 		);

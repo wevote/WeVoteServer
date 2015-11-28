@@ -1,7 +1,7 @@
 import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import BallotItemNavigation from "components/base/BallotItemNavigation";
-import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotItemNavigation from "components/navigation/BallotItemNavigation";
+import BallotMajorNavigation from "components/navigation/BallotMajorNavigation";
 import InfoIconAction from "components/base/InfoIconAction";
 import React from "react";
 import { Button, ButtonToolbar, DropdownButton, MenuItem } from "react-bootstrap";
@@ -33,7 +33,7 @@ export default class BallotCandidatePage extends React.Component {
         }
 	    return (
 <div>
-    <BallotItemNavigation back_to_ballot={true} is_measure={false} />
+    <BallotItemNavigation back_to_text={"< Back to My Ballot"} is_measure={false} />
     <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">

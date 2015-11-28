@@ -1,6 +1,6 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
 import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
 import React from "react";
 import { Button, ButtonToolbar } from "react-bootstrap";
@@ -21,7 +21,7 @@ export default class DonatePage extends React.Component {
 	render() {
 	    return (
 <div>
-	<BallotReturnNavigation back_to_ballot={false} link_route={'more'} />
+	<HeaderBackNavigation link_route={'more'} />
 	<div className="container-fluid well well-90">
 		<h2 className="text-center">Donate</h2>
 

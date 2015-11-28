@@ -1,7 +1,7 @@
 import axios from 'axios';
-import BallotFeedNavigation from "components/base/BallotFeedNavigation";
+import BallotFeedNavigation from "components/navigation/BallotFeedNavigation";
 import BallotFeedItemActionBar from "components/base/BallotFeedItemActionBar";
-import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotMajorNavigation from "components/navigation/BallotMajorNavigation";
 import InfoIconAction from "components/base/InfoIconAction";
 import { Link } from "react-router";
 import React from "react";

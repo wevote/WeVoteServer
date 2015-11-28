@@ -1,11 +1,11 @@
 "use strict";
 
 import axios from 'axios';
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
 import BallotFeedItemActionBar from "components/base/BallotFeedItemActionBar";
-import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotMajorNavigation from "components/navigation/BallotMajorNavigation";
 import InfoIconAction from "components/base/InfoIconAction";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import { Button, ButtonToolbar } from "react-bootstrap";
 import { Link } from "react-router";
 import React from "react";
@@ -27,7 +27,7 @@ export default class IntroBallotContestsPage extends React.Component {
         };
 	    return (
 <div>
-    <ListTitleNavigation header_text={"What's On My Ballot?"} back_to_on={false} />
+    <HeaderBackNavigation header_text={"What's On My Ballot?"} back_to_off={true} />
     <div className="container-fluid well well-90">
         <p>We have found your ballot for this location:</p>
 

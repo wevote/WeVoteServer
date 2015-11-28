@@ -1,7 +1,7 @@
 import axios from 'axios';
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
 import InfoIconAction from "components/base/InfoIconAction";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
@@ -32,7 +32,7 @@ export default class AskOrSharePage extends React.Component {
         }
 	    return (
 <div>
-    <ListTitleNavigation header_text={"Ask or Share"} back_to_on={true} back_to_text={"Cancel"} />
+    <HeaderBackNavigation header_text={"Ask or Share"} back_to_text={"Cancel"} />
 	<div className="container-fluid well well-90">
 		<div>
 			<input type="text" name="ask_message" className="form-control"

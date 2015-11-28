@@ -3,13 +3,13 @@
 import React from "react";
 import { Link } from "react-router";
 
-export default class ListTitleNavigation extends React.Component {
+export default class HeaderBackNavigation extends React.Component {
     render() {
         var back_to_text;
         if (this.props.back_to_text) {
             back_to_text = this.props.back_to_text;
         } else {
-            back_to_text = '&lt; Back';
+            back_to_text = '< Back';
         }
         var link_route;
         if (this.props.link_route) {
@@ -17,8 +17,14 @@ export default class ListTitleNavigation extends React.Component {
         } else {
             link_route = 'ballot';
         }
+        var back_to_on;
+        if (this.props.back_to_off) {
+            back_to_on = false;
+        } else {
+            back_to_on = true;
+        }
         var back_to_link;
-        if (this.props.back_to_on) {
+        if (back_to_on) {
             back_to_link = <span>
                 {/* Switch between "< Back" and "Cancel" */}
                 <Link to={link_route}>{back_to_text}</Link>

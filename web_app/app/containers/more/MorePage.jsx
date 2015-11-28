@@ -2,7 +2,7 @@ import React from "react";
 import axios from 'axios';
 import LanguageSwitchNavigation from "components/navigation/LanguageSwitchNavigation";
 import MainMenu from "../../components/base/MainMenu";
-import BallotMajorNavigation from "../../components/base/BallotMajorNavigation";
+import BallotMajorNavigation from "components/navigation/BallotMajorNavigation";
 import { Link } from "react-router";
 
 export default class MorePage extends React.Component {

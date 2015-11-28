@@ -1,5 +1,5 @@
 import axios from 'axios';
-import BallotMajorNavigation from "components/base/BallotMajorNavigation";
+import BallotMajorNavigation from "components/navigation/BallotMajorNavigation";
 import FollowOrIgnoreAction from "components/base/FollowOrIgnoreAction";
 import MainMenu from "components/base/MainMenu";
 import React from "react";

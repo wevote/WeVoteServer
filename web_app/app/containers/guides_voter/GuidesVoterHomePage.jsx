@@ -1,6 +1,6 @@
 import axios from 'axios';
 import ElectionsListNavigation from "components/base/ElectionsListNavigation";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
@@ -19,7 +19,7 @@ export default class GuidesVoterHomePage extends React.Component {
 	render() {
 	    return (
 <div>
-    <ListTitleNavigation header_text={"My Voter Guides"} back_to_on={true} back_to_text={"< Back"} />
+    <HeaderBackNavigation header_text={"My Voter Guides"} back_to_text={"< Back"} />
 	<div className="container-fluid well well-90">
         <h4>Public Sharing</h4>
         <p>Share voting recommendations publicly.<br />
