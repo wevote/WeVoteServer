@@ -42,7 +42,7 @@ export default class HeaderBackNavigation extends React.Component {
     <nav className="navbar navbar-main navbar-fixed-top">
         <div className="container-fluid">
             {back_to_link}
-            <strong>{header_text}</strong>
+            <h4 className="text-center">{header_text}</h4>
         </div>
     </nav>
 </div>

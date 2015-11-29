@@ -24,28 +24,25 @@ export default class IntroOpinionsPage extends React.Component {
             float: 'right'
         };
 	    return (
-<div>
+<div className="container-fluid">
     <HeaderBackNavigation header_text={"Here's the idea - Learn from Community"} back_to_off={true} />
 
-    <ul className="list-group">
-        <li className="list-group-item">You have organizations and friends you trust when it comes time to
-          vote. Follow them so you can see what they endorse on your ballot.<br />
-          <br />
-        Or skip this.
+    <div className="well well-95">
+        <p>You have organizations and friends you trust when it comes time to
+          vote. Follow them so you can see what they endorse on your ballot.</p>
+        <p className="clearfix">Or skip this.
             <span style={floatRight}><Link to="intro_contests">
-                <Button bsStyle="primary">Start on My Own ></Button>
+                <Button bsStyle="primary" bsSize="small">Start on My Own ></Button>
             </Link></span>
-            <br />
-            <br />
-        </li>
-        <li className="list-group-item">
+        </p>
+        <div>
             <label htmlFor="search_opinions">Follow Like-Minded Organizations</label><br />
             <input type="text" name="search_opinions" className="form-control"
                placeholder="Search by name or twitter handle." /><br />
 
             <OrganizationsToFollowList />
-        </li>
-    </ul>
+        </div>
+    </div>
     <BottomContinueNavigation link_route_continue={'intro_contests'} />
 
 </div>
