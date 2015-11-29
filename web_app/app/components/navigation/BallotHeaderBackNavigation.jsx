@@ -5,7 +5,7 @@ import { Link } from "react-router";
 //  react-router@^1.0.0
 
 // This navigation is for returns to prior page, combined with the option to select "More Opinions".
-export default class BallotItemNavigation extends React.Component {
+export default class BallotHeaderBackNavigation extends React.Component {
 	render() {
         var back_to_text;
         if (this.props.back_to_text) {

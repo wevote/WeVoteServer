@@ -6,15 +6,15 @@ import axios from 'axios';
 //import {IntlProvider, FormattedNumber, FormattedPlural} from 'react-intl';
 // Example code here: https://github.com/yahoo/react-intl
 // npm install react-intl@next
-import {get} from '../../lib/service/calls.js'
+import {get} from '../../../lib/service/calls.js'
 import LanguageSwitchNavigation from "components/navigation/LanguageSwitchNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
 
-import {voterCount, organizationCount} from '../service/api';
+import {voterCount, organizationCount} from '../../service/api';
 
-import docCookies from 'cookies';
+import docCookies from '../../cookies';
 
 export default class HomePage extends React.Component {
 	constructor(props) {

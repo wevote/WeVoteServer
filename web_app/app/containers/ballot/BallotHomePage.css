@@ -1,5 +1,13 @@
+.iconMedium {
+    font-size: 50px;
+}
+
+.iconSmall {
+    font-size: 30px;
+}
+
 .iconXlarge {
-    font-size: 100px;
+    font-size: 80px;
 }
 
 .bufferNone {
@@ -8,6 +16,20 @@
 
 .paddingTopSmall {
     padding-top: 5px;
+}
+
+.typeMedium {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.typeSmall {
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .typeXLarge {

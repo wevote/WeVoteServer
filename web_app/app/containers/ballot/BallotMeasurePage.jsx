@@ -1,6 +1,6 @@
 import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import BallotItemNavigation from "components/navigation/BallotItemNavigation";
+import BallotHeaderBackNavigation from "components/navigation/BallotHeaderBackNavigation";
 import BallotMajorNavigation from "components/navigation/BallotMajorNavigation";
 import InfoIconAction from "components/base/InfoIconAction";
 import React from "react";
@@ -33,7 +33,7 @@ export default class BallotMeasurePage extends React.Component {
         }
 	    return (
 <div>
-	<BallotItemNavigation back_to_text={"< Back to My Ballot"} is_measure={true} />
+	<BallotHeaderBackNavigation back_to_text={"< Back to My Ballot"} is_measure={true} />
 	<div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">
