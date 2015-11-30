@@ -28,7 +28,7 @@ export default class GuidesConfirmOwnershipPage extends React.Component {
             <h5>Method 1</h5>
             <span style={floatRight}>
                 <ButtonToolbar>
-                    <Link to="guides_confirm_ownership"><Button bsStyle="primary">Sign In With Twitter ></Button></Link>
+                    <Link to="guides_organization_confirm_ownership"><Button bsStyle="primary">Sign In With Twitter ></Button></Link>
                 </ButtonToolbar>
             </span>
             Sign in with this organization's Twitter account, @orgHandle.
@@ -42,7 +42,7 @@ export default class GuidesConfirmOwnershipPage extends React.Component {
 			We never sell email addresses. See <Link to="privacy">privacy policy</Link>.
             <span style={floatRight}>
                 <ButtonToolbar>
-                    <Link to="guides_confirm_ownership_email_sent"><Button bsStyle="primary">Send Email ></Button></Link>
+                    <Link to="guides_organization_confirm_ownership_email_sent"><Button bsStyle="primary">Send Email ></Button></Link>
                 </ButtonToolbar>
             </span>
         </div>

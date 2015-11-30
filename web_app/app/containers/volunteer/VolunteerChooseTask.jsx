@@ -16,7 +16,7 @@ export default class VolunteerChooseTask extends React.Component {
 	render() {
 	    return (
 			<div>
-                <HeaderBackNavigation />
+                <HeaderBackNavigation link_route={"volunteer"} />
                 <div className="container-fluid well well-90">
 					<h4 className="text-left">Choose a Volunteer Task</h4>
                     <ul className="list-group">

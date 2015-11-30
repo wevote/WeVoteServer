@@ -27,7 +27,7 @@ export default class HeaderBackNavigation extends React.Component {
         if (back_to_on) {
             back_to_link = <span>
                 {/* Switch between "< Back" and "Cancel" */}
-                <Link to={link_route}>{back_to_text}</Link>
+                <Link to={link_route} params={this.props.params}>{back_to_text}</Link>
                 &nbsp;&nbsp;&nbsp;&nbsp;
             </span>;
         }

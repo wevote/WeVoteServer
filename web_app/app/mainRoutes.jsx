@@ -39,8 +39,16 @@ import GuidesOrganizationBallotResultsPage		from "route-handlers/GuidesOrganizat
 import GuidesOrganizationBallotSearchPage		from "route-handlers/GuidesOrganizationBallotSearchPage";
 import GuidesOrganizationPersonalEmailPage		from "route-handlers/GuidesOrganizationPersonalEmailPage";
 import GuidesOwnershipConfirmedPage				from "route-handlers/GuidesOwnershipConfirmedPage";
-import GuidesVoterAddExistingLinkPage			from "route-handlers/GuidesVoterAddExistingLinkPage";
 import GuidesVoterHomePage						from "route-handlers/GuidesVoterHomePage";
+import GuidesVoterAddExistingLinkPage			from "route-handlers/GuidesVoterAddExistingLinkPage";
+import GuidesVoterAddTwitterPage				from "route-handlers/GuidesVoterAddTwitterPage";
+import GuidesVoterPersonalEmailPage			    from "route-handlers/GuidesVoterPersonalEmailPage";
+import GuidesVoterEmailVerifyPage			    from "route-handlers/GuidesVoterEmailVerifyPage";
+import GuidesVoterChooseElectionPage			from "route-handlers/GuidesVoterChooseElectionPage";
+import GuidesVoterBallotResultsPage			    from "route-handlers/GuidesVoterBallotResultsPage";
+import GuidesVoterEditPage			            from "route-handlers/GuidesVoterEditPage";
+import GuidesVoterEditSettingsPage			    from "route-handlers/GuidesVoterEditSettingsPage";
+import GuidesVoterDisplayPage			        from "route-handlers/GuidesVoterDisplayPage";
 import HomePage     							from "route-handlers/HomePage";
 import IntroBallotContestsPage					from "route-handlers/IntroBallotContestsPage";
 import IntroOpinionsPage						from "route-handlers/IntroOpinionsPage";
@@ -84,8 +92,8 @@ module.exports = (
 		<Route name="donate" path="/more/donate" handler={DonatePage} />
 		<Route name="email_ballot" path="/more/emailballot" handler={EmailBallotPage} />
 		<Route name="framed_content" path="/framed" handler={FramedContentPage} />
-		<Route name="guides_confirm_ownership" path="/guides/org/add/confirm" handler={GuidesConfirmOwnershipPage} />
-		<Route name="guides_confirm_ownership_email_sent" path="/guides/org/add/confirmemailsent" handler={GuidesConfirmOwnershipEmailSentPage} />
+		<Route name="guides_organization_confirm_ownership" path="/guides/org/add/confirm" handler={GuidesConfirmOwnershipPage} />
+		<Route name="guides_organization_confirm_ownership_email_sent" path="/guides/org/add/confirmemailsent" handler={GuidesConfirmOwnershipEmailSentPage} />
 		<Route name="guides_organization_add_search" path="/guides/org/add/search" handler={GuidesAddOrganizationSearchPage} />
 		<Route name="guides_organization_add_results" path="/guides/org/add/results" handler={GuidesAddOrganizationResultsPage} />
 		<Route name="guides_organization_add" path="/guides/org/add/details" handler={GuidesAddOrganizationPage} />
@@ -98,9 +106,17 @@ module.exports = (
 		<Route name="guides_organization_edit" path="/guides/org/:guide_id/edit" handler={GuidesOrganizationEditPage} />
 		<Route name="guides_organization_email_verify" path="/guides/org/add/emailverify" handler={GuidesOrganizationEmailVerifyPage} />
 		<Route name="guides_organization_email" path="/guides/org/add/email" handler={GuidesOrganizationPersonalEmailPage} />
-		<Route name="guides_ownership_confirmed" path="/guides/org/add/ownershipconfirmed" handler={GuidesOwnershipConfirmedPage} />
+		<Route name="guides_organization_ownership_confirmed" path="/guides/org/add/ownershipconfirmed" handler={GuidesOwnershipConfirmedPage} />
 		<Route name="guides_voter" path="/guides/voter/" handler={GuidesVoterHomePage} />
 		<Route name="guides_voter_add_existing_link" path="/guides/voter/add/link" handler={GuidesVoterAddExistingLinkPage} />
+		<Route name="guides_voter_add_twitter" path="/guides/voter/add/twitter" handler={GuidesVoterAddTwitterPage} />
+		<Route name="guides_voter_ballot_results" path="/guides/voter/add/ballotresults" handler={GuidesVoterBallotResultsPage} />
+		<Route name="guides_voter_choose_election" path="/guides/voter/add/election" handler={GuidesVoterChooseElectionPage} />
+		<Route name="guides_voter_display" path="/guides/voter/:guide_id" handler={GuidesVoterDisplayPage} />
+		<Route name="guides_voter_edit" path="/guides/voter/:guide_id/edit" handler={GuidesVoterEditPage} />
+		<Route name="guides_voter_edit_settings" path="/guides/voter/:guide_id/editsettings" handler={GuidesVoterEditSettingsPage} />
+		<Route name="guides_voter_email_verify" path="/guides/voter/add/emailverify" handler={GuidesVoterEmailVerifyPage} />
+		<Route name="guides_voter_email" path="/guides/voter/add/email" handler={GuidesVoterPersonalEmailPage} />
 		<Route name="home" path="/home" handler={HomePage} />
 		<Route name="intro_contests" path="/intro/contests" handler={IntroBallotContestsPage} />
 		<Route name="intro_opinions" path="/intro/opinions" handler={IntroOpinionsPage} />

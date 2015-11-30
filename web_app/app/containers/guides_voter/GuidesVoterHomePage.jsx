@@ -19,7 +19,7 @@ export default class GuidesVoterHomePage extends React.Component {
 	render() {
 	    return (
 <div>
-    <HeaderBackNavigation header_text={"My Voter Guides"} back_to_text={"< Back"} />
+    <HeaderBackNavigation header_text={"My Voter Guides"} back_to_text={"< Back"} link_route={'more'}  />
 	<div className="container-fluid well well-90">
         <h4>Public Sharing</h4>
         <p>Share voting recommendations publicly.<br />
@@ -31,14 +31,10 @@ export default class GuidesVoterHomePage extends React.Component {
                 <Button bsStyle="primary">Create Voter Guide for Organization</Button>
             </Link>
         </p>
-	</div>
 
-	<div className="container-fluid well well-90">
         Current Voter Guides
-        <ElectionsListNavigation link_route={'guides_organization_display'} link_route_edit={'guides_organization_edit'} params={{guide_id: 27}} />
-    </div>
+        <ElectionsListNavigation link_route={'guides_organization_display'} link_route_edit={'guides_voter_edit'} params={{guide_id: 27}} />
 
-	<div className="container-fluid well well-90">
         <h4>Private Sharing</h4>
         <p>To share your voting recommendations privately with friends, invite your friends to
             see what you support or oppose.<br />
