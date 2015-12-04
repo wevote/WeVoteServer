@@ -1,12 +1,9 @@
-import axios from 'axios';
 import BallotReturnNavigation from "components/base/BallotReturnNavigation";
 import FriendsNavigation from "components/base/FriendsNavigation";
-import MainMenu from "components/base/MainMenu";
-import React from "react";
-import { Link } from "react-router";
+import React, { Component } from "react";
 import UnfollowAction from "components/base/UnfollowAction";
 
-export default class RequestsPage extends React.Component {
+export default class MyFriends extends Component {
 	constructor(props) {
 		super(props);
 	}
