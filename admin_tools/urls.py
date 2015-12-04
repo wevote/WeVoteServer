@@ -9,4 +9,5 @@ from . import views
 urlpatterns = [
     url(r'^$', views.admin_home_view, name='admin_home',),
     url(r'^import_sample_data/$', views.import_sample_data_view, name='import_sample_data'),
+    url(r'^statistics/$', views.statistics_summary_view, name='statistics_summary'),
 ]

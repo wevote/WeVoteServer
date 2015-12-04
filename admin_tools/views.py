@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.shortcuts import render
 from election.controllers import elections_import_from_sample_file
+from import_export_google_civic.models import GoogleCivicApiCounterManager
 from office.controllers import offices_import_from_sample_file
 from organization.controllers import organizations_import_from_sample_file
 from polling_location.controllers import import_and_save_all_polling_locations_data
@@ -23,7 +24,7 @@ def admin_home_view(request):
     store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
     template_values = {
     }
-    response = render(request, 'admin_home/index.html', template_values)
+    response = render(request, 'admin_tools/index.html', template_values)
 
     # We want to store the voter_device_id cookie if it is new
     if positive_value_exists(voter_device_id) and positive_value_exists(store_new_voter_device_id_in_cookie):
@@ -123,3 +124,14 @@ def delete_test_data_view(request):
 
     # Delete positions data from exported file
     return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+
+
+def statistics_summary_view(request):
+    google_civic_api_counter_manager = GoogleCivicApiCounterManager()
+    daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
+    template_values = {
+        'daily_summary_list':   daily_summary_list,
+    }
+    response = render(request, 'admin_tools/statistics_summary.html', template_values)
+
+    return response

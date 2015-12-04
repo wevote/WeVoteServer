@@ -1,0 +1,27 @@
+{# templates/admin_tools/statistics_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Quick Statistics{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Quick Statistics</h1>
+
+<h4>Google API Calls</h4>
+<p>We need to track the number of calls to the Google Civic API because there are limits to
+    the number of calls we can make per day. This also gives us a glimpse into new network activity.</p>
+    <table border="1" cellpadding="5" cellspacing="1">
+         <tr>
+            <td>Date</td>
+            <td># of Calls</td>
+        </tr>
+       {% for daily_summary in daily_summary_list %}
+        <tr>
+            <td>{{ daily_summary.date_string }}</td>
+            <td>{{ daily_summary.count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+{%  endblock %}
