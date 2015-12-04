@@ -1,4 +1,4 @@
-import {Dispatcher} from 'flux';
+import { Dispatcher } from 'flux';
 
 // we will be using flux initially until we
 // can convert to reflux successfully

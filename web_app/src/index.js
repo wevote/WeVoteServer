@@ -1,11 +1,10 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM, { render } from 'react-dom';
 import { createHistory } from 'history';
-import Root from './Root.jsx';
+import Root from 'Root';
 
 const rootEl = document.getElementById('app');
 
-
 const history = createHistory();
 
-ReactDOM.render(<Root history={history} />, rootEl);
+render(<Root history={history} />, rootEl);

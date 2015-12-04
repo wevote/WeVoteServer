@@ -4,12 +4,16 @@ var webpack = require('webpack');
 module.exports = {
     devtool: 'eval',
     resolve: {
-        root: [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'static', 'assets'), path.resolve(__dirname,'node_modules')],
+        root: [
+            path.resolve(__dirname, 'src'),
+            path.resolve(__dirname, 'static', 'assets'),
+            path.resolve(__dirname,'node_modules')
+        ],
         extensions: ['','.js','.jsx']
     },
     entry: [
+        'webpack/hot/dev-server',
         'webpack-dev-server/client?http://localhost:3000',
-        'webpack/hot/only-dev-server',
         'babel-polyfill',
         path.join(__dirname, 'src/index.js')
     ],
@@ -19,7 +23,8 @@ module.exports = {
         publicPath: '/static/'
     },
     plugins: [
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.WatchIgnorePlugin([/node_modules/])
     ],
     module: {
         loaders: [
