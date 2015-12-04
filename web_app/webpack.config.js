@@ -10,6 +10,7 @@ module.exports = {
     entry: [
         'webpack-dev-server/client?http://localhost:3000',
         'webpack/hot/only-dev-server',
+        'babel-polyfill',
         path.join(__dirname, 'src/index.js')
     ],
     output: {
@@ -28,6 +29,7 @@ module.exports = {
                 loader: 'babel',
                 include: path.join(__dirname, 'src'),
                 query: {
+                    plugins: ['transform-runtime'],
                     presets: ['es2015', 'react', 'stage-0']
                 }
             },

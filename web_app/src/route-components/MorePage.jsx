@@ -1,10 +1,10 @@
-import React, { PropTypes } from "react";
+import React, { PropTypes, Component } from "react";
 
 import { Link } from "react-router";
 
 import LanguageSwitchNavigation from "components/base/LanguageSwitchNavigation";
 
-export default class More extends React.Component {
+export default class MorePage extends Component {
 	static propTypes = {
 		children: PropTypes.object
 	}

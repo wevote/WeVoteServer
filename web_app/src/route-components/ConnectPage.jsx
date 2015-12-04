@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import { Link } from "react-router";
 
 import { Button } from "react-bootstrap";
@@ -7,8 +7,12 @@ import OrganizationsToFollowList from "components/base/OrganizationsToFollowList
 
 {/* VISUAL DESIGN HERE: https://invis.io/E45246B2C */}
 
-export default class Connect extends React.Component {
-	constructor(props) {
+export default class ConnectPage extends Component {
+    static propTypes = {
+
+    }
+
+    constructor(props) {
 		super(props);
 	}
 

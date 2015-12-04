@@ -1,9 +1,9 @@
-import React from "react";
+import React, { Component } from "react";
 
 import MainMenu from "components/base/MainMenu";
 import FollowOrIgnoreAction from "components/base/FollowOrIgnoreAction";
 
-export default class Requests extends React.Component {
+export default class RequestsPage extends Component {
 	constructor(props) {
 		super(props);
 	}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 
 import { Link } from "react-router";
 
@@ -9,7 +9,7 @@ import StarAction from "components/base/StarAction";
 
 {/* VISUAL DESIGN HERE: https://invis.io/V33KV2GBR */}
 
-export default class MyBallot extends React.Component {
+export default class MyBallotPage extends Component {
 	constructor(props) {
 		super(props);
 	}
@@ -21,8 +21,8 @@ export default class MyBallot extends React.Component {
 	render() {
 	    return (
 			<div>
-			<BallotFeedNavigation />
-			  <div className="well well-sm split-top-skinny">
+			    <BallotFeedNavigation />
+			    <div className="well well-sm split-top-skinny">
 			    <StarAction we_vote_id={'wvcand001'} />
 			    US House - District 12
 			    <InfoIconAction we_vote_id={'wvcand001'} />
