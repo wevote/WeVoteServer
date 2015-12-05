@@ -1,8 +1,3 @@
-body {
-	background: #eee;
-    padding-top: 50px; /* It would be better to control this in each header.jsx file since it varies from header to header */
-}
-
 .this {
 	opacity: 1;
 }

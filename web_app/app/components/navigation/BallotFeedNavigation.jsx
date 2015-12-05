@@ -2,12 +2,13 @@
 
 import React from "react";
 import { Link } from "react-router";
+import NavCSS from 'assets/css/navigation.css'
 
 export default class BallotFeedNavigation extends React.Component {
 	render() {
 		return (
 <header className="row">
-    <nav className="navbar navbar-main navbar-fixed-top bottom-separator">
+    <nav className={"navbar navbar-main navbar-fixed-top bottom-separator " + NavCSS.navHeightAuto}>
         <section className="container-fluid">
               <h4 className="pull-left no-space bold">My Ballot</h4>
               <aside className="pull-right">
@@ -17,7 +18,7 @@ export default class BallotFeedNavigation extends React.Component {
               </aside>
         </section>
     </nav>
-    <div className="container-fluid bg-light box-skinny bottom-separator">
+    <div className="container-fluid bg-light bottom-separator">
         <div className="row">
             <div className="col-xs-6 col-md-6 text-center">
                 <i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i>
