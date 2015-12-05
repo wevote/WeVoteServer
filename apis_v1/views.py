@@ -16,6 +16,7 @@ from organization.controllers import organization_retrieve_for_api, organization
 from position.controllers import position_retrieve_for_api, position_save_for_api
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from star.controllers import voter_star_off_save_for_api, voter_star_on_save_for_api, voter_star_status_retrieve_for_api
 from support_oppose_deciding.controllers import oppose_count_for_api, support_count_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save
 from voter.controllers import voter_address_retrieve_for_api, voter_address_save_for_api, voter_retrieve_list_for_api
@@ -158,7 +159,7 @@ def organization_search_view(request):
 
 def position_retrieve_view(request):
     """
-    Retrieve a single position based on unique identifier
+    Retrieve all of the details about a single position based on unique identifier
     :param request:
     :return:
     """
@@ -406,3 +407,49 @@ def voter_supporting_save_view(request):
     candidate_id = request.GET.get('candidate_id', 0)
     measure_id = request.GET.get('measure_id', 0)
     return voter_supporting_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+
+
+def voter_star_off_save_view(request):
+    """
+    Un-mark the star for a single measure, office or candidate for one voter (voterStarOffSave)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    office_id = request.GET.get('office_id', 0)
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    return voter_star_off_save_for_api(
+        voter_device_id=voter_device_id, office_id=office_id, candidate_id=candidate_id, measure_id=measure_id)
+
+
+def voter_star_on_save_view(request):
+    """
+    Mark the star for a single measure, office or candidate for one voter (voterStarOnSave)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    office_id = request.GET.get('office_id', 0)
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    return voter_star_on_save_for_api(
+        voter_device_id=voter_device_id, office_id=office_id, candidate_id=candidate_id, measure_id=measure_id)
+
+
+def voter_star_status_retrieve_view(request):
+    """
+    Retrieve whether or not a star is marked for an office, candidate or measure based on unique identifier
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    office_id = request.GET.get('office_id', 0)
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    return voter_star_status_retrieve_for_api(
+        voter_device_id=voter_device_id,
+        office_id=office_id,
+        candidate_id=candidate_id,
+        measure_id=measure_id,
+    )
