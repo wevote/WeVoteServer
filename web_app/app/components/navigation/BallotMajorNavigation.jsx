@@ -1,5 +1,6 @@
 import React from "react";
 import { Router, Link } from "react-router";
+import styles from 'assets/css/utilities.css'
 
 export default class BallotMajorNavigation extends React.Component {
   render() {
@@ -16,6 +17,7 @@ export default class BallotMajorNavigation extends React.Component {
         </Link>
         <Link to="requests">
             <div className="col-xs-2 center-block text-center">
+              <span className={styles.badgeTotal + ' badge'}>10</span>
               <span className="glyphicon glyphicon-inbox glyphicon-line-adjustment"></span><br />
               <span className="text-center small">Requests</span>
             </div>
