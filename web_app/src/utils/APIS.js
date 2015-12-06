@@ -6,7 +6,7 @@
  * so it should work like this:
  *     import { voterCount } from utils/APIS;
  *
- *     voterCount().then(data => setDeviceId(data.device_id))
+ *     voterCount().then(data => setDeviceId(data.device_id));
  */
 
 'use strict';
