@@ -1,25 +1,11 @@
-<<<<<<< HEAD:web_app/src/route-components/AboutPage.jsx
-=======
-import axios from 'axios';
-import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
->>>>>>> master:web_app/app/containers/more/AboutPage.jsx
-import React from "react";
-
+import React, { Component } from "react";
 import { Link } from "react-router";
-<<<<<<< HEAD:web_app/src/route-components/AboutPage.jsx
 
-// components
-import BallotReturnNavigation from "components/base/BallotReturnNavigation.jsx";
-import BottomContinueNavigation from "components/base/BottomContinueNavigation.jsx";
-import OrganizationsToFollowList from "components/base/OrganizationsToFollowList.jsx";
-import UnfollowAction from "components/base/UnfollowAction.jsx";
-
-=======
->>>>>>> master:web_app/app/containers/more/AboutPage.jsx
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 
 {/* VISUAL DESIGN HERE:  */}
 
-export default class About extends React.Component {
+export default class About extends Component {
 	constructor(props) {
 		super(props);
 	}

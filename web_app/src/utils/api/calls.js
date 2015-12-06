@@ -1,15 +1,3 @@
-/**
- * The idea of this api file is to abstract away the details
- * of many repetitive service calls that we will be using.
- *
- * Our models will be callable VIA an import.
- * so it should be like this:
- *     import {deviceIdGenerate} from api;
- */
-
-'use strict';
-
-var axios = require('axios');
 var model = require('./model.js');
 
 // The logged in users deviceid

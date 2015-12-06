@@ -1,16 +1,16 @@
-import React, { Component } from 'react';
-import { Router, Route, IndexRoute } from 'react-router';
+import React, { Component }           from 'react';
+import { Router, Route, IndexRoute }  from 'react-router';
 
 // main Application
-import Application  						from 'Application';
+import Application  		          from 'Application';
 
 
 /****************************** ROUTE-COMPONENTS ******************************/
-import MyBallotPage							    from 'route-components/MyBallotPage';
-import RequestsPage                             from 'route-components/RequestsPage';
-import ConnectPage                              from 'route-components/ConnectPage';
-import ActivityPage                             from 'route-components/ActivityPage';
-import MorePage                                 from 'route-components/MorePage';
+import MyBallotPage			          from 'route-components/MyBallotPage';
+import RequestsPage                   from 'route-components/RequestsPage';
+import ConnectPage                    from 'route-components/ConnectPage';
+import ActivityPage                   from 'route-components/ActivityPage';
+import MorePage                       from 'route-components/MorePage';
 
 
 // polyfill
