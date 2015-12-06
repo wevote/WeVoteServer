@@ -12,11 +12,12 @@ export default class ElectionsListNavigation extends React.Component {
         var link_edit;
         if (this.props.link_route_edit) {
             link_edit = <span style={floatRight}>
-                <ButtonToolbar>
-                    <Link to={this.props.link_route_edit} params={{guide_id: 27}}>
-                        <Button bsStyle="info">Edit</Button>
-                    </Link>
-                </ButtonToolbar>
+                <Link to={this.props.link_route_edit} params={{guide_id: 27}}>
+                    <Button bsStyle="info">Edit</Button>
+                </Link>&nbsp;
+                <Link to={this.props.link_route_edit} params={{guide_id: 27}}>
+                    <Button bsStyle="info">Statistics</Button>
+                </Link>
             </span>;
         }
         var link_route;

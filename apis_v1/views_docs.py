@@ -12,7 +12,8 @@ from .documentation_source import ballot_item_options_retrieve_doc, candidates_r
     voter_ballot_items_retrieve_doc, voter_count_doc, voter_create_doc, \
     voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
     voter_guides_to_follow_retrieve_doc, \
-    voter_opposing_save_doc, voter_retrieve_doc, voter_stop_opposing_save_doc, \
+    voter_opposing_save_doc, voter_retrieve_doc, voter_star_off_save_doc, voter_star_on_save_doc, \
+    voter_star_status_retrieve_doc, voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc
 from django.shortcuts import render
 
@@ -281,4 +282,31 @@ def voter_supporting_save_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = voter_supporting_save_doc.voter_supporting_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_star_off_save_doc_view(request):
+    """
+    Show documentation about voterStarOffSave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_star_off_save_doc.voter_star_off_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_star_on_save_doc_view(request):
+    """
+    Show documentation about voterStarOnSave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_star_on_save_doc.voter_star_on_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_star_status_retrieve_doc_view(request):
+    """
+    Show documentation about voterStarStatusRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_star_status_retrieve_doc.voter_star_status_retrieve_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)

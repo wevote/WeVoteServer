@@ -1,8 +1,8 @@
 import AskOrShareAction from "components/base/AskOrShareAction";
 import axios from 'axios';
-import CopyLinkNavigation from "components/base/CopyLinkNavigation";
+import CopyLinkNavigation from "components/navigation/CopyLinkNavigation";
 import InfoIconAction from "components/base/InfoIconAction";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input, Navbar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -23,7 +23,7 @@ export default class Display extends React.Component {
         };
 	    return (
 <div>
-    <ListTitleNavigation header_text={""} back_to_on={true} back_to_text={"< Back"} link_route={'guides_voter'} />
+    <HeaderBackNavigation header_text={""} back_to_text={"< Back"} link_route={'guides_voter'} />
     <div className="container-fluid well well-90">
         <ul className="list-group">
             <li className="list-group-item">

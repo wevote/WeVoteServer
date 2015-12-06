@@ -1,6 +1,6 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
@@ -20,7 +20,7 @@ export default class AddFriends extends React.Component {
         };
 	    return (
 <div>
-	<BallotReturnNavigation back_to_ballot={true} />
+	<HeaderBackNavigation back_to_text={"< Back to My Ballot"} />
 	<div className="container-fluid well well-90">
 		<h2 className="text-center">Add Friends</h2>
 		<div>

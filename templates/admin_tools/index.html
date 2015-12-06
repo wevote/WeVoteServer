@@ -1,4 +1,4 @@
-{# templates/admin_home/index.html #}
+{# templates/admin_tools/index.html #}
 {% extends "template_base.html" %}
 
 {% block title %}Admin Menu{% endblock %}
@@ -25,7 +25,8 @@
     <p><a href="{% url 'voter:voter_list' %}">Voters</a></p>
     <p><a href=""></a>Regions</p>
     <p><a href=""></a>Translation Needed</p>
-    <p><a href=""></a>Quick Statistics</p>
+    <p><a href="{% url 'admin_tools:statistics_summary' %}">Quick Statistics</a></p>
+    <p><a href="{% url 'apis_v1:apisIndex' %}" target="_blank">API Documentation</a></p>
     <p>{# Move this to an integrations category? #}
         {% if user and not user.is_anonymous %}
             <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>

@@ -18,7 +18,7 @@ export default class FollowOrIgnoreAction extends React.Component {
 		return (
 <span style={floatRight}>
     <ButtonToolbar>
-        <Button bsStyle="info">{action_text}</Button>
+        <Button bsStyle="info" bsSize="small">{action_text}</Button>
         <Button bsStyle="danger" bsSize="xsmall">Ignore</Button>
     </ButtonToolbar>
 </span>

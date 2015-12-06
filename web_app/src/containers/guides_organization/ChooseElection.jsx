@@ -1,7 +1,7 @@
 import axios from 'axios';
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
 import ElectionsListNavigation from "components/base/ElectionsListNavigation";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input, ProgressBar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -18,7 +18,7 @@ export default class ChooseElection extends React.Component {
 	render() {
 	    return (
 <div>
-    <ListTitleNavigation header_text={"Create Voter Guide"} back_to_on={true} back_to_text={"< Back"} link_route={'guides_organization_add'} />
+    <HeaderBackNavigation header_text={"Create Voter Guide"} back_to_text={"< Back"} link_route={'guides_organization_add'} />
 	<div className="container-fluid well well-90">
         <h4>Choose Election</h4>
         <ProgressBar striped bsStyle="success" now={80} label="%(percent)s% Complete" />

@@ -1,6 +1,6 @@
 import axios from 'axios';
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Alert, Button, ButtonToolbar, Input, ProgressBar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -20,7 +20,7 @@ export default class ConfirmOwnershipEmailSent extends React.Component {
         };
 	    return (
 <div>
-    <ListTitleNavigation header_text={"Create Voter Guide"} back_to_on={true} back_to_text={"< Back"} link_route={'guides_confirm_ownership'} />
+    <HeaderBackNavigation header_text={"Create Voter Guide"} back_to_text={"< Back"} link_route={'guides_organization_confirm_ownership'} />
 	<div className="container-fluid well well-90">
         <h4>Verification Email Sent</h4>
         <ProgressBar striped bsStyle="success" now={80} label="%(percent)s% Complete" />
@@ -30,7 +30,7 @@ export default class ConfirmOwnershipEmailSent extends React.Component {
             access to the email address 'email@orgemail.org'. Or request another verification email.
             <span>
                 <ButtonToolbar>
-                    <Link to="guides_confirm_ownership" >
+                    <Link to="guides_organization_confirm_ownership" >
                         <Button bsStyle="primary">&lt; Request Another Verification Email</Button>
                     </Link>
                 </ButtonToolbar>
@@ -39,7 +39,7 @@ export default class ConfirmOwnershipEmailSent extends React.Component {
         <br />
         <br />
 	</div>
-    <BottomContinueNavigation link_route_continue={'guides_ownership_confirmed'} continue_text={'Continue >'} link_route_cancel={'guides_voter'} cancel_text={"cancel"} />
+    <BottomContinueNavigation link_route_continue={'guides_organization_ownership_confirmed'} continue_text={'Continue >'} link_route_cancel={'guides_voter'} cancel_text={"cancel"} />
 </div>
 		);
 	}

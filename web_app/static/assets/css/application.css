@@ -1,6 +1,6 @@
 body {
     background: #fff !important;
-    padding-top: 60px !important;
+    padding-top: 45px !important;
     padding-bottom: 70px !important;
 }
 
@@ -54,7 +54,7 @@ body {
 
 .glyphicon {
     color: #919191;
-    font-size: 28px;
+    font-size: 20px;
 }
 
 .glyphicon-small {

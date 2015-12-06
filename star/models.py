@@ -10,8 +10,8 @@ from wevote_functions.models import positive_value_exists
 from voter.models import VoterManager
 
 
-ITEM_STARRED = 'ITEM_STARRED'
-ITEM_NOT_STARRED = 'ITEM_NOT_STARRED'
+ITEM_STARRED = 'STARRED'
+ITEM_NOT_STARRED = 'NOT_STARRED'
 STAR_CHOICES = (
     (ITEM_STARRED,      'Item Starred'),
     (ITEM_NOT_STARRED,  'Item Not Starred'),
@@ -33,7 +33,7 @@ class StarItem(models.Model):
     contest_measure_id = models.BigIntegerField(null=True, blank=True)
 
     # Is this person following or ignoring this organization?
-    star_status = models.CharField(max_length=15, choices=STAR_CHOICES, default=ITEM_STARRED)
+    star_status = models.CharField(max_length=16, choices=STAR_CHOICES, default=ITEM_NOT_STARRED)
 
     # The date the voter followed or stopped following this organization
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
@@ -120,7 +120,7 @@ class StarItemManager(models.Model):
         star_item_manager = StarItemManager()
         star_item_id = 0
         results = star_item_manager.retrieve_star_item(star_item_id, voter_id,
-                                                       candidate_campaign_id, contest_office_id, contest_measure_id)
+                                                       contest_office_id, candidate_campaign_id, contest_measure_id)
 
         star_item_on_stage_found = False
         star_item_on_stage_id = 0
@@ -173,7 +173,7 @@ class StarItemManager(models.Model):
         }
         return results
 
-    def retrieve_star_item(self, star_item_id, voter_id, candidate_campaign_id, contest_office_id, contest_measure_id):
+    def retrieve_star_item(self, star_item_id, voter_id, contest_office_id, candidate_campaign_id, contest_measure_id):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -242,7 +242,7 @@ class StarItemList(models.Model):
     """
     A way to retrieve all of the star_item information
     """
-    def retrieve_star_item_info_for_voter(self, voter_id):
+    def retrieve_star_item_list_for_voter(self, voter_id):
         # Retrieve a list of star_item entries for this voter
         star_item_list_found = False
         star_status = ITEM_STARRED

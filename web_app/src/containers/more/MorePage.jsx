@@ -1,4 +1,12 @@
+<<<<<<< HEAD:web_app/src/containers/more/MorePage.jsx
 import React, { PropTypes } from "react";
+=======
+import React from "react";
+import axios from 'axios';
+import LanguageSwitchNavigation from "components/navigation/LanguageSwitchNavigation";
+import MainMenu from "components/base/MainMenu";
+import BallotMajorNavigation from "components/navigation/BallotMajorNavigation";
+>>>>>>> master:web_app/app/containers/more/MorePage.jsx
 import { Link } from "react-router";
 
 import LanguageSwitchNavigation from "../components/base/LanguageSwitchNavigation";

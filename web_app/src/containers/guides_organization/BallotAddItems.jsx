@@ -1,6 +1,6 @@
 import axios from 'axios';
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input, Navbar, ProgressBar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -20,7 +20,7 @@ export default class BallotAddItems extends React.Component {
         };
 	    return (
 <div>
-    <ListTitleNavigation header_text={"Create Voter Guide"} back_to_on={true} back_to_text={"< Back to Guides"} link_route={'guides_voter'} />
+    <HeaderBackNavigation header_text={"Create Voter Guide"} back_to_text={"< Back to Guides"} link_route={'guides_voter'} />
 	<div className="container-fluid well well-90">
         <Link to="guides_organization_add_existing_link">
         </Link>

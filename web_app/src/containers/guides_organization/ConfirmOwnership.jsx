@@ -1,5 +1,5 @@
 import axios from 'axios';
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Alert, Button, ButtonToolbar, Input, ProgressBar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -19,7 +19,7 @@ export default class ConfirmOwnership extends React.Component {
         };
 	    return (
 <div>
-    <ListTitleNavigation header_text={"Create Voter Guide"} back_to_on={true} back_to_text={"< Back"} link_route={'guides_organization_add_results'} />
+    <HeaderBackNavigation header_text={"Create Voter Guide"} back_to_text={"< Back"} link_route={'guides_organization_add_results'} />
 	<div className="container-fluid well well-90">
         <h4>Confirm You Speak for this Organization</h4>
         <ProgressBar striped bsStyle="success" now={70} label="%(percent)s% Complete" />
@@ -28,7 +28,7 @@ export default class ConfirmOwnership extends React.Component {
             <h5>Method 1</h5>
             <span style={floatRight}>
                 <ButtonToolbar>
-                    <Link to="guides_confirm_ownership"><Button bsStyle="primary">Sign In With Twitter ></Button></Link>
+                    <Link to="guides_organization_confirm_ownership"><Button bsStyle="primary">Sign In With Twitter ></Button></Link>
                 </ButtonToolbar>
             </span>
             Sign in with this organization's Twitter account, @orgHandle.
@@ -42,7 +42,7 @@ export default class ConfirmOwnership extends React.Component {
 			We never sell email addresses. See <Link to="privacy">privacy policy</Link>.
             <span style={floatRight}>
                 <ButtonToolbar>
-                    <Link to="guides_confirm_ownership_email_sent"><Button bsStyle="primary">Send Email ></Button></Link>
+                    <Link to="guides_organization_confirm_ownership_email_sent"><Button bsStyle="primary">Send Email ></Button></Link>
                 </ButtonToolbar>
             </span>
         </div>

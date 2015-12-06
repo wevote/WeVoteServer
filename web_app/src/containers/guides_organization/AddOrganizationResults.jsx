@@ -1,6 +1,6 @@
 import axios from 'axios';
-import BottomContinueNavigation from "components/base/BottomContinueNavigation";
-import ListTitleNavigation from "components/base/ListTitleNavigation";
+import BottomContinueNavigation from "components/navigation/BottomContinueNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import React from "react";
 import { Alert, Button, ButtonToolbar, Input, ProgressBar } from "react-bootstrap";
 import { Link } from "react-router";
@@ -20,7 +20,7 @@ export default class AddOrganizationResults extends React.Component {
         };
 	    return (
 <div>
-    <ListTitleNavigation header_text={"Create Voter Guide"} back_to_on={true} back_to_text={"< Back"} link_route={'guides_organization_add_search'} />
+    <HeaderBackNavigation header_text={"Create Voter Guide"} back_to_text={"< Back"} link_route={'guides_organization_add_search'} />
 	<div className="container-fluid well well-90">
         <h4>Existing Organizations Found</h4>
         <ProgressBar striped bsStyle="success" now={60} label="%(percent)s% Complete" />
@@ -32,7 +32,7 @@ export default class AddOrganizationResults extends React.Component {
           <li className="list-group-item">
             <span style={floatRight}>
                 <ButtonToolbar>
-                    <Link to="guides_confirm_ownership"><Button bsStyle="info">Choose</Button></Link>
+                    <Link to="guides_organization_confirm_ownership"><Button bsStyle="info">Choose</Button></Link>
                 </ButtonToolbar>
             </span>
             <Link to="org_endorsements" params={{org_id: 27}}>
@@ -46,7 +46,7 @@ export default class AddOrganizationResults extends React.Component {
           <li className="list-group-item">
             <span style={floatRight}>
                 <ButtonToolbar>
-                    <Link to="guides_confirm_ownership"><Button bsStyle="info">Choose</Button></Link>
+                    <Link to="guides_organization_confirm_ownership"><Button bsStyle="info">Choose</Button></Link>
                 </ButtonToolbar>
             </span>
               <Link to="org_endorsements" params={{org_id: 27}}>

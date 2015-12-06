@@ -10,6 +10,7 @@
 
 import json
 import requests
+from .models import GoogleCivicApiCounterManager
 from ballot.models import BallotItemManager, BallotItemListManager
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
@@ -397,7 +398,9 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, google_civic_
     # with open("import_export_google_civic/import_data/voterInfoQuery_VA_sample.json") as json_data:
     #     structured_json = json.load(json_data)
 
-    # TODO Add Google Civic API call counter so we can track the number of queries we are doing each day
+    # Use Google Civic API call counter to track the number of queries we are doing each day
+    google_civic_api_counter_manager = GoogleCivicApiCounterManager()
+    google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
 
     # Verify that we got a ballot. (If you use an address in California for an election in New York,
     #  you won't get a ballot for example.)
@@ -489,7 +492,9 @@ def retrieve_from_google_civic_api_election_query():
     request = requests.get(ELECTION_QUERY_URL, params={
         "key": GOOGLE_CIVIC_API_KEY,  # This comes from an environment variable
     })
-    # TODO Add Google Civic API call counter so we can track the number of queries we are doing each day
+    # Use Google Civic API call counter to track the number of queries we are doing each day
+    google_civic_api_counter_manager = GoogleCivicApiCounterManager()
+    google_civic_api_counter_manager.create_counter_entry('election')
     return json.loads(request.text)
 
 

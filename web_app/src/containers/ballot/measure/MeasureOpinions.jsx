@@ -1,5 +1,5 @@
 import axios from 'axios';
-import BallotReturnNavigation from "components/base/BallotReturnNavigation";
+import HeaderBackNavigation from "components/navigation/HeaderBackNavigation";
 import FollowOrIgnoreAction from "components/base/FollowOrIgnoreAction";
 import InfoIconAction from "components/base/InfoIconAction";
 import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
@@ -19,7 +19,7 @@ export default class MeasureOpinions extends React.Component {
 	render() {
 	    return (
 <div>
-    <BallotReturnNavigation />
+    <HeaderBackNavigation />
     <div className="container-fluid well well-90">
         <h2 className="text-center">More Opinions I Can Follow</h2>
 

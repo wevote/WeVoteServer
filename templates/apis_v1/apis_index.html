@@ -81,6 +81,10 @@
         <td colspan="2"><strong>Positions (Support, Oppose, Info Only) or Stars</strong></td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:supportCountDocs' %}">supportCount</a></td>
+        <td>Return the number of organizations the voter follows + the voter's friends that support the specified candidate or measure</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:opposeCountDocs' %}">opposeCount</a></td>
         <td>Return the number of organizations the voter follows + the voter's friends that oppose the specified candidate or measure</td>
     </tr>
@@ -93,24 +97,32 @@
         <td>Save a new position or update an existing position.</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterStopOpposingSaveDocs' %}">voterStopOpposingSave</a></td>
-        <td>Save or update one voter's lack of opposition for one candidate or measure</td>
-    </tr>
-    <tr>
-        <td><a href="{% url 'apis_v1:voterOpposingSaveDocs' %}">voterOpposingSave</a></td>
-        <td>Save or update one voter's opposition for one candidate or measure</td>
-    </tr>
-    <tr>
-        <td><a href="{% url 'apis_v1:supportCountDocs' %}">supportCount</a></td>
-        <td>Return the number of organizations the voter follows + the voter's friends that support the specified candidate or measure</td>
+        <td><a href="{% url 'apis_v1:voterSupportingSaveDocs' %}">voterSupportingSave</a></td>
+        <td>Save or update one voter's support for one candidate or measure</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterStopSupportingSaveDocs' %}">voterStopSupportingSave</a></td>
         <td>Save or update one voter's lack of support for one candidate or measure</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterSupportingSaveDocs' %}">voterSupportingSave</a></td>
-        <td>Save or update one voter's support for one candidate or measure</td>
+        <td><a href="{% url 'apis_v1:voterOpposingSaveDocs' %}">voterOpposingSave</a></td>
+        <td>Save or update one voter's opposition for one candidate or measure</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterStopOpposingSaveDocs' %}">voterStopOpposingSave</a></td>
+        <td>Save or update one voter's lack of opposition for one candidate or measure</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterStarOnSaveDocs' %}">voterStarOnSave</a></td>
+        <td>Save or create private 'star on' state for the current voter for a measure, an office or candidate.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterStarOffSaveDocs' %}">voterStarOffSave</a></td>
+        <td>Save or create private 'star off' state for the current voter for a measure, an office or candidate.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterStarStatusRetrieveDocs' %}">voterStarStatusRetrieve</a></td>
+        <td>Has the voter starred this measure, office or candidate?</td>
     </tr>
 
     {###  ###}
