@@ -2,10 +2,10 @@ import React, { Component } from "react";
 
 import { Link } from "react-router";
 
-import BallotFeedNavigation from "components/base/BallotFeedNavigation";
-import BallotFeedItemActionBar from "components/base/BallotFeedItemActionBar";
-import InfoIconAction from "components/base/InfoIconAction";
-import StarAction from "components/base/StarAction";
+import BallotFeedNavigation from "components/BallotFeedNavigation";
+import BallotFeedItemActionBar from "components/BallotFeedItemActionBar";
+import InfoIconAction from "components/InfoIconAction";
+import StarAction from "components/StarAction";
 
 import BallotStore from 'stores/BallotStore';
 

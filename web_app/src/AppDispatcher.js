@@ -1,5 +1,5 @@
 import { Dispatcher } from 'flux';
 
-const Dispatcher = new Dispatcher();
+const dispatcher = new Dispatcher();
 
-export const register = Dispatcher.register;
+export const register = dispatcher.register;

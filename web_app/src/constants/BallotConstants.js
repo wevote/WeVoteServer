@@ -1,5 +1,5 @@
 import keymirror from 'keymirror';
 
-export default const BallotConstants = {
+export const BallotConstants = keymirror({
     BALLOT_ADD: null
-}
+});

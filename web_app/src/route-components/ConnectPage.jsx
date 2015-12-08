@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 import { Button } from "react-bootstrap";
 
-import OrganizationsToFollowList from "components/base/OrganizationsToFollowList";
+import OrganizationsToFollowList from "components/OrganizationsToFollowList";
 
 {/* VISUAL DESIGN HERE: https://invis.io/E45246B2C */}
 

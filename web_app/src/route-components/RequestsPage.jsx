@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import FollowOrIgnoreAction from "components/base/FollowOrIgnoreAction";
+import FollowOrIgnoreAction from "components/FollowOrIgnoreAction";
 
 export default class RequestsPage extends Component {
 	constructor(props) {

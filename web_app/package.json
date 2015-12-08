@@ -6,6 +6,7 @@
   "main": "server.js",
   "license": "MIT",
   "dependencies": {
+    "keymirror": "^0.1.1",
     "object-assign": "^4.0.1"
   },
   "devDependencies": {
