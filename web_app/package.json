@@ -5,7 +5,9 @@
   "private": true,
   "main": "server.js",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "object-assign": "^4.0.1"
+  },
   "devDependencies": {
     "axios": "^0.7.0",
     "babel-core": "^6.2.1",

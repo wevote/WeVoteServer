@@ -7,6 +7,14 @@ import BallotFeedItemActionBar from "components/base/BallotFeedItemActionBar";
 import InfoIconAction from "components/base/InfoIconAction";
 import StarAction from "components/base/StarAction";
 
+import BallotStore from 'stores/BallotStore';
+
+function getBallotState() {
+    var ballotItems = BallotStore.toArray();
+    return {
+        ballotItems
+    };
+}
 {/* VISUAL DESIGN HERE: https://invis.io/V33KV2GBR */}
 
 export default class MyBallotPage extends Component {
@@ -14,9 +22,17 @@ export default class MyBallotPage extends Component {
 		super(props);
 	}
 
-	static getProps() {
-		return {};
-	}
+    static getProps() {
+        return getBallotState();
+    }
+
+    componentDidMount() {
+        BallotStore.addChangeListener(this._onChange);
+    }
+
+    componentWillUnmount() {
+        BallotStore.removeChangeListener(this._onChange);
+    }
 
 	render() {
 	    return (
@@ -115,4 +131,11 @@ export default class MyBallotPage extends Component {
 			</div>
 		);
 	}
+
+    /*
+        eventListener for ballotChange events
+     */
+    _onChange() {
+        this.setState(getBallotState());
+    }
 }

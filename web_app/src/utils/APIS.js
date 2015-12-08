@@ -23,10 +23,11 @@ const base_path = '/apis/v1/';
 let url = `${protocol}${host}${port}${base_path}`;
 
 function checkParams(params, params_in) {
+    let keys;
     if (!params instanceof Array)
         throw new Error('params must be array');
 
-    var keys = Object.keys(params_in);
+    keys = Object.keys(params_in);
 
     if (params.length !== keys.length)
         return false; // params not valid
@@ -34,7 +35,7 @@ function checkParams(params, params_in) {
     return keys.every( key => {
         var index = params.indexOf(key);
         return index >= 0 ? params.splice(index, 1) : false;
-    })
+    });
 }
 
 module.exports = {

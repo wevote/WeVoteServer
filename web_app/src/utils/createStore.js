@@ -1,32 +1,41 @@
 import EventEmitter from 'events';
-import { each, isFunction } from 'underscore';
+import assign from 'object-assign';
 
 const CHANGE_EVENT = 'change';
 
-export function createStore(spec) {
-    var emitter = new EventEmitter();
-    emitter.setMaxListeners(0);
+/**
+ * create a store using a spec object as mixin
+ * @param  {Object} spec object to mixin
+ * @return {Store}  DataStore Object
+ */
+export function createStore(mixin) {
 
-    const store = Object.assign({
+    const store = assign({}, EventEmitter.prototype, {
         emitChange() {
-            emitter.emit(CHANGE_EVENT);
+            this.emit(CHANGE_EVENT);
         },
 
         addChangeListener(callback) {
-            emitter.on(CHANGE_EVENT, callback);
+            this.on(CHANGE_EVENT, callback);
         },
 
         removeChangeListener(callback) {
-            emitter.removeChangeListener(CHANGE_EVENT, callback);
+            this.removeChangeListener(CHANGE_EVENT, callback);
         }
 
-    },spec);
-
-    each(store, (val, key) => {
-        if (isFunction(val)) {
-            store[key] = store[key].bind(store);
-        }
-    });
+    }, mixin);
 
     return store;
+}
+
+export function mergeIntoStore (store, data) {
+    let key;
+
+    if(typeof data !== 'object')
+        throw new Error('data is not an object');
+
+    for(key in data) {
+        store[key] = data[key];
+    }
+
 }
