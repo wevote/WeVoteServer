@@ -1,4 +1,4 @@
-import AskOrShareAction from "components/base/AskOrShareAction";
+import AskOrShareAction from "components/AskOrShareAction";
 import React from "react";
 import { DropdownButton, MenuItem } from "react-bootstrap";
 import { Link } from "react-router";
