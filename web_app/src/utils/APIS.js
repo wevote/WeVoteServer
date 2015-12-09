@@ -93,6 +93,7 @@ module.exports = {
     /********** Candidates & Measures **********/
     candidatesRetrieve: office_we_vote_id => {
         var params = { office_we_vote_id };
+        console.log(params);
         if (checkParams(['office_we_vote_id'], params))
             return axios.get(url + 'candidatesRetrieve', params);
         else

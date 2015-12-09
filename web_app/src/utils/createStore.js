@@ -29,10 +29,7 @@ export function createStore(mixin) {
 }
 
 export function mergeIntoStore (store, data) {
-    let key;
-
-    if(typeof data !== 'object')
-        throw new Error('data is not an object');
+    let key, a;
 
     for(key in data) {
         store[key] = data[key];

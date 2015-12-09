@@ -7,7 +7,7 @@ module.exports = {
         root: [
             path.resolve(__dirname, 'src'),
             path.resolve(__dirname, 'static', 'assets'),
-            path.resolve(__dirname,'node_modules')
+            path.resolve(__dirname, 'node_modules')
         ],
         extensions: ['','.js','.jsx']
     },
@@ -38,14 +38,15 @@ module.exports = {
                     presets: ['es2015', 'react', 'stage-0']
                 }
             },
-            // {test: /\.md$/, loader: 'html!markdown' },
             {test: /\.css$/, loader:'style-loader!css-loader'},
+            {test: /\.json/, loader: 'json-loader'},
             {test: /\.jpe?g$|\.gif$|\.png$|\.wav$|\.mp3$/, loader: 'url-loader' },
             {test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader' },
             {test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader' },
             {test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader' },
             {test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader' },
             {test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader' }
+            // {test: /\.md$/, loader: 'html!markdown' },
         ]
     }
 };
