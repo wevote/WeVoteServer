@@ -5,7 +5,7 @@
 
 def voter_ballot_items_retrieve_doc_template_values(url_root):
     """
-    Show documentation about voterBallotItemsRetrieveView
+    Show documentation about voterBallotItemsRetrieve
     """
     required_query_parameter_list = [
         {
@@ -78,8 +78,8 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'voterBallotItemsRetrieveView',
-        'api_slug': 'voterBallotItemsRetrieveView',
+        'api_name': 'voterBallotItemsRetrieve',
+        'api_slug': 'voterBallotItemsRetrieve',
         'api_introduction':
             "Request a skeleton of ballot data for this voter location, so that the web_app has all of the ids "
             "it needs to make more requests for data about each ballot item.",

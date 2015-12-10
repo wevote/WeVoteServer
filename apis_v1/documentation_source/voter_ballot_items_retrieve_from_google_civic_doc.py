@@ -5,7 +5,7 @@
 
 def voter_ballot_items_retrieve_from_google_civic_doc_template_values(url_root):
     """
-    Show documentation about voterBallotItemsRetrieveFromGoogleCivicView
+    Show documentation about voterBallotItemsRetrieveFromGoogleCivic
     """
     required_query_parameter_list = [
         {
@@ -79,8 +79,8 @@ def voter_ballot_items_retrieve_from_google_civic_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'voterBallotItemsRetrieveFromGoogleCivicView',
-        'api_slug': 'voterBallotItemsRetrieveFromGoogleCivicView',
+        'api_name': 'voterBallotItemsRetrieveFromGoogleCivic',
+        'api_slug': 'voterBallotItemsRetrieveFromGoogleCivic',
         'api_introduction':
             "Tell the We Vote server to reach out to the Google Civic API and retrieve a list of "
             "ballot items for the current voter (based on the address saved with voterAddressSave), "
