@@ -2,8 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import FollowOrganization
-from .serializers import FollowOrganizationSerializer
+from .models import StarItem
+from .serializers import StarItemSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import wevote_functions.admin
@@ -15,6 +15,6 @@ logger = wevote_functions.admin.get_logger(__name__)
 # NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
 class ExportStarItemDataView(APIView):
     def get(self, request, format=None):
-        follow_organization_list = FollowOrganization.objects.all()
-        serializer = FollowOrganizationSerializer(follow_organization_list, many=True)
+        star_list = StarItem.objects.all()
+        serializer = StarItemSerializer(star_list, many=True)
         return Response(serializer.data)

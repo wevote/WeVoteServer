@@ -104,7 +104,7 @@
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Positions (Support, Oppose, Info Only) or Stars</strong></td>
+        <td colspan="2"><strong>Positions (Support, Oppose, Info Only), Stars and Like's</strong></td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:supportCountDocs' %}">supportCount</a></td>
@@ -131,7 +131,21 @@
     <tr>
         <td><a href="{% url 'apis_v1:voterPositionCommentSaveDocs' %}">voterPositionCommentSave</a></td>
         <td>Save the voter's comment based on voter_device_id and ballot item id.</td>
-    </tr>    <tr>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterPositionLikeOnSaveDocs' %}">voterPositionLikeOnSave</a></td>
+        <td>Mark that the voter wants to 'Like' this position.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterPositionLikeOffSaveDocs' %}">voterPositionLikeOffSave</a></td>
+        <td>Remove a Like that the voter set on a position.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterPositionLikeStatusRetrieveDocs' %}">voterPositionLikeStatusRetrieve</a></td>
+        <td>Has this voter 'Liked' this position?</td>
+    </tr>
+
+    <tr>
         <td><a href="{% url 'apis_v1:voterSupportingSaveDocs' %}">voterSupportingSave</a></td>
         <td>Save or update one voter's support for one candidate or measure</td>
     </tr>

@@ -558,6 +558,17 @@ class PositionEnteredManager(models.Model):
     def __unicode__(self):
         return "PositionEnteredManager"
 
+    def fetch_we_vote_id_from_local_id(self, position_id):
+        if positive_value_exists(position_id):
+            results = self.retrieve_organization_from_id(position_id)
+            if results['position_found']:
+                position = results['position']
+                return position.we_vote_id
+            else:
+                return None
+        else:
+            return None
+
     def retrieve_organization_candidate_campaign_position(self, organization_id, candidate_campaign_id):
         """
         Find a position based on the organization_id & candidate_campaign_id

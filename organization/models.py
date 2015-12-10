@@ -392,7 +392,6 @@ class OrganizationListManager(models.Manager):
             'success':              success,
             'organizations_found':  organizations_found,
             'organizations_list':   organization_list_for_json,
-
         }
         return results
 

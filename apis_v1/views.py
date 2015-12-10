@@ -18,6 +18,8 @@ from organization.controllers import organization_retrieve_for_api, organization
     organization_search_for_api
 from position.controllers import position_retrieve_for_api, position_save_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api
+from position_like.controllers import voter_position_like_off_save_for_api, voter_position_like_on_save_for_api, \
+    voter_position_like_status_retrieve_for_api
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from star.controllers import voter_star_off_save_for_api, voter_star_on_save_for_api, voter_star_status_retrieve_for_api
@@ -408,6 +410,43 @@ def voter_position_retrieve_view(request):
     )
 
 
+def voter_position_like_off_save_view(request):
+    """
+    Un-mark the position_like for a single position for one voter (voterPositionLikeOffSave)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    position_like_id = request.GET.get('position_like_id', 0)
+    position_entered_id = request.GET.get('position_entered_id', 0)
+    return voter_position_like_off_save_for_api(
+        voter_device_id=voter_device_id, position_like_id=position_like_id, position_entered_id=position_entered_id)
+
+
+def voter_position_like_on_save_view(request):
+    """
+    Mark the position_like for a single position for one voter (voterPositionLikeOnSave)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    position_entered_id = request.GET.get('position_entered_id', 0)
+    return voter_position_like_on_save_for_api(
+        voter_device_id=voter_device_id, position_entered_id=position_entered_id)
+
+
+def voter_position_like_status_retrieve_view(request):
+    """
+    Retrieve whether or not a position_like is marked for position (voterPositionLikeStatusRetrieve)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    position_entered_id = request.GET.get('position_entered_id', 0)
+    return voter_position_like_status_retrieve_for_api(
+        voter_device_id=voter_device_id, position_entered_id=position_entered_id)
+
+
 def voter_position_comment_save_view(request):
     """
     Save a single position
@@ -504,7 +543,8 @@ def voter_supporting_save_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     candidate_id = request.GET.get('candidate_id', 0)
     measure_id = request.GET.get('measure_id', 0)
-    return voter_supporting_save_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+    return voter_supporting_save_for_api(
+        voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
 
 
 def voter_star_off_save_view(request):

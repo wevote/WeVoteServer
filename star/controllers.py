@@ -2,9 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .models import StarItemManager
 from django.http import HttpResponse
 import json
-from star.models import StarItemManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.models import is_voter_device_id_valid, positive_value_exists
@@ -44,7 +44,7 @@ def voter_star_off_save_for_api(voter_device_id, office_id, candidate_id, measur
         status = "STAR_OFF_MEASURE " + results['status']
         success = results['success']
     else:
-        status = 'UNABLE_TO_SAVE-OFFICE_ID_AND_CANDIDATE_ID_AND_MEASURE_ID_MISSING'
+        status = 'UNABLE_TO_SAVE_OFF-OFFICE_ID_AND_CANDIDATE_ID_AND_MEASURE_ID_MISSING'
         success = False
 
     json_data = {
@@ -86,7 +86,7 @@ def voter_star_on_save_for_api(voter_device_id, office_id, candidate_id, measure
         status = "STAR_ON_MEASURE " + results['status']
         success = results['success']
     else:
-        status = 'UNABLE_TO_SAVE-OFFICE_ID_AND_CANDIDATE_ID_AND_MEASURE_ID_MISSING'
+        status = 'UNABLE_TO_SAVE_ON-OFFICE_ID_AND_CANDIDATE_ID_AND_MEASURE_ID_MISSING'
         success = False
 
     json_data = {
@@ -159,20 +159,6 @@ def voter_star_status_retrieve_for_api(voter_device_id, office_id, candidate_id,
         status = 'UNABLE_TO_SAVE-OFFICE_ID_AND_CANDIDATE_ID_AND_MEASURE_ID_MISSING'
         success = False
         is_starred = False
-
-    # From retrieve_star_item
-    # results = {
-    #     'status':                       status,
-    #     'success':                      success,
-    #     'star_item_found':              star_item_on_stage_found,
-    #     'star_item_id':                 star_item_on_stage_id,
-    #     'star_item':                    star_item_on_stage,
-    #     'is_starred':                   star_item_on_stage.is_starred(),
-    #     'is_not_starred':               star_item_on_stage.is_not_starred(),
-    #     'error_result':                 error_result,
-    #     'DoesNotExist':                 exception_does_not_exist,
-    #     'MultipleObjectsReturned':      exception_multiple_object_returned,
-    # }
 
     json_data = {
         'status':           status,
