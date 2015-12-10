@@ -114,10 +114,10 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
     if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
         status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
         json_data = {
-            'status': status,
-            'success': False,
-            'office_id': office_id,
-            'office_we_vote_id': office_we_vote_id,
+            'status':                   status,
+            'success':                  False,
+            'office_id':                office_id,
+            'office_we_vote_id':        office_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -134,10 +134,10 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
     else:
         status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING_2'  # It should be impossible to reach this
         json_data = {
-            'status': status,
-            'success': False,
-            'office_id': office_id,
-            'office_we_vote_id': office_we_vote_id,
+            'status':                   status,
+            'success':                  False,
+            'office_id':                office_id,
+            'office_we_vote_id':        office_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')

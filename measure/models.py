@@ -253,20 +253,28 @@ class ContestMeasureManager(models.Model):
             if positive_value_exists(contest_measure_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(id=contest_measure_id)
                 contest_measure_id = contest_measure_on_stage.id
+                status = "RETRIEVE_MEASURE_FOUND_BY_ID"
             elif positive_value_exists(contest_measure_we_vote_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
                 contest_measure_id = contest_measure_on_stage.id
+                status = "RETRIEVE_MEASURE_FOUND_BY_WE_VOTE_ID"
             elif positive_value_exists(maplight_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(maplight_id=maplight_id)
                 contest_measure_id = contest_measure_on_stage.id
+                status = "RETRIEVE_MEASURE_FOUND_BY_MAPLIGHT_ID"
+            else:
+                status = "RETRIEVE_MEASURE_SEARCH_INDEX_MISSING"
         except ContestMeasure.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
+            status = "RETRIEVE_MEASURE_MULTIPLE_OBJECTS_RETURNED"
         except ContestMeasure.DoesNotExist:
             exception_does_not_exist = True
+            status = "RETRIEVE_MEASURE_NOT_FOUND"
 
         results = {
             'success':                      True if contest_measure_id > 0 else False,
+            'status':                       status,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,

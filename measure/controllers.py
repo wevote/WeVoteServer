@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from office.models import ContestOfficeManager
+from measure.models import ContestMeasureManager
 from config.base import get_environment_variable
 from django.http import HttpResponse
 from exception.models import handle_exception, handle_record_not_found_exception, handle_record_not_saved_exception
@@ -16,63 +16,70 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 # CANDIDATE_CAMPAIGNS_URL = get_environment_variable("CANDIDATE_CAMPAIGNS_URL")
 
 
-def measure_retrieve_for_api(office_id, office_we_vote_id):  # TODO DALE This method is still a work in progress
+def measure_retrieve_for_api(measure_id, measure_we_vote_id):
     """
     Used by the api
-    :param office_id:
-    :param office_we_vote_id:
+    :param measure_id:
+    :param measure_we_vote_id:
     :return:
     """
     # NOTE: Office retrieve is independent of *who* wants to see the data. Office retrieve never triggers
     #  a ballot data lookup from Google Civic, like voterBallotItemsFromGoogleCivic does
 
-    if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
-        status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
+    if not positive_value_exists(measure_id) and not positive_value_exists(measure_we_vote_id):
+        status = 'VALID_MEASURE_ID_AND_MEASURE_WE_VOTE_ID_MISSING'
         json_data = {
-            'status': status,
-            'success': False,
-            'office_id': office_id,
-            'office_we_vote_id': office_we_vote_id,
+            'status':                   status,
+            'success':                  False,
+            'measure_id':               measure_id,
+            'measure_we_vote_id':       measure_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    office_manager = ContestOfficeManager()
-    if positive_value_exists(office_id):
-        results = office_manager.retrieve_contest_office_from_id()
+    measure_manager = ContestMeasureManager()
+    if positive_value_exists(measure_id):
+        results = measure_manager.retrieve_contest_measure_from_id(measure_id)
         success = results['success']
         status = results['status']
-    elif positive_value_exists(office_we_vote_id):
-        results = office_manager.retrieve_contest_office_from_id()
+    elif positive_value_exists(measure_we_vote_id):
+        results = measure_manager.retrieve_contest_measure_from_we_vote_id(measure_we_vote_id)
         success = results['success']
         status = results['status']
     else:
-        status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING_2'  # It should be impossible to reach this
+        status = 'VALID_MEASURE_ID_AND_MEASURE_WE_VOTE_ID_MISSING_2'  # It should be impossible to reach this
         json_data = {
-            'status': status,
-            'success': False,
-            'office_id': office_id,
-            'office_we_vote_id': office_we_vote_id,
+            'status':                   status,
+            'success':                  False,
+            'measure_id':               measure_id,
+            'measure_we_vote_id':       measure_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     if success:
-        contest_office = results['contest_office']
+        contest_measure = results['contest_measure']
         json_data = {
             'status':                   status,
             'success':                  True,
-            'office_id':                contest_office.id,
-            'office_we_vote_id':        contest_office.we_vote_id,
-            'google_civic_election_id': contest_office.google_civic_election_id,
-            'office_name':              contest_office.office_name,
+            'measure_id':               contest_measure.id,
+            'measure_we_vote_id':       contest_measure.we_vote_id,
+            'google_civic_election_id': contest_measure.google_civic_election_id,
+            'measure_title':            contest_measure.measure_title,
+            'measure_subtitle':         contest_measure.measure_subtitle,
+            'maplight_id':              contest_measure.maplight_id,
+            'measure_text':             contest_measure.measure_text,
+            'measure_url':              contest_measure.measure_url,
+            'ocd_division_id':          contest_measure.ocd_division_id,
+            'district_name':            contest_measure.district_name,
+            'state_code':               contest_measure.state_code,
         }
     else:
         json_data = {
             'status':                   status,
             'success':                  False,
-            'office_id':                office_id,
-            'office_we_vote_id':        office_we_vote_id,
+            'measure_id':               measure_id,
+            'measure_we_vote_id':       measure_we_vote_id,
             'google_civic_election_id': 0,
         }
 
