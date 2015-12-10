@@ -4,7 +4,7 @@
 
 from django.db import models
 from election.models import Election
-from exception.models import handle_exception, handle_record_found_more_than_one_exception, print_to_log
+from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from office.models import ContestOffice
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
@@ -225,6 +225,10 @@ class CandidateCampaign(models.Model):
         #     politician_manager = PoliticianManager()
         #     return politician_manager.fetch_photo_url(self.politician_id)
 
+    def fetch_twitter_handle(self):
+        # TODO extract the twitter handle from twitter_url if we don't have it stored as a handle yet
+        return self.twitter_url
+
     def get_candidate_state(self):
         # Pull this from ocdDivisionId
         ocd_division_id = self.ocd_division_id
@@ -360,26 +364,35 @@ class CandidateCampaignManager(models.Model):
         candidate_campaign_on_stage = CandidateCampaign()
 
         try:
-            if candidate_campaign_id > 0:
+            if positive_value_exists(candidate_campaign_id):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(id=candidate_campaign_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
-            elif len(we_vote_id) > 0:
+                status = "RETRIEVE_CANDIDATE_FOUND_BY_ID"
+            elif positive_value_exists(we_vote_id):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(we_vote_id=we_vote_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
-            elif candidate_maplight_id > 0 and candidate_maplight_id != "":
+                status = "RETRIEVE_CANDIDATE_FOUND_BY_WE_VOTE_ID"
+            elif positive_value_exists(candidate_maplight_id):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(maplight_id=candidate_maplight_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
-            elif len(candidate_name) > 0:
+                status = "RETRIEVE_CANDIDATE_FOUND_BY_MAPLIGHT_ID"
+            elif positive_value_exists(candidate_name):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
                 candidate_campaign_id = candidate_campaign_on_stage.id
+                status = "RETRIEVE_CANDIDATE_FOUND_BY_NAME"
+            else:
+                status = "RETRIEVE_CANDIDATE_SEARCH_INDEX_MISSING"
         except CandidateCampaign.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
+            status = "RETRIEVE_CANDIDATE_MULTIPLE_OBJECTS_RETURNED"
         except CandidateCampaign.DoesNotExist:
             exception_does_not_exist = True
+            status = "RETRIEVE_CANDIDATE_NOT_FOUND"
 
         results = {
             'success':                  True if candidate_campaign_id > 0 else False,
+            'status':                   status,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,

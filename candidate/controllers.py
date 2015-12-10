@@ -135,6 +135,88 @@ def candidates_import_from_sample_file(request=None, load_from_uri=False):
     return candidates_results
 
 
+def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
+    """
+    Used by the api
+    :param candidate_id:
+    :param candidate_we_vote_id:
+    :return:
+    """
+    # NOTE: Candidates retrieve is independent of *who* wants to see the data. Candidates retrieve never triggers
+    #  a ballot data lookup from Google Civic, like voterBallotItems does
+
+    if not positive_value_exists(candidate_id) and not positive_value_exists(candidate_we_vote_id):
+        status = 'VALID_CANDIDATE_ID_AND_CANDIDATE_WE_VOTE_ID_MISSING'
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'candidate_id':             candidate_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'google_civic_election_id': 0,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    candidate_manager = CandidateCampaignManager()
+    if positive_value_exists(candidate_id):
+        results = candidate_manager.retrieve_candidate_campaign_from_id(candidate_id)
+        success = results['success']
+        status = results['status']
+    elif positive_value_exists(candidate_we_vote_id):
+        results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+        success = results['success']
+        status = results['status']
+    else:
+        status = 'VALID_CANDIDATE_ID_AND_CANDIDATE_WE_VOTE_ID_MISSING_2'  # It should be impossible to reach this
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'candidate_id':             candidate_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'google_civic_election_id': 0,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    if success:
+        candidate_campaign = results['candidate_campaign']
+        json_data = {
+            'status':                       status,
+            'success':                      True,
+            'candidate_id':                 candidate_campaign.id,
+            'candidate_we_vote_id':         candidate_campaign.we_vote_id,
+            'candidate_display_name':       candidate_campaign.candidate_name,
+            'candidate_photo_url':          candidate_campaign.fetch_photo_url(),
+            'order_on_ballot':              candidate_campaign.order_on_ballot,
+            'google_civic_election_id':     candidate_campaign.google_civic_election_id,
+            'maplight_id':                  candidate_campaign.maplight_id,
+            'contest_office_id':            candidate_campaign.contest_office_id,
+            'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
+            'politician_id':                candidate_campaign.politician_id,
+            'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
+            # 'google_civic_candidate_name': candidate_campaign.google_civic_candidate_name,
+            'party':                        candidate_campaign.maplight_id,
+            'ocd_division_id':              candidate_campaign.ocd_division_id,
+            'state_code':                   candidate_campaign.state_code,
+            'candidate_url':                candidate_campaign.candidate_url,
+            'facebook_url':                 candidate_campaign.facebook_url,
+            'twitter_url':                  candidate_campaign.twitter_url,
+            'twitter_handle':               candidate_campaign.fetch_twitter_handle(),
+            'google_plus_url':              candidate_campaign.google_plus_url,
+            'youtube_url':                  candidate_campaign.youtube_url,
+            'candidate_email':              candidate_campaign.candidate_email,
+            'candidate_phone':              candidate_campaign.candidate_phone,
+        }
+    else:
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'candidate_id':             candidate_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'google_civic_election_id': 0,
+        }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 def candidates_retrieve_for_api(office_id, office_we_vote_id):
     """
     Used by the api
@@ -146,7 +228,6 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
     #  a ballot data lookup from Google Civic, like voterBallotItems does
 
     if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
-        # At this point if we don't have a google_civic_election_id, then we don't have an upcoming election
         status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
         json_data = {
             'status': status,

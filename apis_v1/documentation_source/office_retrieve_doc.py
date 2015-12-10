@@ -2,8 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-# This is a template (starting point) for creating documentation for individual APIs
-
 
 def office_retrieve_doc_template_values(url_root):
     """
@@ -66,13 +64,26 @@ def office_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
+                   '  "office_id": integer,\n' \
+                   '  "office_we_vote_id": string,\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "office_name": string,\n' \
+                   '  "ocd_division_id": string,\n' \
+                   '  "maplight_id": string,\n' \
+                   '  "ballotpedia_id": string,\n' \
+                   '  "wikipedia_id": string,\n' \
+                   '  "number_voting_for": integer,\n' \
+                   '  "number_elected": integer,\n' \
+                   '  "state_code": string,\n' \
+                   '  "primary_party": string,\n' \
+                   '  "district_name": string,\n' \
                    '}'
 
     template_values = {
         'api_name': 'officeRetrieve',
         'api_slug': 'officeRetrieve',
         'api_introduction':
-            "",
+            "Retrieve detailed information about one office.",
         'try_now_link': 'apis_v1:officeRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

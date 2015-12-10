@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/measure_retrieve_doc.py
+# apis_v1/documentation_source/candidate_retrieve_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def measure_retrieve_doc_template_values(url_root):
+def candidate_retrieve_doc_template_values(url_root):
     """
-    Show documentation about measureRetrieve
+    Show documentation about candidateRetrieve
     """
     required_query_parameter_list = [
         {
@@ -19,18 +19,18 @@ def measure_retrieve_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
-            'name':         'measure_id',
+            'name':         'candidate_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique internal identifier for this measure '
-                            '(either measure_id OR measure_we_vote_id required -- not both. '
-                            'If it exists, measure_id is used instead of measure_we_vote_id)',
+            'description':  'The unique internal identifier for this candidate '
+                            '(either candidate_id OR candidate_we_vote_id required -- not both. '
+                            'If it exists, candidate_id is used instead of candidate_we_vote_id)',
         },
         {
-            'name':         'measure_we_vote_id',
+            'name':         'candidate_we_vote_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique identifier for this office across all networks '
-                            '(either measure_id OR measure_we_vote_id required -- not both. '
-                            'If it exists, measure_id is used instead of measure_we_vote_id)',
+            'description':  'The unique identifier for this candidate across all networks '
+                            '(either candidate_id OR candidate_we_vote_id required -- not both.) '
+                            'NOTE: In the future we might support other identifiers used in the industry.',
         },
     ]
     optional_query_parameter_list = [
@@ -57,32 +57,43 @@ def measure_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        'measure_we_vote_id': 'wv01meas1',
+        'candidate_we_vote_id': 'wv01cand1755',
     }
 
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "measure_id": integer,\n' \
-                   '  "measure_we_vote_id": string,\n' \
+                   '  "candidate_id": integer,\n' \
+                   '  "candidate_we_vote_id": string,\n' \
+                   '  "candidate_display_name": string,\n' \
+                   '  "candidate_photo_url": string,\n' \
+                   '  "order_on_ballot": integer,\n' \
                    '  "google_civic_election_id": integer,\n' \
-                   '  "measure_title": string,\n' \
-                   '  "measure_subtitle": string,\n' \
                    '  "maplight_id": integer,\n' \
-                   '  "measure_text": string,\n' \
-                   '  "measure_url": string,\n' \
+                   '  "contest_office_id": integer,\n' \
+                   '  "contest_office_we_vote_id": string,\n' \
+                   '  "politician_id": integer,\n' \
+                   '  "politician_we_vote_id": string,\n' \
+                   '  "party": string,\n' \
                    '  "ocd_division_id": string,\n' \
-                   '  "district_name": string,\n' \
                    '  "state_code": string,\n' \
+                   '  "candidate_url": string,\n' \
+                   '  "facebook_url": string,\n' \
+                   '  "twitter_url": string,\n' \
+                   '  "twitter_handle": string,\n' \
+                   '  "google_plus_url": string,\n' \
+                   '  "youtube_url": string,\n' \
+                   '  "candidate_email": string,\n' \
+                   '  "candidate_phone": string,\n' \
                    '}'
 
     template_values = {
-        'api_name': 'measureRetrieve',
-        'api_slug': 'measureRetrieve',
+        'api_name': 'candidateRetrieve',
+        'api_slug': 'candidateRetrieve',
         'api_introduction':
-            "Retrieve detailed information about one measure.",
-        'try_now_link': 'apis_v1:measureRetrieveView',
+            "Retrieve detailed information about one candidate.",
+        'try_now_link': 'apis_v1:candidateRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

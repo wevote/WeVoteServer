@@ -6,7 +6,7 @@ from .controllers import organization_count, organization_follow, organization_f
     organization_stop_following, voter_count, voter_create, \
     voter_guides_to_follow_retrieve
 from ballot.controllers import ballot_item_options_retrieve_for_api, voter_ballot_items_retrieve_for_api
-from candidate.controllers import candidates_retrieve_for_api
+from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from django.http import HttpResponse
 from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
@@ -38,6 +38,12 @@ def ballot_item_options_retrieve_view(request):
     results = ballot_item_options_retrieve_for_api(google_civic_election_id)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
     return response
+
+
+def candidate_retrieve_view(request):
+    candidate_id = request.GET.get('candidate_id', 0)
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', None)
+    return candidate_retrieve_for_api(candidate_id, candidate_we_vote_id)
 
 
 def candidates_retrieve_view(request):

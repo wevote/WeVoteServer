@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .documentation_source import ballot_item_options_retrieve_doc, candidates_retrieve_doc, device_id_generate_doc, \
+from .documentation_source import ballot_item_options_retrieve_doc, candidate_retrieve_doc, candidates_retrieve_doc, \
+    device_id_generate_doc, \
     elections_retrieve_doc, measure_retrieve_doc, office_retrieve_doc, \
     oppose_count_doc, organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
@@ -37,6 +38,15 @@ def ballot_item_options_retrieve_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = ballot_item_options_retrieve_doc.ballot_item_options_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def candidate_retrieve_doc_view(request):
+    """
+    Show documentation about candidateRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = candidate_retrieve_doc.candidate_retrieve_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

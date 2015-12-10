@@ -13,6 +13,7 @@ from . import views_docs
 urlpatterns = [
     # Actual API Calls
     url(r'^ballotItemOptionsRetrieve/', views.ballot_item_options_retrieve_view, name='ballotItemOptionsRetrieveView'),
+    url(r'^candidateRetrieve/', views.candidate_retrieve_view, name='candidateRetrieveView'),
     url(r'^candidatesRetrieve/', views.candidates_retrieve_view, name='candidatesRetrieveView'),
     url(r'^deviceIdGenerate/$', views.device_id_generate_view, name='deviceIdGenerateView'),
     url(r'^electionsRetrieve/', views.ElectionsRetrieveView.as_view(), name='electionsRetrieveView'),
@@ -52,10 +53,12 @@ urlpatterns = [
     url(r'^voterStopOpposingSave/', views.voter_stop_opposing_save_view, name='voterStopOpposingSaveView'),
     url(r'^voterStopSupportingSave/', views.voter_stop_supporting_save_view, name='voterStopSupportingSaveView'),
 
+    ##########################
     # API Documentation Views
     url(r'^docs/$', views_docs.apis_index_doc_view, name='apisIndex'),
     url(r'^docs/ballotItemOptionsRetrieve/$',
         views_docs.ballot_item_options_retrieve_doc_view, name='ballotItemOptionsRetrieveDocs'),
+    url(r'^docs/candidateRetrieve/$', views_docs.candidate_retrieve_doc_view, name='candidateRetrieveDocs'),
     url(r'^docs/candidatesRetrieve/$', views_docs.candidates_retrieve_doc_view, name='candidatesRetrieveDocs'),
     url(r'^docs/deviceIdGenerate/$', views_docs.device_id_generate_doc_view, name='deviceIdGenerateDocs'),
     url(r'^docs/electionsRetrieve/$', views_docs.elections_retrieve_doc_view, name='electionsRetrieveDocs'),

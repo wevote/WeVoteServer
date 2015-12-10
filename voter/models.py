@@ -87,7 +87,7 @@ class VoterManager(BaseUserManager):
     def delete_voter(self, email):
         email = self.normalize_email(email)
         voter_id = 0
-        voter_we_vote_id = ''
+        voter_we_vote_id = None
         voter_deleted = False
 
         if positive_value_exists(email) and validate_email(email):
@@ -148,7 +148,7 @@ class VoterManager(BaseUserManager):
             voter = results['voter']
             return voter.we_vote_id
         else:
-            return ''
+            return None
 
     def fetch_local_id_from_we_vote_id(self, voter_we_vote_id):
         results = self.retrieve_voter_by_we_vote_id(voter_we_vote_id)
@@ -156,7 +156,7 @@ class VoterManager(BaseUserManager):
             voter = results['voter']
             return voter.id
         else:
-            return ''
+            return 0
 
     def retrieve_voter_by_id(self, voter_id):
         email = ''
@@ -634,13 +634,13 @@ class VoterAddressManager(models.Model):
                     'address_type': address_type,
                     # The rest of the values
                     'text_for_map_search': raw_address_text,
-                    'latitude': '',
-                    'longitude': '',
-                    'normalized_line1': '',
-                    'normalized_line2': '',
-                    'normalized_city': '',
-                    'normalized_state': '',
-                    'normalized_zip': '',
+                    'latitude': None,
+                    'longitude': None,
+                    'normalized_line1': None,
+                    'normalized_line2': None,
+                    'normalized_city': None,
+                    'normalized_state': None,
+                    'normalized_zip': None,
                     'refreshed_from_google': False,
                 }
 
