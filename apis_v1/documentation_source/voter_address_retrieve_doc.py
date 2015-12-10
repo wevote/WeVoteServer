@@ -51,7 +51,7 @@ def voter_address_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "address": string (the value submitted and saved),\n' \
+                   '  "text_for_map_search": string (the value submitted and saved),\n' \
                    '  "address_type": string (one char: B = Ballot address),\n' \
                    '  "latitude": string (value from Google),\n' \
                    '  "longitude": string (value from Google),\n' \

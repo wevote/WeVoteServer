@@ -22,7 +22,8 @@
                               value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
                         {% endif %}>
                     {% elif query_parameter.value == 'boolean' %}
-                        <input type="radio" name="{{ query_parameter.name }}" value="true" checked> True<br />
+                        {{ query_parameter.name }}: <br />
+                        <input type="radio" name="{{ query_parameter.name }}" value="true"> True<br />
                         <input type="radio" name="{{ query_parameter.name }}" value="false"> False
                     {% endif %}
                     <br />
@@ -36,7 +37,8 @@
                               value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
                         {% endif %}>
                     {% elif query_parameter.value == 'boolean' %}
-                        <input type="radio" name="{{ query_parameter.name }}" value="true" checked> True<br />
+                        {{ query_parameter.name }}: <br />
+                        <input type="radio" name="{{ query_parameter.name }}" value="true"> True<br />
                         <input type="radio" name="{{ query_parameter.name }}" value="false"> False
                     {% endif %}
                     <br />

@@ -26,11 +26,13 @@
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterAddressRetrieveDocs' %}">voterAddressRetrieve</a></td>
-        <td>Retrieve an address for a voter</td>
+        <td>Retrieve an address for a voter that has previously been saved.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterAddressSaveDocs' %}">voterAddressSave</a></td>
-        <td>Save or update address for an existing voter</td>
+        <td>Save or update address for an existing voter. The front end should call
+        voterBallotItemsRetrieveFromGoogleCivic (asynchronously) immediately following an address change. (If
+        the address has actually changed.)</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterCountDocs' %}">voterCount</a></td>
@@ -56,24 +58,44 @@
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:ballotItemOptionsRetrieveDocs' %}">ballotItemOptionsRetrieve</a></td>
-        <td>Retrieve a list of candidates or measures in the specified election(s).</td>
+        <td>Retrieve a complete list of offices, candidates or measures in the specified election(s).
+        This information is not organized in a hierarchy, but is instead provided in a simple list to help
+            with auto-complete and browser-side quick search features.
+        </td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:electionsRetrieveDocs' %}">electionsRetrieve</a></td>
-        <td>Retrieve a list of elections.</td>
+        <td>Retrieve a list of elections from the Google Civic API.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveDocs' %}">voterBallotItemsRetrieve</a></td>
-        <td>Retrieve a list of ballot items to display.</td>
+        <td>Retrieve a list of ballot items to display for the current voter from the We Vote database. These entries
+            would have been previously retrieved from Google Civic with voterBallotItemsRetrieveFromGoogleCivic.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveFromGoogleCivicDocs' %}">
+            voterBallotItemsRetrieveFromGoogleCivic</a></td>
+        <td>Tell the We Vote server to reach out to the Google Civic API and retrieve a list of ballot items
+            for the current voter (based on the address saved with voterAddressSave), and store them in
+            the We Vote database so we can display them
+            with voterBallotItemsRetrieve, and other API calls.</td>
     </tr>
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Candidates &amp; Measures</strong></td>
+        <td colspan="2"><strong>Offices, Candidates &amp; Measures</strong></td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:officeRetrieveDocs' %}">officeRetrieve</a></td>
+        <td>Retrieve information about one office.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:candidatesRetrieveDocs' %}">candidatesRetrieve</a></td>
         <td>Retrieve a list of candidates competing for an office to display.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:measureRetrieveDocs' %}">measureRetrieve</a></td>
+        <td>Retrieve information about one measure.</td>
     </tr>
 
     {###  ###}
@@ -90,13 +112,22 @@
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionRetrieveDocs' %}">positionRetrieve</a></td>
-        <td>Retrieve one position based on unique identifier.</td>
+        <td>Retrieve one position based on unique position identifier.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionSaveDocs' %}">positionSave</a></td>
-        <td>Save a new position or update an existing position.</td>
+        <td>Save a new position or update an existing position. Mostly for volunteer tools and voter guides. For the
+        typical voter, we use voterPositionCommentSave, voterSupportingSave, voterOpposingSave,
+            voterStopSupportingSave, and voterStopOpposingSave.</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:voterPositionRetrieveDocs' %}">voterPositionRetrieve</a></td>
+        <td>Retrieve the voter's position based on voter_device_id and ballot item id.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterPositionCommentSaveDocs' %}">voterPositionCommentSave</a></td>
+        <td>Save the voter's comment based on voter_device_id and ballot item id.</td>
+    </tr>    <tr>
         <td><a href="{% url 'apis_v1:voterSupportingSaveDocs' %}">voterSupportingSave</a></td>
         <td>Save or update one voter's support for one candidate or measure</td>
     </tr>

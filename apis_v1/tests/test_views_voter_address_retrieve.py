@@ -70,7 +70,8 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
 
         #######################################
         # Create a voter address so we can test retrieve
-        response3 = self.client.post(self.voter_address_save_url, {'address': '123 Main Street, Oakland CA 94602'})
+        response3 = self.client.post(self.voter_address_save_url, {'text_for_map_search':
+                                                                   '123 Main Street, Oakland CA 94602'})
         json_data3 = json.loads(response3.content)
 
         self.assertEqual('status' in json_data3, True,
@@ -93,8 +94,8 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
         # Are any expected fields missing?
         self.assertEqual('success' in json_data4, True,
                          "success expected in the voterAddressRetrieveView json response but not found")
-        self.assertEqual('address' in json_data4, True,
-                         "address expected in the voterAddressRetrieveView json response but not found")
+        self.assertEqual('text_for_map_search' in json_data4, True,
+                         "text_for_map_search expected in the voterAddressRetrieveView json response but not found")
         self.assertEqual('address_type' in json_data4, True,
                          "address_type expected in the voterAddressRetrieveView json response but not found")
         self.assertEqual('latitude' in json_data4, True,
@@ -114,7 +115,8 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
 
         # Does address match the value inserted last?
         self.assertEqual(
-            json_data4['address'], '123 Main Street, Oakland CA 94602',
-            "address:  {address} ('123 Main Street, Oakland CA 94602' expected in voterAddressRetrieveView), "
+            json_data4['text_for_map_search'], '123 Main Street, Oakland CA 94602',
+            "text_for_map_search:  {text_for_map_search} "
+            "('123 Main Street, Oakland CA 94602' expected in voterAddressRetrieveView), "
             "voter_device_id: {voter_device_id}".format(
-                address=json_data4['address'], voter_device_id=json_data4['voter_device_id']))
+                text_for_map_search=json_data4['text_for_map_search'], voter_device_id=json_data4['voter_device_id']))

@@ -20,7 +20,7 @@ def voter_address_save_doc_template_values(url_root):
                             'a voter record on the server',
         },
         {
-            'name':         'address',
+            'name':         'text_for_map_search',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The address text a voter enters to identify the location tied to their ballot. '
                             '(Not mailing address.)',
@@ -64,7 +64,7 @@ def voter_address_save_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string (description of what happened),\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "address": string (the value just saved),\n' \
+                   '  "text_for_map_search": string (the value just saved),\n' \
                    '  "success": boolean (did the save happen?),\n' \
                    '}'
 
@@ -72,7 +72,9 @@ def voter_address_save_doc_template_values(url_root):
         'api_name': 'voterAddressSave',
         'api_slug': 'voterAddressSave',
         'api_introduction':
-            "Save or create an address for the current voter.",
+            "Save or create an address for the current voter. Whenever the address is updated, we should follow this "
+            "call with a call to voterBallotItemsRetrieveFromGoogleCivic"
+            "",
         'try_now_link': 'apis_v1:voterAddressSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

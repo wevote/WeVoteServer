@@ -13,7 +13,7 @@ import wevote_functions.admin
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-class switch(object):
+class LocalSwitch(object):
     def __init__(self, value):
         self.value = value
         self.fall = False
@@ -246,4 +246,5 @@ def get_google_civic_election_id_from_cookie(request):
 
 
 def set_google_civic_election_id_cookie(request, response, google_civic_election_id):
+    # We are leaving request as an incoming variable in case we need to use it in the future.
     set_cookie(response, 'google_civic_election_id', google_civic_election_id)

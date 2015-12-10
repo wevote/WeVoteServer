@@ -11,8 +11,9 @@ from exception.models import handle_record_not_found_exception, handle_record_no
 from organization.models import OrganizationManager
 from position.models import PositionEnteredManager
 import json
+from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
+from wevote_functions.models import convert_to_int, is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -26,6 +27,8 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
     position_we_vote_id = position_we_vote_id.strip()
 
     # TODO for certain positions (voter positions), we need to restrict the retrieve based on voter_device_id / voter_id
+    if voter_device_id:
+        pass
 
     we_vote_id = position_we_vote_id.strip()
     if not positive_value_exists(position_id) and not positive_value_exists(position_we_vote_id):
@@ -54,11 +57,12 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
 
     position_manager = PositionEnteredManager()
     organization_id = 0
+    contest_office_id = 0
     candidate_campaign_id = 0
     contest_measure_id = 0
     position_voter_id = 0
     results = position_manager.retrieve_position(position_id, position_we_vote_id, organization_id, position_voter_id,
-                                                 candidate_campaign_id, contest_measure_id)
+                                                 contest_office_id, candidate_campaign_id, contest_measure_id)
     # results = {
     #     'error_result':             error_result,
     #     'DoesNotExist':             exception_does_not_exist,
@@ -278,7 +282,7 @@ def position_save_for_api(
         return results
 
 
-def positions_import_from_sample_file(request=None, load_from_uri=False):
+def positions_import_from_sample_file(request=None):  # , load_from_uri=False
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -403,3 +407,290 @@ def positions_import_from_sample_file(request=None, load_from_uri=False):
     }
     return positions_results
 
+
+# We retrieve the position for this voter for one ballot item. Could just be the stance, but for now we are
+# retrieving the entire position
+def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidate_we_vote_id, measure_we_vote_id):
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    office_we_vote_id = office_we_vote_id.strip()
+    candidate_we_vote_id = candidate_we_vote_id.strip()
+    measure_we_vote_id = measure_we_vote_id.strip()
+
+    if not positive_value_exists(office_we_vote_id) and \
+            not positive_value_exists(candidate_we_vote_id) and \
+            not positive_value_exists(measure_we_vote_id):
+        json_data = {
+            'status':                   "POSITION_RETRIEVE_MISSING_AT_LEAST_ONE_BALLOT_ITEM_ID",
+            'success':                  False,
+            'position_id':              0,
+            'position_we_vote_id':      '',
+            'is_support':               False,
+            'is_oppose':                False,
+            'is_information_only':      False,
+            'google_civic_election_id': '',
+            'office_we_vote_id':        '',
+            'candidate_we_vote_id':     '',
+            'measure_we_vote_id':       '',
+            'stance':                   '',
+            'statement_text':           '',
+            'statement_html':           '',
+            'more_info_url':            '',
+            'last_updated':             '',
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    position_manager = PositionEnteredManager()
+
+    if positive_value_exists(office_we_vote_id):
+        results = position_manager.retrieve_voter_contest_office_position_with_we_vote_id(
+            voter_id, office_we_vote_id)
+
+    elif positive_value_exists(candidate_we_vote_id):
+        results = position_manager.retrieve_voter_candidate_campaign_position_with_we_vote_id(
+            voter_id, candidate_we_vote_id)
+
+    elif positive_value_exists(measure_we_vote_id):
+        results = position_manager.retrieve_voter_contest_measure_position_with_we_vote_id(
+            voter_id, measure_we_vote_id)
+
+    # retrieve_position results
+    # results = {
+    #     'error_result':             error_result,
+    #     'DoesNotExist':             exception_does_not_exist,
+    #     'MultipleObjectsReturned':  exception_multiple_object_returned,
+    #     'position_found':           True if position_id > 0 else False,
+    #     'position_id':              position_id,
+    #     'position':                 position_on_stage,
+    #     'is_support':               position_on_stage.is_support(),
+    #     'is_oppose':                position_on_stage.is_oppose(),
+    #     'is_no_stance':             position_on_stage.is_no_stance(),
+    #     'is_information_only':      position_on_stage.is_information_only(),
+    #     'is_still_deciding':        position_on_stage.is_still_deciding(),
+    # }
+
+    if results['position_found']:
+        position = results['position']
+        json_data = {
+            'success':                  True,
+            'status':                   results['status'],
+            'position_id':              position.id,
+            'position_we_vote_id':      position.we_vote_id,
+            'is_support':               results['is_support'],
+            'is_oppose':                results['is_oppose'],
+            'is_information_only':      results['is_information_only'],
+            'google_civic_election_id': position.google_civic_election_id,
+            'office_we_vote_id':        position.contest_office_we_vote_id,
+            'candidate_we_vote_id':     position.candidate_campaign_we_vote_id,
+            'measure_we_vote_id':       position.contest_measure_we_vote_id,
+            'stance':                   position.stance,
+            'statement_text':           position.statement_text,
+            'statement_html':           position.statement_html,
+            'more_info_url':            position.more_info_url,
+            'last_updated':             '',
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        json_data = {
+            'status':                   results['status'],
+            'success':                  False,
+            'position_id':              0,
+            'position_we_vote_id':      '',
+            'is_support':               False,
+            'is_oppose':                False,
+            'is_information_only':      False,
+            'google_civic_election_id': '',
+            'office_we_vote_id':        '',
+            'candidate_we_vote_id':     '',
+            'measure_we_vote_id':       '',
+            'stance':                   '',
+            'statement_text':           '',
+            'statement_html':           '',
+            'more_info_url':            '',
+            'last_updated':             '',
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_position_comment_save_for_api(
+        voter_device_id, position_id, position_we_vote_id,
+        google_civic_election_id,
+        office_we_vote_id,
+        candidate_we_vote_id,
+        measure_we_vote_id,
+        statement_text,
+        statement_html
+        ):
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        json_data_from_results = results['json_data']
+        json_data = {
+            'status':                   json_data_from_results['status'],
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'position_id':              position_id,
+            'position_we_vote_id':      position_we_vote_id,
+            'new_position_created':     False,
+            'is_support':               False,
+            'is_oppose':                False,
+            'is_information_only':      False,
+            'google_civic_election_id': google_civic_election_id,
+            'office_we_vote_id':        office_we_vote_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'measure_we_vote_id':       measure_we_vote_id,
+            'statement_text':           statement_text,
+            'statement_html':           statement_html,
+            'last_updated':             '',
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'position_id':              position_id,
+            'position_we_vote_id':      position_we_vote_id,
+            'new_position_created':     False,
+            'is_support':               False,
+            'is_oppose':                False,
+            'is_information_only':      False,
+            'google_civic_election_id': google_civic_election_id,
+            'office_we_vote_id':        office_we_vote_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'measure_we_vote_id':       measure_we_vote_id,
+            'statement_text':           statement_text,
+            'statement_html':           statement_html,
+            'last_updated':             '',
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter = voter_results['voter']
+    position_id = convert_to_int(position_id)
+    position_we_vote_id = position_we_vote_id.strip()
+
+    existing_unique_identifier_found = positive_value_exists(position_id) \
+        or positive_value_exists(position_we_vote_id)
+    new_unique_identifier_found = positive_value_exists(voter_id) \
+        and positive_value_exists(google_civic_election_id) and (
+        positive_value_exists(office_we_vote_id) or
+        positive_value_exists(candidate_we_vote_id) or
+        positive_value_exists(measure_we_vote_id)
+    )
+    unique_identifier_found = existing_unique_identifier_found or new_unique_identifier_found
+    # We must have these variables in order to create a new entry
+    required_variables_for_new_entry = positive_value_exists(voter_id) \
+        and positive_value_exists(google_civic_election_id) and (
+        positive_value_exists(office_we_vote_id) or
+        positive_value_exists(candidate_we_vote_id) or
+        positive_value_exists(measure_we_vote_id)
+    )
+    if not unique_identifier_found:
+        results = {
+            'status':                   "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'position_id':              position_id,
+            'position_we_vote_id':      position_we_vote_id,
+            'new_position_created':     False,
+            'is_support':               False,
+            'is_oppose':                False,
+            'is_information_only':      False,
+            'google_civic_election_id': google_civic_election_id,
+            'office_we_vote_id':        office_we_vote_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'measure_we_vote_id':       measure_we_vote_id,
+            'statement_text':           statement_text,
+            'statement_html':           statement_html,
+            'last_updated':             '',
+        }
+        return results
+    elif not existing_unique_identifier_found and not required_variables_for_new_entry:
+        results = {
+            'status':                   "NEW_POSITION_REQUIRED_VARIABLES_MISSING",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'position_id':              position_id,
+            'position_we_vote_id':      position_we_vote_id,
+            'new_position_created':     False,
+            'is_support':               False,
+            'is_oppose':                False,
+            'is_information_only':      False,
+            'google_civic_election_id': google_civic_election_id,
+            'office_we_vote_id':        office_we_vote_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'measure_we_vote_id':       measure_we_vote_id,
+            'statement_text':           statement_text,
+            'statement_html':           statement_html,
+            'last_updated':             '',
+        }
+        return results
+
+    position_manager = PositionEnteredManager()
+    save_results = position_manager.update_or_create_position(
+        position_id=position_id,
+        position_we_vote_id=position_we_vote_id,
+        voter_we_vote_id=voter.we_vote_id,
+        google_civic_election_id=google_civic_election_id,
+        office_we_vote_id=office_we_vote_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_we_vote_id=measure_we_vote_id,
+        statement_text=statement_text,
+        statement_html=statement_html,
+    )
+
+    if save_results['success']:
+        position = save_results['position']
+        results = {
+            'success':                  save_results['success'],
+            'status':                   save_results['status'],
+            'voter_device_id':          voter_device_id,
+            'position_id':              position.id,
+            'position_we_vote_id':      position.we_vote_id,
+            'new_position_created':     save_results['new_position_created'],
+            'is_support':               position.is_support(),
+            'is_oppose':                position.is_oppose(),
+            'is_information_only':      position.is_information_only(),
+            'google_civic_election_id': position.google_civic_election_id,
+            'office_we_vote_id':        position.contest_office_we_vote_id,
+            'candidate_we_vote_id':     position.candidate_campaign_we_vote_id,
+            'measure_we_vote_id':       position.contest_measure_we_vote_id,
+            'statement_text':           position.statement_text,
+            'statement_html':           position.statement_html,
+            'last_updated':             '',
+        }
+        return results
+    else:
+        results = {
+            'success':                  False,
+            'status':                   save_results['status'],
+            'voter_device_id':          voter_device_id,
+            'position_id':              position_id,
+            'position_we_vote_id':      position_we_vote_id,
+            'new_position_created':     False,
+            'is_support':               False,
+            'is_oppose':                False,
+            'is_information_only':      False,
+            'google_civic_election_id': google_civic_election_id,
+            'office_we_vote_id':        office_we_vote_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'measure_we_vote_id':       measure_we_vote_id,
+            'statement_text':           statement_text,
+            'statement_html':           statement_html,
+            'last_updated':             '',
+        }
+        return results

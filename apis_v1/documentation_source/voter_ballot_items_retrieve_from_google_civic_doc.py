@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/voter_ballot_items_retrieve_doc.py
+# apis_v1/documentation_source/voter_ballot_items_retrieve_from_google_civic_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def voter_ballot_items_retrieve_doc_template_values(url_root):
+def voter_ballot_items_retrieve_from_google_civic_doc_template_values(url_root):
     """
-    Show documentation about voterBallotItemsRetrieveView
+    Show documentation about voterBallotItemsRetrieveFromGoogleCivicView
     """
     required_query_parameter_list = [
         {
@@ -21,10 +21,10 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
-            'name':         'google_civic_election_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique identifier for a particular election. If not provided, use the most recent '
-                            'ballot for the voter\'s address.',
+            'name':         'text_for_map_search',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The voter\'s address we want to look up in the Google Civic API. If blank, we look this '
+                            'value up from the database.',
         },
         {
             'name':         'use_test_election',
@@ -45,12 +45,21 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
             'description':  'A valid voter_id was not found from voter_device_id. Cannot proceed.',
         },
         {
-            'code':         'MISSING_GOOGLE_CIVIC_ELECTION_ID',
-            'description':  'A valid google_civic_election_id not found. Cannot proceed.',
+            'code':         'RETRIEVED_AND_STORED_BALLOT_FOR_VOTER',
+            'description':  'Ballot items were found and saved.',
         },
         {
-            'code':         'VOTER_BALLOT_ITEMS_RETRIEVED',
-            'description':  'Ballot items were found.',
+            'code':         'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH',
+            'description':  'A voter address was not passed in.',
+        },
+        {
+            'code':         'GOOGLE_CIVIC_API_ERROR: Election unknown',
+            'description':  'There is no upcoming election for this address. Or, the election has passed and the '
+                            'election data is no longer available.',
+        },
+        {
+            'code':         'GOOGLE_CIVIC_API_ERROR: Election is over',
+            'description':  'The ballot data for this election is not being hosted by Google Civic any more.',
         },
     ]
 
@@ -61,29 +70,23 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
+                   '  "election_data_retrieved": boolean,\n' \
+                   '  "polling_location_retrieved": boolean,\n' \
+                   '  "contests_retrieved": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer,\n' \
-                   '  "ballot_item_list": list\n' \
-                   '   [\n' \
-                   '     "ballot_item_label": string,\n' \
-                   '     "voter_id": integer,\n' \
-                   '     "google_civic_election_id": integer,\n' \
-                   '     "google_ballot_placement": integer,\n' \
-                   '     "local_ballot_order": integer,\n' \
-                   '     "contest_office_id": integer,\n' \
-                   '     "contest_office_we_vote_id": string,\n' \
-                   '     "contest_measure_id": integer,\n' \
-                   '     "contest_measure_we_vote_id": string,\n' \
-                   '   ],\n' \
+                   '  "text_for_map_search": string,\n' \
                    '}'
 
     template_values = {
-        'api_name': 'voterBallotItemsRetrieveView',
-        'api_slug': 'voterBallotItemsRetrieveView',
+        'api_name': 'voterBallotItemsRetrieveFromGoogleCivicView',
+        'api_slug': 'voterBallotItemsRetrieveFromGoogleCivicView',
         'api_introduction':
-            "Request a skeleton of ballot data for this voter location, so that the web_app has all of the ids "
-            "it needs to make more requests for data about each ballot item.",
-        'try_now_link': 'apis_v1:voterBallotItemsRetrieveView',
+            "Tell the We Vote server to reach out to the Google Civic API and retrieve a list of "
+            "ballot items for the current voter (based on the address saved with voterAddressSave), "
+            "and store them in the We Vote database so we can display them with voterBallotItemsRetrieve, "
+            "and other API calls.",
+        'try_now_link': 'apis_v1:voterBallotItemsRetrieveFromGoogleCivicView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
@@ -91,7 +94,7 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,
         'api_response_notes':
-            "",
+            "If the google_civic_election_id is 2000 then we are looking at test election data.",
         'potential_status_codes_list': potential_status_codes_list,
     }
     return template_values

@@ -135,7 +135,7 @@ def candidates_import_from_sample_file(request=None, load_from_uri=False):
     return candidates_results
 
 
-def candidates_retrieve(office_id, office_we_vote_id):
+def candidates_retrieve_for_api(office_id, office_we_vote_id):
     """
     Used by the api
     :param office_id:

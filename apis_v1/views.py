@@ -5,25 +5,29 @@
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
     organization_stop_following, voter_count, voter_create, \
     voter_guides_to_follow_retrieve
-from ballot.controllers import ballot_item_options_retrieve_for_api, voter_ballot_items_retrieve
-from candidate.controllers import candidates_retrieve
+from ballot.controllers import ballot_item_options_retrieve_for_api, voter_ballot_items_retrieve_for_api
+from candidate.controllers import candidates_retrieve_for_api
 from django.http import HttpResponse
 from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
+from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 import json
+from measure.controllers import measure_retrieve_for_api
+from office.controllers import office_retrieve_for_api
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api
-from position.controllers import position_retrieve_for_api, position_save_for_api
+from position.controllers import position_retrieve_for_api, position_save_for_api, \
+    voter_position_retrieve_for_api, voter_position_comment_save_for_api
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from star.controllers import voter_star_off_save_for_api, voter_star_on_save_for_api, voter_star_status_retrieve_for_api
 from support_oppose_deciding.controllers import oppose_count_for_api, support_count_for_api, \
-    voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save
+    voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_address_save_for_api, voter_retrieve_list_for_api
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
-    get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie
+    get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie, positive_value_exists
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -39,7 +43,7 @@ def ballot_item_options_retrieve_view(request):
 def candidates_retrieve_view(request):
     office_id = request.GET.get('office_id', 0)
     office_we_vote_id = request.GET.get('office_we_vote_id', '')
-    return candidates_retrieve(office_id, office_we_vote_id)
+    return candidates_retrieve_for_api(office_id, office_we_vote_id)
 
 
 def device_id_generate_view(request):
@@ -79,6 +83,18 @@ class ElectionsRetrieveView(APIView):
             election_list = results['election_list']
             serializer = ElectionSerializer(election_list, many=True)
             return Response(serializer.data)
+
+
+def measure_retrieve_view(request):
+    measure_id = request.GET.get('measure_id', 0)
+    measure_we_vote_id = request.GET.get('measure_we_vote_id', None)
+    return measure_retrieve_for_api(measure_id, measure_we_vote_id)
+
+
+def office_retrieve_view(request):
+    office_id = request.GET.get('office_id', 0)
+    office_we_vote_id = request.GET.get('office_we_vote_id', None)
+    return office_retrieve_for_api(office_id, office_we_vote_id)
 
 
 def organization_count_view(request):
@@ -261,13 +277,13 @@ def voter_address_save_view(request):
 
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     try:
-        address = request.POST['address']
+        text_for_map_search = request.POST['text_for_map_search']
         address_variable_exists = True
     except KeyError:
-        address = ''
+        text_for_map_search = ''
         address_variable_exists = False
 
-    response = voter_address_save_for_api(voter_device_id, address, address_variable_exists)
+    response = voter_address_save_for_api(voter_device_id, text_for_map_search, address_variable_exists)
 
     # Reset google_civic_election_id whenever we save a new address
     google_civic_election_id = 0
@@ -278,14 +294,41 @@ def voter_address_save_view(request):
 
 def voter_ballot_items_retrieve_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    # We look in the cookies for google_civic_election_id
-    google_civic_election_id = get_google_civic_election_id_from_cookie(request)
+    # If passed in, we want to look at
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    use_test_election = request.GET.get('use_test_election', False)
+
+    if use_test_election:
+        google_civic_election_id = 2000  # The Google Civic API Test election
+    elif not positive_value_exists(google_civic_election_id):
+        # We look in the cookies for google_civic_election_id
+        google_civic_election_id = get_google_civic_election_id_from_cookie(request)
+
     # This 'voter_ballot_items_retrieve' lives in ballot/controllers.py
-    results = voter_ballot_items_retrieve(voter_device_id, google_civic_election_id)
+    results = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
-    # Save google_civic_election_id whenever we retrieve a new ballot
-    set_google_civic_election_id_cookie(request, response, results['google_civic_election_id'])
+    # Save google_civic_election_id in the cookie so the interface knows
+    google_civic_election_id_from_ballot_retrieve = results['google_civic_election_id']
+    if positive_value_exists(google_civic_election_id_from_ballot_retrieve):
+        set_google_civic_election_id_cookie(request, response, results['google_civic_election_id'])
+
+    return response
+
+
+def voter_ballot_items_retrieve_from_google_civic_view(request):
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    text_for_map_search = request.GET.get('text_for_map_search', '')
+    use_test_election = request.GET.get('use_test_election', False)
+
+    results = voter_ballot_items_retrieve_from_google_civic_for_api(
+        voter_device_id, text_for_map_search, use_test_election)
+    response = HttpResponse(json.dumps(results), content_type='application/json')
+
+    # Save google_civic_election_id in the cookie so the interface knows
+    google_civic_election_id_from_ballot_retrieve = results['google_civic_election_id']
+    if positive_value_exists(google_civic_election_id_from_ballot_retrieve):
+        set_google_civic_election_id_cookie(request, response, results['google_civic_election_id'])
 
     return response
 
@@ -339,6 +382,55 @@ def voter_guides_to_follow_retrieve_view(request):
     set_google_civic_election_id_cookie(request, response, results['google_civic_election_id'])
 
     return response
+
+
+def voter_position_retrieve_view(request):
+    """
+    Retrieve all of the details about a single position based on unique identifier
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    office_we_vote_id = request.GET.get('office_we_vote_id', '')
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+    measure_we_vote_id = request.GET.get('measure_we_vote_id', '')
+    return voter_position_retrieve_for_api(
+        voter_device_id=voter_device_id,
+        office_we_vote_id=office_we_vote_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_we_vote_id=measure_we_vote_id
+    )
+
+
+def voter_position_comment_save_view(request):
+    """
+    Save a single position
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    position_id = request.POST.get('position_id', False)
+    position_we_vote_id = request.POST.get('position_we_vote_id', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', False)
+    office_we_vote_id = request.POST.get('office_we_vote_id', False)
+    candidate_we_vote_id = request.POST.get('candidate_we_vote_id', False)
+    measure_we_vote_id = request.POST.get('measure_we_vote_id', False)
+    statement_text = request.POST.get('statement_text', False)
+    statement_html = request.POST.get('statement_html', False)
+
+    results = voter_position_comment_save_for_api(
+        voter_device_id=voter_device_id,
+        position_id=position_id,
+        position_we_vote_id=position_we_vote_id,
+        google_civic_election_id=google_civic_election_id,
+        office_we_vote_id=office_we_vote_id,
+        candidate_we_vote_id=candidate_we_vote_id,
+        measure_we_vote_id=measure_we_vote_id,
+        statement_text=statement_text,
+        statement_html=statement_html,
+    )
+
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
 
 def voter_opposing_save_view(request):
@@ -406,7 +498,7 @@ def voter_supporting_save_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     candidate_id = request.GET.get('candidate_id', 0)
     measure_id = request.GET.get('measure_id', 0)
-    return voter_supporting_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+    return voter_supporting_save_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
 
 
 def voter_star_off_save_view(request):

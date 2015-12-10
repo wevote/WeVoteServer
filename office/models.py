@@ -198,20 +198,28 @@ class ContestOfficeManager(models.Model):
             if positive_value_exists(contest_office_id):
                 contest_office_on_stage = ContestOffice.objects.get(id=contest_office_id)
                 contest_office_id = contest_office_on_stage.id
+                status = "RETRIEVE_OFFICE_FOUND_BY_ID"
             elif positive_value_exists(contest_office_we_vote_id):
                 contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
                 contest_office_id = contest_office_on_stage.id
+                status = "RETRIEVE_OFFICE_FOUND_BY_WE_VOTE_ID"
             elif positive_value_exists(maplight_id):
                 contest_office_on_stage = ContestOffice.objects.get(maplight_id=maplight_id)
                 contest_office_id = contest_office_on_stage.id
+                status = "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID"
+            else:
+                status = "RETRIEVE_OFFICE_SEARCH_INDEX_MISSING"
         except ContestOffice.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
+            status = "RETRIEVE_OFFICE_MULTIPLE_OBJECTS_RETURNED"
         except ContestOffice.DoesNotExist:
             exception_does_not_exist = True
+            status = "RETRIEVE_OFFICE_NOT_FOUND"
 
         results = {
             'success':                      True if contest_office_id > 0 else False,
+            'status':                       status,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,

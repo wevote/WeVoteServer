@@ -87,6 +87,7 @@ class VoterManager(BaseUserManager):
     def delete_voter(self, email):
         email = self.normalize_email(email)
         voter_id = 0
+        voter_we_vote_id = ''
         voter_deleted = False
 
         if positive_value_exists(email) and validate_email(email):
@@ -96,7 +97,7 @@ class VoterManager(BaseUserManager):
 
         try:
             if email_valid:
-                results = self.retrieve_voter(voter_id, email)
+                results = self.retrieve_voter(voter_id, email, voter_we_vote_id)
                 if results['voter_found']:
                     voter = results['voter']
                     voter_id = voter.id
@@ -113,9 +114,7 @@ class VoterManager(BaseUserManager):
         return results
 
     def retrieve_voter_from_voter_device_id(self, voter_device_id):
-        voter_device_link_manager = VoterDeviceLinkManager()
-        results = voter_device_link_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-        voter_id = results['voter_id']
+        voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
 
         if not voter_id:
             results = {
@@ -151,29 +150,50 @@ class VoterManager(BaseUserManager):
         else:
             return ''
 
+    def fetch_local_id_from_we_vote_id(self, voter_we_vote_id):
+        results = self.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+        if results['voter_found']:
+            voter = results['voter']
+            return voter.id
+        else:
+            return ''
+
     def retrieve_voter_by_id(self, voter_id):
         email = ''
+        voter_we_vote_id = ''
         voter_manager = VoterManager()
-        return voter_manager.retrieve_voter(voter_id, email)
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
 
-    def retrieve_voter(self, voter_id, email):
+    def retrieve_voter_by_we_vote_id(self, voter_we_vote_id):
+        voter_id = ''
+        email = ''
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
+
+    def retrieve_voter(self, voter_id, email='', voter_we_vote_id=''):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
             email = None
+        voter_we_vote_id = voter_we_vote_id.strip()
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         voter_on_stage = Voter()
 
         try:
-            if voter_id > 0:
+            if positive_value_exists(voter_id):
                 voter_on_stage = Voter.objects.get(id=voter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             elif email is not '' and email is not None:
                 voter_on_stage = Voter.objects.get(
                     email=email)
+                # If still here, we found an existing voter
+                voter_id = voter_on_stage.id
+            elif positive_value_exists(voter_we_vote_id):
+                voter_on_stage = Voter.objects.get(
+                    we_vote_id=voter_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             else:
@@ -471,7 +491,7 @@ class VoterAddress(models.Model):
     address_type = models.CharField(
         verbose_name="type of address", max_length=1, choices=ADDRESS_TYPE_CHOICES, default=BALLOT_ADDRESS)
 
-    address = models.CharField(max_length=255, blank=False, null=False, verbose_name='address as entered')
+    text_for_map_search = models.CharField(max_length=255, blank=False, null=False, verbose_name='address as entered')
 
     latitude = models.CharField(max_length=255, blank=True, null=True, verbose_name='latitude returned from Google')
     longitude = models.CharField(max_length=255, blank=True, null=True, verbose_name='longitude returned from Google')
@@ -485,6 +505,11 @@ class VoterAddress(models.Model):
                                         verbose_name='normalized state returned from Google')
     normalized_zip = models.CharField(max_length=255, blank=True, null=True,
                                       verbose_name='normalized zip returned from Google')
+    # This is the election_id last found for this address
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id for this address", null=True, unique=False)
+    # The last election day this address was used to retrieve a ballot
+    election_day_text = models.CharField(verbose_name="election day", max_length=255, null=True, blank=True)
 
     refreshed_from_google = models.BooleanField(
         verbose_name="have normalized fields been updated from Google since address change?", default=False)
@@ -527,8 +552,8 @@ class VoterAddressManager(models.Model):
                     if positive_value_exists(voter_address.normalized_state) else ''
                 ballot_map_text += " " + voter_address.normalized_zip \
                     if positive_value_exists(voter_address.normalized_zip) else ''
-            elif positive_value_exists(voter_address.address):
-                ballot_map_text += voter_address.address
+            elif positive_value_exists(voter_address.text_for_map_search):
+                ballot_map_text += voter_address.text_for_map_search
         return ballot_map_text
 
     def retrieve_address(self, voter_address_id, voter_id, address_type):
@@ -608,7 +633,7 @@ class VoterAddressManager(models.Model):
                     'voter_id': voter_id,
                     'address_type': address_type,
                     # The rest of the values
-                    'address': raw_address_text,
+                    'text_for_map_search': raw_address_text,
                     'latitude': '',
                     'longitude': '',
                     'normalized_line1': '',

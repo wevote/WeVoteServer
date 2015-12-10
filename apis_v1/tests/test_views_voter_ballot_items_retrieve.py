@@ -84,29 +84,6 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
                 status=json_data03['status'], voter_device_id=json_data03['voter_device_id']))
 
         #######################################
-        # Test the response before a google_civic_election_id has been specified
-        # In the case of no google_civic_election_id, we want to reach out to Google Civic API. BUT an address isn't
-        # set, so we expect MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH
-        response04 = self.client.get(self.voter_ballot_items_retrieve_url)
-        json_data04 = json.loads(response04.content)
-
-        self.assertEqual('status' in json_data04, True,
-                         "status expected in the voterBallotItemsRetrieve json response but not found")
-        self.assertEqual('success' in json_data04, True,
-                         "success expected in the voterBallotItemsRetrieve json response but not found")
-        self.assertEqual('voter_device_id' in json_data04, True,
-                         "voter_device_id expected in the voterBallotItemsRetrieve json response but not found")
-        self.assertEqual('voter_id' in json_data04, True,
-                         "voter_id expected in the voterBallotItemsRetrieve json response but not found")
-        self.assertEqual('ballot_item_list' in json_data04, True,
-                         "ballot_item_list expected in the voterBallotItemsRetrieve json response but not found")
-        self.assertEqual(
-            json_data04['status'], 'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH',
-            "status: {status} (MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH expected), "
-            "voter_device_id: {voter_device_id}".format(
-                status=json_data04['status'], voter_device_id=json_data04['voter_device_id']))
-
-        #######################################
         # Test the response with google_civic_election_id in cookie
         cookies["google_civic_election_id"] = 4162
         self.client = Client(HTTP_COOKIE=cookies.output(header='', sep='; '))
@@ -122,8 +99,6 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
                          "success expected in the voterBallotItemsRetrieve json response but not found")
         self.assertEqual('voter_device_id' in json_data05, True,
                          "voter_device_id expected in the voterBallotItemsRetrieve json response but not found")
-        self.assertEqual('voter_id' in json_data05, True,
-                         "voter_id expected in the voterBallotItemsRetrieve json response but not found")
         self.assertEqual('ballot_item_list' in json_data05, True,
                          "ballot_item_list expected in the voterBallotItemsRetrieve json response but not found")
         self.assertEqual(

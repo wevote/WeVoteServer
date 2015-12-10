@@ -17,8 +17,9 @@ from config.base import get_environment_variable
 from election.models import ElectionManager
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
-from voter.models import VoterAddressManager
-from wevote_functions.models import extract_state_from_ocd_division_id, logger, positive_value_exists
+from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
+from wevote_functions.models import extract_state_from_ocd_division_id, is_voter_device_id_valid, logger, \
+    positive_value_exists
 
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 ELECTION_QUERY_URL = get_environment_variable("ELECTION_QUERY_URL")
@@ -378,14 +379,21 @@ def process_contests_from_structured_json(
     return results
 
 
-def retrieve_one_ballot_from_google_civic_api(text_for_map_search, google_civic_election_id=0):
+def retrieve_one_ballot_from_google_civic_api(text_for_map_search, use_test_election=False):
     # Request json file from Google servers
-    logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
-    request = requests.get(VOTER_INFO_URL, params={
-        "key": GOOGLE_CIVIC_API_KEY,
-        "address": text_for_map_search,
-        "electionId": google_civic_election_id,
-    })
+    # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
+    if use_test_election:
+        request = requests.get(VOTER_INFO_URL, params={
+            "key": GOOGLE_CIVIC_API_KEY,
+            "address": text_for_map_search,
+            "electionId": 2000,  # The Google Civic API Test election
+        })
+    else:
+        request = requests.get(VOTER_INFO_URL, params={
+            "key": GOOGLE_CIVIC_API_KEY,
+            "address": text_for_map_search,
+        })
+
     structured_json = json.loads(request.text)
 
     # # For internal testing. Write the json retrieved above into a local file
@@ -398,19 +406,36 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, google_civic_
     # with open("import_export_google_civic/import_data/voterInfoQuery_VA_sample.json") as json_data:
     #     structured_json = json.load(json_data)
 
+    # Verify that we got a ballot. (If you use an address in California for an election in New York,
+    #  you won't get a ballot for example.)
+    success = False
+    election_data_retrieved = False
+    polling_location_retrieved = False
+    contests_retrieved = False
+    if 'election' in structured_json:
+        if 'id' in structured_json['election']:
+            election_data_retrieved = True
+            success = True
+            google_civic_election_id = structured_json['election']['id']
+
     # Use Google Civic API call counter to track the number of queries we are doing each day
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
     google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
 
-    # Verify that we got a ballot. (If you use an address in California for an election in New York,
-    #  you won't get a ballot for example.)
-    success = False
+    if 'pollingLocations' in structured_json:
+        polling_location_retrieved = True
+        success = True
+
     if 'contests' in structured_json:
         if len(structured_json['contests']) > 0:
+            contests_retrieved = True
             success = True
 
     results = {
         'success': success,
+        'election_data_retrieved': election_data_retrieved,
+        'polling_location_retrieved': polling_location_retrieved,
+        'contests_retrieved': contests_retrieved,
         'structured_json': structured_json,
     }
     return results
@@ -499,7 +524,10 @@ def retrieve_from_google_civic_api_election_query():
 
 
 def store_results_from_google_civic_api_election_query(structured_json):
-    elections_list_json = structured_json['elections']
+    if 'elections' in structured_json:
+        elections_list_json = structured_json['elections']
+    else:
+        elections_list_json = {}
     results = {}
     for one_election in elections_list_json:
         raw_ocd_division_id = one_election['ocdDivisionId']
@@ -514,52 +542,130 @@ def store_results_from_google_civic_api_election_query(structured_json):
     return results
 
 
-def retrieve_and_store_ballot_for_voter(voter_id, text_for_map_search=''):
+def voter_ballot_items_retrieve_from_google_civic_for_api(
+        voter_device_id, text_for_map_search='', use_test_election=False):
+    """
+    We are telling the server to explicitly reach out to the Google Civic API and retrieve the ballot items
+    for this voter.
+    """
+    # Confirm that we have a Google Civic API Key (GOOGLE_CIVIC_API_KEY)
+    if not positive_value_exists(GOOGLE_CIVIC_API_KEY):
+        json_data = {
+            'status': 'NO_GOOGLE_CIVIC_API_KEY',
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'google_civic_election_id': 0,
+            'text_for_map_search': text_for_map_search,
+        }
+        results = {
+            'success': False,
+            'json_data': json_data,
+            'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
+        }
+        return results
+
+    # Get voter_id from the voter_device_id so we can figure out which ballot_items to offer
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        json_data = {
+            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'google_civic_election_id': 0,
+            'text_for_map_search': text_for_map_search,
+        }
+        results = {
+            'success': False,
+            'json_data': json_data,
+            'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
+        }
+        return results
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status': "VALID_VOTER_ID_MISSING",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'google_civic_election_id': 0,
+            'text_for_map_search': text_for_map_search,
+        }
+        results = {
+            'success': False,
+            'json_data': json_data,
+            'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
+        }
+        return results
+
     google_civic_election_id = 0
+    status = ''
+    success = False
+    election_data_retrieved = False
+    polling_location_retrieved = False
+    contests_retrieved = False
     if not positive_value_exists(text_for_map_search):
         # Retrieve it from voter address
         voter_address_manager = VoterAddressManager()
         text_for_map_search = voter_address_manager.retrieve_ballot_map_text_from_voter_id(voter_id)
 
     if positive_value_exists(text_for_map_search):
-        one_ballot_results = retrieve_one_ballot_from_google_civic_api(text_for_map_search)
+        one_ballot_results = retrieve_one_ballot_from_google_civic_api(text_for_map_search, use_test_election)
+
         if one_ballot_results['success']:
             one_ballot_json = one_ballot_results['structured_json']
 
-            # Wipe out ballot_items stored previously
-            ballot_item_list_manager = BallotItemListManager()
-            # We do not include a google_civic_election_id, so all prior ballots are removed
-            google_civic_election_id_to_delete = 0  # This means "delete all"
-            ballot_item_list_manager.delete_all_ballot_items_for_voter(voter_id, google_civic_election_id_to_delete)
-
-            # We update VoterAddress with normalized address data in store_one_ballot_from_google_civic_api
-
-            store_one_ballot_results = store_one_ballot_from_google_civic_api(one_ballot_json, voter_id)
-            if store_one_ballot_results['success']:
-                status = 'RETRIEVED_AND_STORED_BALLOT_FOR_VOTER'
+            # We may receive some election data, but not all of the data we need
+            if one_ballot_results['election_data_retrieved']:
+                election_data_retrieved = True
                 success = True
-                google_civic_election_id = store_one_ballot_results['google_civic_election_id']
-            else:
-                status = 'UNABLE_TO-store_one_ballot_from_google_civic_api'
-                success = False
+
+            if one_ballot_results['polling_location_retrieved']:
+                polling_location_retrieved = True
+                success = True
+
+            if one_ballot_results['contests_retrieved']:
+                contests_retrieved = True
+
+                # Now that we know we have new ballot data, we need to delete prior ballot data for this election
+                # because when we change voterAddress, we usually get different ballot items
+                ballot_item_list_manager = BallotItemListManager()
+                # We include a google_civic_election_id, so only the ballot info for this election is removed
+                google_civic_election_id_to_delete = one_ballot_json['election']['id']  # '0' would mean "delete all"
+                if positive_value_exists(google_civic_election_id_to_delete):
+                    ballot_item_list_manager.delete_all_ballot_items_for_voter(
+                        voter_id, google_civic_election_id_to_delete)
+
+                # We update VoterAddress with normalized address data in store_one_ballot_from_google_civic_api
+                store_one_ballot_results = store_one_ballot_from_google_civic_api(one_ballot_json, voter_id)
+                if store_one_ballot_results['success']:
+                    status += 'RETRIEVED_AND_STORED_BALLOT_FOR_VOTER '
+                    success = True
+                    google_civic_election_id = store_one_ballot_results['google_civic_election_id']
+                else:
+                    status += 'UNABLE_TO-store_one_ballot_from_google_civic_api'
         elif 'error' in one_ballot_results['structured_json']:
             if one_ballot_results['structured_json']['error']['message'] == 'Election unknown':
-                success = True
+                success = False  # It is only successful if new ballot data is retrieved.
             else:
                 success = False
-            status = one_ballot_results['structured_json']['error']['message']
+            status += "GOOGLE_CIVIC_API_ERROR: " + one_ballot_results['structured_json']['error']['message']
 
         else:
-            status = 'UNABLE_TO-retrieve_one_ballot_from_google_civic_api'
+            status += 'UNABLE_TO-retrieve_one_ballot_from_google_civic_api'
             success = False
     else:
-        status = 'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH'
+        status += 'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH'
         success = False
 
     results = {
-        'google_civic_election_id': google_civic_election_id,
         'success': success,
         'status': status,
+        'voter_device_id': voter_device_id,
+        'google_civic_election_id': google_civic_election_id,
+        'text_for_map_search': text_for_map_search,
+        'election_data_retrieved': election_data_retrieved,
+        'polling_location_retrieved': polling_location_retrieved,
+        'contests_retrieved': contests_retrieved,
     }
     return results
 

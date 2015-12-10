@@ -5,7 +5,6 @@
 
 from .models import ContestMeasure
 from .serializers import ContestMeasureSerializer
-from candidate.models import CandidateCampaign
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages

@@ -103,6 +103,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
             store_one_ballot_results = store_one_ballot_from_google_civic_api(one_ballot_json)
             if store_one_ballot_results['success']:
                 success = True
+        # TODO: Record locally the address that failed (or succeeded) here?
 
         if success:
             ballots_retrieved += 1
@@ -203,7 +204,9 @@ def election_edit_process_view(request):
 # @login_required()  # Commented out while we are developing login process()
 def election_list_view(request):
     messages_on_stage = get_messages(request)
-    election_list = Election.objects.order_by('election_name')
+    election_list_query = Election.objects.all()
+    election_list_query = election_list_query.order_by('election_day_text').reverse()
+    election_list = election_list_query
 
     template_values = {
         'messages_on_stage': messages_on_stage,

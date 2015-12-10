@@ -35,7 +35,7 @@ def voter_address_retrieve_for_api(voter_device_id):
         json_data = {
             'voter_device_id': voter_device_id,
             'address_type': voter_address.address_type if voter_address.address_type else '',
-            'address': voter_address.address if voter_address.address else '',
+            'text_for_map_search': voter_address.text_for_map_search if voter_address.text_for_map_search else '',
             'latitude': voter_address.latitude if voter_address.latitude else '',
             'longitude': voter_address.longitude if voter_address.longitude else '',
             'normalized_line1': voter_address.normalized_line1 if voter_address.normalized_line1 else '',
@@ -89,7 +89,7 @@ def voter_address_save_for_api(voter_device_id, address_raw_text, address_variab
                 'status': "VOTER_ADDRESS_SAVED",
                 'success': True,
                 'voter_device_id': voter_device_id,
-                'address': address_raw_text,
+                'text_for_map_search': address_raw_text,
             }
 
     # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':

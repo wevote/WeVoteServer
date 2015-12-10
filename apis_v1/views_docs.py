@@ -3,15 +3,16 @@
 # -*- coding: UTF-8 -*-
 
 from .documentation_source import ballot_item_options_retrieve_doc, candidates_retrieve_doc, device_id_generate_doc, \
-    elections_retrieve_doc, \
+    elections_retrieve_doc, measure_retrieve_doc, office_retrieve_doc, \
     oppose_count_doc, organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
     position_retrieve_doc, position_save_doc, \
     support_count_doc, voter_address_retrieve_doc, voter_address_save_doc, \
-    voter_ballot_items_retrieve_doc, voter_count_doc, voter_create_doc, \
-    voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
+    voter_ballot_items_retrieve_doc, voter_ballot_items_retrieve_from_google_civic_doc, voter_count_doc, \
+    voter_create_doc, voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
     voter_guides_to_follow_retrieve_doc, \
+    voter_position_comment_save_doc, voter_position_retrieve_doc, \
     voter_opposing_save_doc, voter_retrieve_doc, voter_star_off_save_doc, voter_star_on_save_doc, \
     voter_star_status_retrieve_doc, voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc
@@ -63,6 +64,24 @@ def elections_retrieve_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = elections_retrieve_doc.elections_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def measure_retrieve_doc_view(request):
+    """
+    Show documentation about candidatesRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = measure_retrieve_doc.measure_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def office_retrieve_doc_view(request):
+    """
+    Show documentation about candidatesRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = office_retrieve_doc.office_retrieve_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -194,6 +213,16 @@ def voter_ballot_items_retrieve_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def voter_ballot_items_retrieve_from_google_civic_doc_view(request):
+    """
+    Show documentation about voterBallotItemsRetrieveFromGoogleCivic
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_ballot_items_retrieve_from_google_civic_doc.\
+        voter_ballot_items_retrieve_from_google_civic_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def voter_count_doc_view(request):
     """
     Show documentation about voterCount
@@ -237,6 +266,25 @@ def voter_guides_to_follow_retrieve_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = voter_guides_to_follow_retrieve_doc.voter_guides_to_follow_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_position_retrieve_doc_view(request):
+    """
+    Show documentation about positionRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+
+    template_values = voter_position_retrieve_doc.voter_position_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_position_comment_save_doc_view(request):
+    """
+    Show documentation about positionSave
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_position_comment_save_doc.voter_position_comment_save_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

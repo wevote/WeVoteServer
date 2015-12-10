@@ -6,7 +6,6 @@ from .models import BallotItemListManager
 from candidate.models import CandidateCampaignList
 from config.base import get_environment_variable
 from exception.models import handle_exception
-from import_export_google_civic.controllers import retrieve_and_store_ballot_for_voter
 from measure.models import ContestMeasureList
 from office.models import ContestOfficeList
 from voter.models import fetch_voter_id_from_voter_device_link
@@ -18,7 +17,14 @@ logger = wevote_functions.admin.get_logger(__name__)
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
 
 
-def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
+def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id):
+    """
+
+    :param voter_device_id:
+    :param google_civic_election_id: This variable either was stored in a cookie, or passed in explicitly so we can
+    get the ballot items related to that election.
+    :return:
+    """
     # Get voter_id from the voter_device_id so we can figure out which ballot_items to offer
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -54,72 +60,6 @@ def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
         }
         return results
 
-    # If the google_civic_election_id was found cached in a cookie and passed in, use that
-    if positive_value_exists(google_civic_election_id):
-        # If we have a google_civic_election_id, we can assume we have ballot information already stored for this voter
-        pass
-    else:
-        # We need to reach out to Google Civic to get this voter's ballot
-
-        # Confirm that we have a Google Civic API Key (GOOGLE_CIVIC_API_KEY)
-        if positive_value_exists(GOOGLE_CIVIC_API_KEY):
-            # NOTE: We remove prior ballot_items within retrieve_and_store_ballot_for_voter
-            results = retrieve_and_store_ballot_for_voter(voter_id)
-
-            if results['success']:
-                # We come back from retrieving the ballot with a google_civic_election_id and the data
-                # stored in the BallotItem table
-                google_civic_election_id = results['google_civic_election_id']
-            else:
-                json_data = {
-                    'status': "GOOGLE_CIVIC_API_ERROR: " + results['status'],
-                    'success': False,
-                    'voter_id': voter_id,
-                    'voter_device_id': voter_device_id,
-                    'ballot_item_list': [],
-                    'google_civic_election_id': 0,
-                }
-                results = {
-                    'success': False,
-                    'json_data': json_data,
-                    'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
-                }
-                return results
-
-        else:
-            json_data = {
-                'status': 'NO_GOOGLE_CIVIC_API_KEY',
-                'success': False,
-                'voter_id': voter_id,
-                'voter_device_id': voter_device_id,
-                'ballot_item_list': [],
-                'google_civic_election_id': 0,
-            }
-            results = {
-                'success': False,
-                'json_data': json_data,
-                'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
-            }
-            return results
-
-    if not positive_value_exists(google_civic_election_id):
-        # At this point if we don't have a google_civic_election_id, then we don't have an upcoming election
-        #  for that address
-        json_data = {
-            'status': 'NO_UPCOMING_ELECTION_ID_FOUND',
-            'success': True,
-            'voter_id': voter_id,
-            'voter_device_id': voter_device_id,
-            'ballot_item_list': [],
-            'google_civic_election_id': 0,
-        }
-        results = {
-            'success': True,
-            'json_data': json_data,
-            'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
-        }
-        return results
-
     ballot_item_list = []
     ballot_items_to_display = []
     try:
@@ -136,24 +76,33 @@ def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
 
     if success:
         for ballot_item in ballot_item_list:
-            one_ballot_item = {
-                'ballot_item_label':            ballot_item.ballot_item_label,
-                'voter_id':                     ballot_item.voter_id,
-                'google_civic_election_id':     ballot_item.google_civic_election_id,
-                'google_ballot_placement':      ballot_item.google_ballot_placement,
-                'local_ballot_order':           ballot_item.local_ballot_order,
-                'contest_office_id':            ballot_item.contest_office_id,
-                'contest_office_we_vote_id':    ballot_item.contest_office_we_vote_id,
-                'contest_measure_id':           ballot_item.contest_measure_id,
-                'contest_measure_we_vote_id':   ballot_item.contest_measure_we_vote_id,
-            }
-            ballot_items_to_display.append(one_ballot_item.copy())
+            if ballot_item.contest_office_we_vote_id:
+                ballot_item_type = 'office'
+                ballot_item_id = ballot_item.contest_office_id
+                we_vote_id = ballot_item.contest_office_we_vote_id
+            elif ballot_item.contest_measure_we_vote_id:
+                ballot_item_type = 'measure'
+                ballot_item_id = ballot_item.contest_measure_id
+                we_vote_id = ballot_item.contest_measure_we_vote_id
+            else:
+                ballot_item_type = ''
+
+            if positive_value_exists(ballot_item_type):
+                one_ballot_item = {
+                    'ballot_item_label':            ballot_item.ballot_item_label,
+                    'google_civic_election_id':     ballot_item.google_civic_election_id,
+                    'google_ballot_placement':      ballot_item.google_ballot_placement,
+                    'local_ballot_order':           ballot_item.local_ballot_order,
+                    'type':                         ballot_item_type,
+                    'id':                           ballot_item_id,
+                    'we_vote_id':                   we_vote_id,
+                }
+                ballot_items_to_display.append(one_ballot_item.copy())
 
         json_data = {
             'status': 'VOTER_BALLOT_ITEMS_RETRIEVED',
             'success': True,
             'voter_device_id': voter_device_id,
-            'voter_id': voter_id,
             'ballot_item_list': ballot_items_to_display,
             'google_civic_election_id': google_civic_election_id,
         }
@@ -162,7 +111,6 @@ def voter_ballot_items_retrieve(voter_device_id, google_civic_election_id):
             'status': status,
             'success': False,
             'voter_device_id': voter_device_id,
-            'voter_id': voter_id,
             'ballot_item_list': [],
             'google_civic_election_id': google_civic_election_id,
         }

@@ -74,8 +74,8 @@ def import_sample_data_view(request):
     organizations_results = organizations_import_from_sample_file(request, load_from_uri)
 
     # Import positions data from We Vote export file
-    load_from_uri = False
-    positions_results = positions_import_from_sample_file(request, load_from_uri)
+    # load_from_uri = False
+    positions_results = positions_import_from_sample_file(request)  # , load_from_uri
 
     messages.add_message(request, messages.INFO,
                          'The following data has been imported: <br />'

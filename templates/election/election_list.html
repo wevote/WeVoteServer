@@ -11,10 +11,17 @@
 
 {% if election_list %}
     <table border="1" cellpadding="10">
+        <tr>
+            <td>Election Name</td>
+            <td>Date</td>
+            <td>Google Civic ID</td>
+            <td>&nbsp;</td>
+        </tr>
     {% for election in election_list %}
         <tr>
             <td><a href="{% url 'election:election_summary' election.id %}">{{ election.election_name }}</a></td>
             <td>{{ election.election_day_text }}</td>
+            <td align="middle">{{ election.google_civic_election_id }}</td>
             <td><a href="{% url 'election:election_edit' election.id %}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}

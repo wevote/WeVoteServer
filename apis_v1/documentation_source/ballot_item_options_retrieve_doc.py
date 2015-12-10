@@ -23,7 +23,8 @@ def ballot_item_options_retrieve_doc_template_values(url_root):
         {
             'name':         'google_civic_election_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique identifier for a particular election.',
+            'description':  'The unique identifier for a particular election. If NOT provided, we instead use the '
+                            'google_civic_election_id for the person who is signed in.',
         },
     ]
 
@@ -59,8 +60,12 @@ def ballot_item_options_retrieve_doc_template_values(url_root):
         'api_name': 'ballotItemOptionsRetrieve',
         'api_slug': 'ballotItemOptionsRetrieve',
         'api_introduction':
-            "Returns all of the measures and candidates for the specified election(s) so we can help volunteers find"
-            "candidates or measure in the interface.",
+            "Returns ALL of the offices, measures and candidates for a) the currently signed in voter, or "
+            "b) the election specified by the google_civic_election_id, so we can help "
+            "volunteers or staff find offices, candidates or measures when they are building out organizational "
+            "voter guides. This information is not organized in a "
+            "hierarchy, but is instead provided in a simple list to help with auto-complete and browser-side "
+            "quick search features.",
         'try_now_link': 'apis_v1:ballotItemOptionsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

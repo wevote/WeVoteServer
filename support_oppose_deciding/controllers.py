@@ -270,7 +270,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, measure_id):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_supporting_save(voter_device_id, candidate_id, measure_id):
+def voter_supporting_save_for_api(voter_device_id, candidate_id, measure_id):
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:

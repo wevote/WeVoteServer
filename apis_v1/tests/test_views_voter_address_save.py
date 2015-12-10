@@ -16,7 +16,8 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         self.voter_address_retrieve_url = reverse("apis_v1:voterAddressRetrieveView")
 
     def test_save_with_no_cookie(self):
-        response = self.client.post(self.voter_address_retrieve_url, {'address': '321 Main Street, Oakland CA 94602'})
+        response = self.client.post(self.voter_address_retrieve_url, {'text_for_map_search':
+                                                                      '321 Main Street, Oakland CA 94602'})
         json_data = json.loads(response.content)
 
         #######################################
@@ -69,7 +70,8 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
 
         #######################################
         # Create a voter address so we can test retrieve
-        response2 = self.client.post(self.voter_address_save_url, {'address': '123 Main Street, Oakland CA 94602'})
+        response2 = self.client.post(self.voter_address_save_url, {'text_for_map_search':
+                                                                   '123 Main Street, Oakland CA 94602'})
         json_data2 = json.loads(response2.content)
 
         self.assertEqual('status' in json_data2, True,
@@ -78,7 +80,7 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
                          "voter_device_id expected in the voterAddressSaveView json response but not found")
         self.assertEqual('success' in json_data2, True,
                          "success expected in the voterAddressSaveView json response but not found")
-        self.assertEqual('address' in json_data2, True,
+        self.assertEqual('text_for_map_search' in json_data2, True,
                          "address expected in the voterAddressSaveView json response but not found")
 
         # First address save
@@ -90,7 +92,8 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
 
         #######################################
         # Try and save the voter address again
-        response3 = self.client.post(self.voter_address_save_url, {'address': '321 Main Street, Oakland CA 94602'})
+        response3 = self.client.post(self.voter_address_save_url, {'text_for_map_search':
+                                                                   '321 Main Street, Oakland CA 94602'})
         json_data3 = json.loads(response3.content)
 
         # First address update
@@ -126,13 +129,14 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         # Are any expected fields missing?
         self.assertEqual('success' in json_data4, True,
                          "success expected in the voterAddressSaveView json response but not found")
-        self.assertEqual('address' in json_data4, True,
-                         "address expected in the voterAddressSaveView json response but not found")
+        self.assertEqual('text_for_map_search' in json_data4, True,
+                         "text_for_map_search expected in the voterAddressSaveView json response but not found")
         # A more thorough testing of expected variables is done in test_views_voter_address_retrieve.py
 
         # Does address match the value inserted last?
         self.assertEqual(
-            json_data4['address'], '321 Main Street, Oakland CA 94602',
-            "address:  {address} ('321 Main Street, Oakland CA 94602' expected in voterAddressSaveView), "
+            json_data4['text_for_map_search'], '321 Main Street, Oakland CA 94602',
+            "text_for_map_search:  {text_for_map_search} ('321 Main Street, Oakland CA 94602' expected "
+            "in voterAddressSaveView), "
             "voter_device_id: {voter_device_id}".format(
-                address=json_data4['address'], voter_device_id=json_data4['voter_device_id']))
+                text_for_map_search=json_data4['text_for_map_search'], voter_device_id=json_data4['voter_device_id']))
