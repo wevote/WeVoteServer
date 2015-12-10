@@ -8,5 +8,5 @@ from . import views_admin
 
 
 urlpatterns = [
-    url(r'^export/', views_admin.ExportPositionLikeDataView.as_view(), name='position_like_export'),
+    url(r'^export/', views_admin.export_position_like_data_view(), name='position_like_export'),
 ]

@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PositionLike
+# from .models import PositionLike
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
