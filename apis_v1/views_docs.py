@@ -8,7 +8,7 @@ from .documentation_source import ballot_item_options_retrieve_doc, candidate_re
     oppose_count_doc, organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
-    position_retrieve_doc, position_save_doc, \
+    position_like_count_doc, position_retrieve_doc, position_save_doc, \
     support_count_doc, voter_address_retrieve_doc, voter_address_save_doc, \
     voter_ballot_items_retrieve_doc, voter_ballot_items_retrieve_from_google_civic_doc, voter_count_doc, \
     voter_create_doc, voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
@@ -282,7 +282,7 @@ def voter_guides_to_follow_retrieve_doc_view(request):
 
 def voter_position_like_off_save_doc_view(request):
     """
-    Show documentation about voterStarOffSave
+    Show documentation about voterPositionLikeOffSave
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = voter_position_like_off_save_doc.voter_position_like_off_save_doc_template_values(url_root)
@@ -291,7 +291,7 @@ def voter_position_like_off_save_doc_view(request):
 
 def voter_position_like_on_save_doc_view(request):
     """
-    Show documentation about voterStarOnSave
+    Show documentation about voterPositionLikeOnSave
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = voter_position_like_on_save_doc.voter_position_like_on_save_doc_template_values(url_root)
@@ -300,11 +300,20 @@ def voter_position_like_on_save_doc_view(request):
 
 def voter_position_like_status_retrieve_doc_view(request):
     """
-    Show documentation about voterStarStatusRetrieve
+    Show documentation about voterPositionLikeStatusRetrieve
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = voter_position_like_status_retrieve_doc.voter_position_like_status_retrieve_doc_template_values(
         url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def position_like_count_doc_view(request):
+    """
+    Show documentation about positionLikeCount
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = position_like_count_doc.position_like_count_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

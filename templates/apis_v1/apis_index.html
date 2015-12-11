@@ -144,7 +144,11 @@
         <td><a href="{% url 'apis_v1:voterPositionLikeStatusRetrieveDocs' %}">voterPositionLikeStatusRetrieve</a></td>
         <td>Has this voter 'Liked' this position?</td>
     </tr>
-
+    <tr>
+        <td><a href="{% url 'apis_v1:positionLikeCountDocs' %}">positionLikeCount</a></td>
+        <td>The total number of Likes that a position has received, either from the perspective of
+            your network of friends, or the entire network.</td>
+    </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterSupportingSaveDocs' %}">voterSupportingSave</a></td>
         <td>Save or update one voter's support for one candidate or measure</td>

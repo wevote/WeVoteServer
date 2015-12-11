@@ -102,9 +102,7 @@ class PositionLikeManager(models.Model):
                 position_like_found = True
                 status = 'POSITION_LIKE_CREATED'
             except Exception as e:
-                status = "POSITION_LIKE_NOT_CREATED: {error}".format(
-                    error=e
-                )
+                status = "POSITION_LIKE_NOT_CREATED: {error}".format(error=e)
         else:
             status = results['status']
 
@@ -166,7 +164,7 @@ class PositionLikeManager(models.Model):
         return results
 
 
-class PositionLikeList(models.Model):
+class PositionLikeListManager(models.Model):
     """
     A way to retrieve all of the position_like information
     """
@@ -187,3 +185,45 @@ class PositionLikeList(models.Model):
         else:
             position_like_list = {}
             return position_like_list
+
+    def count_all_position_likes(self, position_entered_id):
+        # How many people, across the entire network, like this position?
+        try:
+            position_like_query = PositionLike.objects.all()
+            position_like_query = position_like_query.filter(position_entered_id=position_entered_id)
+            number_of_likes = position_like_query.count()
+            status = "POSITION_LIKE_ALL_COUNT_RETRIEVED"
+            success = True
+        except Exception as e:
+            status = "POSITION_LIKE_ALL_COUNT_FAILED: {error}".format(error=e)
+            success = True
+            number_of_likes = 0
+
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'number_of_likes':          number_of_likes,
+            'position_entered_id':      position_entered_id,
+        }
+        return results
+
+    def count_voter_network_position_likes(self, position_entered_id, voter_id):
+        # How many people, limited to the voter's network, like this position?  # TODO limit to just the voter's network
+        try:
+            position_like_query = PositionLike.objects.all()
+            position_like_query = position_like_query.filter(position_entered_id=position_entered_id)
+            number_of_likes = position_like_query.count()
+            status = "POSITION_LIKE_VOTER_NETWORK_COUNT_RETRIEVED"
+            success = True
+        except Exception as e:
+            status = "POSITION_LIKE_VOTER_NETWORK_COUNT_FAILED: {error}".format(error=e)
+            success = True
+            number_of_likes = 0
+
+        results = {
+            'status':                   status,
+            'success':                  success,
+            'number_of_likes':          number_of_likes,
+            'position_entered_id':      position_entered_id,
+        }
+        return results

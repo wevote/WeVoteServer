@@ -18,8 +18,8 @@ from organization.controllers import organization_retrieve_for_api, organization
     organization_search_for_api
 from position.controllers import position_retrieve_for_api, position_save_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api
-from position_like.controllers import voter_position_like_off_save_for_api, voter_position_like_on_save_for_api, \
-    voter_position_like_status_retrieve_for_api
+from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
+    voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from star.controllers import voter_star_off_save_for_api, voter_star_on_save_for_api, voter_star_status_retrieve_for_api
@@ -445,6 +445,20 @@ def voter_position_like_status_retrieve_view(request):
     position_entered_id = request.GET.get('position_entered_id', 0)
     return voter_position_like_status_retrieve_for_api(
         voter_device_id=voter_device_id, position_entered_id=position_entered_id)
+
+
+def position_like_count_view(request):
+    """
+    Retrieve the total number of Likes that a position has received, either from the perspective of the voter's
+    network of friends, or the entire network. (positionLikeCount)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    position_entered_id = request.GET.get('position_entered_id', 0)
+    limit_to_voters_network = request.GET.get('limit_to_voters_network', False)
+    return position_like_count_for_api(voter_device_id=voter_device_id, position_entered_id=position_entered_id,
+                                       limit_to_voters_network=limit_to_voters_network)
 
 
 def voter_position_comment_save_view(request):
