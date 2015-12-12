@@ -5,11 +5,12 @@
 from .documentation_source import ballot_item_options_retrieve_doc, candidate_retrieve_doc, candidates_retrieve_doc, \
     device_id_generate_doc, \
     elections_retrieve_doc, measure_retrieve_doc, office_retrieve_doc, \
-    oppose_count_doc, organization_count_doc, \
+    organization_count_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
-    position_like_count_doc, position_retrieve_doc, position_save_doc, \
-    support_count_doc, voter_address_retrieve_doc, voter_address_save_doc, \
+    position_like_count_doc, position_list_for_ballot_item_doc, position_oppose_count_for_ballot_item_doc, \
+    position_retrieve_doc, position_save_doc, \
+    position_support_count_for_ballot_item_doc, voter_address_retrieve_doc, voter_address_save_doc, \
     voter_ballot_items_retrieve_doc, voter_ballot_items_retrieve_from_google_civic_doc, voter_count_doc, \
     voter_create_doc, voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
     voter_guides_to_follow_retrieve_doc, \
@@ -160,6 +161,15 @@ def organization_search_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def position_list_for_ballot_item_doc_view(request):
+    """
+    Show documentation about positionListForBallotItem
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = position_list_for_ballot_item_doc.position_list_for_ballot_item_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def position_retrieve_doc_view(request):
     """
     Show documentation about positionRetrieve
@@ -179,21 +189,23 @@ def position_save_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def oppose_count_doc_view(request):
+def position_oppose_count_for_ballot_item_doc_view(request):
     """
-    Show documentation about opposeCount
+    Show documentation about positionOpposeCountForBallotItem
     """
     url_root = LOCALHOST_URL_ROOT
-    template_values = oppose_count_doc.oppose_count_doc_template_values(url_root)
+    template_values = position_oppose_count_for_ballot_item_doc.\
+        position_oppose_count_for_ballot_item_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def support_count_doc_view(request):
+def position_support_count_for_ballot_item_doc_view(request):
     """
-    Show documentation about supportCount
+    Show documentation about positionSupportCountForBallotItem
     """
     url_root = LOCALHOST_URL_ROOT
-    template_values = support_count_doc.support_count_doc_template_values(url_root)
+    template_values = position_support_count_for_ballot_item_doc.\
+        position_support_count_for_ballot_item_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

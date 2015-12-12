@@ -206,7 +206,7 @@ def relink_candidates_measures_view(request):
 #     messages_on_stage = get_messages(request)
 #     candidate_campaign_id = convert_to_int(candidate_campaign_id)
 #
-#     position_list_manager = PositionListForCandidateCampaign()
+#     position_list_manager = PositionListManager()
 #     all_positions_list_for_candidate_campaign = \
 #         position_list_manager.retrieve_all_positions_for_candidate_campaign(
 #             candidate_campaign_id, stance_we_are_looking_for)

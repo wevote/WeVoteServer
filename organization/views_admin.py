@@ -15,7 +15,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
 from candidate.models import CandidateCampaign, CandidateCampaignList
 from election.models import Election
-from position.models import PositionEntered, PositionEnteredManager, INFORMATION_ONLY, OPPOSE, \
+from position.models import PositionEntered, PositionEnteredManager, ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response

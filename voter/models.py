@@ -175,7 +175,8 @@ class VoterManager(BaseUserManager):
         if not validate_email(email):
             # We do not want to search for an invalid email
             email = None
-        voter_we_vote_id = voter_we_vote_id.strip()
+        if positive_value_exists(voter_we_vote_id):
+            voter_we_vote_id = voter_we_vote_id.strip()
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False

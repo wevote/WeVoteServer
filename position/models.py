@@ -18,7 +18,7 @@ from wevote_functions.models import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_position_integer, fetch_site_unique_id_prefix
 
 
-ANY = 'ANY'  # This is a way to indicate when we want to return any stance (support, oppose, no_stance)
+ANY_STANCE = 'ANY_STANCE'  # This is a way to indicate when we want to return any stance (support, oppose, no_stance)
 SUPPORT = 'SUPPORT'
 STILL_DECIDING = 'STILL_DECIDING'
 NO_STANCE = 'NO_STANCE'
@@ -395,162 +395,110 @@ class Position(models.Model):
     #     if candidate_campaign.id:
 
 
-class PositionListForCandidateCampaign(models.Model):
-    """
-    A way to retrieve all of the positions stated about this CandidateCampaign
-    """
-    # candidate_campaign = models.ForeignKey(
-    #     CandidateCampaign, null=False, blank=False, verbose_name='candidate campaign')
-    # position = models.ForeignKey(
-    #     PositionEntered, null=False, blank=False, verbose_name='position about candidate')
+class PositionListManager(models.Model):
+
+    def calculate_positions_followed_by_voter(
+            self, voter_id, all_positions_list, organizations_followed_by_voter):
+        """
+        We need a list of positions that were made by an organization, public figure or friend that this voter follows
+        :param all_positions_list:
+        :param organizations_followed_by_voter:
+        :return:
+        """
+
+        positions_followed_by_voter = []
+        # Only return the positions if they are from organizations the voter follows
+        for position in all_positions_list:
+            if position.voter_id == voter_id:  # We include the voter currently viewing the ballot in this list
+                positions_followed_by_voter.append(position)
+            # TODO Include a check against a list of "people_followed_by_voter" so we can include friends
+            elif position.organization_id in organizations_followed_by_voter:
+                logger.debug("position {position_id} followed by voter (org {org_id})".format(
+                    position_id=position.id, org_id=position.organization_id
+                ))
+                positions_followed_by_voter.append(position)
+
+        return positions_followed_by_voter
+
+    def calculate_positions_not_followed_by_voter(
+            self, all_positions_list, organizations_followed_by_voter):
+        """
+        We need a list of positions that were NOT made by an organization, public figure or friend that this voter follows
+        :param all_positions_list:
+        :param organizations_followed_by_voter:
+        :return:
+        """
+        positions_not_followed_by_voter = []
+        # Only return the positions if they are from organizations the voter follows
+        for position in all_positions_list:
+            # Some positions are for individual voters, so we want to filter those out
+            if position.organization_id \
+                    and position.organization_id not in organizations_followed_by_voter:
+                logger.debug("position {position_id} NOT followed by voter (org {org_id})".format(
+                    position_id=position.id, org_id=position.organization_id
+                ))
+                positions_not_followed_by_voter.append(position)
+
+        return positions_not_followed_by_voter
+
     def retrieve_all_positions_for_candidate_campaign(self, candidate_campaign_id, stance_we_are_looking_for):
-        # TODO Error check stance_we_are_looking_for
+        if stance_we_are_looking_for not in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE):
+            position_list = []
+            return position_list
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
         #  all stances
 
         # Retrieve the support positions for this candidate_campaign_id
-        organization_position_list = PositionEntered()
-        organization_position_list_found = False
+        position_list = PositionEntered()
+        position_list_found = False
         try:
-            organization_position_list = PositionEntered.objects.order_by('date_entered')
-            organization_position_list = organization_position_list.filter(candidate_campaign_id=candidate_campaign_id)
+            position_list = PositionEntered.objects.order_by('date_entered')
+            position_list = position_list.filter(candidate_campaign_id=candidate_campaign_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE
-            if stance_we_are_looking_for != ANY:
-                # If we passed in the stance "ANY" it means we want to not filter down the list
-                organization_position_list = organization_position_list.filter(stance=stance_we_are_looking_for)
-            # organization_position_list = organization_position_list.filter(election_id=election_id)
-            if len(organization_position_list):
-                organization_position_list_found = True
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                position_list = position_list.filter(stance=stance_we_are_looking_for)
+            # position_list = position_list.filter(election_id=election_id)
+            if len(position_list):
+                position_list_found = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
-        if organization_position_list_found:
-            return organization_position_list
+        if position_list_found:
+            return position_list
         else:
-            organization_position_list = []
-            return organization_position_list
+            position_list = []
+            return position_list
 
-    def calculate_positions_followed_by_voter(
-            self, voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter):
-        """
-        We need a list of positions that were made by an organization that this voter follows
-        :param all_positions_list_for_candidate_campaign:
-        :param organizations_followed_by_voter:
-        :return:
-        """
-
-        positions_followed_by_voter = []
-        # Only return the positions if they are from organizations the voter follows
-        for position in all_positions_list_for_candidate_campaign:
-            if position.voter_id == voter_id:  # We include the voter currently viewing the ballot in this list
-                positions_followed_by_voter.append(position)
-            # TODO Include a check against a list of "people_followed_by_voter" so we can include friends
-            elif position.organization_id in organizations_followed_by_voter:
-                logger.debug("position {position_id} followed by voter (org {org_id})".format(
-                    position_id=position.id, org_id=position.organization_id
-                ))
-                positions_followed_by_voter.append(position)
-
-        return positions_followed_by_voter
-
-    def calculate_positions_not_followed_by_voter(
-            self, all_positions_list_for_candidate_campaign, organizations_followed_by_voter):
-        """
-        We need a list of positions that were made by an organization that this voter follows
-        :param all_positions_list_for_candidate_campaign:
-        :param organizations_followed_by_voter:
-        :return:
-        """
-        positions_not_followed_by_voter = []
-        # Only return the positions if they are from organizations the voter follows
-        for position in all_positions_list_for_candidate_campaign:
-            # Some positions are for individual voters, so we want to filter those out
-            if position.organization_id \
-                    and position.organization_id not in organizations_followed_by_voter:
-                logger.debug("position {position_id} NOT followed by voter (org {org_id})".format(
-                    position_id=position.id, org_id=position.organization_id
-                ))
-                positions_not_followed_by_voter.append(position)
-
-        return positions_not_followed_by_voter
-
-
-class PositionListForContestMeasure(models.Model):
-    """
-    A way to retrieve all of the positions stated about this ContestMeasure
-    """
-    def retrieve_all_positions_for_contest_measure(self, candidate_campaign_id, stance_we_are_looking_for):
-        # TODO Error check stance_we_are_looking_for
+    def retrieve_all_positions_for_contest_measure(self, contest_measure_id, stance_we_are_looking_for):
+        if stance_we_are_looking_for not in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE):
+            position_list = []
+            return position_list
 
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
         #  all stances
 
-        # Retrieve the support positions for this candidate_campaign_id
-        organization_position_list = PositionEntered()
-        organization_position_list_found = False
+        # Retrieve the support positions for this contest_measure_id
+        position_list_found = False
         try:
-            organization_position_list = PositionEntered.objects.order_by('date_entered')
-            organization_position_list = organization_position_list.filter(candidate_campaign_id=candidate_campaign_id)
+            position_list = PositionEntered.objects.order_by('date_entered')
+            position_list = position_list.filter(contest_measure_id=contest_measure_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE
-            if stance_we_are_looking_for != ANY:
+            if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list
-                organization_position_list = organization_position_list.filter(stance=stance_we_are_looking_for)
-            # organization_position_list = organization_position_list.filter(election_id=election_id)
-            if len(organization_position_list):
-                organization_position_list_found = True
+                position_list = position_list.filter(stance=stance_we_are_looking_for)
+            # position_list = position_list.filter(election_id=election_id)
+            if len(position_list):
+                position_list_found = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
-        if organization_position_list_found:
-            return organization_position_list
+        if position_list_found:
+            return position_list
         else:
-            organization_position_list = []
-            return organization_position_list
-
-    def calculate_positions_followed_by_voter(
-            self, voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter):
-        """
-        We need a list of positions that were made by an organization that this voter follows
-        :param all_positions_list_for_candidate_campaign:
-        :param organizations_followed_by_voter:
-        :return:
-        """
-
-        positions_followed_by_voter = []
-        # Only return the positions if they are from organizations the voter follows
-        for position in all_positions_list_for_candidate_campaign:
-            if position.voter_id == voter_id:  # We include the voter currently viewing the ballot in this list
-                positions_followed_by_voter.append(position)
-            # TODO Include a check against a list of "people_followed_by_voter" so we can include friends
-            elif position.organization_id in organizations_followed_by_voter:
-                logger.debug("position {position_id} followed by voter (org {org_id})".format(
-                    position_id=position.id, org_id=position.organization_id
-                ))
-                positions_followed_by_voter.append(position)
-
-        return positions_followed_by_voter
-
-    def calculate_positions_not_followed_by_voter(
-            self, all_positions_list_for_candidate_campaign, organizations_followed_by_voter):
-        """
-        We need a list of positions that were made by an organization that this voter follows
-        :param all_positions_list_for_candidate_campaign:
-        :param organizations_followed_by_voter:
-        :return:
-        """
-        positions_not_followed_by_voter = []
-        # Only return the positions if they are from organizations the voter follows
-        for position in all_positions_list_for_candidate_campaign:
-            # Some positions are for individual voters, so we want to filter those out
-            if position.organization_id \
-                    and position.organization_id not in organizations_followed_by_voter:
-                logger.debug("position {position_id} NOT followed by voter (org {org_id})".format(
-                    position_id=position.id, org_id=position.organization_id
-                ))
-                positions_not_followed_by_voter.append(position)
-
-        return positions_not_followed_by_voter
+            position_list = []
+            return position_list
 
 
 class PositionEnteredManager(models.Model):
@@ -1470,36 +1418,3 @@ class PositionEnteredManager(models.Model):
             'position_id':      position_id,
         }
         return results
-
-
-class PositionList(models.Model):
-    """
-    A way to retrieve lists of positions
-    """
-    def retrieve_all_positions_for_contest_measure(self, candidate_campaign_id, stance_we_are_looking_for):
-        # TODO Error check stance_we_are_looking_for
-
-        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
-        #  all stances
-
-        # Retrieve the support positions for this candidate_campaign_id
-        position_list = PositionEntered()
-        position_list_found = False
-        try:
-            position_list = PositionEntered.objects.order_by('date_entered')
-            position_list = position_list.filter(candidate_campaign_id=candidate_campaign_id)
-            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE
-            if stance_we_are_looking_for != ANY:
-                # If we passed in the stance "ANY" it means we want to not filter down the list
-                position_list = position_list.filter(stance=stance_we_are_looking_for)
-            # position_list = position_list.filter(election_id=election_id)
-            if len(position_list):
-                position_list_found = True
-        except Exception as e:
-            handle_record_not_found_exception(e, logger=logger)
-
-        if position_list_found:
-            return position_list
-        else:
-            position_list = []
-            return position_list

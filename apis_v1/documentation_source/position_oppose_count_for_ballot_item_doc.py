@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/support_count_doc.py
+# apis_v1/documentation_source/position_oppose_count_for_ballot_item_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def support_count_doc_template_values(url_root):
+def position_oppose_count_for_ballot_item_doc_template_values(url_root):
     """
-    Show documentation about supportCount
+    Show documentation about positionOpposeCountForBallotItem
     """
     required_query_parameter_list = [
         {
@@ -21,13 +21,13 @@ def support_count_doc_template_values(url_root):
         {
             'name':         'candidate_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The candidate we want the support count for. '
+            'description':  'The candidate we want the oppose count for. '
                             '(Either measure_id or candidate_id must exist)',
         },
         {
             'name':         'measure_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The measure we want the support count for. (Either measure_id or candidate_id must exist. '
+            'description':  'The measure we want the oppose count for. (Either measure_id or candidate_id must exist. '
                             'We ignore measure_id if candidate_id exists.)',
         },
     ]
@@ -54,11 +54,11 @@ def support_count_doc_template_values(url_root):
         },
         {
             'code':         'SUCCESSFUL_RETRIEVE_OF_POSITIONS',
-            'description':  'The number of supports for this ballot item was retrieved.',
+            'description':  'The number of opposes for this ballot item was retrieved.',
         },
         {
             'code':         'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED',
-            'description':  'The number of organizations that support this ballot item that voter is NOT following.',
+            'description':  'The number of organizations that oppose this ballot item that voter is NOT following.',
         },
     ]
 
@@ -73,12 +73,12 @@ def support_count_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'supportCount',
-        'api_slug': 'supportCount',
+        'api_name': 'positionOpposeCountForBallotItem',
+        'api_slug': 'positionOpposeCountForBallotItem',
         'api_introduction':
-            "How many of the organizations that the voter follows, plus the friends of the voter, "
-            "support this candidate or measure?",
-        'try_now_link': 'apis_v1:supportCountView',
+            "A single number showing the total that oppose this Ballot Item (Candidate or Measure) from "
+            "organizations, friends, and public figures this voter follows.",
+        'try_now_link': 'apis_v1:positionOpposeCountForBallotItemView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

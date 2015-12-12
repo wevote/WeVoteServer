@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from follow.models import FollowOrganizationList
 import json
 from position.models import SUPPORT, OPPOSE, \
-    PositionEnteredManager, PositionListForCandidateCampaign, PositionListForContestMeasure
+    PositionEnteredManager, PositionListManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.models import is_voter_device_id_valid, positive_value_exists
@@ -14,7 +14,7 @@ from wevote_functions.models import is_voter_device_id_valid, positive_value_exi
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-def oppose_count_for_api(voter_device_id, candidate_id, measure_id):
+def position_oppose_count_for_ballot_item_for_api(voter_device_id, candidate_id, measure_id):
 
     stance_we_are_looking_for = OPPOSE
     return positions_count_for_api(voter_device_id, candidate_id, measure_id, stance_we_are_looking_for)
@@ -38,15 +38,15 @@ def positions_count_for_api(voter_device_id, candidate_id, measure_id, stance_we
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    show_followed_positions = True
+    show_positions_this_voter_follows = True
     if positive_value_exists(candidate_id):
         results = positions_count_for_candidate_campaign(voter_id, candidate_id, stance_we_are_looking_for,
-                                                         show_followed_positions)
+                                                         show_positions_this_voter_follows)
         json_data = results['json_data']
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(measure_id):
         results = positions_count_for_contest_measure(voter_id, candidate_id, stance_we_are_looking_for,
-                                                      show_followed_positions)
+                                                      show_positions_this_voter_follows)
         json_data = results['json_data']
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -61,14 +61,15 @@ def positions_count_for_api(voter_device_id, candidate_id, measure_id, stance_we
 
 
 def positions_count_for_candidate_campaign(voter_id, candidate_id, stance_we_are_looking_for,
-                                           show_followed_positions=True):
+                                           show_positions_this_voter_follows=True):
     """
-    We want to return a JSON file with the support positions for a particular candidate's campaign
+    We want to return a JSON file with the number of orgs, friends and public figures the voter follows who support
+    this particular candidate's campaign
     """
     # This implementation is built to make only two database calls. All other calculations are done here in the
     #  application layer
 
-    position_list_manager = PositionListForCandidateCampaign()
+    position_list_manager = PositionListManager()
     all_positions_list_for_candidate_campaign = \
         position_list_manager.retrieve_all_positions_for_candidate_campaign(
             candidate_id, stance_we_are_looking_for)
@@ -77,7 +78,7 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, stance_we_are
     organizations_followed_by_voter = \
         follow_organization_list_manager.retrieve_follow_organization_info_for_voter_simple_array(voter_id)
 
-    if show_followed_positions:
+    if show_positions_this_voter_follows:
         positions_followed = position_list_manager.calculate_positions_followed_by_voter(
             voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
         positions_followed_count = len(positions_followed)
@@ -105,29 +106,30 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, stance_we_are
         return results
 
 
-def positions_count_for_contest_measure(voter_id, candidate_id, stance_we_are_looking_for,
-                                        show_followed_positions=True):  # TODO DALE Get this working for measures
+def positions_count_for_contest_measure(voter_id, measure_id, stance_we_are_looking_for,
+                                        show_positions_this_voter_follows=True):
     """
-    We want to return a JSON file with the support positions for a particular measure
+    We want to return a JSON file with the number of orgs, friends and public figures the voter follows who support
+    this particular measure
     """
     # This implementation is built to make only two database calls. All other calculations are done here in the
     #  application layer
 
-    position_list_manager = PositionListForContestMeasure()
-    all_positions_list_for_candidate_campaign = \
+    position_list_manager = PositionListManager()
+    all_positions_list_for_contest_measure = \
         position_list_manager.retrieve_all_positions_for_contest_measure(
-            candidate_id, stance_we_are_looking_for)
+            measure_id, stance_we_are_looking_for)
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
         follow_organization_list_manager.retrieve_follow_organization_info_for_voter_simple_array(voter_id)
 
-    if show_followed_positions:
+    if show_positions_this_voter_follows:
         positions_followed = position_list_manager.calculate_positions_followed_by_voter(
-            voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
+            voter_id, all_positions_list_for_contest_measure, organizations_followed_by_voter)
         positions_followed_count = len(positions_followed)
         json_data = {
-            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS',
+            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITION_COUNT_FOR_CONTEST_MEASURE',
             'success': True,
             'count': positions_followed_count,
         }
@@ -137,10 +139,10 @@ def positions_count_for_contest_measure(voter_id, candidate_id, stance_we_are_lo
         return results
     else:
         positions_not_followed = position_list_manager.calculate_positions_not_followed_by_voter(
-            all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
+            all_positions_list_for_contest_measure, organizations_followed_by_voter)
         positions_not_followed_count = len(positions_not_followed)
         json_data = {
-            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED',
+            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED_COUNT_FOR_CONTEST_MEASURE',
             'success': True,
             'count': positions_not_followed_count,
         }
@@ -150,7 +152,7 @@ def positions_count_for_contest_measure(voter_id, candidate_id, stance_we_are_lo
         return results
 
 
-def support_count_for_api(voter_device_id, candidate_id, measure_id):
+def position_support_count_for_ballot_item_for_api(voter_device_id, candidate_id, measure_id):
     stance_we_are_looking_for = SUPPORT
     return positions_count_for_api(voter_device_id, candidate_id, measure_id, stance_we_are_looking_for)
 

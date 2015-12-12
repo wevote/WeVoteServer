@@ -16,14 +16,16 @@ from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api
-from position.controllers import position_retrieve_for_api, position_save_for_api, \
-    voter_position_retrieve_for_api, voter_position_comment_save_for_api
+from position.controllers import position_list_for_ballot_item_for_api, position_retrieve_for_api, \
+    position_save_for_api, voter_position_retrieve_for_api, voter_position_comment_save_for_api
+from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE
 from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from star.controllers import voter_star_off_save_for_api, voter_star_on_save_for_api, voter_star_status_retrieve_for_api
-from support_oppose_deciding.controllers import oppose_count_for_api, support_count_for_api, \
+from support_oppose_deciding.controllers import position_oppose_count_for_ballot_item_for_api, \
+    position_support_count_for_ballot_item_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_address_save_for_api, voter_retrieve_list_for_api
 from voter.serializers import VoterSerializer
@@ -181,6 +183,30 @@ def organization_search_view(request):
                                        organization_email=organization_email)
 
 
+def position_list_for_ballot_item_view(request):
+    """
+    Retrieve the number of orgs and friends that support this (positionSupportCountForBallotItem)
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    office_id = request.GET.get('office_id', 0)
+    candidate_id = request.GET.get('candidate_id', 0)
+    measure_id = request.GET.get('measure_id', 0)
+    stance = request.GET.get('stance', ANY_STANCE)
+    if stance in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE):
+        stance_we_are_looking_for = stance
+    else:
+        stance_we_are_looking_for = ANY_STANCE
+    show_positions_this_voter_follows = request.GET.get('show_positions_this_voter_follows', True)
+    return position_list_for_ballot_item_for_api(voter_device_id=voter_device_id,
+                                                 office_id=office_id,
+                                                 candidate_id=candidate_id,
+                                                 measure_id=measure_id,
+                                                 stance_we_are_looking_for=stance_we_are_looking_for,
+                                                 show_positions_this_voter_follows=show_positions_this_voter_follows)
+
+
 def position_retrieve_view(request):
     """
     Retrieve all of the details about a single position based on unique identifier
@@ -242,28 +268,28 @@ def position_save_view(request):
     return HttpResponse(json.dumps(results), content_type='application/json')
 
 
-def oppose_count_view(request):
+def position_oppose_count_for_ballot_item_view(request):
     """
-    Retrieve the number of orgs and friends that oppose this (opposeCount)
+    Retrieve the number of orgs and friends that oppose this (positionOpposeCountForBallotItem)
     :param request:
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     candidate_id = request.GET.get('candidate_id', 0)
     measure_id = request.GET.get('measure_id', 0)
-    return oppose_count_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+    return position_oppose_count_for_ballot_item_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
 
 
-def support_count_view(request):
+def position_support_count_for_ballot_item_view(request):
     """
-    Retrieve the number of orgs and friends that support this (supportCount)
+    Retrieve the number of orgs and friends that support this (positionSupportCountForBallotItem)
     :param request:
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     candidate_id = request.GET.get('candidate_id', 0)
     measure_id = request.GET.get('measure_id', 0)
-    return support_count_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+    return position_support_count_for_ballot_item_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
 
 
 def voter_address_retrieve_view(request):

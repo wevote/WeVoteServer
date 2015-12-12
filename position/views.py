@@ -6,8 +6,8 @@ from django.http import JsonResponse
 from candidate.models import CandidateCampaignManager
 from follow.models import FollowOrganizationList
 from organization.models import OrganizationManager
-from .models import ANY, SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECIDING, OPPOSE, \
-    PositionListForCandidateCampaign
+from .models import ANY_STANCE, SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECIDING, OPPOSE, \
+    PositionListManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, get_voter_device_id
@@ -16,7 +16,8 @@ from wevote_functions.models import convert_to_int, get_voter_device_id
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-def positions_related_to_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for):
+# ### TODO DEPRECATE EVERYTHING UNDER HERE - should be moved to controller
+def positions_related_to_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for):  # TODO DEPRECATE
     """
     We want to return a JSON file with the support positions for a particular candidate's campaign
     :param request:
@@ -30,7 +31,7 @@ def positions_related_to_candidate_campaign_view(request, candidate_campaign_id,
     # This implementation is built to make only two database calls. All other calculations are done here in the
     #  application layer
 
-    position_list_manager = PositionListForCandidateCampaign()
+    position_list_manager = PositionListManager()
     all_positions_list_for_candidate_campaign = \
         position_list_manager.retrieve_all_positions_for_candidate_campaign(
             candidate_campaign_id, stance_we_are_looking_for)
@@ -61,7 +62,7 @@ def positions_related_to_candidate_campaign_view(request, candidate_campaign_id,
 
 
 def assemble_candidate_campaign_stance_html(
-        candidate_campaign_id, stance_we_are_looking_for, positions_followed, positions_not_followed):
+        candidate_campaign_id, stance_we_are_looking_for, positions_followed, positions_not_followed):  # TODO DEPRECATE
     """
 
     :param candidate_campaign_id:
@@ -220,7 +221,7 @@ def assemble_candidate_campaign_stance_html(
     return stance_html
 
 
-def display_stance_we_are_looking_for_title(stance_we_are_looking_for, number_of_stances_found):
+def display_stance_we_are_looking_for_title(stance_we_are_looking_for, number_of_stances_found):  # TODO DEPRECATE
     text_for_stance_we_are_looking_for = ""
     if stance_we_are_looking_for == OPPOSE:
         text_for_stance_we_are_looking_for += "Opposition to" \
@@ -237,7 +238,7 @@ def display_stance_we_are_looking_for_title(stance_we_are_looking_for, number_of
     return text_for_stance_we_are_looking_for
 
 
-def display_stance_we_are_looking_for(stance_we_are_looking_for, number_of_stances_found, only_you):
+def display_stance_we_are_looking_for(stance_we_are_looking_for, number_of_stances_found, only_you):  # TODO DEPRECATE
     # If only_you is True, we want singular like "You oppose" as opposed to "You opposes"
     text_for_stance_we_are_looking_for = ""
     if stance_we_are_looking_for == OPPOSE:
@@ -255,7 +256,7 @@ def display_stance_we_are_looking_for(stance_we_are_looking_for, number_of_stanc
     return text_for_stance_we_are_looking_for
 
 
-def display_stance_verb_we_are_looking_for_singular(stance_we_are_looking_for):
+def display_stance_verb_we_are_looking_for_singular(stance_we_are_looking_for):  # TODO DEPRECATE
     text_for_stance_we_are_looking_for = ""
     if stance_we_are_looking_for == OPPOSE:
         text_for_stance_we_are_looking_for += "oppose"
@@ -268,7 +269,7 @@ def display_stance_verb_we_are_looking_for_singular(stance_we_are_looking_for):
     return text_for_stance_we_are_looking_for
 
 
-def display_stance_verb_we_are_looking_for_plural(stance_we_are_looking_for):
+def display_stance_verb_we_are_looking_for_plural(stance_we_are_looking_for):  # TODO DEPRECATE
     text_for_stance_we_are_looking_for = ""
     if stance_we_are_looking_for == OPPOSE:
         text_for_stance_we_are_looking_for += "opposes"
@@ -281,27 +282,27 @@ def display_stance_verb_we_are_looking_for_plural(stance_we_are_looking_for):
     return text_for_stance_we_are_looking_for
 
 
-def positions_count_for_candidate_campaign_any_not_followed_view(request, candidate_campaign_id):
-    show_followed_positions = False
+def positions_count_for_candidate_campaign_any_not_followed_view(request, candidate_campaign_id):  # TODO DEPRECATE
+    show_positions_this_voter_follows = False
     return positions_count_for_candidate_campaign_any_view(
-        request, candidate_campaign_id, show_followed_positions)
+        request, candidate_campaign_id, show_positions_this_voter_follows)
 
 
-def positions_count_for_candidate_campaign_any_view(request, candidate_campaign_id, show_followed_positions=True):
+def positions_count_for_candidate_campaign_any_view(request, candidate_campaign_id, show_positions_this_voter_follows=True):  # TODO DEPRECATE
     """
     We want to return a simple count of available positions (not already followed) for a particular candidate's campaign
     :param request:
     :param candidate_campaign_id:
     :return:
     """
-    stance_we_are_looking_for = ANY
+    stance_we_are_looking_for = ANY_STANCE
     # TODO Isn't working -- needs some code from wevotebase
     # return positions_count_for_candidate_campaign_view(
-    #     request, candidate_campaign_id, stance_we_are_looking_for, show_followed_positions)
+    #     request, candidate_campaign_id, stance_we_are_looking_for, show_positions_this_voter_follows)
     return
 
 
-def positions_related_to_candidate_campaign_oppose_view(request, candidate_campaign_id):
+def positions_related_to_candidate_campaign_oppose_view(request, candidate_campaign_id):  # TODO DEPRECATE
     """
     We want to return a JSON file with the oppose positions for a particular candidate's campaign
     :param request:
@@ -312,7 +313,7 @@ def positions_related_to_candidate_campaign_oppose_view(request, candidate_campa
     return positions_related_to_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-def positions_count_for_candidate_campaign_oppose_view(request, candidate_campaign_id):
+def positions_count_for_candidate_campaign_oppose_view(request, candidate_campaign_id):  # TODO DEPRECATE
     """
     We want to return a simple count of the oppose positions (of followed orgs) for a particular candidate's campaign
     :param request:
@@ -325,7 +326,7 @@ def positions_count_for_candidate_campaign_oppose_view(request, candidate_campai
     return
 
 
-def positions_related_to_candidate_campaign_information_only_view(request, candidate_campaign_id):
+def positions_related_to_candidate_campaign_information_only_view(request, candidate_campaign_id):  # TODO DEPRECATE
     """
     We want to return a JSON file with the oppose positions for a particular candidate's campaign
     :param request:
@@ -336,7 +337,7 @@ def positions_related_to_candidate_campaign_information_only_view(request, candi
     return positions_related_to_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-def positions_related_to_candidate_campaign_still_deciding_view(request, candidate_campaign_id):
+def positions_related_to_candidate_campaign_still_deciding_view(request, candidate_campaign_id):  # TODO DEPRECATE
     """
     We want to return a JSON file with the oppose positions for a particular candidate's campaign
     :param request:
@@ -347,7 +348,7 @@ def positions_related_to_candidate_campaign_still_deciding_view(request, candida
     return positions_related_to_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-def positions_related_to_candidate_campaign_support_view(request, candidate_campaign_id):
+def positions_related_to_candidate_campaign_support_view(request, candidate_campaign_id):  # TODO DEPRECATE
     """
     We want to return a JSON file with the support positions (of followed orgs) for a particular candidate's campaign
     :param request:
@@ -358,7 +359,7 @@ def positions_related_to_candidate_campaign_support_view(request, candidate_camp
     return positions_related_to_candidate_campaign_view(request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-def positions_count_for_candidate_campaign_support_view(request, candidate_campaign_id):
+def positions_count_for_candidate_campaign_support_view(request, candidate_campaign_id):  # TODO DEPRECATE
     """
     We want to return a simple count of the support positions (of followed orgs) for a particular candidate's campaign
     :param request:
@@ -371,7 +372,7 @@ def positions_count_for_candidate_campaign_support_view(request, candidate_campa
     return
 
 
-def positions_related_to_contest_measure_oppose_view(request, contest_measure_id):
+def positions_related_to_contest_measure_oppose_view(request, contest_measure_id):  # TODO DEPRECATE
     """
     We want to return a JSON file with the oppose positions for a particular measure's campaign
     :param request:
@@ -383,7 +384,7 @@ def positions_related_to_contest_measure_oppose_view(request, contest_measure_id
     return JsonResponse({0: "Sierra Club opposes"})
 
 
-def positions_related_to_contest_measure_support_view(request, contest_measure_id):
+def positions_related_to_contest_measure_support_view(request, contest_measure_id):  # TODO DEPRECATE
     """
     We want to return a JSON file with the support positions for a particular measure's campaign
     :param request:

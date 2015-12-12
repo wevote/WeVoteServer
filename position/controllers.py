@@ -2,14 +2,14 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PositionEntered
+from .models import PositionEntered, PositionEnteredManager, PositionListManager, ANY_STANCE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception, handle_record_not_saved_exception
+from follow.models import FollowOrganizationList
 from organization.models import OrganizationManager
-from position.models import PositionEnteredManager
 import json
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 import wevote_functions.admin
@@ -280,6 +280,133 @@ def position_save_for_api(
             'last_updated':             '',
         }
         return results
+
+
+def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_id, measure_id,
+                                          stance_we_are_looking_for=ANY_STANCE,
+                                          show_positions_this_voter_follows=True):
+    """
+    We want to return a JSON file with the position identifiers from orgs, friends and public figures the voter follows
+    This list of information is used to retrieve the detailed information
+    """
+    # Get voter_id from the voter_device_id so we can know who is supporting/opposing
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        position_list = []
+        json_data = {
+            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
+            'success': False,
+            'count':            0,
+            'ballot_item_type': "UNKNOWN",
+            'ballot_item_id':   0,
+            'position_list':    position_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        position_list = []
+        json_data = {
+            'status': "VALID_VOTER_ID_MISSING ",
+            'success': False,
+            'count':            0,
+            'ballot_item_type': "UNKNOWN",
+            'ballot_item_id':   0,
+            'position_list':    position_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    position_list_manager = PositionListManager()
+    if positive_value_exists(candidate_id):
+        all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+                candidate_id, stance_we_are_looking_for)
+        ballot_item_type = 'CANDIDATE'
+        ballot_item_id = candidate_id
+    elif positive_value_exists(measure_id):
+        all_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
+                measure_id, stance_we_are_looking_for)
+        ballot_item_type = 'MEASURE'
+        ballot_item_id = measure_id
+    elif positive_value_exists(office_id):
+        all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
+                office_id, stance_we_are_looking_for)
+        ballot_item_type = 'OFFICE'
+        ballot_item_id = measure_id
+    else:
+        position_list = []
+        json_data = {
+            'status':           'POSITION_LIST_RETRIEVE_MISSING_BALLOT_ITEM_ID',
+            'success':          False,
+            'count':            0,
+            'ballot_item_type': "UNKNOWN",
+            'ballot_item_id':   0,
+            'position_list':    position_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    follow_organization_list_manager = FollowOrganizationList()
+    organizations_followed_by_voter = \
+        follow_organization_list_manager.retrieve_follow_organization_info_for_voter_simple_array(voter_id)
+
+    if show_positions_this_voter_follows:
+        position_objects = position_list_manager.calculate_positions_followed_by_voter(
+            voter_id, all_positions_list, organizations_followed_by_voter)
+        positions_count = len(position_objects)
+        status = 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_FOLLOWED'
+        success = True
+    else:
+        position_objects = position_list_manager.calculate_positions_not_followed_by_voter(
+            all_positions_list, organizations_followed_by_voter)
+        positions_count = len(position_objects)
+        status = 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED'
+        success = True
+
+    position_list = []
+    for one_position in position_objects:
+        # Whose position is it?
+        if positive_value_exists(one_position.organization_we_vote_id):
+            speaker_type = "ORGANIZATION"
+            speaker_id = one_position.organization_id
+            speaker_we_vote_id = one_position.organization_we_vote_id
+            one_position_success = True
+        elif positive_value_exists(one_position.voter_id):
+            speaker_type = "VOTER"
+            speaker_id = one_position.voter_id
+            speaker_we_vote_id = one_position.voter_we_vote_id
+            one_position_success = True
+        elif positive_value_exists(one_position.public_figure_we_vote_id):
+            speaker_type = "PUBLIC_FIGURE"
+            speaker_id = one_position.public_figure_id
+            speaker_we_vote_id = one_position.public_figure_we_vote_id
+            one_position_success = True
+        else:
+            speaker_type = "UNKNOWN"
+            speaker_id = None
+            speaker_we_vote_id = None
+            one_position_success = False
+
+        if one_position_success:
+            one_position_dict_for_api = {
+                'position_id':          one_position.id,
+                'position_we_vote_id':  one_position.we_vote_id,
+                'speaker_label':        'Organization Name TEMP',  # TODO DALE Add this to PositionEntered
+                'speaker_type':         speaker_type,
+                'speaker_id':           speaker_id,
+                'speaker_we_vote_id':   speaker_we_vote_id,
+                'is_support':           one_position.is_support(),
+                'is_oppose':            one_position.is_oppose(),
+            }
+            position_list.append(one_position_dict_for_api)
+
+    json_data = {
+        'status':           status,
+        'success':          success,
+        'count':            positions_count,
+        'ballot_item_type': ballot_item_type,
+        'ballot_item_id':   ballot_item_id,
+        'position_list':    position_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def positions_import_from_sample_file(request=None):  # , load_from_uri=False

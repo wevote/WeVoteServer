@@ -107,12 +107,19 @@
         <td colspan="2"><strong>Positions (Support, Oppose, Info Only), Stars and Like's</strong></td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:supportCountDocs' %}">supportCount</a></td>
-        <td>Return the number of organizations the voter follows + the voter's friends that support the specified candidate or measure</td>
+        <td><a href="{% url 'apis_v1:positionListForBallotItemDocs' %}">positionListForBallotItem</a></td>
+        <td>A list of all positions (support/oppose/info) for this Ballot Item (Office, Candidate or Measure)
+            from organizations, friends, and public figures this voter follows.</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:opposeCountDocs' %}">opposeCount</a></td>
-        <td>Return the number of organizations the voter follows + the voter's friends that oppose the specified candidate or measure</td>
+        <td><a href="{% url 'apis_v1:positionSupportCountForBallotItemDocs' %}">positionSupportCountForBallotItem</a></td>
+        <td>A single number showing the total supporters for this Ballot Item (Candidate or Measure) from organizations,
+            friends, and public figures this voter follows.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionOpposeCountForBallotItemDocs' %}">positionOpposeCountForBallotItem</a></td>
+        <td>A single number showing the total that oppose this Ballot Item (Candidate or Measure) from organizations,
+            friends, and public figures this voter follows.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionRetrieveDocs' %}">positionRetrieve</a></td>
