@@ -28,6 +28,7 @@ export default class IntroOpinionsPage extends React.Component {
     <HeaderBackNavigation header_text={"Here's the idea - Learn from Community"} back_to_off={true} />
 
     <div className="well well-95">
+        <p>&nbsp;</p>
         <p>You have organizations and friends you trust when it comes time to
           vote. Follow them so you can see what they endorse on your ballot.</p>
         <p className="clearfix">Or skip this.

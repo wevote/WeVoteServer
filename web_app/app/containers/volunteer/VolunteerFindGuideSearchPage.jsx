@@ -1,11 +1,11 @@
 import axios from 'axios';
-import FramedContentHeaderNavigation from "components/navigation/FramedContentHeaderNavigation";
+import VolunteerFindGuideSearchNavigation from "components/navigation/volunteer/VolunteerFindGuideSearchNavigation";
 import React from "react";
 import { Button, ButtonToolbar, Input } from "react-bootstrap";
 import { Link } from "react-router";
-import FramedContentPageStyles from "./FramedContentPage.css";
+import FramedContentPageStyles from "../FramedContentPage.css";
 
-export default class FramedContentPage extends React.Component {
+export default class VolunteerFindGuideSearch extends React.Component {
 	constructor(props) {
 		super(props);
 	}
@@ -25,9 +25,9 @@ export default class FramedContentPage extends React.Component {
 	render() {
 	    return (
 <div>
-	<FramedContentHeaderNavigation />
+	<VolunteerFindGuideSearchNavigation />
 
-    <iframe className={FramedContentPageStyles.iframe_for_framed_content} src="http://www.WeVoteUSA.org" height="100%" width="100%" frameborder="0"></iframe>
+    <iframe className={FramedContentPageStyles.iframe_for_framed_content} src="http://www.google.com" height="100%" width="100%" frameborder="0"></iframe>
 </div>
 		);
 	}

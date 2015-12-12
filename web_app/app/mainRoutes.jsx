@@ -61,7 +61,8 @@ import OrgEndorsementsPage 						from "route-handlers/OrgEndorsementsPage";
 import ReadmePage   							from "route-handlers/ReadmePage";
 import RequestsPage								from "route-handlers/RequestsPage";
 import TermsAndPoliciesPage 					from "route-handlers/TermsAndPoliciesPage";
-import VolunteerChooseTask						from "route-handlers/VolunteerChooseTask";
+import VolunteerChooseTaskPage						from "route-handlers/VolunteerChooseTaskPage";
+import VolunteerFindGuideSearchPage				from "route-handlers/VolunteerFindGuideSearchPage";
 import VolunteerHomePage						from "route-handlers/VolunteerHomePage";
 /* eslint-enable */
 
@@ -129,7 +130,8 @@ module.exports = (
 		<Route name="requests" path="/requests" handler={RequestsPage} />
 		<Route name="privacy" path="/privacy" handler={TermsAndPoliciesPage} />
 		<Route name="volunteer" path="/volunteer" handler={VolunteerHomePage} />
-		<Route name="volunteer_choose_task" path="/volunteer/tasks" handler={VolunteerChooseTask} />
+		<Route name="volunteer_choose_task" path="/volunteer/tasks" handler={VolunteerChooseTaskPage} />
+		<Route name="volunteer_find_guide" path="/volunteer/find" handler={VolunteerFindGuideSearchPage} />
 		<DefaultRoute handler={HomePage} />
 		<NotFoundRoute handler={NotFoundPage} />
 	</Route>

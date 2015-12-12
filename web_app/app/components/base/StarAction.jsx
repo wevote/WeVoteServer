@@ -19,7 +19,7 @@ export default class StarAction extends React.Component {
         }
 		return (
 <span style={floatRight}>
-    &nbsp;<span className="glyphicon glyphicon-small glyphicon-star-empty"></span>
+    &nbsp;<span className="glyphicon glyphicon-small glyphicon-star-empty"></span>{/* A solid star is "glyphicon-star" */}
 </span>
         );
 	}

@@ -94,7 +94,8 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '     "position_id": integer,\n' \
                    '     "position_we_vote_id": string,\n' \
                    '     "speaker_label": string,\n' \
-                   '     "speaker_type": string,\n' \
+                   '     "speaker_type": string, ' \
+                   '      (One of these: \'ORGANIZATION\', \'VOTER\', \'PUBLIC_FIGURE\', \'UNKNOWN\',)\n' \
                    '     "speaker_id": integer,\n' \
                    '     "speaker_we_vote_id": string,\n' \
                    '     "is_support": boolean,\n' \
