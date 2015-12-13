@@ -1,14 +1,7 @@
-import React, { PropTypes } from "react";
-
-// style libraries
-import 'font-awesome/css/font-awesome.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-
-import 'css/application.css';
-
+import React, { Component, PropTypes } from "react";
 import Navigator from 'components/Navigator';
 
-export default class Application extends React.Component {
+export default class Application extends Component {
     static propTypes = {
         children: PropTypes.object
     };
@@ -23,7 +16,7 @@ export default class Application extends React.Component {
                 {/*Check and see if this is the users first time entering the site*/}
                 {/* TODO:: ADD top nav, bottom nav... Global components in here... */}
                 {/* Put loading logic back into this section here...*/}
-			    {this.props.children}
+                { this.props.children }
                 <Navigator />
 		    </div>
         );

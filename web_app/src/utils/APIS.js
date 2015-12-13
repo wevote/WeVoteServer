@@ -10,8 +10,13 @@
  */
 
 'use strict';
+import * as cookies from './cookies';
+import assign from 'object-assign';
 
-const axios = require('axios');
+import * as request from 'superagent';
+
+
+window._request = request;
 
 // basic endpoint url configuration
 const protocol = 'http://';
@@ -19,8 +24,13 @@ const host = 'localhost';
 const port = ':8000';
 const base_path = '/apis/v1/';
 
-// full url to API endpoints
-let url = `${protocol}${host}${port}${base_path}`;
+let CONFIG = {
+    BASE: `${protocol}${host}${port}${base_path}`,
+    HEADERS: {
+        //Cookie: document.cookie
+    }
+};
+
 
 function checkParams(params, params_in) {
     let keys;
@@ -38,54 +48,78 @@ function checkParams(params, params_in) {
     });
 }
 
-module.exports = {
-    /********** Voter Basic Data **********/
-    deviceIdGenerate: () => axios.get(url + 'deviceIdGenerate'),
-    voterAddressRetrieve: () => axios.get(url + 'voterAddressRetrieve'),
-    voterAddressSave: params => {
-        if (checkParams(['api_key', 'voter_device_id', 'address'], params))
-            return axios.post(url + 'voterAddressSave', params);
-        else
-            throw new Error('incorrect parameters', params);
+function get(url, callback) {
+    return request
+        .get(CONFIG.BASE + url)
+        .set(CONFIG.HEADERS)
+        .end(callback);
+}
+
+function post(url, data, callback) {
+    return request
+        .post(CONFIG.BASE + url)
+        .set(CONFIG.HEADERS)
+        .end(callback);
+}
+
+module.exports = window.APIS = {
+    /********** This is a custom method for getting
+     ********** the users location information
+     **********/
+    locationService: cb => {
     },
-    voterCount: () => axios.get(url + 'voterCount'),
+
+    /********** Voter Basic Data **********/
+    deviceIdGenerate: cb => get('deviceIdGenerate', cb),
+    voterAddressRetrieve: cb => get('voterAddressRetrieve', cb),
+
+    voterAddressSave: (text_for_map_search, cb) => {
+        var csrfmiddlewaretoken = 'NpSeKcfbbSycWQZkSpuv9n7BdAUO6wAz';
+        post('voterAddressSave/', {
+            text_for_map_search,
+            csrfmiddlewaretoken
+        },cb);
+    },
+
+    voterCount: cb => request.get('voterCount', cb),
+
     voterCreate: voter_device_id => {
         const params = { voter_device_id };
         if (checkParams(['voter_device_id'], params))
-            return axios.get(url + 'voterCreate', params);
+            return request.get('voterCreate', {params});
         else
             throw new Error('missing voter_device_id', params);
     },
     voterRetrieve: voter_device_id => {
         const params = { voter_device_id };
         if (checkParams(['voter_device_id'], params))
-            return axios.get(url + 'voterRetrieve', params);
+            return request.get('voterRetrieve', {params});
         else
             throw new Error('missing voter_device_id', params);
     },
 
     /********** Org, People & Voter Guides **********/
-    organizationCount: () => axios.get(url + 'organizationCount'),
+    organizationCount: () => request.get('organizationCount'),
 
 
     /********** Ballot Contest Data **********/
     ballotItemOptionsRetrieve: params => {
         if (checkParams(['voter_device_id', 'api_key'], params))
-            return axios.get(url + 'ballotItemOptionsRetrieve', params);
+            return request.get('ballotItemOptionsRetrieve', {params});
         else
             throw new Error('incorrect parameters', params);
     },
 
     electionsRetrieve:  params => {
         if (checkParams(['voter_device_id', 'api_key'], params))
-            return axios.get(url + 'electionsRetrieve', params);
+            return request.get('electionsRetrieve', {params});
         else
             throw new Error('incorrect parameters', params);
     },
 
     voterBallotItemsRetrieve: params => {
         if (checkParams(['voter_device_id', 'api_key'], params))
-            return axios.get(url + 'voterBallotItemsRetrieve', params);
+            return request.get('voterBallotItemsRetrieve', {params});
         else
             throw new Error('incorrect parameters', params);
     },
@@ -93,9 +127,8 @@ module.exports = {
     /********** Candidates & Measures **********/
     candidatesRetrieve: office_we_vote_id => {
         var params = { office_we_vote_id };
-        console.log(params);
         if (checkParams(['office_we_vote_id'], params))
-            return axios.get(url + 'candidatesRetrieve', params);
+            return request.get('candidatesRetrieve', {params});
         else
             throw new Error('missing office_we_vote_id parameter', params);
 

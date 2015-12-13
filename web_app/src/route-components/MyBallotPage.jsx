@@ -1,13 +1,8 @@
 import React, { Component } from "react";
 import { Link } from "react-router";
 
-
-import OfficeStore from 'stores/OfficeStore';
-import OfficeActions from 'actions/OfficeActions';
-
-import Office from 'components/objects/Office';
-
-import CandidateActions from 'actions/CandidateActions';
+import AddressBox from 'components/AddressBox/AddressBox';
+import Office from 'components/Office';
 
 /*****************************************************************************/
                             //\\REMOVE\\//
@@ -19,20 +14,15 @@ import BallotFeedNavigation from "components/BallotFeedNavigation";
 import BallotFeedItemActionBar from "components/BallotFeedItemActionBar";
 /*****************************************************************************/
 
-
-function getOfficeState() {
-    var officeItems = OfficeStore.toArray();
-    return {
-        officeItems
-    };
-}
 {/* VISUAL DESIGN HERE: https://invis.io/V33KV2GBR */}
+function loadOfficeItems () {
+
+}
 
 export default class MyBallotPage extends Component {
 	constructor(props) {
 		super(props);
-        OfficeActions.load();
-        this.state = getOfficeState();
+
 	}
 
     static getProps() {
@@ -40,32 +30,44 @@ export default class MyBallotPage extends Component {
     }
 
     componentDidMount() {
-        OfficeStore.addChangeListener(this._onChange);
+
     }
 
     componentWillUnmount() {
-        OfficeStore.removeChangeListener(this._onChange);
+    }
+
+    /**
+     * save address changes
+     * @return {undefined}
+     */
+    changeSaved(err) {
+        if (err) console.error('Issue saving address to server..', err);
+        console.log('Ballot page saving...');
+
     }
 
 	render() {
-        let {officeItems} = this.state,
-            offices = [];
 
-        officeItems.forEach(office => {
-            CandidateActions.loadByOfficeId(office.we_vote_id);
-            offices.push(
-                <Office
-                    key={office.we_vote_id}
-                    office_name={office.office_name}
-                    we_vote_id={office.we_vote_id}
-                />
-            )
-        }
-        );
 	    return (
 			<div>
-			    <BallotFeedNavigation />
-                { offices }
+            <div className="row">
+                <nav className="navbar navbar-main navbar-fixed-top bottom-separator">
+                    <div className="container-fluid">
+                        <div className="left-inner-addon">
+                          <h4 className="pull-left no-space bold">My Ballot</h4>
+                          <ul className="nav nav-pills pull-right">
+                                <AddressBox changeSaved={this.changeSaved.bind(this)}/>
+                          </ul>
+                        </div>
+                    </div>
+                </nav>
+                <div className="container-fluid bg-light box-skinny bottom-separator">
+                  <div className="row">
+                    <div className="col-xs-6 col-md-6 text-center"><i className="icon-icon-add-friends-2-1 icon-light icon-medium"></i><Link to="add_friends" className="font-darkest fluff-left-narrow">Add Friends</Link></div>
+                    <div className="col-xs-6 col-md-6 text-center"><i className="icon-icon-more-opinions-2-2 icon-light icon-medium"></i><Link to="ballot_opinions" className="font-darkest fluff-left-narrow">More Opinions</Link></div>
+                  </div>
+                </div>
+            </div>
                 <div>
 			        <div className="well well-sm split-top-skinny">
 			             <StarAction we_vote_id={'wvcand001'} />
@@ -112,11 +114,4 @@ export default class MyBallotPage extends Component {
 			</div>
 		);
 	}
-
-    /*
-        eventListener for ballotChange events
-     */
-    _onChange() {
-        this.setState(getOfficeState());
-    }
 }

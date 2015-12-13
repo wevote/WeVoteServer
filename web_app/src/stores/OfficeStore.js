@@ -5,7 +5,6 @@ import { OfficeConstants } from 'constants/Constants';
 import { each } from 'underscore';
 
 const _offices = {};
-let _officeArray;
 
 /**
  * add data into store via mergeIntoStore
@@ -34,10 +33,19 @@ const OfficeStore = createStore({
     },
 
     /**
+     * add a list of candidates to an office
+     * @param {String} id   we vote office id
+     * @param {Array} list array of string ids
+     */
+    addCandidates (id, list) {
+        _offices[id].candidate_list = list;
+    },
+
+    /**
      * @return {Array} array of Ballot Data
      */
     toArray () {
-        _officeArray = _officeArray || [];
+        let _officeArray = [];
         each(_offices, (val, key) =>
             _officeArray.push(_offices[key])
         );

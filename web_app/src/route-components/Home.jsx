@@ -1,24 +1,24 @@
 'use strict';
+import React, { Component } from "react";
 
-// TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
-//import ReactDOM from 'react-dom';
-//import {IntlProvider, FormattedNumber, FormattedPlural} from 'react-intl';
-// Example code here: https://github.com/yahoo/react-intl
-// npm install react-intl@next
-import LanguageSwitchNavigation from "../components/base/LanguageSwitchNavigation.jsx";
-import React from "react";
 import { Button, Input } from "react-bootstrap";
 import { Link } from "react-router";
 
-import {voterCount, organizationCount} from '../service/api.js';
+import * as cookies from 'utils/cookies';
+import { locationService, deviceIdGenerate, voterCount, organizationCount } from 'utils/APIS';
 
-export default class Home extends React.Component {
+
+export default class Home extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+            device_verified: cookies.getItem('voter_device_id') ? true : false,
 			voter_count: null,
 			organization_count: null
 		};
+
+        if (this.state.device_verified)
+            location.href='myballot';
 	}
 
 	static getProps() {
@@ -26,30 +26,52 @@ export default class Home extends React.Component {
 	}
 
 	componentDidMount() {
-		this.getOrganizationCount();
-		this.getVoterCount();
+        this._assign_device_id();
+        this._getVoterLocation();
 	}
 
+    /**
+     * verify the device id of the the active user
+     * @return {undefined}
+     */
+    _assign_device_id() {
+        deviceIdGenerate(function (err, res) {
+            if (res.ok) {
+                console.log(res.body);
+                cookies.setItem('voter_device_id', res.body.voter_device_id);
+            }
+            else console.log(err);
+        }.bind(this));
+    }
+
+    /**
+     * get the location of the active user
+     * @return {undefined}
+     */
+    _getVoterLocation() {
+
+    }
+
 	getVoterCount() {
-		voterCount()
-			.then(
-                (count) => this.setState({
-	               voter_count: count
-                })
-            );
+        this.setState({
+             voter_count: '1001am'
+        });
 	}
 
     getOrganizationCount() {
-        organizationCount()
-            .then(
-                (count) => this.setState({
-                    organization_count: count
-                })
-            );
+        this.setState({
+            organization_count: 'a lot'
+        });
+
     }
 
 	render() {
-		return (
+        console.log(this.state);
+        let view = this.state.device_verified ? (
+            <div className="center">
+                <i className="fa fa-spinner fa-spin fa-3x"></i>
+            </div>
+        ) : (
 			<div className="container-fluid well well-90">
 			    <h2 className="text-center">We Vote Social Voter Guide</h2>
 			    <ul className="list-group">
@@ -79,16 +101,7 @@ export default class Home extends React.Component {
 			    </Link>
 			    <br />
 			    <br />
-			    <LanguageSwitchNavigation />
-			</div>
-		);
-	}
+			</div> );
+		return view;
+    }
 }
-
-// TODO When we upgrade to react@0.14.0 we can use react-intl@2.0.0-beta-1
-//ReactDOM.render(
-//    <IntlProvider locale="en">
-//        <App />
-//    </IntlProvider>,
-//    document.getElementById('container')
-//);

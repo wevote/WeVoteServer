@@ -9,7 +9,6 @@ const CHANGE_EVENT = 'change';
  * @return {Store}  DataStore Object
  */
 export function createStore(mixin) {
-
     const store = assign({}, EventEmitter.prototype, {
         emitChange() {
             this.emit(CHANGE_EVENT);

@@ -6,7 +6,7 @@ export const OfficeConstants = keyMirror({
 });
 
 export const CandidateConstants = keyMirror({
-    CANDIDATES_LOAD_SUCCESSFUL: null,
+    CANDIDATES_RETRIEVED: null,
     CANDIDATE_SUPPORT: null,
     CANDIDATE_UNSUPPORT: null
 });

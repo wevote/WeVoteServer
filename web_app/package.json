@@ -7,10 +7,10 @@
   "license": "MIT",
   "dependencies": {
     "keymirror": "^0.1.1",
-    "object-assign": "^4.0.1"
+    "object-assign": "^4.0.1",
+    "superagent": "^1.5.0"
   },
   "devDependencies": {
-    "axios": "^0.7.0",
     "babel-core": "^6.2.1",
     "babel-eslint": "^4.1.6",
     "babel-loader": "^6.2.0",

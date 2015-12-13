@@ -5,14 +5,13 @@ import { candidatesRetrieve } from 'utils/APIS';
 
 var CandidateActions = {
     loadByOfficeId: (office_we_vote_id) => {
-        candidatesRetrieve(office_we_vote_id).then( data => {
-            console.log(data);
-        });
-
-        dispatcher.dispatch({
-            actionType: CandidateConstants.CANDIDATES_LOAD_SUCCESSFUL,
-
-        });
+        candidatesRetrieve(office_we_vote_id)
+            .then( data =>
+                dispatcher.dispatch({
+                    actionType: CandidateConstants.CANDIDATES_RETRIEVED,
+                    actionData: data.data
+                })
+            );
     }
 };
 

@@ -3,6 +3,9 @@ body {
     padding-top: 45px !important;
     padding-bottom: 70px !important;
 }
+.center {
+    text-align: center;
+}
 
 .navbar-main {
     background-color: #FFF;
