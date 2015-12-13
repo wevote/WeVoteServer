@@ -1,0 +1,125 @@
+{
+    "offices": [
+        {
+            "wv01off922": {
+                "we_vote_id": "wv01off922",
+                "office_name": "Sheriff CAROLINE COUNTY"
+            }
+        },{
+            "wv01off919": {
+                "we_vote_id": "wv01off919",
+                "office_name": "Soil and Water Conservation Director Blue Ridge District FRANKLIN COUNTY"
+            }
+        },{
+            "wv01off828": {
+                "we_vote_id": "wv01off828",
+                "office_name": "Soil and Water Conservation Director Peaks of Otter District BEDFORD COUNTY"
+            }
+        },{
+            "wv01off920": {
+                "we_vote_id": "wv01off920",
+                "office_name": "Clerk of Court CAROLINE COUNTY"
+            }
+        },{
+            "wv01off921": {
+                "we_vote_id": "wv01off921",
+                "office_name": "Commonwealth's Attorney CAROLINE COUNTY"
+            }
+        },{
+            "wv01off922": {
+                "we_vote_id": "wv01off922",
+                "office_name": "Sheriff CAROLINE COUNTY"
+            }
+        },{
+            "wv01off923": {
+                "we_vote_id": "wv01off923",
+                "office_name": "Commissioner of Revenue CAROLINE COUNTY"
+            }
+        },{
+            "wv01off924": {
+                "we_vote_id": "wv01off924",
+                "office_name": "Treasurer CAROLINE COUNTY"
+            }
+        },{
+            "wv01off925": {
+                "we_vote_id": "wv01off925",
+                "office_name": "Soil and Water Conservation Director Hanover-Caroline District CAROLINE COUNTY"
+            }
+        },{
+            "wv01off926": {
+                "we_vote_id": "wv01off926",
+                "office_name": "Clerk of Court CLARKE COUNTY"
+            }
+        },{
+            "wv01off927": {
+                "we_vote_id": "wv01off927",
+                "office_name": "Commonwealth's Attorney CLARKE COUNTY"
+            }
+        },{
+            "wv01off928": {
+                "we_vote_id": "wv01off928",
+                "office_name": "Sheriff CLARKE COUNTY"
+            }
+        },{
+            "wv01off929": {
+                "we_vote_id": "wv01off929",
+                "office_name": "Commissioner of Revenue CLARKE COUNTY"
+            }
+        },{
+            "wv01off930": {
+                "we_vote_id": "wv01off930",
+                "office_name": "Treasurer CLARKE COUNTY"
+            }
+        },{
+            "wv01off931": {
+                "we_vote_id": "wv01off931",
+                "office_name": "Soil and Water Conservation Director Lord Fairfax District CLARKE COUNTY"
+            }
+        },{
+            "wv01off932": {
+                "we_vote_id": "wv01off932",
+                "office_name": "Clerk of Court KING WILLIAM COUNTY"
+            }
+        },{
+            "wv01off590": {
+                "we_vote_id": "wv01off590",
+                "office_name": "Soil and Water Conservation Director Virginia Dare District VIRGINIA BEACH CITY"
+            }
+        },{
+            "wv01off647": {
+                "we_vote_id": "wv01off647",
+                "office_name": "Soil and Water Conservation Director Northern Virginia District FAIRFAX COUNTY"
+            }
+        },{
+            "wv01off933": {
+                "we_vote_id": "wv01off933",
+                "office_name": "Commonwealth's Attorney KING WILLIAM COUNTY"
+            }
+        },{
+            "wv01off934": {
+                "we_vote_id": "wv01off934",
+                "office_name": "Sheriff KING WILLIAM COUNTY"
+            }
+        },{
+            "wv01off935": {
+                "we_vote_id": "wv01off935",
+                "office_name": "Commissioner of Revenue KING WILLIAM COUNTY"
+            }
+        },{
+            "wv01off936": {
+                "we_vote_id": "wv01off936",
+                "office_name": "Treasurer KING WILLIAM COUNTY"
+            }
+        },{
+            "wv01off937": {
+                "we_vote_id": "wv01off937",
+                "office_name": "Soil and Water Conservation Director Three Rivers District KING WILLIAM COUNTY"
+            }
+        },{
+            "wv01off938": {
+                "we_vote_id": "wv01off938",
+                "office_name": "Member School Board At Large KING WILLIAM COUNTY"
+            }
+        }
+    ]
+}
