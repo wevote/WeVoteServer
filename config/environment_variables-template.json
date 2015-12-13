@@ -25,9 +25,9 @@
 
   "_comment":                       "import_export_google_civic",
   "GOOGLE_CIVIC_API_KEY":           "",
-  "ELECTION_QUERY_URL":             "",
-  "VOTER_INFO_URL":                 "",
-  "VOTER_INFO_JSON_FILE":           "",
+  "ELECTION_QUERY_URL":             "https://www.googleapis.com/civicinfo/v2/elections",
+  "VOTER_INFO_URL":                 "https://www.googleapis.com/civicinfo/v2/voterinfo",
+  "VOTER_INFO_JSON_FILE":           "import_export_google_civic/import_data/voterinfo_sample.json",
 
   "_comment":                       "import_export_theunitedstatesio",
   "LEGISLATORS_CURRENT_CSV_FILE":   "import_export_theunitedstatesio/import_data/legislators-current.csv",
