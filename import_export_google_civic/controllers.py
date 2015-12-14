@@ -14,6 +14,7 @@ from .models import GoogleCivicApiCounterManager
 from ballot.models import BallotItemManager, BallotItemListManager
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
+from django.contrib import messages
 from election.models import ElectionManager
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
@@ -412,6 +413,7 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, use_test_elec
     election_data_retrieved = False
     polling_location_retrieved = False
     contests_retrieved = False
+    google_civic_election_id = 0
     if 'election' in structured_json:
         if 'id' in structured_json['election']:
             election_data_retrieved = True
@@ -514,6 +516,10 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0):
 def retrieve_from_google_civic_api_election_query():
     # Request json file from Google servers
     logger.info("Loading json data from Google servers, API call electionQuery")
+    # if not positive_value_exists(ELECTION_QUERY_URL):
+    #     messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Google Civic.')
+    #     return "{}"
+
     request = requests.get(ELECTION_QUERY_URL, params={
         "key": GOOGLE_CIVIC_API_KEY,  # This comes from an environment variable
     })
