@@ -1,8 +1,8 @@
 'use strict';
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import { Button, Input } from "react-bootstrap";
-import { Link } from "react-router";
+import { Button, Input } from 'react-bootstrap';
+import { Link } from 'react-router';
 
 import * as cookies from 'utils/cookies';
 import { locationService, deviceIdGenerate, voterCount, organizationCount } from 'utils/APIS';
@@ -26,8 +26,8 @@ export default class Home extends Component {
 	}
 
 	componentDidMount() {
-        this._assign_device_id();
-        this._getVoterLocation();
+        // this._assign_device_id();
+        // this._getVoterLocation();
 	}
 
     /**

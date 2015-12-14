@@ -1,10 +1,6 @@
 body {
-    background: #fff !important;
-    padding-top: 45px !important;
-    padding-bottom: 70px !important;
-}
-.center {
-    text-align: center;
+    padding-top: 45px;
+    padding-bottom: 70px;
 }
 
 .navbar-main {
@@ -56,7 +52,7 @@ body {
 /* App boostrap themes */
 
 .glyphicon {
-    color: #919191;
+    color: #ccc;
     font-size: 20px;
 }
 
@@ -64,64 +60,14 @@ body {
     font-size: 16px;
 }
 
-.glyphicon-line-adjustment {
-  line-height: 1.1 !important;
-}
-
 .icon-search {
     font-size: 20px;
-}
-
-.icon-light {
-    color: #919191;
-}
-
-.icon-medium {
-    font-size: 26px;
-}
-
-.icon-large {
-    font-size: 32px;
 }
 
 .well-90 {
     width: 90%;
 }
 
-/*------------------- App Styling ----------------------------------*/
-.font-lightest {
-  color: #BEBEBE;
-}
-
-.font-darkest {
-  color: #000;
-}
-
-.bg-light {
-  background: #fff;
-}
-
-.box-skinny {
-  padding: 0.5em;
-}
-
-.no-space {
-  padding: 0;
-  margin: 0;
-}
-
-.split-top-skinny {
-  margin-top: .75em;
-}
-
-.fluff-left-narrow {
-  padding-left: .25em;
-}
-
-.navbar.bottom-separator, .bottom-separator {
-  border-bottom: 1px solid #C7C7C7;
-}
-
-.bold {
-  font-weight: bold;
+.well-95 {
+    width: 95%;
 }

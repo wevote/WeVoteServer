@@ -13,7 +13,7 @@ module.exports = {
     },
     entry: [
         'webpack/hot/dev-server',
-        'webpack-dev-server/client?http://localhost:3000',
+        'webpack-dev-server/client?http://localhost:3001',
         'babel-polyfill',
         path.join(__dirname, 'src/index.js')
     ],
