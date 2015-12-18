@@ -224,7 +224,10 @@ def election_remote_retrieve_view(request):
     """
     results = election_remote_retrieve()
 
-    messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Google Civic.')
+    if not results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Google Civic.')
     return HttpResponseRedirect(reverse('election:election_list', args=()))
 
 

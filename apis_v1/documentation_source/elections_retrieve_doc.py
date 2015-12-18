@@ -65,7 +65,9 @@ def elections_retrieve_doc_template_values(url_root):
         'api_name': 'electionsRetrieve',
         'api_slug': 'electionsRetrieve/?format=json',
         'api_introduction':
-            "Export the raw elections data to JSON format",
+            "Export the raw elections data stored in the database to JSON format. "
+            "This API call does not reach out to the Google Civic API, but simply returns data that was retrieved "
+            "earlier.",
         'try_now_link': 'apis_v1:electionsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

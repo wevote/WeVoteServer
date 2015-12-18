@@ -1,0 +1,125 @@
+{# templates/quick_info/quick_info_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if quick_info %}{{ quick_info.ballot_item_label  }}{% else %}New Quick Info Entry{% endif %}{% endblock %}
+
+{%  block content %}
+<h1>{% if quick_info %}Edit {{ quick_info.ballot_item_label }}{% else %}New Quick Info Entry{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+<form action="{% url "quick_info:quick_info_edit_process" %}" method="post">
+{% csrf_token %}
+    <input type="hidden" name="quick_info_id" value="{% if quick_info %}{{ quick_info.id }}{% else %}0{% endif %}">
+
+
+{% if election_list %}
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == quick_info.google_civic_election_id %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id == quick_info.google_civic_election_id %} selected="selected"{% endif %}>
+            {{ election.election_name }}, {{ election.election_day_text }} ({{ election.google_civic_election_id }})</option>
+    {% endfor %}
+    </select><br />
+{% else %}
+    (no election information)<br />
+{% endif %}{# End of if election_list #}
+
+<table>
+    <tr>
+        <td>Create Master Entry?</td>
+        <td>Assign this Value To...</td>
+    </tr>
+    <tr>
+        <td>
+            <input type="checkbox" name="used_by_many" value="1" id="used_by_many_id">
+            <label for="used_by_many_id">Master Entry?</label><br />
+            Create an entry that can be used by many other entries?
+        </td>
+        <td>
+
+
+            {% if contest_office_options %}
+                <label for="office_id">Offices</label>
+                <select name="contest_office_we_vote_id">
+                    <option value="" {% if not quick_info.contest_office_we_vote_id %} selected="selected"{% endif %}>
+                        -- Choose Office to Describe --</option>
+                {% for one_contest_office in contest_office_options %}
+                    <option value="{{ one_contest_office.we_vote_id }}"
+                            {% if one_contest_office.we_vote_id == quick_info.contest_office_we_vote_id %} selected="selected"{% endif %}
+                            >
+                        {{ one_contest_office.office_name }}
+                    </option>
+                {% endfor %}
+                </select><br />
+            {% endif %}
+
+            {% if candidate_campaign_options %}
+                <label for="office_id">Candidates</label>
+                <select name="candidate_campaign_we_vote_id">
+                    <option value="" {% if not quick_info.candidate_campaign_we_vote_id %} selected="selected"{% endif %}>
+                        -- Choose Candidate to Describe --</option>
+                {% for one_candidate in candidate_campaign_options %}
+                    <option value="{{ one_candidate.we_vote_id }}"
+                            {% if one_candidate.we_vote_id == quick_info.candidate_campaign_we_vote_id %} selected="selected"{% endif %}
+                            >
+                        {{ one_candidate.candidate_name }}
+                    </option>
+                {% endfor %}
+                </select><br />
+            {% endif %}
+
+            {% if contest_measure_options %}
+                <label for="measure_id">Measures</label>
+                <select name="contest_measure_we_vote_id">
+                    <option value="" {% if not quick_info.contest_measure_we_vote_id %} selected="selected"{% endif %}>
+                        -- Choose Measure to Describe --</option>
+                {% for one_contest_measure in contest_measure_options %}
+                    <option value="{{ one_contest_measure.we_vote_id }}"
+                            {% if one_contest_measure.we_vote_id == quick_info.contest_measure_we_vote_id %} selected="selected"{% endif %}
+                            >
+                        {{ one_contest_measure.measure_title }}
+                    </option>
+                {% endfor %}
+                </select><br />
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+
+
+    {% if quick_info %}
+    <p>Quick Info We Vote ID: {{ quick_info.we_vote_id }}<br />
+    Ballot Item Label: {{ quick_info.ballot_item_label }}<br />
+    </p>
+    {% endif %}
+    <hr>
+    OPTION 1 - Enter text that can be used for multiple ballot items<br />
+
+    <hr>
+    OPTION 2<br />
+    <label for="language_id">Language</label>
+    <select id="language_id" name="language">
+    {% for key,value in language_choices %}
+        <option value="{{ key }}" {% if key == quick_info.language %} selected="selected"{% endif %}>
+            {{ value }}
+        </option>
+    {% endfor %}
+    </select><br />
+
+    <textarea name="info_text" id="info_text_id" class="quick_info_text" >{{ quick_info.info_text }}</textarea><br />
+
+    <label for="more_info_id">More Info URL</label>
+    <input type="text" name="more_info" id="more_info_id" value="{% if quick_info %}{{ quick_info.more_info_url }}{% endif %}" /><br />
+
+
+
+
+<p><a href="{% url 'quick_info:quick_info_list' %}">cancel</a>
+<input type="submit" value="{% if quick_info %}Update Quick Info Entry{% else %}Save New Quick Info Entry{% endif %}" /></p>
+</form>
+
+{% endblock %}

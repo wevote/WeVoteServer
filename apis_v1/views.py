@@ -357,6 +357,7 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):
 
     results = voter_ballot_items_retrieve_from_google_civic_for_api(
         voter_device_id, text_for_map_search, use_test_election)
+
     response = HttpResponse(json.dumps(results), content_type='application/json')
 
     # Save google_civic_election_id in the cookie so the interface knows

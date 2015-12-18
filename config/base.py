@@ -93,6 +93,7 @@ INSTALLED_APPS = (
     'polling_location',
     'position',
     'position_like',
+    'quick_info',
     'rest_framework',
     'support_oppose_deciding',
     'star',

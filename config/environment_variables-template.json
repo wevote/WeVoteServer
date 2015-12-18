@@ -22,6 +22,7 @@
   "ORGANIZATIONS_URL":              "http://my.wevoteusa.org/import_export/organizations/?format=json",
   "CANDIDATE_CAMPAIGNS_URL":        "http://my.wevoteusa.org/import_export/candidate_campaigns/?format=json",
   "POSITIONS_URL":                  "http://my.wevoteusa.org/import_export/positions/?format=json",
+  "QUICK_INFO_URL":                  "http://my.wevoteusa.org/import_export/quick_info/?format=json",
 
   "_comment":                       "import_export_google_civic",
   "GOOGLE_CIVIC_API_KEY":           "",

@@ -1,0 +1,75 @@
+{# templates/quick_info/quick_info_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Quick Info Contents{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Quick Info Contents</h1>
+<p>
+These are the entries that appear next to ballot items (info icon) with information about an office, candidate,
+or measure. There are links to edit quick info entries on other ballot item admin pages.
+</p>
+<p><a href="{% url 'quick_info:quick_info_new' %}">create new entry</a>&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="{% url 'quick_info:quick_info_new' %}">create new master entry</a><br />
+
+<a href="{% url 'quick_info:quick_info_new' %}">import tool</a>&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="{% url 'quick_info:quick_info_new' %}">view master entries</a><br />
+</p>
+
+
+{% if election_list %}
+    <form name="organization_quick_info_choose_election" method="get" action="{% url 'quick_info:quick_info_list' %}">
+        {% csrf_token %}
+
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    </form>
+{% endif %}{# End of if election_list #}
+
+{% if quick_info_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>ID</td>
+            <td>Ballot Item ID</td>
+            <td>Ballot Item</td>
+            <td>Election</td>
+        </tr>
+    {% for quick_info in quick_info_list %}
+        <tr>
+            <td>{{ quick_info.we_vote_id }}</td>
+            <td><a href="{% url 'quick_info:quick_info_edit' quick_info.id %}">
+                {{ quick_info.get_ballot_item_we_vote_id }}</a></td>
+            <td>{{ quick_info.ballot_item_label }}</td>
+            <td>{{ quick_info.google_civic_election_id }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+    <p>
+        <a href="{% url 'quick_info:quick_info_export' %}?format=json" target="_blank" >Export Quick Info</a>
+{#        ,#}
+{#    <a href="{% url 'quick_info:quick_info_import' %}" >Import Quick Info</a>#}
+    </p>
+{% else %}
+    <p>(no quick_info found)</p>
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

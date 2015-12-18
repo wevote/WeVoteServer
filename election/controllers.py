@@ -14,9 +14,19 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 def election_remote_retrieve():
-    structured_json = retrieve_from_google_civic_api_election_query()
-    results = store_results_from_google_civic_api_election_query(structured_json)
-    return results
+    retrieve_results = retrieve_from_google_civic_api_election_query()
+
+    if not retrieve_results['success']:
+
+        results = {
+            'success':  False,
+            'status':   retrieve_results['status']
+        }
+        return results
+    else:
+        structured_json = retrieve_results['structured_json']
+        results = store_results_from_google_civic_api_election_query(structured_json)
+        return results
 
 
 def elections_import_from_sample_file():

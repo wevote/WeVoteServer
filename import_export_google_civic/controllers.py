@@ -516,9 +516,12 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0):
 def retrieve_from_google_civic_api_election_query():
     # Request json file from Google servers
     logger.info("Loading json data from Google servers, API call electionQuery")
-    # if not positive_value_exists(ELECTION_QUERY_URL):
-    #     messages.add_message(request, messages.INFO, 'Upcoming elections retrieved from Google Civic.')
-    #     return "{}"
+    if not positive_value_exists(ELECTION_QUERY_URL):
+        results = {
+            'success':  False,
+            'status':   'ELECTION_QUERY_URL missing from config/environment_variables.json',
+        }
+        return results
 
     request = requests.get(ELECTION_QUERY_URL, params={
         "key": GOOGLE_CIVIC_API_KEY,  # This comes from an environment variable
@@ -526,7 +529,14 @@ def retrieve_from_google_civic_api_election_query():
     # Use Google Civic API call counter to track the number of queries we are doing each day
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
     google_civic_api_counter_manager.create_counter_entry('election')
-    return json.loads(request.text)
+    structured_json = json.loads(request.text)
+
+    results = {
+        'structured_json':  structured_json,
+        'success':          True,
+        'status':           'structured_json retrieved',
+    }
+    return results
 
 
 def store_results_from_google_civic_api_election_query(structured_json):
@@ -556,50 +566,46 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
     """
     # Confirm that we have a Google Civic API Key (GOOGLE_CIVIC_API_KEY)
     if not positive_value_exists(GOOGLE_CIVIC_API_KEY):
-        json_data = {
+        results = {
             'status': 'NO_GOOGLE_CIVIC_API_KEY',
             'success': False,
             'voter_device_id': voter_device_id,
             'google_civic_election_id': 0,
             'text_for_map_search': text_for_map_search,
         }
+        return results
+
+    # Confirm that we have the URL where we retrieve voter ballots (VOTER_INFO_URL)
+    if not positive_value_exists(VOTER_INFO_URL):
         results = {
+            'status': 'MISSING VOTER_INFO_URL in config/environment_variables.json',
             'success': False,
-            'json_data': json_data,
-            'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
+            'voter_device_id': voter_device_id,
+            'google_civic_election_id': 0,
+            'text_for_map_search': text_for_map_search,
         }
         return results
 
     # Get voter_id from the voter_device_id so we can figure out which ballot_items to offer
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
-        json_data = {
+        results = {
             'status': 'VALID_VOTER_DEVICE_ID_MISSING',
             'success': False,
             'voter_device_id': voter_device_id,
             'google_civic_election_id': 0,
             'text_for_map_search': text_for_map_search,
         }
-        results = {
-            'success': False,
-            'json_data': json_data,
-            'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
-        }
         return results
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
-        json_data = {
+        results = {
             'status': "VALID_VOTER_ID_MISSING",
             'success': False,
             'voter_device_id': voter_device_id,
             'google_civic_election_id': 0,
             'text_for_map_search': text_for_map_search,
-        }
-        results = {
-            'success': False,
-            'json_data': json_data,
-            'google_civic_election_id': 0,  # Force the clearing of google_civic_election_id
         }
         return results
 
