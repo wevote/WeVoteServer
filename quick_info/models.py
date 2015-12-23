@@ -72,7 +72,8 @@ class QuickInfo(models.Model):
     ballot_item_label = models.CharField(verbose_name="text name for ballot item for quick display",
                                          max_length=255, null=True, blank=True)
 
-    site_to_credit = models.CharField(max_length=15, choices=SOURCE_SITE_CHOICES, default=BALLOTPEDIA)
+    site_to_credit = models.CharField(max_length=15, choices=SOURCE_SITE_CHOICES, default=BALLOTPEDIA,
+                                      null=True, blank=True)
 
     # A link to any location with more information about this quick information
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more the full entry for this info')
@@ -107,7 +108,7 @@ class QuickInfo(models.Model):
 
     # There are many ballot items that don't have (or need) a custom quick_info entry, and can reference a general
     # entry. This field is the we_vote_id of the master quick_info entry that has the general text.
-    link_to_master_we_vote_id = models.CharField(
+    quick_info_master_we_vote_id = models.CharField(
         verbose_name="we vote id of other entry which is the master", max_length=255, default=None, null=True,
         blank=True, unique=True)
 
@@ -164,6 +165,17 @@ class QuickInfo(models.Model):
         if self.language == TAGALOG:
             return True
         return False
+
+    def get_kind_of_ballot_item(self):
+        if positive_value_exists(self.contest_office_we_vote_id):
+            return OFFICE
+        elif positive_value_exists(self.candidate_campaign_we_vote_id):
+            return CANDIDATE
+        elif positive_value_exists(self.politician_we_vote_id):
+            return POLITICIAN
+        elif positive_value_exists(self.contest_measure_we_vote_id):
+            return MEASURE
+        return None
 
     def get_ballot_item_we_vote_id(self):
         if positive_value_exists(self.contest_office_we_vote_id):
@@ -355,7 +367,7 @@ class QuickInfoManager(models.Model):
                                     info_text,
                                     language,
                                     last_editor_we_vote_id,
-                                    link_to_master_we_vote_id,
+                                    quick_info_master_we_vote_id,
                                     more_info_url,
                                     site_to_credit,
                                     google_civic_election_id
@@ -387,8 +399,8 @@ class QuickInfoManager(models.Model):
                     quick_info_on_stage.language = language
                 if last_editor_we_vote_id is not False:
                     quick_info_on_stage.last_editor_we_vote_id = last_editor_we_vote_id
-                if link_to_master_we_vote_id is not False:
-                    quick_info_on_stage.link_to_master_we_vote_id = link_to_master_we_vote_id
+                if quick_info_master_we_vote_id is not False:
+                    quick_info_on_stage.quick_info_master_we_vote_id = quick_info_master_we_vote_id
                 if more_info_url is not False:
                     quick_info_on_stage.more_info_url = more_info_url
                 if site_to_credit is not False:
@@ -407,7 +419,24 @@ class QuickInfoManager(models.Model):
         elif results['DoesNotExist']:
             try:
                 # Create new quick_info entry
-                # NOTE: For speed purposes, we are not validating the existence of the items being starred
+                if ballot_item_label is False:
+                    ballot_item_label = None
+                if info_html is False:
+                    info_html = None
+                if info_text is False:
+                    info_text = None
+                if language is False:
+                    language = ENGLISH
+                if last_editor_we_vote_id is False:
+                    last_editor_we_vote_id = None
+                if quick_info_master_we_vote_id is False:
+                    quick_info_master_we_vote_id = None
+                if more_info_url is False:
+                    more_info_url = None
+                if site_to_credit is False:
+                    site_to_credit = None
+                if google_civic_election_id is False:
+                    google_civic_election_id = None
                 quick_info_on_stage = QuickInfo(
                     ballot_item_label=ballot_item_label,
                     contest_office_we_vote_id=contest_office_we_vote_id,
@@ -418,7 +447,7 @@ class QuickInfoManager(models.Model):
                     info_text=info_text,
                     language=language,
                     last_editor_we_vote_id=last_editor_we_vote_id,
-                    link_to_master_we_vote_id=link_to_master_we_vote_id,
+                    quick_info_master_we_vote_id=quick_info_master_we_vote_id,
                     more_info_url=more_info_url,
                     site_to_credit=site_to_credit,
                     google_civic_election_id=google_civic_election_id
@@ -429,7 +458,7 @@ class QuickInfoManager(models.Model):
                 quick_info_on_stage_found = True
                 status = 'CREATED_QUICK_INFO'
             except Exception as e:
-                status = 'FAILED_TO_UPDATE_QUICK_INFO'
+                status = 'FAILED_TO_CREATE_NEW_QUICK_INFO'
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         else:
             status = results['status']
@@ -492,7 +521,8 @@ class QuickInfoMaster(models.Model):
     master_entry_name = models.CharField(verbose_name="text name for quick info master entry",
                                          max_length=255, null=True, blank=True)
 
-    site_to_credit = models.CharField(max_length=15, choices=SOURCE_SITE_CHOICES, default=BALLOTPEDIA)
+    site_to_credit = models.CharField(max_length=15, choices=SOURCE_SITE_CHOICES, default=BALLOTPEDIA,
+                                      null=True, blank=True)
 
     # A link to any location with more information about this quick information
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more the full entry for this info')
@@ -621,15 +651,11 @@ class QuickInfoMasterManager(models.Model):
             'quick_info_master_found':  True if quick_info_master_id > 0 else False,
             'quick_info_master_id':     quick_info_master_id,
             'quick_info_master':        quick_info_master,
-            'is_chinese':               quick_info_master.is_chinese(),
-            'is_english':               quick_info_master.is_english(),
-            'is_spanish':               quick_info_master.is_spanish(),
-            'is_tagalog':               quick_info_master.is_tagalog(),
-            'is_vietnamese':            quick_info_master.is_vietnamese(),
         }
         return results
 
-    def update_or_create_quick_info_master(self, quick_info_master_id, quick_info_master_we_vote_id,
+    def update_or_create_quick_info_master(self, quick_info_master_id,
+                                           quick_info_master_we_vote_id,
                                            master_entry_name,
                                            info_html, info_text,
                                            language,
@@ -640,16 +666,16 @@ class QuickInfoMasterManager(models.Model):
                                            ):
         # Does a quick_info_master entry already exist?
         quick_info_master_manager = QuickInfoMasterManager()
-        results = quick_info_master_manager.retrieve_quick_info_master(quick_info_master_id,
-                                                                       quick_info_master_we_vote_id)
+        if positive_value_exists(quick_info_master_id) or positive_value_exists(quick_info_master_we_vote_id):
+            results = quick_info_master_manager.retrieve_quick_info_master(quick_info_master_id,
+                                                                           quick_info_master_we_vote_id)
+            quick_info_master_found = results['quick_info_master_found']
+        else:
+            quick_info_master_found = False
 
-        quick_info_master_found = False
-        quick_info_master_id = 0
-        quick_info_master = QuickInfoMaster()
-        if results['quick_info_master_found']:
+        if quick_info_master_found:
             quick_info_master = results['quick_info_master']
 
-            # Update this quick_info_master entry with new values - we do not delete because we might be able to use
             # noinspection PyBroadException
             try:
                 if master_entry_name is not False:
@@ -675,12 +701,24 @@ class QuickInfoMasterManager(models.Model):
                 status = 'QUICK_INFO_MASTER_UPDATED'
             except Exception as e:
                 status = 'FAILED_TO_UPDATE_QUICK_INFO_MASTER'
-        elif results['MultipleObjectsReturned']:
-            status = 'QUICK_INFO_MASTER MultipleObjectsReturned'
-        elif results['DoesNotExist']:
+        else:
             try:
                 # Create new quick_info_master entry
-                # NOTE: For speed purposes, we are not validating the existence of the items being starred
+                # Create new quick_info entry
+                if master_entry_name is False:
+                    master_entry_name = NULL
+                if info_html is False:
+                    info_html = None
+                if info_text is False:
+                    info_text = None
+                if language is False:
+                    language = ENGLISH
+                if last_editor_we_vote_id is False:
+                    last_editor_we_vote_id = None
+                if more_info_url is False:
+                    more_info_url = None
+                if site_to_credit is False:
+                    site_to_credit = None
                 quick_info_master = QuickInfoMaster(
                     master_entry_name=master_entry_name,
                     info_html=info_html,
@@ -697,10 +735,8 @@ class QuickInfoMasterManager(models.Model):
                 quick_info_master_found = True
                 status = 'CREATED_QUICK_INFO_MASTER'
             except Exception as e:
-                status = 'FAILED_TO_UPDATE_QUICK_INFO_MASTER'
+                status = 'FAILED_TO_CREATE_NEW_QUICK_INFO_MASTER'
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
-        else:
-            status = results['status']
 
         results = {
             'success':                  True if quick_info_master_found else False,

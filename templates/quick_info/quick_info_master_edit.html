@@ -1,0 +1,99 @@
+{# templates/quick_info/quick_info_master_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if quick_info_master.id %}{{ quick_info_master.master_entry_name  }}{% else %}New Quick Info Master Entry{% endif %}{% endblock %}
+
+{%  block content %}
+
+<a href="{% url 'quick_info:quick_info_master_list' %}">< Back</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="{% url 'admin_tools:admin_home' %}">Back to Admin Home</a>
+
+<h1>{% if quick_info_master.id %}Edit Master Entry '{{ quick_info_master.master_entry_name }}'{% else %}New Quick Info Master Entry{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+<form name="submit_edit_form" id="submit_edit_form_id" action="{% url "quick_info:quick_info_master_edit_process" %}" method="post">
+{% csrf_token %}
+    <input type="hidden" name="quick_info_master_id" value="{% if quick_info_master.id %}{{ quick_info_master.id }}{% else %}0{% endif %}">
+<p>
+    Master entries are used by multiple ballot items. Quick info items are the entries that appear next to ballot items
+    (info icon) with information about an office, candidate, or measure.
+</p>
+
+<p><strong>1) What kind of ballot item?</strong><br />
+
+{# Kind of Ballot Item List #}
+<select id="kind_of_ballot_item_id" name="kind_of_ballot_item">
+    <option value="">-- Kind of Ballot Item --</option>
+{% for key,value in ballot_item_choices %}
+    <option value="{{ key }}" {% if key == quick_info_master.kind_of_ballot_item %} selected="selected"{% endif %}>{{ value }}</option>
+{% endfor %}
+</select>
+
+</p>
+
+<p><strong>2) Please name this master entry</strong><br />
+
+<input type="text" name="master_entry_name" id="master_entry_name_id" value="{% if quick_info_master.id %}{{ quick_info_master.master_entry_name }}{% endif %}" /><br />
+
+
+
+    <p><strong>3) Enter text for "quick info" popup</strong><br />
+
+        <select id="language_id" name="language">
+        {% for key,value in language_choices %}
+            <option value="{{ key }}" {% if key == quick_info_master.language %} selected="selected"{% endif %}>
+                {{ value }}
+            </option>
+        {% endfor %}
+        </select><br />
+
+        <textarea name="info_text" id="info_text_id" class="quick_info_text" >{{ quick_info_master.info_text }}</textarea><br />
+
+        <label for="more_info_id">More Info URL</label>
+        <input type="text" name="more_info_url" id="more_info_url_id" value="{% if quick_info_master.id %}{{ quick_info_master.more_info_url }}{% endif %}" /><br />
+    </p>
+
+
+    {% if quick_info_master.id %}
+    <p>Quick Info Master We Vote ID: {{ quick_info_master.we_vote_id }}<br />
+    </p>
+    {% endif %}
+
+
+<p><a href="{% url 'quick_info:quick_info_master_list' %}">cancel</a>
+<input type="submit" name="form_submitted" value="{% if quick_info_master.id %}Update{% else %}Save New{% endif %}" /></p>
+</form>
+
+<p>&nbsp;</p>
+
+{% if quick_info_list %}
+    <h4>Quick Info Items Using this Master Entry</h4>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>ID</td>
+            <td>Ballot Item ID</td>
+            <td>Ballot Item</td>
+            <td>Kind</td>
+            <td>Language</td>
+            <td>Election</td>
+        </tr>
+    {% for quick_info in quick_info_list %}
+        <tr>
+            <td>{{ quick_info.we_vote_id }}</td>
+            <td><a href="{% url 'quick_info:quick_info_edit' quick_info.id %}" target="_blank">
+                {{ quick_info.get_ballot_item_we_vote_id }}</a></td>
+            <td>{{ quick_info.ballot_item_label }}</td>
+            <td>{{ quick_info.get_kind_of_ballot_item }}</td>
+            <td>{{ quick_info.language }}</td>
+            <td>{{ quick_info.google_civic_election_id }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    <p>(no quick info items found)</p>
+{% endif %}
+
+{% endblock %}

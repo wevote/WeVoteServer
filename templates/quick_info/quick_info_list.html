@@ -1,29 +1,30 @@
 {# templates/quick_info/quick_info_list.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Quick Info Contents{% endblock %}
+{% block title %}Quick Info for Ballot Items{% endblock %}
 
 {%  block content %}
 <a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 
-<h1>Quick Info Contents</h1>
+<h1>Quick Info for Ballot Items</h1>
 <p>
 These are the entries that appear next to ballot items (info icon) with information about an office, candidate,
 or measure. There are links to edit quick info entries on other ballot item admin pages.
 </p>
 <p><a href="{% url 'quick_info:quick_info_new' %}">create new entry</a>&nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="{% url 'quick_info:quick_info_new' %}">create new master entry</a><br />
+    <a href="{% url 'quick_info:quick_info_master_new' %}">create new master entry</a><br />
 
 <a href="{% url 'quick_info:quick_info_new' %}">import tool</a>&nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="{% url 'quick_info:quick_info_new' %}">view master entries</a><br />
+    <a href="{% url 'quick_info:quick_info_master_list' %}">view master entries</a><br />
 </p>
 
 
-{% if election_list %}
-    <form name="organization_quick_info_choose_election" method="get" action="{% url 'quick_info:quick_info_list' %}">
-        {% csrf_token %}
+<form name="quick_info_list_display" method="get" action="{% url 'quick_info:quick_info_list' %}">
+{% csrf_token %}
 
-    <select id="google_civic_election_id" name="google_civic_election_id">
+
+{% if election_list %}
+    <select id="google_civic_election_id_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
             -- Filter by Election --</option>
     {% for election in election_list %}
@@ -31,9 +32,29 @@ or measure. There are links to edit quick info entries on other ballot item admi
                 {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
             {{ election.election_name }} - {{ election.election_day_text }}</option>
     {% endfor %}
-    </select>
-    </form>
+    </select><br />
 {% endif %}{# End of if election_list #}
+
+
+{# Kind of Ballot Item List #}
+<select id="kind_of_ballot_item_id" name="kind_of_ballot_item">
+    <option value="">-- Filter by Kind of Ballot Item --</option>
+{% for key,value in ballot_item_choices %}
+    <option value="{{ key }}" {% if key == kind_of_ballot_item %} selected="selected"{% endif %}>{{ value }}</option>
+{% endfor %}
+</select><br />
+
+
+{# Language List #}
+<select id="language_id" name="language">
+    <option value="">-- Filter by Language --</option>
+{% for key,value in language_choices %}
+    <option value="{{ key }}" {% if key == language %} selected="selected"{% endif %}>{{ value }}</option>
+{% endfor %}
+</select><br />
+
+</form>
+
 
 {% if quick_info_list %}
     <table border="1" cellpadding="5" cellspacing="5">
@@ -41,6 +62,8 @@ or measure. There are links to edit quick info entries on other ballot item admi
             <td>ID</td>
             <td>Ballot Item ID</td>
             <td>Ballot Item</td>
+            <td>Kind</td>
+            <td>Language</td>
             <td>Election</td>
         </tr>
     {% for quick_info in quick_info_list %}
@@ -49,6 +72,8 @@ or measure. There are links to edit quick info entries on other ballot item admi
             <td><a href="{% url 'quick_info:quick_info_edit' quick_info.id %}">
                 {{ quick_info.get_ballot_item_we_vote_id }}</a></td>
             <td>{{ quick_info.ballot_item_label }}</td>
+            <td>{{ quick_info.get_kind_of_ballot_item }}</td>
+            <td>{{ quick_info.language }}</td>
             <td>{{ quick_info.google_civic_election_id }}</td>
         </tr>
     {% endfor %}
@@ -61,12 +86,22 @@ or measure. There are links to edit quick info entries on other ballot item admi
 {#    <a href="{% url 'quick_info:quick_info_import' %}" >Import Quick Info</a>#}
     </p>
 {% else %}
-    <p>(no quick_info found)</p>
+    <p>(no quick info items found)</p>
 {% endif %}
 
     <script>
         $(function() {
-            $('#google_civic_election_id').change(function() {
+            $('#kind_of_ballot_item_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#language_id').change(function() {
+                this.form.submit();
+            });
+        });
+        $(function() {
+            $('#google_civic_election_id_id').change(function() {
                 this.form.submit();
             });
         });
