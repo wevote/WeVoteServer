@@ -37,10 +37,12 @@ KIND_OF_BALLOT_ITEM_CHOICES = (
     (MEASURE,       'Measure'),
 )
 
+NOT_SPECIFIED = 'not_specified'
 BALLOTPEDIA = 'ballotpedia'
 DIRECT_ENTRY = 'direct'
 WIKIPEDIA = 'wikipedia'
 SOURCE_SITE_CHOICES = (
+    (NOT_SPECIFIED,   'Not Specified'),
     (BALLOTPEDIA,   'Ballotpedia'),
     (DIRECT_ENTRY,  'Direct Entry'),
     (WIKIPEDIA,     'Wikipedia'),
@@ -72,8 +74,9 @@ class QuickInfo(models.Model):
     ballot_item_label = models.CharField(verbose_name="text name for ballot item for quick display",
                                          max_length=255, null=True, blank=True)
 
-    site_to_credit = models.CharField(max_length=15, choices=SOURCE_SITE_CHOICES, default=BALLOTPEDIA,
-                                      null=True, blank=True)
+    # See also more_info_credit_text
+    more_info_credit = models.CharField(max_length=15, choices=SOURCE_SITE_CHOICES, default=NOT_SPECIFIED,
+                                        null=True, blank=True)
 
     # A link to any location with more information about this quick information
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more the full entry for this info')
@@ -187,6 +190,13 @@ class QuickInfo(models.Model):
         elif positive_value_exists(self.contest_measure_we_vote_id):
             return self.contest_measure_we_vote_id
         return None
+
+    def more_info_credit_text(self):
+        if self.more_info_credit == BALLOTPEDIA:
+            return "Courtesy of Ballotpedia.org"
+        if self.more_info_credit == WIKIPEDIA:
+            return "Courtesy of Wikipedia.org"
+        return ""
 
 
 class QuickInfoManager(models.Model):
@@ -348,6 +358,7 @@ class QuickInfoManager(models.Model):
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'quick_info_found':         True if quick_info_id > 0 else False,
             'quick_info_id':            quick_info_id,
+            'quick_info_we_vote_id':    quick_info_on_stage.we_vote_id,
             'quick_info':               quick_info_on_stage,
             'is_chinese':               quick_info_on_stage.is_chinese(),
             'is_english':               quick_info_on_stage.is_english(),
@@ -369,7 +380,7 @@ class QuickInfoManager(models.Model):
                                     last_editor_we_vote_id,
                                     quick_info_master_we_vote_id,
                                     more_info_url,
-                                    site_to_credit,
+                                    more_info_credit,
                                     google_civic_election_id
                                     ):
         # Does a quick_info entry already exist?
@@ -389,22 +400,56 @@ class QuickInfoManager(models.Model):
             # Update this quick_info entry with new values - we do not delete because we might be able to use
             # noinspection PyBroadException
             try:
+                # Figure out if the update is a change to a master entry
+                if positive_value_exists(quick_info_master_we_vote_id):
+                    uses_master_entry = True
+                elif (info_html is not False) or (info_text is not False) or (more_info_url is not False):
+                    uses_master_entry = False
+                elif positive_value_exists(quick_info_on_stage.info_textx) or \
+                        positive_value_exists(quick_info_on_stage.info_html) or \
+                        positive_value_exists(quick_info_on_stage.more_info_url):
+                    uses_master_entry = False
+                elif positive_value_exists(quick_info_on_stage.quick_info_master_we_vote_id):
+                    uses_master_entry = True
+                else:
+                    uses_master_entry = True
+
                 if ballot_item_label is not False:
                     quick_info_on_stage.ballot_item_label = ballot_item_label
-                if info_html is not False:
-                    quick_info_on_stage.info_html = info_html
-                if info_text is not False:
-                    quick_info_on_stage.info_text = info_text
                 if language is not False:
                     quick_info_on_stage.language = language
                 if last_editor_we_vote_id is not False:
                     quick_info_on_stage.last_editor_we_vote_id = last_editor_we_vote_id
-                if quick_info_master_we_vote_id is not False:
-                    quick_info_on_stage.quick_info_master_we_vote_id = quick_info_master_we_vote_id
-                if more_info_url is not False:
-                    quick_info_on_stage.more_info_url = more_info_url
-                if site_to_credit is not False:
-                    quick_info_on_stage.site_to_credit = site_to_credit
+                if contest_office_we_vote_id is not False:
+                    quick_info_on_stage.contest_office_we_vote_id = contest_office_we_vote_id
+                if candidate_campaign_we_vote_id is not False:
+                    quick_info_on_stage.candidate_campaign_we_vote_id = candidate_campaign_we_vote_id
+                if politician_we_vote_id is not False:
+                    quick_info_on_stage.politician_we_vote_id = politician_we_vote_id
+                if contest_measure_we_vote_id is not False:
+                    quick_info_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
+                if google_civic_election_id is not False:
+                    quick_info_on_stage.google_civic_election_id = google_civic_election_id
+                if uses_master_entry:
+                    if quick_info_master_we_vote_id is not False:
+                        quick_info_on_stage.quick_info_master_we_vote_id = quick_info_master_we_vote_id
+                    # Clear out unique entry values
+                    quick_info_on_stage.info_text = ""
+                    quick_info_on_stage.info_html = ""
+                    quick_info_on_stage.more_info_url = ""
+                    quick_info_on_stage.more_info_credit = NOT_SPECIFIED
+                else:
+                    # If here, this is NOT a master entry
+                    if info_text is not False:
+                        quick_info_on_stage.info_text = info_text
+                    if info_html is not False:
+                        quick_info_on_stage.info_html = info_html
+                    if more_info_url is not False:
+                        quick_info_on_stage.more_info_url = more_info_url
+                    if more_info_credit is not False:
+                        quick_info_on_stage.more_info_credit = more_info_credit
+                    # Clear out master entry value
+                    quick_info_on_stage.quick_info_master_we_vote_id = ""
                 if google_civic_election_id is not False:
                     quick_info_on_stage.google_civic_election_id = google_civic_election_id
                 # We don't need to update date_last_changed here because set set auto_now=True in the field
@@ -420,23 +465,33 @@ class QuickInfoManager(models.Model):
             try:
                 # Create new quick_info entry
                 if ballot_item_label is False:
-                    ballot_item_label = None
-                if info_html is False:
-                    info_html = None
-                if info_text is False:
-                    info_text = None
+                    ballot_item_label = ""
                 if language is False:
                     language = ENGLISH
                 if last_editor_we_vote_id is False:
-                    last_editor_we_vote_id = None
-                if quick_info_master_we_vote_id is False:
-                    quick_info_master_we_vote_id = None
-                if more_info_url is False:
-                    more_info_url = None
-                if site_to_credit is False:
-                    site_to_credit = None
+                    last_editor_we_vote_id = ""
+                if contest_office_we_vote_id is False:
+                    contest_office_we_vote_id = ""
+                if candidate_campaign_we_vote_id is False:
+                    candidate_campaign_we_vote_id = ""
+                if politician_we_vote_id is False:
+                    politician_we_vote_id = ""
+                if contest_measure_we_vote_id is False:
+                    contest_measure_we_vote_id = ""
                 if google_civic_election_id is False:
-                    google_civic_election_id = None
+                    google_civic_election_id = 0
+                # Master related data
+                if quick_info_master_we_vote_id is False:
+                    quick_info_master_we_vote_id = ""
+                # Unique related data
+                if info_html is False:
+                    info_html = ""
+                if info_text is False:
+                    info_text = ""
+                if more_info_url is False:
+                    more_info_url = ""
+                if more_info_credit is False:
+                    more_info_credit = None
                 quick_info_on_stage = QuickInfo(
                     ballot_item_label=ballot_item_label,
                     contest_office_we_vote_id=contest_office_we_vote_id,
@@ -449,7 +504,7 @@ class QuickInfoManager(models.Model):
                     last_editor_we_vote_id=last_editor_we_vote_id,
                     quick_info_master_we_vote_id=quick_info_master_we_vote_id,
                     more_info_url=more_info_url,
-                    site_to_credit=site_to_credit,
+                    more_info_credit=more_info_credit,
                     google_civic_election_id=google_civic_election_id
                     # We don't need to update last_updated here because set set auto_now=True in the field
                 )
@@ -521,7 +576,7 @@ class QuickInfoMaster(models.Model):
     master_entry_name = models.CharField(verbose_name="text name for quick info master entry",
                                          max_length=255, null=True, blank=True)
 
-    site_to_credit = models.CharField(max_length=15, choices=SOURCE_SITE_CHOICES, default=BALLOTPEDIA,
+    more_info_credit = models.CharField(max_length=15, choices=SOURCE_SITE_CHOICES, default=BALLOTPEDIA,
                                       null=True, blank=True)
 
     # A link to any location with more information about this quick information
@@ -582,6 +637,13 @@ class QuickInfoMaster(models.Model):
         if self.language == TAGALOG:
             return True
         return False
+
+    def more_info_credit_text(self):
+        if self.more_info_credit == BALLOTPEDIA:
+            return "Courtesy of Ballotpedia.org"
+        if self.more_info_credit == WIKIPEDIA:
+            return "Courtesy of Wikipedia.org"
+        return ""
 
 
 class QuickInfoMasterManager(models.Model):
@@ -662,7 +724,7 @@ class QuickInfoMasterManager(models.Model):
                                            kind_of_ballot_item,
                                            last_editor_we_vote_id,
                                            more_info_url,
-                                           site_to_credit,
+                                           more_info_credit,
                                            ):
         # Does a quick_info_master entry already exist?
         quick_info_master_manager = QuickInfoMasterManager()
@@ -692,8 +754,8 @@ class QuickInfoMasterManager(models.Model):
                     quick_info_master.last_editor_we_vote_id = last_editor_we_vote_id
                 if more_info_url is not False:
                     quick_info_master.more_info_url = more_info_url
-                if site_to_credit is not False:
-                    quick_info_master.site_to_credit = site_to_credit
+                if more_info_credit is not False:
+                    quick_info_master.more_info_credit = more_info_credit
                 # We don't need to update date_last_changed here because set set auto_now=True in the field
                 quick_info_master.save()
                 quick_info_master_id = quick_info_master.id
@@ -706,7 +768,7 @@ class QuickInfoMasterManager(models.Model):
                 # Create new quick_info_master entry
                 # Create new quick_info entry
                 if master_entry_name is False:
-                    master_entry_name = NULL
+                    master_entry_name = None
                 if info_html is False:
                     info_html = None
                 if info_text is False:
@@ -717,8 +779,8 @@ class QuickInfoMasterManager(models.Model):
                     last_editor_we_vote_id = None
                 if more_info_url is False:
                     more_info_url = None
-                if site_to_credit is False:
-                    site_to_credit = None
+                if more_info_credit is False:
+                    more_info_credit = None
                 quick_info_master = QuickInfoMaster(
                     master_entry_name=master_entry_name,
                     info_html=info_html,
@@ -727,7 +789,7 @@ class QuickInfoMasterManager(models.Model):
                     kind_of_ballot_item=kind_of_ballot_item,
                     last_editor_we_vote_id=last_editor_we_vote_id,
                     more_info_url=more_info_url,
-                    site_to_credit=site_to_credit,
+                    more_info_credit=more_info_credit,
                     # We don't need to update last_updated here because set set auto_now=True in the field
                 )
                 quick_info_master.save()

@@ -36,12 +36,13 @@
 {% if election_found %}
 <p><strong>2) Choose which ballot item to describe...</strong> (only one)<br />
     {% if contest_office_options %}
+        Current value: {{ quick_info.contest_office_we_vote_id }}
         <select name="contest_office_we_vote_id">
             <option value="" {% if not quick_info.contest_office_we_vote_id %} selected="selected"{% endif %}>
                 -- Choose Office to Describe --</option>
         {% for one_contest_office in contest_office_options %}
             <option value="{{ one_contest_office.we_vote_id }}"
-                    {% if one_contest_office.we_vote_id == quick_info.contest_office_we_vote_id %} selected="selected"{% endif %}
+                    {% if one_contest_office.we_vote_id|slugify == quick_info.contest_office_we_vote_id|slugify %} selected="selected"{% endif %}
                     >
                 {{ one_contest_office.office_name }}
             </option>
@@ -53,12 +54,13 @@
     {% endif %}
 
     {% if candidate_campaign_options %}
+        Current value: {{ quick_info.candidate_campaign_we_vote_id }}
         <select name="candidate_campaign_we_vote_id">
             <option value="" {% if not quick_info.candidate_campaign_we_vote_id %} selected="selected"{% endif %}>
                 -- Choose Candidate to Describe --</option>
         {% for one_candidate in candidate_campaign_options %}
             <option value="{{ one_candidate.we_vote_id }}"
-                    {% if one_candidate.we_vote_id == quick_info.candidate_campaign_we_vote_id %} selected="selected"{% endif %}
+                    {% if one_candidate.we_vote_id|slugify == quick_info.candidate_campaign_we_vote_id|slugify %} selected="selected"{% endif %}
                     >
                 {{ one_candidate.candidate_name }}
             </option>
@@ -69,12 +71,13 @@
     {% endif %}
 
     {% if contest_measure_options %}
+        Current value: {{ quick_info.contest_measure_we_vote_id }}
         <select name="contest_measure_we_vote_id">
             <option value="" {% if not quick_info.contest_measure_we_vote_id %} selected="selected"{% endif %}>
                 -- Choose Measure to Describe --</option>
         {% for one_contest_measure in contest_measure_options %}
             <option value="{{ one_contest_measure.we_vote_id }}"
-                    {% if one_contest_measure.we_vote_id == quick_info.contest_measure_we_vote_id %} selected="selected"{% endif %}
+                    {% if one_contest_measure.we_vote_id|slugify == quick_info.contest_measure_we_vote_id|slugify %} selected="selected"{% endif %}
                     >
                 {{ one_contest_measure.measure_title }}
             </option>
@@ -114,7 +117,9 @@
                         {% if quick_info_master.we_vote_id == quick_info_master_option.we_vote_id %} selected="selected"{% endif %}>
                     {{ quick_info_master_option.master_entry_name }}</option>
             {% endfor %}
-            </select><br />
+            </select>
+            <a href="{% url 'quick_info:quick_info_master_edit' quick_info_master.id %}" target="_blank">jump to master entry</a>
+            <br />
             {% if quick_info_master.we_vote_id|length > 0 %}
             <textarea name="info_text" id="info_text_id" class="quick_info_text" disabled >{{ quick_info_master.info_text }}</textarea><br />
             {% endif %}

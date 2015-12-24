@@ -21,6 +21,7 @@ from position.controllers import position_list_for_ballot_item_for_api, position
 from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE
 from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
+from quick_info.controllers import quick_info_retrieve_for_api
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from star.controllers import voter_star_off_save_for_api, voter_star_on_save_for_api, voter_star_status_retrieve_for_api
@@ -277,7 +278,8 @@ def position_oppose_count_for_ballot_item_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     candidate_id = request.GET.get('candidate_id', 0)
     measure_id = request.GET.get('measure_id', 0)
-    return position_oppose_count_for_ballot_item_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+    return position_oppose_count_for_ballot_item_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id,
+                                                         measure_id=measure_id)
 
 
 def position_support_count_for_ballot_item_view(request):
@@ -289,7 +291,20 @@ def position_support_count_for_ballot_item_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     candidate_id = request.GET.get('candidate_id', 0)
     measure_id = request.GET.get('measure_id', 0)
-    return position_support_count_for_ballot_item_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+    return position_support_count_for_ballot_item_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id,
+                                                          measure_id=measure_id)
+
+
+def quick_info_retrieve_view(request):
+    """
+    Retrieve the information necessary to populate a bubble next to a ballot item.
+    :param request:
+    :return:
+    """
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', "")
+    return quick_info_retrieve_for_api(kind_of_ballot_item=kind_of_ballot_item,
+                                       ballot_item_we_vote_id=ballot_item_we_vote_id)
 
 
 def voter_address_retrieve_view(request):

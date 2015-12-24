@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import QuickInfo, QuickInfoManager
+from .models import QuickInfo, QuickInfoManager, QuickInfoMasterManager, OFFICE, CANDIDATE, POLITICIAN, MEASURE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -20,7 +20,7 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 QUICK_INFO_URL = get_environment_variable("QUICK_INFO_URL")
 
 
-def quick_info_save_for_api(
+def quick_info_save_for_api(  # TODO to be converted
         voter_device_id, quick_info_id, quick_info_we_vote_id,
         organization_we_vote_id,
         public_figure_we_vote_id,
@@ -176,7 +176,7 @@ def quick_info_save_for_api(
         return results
 
 
-def quick_info_import_from_sample_file(request=None):  # , load_from_uri=False
+def quick_info_import_from_sample_file(request=None):  # , load_from_uri=False  # TODO to be converted
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -304,107 +304,199 @@ def quick_info_import_from_sample_file(request=None):  # , load_from_uri=False
 
 # We retrieve the quick info for one ballot item. Could just be the stance, but for now we are
 # retrieving all data
-def quick_info_retrieve_for_api(office_we_vote_id, candidate_we_vote_id, measure_we_vote_id):
-    office_we_vote_id = office_we_vote_id.strip()
-    candidate_we_vote_id = candidate_we_vote_id.strip()
-    measure_we_vote_id = measure_we_vote_id.strip()
+def quick_info_retrieve_for_api(kind_of_ballot_item, ballot_item_we_vote_id):
+    ballot_item_we_vote_id = ballot_item_we_vote_id.strip()
+
+    if not positive_value_exists(kind_of_ballot_item) and \
+            not kind_of_ballot_item in(OFFICE, CANDIDATE, POLITICIAN, MEASURE):
+        json_data = {
+            'status':                           "QUICK_INFO_RETRIEVE_KIND_OF_BALLOT_ITEM_NOT_SPECIFIED",
+            'success':                          False,
+            'quick_info_id':                    0,
+            'quick_info_we_vote_id':            '',
+            'kind_of_ballot_item':              kind_of_ballot_item,
+            'ballot_item_we_vote_id':           ballot_item_we_vote_id,
+            'quick_info_found':                 False,
+            'language':                         '',
+            'info_text':                        '',
+            'info_html':                        '',
+            'ballot_item_label':                '',
+            'more_info_credit_text':            '',
+            'more_info_url':                    '',
+            'last_updated':                     '',
+            'last_editor_we_vote_id':           '',
+            'office_we_vote_id':                '',
+            'candidate_we_vote_id':             '',
+            'politician_we_vote_id':            '',
+            'measure_we_vote_id':               '',
+            'quick_info_master_we_vote_id':     '',
+            'google_civic_election_id':         '',
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    if kind_of_ballot_item == OFFICE:
+        office_we_vote_id = ballot_item_we_vote_id
+        candidate_we_vote_id = ""
+        politician_we_vote_id = ""
+        measure_we_vote_id = ""
+    elif kind_of_ballot_item == CANDIDATE:
+        office_we_vote_id = ""
+        candidate_we_vote_id = ballot_item_we_vote_id
+        politician_we_vote_id = ""
+        measure_we_vote_id = ""
+    elif kind_of_ballot_item == POLITICIAN:
+        office_we_vote_id = ""
+        candidate_we_vote_id = ""
+        politician_we_vote_id = ballot_item_we_vote_id
+        measure_we_vote_id = ""
+    elif kind_of_ballot_item == MEASURE:
+        office_we_vote_id = ""
+        candidate_we_vote_id = ""
+        politician_we_vote_id = ""
+        measure_we_vote_id = ballot_item_we_vote_id
+    else:
+        office_we_vote_id = ""
+        candidate_we_vote_id = ""
+        politician_we_vote_id = ""
+        measure_we_vote_id = ""
 
     if not positive_value_exists(office_we_vote_id) and \
             not positive_value_exists(candidate_we_vote_id) and \
+            not positive_value_exists(politician_we_vote_id) and \
             not positive_value_exists(measure_we_vote_id):
         json_data = {
-            'status':                   "QUICK_INFO_RETRIEVE_MISSING_AT_LEAST_ONE_BALLOT_ITEM_ID",
-            'success':                  False,
-            'quick_info_id':              0,
-            'quick_info_we_vote_id':      '',
-            'is_support':               False,
-            'is_oppose':                False,
-            'is_information_only':      False,
-            'google_civic_election_id': '',
-            'office_we_vote_id':        '',
-            'candidate_we_vote_id':     '',
-            'measure_we_vote_id':       '',
-            'stance':                   '',
-            'statement_text':           '',
-            'statement_html':           '',
-            'more_info_url':            '',
-            'last_updated':             '',
+            'status':                           "QUICK_INFO_RETRIEVE_MISSING_BALLOT_ITEM_ID",
+            'success':                          False,
+            'quick_info_id':                    0,
+            'quick_info_we_vote_id':            '',
+            'kind_of_ballot_item':              kind_of_ballot_item,
+            'ballot_item_we_vote_id':           ballot_item_we_vote_id,
+            'quick_info_found':                 False,
+            'language':                         '',
+            'info_text':                        '',
+            'info_html':                        '',
+            'ballot_item_label':                '',
+            'more_info_credit_text':            '',
+            'more_info_url':                    '',
+            'last_updated':                     '',
+            'last_editor_we_vote_id':           '',
+            'office_we_vote_id':                office_we_vote_id,
+            'candidate_we_vote_id':             candidate_we_vote_id,
+            'politician_we_vote_id':            politician_we_vote_id,
+            'measure_we_vote_id':               measure_we_vote_id,
+            'quick_info_master_we_vote_id':     '',
+            'google_civic_election_id':         '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     quick_info_manager = QuickInfoManager()
 
     if positive_value_exists(office_we_vote_id):
-        results = quick_info_manager.retrieve_voter_contest_office_quick_info_with_we_vote_id(
-            voter_id, office_we_vote_id)
+        results = quick_info_manager.retrieve_contest_office_quick_info(office_we_vote_id)
 
     elif positive_value_exists(candidate_we_vote_id):
-        results = quick_info_manager.retrieve_voter_candidate_campaign_quick_info_with_we_vote_id(
-            voter_id, candidate_we_vote_id)
+        results = quick_info_manager.retrieve_candidate_campaign_quick_info(candidate_we_vote_id)
 
     elif positive_value_exists(measure_we_vote_id):
-        results = quick_info_manager.retrieve_voter_contest_measure_quick_info_with_we_vote_id(
-            voter_id, measure_we_vote_id)
+        results = quick_info_manager.retrieve_contest_measure_quick_info(measure_we_vote_id)
 
     # retrieve_quick_info results
     # results = {
+    #     'success':                  success,
+    #     'status':                   status,
     #     'error_result':             error_result,
     #     'DoesNotExist':             exception_does_not_exist,
     #     'MultipleObjectsReturned':  exception_multiple_object_returned,
-    #     'quick_info_found':           True if quick_info_id > 0 else False,
-    #     'quick_info_id':              quick_info_id,
-    #     'quick_info':                 quick_info,
-    #     'is_support':               quick_info.is_support(),
-    #     'is_oppose':                quick_info.is_oppose(),
-    #     'is_no_stance':             quick_info.is_no_stance(),
-    #     'is_information_only':      quick_info.is_information_only(),
-    #     'is_still_deciding':        quick_info.is_still_deciding(),
+    #     'quick_info_found':         True if quick_info_id > 0 else False,
+    #     'quick_info_id':            quick_info_id,
+    #     'quick_info_we_vote_id':    quick_info_on_stage.we_vote_id,
+    #     'quick_info':               quick_info_on_stage,
+    #     'is_chinese':               quick_info_on_stage.is_chinese(),
+    #     'is_english':               quick_info_on_stage.is_english(),
+    #     'is_spanish':               quick_info_on_stage.is_spanish(),
+    #     'is_tagalog':               quick_info_on_stage.is_tagalog(),
+    #     'is_vietnamese':            quick_info_on_stage.is_vietnamese(),
     # }
 
     if results['quick_info_found']:
         quick_info = results['quick_info']
+
+        if positive_value_exists(quick_info.quick_info_master_we_vote_id):
+            # If here, we are looking at a master entry
+            quick_info_master_manager = QuickInfoMasterManager()
+            quick_info_master_results = quick_info_master_manager.retrieve_quick_info_master_from_we_vote_id(
+                quick_info.quick_info_master_we_vote_id)
+            if quick_info_master_results['quick_info_master_found']:
+                quick_info_master = quick_info_master_results['quick_info_master']
+                info_text = quick_info_master.info_text
+                info_html = quick_info_master.info_html
+                more_info_url = quick_info_master.more_info_url
+                more_info_credit_text = quick_info_master.more_info_credit_text()
+            else:
+                info_text = ""
+                info_html = ""
+                more_info_url = ""
+                more_info_credit_text = ""
+                results['status'] += ", " + quick_info_master_results['status']
+        else:
+            # If here, we are looking at a unique entry
+            info_text = quick_info.info_text
+            info_html = quick_info.info_html
+            more_info_url = quick_info.more_info_url
+            more_info_credit_text = quick_info.more_info_credit_text()
+
         json_data = {
-            'success':                  True,
-            'status':                   results['status'],
-            'quick_info_id':              quick_info.id,
-            'quick_info_we_vote_id':      quick_info.we_vote_id,
-            'is_support':               results['is_support'],
-            'is_oppose':                results['is_oppose'],
-            'is_information_only':      results['is_information_only'],
-            'google_civic_election_id': quick_info.google_civic_election_id,
-            'office_we_vote_id':        quick_info.contest_office_we_vote_id,
-            'candidate_we_vote_id':     quick_info.candidate_campaign_we_vote_id,
-            'measure_we_vote_id':       quick_info.contest_measure_we_vote_id,
-            'stance':                   quick_info.stance,
-            'statement_text':           quick_info.statement_text,
-            'statement_html':           quick_info.statement_html,
-            'more_info_url':            quick_info.more_info_url,
-            'last_updated':             '',
+            'success':                          True,
+            'status':                           results['status'],
+            'quick_info_found':                 True,
+            'quick_info_id':                    quick_info.id,
+            'quick_info_we_vote_id':            quick_info.we_vote_id,
+            'kind_of_ballot_item':              kind_of_ballot_item,
+            'ballot_item_we_vote_id':           ballot_item_we_vote_id,
+            'ballot_item_label':                quick_info.ballot_item_label,
+            'language':                         quick_info.language,
+            'info_text':                        info_text,
+            'info_html':                        info_html,
+            'more_info_url':                    more_info_url,
+            'more_info_credit_text':            more_info_credit_text,
+            'last_updated':                     str(quick_info.last_updated),
+            'last_editor_we_vote_id':           quick_info.last_editor_we_vote_id,
+            'office_we_vote_id':                quick_info.contest_office_we_vote_id,
+            'candidate_we_vote_id':             quick_info.candidate_campaign_we_vote_id,
+            'politician_we_vote_id':            quick_info.politician_we_vote_id,
+            'measure_we_vote_id':               quick_info.contest_measure_we_vote_id,
+            'quick_info_master_we_vote_id':     quick_info.quick_info_master_we_vote_id,
+            'google_civic_election_id':         quick_info.google_civic_election_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
         json_data = {
-            'status':                   results['status'],
-            'success':                  False,
-            'quick_info_id':              0,
-            'quick_info_we_vote_id':      '',
-            'is_support':               False,
-            'is_oppose':                False,
-            'is_information_only':      False,
-            'google_civic_election_id': '',
-            'office_we_vote_id':        '',
-            'candidate_we_vote_id':     '',
-            'measure_we_vote_id':       '',
-            'stance':                   '',
-            'statement_text':           '',
-            'statement_html':           '',
-            'more_info_url':            '',
-            'last_updated':             '',
+            'status':                           results['status'],
+            'success':                          False,
+            'quick_info_id':                    0,
+            'quick_info_we_vote_id':            '',
+            'kind_of_ballot_item':              kind_of_ballot_item,
+            'ballot_item_we_vote_id':           ballot_item_we_vote_id,
+            'quick_info_found':                 False,
+            'language':                         '',
+            'info_text':                        '',
+            'info_html':                        '',
+            'ballot_item_label':                '',
+            'more_info_credit_text':            '',
+            'more_info_url':                    '',
+            'last_updated':                     '',
+            'last_editor_we_vote_id':           '',
+            'contest_office_we_vote_id':        office_we_vote_id,
+            'candidate_campaign_we_vote_id':    candidate_we_vote_id,
+            'politician_we_vote_id':            politician_we_vote_id,
+            'contest_measure_we_vote_id':       measure_we_vote_id,
+            'quick_info_master_we_vote_id':     '',
+            'google_civic_election_id':         '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def quick_info_text_save_for_api(
+def quick_info_text_save_for_api(  # TODO to be converted
         voter_device_id, quick_info_id, quick_info_we_vote_id,
         google_civic_election_id,
         office_we_vote_id,

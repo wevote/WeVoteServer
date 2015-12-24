@@ -5,7 +5,8 @@
 from .models import KIND_OF_BALLOT_ITEM_CHOICES, LANGUAGE_CHOICES, QuickInfo, QuickInfoManager, \
     QuickInfoMaster, QuickInfoMasterManager, \
     SPANISH, ENGLISH, TAGALOG, VIETNAMESE, CHINESE, \
-    OFFICE, CANDIDATE, MEASURE, POLITICIAN
+    OFFICE, CANDIDATE, MEASURE, POLITICIAN, \
+    NOT_SPECIFIED
 from .serializers import QuickInfoSerializer, QuickInfoMasterSerializer
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from django.http import HttpResponseRedirect
@@ -89,7 +90,7 @@ def quick_info_new_view(request):
     info_text = request.POST.get('info_text', "")
     info_html = request.POST.get('info_html', "")
     ballot_item_label = request.POST.get('ballot_item_label', "")
-    site_to_credit = request.POST.get('site_to_credit', "")
+    more_info_credit = request.POST.get('more_info_credit', "")
     more_info_url = request.POST.get('more_info_url', "")
 
     contest_office_we_vote_id = request.POST.get('contest_office_we_vote_id', "")
@@ -117,8 +118,6 @@ def quick_info_new_view(request):
     # See below: quick_info.info_text = info_text
     # See below: quick_info.info_html = info_html
     quick_info.ballot_item_label = ballot_item_label
-    quick_info.site_to_credit = site_to_credit
-    quick_info.more_info_url = more_info_url
     quick_info.contest_office_we_vote_id = contest_office_we_vote_id
     quick_info.candidate_campaign_we_vote_id = candidate_campaign_we_vote_id
     quick_info.politician_we_vote_id = politician_we_vote_id
@@ -140,6 +139,8 @@ def quick_info_new_view(request):
     else:
         quick_info.info_text = info_text
         quick_info.info_html = info_html
+        quick_info.more_info_credit = more_info_credit
+        quick_info.more_info_url = more_info_url
         quick_info_master = QuickInfoMaster()
         # When in the other state (unique entry for this ballot item), we cache the quick_info_master_we_vote_id value
         # in a hidden field
@@ -211,7 +212,7 @@ def quick_info_edit_view(request, quick_info_id):
         info_text = request.POST.get('info_text', False)
         info_html = request.POST.get('info_html', False)
         ballot_item_label = request.POST.get('ballot_item_label', False)
-        site_to_credit = request.POST.get('site_to_credit', False)
+        more_info_credit = request.POST.get('more_info_credit', False)
         more_info_url = request.POST.get('more_info_url', False)
 
         contest_office_we_vote_id = request.POST.get('contest_office_we_vote_id', False)
@@ -233,8 +234,8 @@ def quick_info_edit_view(request, quick_info_id):
         # See below: quick_info.info_html = info_html
         if ballot_item_label is not False:
             quick_info.ballot_item_label = ballot_item_label
-        if site_to_credit is not False:
-            quick_info.site_to_credit = site_to_credit
+        if more_info_credit is not False:
+            quick_info.more_info_credit = more_info_credit
         if more_info_url is not False:
             quick_info.more_info_url = more_info_url
         if contest_office_we_vote_id is not False:
@@ -350,7 +351,7 @@ def quick_info_edit_process_view(request):
     info_text = request.POST.get('info_text', False)
     info_html = request.POST.get('info_html', False)
     ballot_item_label = request.POST.get('ballot_item_label', False)
-    site_to_credit = request.POST.get('site_to_credit', False)
+    more_info_credit = request.POST.get('more_info_credit', False)
     more_info_url = request.POST.get('more_info_url', False)
 
     contest_office_we_vote_id = request.POST.get('contest_office_we_vote_id', False)
@@ -426,6 +427,15 @@ def quick_info_edit_process_view(request):
             return quick_info_new_view(request)
             # return HttpResponseRedirect(reverse('quick_info:quick_info_new', args=()) + url_variables)
 
+    # Now that we know we are ready to save, we want to wipe out the values we don't want to save
+    if positive_value_exists(use_master_entry):
+        info_html = ""
+        info_text = ""
+        more_info_url = ""
+        more_info_credit = NOT_SPECIFIED
+    else:
+        quick_info_master_we_vote_id = ""
+
     # Figure out what text to use for the Ballot Item Label
     if not positive_value_exists(ballot_item_label):
         if positive_value_exists(contest_office_we_vote_id):
@@ -473,7 +483,7 @@ def quick_info_edit_process_view(request):
         last_editor_we_vote_id=last_editor_we_vote_id,
         quick_info_master_we_vote_id=quick_info_master_we_vote_id,
         more_info_url=more_info_url,
-        site_to_credit=site_to_credit,
+        more_info_credit=more_info_credit,
         google_civic_election_id=google_civic_election_id
         )
     if results['success']:
@@ -492,7 +502,7 @@ def quick_info_edit_process_view(request):
 
 
 # @login_required()  # Commented out while we are developing login process()
-def quick_info_summary_view(request, quick_info_id):
+def quick_info_summary_view(request, quick_info_id):  # TODO to be updated
     messages_on_stage = get_messages(request)
     quick_info_id = convert_to_int(quick_info_id)
     quick_info_on_stage_found = False
@@ -549,14 +559,14 @@ def quick_info_master_new_view(request):
     info_text = request.POST.get('info_text', "")
     info_html = request.POST.get('info_html', "")
     master_entry_name = request.POST.get('master_entry_name', "")
-    site_to_credit = request.POST.get('site_to_credit', "")
+    more_info_credit = request.POST.get('more_info_credit', "")
     more_info_url = request.POST.get('more_info_url', "")
 
     quick_info_master = QuickInfoMaster()
     quick_info_master.kind_of_ballot_item = kind_of_ballot_item
     quick_info_master.language = language
     quick_info_master.master_entry_name = master_entry_name
-    quick_info_master.site_to_credit = site_to_credit
+    quick_info_master.more_info_credit = more_info_credit
     quick_info_master.more_info_url = more_info_url
     quick_info_master.info_text = info_text
     quick_info_master.info_html = info_html
@@ -594,7 +604,7 @@ def quick_info_master_edit_view(request, quick_info_master_id):
         info_text = request.POST.get('info_text', False)
         info_html = request.POST.get('info_html', False)
         master_entry_name = request.POST.get('master_entry_name', False)
-        site_to_credit = request.POST.get('site_to_credit', False)
+        more_info_credit = request.POST.get('more_info_credit', False)
         more_info_url = request.POST.get('more_info_url', False)
 
         # Write over the fields where a change has been made on the form
@@ -604,8 +614,8 @@ def quick_info_master_edit_view(request, quick_info_master_id):
             quick_info_master.language = language
         if master_entry_name is not False:
             quick_info_master.master_entry_name = master_entry_name
-        if site_to_credit is not False:
-            quick_info_master.site_to_credit = site_to_credit
+        if more_info_credit is not False:
+            quick_info_master.more_info_credit = more_info_credit
         if more_info_url is not False:
             quick_info_master.more_info_url = more_info_url
         if info_text is not False:
@@ -645,7 +655,7 @@ def quick_info_master_edit_process_view(request):
     info_text = request.POST.get('info_text', False)
     info_html = request.POST.get('info_html', False)
     master_entry_name = request.POST.get('master_entry_name', False)
-    site_to_credit = request.POST.get('site_to_credit', False)
+    more_info_credit = request.POST.get('more_info_credit', False)
     more_info_url = request.POST.get('more_info_url', False)
 
     if not positive_value_exists(language):
@@ -681,7 +691,7 @@ def quick_info_master_edit_process_view(request):
         language=language,
         last_editor_we_vote_id=last_editor_we_vote_id,
         more_info_url=more_info_url,
-        site_to_credit=site_to_credit)
+        more_info_credit=more_info_credit)
     if results['success']:
         messages.add_message(request, messages.INFO, results['status'])
     else:
