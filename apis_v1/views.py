@@ -22,6 +22,7 @@ from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONL
 from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
 from quick_info.controllers import quick_info_retrieve_for_api
+from quick_info.models import OFFICE, CANDIDATE, MEASURE
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from star.controllers import voter_star_off_save_for_api, voter_star_on_save_for_api, voter_star_status_retrieve_for_api
@@ -43,6 +44,40 @@ def ballot_item_options_retrieve_view(request):
     results = ballot_item_options_retrieve_for_api(google_civic_election_id)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
     return response
+
+
+def ballot_item_retrieve_view(request):
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    ballot_item_id = request.GET.get('ballot_item_id', 0)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+
+    if not positive_value_exists(kind_of_ballot_item) or kind_of_ballot_item not in(OFFICE, CANDIDATE, MEASURE):
+        status = 'VALID_BALLOT_ITEM_TYPE_MISSING'
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'kind_of_ballot_item':         kind_of_ballot_item,
+            'ballot_item_id':           ballot_item_id,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    if kind_of_ballot_item == OFFICE:
+        return office_retrieve_for_api(ballot_item_id, ballot_item_we_vote_id)
+    elif kind_of_ballot_item == CANDIDATE:
+        return candidate_retrieve_for_api(ballot_item_id, ballot_item_we_vote_id)
+    elif kind_of_ballot_item == MEASURE:
+        return measure_retrieve_for_api(ballot_item_id, ballot_item_we_vote_id)
+    else:
+        status = 'BALLOT_ITEM_RETRIEVE_UNKNOWN_ERROR'
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'kind_of_ballot_item':      kind_of_ballot_item,
+            'ballot_item_id':           ballot_item_id,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def candidate_retrieve_view(request):

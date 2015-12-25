@@ -12,7 +12,7 @@ def quick_info_retrieve_doc_template_values(url_root):
             'name':         'kind_of_ballot_item',
             'value':        'string',  # boolean, integer, long, string
             'description':  'What is the type of ballot item that we want quick information for (for use in a popup)? '
-                            '(Either "office", "candidate", "politician" or "measure")',
+                            '(Either "OFFICE", "CANDIDATE", "POLITICIAN" or "MEASURE")',
         },
         {
             'name':         'ballot_item_we_vote_id',

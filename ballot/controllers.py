@@ -77,23 +77,23 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
     if success:
         for ballot_item in ballot_item_list:
             if ballot_item.contest_office_we_vote_id:
-                ballot_item_type = 'office'
+                kind_of_ballot_item = 'OFFICE'
                 ballot_item_id = ballot_item.contest_office_id
                 we_vote_id = ballot_item.contest_office_we_vote_id
             elif ballot_item.contest_measure_we_vote_id:
-                ballot_item_type = 'measure'
+                kind_of_ballot_item = 'MEASURE'
                 ballot_item_id = ballot_item.contest_measure_id
                 we_vote_id = ballot_item.contest_measure_we_vote_id
             else:
-                ballot_item_type = ''
+                kind_of_ballot_item = ''
 
-            if positive_value_exists(ballot_item_type):
+            if positive_value_exists(kind_of_ballot_item):
                 one_ballot_item = {
                     'ballot_item_label':            ballot_item.ballot_item_label,
                     'google_civic_election_id':     ballot_item.google_civic_election_id,
                     'google_ballot_placement':      ballot_item.google_ballot_placement,
                     'local_ballot_order':           ballot_item.local_ballot_order,
-                    'type':                         ballot_item_type,
+                    'type':                         kind_of_ballot_item,
                     'id':                           ballot_item_id,
                     'we_vote_id':                   we_vote_id,
                 }

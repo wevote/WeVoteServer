@@ -297,7 +297,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
             'status': 'VALID_VOTER_DEVICE_ID_MISSING',
             'success': False,
             'count':            0,
-            'ballot_item_type': "UNKNOWN",
+            'kind_of_ballot_item': "UNKNOWN",
             'ballot_item_id':   0,
             'position_list':    position_list,
         }
@@ -310,7 +310,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
             'status': "VALID_VOTER_ID_MISSING ",
             'success': False,
             'count':            0,
-            'ballot_item_type': "UNKNOWN",
+            'kind_of_ballot_item': "UNKNOWN",
             'ballot_item_id':   0,
             'position_list':    position_list,
         }
@@ -320,17 +320,17 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
     if positive_value_exists(candidate_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 candidate_id, stance_we_are_looking_for)
-        ballot_item_type = 'CANDIDATE'
+        kind_of_ballot_item = 'CANDIDATE'
         ballot_item_id = candidate_id
     elif positive_value_exists(measure_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
                 measure_id, stance_we_are_looking_for)
-        ballot_item_type = 'MEASURE'
+        kind_of_ballot_item = 'MEASURE'
         ballot_item_id = measure_id
     elif positive_value_exists(office_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
                 office_id, stance_we_are_looking_for)
-        ballot_item_type = 'OFFICE'
+        kind_of_ballot_item = 'OFFICE'
         ballot_item_id = measure_id
     else:
         position_list = []
@@ -338,7 +338,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
             'status':           'POSITION_LIST_RETRIEVE_MISSING_BALLOT_ITEM_ID',
             'success':          False,
             'count':            0,
-            'ballot_item_type': "UNKNOWN",
+            'kind_of_ballot_item': "UNKNOWN",
             'ballot_item_id':   0,
             'position_list':    position_list,
         }
@@ -402,7 +402,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
         'status':           status,
         'success':          success,
         'count':            positions_count,
-        'ballot_item_type': ballot_item_type,
+        'kind_of_ballot_item': kind_of_ballot_item,
         'ballot_item_id':   ballot_item_id,
         'position_list':    position_list,
     }

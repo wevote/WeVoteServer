@@ -26,10 +26,10 @@ LANGUAGE_CHOICES = (
     (CHINESE,    'Chinese'),
 )
 
-OFFICE = 'office'
-CANDIDATE = 'candidate'
-POLITICIAN = 'politician'
-MEASURE = 'measure'
+OFFICE = 'OFFICE'
+CANDIDATE = 'CANDIDATE'
+POLITICIAN = 'POLITICIAN'
+MEASURE = 'MEASURE'
 KIND_OF_BALLOT_ITEM_CHOICES = (
     (OFFICE,        'Office'),
     (CANDIDATE,     'Candidate'),

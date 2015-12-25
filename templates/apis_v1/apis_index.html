@@ -86,12 +86,17 @@
         <td colspan="2"><strong>Offices, Candidates &amp; Measures</strong></td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:ballotItemRetrieveDocs' %}">ballotItemRetrieve</a></td>
+        <td>Retrieve details about one office, candidate or measure. This is a wrapper for officeRetrieve,
+        candidateRetrieve and measureRetrieve.</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:officeRetrieveDocs' %}">officeRetrieve</a></td>
-        <td>Retrieve details about one office.</td>
+        <td>Retrieve details about one office. Alternate to ballotItemRetrieve.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:candidateRetrieveDocs' %}">candidateRetrieve</a></td>
-        <td>Retrieve details about one candidate.</td>
+        <td>Retrieve details about one candidate. Alternate to ballotItemRetrieve.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:candidatesRetrieveDocs' %}">candidatesRetrieve</a></td>
@@ -99,7 +104,7 @@
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:measureRetrieveDocs' %}">measureRetrieve</a></td>
-        <td>Retrieve details about one measure.</td>
+        <td>Retrieve details about one measure. Alternate to ballotItemRetrieve.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:quickInfoRetrieveDocs' %}">quickInfoRetrieve</a></td>

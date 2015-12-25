@@ -86,7 +86,7 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "count": integer,\n' \
-                   '  "ballot_item_type": string, ' \
+                   '  "kind_of_ballot_item": string, ' \
                    '   (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\',)\n' \
                    '  "ballot_item_id": integer,\n' \
                    '  "position_list": list\n' \
