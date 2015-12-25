@@ -1,0 +1,20 @@
+{# templates/import_export_vote_smart/vote_smart_import.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Vote Smart Import{% endblock %}
+
+{%  block content %}
+<h1>Vote Smart Import</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% if state_list %}
+    <ol>
+    {% for state in state_list %}
+        <li><a href="{% url 'import_export_vote_smart:state_detail' state.stateId %}">{{ state.stateId }} {{ state.name }}</a></li>
+    {% endfor %}
+    </ol>
+{% else %}
+    <p>No states are available.</p>
+{% endif %}
+
+{% endblock %}

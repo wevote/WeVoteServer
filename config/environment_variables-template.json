@@ -33,6 +33,10 @@
   "_comment":                       "import_export_theunitedstatesio",
   "LEGISLATORS_CURRENT_CSV_FILE":   "import_export_theunitedstatesio/import_data/legislators-current.csv",
 
+  "_comment":                       "import_export_vote_smart",
+  "VOTE_SMART_API_KEY":             "",
+  "VOTE_SMART_API_URL":             "http://api.votesmart.org",
+
   "_comment":                       "import_export_voting_info_project",
   "VOTING_INFO_PROJECT_SAMPLE_XML_FILE": "import_export_voting_info_project/import_data/sample_feed.xml",
 

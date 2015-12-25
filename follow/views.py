@@ -2,4 +2,4 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-# See also organization/views.py for follow_organization-related views
+# See also follow/admin_views.py for views used in the admin area

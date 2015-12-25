@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'exception',
     'follow',
     'import_export_google_civic',
+    'import_export_vote_smart',
     'measure',
     'office',
     'organization',
