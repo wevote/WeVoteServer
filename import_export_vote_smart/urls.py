@@ -8,6 +8,7 @@ from . import views, views_admin
 
 
 urlpatterns = [
+    url(r'^import_photo/$', views_admin.import_photo_view, name='import_photo'),
     url(r'^import_states/$', views_admin.import_states_view, name='import_states'),
     url(r'^states/(?P<pk>[A-Z]+)/$', views_admin.state_detail_view, name='state_detail'),
 ]

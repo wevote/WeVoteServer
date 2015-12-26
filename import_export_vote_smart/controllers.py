@@ -2,15 +2,11 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import json
-import requests
-from .models import State, state_filter
+from .models import VoteSmartCandidate, candidate_object_filter, VoteSmartState, state_filter
+from .votesmart_local import votesmart, VotesmartApiError
 from config.base import get_environment_variable
-from django.contrib import messages
-#from votesmart import votesmart
-from .votesmart_local import votesmart  # Modified to work with Python 3
+import requests
 import wevote_functions.admin
-from wevote_functions.models import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -20,13 +16,32 @@ VOTE_SMART_API_URL = get_environment_variable("VOTE_SMART_API_URL")
 votesmart.apikey = VOTE_SMART_API_KEY
 
 
-def get_vote_smart_candidate():
-    return
+def get_vote_smart_candidate(last_name):
+    try:
+        candidates_list = votesmart.candidates.getByLastname(last_name)
+        for one_candidate in candidates_list:
+            one_candidate_filtered = candidate_object_filter(one_candidate)
+            candidate, created = VoteSmartCandidate.objects.update_or_create(
+                candidateId=one_candidate.candidateId, defaults=one_candidate_filtered)
+            candidate.save()
+        status = "VOTE_SMART_CANDIDATES_PROCESSED"
+        success = True
+    except VotesmartApiError as error_instance:
+        # Catch the error message coming back from Vote Smart and pass it in the status
+        error_message = error_instance.args
+        status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+        success = False
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
 
 
-def _get_state_by_id_as_dict(stateId):
+def _get_state_by_id_as_dict(state_id):
     """Access Vote Smart API and return dictionary representing state."""
-    return votesmart.state.getState(stateId).__dict__
+    return votesmart.state.getState(state_id).__dict__
 
 
 def _get_state_names():
@@ -41,9 +56,8 @@ def retrieve_and_save_vote_smart_states():
     state_count = 0
     for stateId in state_names_dict:
         one_state = _get_state_by_id_as_dict(stateId)
-        logger.error("one state found")
         one_state_filtered = state_filter(one_state)
-        state, created = State.objects.get_or_create(**one_state_filtered)
+        state, created = VoteSmartState.objects.get_or_create(**one_state_filtered)
         # state, created = State.objects.get_or_create(**_get_state_by_id_as_dict(stateId))
         state.save()
         if state_count > 3:
