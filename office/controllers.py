@@ -3,9 +3,9 @@
 # -*- coding: UTF-8 -*-
 
 from .models import ContestOfficeManager
+from ballot.models import OFFICE
 from config.base import get_environment_variable
 from django.http import HttpResponse
-from exception.models import handle_exception, handle_record_not_found_exception, handle_record_not_saved_exception
 import json
 import wevote_functions.admin
 from wevote_functions.models import positive_value_exists
@@ -116,8 +116,9 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  False,
-            'office_id':                office_id,
-            'office_we_vote_id':        office_we_vote_id,
+            'kind_of_ballot_item':      OFFICE,
+            'id':                       office_id,
+            'we_vote_id':               office_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -136,8 +137,9 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  False,
-            'office_id':                office_id,
-            'office_we_vote_id':        office_we_vote_id,
+            'kind_of_ballot_item':      OFFICE,
+            'id':                       office_id,
+            'we_vote_id':               office_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -147,10 +149,11 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  True,
-            'office_id':                contest_office.id,
-            'office_we_vote_id':        contest_office.we_vote_id,
+            'kind_of_ballot_item':      OFFICE,
+            'id':                       contest_office.id,
+            'we_vote_id':               contest_office.we_vote_id,
             'google_civic_election_id': contest_office.google_civic_election_id,
-            'office_name':              contest_office.office_name,
+            'ballot_item_label':        contest_office.office_name,
             'ocd_division_id':          contest_office.ocd_division_id,
             'maplight_id':              contest_office.maplight_id,
             'ballotpedia_id':           contest_office.ballotpedia_id,
@@ -165,8 +168,9 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  False,
-            'office_id':                office_id,
-            'office_we_vote_id':        office_we_vote_id,
+            'kind_of_ballot_item':      OFFICE,
+            'id':                       office_id,
+            'we_vote_id':               office_we_vote_id,
             'google_civic_election_id': 0,
         }
 

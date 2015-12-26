@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import PositionEntered, PositionEnteredManager, PositionListManager, ANY_STANCE
+from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -320,17 +321,17 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
     if positive_value_exists(candidate_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 candidate_id, stance_we_are_looking_for)
-        kind_of_ballot_item = 'CANDIDATE'
+        kind_of_ballot_item = CANDIDATE
         ballot_item_id = candidate_id
     elif positive_value_exists(measure_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
                 measure_id, stance_we_are_looking_for)
-        kind_of_ballot_item = 'MEASURE'
+        kind_of_ballot_item = MEASURE
         ballot_item_id = measure_id
     elif positive_value_exists(office_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
                 office_id, stance_we_are_looking_for)
-        kind_of_ballot_item = 'OFFICE'
+        kind_of_ballot_item = OFFICE
         ballot_item_id = measure_id
     else:
         position_list = []

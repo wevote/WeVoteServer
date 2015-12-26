@@ -2,11 +2,11 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import KIND_OF_BALLOT_ITEM_CHOICES, LANGUAGE_CHOICES, QuickInfo, QuickInfoManager, \
+from .models import LANGUAGE_CHOICES, QuickInfo, QuickInfoManager, \
     QuickInfoMaster, QuickInfoMasterManager, \
     SPANISH, ENGLISH, TAGALOG, VIETNAMESE, CHINESE, \
-    OFFICE, CANDIDATE, MEASURE, POLITICIAN, \
     NOT_SPECIFIED
+from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE, KIND_OF_BALLOT_ITEM_CHOICES
 from .serializers import QuickInfoSerializer, QuickInfoMasterSerializer
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from django.http import HttpResponseRedirect

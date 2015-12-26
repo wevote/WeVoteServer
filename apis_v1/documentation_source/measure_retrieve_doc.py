@@ -27,8 +27,8 @@ def measure_retrieve_doc_template_values(url_root):
         },
         {
             'name':         'measure_we_vote_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique identifier for this office across all networks '
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this measure across all networks '
                             '(either measure_id OR measure_we_vote_id required -- not both. '
                             'If it exists, measure_id is used instead of measure_we_vote_id)',
         },
@@ -64,10 +64,11 @@ def measure_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "measure_id": integer,\n' \
-                   '  "measure_we_vote_id": string,\n' \
+                   '  "kind_of_ballot_item": string,\n' \
+                   '  "id": integer,\n' \
+                   '  "we_vote_id": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
-                   '  "measure_title": string,\n' \
+                   '  "ballot_item_label": string,\n' \
                    '  "measure_subtitle": string,\n' \
                    '  "maplight_id": integer,\n' \
                    '  "measure_text": string,\n' \

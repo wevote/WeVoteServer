@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import QuickInfo, QuickInfoManager, QuickInfoMasterManager, OFFICE, CANDIDATE, POLITICIAN, MEASURE
+from .models import QuickInfo, QuickInfoManager, QuickInfoMasterManager
+from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages

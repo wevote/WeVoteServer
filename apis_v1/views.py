@@ -22,7 +22,7 @@ from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONL
 from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
 from quick_info.controllers import quick_info_retrieve_for_api
-from quick_info.models import OFFICE, CANDIDATE, MEASURE
+from ballot.models import OFFICE, CANDIDATE, MEASURE
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from star.controllers import voter_star_off_save_for_api, voter_star_on_save_for_api, voter_star_status_retrieve_for_api

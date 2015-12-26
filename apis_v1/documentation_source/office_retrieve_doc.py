@@ -34,11 +34,6 @@ def office_retrieve_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
     ]
 
     potential_status_codes_list = [
@@ -50,10 +45,6 @@ def office_retrieve_doc_template_values(url_root):
             'code':         'VALID_VOTER_ID_MISSING',
             'description':  'Cannot proceed. A valid voter_id was not found.',
         },
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
@@ -64,10 +55,11 @@ def office_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "office_id": integer,\n' \
-                   '  "office_we_vote_id": string,\n' \
+                   '  "kind_of_ballot_item": string,\n' \
+                   '  "id": integer,\n' \
+                   '  "we_vote_id": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
-                   '  "office_name": string,\n' \
+                   '  "ballot_item_label": string,\n' \
                    '  "ocd_division_id": string,\n' \
                    '  "maplight_id": string,\n' \
                    '  "ballotpedia_id": string,\n' \

@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 # Diagrams here: https://docs.google.com/drawings/d/1fEs_f2-4Du9knJ8FXn6PQ2BcmXL4zSkMYh-cp75EeLE/edit
 
+from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE, KIND_OF_BALLOT_ITEM_CHOICES
 from django.db import models
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_saved_exception
@@ -24,17 +25,6 @@ LANGUAGE_CHOICES = (
     (TAGALOG,    'Tagalog'),
     (VIETNAMESE, 'Vietnamese'),
     (CHINESE,    'Chinese'),
-)
-
-OFFICE = 'OFFICE'
-CANDIDATE = 'CANDIDATE'
-POLITICIAN = 'POLITICIAN'
-MEASURE = 'MEASURE'
-KIND_OF_BALLOT_ITEM_CHOICES = (
-    (OFFICE,        'Office'),
-    (CANDIDATE,     'Candidate'),
-    (POLITICIAN,    'Politician'),
-    (MEASURE,       'Measure'),
 )
 
 NOT_SPECIFIED = 'not_specified'

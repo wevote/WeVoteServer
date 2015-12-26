@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BallotItemListManager
+from .models import BallotItemListManager, OFFICE, CANDIDATE, MEASURE
 from candidate.models import CandidateCampaignList
 from config.base import get_environment_variable
 from exception.models import handle_exception
@@ -77,11 +77,11 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
     if success:
         for ballot_item in ballot_item_list:
             if ballot_item.contest_office_we_vote_id:
-                kind_of_ballot_item = 'OFFICE'
+                kind_of_ballot_item = OFFICE
                 ballot_item_id = ballot_item.contest_office_id
                 we_vote_id = ballot_item.contest_office_we_vote_id
             elif ballot_item.contest_measure_we_vote_id:
-                kind_of_ballot_item = 'MEASURE'
+                kind_of_ballot_item = MEASURE
                 ballot_item_id = ballot_item.contest_measure_id
                 we_vote_id = ballot_item.contest_measure_we_vote_id
             else:

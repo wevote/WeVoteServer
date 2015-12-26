@@ -8,6 +8,16 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 import wevote_functions.admin
 from wevote_functions.models import positive_value_exists
 
+OFFICE = 'OFFICE'
+CANDIDATE = 'CANDIDATE'
+POLITICIAN = 'POLITICIAN'
+MEASURE = 'MEASURE'
+KIND_OF_BALLOT_ITEM_CHOICES = (
+    (OFFICE,        'Office'),
+    (CANDIDATE,     'Candidate'),
+    (POLITICIAN,    'Politician'),
+    (MEASURE,       'Measure'),
+)
 
 logger = wevote_functions.admin.get_logger(__name__)
 
