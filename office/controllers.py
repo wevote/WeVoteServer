@@ -153,7 +153,7 @@ def office_retrieve_for_api(office_id, office_we_vote_id):
             'id':                       contest_office.id,
             'we_vote_id':               contest_office.we_vote_id,
             'google_civic_election_id': contest_office.google_civic_election_id,
-            'ballot_item_label':        contest_office.office_name,
+            'ballot_item_display_name': contest_office.office_name,
             'ocd_division_id':          contest_office.ocd_division_id,
             'maplight_id':              contest_office.maplight_id,
             'ballotpedia_id':           contest_office.ballotpedia_id,

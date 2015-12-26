@@ -89,7 +89,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
 
             if positive_value_exists(kind_of_ballot_item):
                 one_ballot_item = {
-                    'ballot_item_label':            ballot_item.ballot_item_label,
+                    'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                     'google_civic_election_id':     ballot_item.google_civic_election_id,
                     'google_ballot_placement':      ballot_item.google_ballot_placement,
                     'local_ballot_order':           ballot_item.local_ballot_order,

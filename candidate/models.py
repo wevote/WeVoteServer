@@ -115,10 +115,10 @@ class CandidateCampaignList(models.Model):
         if candidate_list_found:
             for candidate in candidate_list_objects:
                 one_candidate = {
-                    'ballot_item_label':    candidate.candidate_name,
-                    'candidate_we_vote_id': candidate.we_vote_id,
-                    'office_we_vote_id':    candidate.contest_office_we_vote_id,
-                    'measure_we_vote_id':   '',
+                    'ballot_item_display_name': candidate.candidate_name,
+                    'candidate_we_vote_id':     candidate.we_vote_id,
+                    'office_we_vote_id':        candidate.contest_office_we_vote_id,
+                    'measure_we_vote_id':       '',
                 }
                 candidate_list_light.append(one_candidate.copy())
 

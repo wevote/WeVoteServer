@@ -265,18 +265,18 @@ def process_contest_office_from_structured_json(
         contest_office = update_or_create_contest_office_results['contest_office']
         contest_office_id = contest_office.id
         contest_office_we_vote_id = contest_office.we_vote_id
-        ballot_item_label = contest_office.office_name
+        ballot_item_display_name = contest_office.office_name
     else:
         contest_office_id = 0
         contest_office_we_vote_id = ''
-        ballot_item_label = ''
+        ballot_item_display_name = ''
 
     # If a voter_id was passed in, save an entry for this office for the voter's ballot
     if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id) \
             and positive_value_exists(contest_office_id):
         ballot_item_manager = BallotItemManager()
         ballot_item_manager.update_or_create_ballot_item_for_voter(
-            voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label,
+            voter_id, google_civic_election_id, google_ballot_placement, ballot_item_display_name,
             local_ballot_order, contest_office_id, contest_office_we_vote_id)
         # We leave off these and rely on default empty values: contest_measure_id, contest_measure_we_vote_id
 
@@ -779,7 +779,7 @@ def process_contest_referendum_from_structured_json(
         contest_measure = update_or_create_contest_measure_results['contest_measure']
         contest_measure_id = contest_measure.id
         contest_measure_we_vote_id = contest_measure.we_vote_id
-        ballot_item_label = contest_measure.measure_title
+        ballot_item_display_name = contest_measure.measure_title
 
         # If a voter_id was passed in, save an entry for this office for the voter's ballot
         if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id) \
@@ -788,7 +788,7 @@ def process_contest_referendum_from_structured_json(
             contest_office_id = 0
             contest_office_we_vote_id = ''
             ballot_item_manager.update_or_create_ballot_item_for_voter(
-                voter_id, google_civic_election_id, google_ballot_placement, ballot_item_label, local_ballot_order,
+                voter_id, google_civic_election_id, google_ballot_placement, ballot_item_display_name, local_ballot_order,
                 contest_office_id, contest_office_we_vote_id,
                 contest_measure_id, contest_measure_we_vote_id)
 

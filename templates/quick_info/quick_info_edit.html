@@ -1,14 +1,14 @@
 {# templates/quick_info/quick_info_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if quick_info.id %}{{ quick_info.ballot_item_label  }}{% else %}New Quick Info for Ballot Item{% endif %}{% endblock %}
+{% block title %}{% if quick_info.id %}{{ quick_info.ballot_item_display_name  }}{% else %}New Quick Info for Ballot Item{% endif %}{% endblock %}
 
 {%  block content %}
 
 <a href="{% url 'quick_info:quick_info_list' %}">< Back</a>&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="{% url 'admin_tools:admin_home' %}">Back to Admin Home</a>
 
-<h1>{% if quick_info.id %}Edit {{ quick_info.ballot_item_label }}{% else %}New Quick Info for Ballot Item{% endif %}</h1>
+<h1>{% if quick_info.id %}Edit {{ quick_info.ballot_item_display_name }}{% else %}New Quick Info for Ballot Item{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
@@ -159,7 +159,7 @@
 
     {% if quick_info.id %}
     <p>Quick Info We Vote ID: {{ quick_info.we_vote_id }}<br />
-    Ballot Item Label: {{ quick_info.ballot_item_label }}<br />
+    Ballot Item Label: {{ quick_info.ballot_item_display_name }}<br />
     </p>
     {% endif %}
 {% endif %}{# End of if quick_info.google_civic_election_id #}

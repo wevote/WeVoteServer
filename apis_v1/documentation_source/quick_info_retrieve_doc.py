@@ -50,7 +50,7 @@ def quick_info_retrieve_doc_template_values(url_root):
                    '  "language": string,\n' \
                    '  "info_text": string,\n' \
                    '  "info_html": string,\n' \
-                   '  "ballot_item_label": string,\n' \
+                   '  "ballot_item_display_name": string,\n' \
                    '  "more_info_url": string,\n' \
                    '  "more_info_credit_text": string,\n' \
                    '  "last_updated": string,\n' \

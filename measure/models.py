@@ -354,10 +354,10 @@ class ContestMeasureList(models.Model):
         if measure_list_found:
             for measure in measure_list_objects:
                 one_measure = {
-                    'ballot_item_label':    measure.measure_title,
-                    'measure_we_vote_id':   measure.we_vote_id,
-                    'office_we_vote_id':    '',
-                    'candidate_we_vote_id': '',
+                    'ballot_item_display_name': measure.measure_title,
+                    'measure_we_vote_id':       measure.we_vote_id,
+                    'office_we_vote_id':        '',
+                    'candidate_we_vote_id':     '',
                 }
                 measure_list_light.append(one_measure.copy())
 

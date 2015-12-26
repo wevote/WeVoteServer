@@ -55,7 +55,7 @@ class PositionEntered(models.Model):
     # The id for the generated position that this PositionEntered entry influences
     position_id = models.BigIntegerField(null=True, blank=True)  # NOT USED CURRENTLY
     test = models.BigIntegerField(null=True, blank=True)
-    ballot_item_label = models.CharField(verbose_name="text name for ballot item",
+    ballot_item_display_name = models.CharField(verbose_name="text name for ballot item",
                                          max_length=255, null=True, blank=True)
 
     date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)
@@ -918,7 +918,7 @@ class PositionEnteredManager(models.Model):
             public_figure_we_vote_id=False,
             voter_we_vote_id=False,
             google_civic_election_id=False,
-            ballot_item_label=False,
+            ballot_item_display_name=False,
             office_we_vote_id=False,
             candidate_we_vote_id=False,
             measure_we_vote_id=False,
@@ -977,8 +977,8 @@ class PositionEnteredManager(models.Model):
                         position_on_stage.fetch_organization_id_from_we_vote_id(organization_we_vote_id)
                 if google_civic_election_id:
                     position_on_stage.google_civic_election_id = google_civic_election_id
-                if ballot_item_label:
-                    position_on_stage.ballot_item_label = ballot_item_label
+                if ballot_item_display_name:
+                    position_on_stage.ballot_item_display_name = ballot_item_display_name
                 if office_we_vote_id:
                     position_on_stage.contest_office_we_vote_id = office_we_vote_id
                     # Lookup contest_office_id based on office_we_vote_id and update
@@ -1006,7 +1006,7 @@ class PositionEnteredManager(models.Model):
                     position_on_stage.more_info_url = more_info_url
 
                 # As long as at least one of the above variables has changed, then save
-                if organization_we_vote_id or google_civic_election_id or ballot_item_label or office_we_vote_id \
+                if organization_we_vote_id or google_civic_election_id or ballot_item_display_name or office_we_vote_id \
                         or candidate_we_vote_id or measure_we_vote_id or stance or statement_text \
                         or statement_html or more_info_url:
                     position_on_stage.save()
@@ -1270,9 +1270,9 @@ class PositionEnteredManager(models.Model):
                 # Save values entered in steps 3-11
                 if position_on_stage_found:
                     try:
-                        if ballot_item_label or stance or statement_text or statement_html or more_info_url:
-                            if ballot_item_label:
-                                position_on_stage.ballot_item_label = ballot_item_label
+                        if ballot_item_display_name or stance or statement_text or statement_html or more_info_url:
+                            if ballot_item_display_name:
+                                position_on_stage.ballot_item_display_name = ballot_item_display_name
                             if stance:
                                 position_on_stage.stance = stance
                             if statement_text:
@@ -1320,8 +1320,8 @@ class PositionEnteredManager(models.Model):
                 if google_civic_election_id is False:
                     google_civic_election_id = None
 
-                if ballot_item_label is False:
-                    ballot_item_label = None
+                if ballot_item_display_name is False:
+                    ballot_item_display_name = None
 
                 if office_we_vote_id:
                     contest_office_id = \
@@ -1365,7 +1365,7 @@ class PositionEnteredManager(models.Model):
                     voter_we_vote_id=voter_we_vote_id,
                     voter_id=voter_id,
                     google_civic_election_id=google_civic_election_id,
-                    ballot_item_label=ballot_item_label,
+                    ballot_item_display_name=ballot_item_display_name,
                     contest_office_we_vote_id=office_we_vote_id,
                     contest_office_id=contest_office_id,
                     candidate_campaign_we_vote_id=candidate_we_vote_id,

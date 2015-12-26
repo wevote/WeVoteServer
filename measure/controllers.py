@@ -68,7 +68,7 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):
             'id':                       contest_measure.id,
             'we_vote_id':               contest_measure.we_vote_id,
             'google_civic_election_id': contest_measure.google_civic_election_id,
-            'ballot_item_label':        contest_measure.measure_title,
+            'ballot_item_display_name': contest_measure.measure_title,
             'measure_subtitle':         contest_measure.measure_subtitle,
             'maplight_id':              contest_measure.maplight_id,
             'measure_text':             contest_measure.measure_text,

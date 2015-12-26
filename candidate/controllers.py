@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import CandidateCampaignList, CandidateCampaignManager
+from ballot.models import CANDIDATE
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
@@ -150,8 +151,9 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  False,
-            'candidate_id':             candidate_id,
-            'candidate_we_vote_id':     candidate_we_vote_id,
+            'kind_of_ballot_item':      CANDIDATE,
+            'id':                       candidate_id,
+            'we_vote_id':               candidate_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -170,8 +172,9 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  False,
-            'candidate_id':             candidate_id,
-            'candidate_we_vote_id':     candidate_we_vote_id,
+            'kind_of_ballot_item':      CANDIDATE,
+            'id':                       candidate_id,
+            'we_vote_id':               candidate_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -181,9 +184,10 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
         json_data = {
             'status':                       status,
             'success':                      True,
-            'candidate_id':                 candidate_campaign.id,
-            'candidate_we_vote_id':         candidate_campaign.we_vote_id,
-            'candidate_display_name':       candidate_campaign.candidate_name,
+            'kind_of_ballot_item':          CANDIDATE,
+            'id':                           candidate_campaign.id,
+            'we_vote_id':                   candidate_campaign.we_vote_id,
+            'ballot_item_display_name':     candidate_campaign.candidate_name,
             'candidate_photo_url':          candidate_campaign.fetch_photo_url(),
             'order_on_ballot':              candidate_campaign.order_on_ballot,
             'google_civic_election_id':     candidate_campaign.google_civic_election_id,
@@ -209,8 +213,9 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  False,
-            'candidate_id':             candidate_id,
-            'candidate_we_vote_id':     candidate_we_vote_id,
+            'kind_of_ballot_item':      CANDIDATE,
+            'id':                       candidate_id,
+            'we_vote_id':               candidate_we_vote_id,
             'google_civic_election_id': 0,
         }
 
@@ -230,12 +235,12 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
     if not positive_value_exists(office_id) and not positive_value_exists(office_we_vote_id):
         status = 'VALID_OFFICE_ID_AND_OFFICE_WE_VOTE_ID_MISSING'
         json_data = {
-            'status': status,
-            'success': False,
-            'office_id': office_id,
-            'office_we_vote_id': office_we_vote_id,
+            'status':                   status,
+            'success':                  False,
+            'office_id':                office_id,
+            'office_we_vote_id':        office_we_vote_id,
             'google_civic_election_id': 0,
-            'candidate_list': [],
+            'candidate_list':           [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -260,9 +265,9 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
         office_we_vote_id = ''
         for candidate in candidate_list:
             one_candidate = {
-                'candidate_id':                 candidate.id,
-                'candidate_we_vote_id':         candidate.we_vote_id,
-                'candidate_display_name':       candidate.candidate_name,
+                'id':                           candidate.id,
+                'we_vote_id':                   candidate.we_vote_id,
+                'ballot_item_display_name':     candidate.candidate_name,
                 'candidate_photo_url':          candidate.fetch_photo_url(),
                 'order_on_ballot':              candidate.order_on_ballot,
             }

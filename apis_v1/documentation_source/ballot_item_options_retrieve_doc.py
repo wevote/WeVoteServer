@@ -48,7 +48,7 @@ def ballot_item_options_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "ballot_item_list": list\n' \
                    '   [\n' \
-                   '     "ballot_item_label": string,\n' \
+                   '     "ballot_item_display_name": string,\n' \
                    '     "measure_we_vote_id": integer,\n' \
                    '     "office_we_vote_id": string,\n' \
                    '     "candidate_we_vote_id": string,\n' \

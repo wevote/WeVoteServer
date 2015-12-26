@@ -61,7 +61,7 @@ class QuickInfo(models.Model):
     info_text = models.TextField(null=True, blank=True)
     info_html = models.TextField(null=True, blank=True)
 
-    ballot_item_label = models.CharField(verbose_name="text name for ballot item for quick display",
+    ballot_item_display_name = models.CharField(verbose_name="text name for ballot item for quick display",
                                          max_length=255, null=True, blank=True)
 
     # See also more_info_credit_text
@@ -359,7 +359,7 @@ class QuickInfoManager(models.Model):
         return results
 
     def update_or_create_quick_info(self, quick_info_id, quick_info_we_vote_id,
-                                    ballot_item_label,
+                                    ballot_item_display_name,
                                     contest_office_we_vote_id,
                                     candidate_campaign_we_vote_id,
                                     politician_we_vote_id,
@@ -404,8 +404,8 @@ class QuickInfoManager(models.Model):
                 else:
                     uses_master_entry = True
 
-                if ballot_item_label is not False:
-                    quick_info_on_stage.ballot_item_label = ballot_item_label
+                if ballot_item_display_name is not False:
+                    quick_info_on_stage.ballot_item_display_name = ballot_item_display_name
                 if language is not False:
                     quick_info_on_stage.language = language
                 if last_editor_we_vote_id is not False:
@@ -454,8 +454,8 @@ class QuickInfoManager(models.Model):
         elif results['DoesNotExist']:
             try:
                 # Create new quick_info entry
-                if ballot_item_label is False:
-                    ballot_item_label = ""
+                if ballot_item_display_name is False:
+                    ballot_item_display_name = ""
                 if language is False:
                     language = ENGLISH
                 if last_editor_we_vote_id is False:
@@ -483,7 +483,7 @@ class QuickInfoManager(models.Model):
                 if more_info_credit is False:
                     more_info_credit = None
                 quick_info_on_stage = QuickInfo(
-                    ballot_item_label=ballot_item_label,
+                    ballot_item_display_name=ballot_item_display_name,
                     contest_office_we_vote_id=contest_office_we_vote_id,
                     candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
                     politician_we_vote_id=politician_we_vote_id,
