@@ -55,7 +55,6 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        # 'organization_we_vote_id': 'wv85org1',
     }
 
     api_response = '{\n' \
@@ -70,10 +69,9 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '     "google_civic_election_id": integer,\n' \
                    '     "google_ballot_placement": integer,\n' \
                    '     "local_ballot_order": integer,\n' \
-                   '     "contest_office_id": integer,\n' \
-                   '     "contest_office_we_vote_id": string,\n' \
-                   '     "contest_measure_id": integer,\n' \
-                   '     "contest_measure_we_vote_id": string,\n' \
+                   '     "kind_of_ballot_item": string,\n' \
+                   '     "id": integer,\n' \
+                   '     "we_vote_id": string,\n' \
                    '   ],\n' \
                    '}'
 
