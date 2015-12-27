@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import VoteSmartCandidate, candidate_object_filter, VoteSmartState, state_filter
+from .models import VoteSmartCandidate, candidate_object_filter, VoteSmartCandidateBio, candidate_bio_object_filter, \
+    VoteSmartOfficial, official_object_filter, VoteSmartState, state_filter
 from .votesmart_local import votesmart, VotesmartApiError
 from config.base import get_environment_variable
 import requests
@@ -25,6 +26,51 @@ def get_vote_smart_candidate(last_name):
                 candidateId=one_candidate.candidateId, defaults=one_candidate_filtered)
             candidate.save()
         status = "VOTE_SMART_CANDIDATES_PROCESSED"
+        success = True
+    except VotesmartApiError as error_instance:
+        # Catch the error message coming back from Vote Smart and pass it in the status
+        error_message = error_instance.args
+        status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+        success = False
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
+def get_vote_smart_candidate_bio(candidate_id):
+    try:
+        one_candidate_bio = votesmart.candidatebio.getBio(candidate_id)
+        candidate_bio_filtered = candidate_bio_object_filter(one_candidate_bio)
+        candidate_bio, created = VoteSmartCandidateBio.objects.update_or_create(
+            candidateId=one_candidate_bio.candidateId, defaults=candidate_bio_filtered)
+        candidate_bio.save()
+        status = "VOTE_SMART_CANDIDATE_BIO_PROCESSED"
+        success = True
+    except VotesmartApiError as error_instance:
+        # Catch the error message coming back from Vote Smart and pass it in the status
+        error_message = error_instance.args
+        status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+        success = False
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
+def get_vote_smart_official(last_name):
+    try:
+        officials_list = votesmart.officials.getByLastname(last_name)
+        for one_official in officials_list:
+            one_official_filtered = official_object_filter(one_official)
+            official, created = VoteSmartOfficial.objects.update_or_create(
+                candidateId=one_official.candidateId, defaults=one_official_filtered)
+            official.save()
+        status = "VOTE_SMART_OFFICIALS_PROCESSED"
         success = True
     except VotesmartApiError as error_instance:
         # Catch the error message coming back from Vote Smart and pass it in the status

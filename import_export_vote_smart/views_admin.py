@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import get_vote_smart_candidate, retrieve_and_save_vote_smart_states
+from .controllers import get_vote_smart_candidate, get_vote_smart_candidate_bio, get_vote_smart_official, \
+    retrieve_and_save_vote_smart_states
 from .models import VoteSmartState
 from django.contrib import messages
 from django.contrib.messages import get_messages
@@ -33,9 +34,12 @@ def import_photo_view(request):
         messages.add_message(request, messages.INFO, "Photo retrieved.")
 
         # Now we can go on to make sure we have the right VoteSmartCandidate
-
+        vote_smart_candidate_id = 15723
         # ...and then retrieve the photo
-        #results = get_vote_smart_candidate_bio(vote_smart_candidate_id)
+        results = get_vote_smart_candidate_bio(vote_smart_candidate_id)
+
+    last_name = "Pelosi"
+    results = get_vote_smart_official(last_name)
 
     messages_on_stage = get_messages(request)
 
