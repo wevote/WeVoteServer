@@ -36,13 +36,13 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     election_on_stage = Election()
 
-    # Testing
-    messages.add_message(request, messages.INFO,
-                         'election_local_id: {election_local_id}, '
-                         'google_civic_election_id: {google_civic_election_id}.'.format(
-                             election_local_id=election_local_id,
-                             google_civic_election_id=google_civic_election_id,
-                         ))
+    # # Testing
+    # messages.add_message(request, messages.INFO,
+    #                      'election_local_id: {election_local_id}, '
+    #                      'google_civic_election_id: {google_civic_election_id}.'.format(
+    #                          election_local_id=election_local_id,
+    #                          google_civic_election_id=google_civic_election_id,
+    #                      ))
 
     try:
         if positive_value_exists(election_local_id):

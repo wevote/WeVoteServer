@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, positive_value_exists
 
@@ -80,11 +81,16 @@ class VoteSmartCandidateManager(models.Model):
             elif positive_value_exists(first_name) or positive_value_exists(last_name):
                 candidate_queryset = VoteSmartCandidate.objects.all()
                 if positive_value_exists(first_name):
-                    candidate_queryset = candidate_queryset.filter(firstName__istartswith=first_name)
+                    first_name = first_name.replace("`", "'")  # Vote Smart doesn't like this kind of apostrophe: `
+                    candidate_queryset = candidate_queryset.filter(Q(firstName__istartswith=first_name) |
+                                                                   Q(nickName__istartswith=first_name) |
+                                                                   Q(preferredName__istartswith=first_name))
                 if positive_value_exists(last_name):
+                    last_name = last_name.replace("`", "'")  # Vote Smart doesn't like this kind of apostrophe: `
                     candidate_queryset = candidate_queryset.filter(lastName__iexact=last_name)
                 if positive_value_exists(state_code):
-                    candidate_queryset = candidate_queryset.filter(electionStateId__iexact=state_code)
+                    candidate_queryset = candidate_queryset.filter(Q(electionStateId__iexact=state_code) |
+                                                                   Q(electionStateId__iexact="NA"))
                 vote_smart_candidate_list = list(candidate_queryset[:1])
                 if vote_smart_candidate_list:
                     vote_smart_candidate = vote_smart_candidate_list[0]

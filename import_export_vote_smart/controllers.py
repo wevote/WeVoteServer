@@ -19,7 +19,7 @@ votesmart.apikey = VOTE_SMART_API_KEY
 
 def retrieve_vote_smart_candidates_into_local_db(last_name):
     try:
-
+        last_name = last_name.replace("`", "'")  # Vote Smart doesn't like this kind of apostrophe: `
         candidates_list = votesmart.candidates.getByLastname(last_name)
         for one_candidate in candidates_list:
             one_candidate_filtered = candidate_object_filter(one_candidate)
