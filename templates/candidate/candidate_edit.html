@@ -17,6 +17,8 @@
 {% if candidate %}
 <p><strong>Values from Google Civic API (do not edit)</strong></p>
 <p>Candidate Name: {{ candidate.candidate_name }}</p>
+<p>Candidate We Vote ID: {{ candidate.we_vote_id }}</p>
+<p>Vote Smart ID: {{ candidate.vote_smart_id }}</p>
 <p>Twitter URL: {{ candidate.twitter_url }}</p>
 <p>Website: {{ candidate.candidate_url }}</p>
 
@@ -34,4 +36,11 @@
 <input type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 </form>
 
+<br />
+{% if candidate %}
+<a href="{% url 'candidate:candidate_retrieve_photos' candidate.id %}">Retrieve photos</a><br />
+    {% if candidate.fetch_photo_url %}
+    <img src='{{ candidate.fetch_photo_url }}' />
+    {% endif %}
+{% endif %}
 {% endblock %}

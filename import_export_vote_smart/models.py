@@ -4,9 +4,114 @@
 
 from django.db import models
 import wevote_functions.admin
+from wevote_functions.models import convert_to_int, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+class VoteSmartCandidateManager(models.Model):
+
+    def __unicode__(self):
+        return "VoteSmartCandidateManager"
+
+    def retrieve_candidate_from_vote_smart_id(self, vote_smart_candidate_id):
+        return self.retrieve_vote_smart_candidate(vote_smart_candidate_id)
+
+    def retrieve_vote_smart_candidate_from_we_vote_id(self, we_vote_id):
+        vote_smart_candidate_id = 0
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+        return vote_smart_candidate_manager.retrieve_vote_smart_candidate(vote_smart_candidate_id, we_vote_id)
+
+    def fetch_vote_smart_candidate_id_from_we_vote_id(self, we_vote_id):
+        vote_smart_candidate_id = 0
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+        results = vote_smart_candidate_manager.retrieve_vote_smart_candidate(vote_smart_candidate_id, we_vote_id)
+        if results['success']:
+            return results['vote_smart_candidate_id']
+        return 0
+
+    def retrieve_vote_smart_candidate_from_we_vote_local_id(self, local_candidate_id):
+        vote_smart_candidate_id = 0
+        we_vote_id = ''
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+        return vote_smart_candidate_manager.retrieve_vote_smart_candidate(
+            vote_smart_candidate_id, we_vote_id, candidate_maplight_id)
+
+    def retrieve_vote_smart_candidate_from_full_name(self, candidate_name, state_code=None):
+        vote_smart_candidate_id = 0
+        we_vote_id = ''
+        candidate_maplight_id = ''
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+
+        results = vote_smart_candidate_manager.retrieve_vote_smart_candidate(
+            vote_smart_candidate_id, first_name, last_name, state_code)
+        return results
+
+    def retrieve_vote_smart_candidate_from_name_components(self, first_name=None, last_name=None, state_code=None):
+        vote_smart_candidate_id = 0
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+
+        results = vote_smart_candidate_manager.retrieve_vote_smart_candidate(
+            vote_smart_candidate_id, first_name, last_name, state_code)
+        return results
+
+    # NOTE: searching by all other variables seems to return a list of objects
+    def retrieve_vote_smart_candidate(
+            self, vote_smart_candidate_id=None, first_name=None, last_name=None, state_code=None):
+        """
+        We want to return one and only one candidate
+        :param vote_smart_candidate_id:
+        :param first_name:
+        :param last_name:
+        :param state_code:
+        :return:
+        """
+        error_result = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        vote_smart_candidate = VoteSmartCandidate()
+
+        try:
+            if positive_value_exists(vote_smart_candidate_id):
+                vote_smart_candidate = VoteSmartCandidate.objects.get(candidateId=vote_smart_candidate_id)
+                vote_smart_candidate_id = convert_to_int(vote_smart_candidate.candidateId)
+                status = "RETRIEVE_VOTE_SMART_CANDIDATE_FOUND_BY_ID"
+            elif positive_value_exists(first_name) or positive_value_exists(last_name):
+                candidate_queryset = VoteSmartCandidate.objects.all()
+                if positive_value_exists(first_name):
+                    candidate_queryset = candidate_queryset.filter(firstName__istartswith=first_name)
+                if positive_value_exists(last_name):
+                    candidate_queryset = candidate_queryset.filter(lastName__iexact=last_name)
+                if positive_value_exists(state_code):
+                    candidate_queryset = candidate_queryset.filter(electionStateId__iexact=state_code)
+                vote_smart_candidate_list = list(candidate_queryset[:1])
+                if vote_smart_candidate_list:
+                    vote_smart_candidate = vote_smart_candidate_list[0]
+                else:
+                    vote_smart_candidate = VoteSmartCandidate()
+                vote_smart_candidate_id = convert_to_int(vote_smart_candidate.candidateId)
+                status = "RETRIEVE_VOTE_SMART_CANDIDATE_FOUND_BY_NAME"
+            else:
+                status = "RETRIEVE_VOTE_SMART_CANDIDATE_SEARCH_INDEX_MISSING"
+        except VoteSmartCandidate.MultipleObjectsReturned as e:
+            exception_multiple_object_returned = True
+            status = "RETRIEVE_VOTE_SMART_CANDIDATE_MULTIPLE_OBJECTS_RETURNED"
+        except VoteSmartCandidate.DoesNotExist:
+            exception_does_not_exist = True
+            status = "RETRIEVE_VOTE_SMART_CANDIDATE_NOT_FOUND"
+
+        results = {
+            'success':                      True if positive_value_exists(vote_smart_candidate_id) else False,
+            'status':                       status,
+            'error_result':                 error_result,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'vote_smart_candidate_found':   True if positive_value_exists(vote_smart_candidate_id) else False,
+            'vote_smart_candidate_id':      vote_smart_candidate_id,
+            'vote_smart_candidate':         vote_smart_candidate,
+        }
+        return results
 
 
 class VoteSmartCandidate(models.Model):
@@ -167,6 +272,110 @@ def candidate_bio_object_filter(one_candidate_bio):
         # 'stateId': one_candidate_bio.stateId,
     }
     return one_candidate_bio_filtered
+
+
+class VoteSmartOfficialManager(models.Model):
+
+    def __unicode__(self):
+        return "VoteSmartOfficialManager"
+
+    def retrieve_official_from_vote_smart_id(self, vote_smart_candidate_id):
+        return self.retrieve_vote_smart_official(vote_smart_candidate_id)
+
+    def retrieve_vote_smart_official_from_we_vote_id(self, we_vote_id):
+        vote_smart_candidate_id = 0
+        vote_smart_official_manager = VoteSmartOfficialManager()
+        return vote_smart_official_manager.retrieve_vote_smart_official(vote_smart_candidate_id, we_vote_id)
+
+    def fetch_vote_smart_candidate_id_from_we_vote_id(self, we_vote_id):
+        vote_smart_candidate_id = 0
+        vote_smart_official_manager = VoteSmartOfficialManager()
+        results = vote_smart_official_manager.retrieve_vote_smart_official(vote_smart_candidate_id, we_vote_id)
+        if results['success']:
+            return results['vote_smart_candidate_id']
+        return 0
+
+    def retrieve_vote_smart_official_from_we_vote_local_id(self, local_official_id):
+        vote_smart_candidate_id = 0
+        we_vote_id = ''
+        vote_smart_official_manager = VoteSmartOfficialManager()
+        return vote_smart_official_manager.retrieve_vote_smart_official(
+            vote_smart_candidate_id, we_vote_id, official_maplight_id)
+
+    def retrieve_vote_smart_official_from_full_name(self, official_name, state_code=None):
+        vote_smart_candidate_id = 0
+        we_vote_id = ''
+        official_maplight_id = ''
+        vote_smart_official_manager = VoteSmartOfficialManager()
+
+        results = vote_smart_official_manager.retrieve_vote_smart_official(
+            vote_smart_candidate_id, first_name, last_name, state_code)
+        return results
+
+    def retrieve_vote_smart_official_from_name_components(self, first_name=None, last_name=None, state_code=None):
+        vote_smart_candidate_id = 0
+        vote_smart_official_manager = VoteSmartOfficialManager()
+
+        results = vote_smart_official_manager.retrieve_vote_smart_official(
+            vote_smart_candidate_id, first_name, last_name, state_code)
+        return results
+
+    # NOTE: searching by all other variables seems to return a list of objects
+    def retrieve_vote_smart_official(
+            self, vote_smart_candidate_id=None, first_name=None, last_name=None, state_code=None):
+        """
+        We want to return one and only one official
+        :param vote_smart_candidate_id:
+        :param first_name:
+        :param last_name:
+        :param state_code:
+        :return:
+        """
+        error_result = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        vote_smart_official = VoteSmartOfficial()
+
+        try:
+            if positive_value_exists(vote_smart_candidate_id):
+                vote_smart_official = VoteSmartOfficial.objects.get(candidateId=vote_smart_candidate_id)
+                vote_smart_candidate_id = convert_to_int(vote_smart_official.candidateId)
+                status = "RETRIEVE_VOTE_SMART_OFFICIAL_FOUND_BY_ID"
+            elif positive_value_exists(first_name) or positive_value_exists(last_name):
+                official_queryset = VoteSmartOfficial.objects.all()
+                if positive_value_exists(first_name):
+                    official_queryset = official_queryset.filter(firstName__istartswith=first_name)
+                if positive_value_exists(last_name):
+                    official_queryset = official_queryset.filter(lastName__iexact=last_name)
+                if positive_value_exists(state_code):
+                    official_queryset = official_queryset.filter(officeStateId__iexact=state_code)
+                vote_smart_official_list = list(official_queryset[:1])
+                if vote_smart_official_list:
+                    vote_smart_official = vote_smart_official_list[0]
+                else:
+                    vote_smart_official = VoteSmartOfficial()
+                vote_smart_candidate_id = convert_to_int(vote_smart_official.candidateId)
+                status = "RETRIEVE_VOTE_SMART_OFFICIAL_FOUND_BY_NAME"
+            else:
+                status = "RETRIEVE_VOTE_SMART_OFFICIAL_SEARCH_INDEX_MISSING"
+        except VoteSmartOfficial.MultipleObjectsReturned as e:
+            exception_multiple_object_returned = True
+            status = "RETRIEVE_VOTE_SMART_OFFICIAL_MULTIPLE_OBJECTS_RETURNED"
+        except VoteSmartOfficial.DoesNotExist:
+            exception_does_not_exist = True
+            status = "RETRIEVE_VOTE_SMART_OFFICIAL_NOT_FOUND"
+
+        results = {
+            'success':                      True if positive_value_exists(vote_smart_candidate_id) else False,
+            'status':                       status,
+            'error_result':                 error_result,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'vote_smart_official_found':   True if positive_value_exists(vote_smart_candidate_id) else False,
+            'vote_smart_candidate_id':      vote_smart_candidate_id,
+            'vote_smart_official':         vote_smart_official,
+        }
+        return results
 
 
 class VoteSmartOfficial(models.Model):

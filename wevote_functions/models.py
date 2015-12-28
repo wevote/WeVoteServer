@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 import datetime
+from nameparser import HumanName
 import random
 import string
 import sys
@@ -11,6 +12,68 @@ import wevote_functions.admin
 
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+STATE_CODE_MAP = {
+    'AK': 'Alaska',
+    'AL': 'Alabama',
+    'AR': 'Arkansas',
+    'AS': 'American Samoa',
+    'AZ': 'Arizona',
+    'CA': 'California',
+    'CO': 'Colorado',
+    'CT': 'Connecticut',
+    'DC': 'District of Columbia',
+    'DE': 'Delaware',
+    'FL': 'Florida',
+    'GA': 'Georgia',
+    'GU': 'Guam',
+    'HI': 'Hawaii',
+    'IA': 'Iowa',
+    'ID': 'Idaho',
+    'IL': 'Illinois',
+    'IN': 'Indiana',
+    'KS': 'Kansas',
+    'KY': 'Kentucky',
+    'LA': 'Louisiana',
+    'MA': 'Massachusetts',
+    'MD': 'Maryland',
+    'ME': 'Maine',
+    'MI': 'Michigan',
+    'MN': 'Minnesota',
+    'MO': 'Missouri',
+    'MP': 'Northern Mariana Islands',
+    'MS': 'Mississippi',
+    'MT': 'Montana',
+    'NA': 'National',
+    'NC': 'North Carolina',
+    'ND': 'North Dakota',
+    'NE': 'Nebraska',
+    'NH': 'New Hampshire',
+    'NJ': 'New Jersey',
+    'NM': 'New Mexico',
+    'NV': 'Nevada',
+    'NY': 'New York',
+    'OH': 'Ohio',
+    'OK': 'Oklahoma',
+    'OR': 'Oregon',
+    'PA': 'Pennsylvania',
+    'PR': 'Puerto Rico',
+    'RI': 'Rhode Island',
+    'SC': 'South Carolina',
+    'SD': 'South Dakota',
+    'TN': 'Tennessee',
+    'TX': 'Texas',
+    'UT': 'Utah',
+    'VA': 'Virginia',
+    'VI': 'Virgin Islands',
+    'VT': 'Vermont',
+    'WA': 'Washington',
+    'WI': 'Wisconsin',
+    'WV': 'West Virginia',
+    'WY': 'Wyoming'
+}
+
 
 
 class LocalSwitch(object):
@@ -104,6 +167,30 @@ def extract_zip_formatted_from_zip9(zip9):
         formatted_zip_text += '-' + extract_zip4_from_zip9(zip9)
 
     return formatted_zip_text
+
+
+def extract_first_name_from_full_name(full_name):
+    """
+    See documentation here: https://github.com/derek73/python-nameparser
+    :param full_name:
+    :return:
+    """
+    full_name.strip()
+    full_name_parsed = HumanName(full_name)
+    first_name = full_name_parsed.first
+    return first_name
+
+
+def extract_last_name_from_full_name(full_name):
+    """
+    See documentation here: https://github.com/derek73/python-nameparser
+    :param full_name:
+    :return:
+    """
+    full_name.strip()
+    full_name_parsed = HumanName(full_name)
+    last_name = full_name_parsed.last
+    return last_name
 
 
 # http://stackoverflow.com/questions/1622793/django-cookies-how-can-i-set-them
@@ -248,3 +335,19 @@ def get_google_civic_election_id_from_cookie(request):
 def set_google_civic_election_id_cookie(request, response, google_civic_election_id):
     # We are leaving request as an incoming variable in case we need to use it in the future.
     set_cookie(response, 'google_civic_election_id', google_civic_election_id)
+
+
+def convert_state_text_to_state_code(state):
+    for state_code, state_text in STATE_CODE_MAP.items():
+        if state.lower() == state_text.lower():
+            return state_code
+    else:
+        return ""
+
+
+def convert_state_code_to_state_text(incoming_state_code):
+    for state_code, state_text in STATE_CODE_MAP.items():
+        if incoming_state_code.lower() == state_code.lower():
+            return state_text
+    else:
+        return ""

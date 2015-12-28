@@ -8,7 +8,8 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from office.models import ContestOffice
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.models import extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.models import extract_first_name_from_full_name, extract_last_name_from_full_name, \
+    extract_state_from_ocd_division_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -144,6 +145,8 @@ class CandidateCampaign(models.Model):
         blank=True, unique=True)
     maplight_id = models.CharField(
         verbose_name="maplight candidate id", max_length=255, default=None, null=True, blank=True, unique=True)
+    vote_smart_id = models.CharField(
+        verbose_name="vote smart candidate id", max_length=15, default=None, null=True, blank=True, unique=False)
     # The internal We Vote id for the ContestOffice that this candidate is competing for. During setup we need to allow
     # this to be null.
     contest_office_id = models.CharField(
@@ -216,6 +219,8 @@ class CandidateCampaign(models.Model):
     def fetch_photo_url(self):
         if self.photo_url_from_maplight:
             return self.photo_url_from_maplight
+        elif self.vote_smart_id:
+            return self.photo_url_from_vote_smart()
         elif self.photo_url:
             return self.photo_url
         else:
@@ -225,6 +230,13 @@ class CandidateCampaign(models.Model):
         #     politician_manager = PoliticianManager()
         #     return politician_manager.fetch_photo_url(self.politician_id)
 
+    def photo_url_from_vote_smart(self):
+        if self.vote_smart_id:
+            vote_smart_photo_url = "http://votesmart.org/canphoto/{candidate_id}_lg.jpg"
+            return vote_smart_photo_url.format(candidate_id=self.vote_smart_id)
+        else:
+            return ""
+
     def fetch_twitter_handle(self):
         # TODO extract the twitter handle from twitter_url if we don't have it stored as a handle yet
         return self.twitter_url
@@ -233,6 +245,14 @@ class CandidateCampaign(models.Model):
         # Pull this from ocdDivisionId
         ocd_division_id = self.ocd_division_id
         return extract_state_from_ocd_division_id(ocd_division_id)
+
+    def extract_first_name(self):
+        full_name = self.candidate_name
+        return extract_first_name_from_full_name(full_name)
+
+    def extract_last_name(self):
+        full_name = self.candidate_name
+        return extract_last_name_from_full_name(full_name)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):

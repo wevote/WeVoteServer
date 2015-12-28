@@ -17,14 +17,15 @@ VOTE_SMART_API_URL = get_environment_variable("VOTE_SMART_API_URL")
 votesmart.apikey = VOTE_SMART_API_KEY
 
 
-def get_vote_smart_candidate(last_name):
+def retrieve_vote_smart_candidates_into_local_db(last_name):
     try:
+
         candidates_list = votesmart.candidates.getByLastname(last_name)
         for one_candidate in candidates_list:
             one_candidate_filtered = candidate_object_filter(one_candidate)
-            candidate, created = VoteSmartCandidate.objects.update_or_create(
+            vote_smart_candidate, created = VoteSmartCandidate.objects.update_or_create(
                 candidateId=one_candidate.candidateId, defaults=one_candidate_filtered)
-            candidate.save()
+            vote_smart_candidate.save()
         status = "VOTE_SMART_CANDIDATES_PROCESSED"
         success = True
     except VotesmartApiError as error_instance:
@@ -62,14 +63,14 @@ def get_vote_smart_candidate_bio(candidate_id):
     return results
 
 
-def get_vote_smart_official(last_name):
+def retrieve_vote_smart_officials_into_local_db(last_name):
     try:
         officials_list = votesmart.officials.getByLastname(last_name)
         for one_official in officials_list:
             one_official_filtered = official_object_filter(one_official)
-            official, created = VoteSmartOfficial.objects.update_or_create(
+            vote_smart_official, created = VoteSmartOfficial.objects.update_or_create(
                 candidateId=one_official.candidateId, defaults=one_official_filtered)
-            official.save()
+            vote_smart_official.save()
         status = "VOTE_SMART_OFFICIALS_PROCESSED"
         success = True
     except VotesmartApiError as error_instance:

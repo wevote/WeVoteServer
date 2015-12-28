@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import get_vote_smart_candidate, get_vote_smart_candidate_bio, get_vote_smart_official, \
+from .controllers import retrieve_vote_smart_candidates_into_local_db, get_vote_smart_candidate_bio, retrieve_vote_smart_officials_into_local_db, \
     retrieve_and_save_vote_smart_states
 from .models import VoteSmartState
 from django.contrib import messages
@@ -27,7 +27,7 @@ def import_states_view(request):
 
 def import_photo_view(request):
     last_name = "Trump"
-    results = get_vote_smart_candidate(last_name)
+    results = retrieve_vote_smart_candidates_into_local_db(last_name)
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])
     else:
@@ -39,7 +39,7 @@ def import_photo_view(request):
         results = get_vote_smart_candidate_bio(vote_smart_candidate_id)
 
     last_name = "Pelosi"
-    results = get_vote_smart_official(last_name)
+    results = retrieve_vote_smart_officials_into_local_db(last_name)
 
     messages_on_stage = get_messages(request)
 
