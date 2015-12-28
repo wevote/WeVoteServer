@@ -12,6 +12,7 @@ def import_and_save_all_polling_locations_data():
     # and download the first zip file.
     # https://data.votinginfoproject.org/feeds/STATE/?order=D
 
+    # ##################
     # California
     xml_file_location = 'polling_location/import_data/ca/vipFeed-06-2015-11-03-short.xml'
     ca1_results = import_and_save_polling_location_data(xml_file_location)
@@ -37,12 +38,26 @@ def import_and_save_all_polling_locations_data():
     xml_file_location = 'polling_location/import_data/ca/vipFeed-6115-2014-11-04-short.xml'
     ca8_results = import_and_save_polling_location_data(xml_file_location)
 
+    # ##################
+    # Rhode Island
+    xml_file_location = 'polling_location/import_data/ri/vipFeed-44-2015-12-15-short.xml'
+    ri1_results = import_and_save_polling_location_data(xml_file_location)
+
+    xml_file_location = 'polling_location/import_data/ri/vipFeed-44-2016-01-05-egreenwich-short.xml'
+    ri2_results = import_and_save_polling_location_data(xml_file_location)
+
+    xml_file_location = 'polling_location/import_data/ri/vipFeed-44-2016-01-05-senate-short.xml'
+    ri3_results = import_and_save_polling_location_data(xml_file_location)
+
+    # ##################
     # Virginia
     xml_file_location = 'polling_location/import_data/va/vipFeed-51-2015-11-03-short.xml'
     va_results = import_and_save_polling_location_data(xml_file_location)
 
     return merge_polling_location_results(ca1_results, ca2_results, ca3_results, ca4_results, ca5_results, ca6_results,
-                                          ca7_results, ca8_results, va_results)
+                                          ca7_results, ca8_results,
+                                          ri1_results, ri2_results, ri3_results,
+                                          va_results)
 
 
 def merge_polling_location_results(*dict_args):
