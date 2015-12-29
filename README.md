@@ -1,9 +1,13 @@
 [![Build Status](https://travis-ci.org/wevote/WeVoteServer.svg?branch=master)](https://travis-ci.org/wevote/WeVoteServer) [![Coverage Status](https://coveralls.io/repos/wevote/WeVoteServer/badge.svg?branch=master&service=github)](https://coveralls.io/github/wevote/WeVoteServer?branch=master)
 
-# WeVoteServer
+# README for WeVoteServer
 
-This WeVoteServer repository contains a Python/Django-powered API server. 
-WeVoteServer powers the We Vote front-end applications:
+This WeVoteServer repository contains a Python/Django-powered API endpoints server. We take in ballot data from 
+Google Civic API, Vote Smart, MapLight, TheUnitedStates.io and the Voting Information Project. We then serve
+it up to voters, and let voters Support/Oppose and Like ballot items. We are also building tools to capture
+and share voter guide data.
+
+You can use these API endpoints for any of these the We Vote front-end applications:
 
  * [Node/React/Flux WebApp mobile website](https://github.com/wevote/WebApp)
  
@@ -16,13 +20,7 @@ http://start.wevoteusa.org/
 
 ## Installing Python/Django API Server
 
-These are the models and controllers that power the API Endpoints used by the front end applications. 
-We recommend you install this first. 
-
-Initial installation instructions for the 
-[Python/Django API server can be found here](README_API_INSTALL.md).
-
-[Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
+[Installation instructions](README_API_INSTALL.md).
 
 ## Installing We Vote Mobile Web Application (Node/React/Flux)
 

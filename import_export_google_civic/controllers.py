@@ -380,7 +380,8 @@ def process_contests_from_structured_json(
     return results
 
 
-def retrieve_one_ballot_from_google_civic_api(text_for_map_search, use_test_election=False):
+def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_google_civic_election_id=0,
+                                              use_test_election=False):
     # Request json file from Google servers
     # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
     if use_test_election:
@@ -388,6 +389,12 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, use_test_elec
             "key": GOOGLE_CIVIC_API_KEY,
             "address": text_for_map_search,
             "electionId": 2000,  # The Google Civic API Test election
+        })
+    elif positive_value_exists(incoming_google_civic_election_id):
+        request = requests.get(VOTER_INFO_URL, params={
+            "key": GOOGLE_CIVIC_API_KEY,
+            "address": text_for_map_search,
+            "electionId": incoming_google_civic_election_id,
         })
     else:
         request = requests.get(VOTER_INFO_URL, params={
@@ -496,17 +503,22 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0):
                 state_code = one_ballot_json['state']['name']
 
     # Loop through all contests and store in local db cache
-    results = process_contests_from_structured_json(one_ballot_json['contests'], google_civic_election_id,
-                                                    ocd_division_id, state_code, voter_id)
+    if 'contests' in one_ballot_json:
+        results = process_contests_from_structured_json(one_ballot_json['contests'], google_civic_election_id,
+                                                        ocd_division_id, state_code, voter_id)
 
-    status = results['status']
+        status = results['status']
+        success = results['success']
+    else:
+        status = "STORE_ONE_BALLOT_NO_CONTESTS_FOUND"
+        success = False
 
     # When saving a ballot for individual voter, loop through all pollingLocations and store in local db
     # process_polling_locations_from_structured_json(one_ballot_json['pollingLocations'])
 
     results = {
         'status': status,
-        'success': results['success'],
+        'success': success,
         'google_civic_election_id': google_civic_election_id,
     }
     return results
@@ -621,7 +633,8 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         text_for_map_search = voter_address_manager.retrieve_ballot_map_text_from_voter_id(voter_id)
 
     if positive_value_exists(text_for_map_search):
-        one_ballot_results = retrieve_one_ballot_from_google_civic_api(text_for_map_search, use_test_election)
+        one_ballot_results = retrieve_one_ballot_from_google_civic_api(
+            text_for_map_search, google_civic_election_id, use_test_election)
 
         if one_ballot_results['success']:
             one_ballot_json = one_ballot_results['structured_json']
