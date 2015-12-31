@@ -6,6 +6,7 @@ from django.db import models
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from office.models import ContestOffice
+import re
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.models import extract_first_name_from_full_name, extract_last_name_from_full_name, \
@@ -170,7 +171,10 @@ class CandidateCampaign(models.Model):
     party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
     # A URL for a photo of the candidate.
     photo_url = models.CharField(verbose_name="photoUrl", max_length=255, null=True, blank=True)
-    photo_url_from_maplight = models.URLField(verbose_name='candidate portrait url of candidate', blank=True, null=True)
+    photo_url_from_maplight = models.URLField(
+        verbose_name='candidate portrait url of candidate from maplight', blank=True, null=True)
+    photo_url_from_vote_smart = models.URLField(
+        verbose_name='candidate portrait url of candidate from vote smart', blank=True, null=True)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
@@ -219,8 +223,8 @@ class CandidateCampaign(models.Model):
     def fetch_photo_url(self):
         if self.photo_url_from_maplight:
             return self.photo_url_from_maplight
-        elif self.vote_smart_id:
-            return self.photo_url_from_vote_smart()
+        elif self.photo_url_from_vote_smart:
+            return self.photo_url_from_vote_smart_large()
         elif self.photo_url:
             return self.photo_url
         else:
@@ -230,10 +234,12 @@ class CandidateCampaign(models.Model):
         #     politician_manager = PoliticianManager()
         #     return politician_manager.fetch_photo_url(self.politician_id)
 
-    def photo_url_from_vote_smart(self):
-        if self.vote_smart_id:
-            vote_smart_photo_url = "http://votesmart.org/canphoto/{candidate_id}_lg.jpg"
-            return vote_smart_photo_url.format(candidate_id=self.vote_smart_id)
+    def photo_url_from_vote_smart_large(self):
+        if positive_value_exists(self.photo_url_from_vote_smart):
+            # Use regex to replace '.jpg' with '_lg.jpg'
+            # Vote smart returns the link to the small photo, but we want to use the large photo
+            photo_url_from_vote_smart_large = re.sub(r'.jpg', r'_lg.jpg', self.photo_url_from_vote_smart)
+            return photo_url_from_vote_smart_large
         else:
             return ""
 

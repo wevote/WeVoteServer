@@ -8,6 +8,9 @@ from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_exception
+from import_export_vote_smart.controllers import retrieve_and_match_candidate_from_vote_smart, \
+    retrieve_candidate_photo_from_vote_smart
+from import_export_vote_smart.models import VoteSmartCandidateManager
 import json
 from office.models import ContestOfficeManager
 import wevote_functions.admin
@@ -304,3 +307,27 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
         }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
+    # Has this candidate already been linked to a Vote Smart candidate?
+    candidate_retrieve_results = retrieve_and_match_candidate_from_vote_smart(we_vote_candidate, force_retrieve)
+
+    if positive_value_exists(candidate_retrieve_results['vote_smart_candidate_id']):
+        # Bring out the object that now has vote_smart_id attached
+        we_vote_candidate = candidate_retrieve_results['we_vote_candidate']
+        # Reach out to Vote Smart and retrieve photo URL
+        photo_retrieve_results = retrieve_candidate_photo_from_vote_smart(we_vote_candidate)
+        status = photo_retrieve_results['status']
+        success = photo_retrieve_results['success']
+    else:
+        status = candidate_retrieve_results['status'] + ' '
+        status += 'RETRIEVE_CANDIDATE_PHOTOS_NO_CANDIDATE_MATCH'
+        success = False
+
+    results = {
+        'success':  success,
+        'status':   status
+    }
+
+    return results

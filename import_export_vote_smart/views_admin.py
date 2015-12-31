@@ -2,8 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import retrieve_vote_smart_candidates_into_local_db, get_vote_smart_candidate_bio, retrieve_vote_smart_officials_into_local_db, \
-    retrieve_and_save_vote_smart_states
+from .controllers import retrieve_vote_smart_candidates_into_local_db, retrieve_vote_smart_candidate_bio_into_local_db, \
+    retrieve_vote_smart_officials_into_local_db, retrieve_and_save_vote_smart_states
 from .models import VoteSmartState
 from django.contrib import messages
 from django.contrib.messages import get_messages
@@ -26,6 +26,8 @@ def import_states_view(request):
 
 
 def import_photo_view(request):
+    # NOTE: This view is for testing purposes. For the operational "Import Vote Smart Images" view, see:
+    #  "candidate_retrieve_photos_view" in candidate/views_admin.py
     last_name = "Trump"
     results = retrieve_vote_smart_candidates_into_local_db(last_name)
     if not results['success']:
@@ -36,7 +38,7 @@ def import_photo_view(request):
         # Now we can go on to make sure we have the right VoteSmartCandidate
         vote_smart_candidate_id = 15723
         # ...and then retrieve the photo
-        results = get_vote_smart_candidate_bio(vote_smart_candidate_id)
+        results = retrieve_vote_smart_candidate_bio_into_local_db(vote_smart_candidate_id)
 
     last_name = "Pelosi"
     results = retrieve_vote_smart_officials_into_local_db(last_name)

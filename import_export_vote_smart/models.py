@@ -119,6 +119,44 @@ class VoteSmartCandidateManager(models.Model):
         }
         return results
 
+    def retrieve_vote_smart_candidate_bio(self, vote_smart_candidate_id):
+        error_result = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        vote_smart_candidate_bio = VoteSmartCandidateBio()
+        vote_smart_candidate_bio_found = False
+
+        try:
+            if positive_value_exists(vote_smart_candidate_id):
+                vote_smart_candidate_bio = VoteSmartCandidateBio.objects.get(candidateId=vote_smart_candidate_id)
+                vote_smart_candidate_id = convert_to_int(vote_smart_candidate_bio.candidateId)
+                vote_smart_candidate_bio_found = True
+                status = "RETRIEVE_VOTE_SMART_CANDIDATE_BIO_FOUND_BY_ID"
+                success = True
+            else:
+                status = "RETRIEVE_VOTE_SMART_CANDIDATE_BIO_ID_MISSING"
+                success = False
+        except VoteSmartCandidateBio.MultipleObjectsReturned as e:
+            exception_multiple_object_returned = True
+            status = "RETRIEVE_VOTE_SMART_CANDIDATE_BIO_MULTIPLE_OBJECTS_RETURNED"
+            success = False
+        except VoteSmartCandidateBio.DoesNotExist:
+            exception_does_not_exist = True
+            status = "RETRIEVE_VOTE_SMART_CANDIDATE_BIO_NOT_FOUND"
+            success = False
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'error_result':                     error_result,
+            'DoesNotExist':                     exception_does_not_exist,
+            'MultipleObjectsReturned':          exception_multiple_object_returned,
+            'vote_smart_candidate_bio_found':   vote_smart_candidate_bio_found,
+            'vote_smart_candidate_id':          vote_smart_candidate_id,
+            'vote_smart_candidate_bio':         vote_smart_candidate_bio,
+        }
+        return results
+
 
 class VoteSmartCandidate(models.Model):
     """http://api.votesmart.org/docs/Candidates.html

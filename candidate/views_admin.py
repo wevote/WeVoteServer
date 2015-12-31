@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import candidates_import_from_sample_file
+from .controllers import candidates_import_from_sample_file, retrieve_candidate_photos
 from .models import CandidateCampaign, CandidateCampaignManager
 from .serializers import CandidateCampaignSerializer
 from django.http import HttpResponseRedirect
@@ -14,8 +14,6 @@ from django.shortcuts import render
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
-from import_export_vote_smart.controllers import retrieve_vote_smart_candidates_into_local_db, retrieve_vote_smart_officials_into_local_db
-from import_export_vote_smart.models import VoteSmartCandidateManager, VoteSmartOfficialManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import wevote_functions.admin
@@ -160,6 +158,7 @@ def candidate_edit_process_view(request):
 # @login_required()  # Commented out while we are developing login process
 def candidate_retrieve_photos_view(request, candidate_id):
     candidate_id = convert_to_int(candidate_id)
+    force_retrieve = request.GET.get('force_retrieve', 0)
 
     candidate_campaign_manager = CandidateCampaignManager()
 
@@ -171,66 +170,11 @@ def candidate_retrieve_photos_view(request, candidate_id):
 
     we_vote_candidate = results['candidate_campaign']
 
-    # Has this candidate already been linked to a Vote Smart candidate?
-    if positive_value_exists(we_vote_candidate.vote_smart_id):
-        messages.add_message(request, messages.INFO, "Vote Smart candidate id already retrieved previously.")
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+    display_messages = True
+    retrieve_candidate_results = retrieve_candidate_photos(we_vote_candidate, force_retrieve)
 
-    first_name = we_vote_candidate.extract_first_name()
-    last_name = we_vote_candidate.extract_last_name()
-
-    # Fill the VoteSmartCandidate table with politicians that might match this candidate
-    candidate_results = retrieve_vote_smart_candidates_into_local_db(last_name)
-    if not candidate_results['success']:
-        messages.add_message(request, messages.ERROR, candidate_results['status'])
-    else:
-        messages.add_message(request, messages.INFO,
-                             "Photo(s) retrieved from Vote Smart Candidates for '{last_name}'.".format(
-                                 last_name=last_name))
-
-        # Now look through those Vote Smart candidates and match them
-        vote_smart_candidate_manager = VoteSmartCandidateManager()
-        results = vote_smart_candidate_manager.retrieve_vote_smart_candidate_from_name_components(
-            first_name, last_name, we_vote_candidate.state_code)
-        if results['vote_smart_candidate_found']:
-            vote_smart_candidate = results['vote_smart_candidate']
-            we_vote_candidate.vote_smart_id = convert_to_int(vote_smart_candidate.candidateId)
-            we_vote_candidate.save()
-            messages.add_message(request, messages.INFO,
-                                 "Vote Smart Candidate db entry found for '{first_name} {last_name}'.".format(
-                                     first_name=first_name, last_name=last_name))
-        else:
-            messages.add_message(request, messages.INFO,
-                                 "Vote Smart Candidate db entry NOT found for '{first_name} {last_name}'.".format(
-                                     first_name=first_name, last_name=last_name))
-
-    if not positive_value_exists(we_vote_candidate.vote_smart_id):
-        # If we didn't find a candidate, look through Vote Smart officials and match them
-
-        # Fill the VoteSmartOfficial table with politicians that might match this candidate
-        officials_results = retrieve_vote_smart_officials_into_local_db(last_name)
-        if not officials_results['success']:
-            messages.add_message(request, messages.ERROR, officials_results['status'])
-        else:
-            messages.add_message(request, messages.INFO,
-                                 "Photo(s) retrieved from Vote Smart Officials for '{last_name}'.".format(
-                                     last_name=last_name))
-
-            vote_smart_official_manager = VoteSmartOfficialManager()
-            results = vote_smart_official_manager.retrieve_vote_smart_official_from_name_components(
-                first_name, last_name, we_vote_candidate.state_code)
-            if results['vote_smart_official_found']:
-                vote_smart_official = results['vote_smart_official']
-                we_vote_candidate.vote_smart_id = convert_to_int(vote_smart_official.candidateId)
-                we_vote_candidate.save()
-                messages.add_message(request, messages.INFO,
-                                     "Vote Smart Official db entry found for '{first_name} {last_name}'.".format(
-                                         first_name=first_name, last_name=last_name))
-            else:
-                messages.add_message(request, messages.INFO,
-                                     "Vote Smart Official db entry NOT found for '{first_name} {last_name}'.".format(
-                                         first_name=first_name, last_name=last_name))
-
+    if retrieve_candidate_results['status'] and display_messages:
+        messages.add_message(request, messages.INFO, retrieve_candidate_results['status'])
     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
 
@@ -243,7 +187,6 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
         messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
-    candidate_campaign_manager = CandidateCampaignManager()
     try:
         candidate_list = CandidateCampaign.objects.order_by('candidate_name')
         if positive_value_exists(google_civic_election_id):
@@ -251,49 +194,14 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
     except CandidateCampaign.DoesNotExist:
         pass
 
+    display_messages = False
+    force_retrieve = False
     # Loop through all of the candidates in this election
     for we_vote_candidate in candidate_list:
-        results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(we_vote_candidate.id)
-        if not positive_value_exists(results['candidate_campaign_found']):
-            continue
+        retrieve_candidate_results = retrieve_candidate_photos(we_vote_candidate, force_retrieve)
 
-        # Has this candidate already been linked to a Vote Smart candidate?
-        if positive_value_exists(we_vote_candidate.vote_smart_id):
-            continue
-
-        first_name = we_vote_candidate.extract_first_name()
-        last_name = we_vote_candidate.extract_last_name()
-
-        # Fill the VoteSmartCandidate table with politicians that might match this candidate
-        candidate_results = retrieve_vote_smart_candidates_into_local_db(last_name)
-        if not candidate_results['success']:
-            pass
-            # messages.add_message(request, messages.ERROR, candidate_results['status'])
-        else:
-            # Now look through those Vote Smart candidates and match them
-            vote_smart_candidate_manager = VoteSmartCandidateManager()
-            results = vote_smart_candidate_manager.retrieve_vote_smart_candidate_from_name_components(
-                first_name, last_name, we_vote_candidate.state_code)
-            if results['vote_smart_candidate_found']:
-                vote_smart_candidate = results['vote_smart_candidate']
-                we_vote_candidate.vote_smart_id = convert_to_int(vote_smart_candidate.candidateId)
-                we_vote_candidate.save()
-
-        # Fill the VoteSmartOfficial table with politicians that might match this candidate
-        if not positive_value_exists(we_vote_candidate.vote_smart_id):
-            officials_results = retrieve_vote_smart_officials_into_local_db(last_name)
-            if not officials_results['success']:
-                pass
-                # messages.add_message(request, messages.ERROR, officials_results['status'])
-            else:
-                # If we didn't find a candidate, look through Vote Smart officials and match them
-                vote_smart_official_manager = VoteSmartOfficialManager()
-                results = vote_smart_official_manager.retrieve_vote_smart_official_from_name_components(
-                    first_name, last_name, we_vote_candidate.state_code)
-                if results['vote_smart_official_found']:
-                    vote_smart_official = results['vote_smart_official']
-                    we_vote_candidate.vote_smart_id = convert_to_int(vote_smart_official.candidateId)
-                    we_vote_candidate.save()
+        if retrieve_candidate_results['status'] and display_messages:
+            messages.add_message(request, messages.INFO, retrieve_candidate_results['status'])
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}".format(
         var=google_civic_election_id))
