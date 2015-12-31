@@ -337,17 +337,17 @@ def set_google_civic_election_id_cookie(request, response, google_civic_election
     set_cookie(response, 'google_civic_election_id', google_civic_election_id)
 
 
-def convert_state_text_to_state_code(state):
-    for state_code, state_text in STATE_CODE_MAP.items():
-        if state.lower() == state_text.lower():
+def convert_state_text_to_state_code(state_text):
+    for state_code, state_name in STATE_CODE_MAP.items():
+        if state_text.lower() == state_name.lower():
             return state_code
     else:
         return ""
 
 
 def convert_state_code_to_state_text(incoming_state_code):
-    for state_code, state_text in STATE_CODE_MAP.items():
+    for state_code, state_name in STATE_CODE_MAP.items():
         if incoming_state_code.lower() == state_code.lower():
-            return state_text
+            return state_name
     else:
         return ""
