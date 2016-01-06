@@ -2,9 +2,15 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import VoteSmartCandidate, VoteSmartCandidateManager, candidate_object_filter, VoteSmartCandidateBio, \
-    candidate_bio_object_filter, VoteSmartOfficial, VoteSmartOfficialManager, official_object_filter, \
-    VoteSmartState, state_filter
+from .models import VoteSmartCandidate, VoteSmartCandidateManager, vote_smart_candidate_object_filter, \
+    VoteSmartCandidateBio, vote_smart_candidate_bio_object_filter, \
+    VoteSmartCategory, vote_smart_category_filter, \
+    VoteSmartOfficial, VoteSmartOfficialManager, vote_smart_official_object_filter, \
+    VoteSmartRating, VoteSmartRatingCategoryLink, vote_smart_candidate_rating_filter, vote_smart_rating_list_filter, \
+    VoteSmartRatingOneCandidate, vote_smart_rating_one_candidate_filter, \
+    VoteSmartSpecialInterestGroup, vote_smart_special_interest_group_filter, \
+    vote_smart_special_interest_group_list_filter, \
+    VoteSmartState, vote_smart_state_filter
 from .votesmart_local import votesmart, VotesmartApiError
 from config.base import get_environment_variable
 import requests
@@ -190,7 +196,7 @@ def retrieve_vote_smart_candidates_into_local_db(last_name):
         last_name = last_name.replace("`", "'")  # Vote Smart doesn't like this kind of apostrophe: `
         candidates_list = votesmart.candidates.getByLastname(last_name)
         for one_candidate in candidates_list:
-            one_candidate_filtered = candidate_object_filter(one_candidate)
+            one_candidate_filtered = vote_smart_candidate_object_filter(one_candidate)
             vote_smart_candidate, created = VoteSmartCandidate.objects.update_or_create(
                 candidateId=one_candidate.candidateId, defaults=one_candidate_filtered)
             vote_smart_candidate.save()
@@ -212,7 +218,7 @@ def retrieve_vote_smart_candidates_into_local_db(last_name):
 def retrieve_vote_smart_candidate_bio_into_local_db(candidate_id):
     try:
         one_candidate_bio = votesmart.candidatebio.getBio(candidate_id)
-        candidate_bio_filtered = candidate_bio_object_filter(one_candidate_bio)
+        candidate_bio_filtered = vote_smart_candidate_bio_object_filter(one_candidate_bio)
         candidate_bio, created = VoteSmartCandidateBio.objects.update_or_create(
             candidateId=one_candidate_bio.candidateId, defaults=candidate_bio_filtered)
         candidate_bio.save()
@@ -235,11 +241,179 @@ def retrieve_vote_smart_officials_into_local_db(last_name):
     try:
         officials_list = votesmart.officials.getByLastname(last_name)
         for one_official in officials_list:
-            one_official_filtered = official_object_filter(one_official)
+            one_official_filtered = vote_smart_official_object_filter(one_official)
             vote_smart_official, created = VoteSmartOfficial.objects.update_or_create(
                 candidateId=one_official.candidateId, defaults=one_official_filtered)
             vote_smart_official.save()
         status = "VOTE_SMART_OFFICIALS_PROCESSED"
+        success = True
+    except VotesmartApiError as error_instance:
+        # Catch the error message coming back from Vote Smart and pass it in the status
+        error_message = error_instance.args
+        status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+        success = False
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
+def retrieve_vote_smart_position_categories_into_local_db(state_code='NA'):
+    try:
+        position_categories_list = votesmart.rating.getCategories(state_code)
+        for vote_smart_category in position_categories_list:
+            vote_smart_category_filtered = vote_smart_category_filter(vote_smart_category)
+            vote_smart_category_object, created = VoteSmartCategory.objects.update_or_create(
+                categoryId=vote_smart_category.categoryId, defaults=vote_smart_category_filtered)
+            vote_smart_category_object.save()
+        status = "VOTE_SMART_CATEGORIES_PROCESSED"
+        success = True
+    except VotesmartApiError as error_instance:
+        # Catch the error message coming back from Vote Smart and pass it in the status
+        error_message = error_instance.args
+        status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+        success = False
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
+def retrieve_vote_smart_ratings_by_candidate_into_local_db(vote_smart_candidate_id):
+    try:
+        ratings_list = votesmart.rating.getCandidateRating(vote_smart_candidate_id)
+
+        # A Vote Smart "rating" is like a the voter guide for that group for that election. It contains multiple
+        # positions about a variety of candidates.
+        for one_rating in ratings_list:
+            # Note that this filter is specific to the getCandidateRating call
+            one_rating_filtered = vote_smart_candidate_rating_filter(one_rating)
+            one_rating_filtered['candidateId'] = vote_smart_candidate_id
+            vote_smart_rating_one_candidate, rating_one_candidate_created = \
+                VoteSmartRatingOneCandidate.objects.update_or_create(
+                    ratingId=one_rating_filtered['ratingId'],
+                    sigId=one_rating_filtered['sigId'],
+                    candidateId=one_rating_filtered['candidateId'],
+                    timeSpan=one_rating_filtered['timeSpan'],
+                    defaults=one_rating_filtered)
+
+            # We start with one_rating_filtered, and add additional data with each loop below
+            one_category = one_rating.categories['category']
+            # Now save the category/categories for this rating
+            rating_values_for_category_save = dict(one_rating_filtered)
+            rating_values_for_category_save['categoryId'] = one_category['categoryId']
+            rating_values_for_category_save['categoryName'] = one_category['name']  # Change "name" to "categoryName"
+            del rating_values_for_category_save['ratingText']
+            del rating_values_for_category_save['ratingName']
+            del rating_values_for_category_save['rating']
+            vote_smart_category_link, category_link_created = VoteSmartRatingCategoryLink.objects.update_or_create(
+                    ratingId=one_rating_filtered['ratingId'],
+                    sigId=one_rating_filtered['sigId'],
+                    candidateId=one_rating_filtered['candidateId'],
+                    timeSpan=one_rating_filtered['timeSpan'],
+                    categoryId=one_category['categoryId'],
+                    defaults=rating_values_for_category_save)
+            status = "VOTE_SMART_RATINGS_BY_CANDIDATE_PROCESSED"
+        success = True
+    except VotesmartApiError as error_instance:
+        # Catch the error message coming back from Vote Smart and pass it in the status
+        error_message = error_instance.args
+        status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+        success = False
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
+def retrieve_vote_smart_ratings_by_group_into_local_db(special_interest_group_id):
+    try:
+        ratings_list = votesmart.rating.getSigRatings(special_interest_group_id)
+        # A Vote Smart "rating" is like a the voter guide for that group for that election. It contains multiple
+        # positions about a variety of candidates.
+        for one_rating in ratings_list:
+            # Note that this filter is specific to the getSigRatings call
+            one_rating_filtered = vote_smart_rating_list_filter(one_rating)
+            one_rating_filtered['sigId'] = special_interest_group_id
+            vote_smart_rating, rating_created = VoteSmartRating.objects.update_or_create(
+                ratingId=one_rating.ratingId, defaults=one_rating_filtered)
+
+            rating_candidates_list = votesmart.rating.getRating(one_rating.ratingId)
+            for rating_one_candidate in rating_candidates_list:
+                # Note that this filter is specific to the getRating call
+                rating_one_candidate_filtered = vote_smart_rating_one_candidate_filter(rating_one_candidate)
+                rating_one_candidate_filtered['ratingId'] = one_rating.ratingId
+                rating_one_candidate_filtered['sigId'] = special_interest_group_id
+                rating_one_candidate_filtered['timeSpan'] = one_rating.timespan
+                rating_one_candidate_filtered['ratingName'] = one_rating.ratingName
+                rating_one_candidate_filtered['ratingText'] = one_rating.ratingText
+                vote_smart_rating_one_candidate, rating_one_candidate_created = \
+                    VoteSmartRatingOneCandidate.objects.update_or_create(
+                        ratingId=one_rating.ratingId,
+                        sigId=special_interest_group_id,
+                        candidateId=rating_one_candidate_filtered['candidateId'],
+                        timeSpan=one_rating.timespan,
+                        defaults=rating_one_candidate_filtered)
+        status = "VOTE_SMART_RATINGS_BY_GROUP_PROCESSED"
+        success = True
+    except VotesmartApiError as error_instance:
+        # Catch the error message coming back from Vote Smart and pass it in the status
+        error_message = error_instance.args
+        status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+        success = False
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
+# Retrieve the details about one group
+def retrieve_vote_smart_special_interest_group_into_local_db(special_interest_group_id):
+    try:
+        vote_smart_special_interest_group = votesmart.rating.getSig(special_interest_group_id)
+        # Note that we use a different filter function when retrieving one group, than when we retrieve a list of groups
+        vote_smart_special_interest_group_filtered = vote_smart_special_interest_group_filter(
+            vote_smart_special_interest_group)
+        vote_smart_special_interest_group_object, created = VoteSmartSpecialInterestGroup.objects.update_or_create(
+            sigId=vote_smart_special_interest_group.sigId,
+            defaults=vote_smart_special_interest_group_filtered)
+        vote_smart_special_interest_group_object.save()
+        status = "VOTE_SMART_SPECIAL_INTEREST_GROUP_PROCESSED"
+        success = True
+    except VotesmartApiError as error_instance:
+        # Catch the error message coming back from Vote Smart and pass it in the status
+        error_message = error_instance.args
+        status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+        success = False
+
+    results = {
+        'status': status,
+        'success': success,
+    }
+    return results
+
+
+# Retrieve list of groups
+def retrieve_vote_smart_special_interest_groups_into_local_db(category_id, state_code='NA'):
+    try:
+        special_interest_group_list = votesmart.rating.getSigList(category_id, state_code)
+        for vote_smart_special_interest_group in special_interest_group_list:
+            # Note that we use a different filter function when retrieving a list of groups vs. one group
+            vote_smart_special_interest_group_filtered = vote_smart_special_interest_group_list_filter(
+                vote_smart_special_interest_group)
+            vote_smart_special_interest_group_object, created = VoteSmartSpecialInterestGroup.objects.update_or_create(
+                sigId=vote_smart_special_interest_group.sigId,
+                defaults=vote_smart_special_interest_group_filtered)
+            vote_smart_special_interest_group_object.save()
+        status = "VOTE_SMART_SPECIAL_INTEREST_GROUPS_PROCESSED"
         success = True
     except VotesmartApiError as error_instance:
         # Catch the error message coming back from Vote Smart and pass it in the status
@@ -271,7 +445,7 @@ def retrieve_and_save_vote_smart_states():
     state_count = 0
     for stateId in state_names_dict:
         one_state = _get_state_by_id_as_dict(stateId)
-        one_state_filtered = state_filter(one_state)
+        one_state_filtered = vote_smart_state_filter(one_state)
         state, created = VoteSmartState.objects.get_or_create(**one_state_filtered)
         # state, created = State.objects.get_or_create(**_get_state_by_id_as_dict(stateId))
         state.save()

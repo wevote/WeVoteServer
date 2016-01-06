@@ -1,0 +1,46 @@
+{# templates/import_export_vote_smart/special_interest_group_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Vote Smart Special Interest Groups{% endblock %}
+
+{%  block content %}
+<a href="{% url 'import_export_vote_smart:vote_smart_index' %}">< Back to Vote Smart Index</a>
+
+<h1>Vote Smart Special Interest Groups</h1>
+<p>Also see <a href="{% url 'organization:organization_list' %}">We Vote Organizations</a></p>
+
+<p><a href="{% url 'import_export_vote_smart:import_special_interest_groups' %}">Import All Vote Smart Special Interest Groups</a></p>
+
+
+{% if special_interest_group_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>sigId</td>
+            <td>name</td>
+            <td>stateId</td>
+            <td>url</td>
+        </tr>
+    {% for special_interest_group in special_interest_group_list %}
+        <tr>
+            <td>{{ special_interest_group.sigId }}</td>
+            <td><a href="{% url 'import_export_vote_smart:special_interest_group_rating_list' special_interest_group.sigId %}">{{ special_interest_group.name }}</a></td>
+            <td>{{ special_interest_group.stateId }}</td>
+            <td>{{ special_interest_group.url }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    <p>(no special interest groups found)</p>
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

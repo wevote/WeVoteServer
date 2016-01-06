@@ -4,6 +4,7 @@
 
 from django.db import models
 from django.db.models import Q
+from organization.models import OrganizationManager, Organization
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, positive_value_exists
 
@@ -194,7 +195,7 @@ class VoteSmartCandidate(models.Model):
     runningMateName = models.CharField(max_length=255)
 
 
-def candidate_object_filter(one_candidate):
+def vote_smart_candidate_object_filter(one_candidate):
     """
     Filter down the complete dict from Vote Smart to just the fields we use locally
     :param one_candidate:
@@ -276,7 +277,7 @@ class VoteSmartCandidateBio(models.Model):
     # profession
 
 
-def candidate_bio_object_filter(one_candidate_bio):
+def vote_smart_candidate_bio_object_filter(one_candidate_bio):
     """
     Filter down the complete dict from Vote Smart to just the fields we use locally
     :param one_candidate_bio:
@@ -444,7 +445,7 @@ class VoteSmartOfficial(models.Model):
     officeStateId = models.CharField(max_length=255)
 
 
-def official_object_filter(one_official):
+def vote_smart_official_object_filter(one_official):
     """
     Filter down the complete dict from Vote Smart to just the fields we use locally
     :param one_official:
@@ -469,6 +470,378 @@ def official_object_filter(one_official):
         'officeStateId': one_official.officeStateId,
     }
     return one_official_filtered
+
+
+class VoteSmartRatingManager(models.Model):
+
+    def __unicode__(self):
+        return "VoteSmartRatingManager"
+
+    def retrieve_candidate_from_vote_smart_id(self, vote_smart_candidate_id):
+        return self.retrieve_vote_smart_candidate(vote_smart_candidate_id)
+
+    def retrieve_vote_smart_candidate_from_we_vote_id(self, we_vote_id):
+        vote_smart_candidate_id = 0
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+        return vote_smart_candidate_manager.retrieve_vote_smart_candidate(vote_smart_candidate_id, we_vote_id)
+
+    def fetch_vote_smart_candidate_id_from_we_vote_id(self, we_vote_id):
+        vote_smart_candidate_id = 0
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+        results = vote_smart_candidate_manager.retrieve_vote_smart_candidate(vote_smart_candidate_id, we_vote_id)
+        if results['success']:
+            return results['vote_smart_candidate_id']
+        return 0
+
+    def retrieve_vote_smart_candidate_from_we_vote_local_id(self, local_candidate_id):
+        vote_smart_candidate_id = 0
+        we_vote_id = ''
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+        return vote_smart_candidate_manager.retrieve_vote_smart_candidate(
+            vote_smart_candidate_id, we_vote_id, candidate_maplight_id)
+
+    def retrieve_vote_smart_candidate_from_full_name(self, candidate_name, state_code=None):
+        vote_smart_candidate_id = 0
+        we_vote_id = ''
+        candidate_maplight_id = ''
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+
+        results = vote_smart_candidate_manager.retrieve_vote_smart_candidate(
+            vote_smart_candidate_id, first_name, last_name, state_code)
+        return results
+
+    def retrieve_vote_smart_candidate_from_name_components(self, first_name=None, last_name=None, state_code=None):
+        vote_smart_candidate_id = 0
+        vote_smart_candidate_manager = VoteSmartCandidateManager()
+
+        results = vote_smart_candidate_manager.retrieve_vote_smart_candidate(
+            vote_smart_candidate_id, first_name, last_name, state_code)
+        return results
+
+    # NOTE: searching by all other variables seems to return a list of objects
+    def retrieve_vote_smart_candidate(
+            self, vote_smart_candidate_id=None, first_name=None, last_name=None, state_code=None):
+        """
+        We want to return one and only one candidate
+        :param vote_smart_candidate_id:
+        :param first_name:
+        :param last_name:
+        :param state_code:
+        :return:
+        """
+        error_result = False
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        vote_smart_candidate = VoteSmartCandidate()
+
+        try:
+            if positive_value_exists(vote_smart_candidate_id):
+                vote_smart_candidate = VoteSmartCandidate.objects.get(candidateId=vote_smart_candidate_id)
+                vote_smart_candidate_id = convert_to_int(vote_smart_candidate.candidateId)
+                status = "RETRIEVE_VOTE_SMART_CANDIDATE_FOUND_BY_ID"
+            elif positive_value_exists(first_name) or positive_value_exists(last_name):
+                candidate_queryset = VoteSmartCandidate.objects.all()
+                if positive_value_exists(first_name):
+                    first_name = first_name.replace("`", "'")  # Vote Smart doesn't like this kind of apostrophe: `
+                    candidate_queryset = candidate_queryset.filter(Q(firstName__istartswith=first_name) |
+                                                                   Q(nickName__istartswith=first_name) |
+                                                                   Q(preferredName__istartswith=first_name))
+                if positive_value_exists(last_name):
+                    last_name = last_name.replace("`", "'")  # Vote Smart doesn't like this kind of apostrophe: `
+                    candidate_queryset = candidate_queryset.filter(lastName__iexact=last_name)
+                if positive_value_exists(state_code):
+                    candidate_queryset = candidate_queryset.filter(Q(electionStateId__iexact=state_code) |
+                                                                   Q(electionStateId__iexact="NA"))
+                vote_smart_candidate_list = list(candidate_queryset[:1])
+                if vote_smart_candidate_list:
+                    vote_smart_candidate = vote_smart_candidate_list[0]
+                else:
+                    vote_smart_candidate = VoteSmartCandidate()
+                vote_smart_candidate_id = convert_to_int(vote_smart_candidate.candidateId)
+                status = "RETRIEVE_VOTE_SMART_CANDIDATE_FOUND_BY_NAME"
+            else:
+                status = "RETRIEVE_VOTE_SMART_CANDIDATE_SEARCH_INDEX_MISSING"
+        except VoteSmartCandidate.MultipleObjectsReturned as e:
+            exception_multiple_object_returned = True
+            status = "RETRIEVE_VOTE_SMART_CANDIDATE_MULTIPLE_OBJECTS_RETURNED"
+        except VoteSmartCandidate.DoesNotExist:
+            exception_does_not_exist = True
+            status = "RETRIEVE_VOTE_SMART_CANDIDATE_NOT_FOUND"
+
+        results = {
+            'success':                      True if positive_value_exists(vote_smart_candidate_id) else False,
+            'status':                       status,
+            'error_result':                 error_result,
+            'DoesNotExist':                 exception_does_not_exist,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'vote_smart_candidate_found':   True if positive_value_exists(vote_smart_candidate_id) else False,
+            'vote_smart_candidate_id':      vote_smart_candidate_id,
+            'vote_smart_candidate':         vote_smart_candidate,
+        }
+        return results
+
+
+class VoteSmartCategory(models.Model):
+    """http://api.votesmart.org/docs/Rating.html
+    """
+    categoryId = models.CharField(max_length=15, primary_key=True)
+    name = models.CharField(max_length=255)
+
+
+def vote_smart_category_filter(category):
+    """
+    Filter down the complete dict from Vote Smart to just the fields we use locally
+    :param category:
+    :return:
+    """
+    category_filtered = {
+        'categoryId': category.categoryId,
+        'name': category.name,
+    }
+    return category_filtered
+
+
+class VoteSmartRating(models.Model):
+    """
+    http://api.votesmart.org/docs/Rating.html
+    A Vote Smart rating is like a voter guide, because it contains a package of candidateId/rating pairs like this:
+    {'candidateRating': [{'candidateId': '53279', 'rating': '40'},
+                         {'candidateId': '53266', 'rating': '90'},
+    """
+    ratingId = models.CharField(max_length=15, primary_key=True)
+    sigId = models.CharField(verbose_name="special interest group id", max_length=15)
+    timeSpan = models.CharField(max_length=255)
+    ratingName = models.CharField(max_length=255)
+    ratingText = models.TextField()
+
+
+# This is the filter used for the Vote Smart call: Rating.getCandidateRating
+# http://api.votesmart.org/docs/Rating.html
+def vote_smart_candidate_rating_filter(rating):
+    """
+    Filter down the complete dict from Vote Smart to just the fields we use locally
+    :param rating:
+    :return:
+    """
+    rating_filtered = {
+        'ratingId':     rating.ratingId,
+        'rating':       rating.rating,
+        'timeSpan':     rating.timespan,  # Seems to be typo with lower case "s"
+        'ratingName':   rating.ratingName,
+        'ratingText':   rating.ratingText,
+        'sigId':        rating.sigId,
+    }
+    return rating_filtered
+
+
+# This is the filter used for the Vote Smart call: Rating.getSigRatings
+# http://api.votesmart.org/docs/Rating.html
+def vote_smart_rating_list_filter(rating):
+    """
+    Filter down the complete dict from Vote Smart to just the fields we use locally
+    :param rating:
+    :return:
+    """
+    rating_filtered = {
+        'ratingId': rating.ratingId,
+        'timeSpan': rating.timespan,  # Seems to be typo with lower case "s"
+        'ratingName': rating.ratingName,
+        'ratingText': rating.ratingText,
+    }
+    return rating_filtered
+
+
+class VoteSmartRatingOneCandidate(models.Model):
+    """
+    http://api.votesmart.org/docs/Rating.html
+    A Vote Smart rating is like a voter guide, because it contains a package of candidateId/rating pairs like this:
+    {'candidateRating': [{'candidateId': '53279', 'rating': '40'},
+                         {'candidateId': '53266', 'rating': '90'},
+    """
+    ratingId = models.CharField(max_length=15)
+    sigId = models.CharField(verbose_name="special interest group id", max_length=15)
+    candidateId = models.CharField(max_length=15)
+    timeSpan = models.CharField(max_length=255)
+    rating = models.CharField(max_length=255)
+    ratingName = models.CharField(max_length=255)
+    ratingText = models.TextField()
+
+
+def vote_smart_rating_one_candidate_filter(rating_one_candidate):
+    """
+    Filter down the complete dict from Vote Smart to just the fields we use locally
+    :param rating:
+    :return:
+    """
+    rating_one_candidate_filtered = {
+        'candidateId': rating_one_candidate.candidateId,
+        'rating': rating_one_candidate.rating,
+    }
+    return rating_one_candidate_filtered
+
+
+class VoteSmartRatingCategoryLink(models.Model):
+    """http://api.votesmart.org/docs/Rating.html
+    """
+    ratingId = models.CharField(max_length=15, primary_key=True)
+    sigId = models.CharField(verbose_name="group id for this rating", max_length=15)
+    candidateId = models.CharField(verbose_name="vote smart candidate id for this rating", max_length=15)
+    timeSpan = models.CharField(max_length=255)
+    categoryId = models.CharField(verbose_name="category id for this rating", max_length=15)
+    categoryName = models.CharField(verbose_name="category name", max_length=255)
+
+
+class VoteSmartSpecialInterestGroup(models.Model):
+    """http://api.votesmart.org/docs/Rating.html
+    """
+    sigId = models.CharField(verbose_name="special interest group id", max_length=15, primary_key=True)
+    parentId = models.CharField(max_length=15)
+    stateId = models.CharField(max_length=2)
+    name = models.CharField(verbose_name="name of special interest group", max_length=255)
+    description = models.TextField()
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    state = models.CharField(max_length=255)
+    zip = models.CharField(max_length=255)
+    phone1 = models.CharField(max_length=255)
+    phone2 = models.CharField(max_length=255)
+    fax = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    url = models.CharField(max_length=255)
+    contactName = models.CharField(max_length=255)
+
+
+def vote_smart_special_interest_group_list_filter(special_interest_group_from_list):
+    """
+    Filter down the complete dict from Vote Smart to just the fields we use locally
+    :param special_interest_group:
+    :return:
+    """
+    special_interest_group_list_filtered = {
+        'sigId': special_interest_group_from_list.sigId,
+        'parentId': special_interest_group_from_list.parentId,
+        'name': special_interest_group_from_list.name,
+    }
+    return special_interest_group_list_filtered
+
+
+def vote_smart_special_interest_group_filter(special_interest_group):
+    """
+    Filter down the complete dict from Vote Smart to just the fields we use locally
+    :param special_interest_group:
+    :return:
+    """
+    special_interest_group_filtered = {
+        'sigId': special_interest_group.sigId,
+        'parentId': special_interest_group.parentId,
+        'stateId': special_interest_group.stateId,
+        'name': special_interest_group.name,
+        'description': special_interest_group.description,
+        'address': special_interest_group.address,
+        'city': special_interest_group.city,
+        'state': special_interest_group.state,
+        'zip': special_interest_group.zip,
+        'phone1': special_interest_group.phone1,
+        'phone2': special_interest_group.phone2,
+        'fax': special_interest_group.fax,
+        'email': special_interest_group.email,
+        'url': special_interest_group.url,
+        'contactName': special_interest_group.contactName,
+    }
+    return special_interest_group_filtered
+
+
+class VoteSmartSpecialInterestGroupManager(models.Model):
+
+    def __unicode__(self):
+        return "VoteSmartSpecialInterestGroupManager"
+
+    def update_or_create_we_vote_organization(self, vote_smart_special_interest_group_id):
+        # See if we can find an existing We Vote organization with vote_smart_special_interest_group_id
+        if not positive_value_exists(vote_smart_special_interest_group_id):
+            results = {
+                'success':  False,
+                'status':   "SPECIAL_INTEREST_GROUP_ID_MISSING"
+            }
+            return results
+
+        # Retrieve Special Interest Group
+        try:
+            vote_smart_organization = VoteSmartSpecialInterestGroup.objects.get(
+                sigId=vote_smart_special_interest_group_id)
+            vote_smart_organization_found = True
+        except VoteSmartSpecialInterestGroup.MultipleObjectsReturned as e:
+            vote_smart_organization_found = False
+        except VoteSmartSpecialInterestGroup.DoesNotExist as e:
+            # An organization matching this Vote Smart ID wasn't found
+            vote_smart_organization_found = False
+
+        if not vote_smart_organization_found:
+            results = {
+                'success':  False,
+                'status':   "SPECIAL_INTEREST_GROUP_MISSING"
+            }
+            return results
+
+        we_vote_organization_manager = OrganizationManager()
+        organization_id = 0
+        organization_we_vote_id = None
+        we_vote_organization_found = False
+        results = we_vote_organization_manager.retrieve_organization(organization_id, organization_we_vote_id,
+                                                                     vote_smart_special_interest_group_id)
+
+        if results['organization_found']:
+            we_vote_organization_found = True
+            success = True
+            status = "NOT UPDATING RIGHT NOW"
+        else:
+            # If here, a We Vote organization with the Vote Smart ID wasn't found, so we want to check against other
+            # fields that might match.
+            pass
+
+        if we_vote_organization_found:  # TODO DALE FINISH THIS
+            pass
+        else:
+            success = False
+            status = "CREATING_NEW_ORGANIZATION_FROM_VOTE_SMART"
+            # Create new organization
+            try:
+                defaults_from_vote_smart = {
+                    'organization_name': vote_smart_organization.name,
+                    'organization_address': vote_smart_organization.address,
+                    'organization_city': vote_smart_organization.city,
+                    'organization_state': vote_smart_organization.state,
+                    'organization_zip': vote_smart_organization.zip,
+                    'organization_phone1': vote_smart_organization.phone1,
+                    'organization_phone2': vote_smart_organization.phone2,
+                    'organization_fax': vote_smart_organization.fax,
+                    'organization_email': vote_smart_organization.email,
+                    'organization_website': vote_smart_organization.url,
+                    'organization_contact_name': vote_smart_organization.contactName,
+                    'organization_description': vote_smart_organization.description,
+                    'state_served_code': vote_smart_organization.stateId,
+                    'vote_smart_id': vote_smart_organization.sigId,
+                }
+                Organization.update_or_create(
+                    organization_name=vote_smart_organization.name,
+                    organization_website=vote_smart_organization.url,
+                    organization_email=vote_smart_organization.email,
+                    defaults=defaults_from_vote_smart,
+                )
+                success = True
+                status = "UPDATE_OR_CREATE_ORGANIZATION_FROM_VOTE_SMART"
+            except Organization.MultipleObjectsReturned as e:
+                success = False
+                status = "UPDATE_OR_CREATE_ORGANIZATION_FROM_VOTE_SMART_MULTIPLE_FOUND"
+            except Exception as e:
+                success = False
+                status = "UPDATE_OR_CREATE_ORGANIZATION_FROM_VOTE_SMART_FAILED"
+
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
 
 
 class VoteSmartState(models.Model):
@@ -507,7 +880,7 @@ class VoteSmartState(models.Model):
     largestCity = models.CharField(max_length=255)  # example:
 
 
-def state_filter(one_state):
+def vote_smart_state_filter(one_state):
     """
     Filter down the complete dict from Vote Smart to just the fields we use locally
     :param one_state:

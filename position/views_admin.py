@@ -5,11 +5,11 @@
 from .models import PositionEntered
 from .serializers import PositionSerializer
 from candidate.models import CandidateCampaign
-from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 # from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\

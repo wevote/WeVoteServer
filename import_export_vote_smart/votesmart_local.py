@@ -154,6 +154,14 @@ class Rating(VotesmartApiObject):
     def __str__(self):
         return self.ratingText
 
+class RatingOneCandidate(VotesmartApiObject):
+    def __str__(self):
+        return ': '.join((self.candidateId, self.rating))
+
+class Ratings(VotesmartApiObject):
+    def __str__(self):
+        return ': '.join((self.ratingId, self.ratingName))
+
 class State(VotesmartApiObject):
     def __str__(self):
         return ' '.join((self.stateId, self.name))
@@ -565,6 +573,18 @@ class votesmart(object):
             params = {'candidateId':candidateId, 'sigId':sigId}
             result = votesmart._apicall('Rating.getCandidateRating', params)
             return _result_to_obj(Rating, result['candidateRating']['rating'])
+
+        @staticmethod
+        def getRating(ratingId):
+            params = {'ratingId':ratingId}
+            result = votesmart._apicall('Rating.getRating', params)
+            return _result_to_obj(RatingOneCandidate, result['rating']['candidateRating'])
+
+        @staticmethod
+        def getSigRatings(sigId):
+            params = {'sigId':sigId}
+            result = votesmart._apicall('Rating.getSigRatings', params)
+            return _result_to_obj(Ratings, result['sigRatings']['rating'])
 
     class state(object):
         @staticmethod

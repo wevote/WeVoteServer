@@ -1,0 +1,41 @@
+{# templates/import_export_vote_smart/position_category_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Vote Smart Position Categories{% endblock %}
+
+{%  block content %}
+<a href="{% url 'import_export_vote_smart:vote_smart_index' %}">< Back to Vote Smart Index</a>
+
+<h1>Vote Smart Position Categories</h1>
+<p>Also see <a href="{% url 'position:position_list' %}">We Vote positions</a></p>
+
+<p><a href="{% url 'import_export_vote_smart:import_vote_smart_position_categories' %}">Import All Vote Smart Categories</a></p>
+
+{% if position_category_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>categoryId</td>
+            <td>name</td>
+        </tr>
+    {% for position_category in position_category_list %}
+        <tr>
+            <td>{{ position_category.categoryId }}</td>
+            <td>{{ position_category.name }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    <p>(no position categories found)</p>
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

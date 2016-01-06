@@ -55,7 +55,7 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def retrieve_organization(self, organization_id, we_vote_id=None):
+    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -73,6 +73,11 @@ class OrganizationManager(models.Manager):
                 organization_on_stage = Organization.objects.get(we_vote_id=we_vote_id)
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_WE_VOTE_ID"
+            elif positive_value_exists(vote_smart_id):
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_VOTE_SMART_ID"
+                organization_on_stage = Organization.objects.get(vote_smart_id=vote_smart_id)
+                organization_on_stage_id = organization_on_stage.id
+                status = "ORGANIZATION_FOUND_WITH_VOTE_SMART_ID"
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True
@@ -413,8 +418,23 @@ class Organization(models.Model):
         verbose_name='organization twitter handle', max_length=255, null=True, unique=False)
     organization_email = models.EmailField(
         verbose_name='organization contact email address', max_length=255, unique=False, null=True, blank=True)
+    organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
     organization_facebook = models.URLField(verbose_name='url of facebook page', blank=True, null=True)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)
+    state_served_code = models.CharField(verbose_name="state this organization serves", max_length=2, null=True, blank=True)
+    # The vote_smart special interest group sigId for this organization
+    vote_smart_id = models.IntegerField(
+        verbose_name="vote smart special interest group id", null=True, blank=True, unique=True)
+    organization_description = models.TextField(
+        verbose_name="Text description of this organization.", null=True, blank=True)
+    organization_address = models.CharField(
+        verbose_name='organization street address', max_length=255, unique=False, null=True, blank=True)
+    organization_city = models.CharField(max_length=255, null=True, blank=True)
+    organization_state = models.CharField(max_length=2, null=True, blank=True)
+    organization_zip = models.CharField(max_length=255, null=True, blank=True)
+    organization_phone1 = models.CharField(max_length=255, null=True, blank=True)
+    organization_phone2 = models.CharField(max_length=255, null=True, blank=True)
+    organization_fax = models.CharField(max_length=255, null=True, blank=True)
 
     NONPROFIT_501C3 = '3'
     NONPROFIT_501C4 = '4'

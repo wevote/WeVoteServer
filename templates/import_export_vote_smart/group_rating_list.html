@@ -1,0 +1,75 @@
+{# templates/import_export_vote_smart/group_rating_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if special_interest_group %}{{ special_interest_group.name  }}{% else %}Error: Name Missing{% endif %}{% endblock %}
+
+{%  block content %}
+
+<p><a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">< Back to Special Interest Groups</a></p>
+
+{% if special_interest_group %}
+<h1>{{ special_interest_group.name  }}</h1>
+
+    <p>
+    stateId: {{ special_interest_group.stateId }}<br />
+    Website: {{ special_interest_group.url }}<br />
+    Description: {{ special_interest_group.description }}<br />
+    </p>
+<p><a href="{% url 'import_export_vote_smart:import_one_group_ratings' special_interest_group.sigId %}">Import Vote Smart Ratings for this Group</a></p>
+
+    {% if election_list %}
+        <form name="special_interest_group_rating_choose_election" method="get"
+              action="{% url 'import_export_vote_smart:special_interest_group_rating_list' special_interest_group.sigId %}">
+            {% csrf_token %}
+
+        <select id="google_civic_election_id" name="google_civic_election_id">
+            <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+                -- Filter by Election --</option>
+        {% for election in election_list %}
+            <option value="{{ election.google_civic_election_id }}"
+                    {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
+                {{ election.election_name }} - {{ election.election_day_text }}</option>
+        {% endfor %}
+        </select>
+        </form>
+    {% endif %}{# End of if election_list #}
+
+
+
+{% if rating_list %}
+    <table border="1">
+    <tr>
+        <td>ratingId</td>
+        <td>sigId</td>
+        <td>ratingName</td>
+        <td>timeSpan</td>
+        <td>candidateId</td>
+        <td>rating</td>
+    </tr>
+
+    {% for special_interest_group_rating in rating_list %}
+    <tr>
+        <td>{{ special_interest_group_rating.ratingId }}</td>
+        <td>{{ special_interest_group_rating.sigId }}</td>
+        <td>{{ special_interest_group_rating.ratingName }}</td>
+        <td>{{ special_interest_group_rating.timeSpan }}</td>
+        <td>{{ special_interest_group_rating.candidateId }}</td>
+        <td>{{ special_interest_group_rating.rating }}</td>
+    </tr>
+    {% endfor %}
+
+    </table>
+{% else %}
+    <p>(no special interest group ratings found)</p>
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endif %}
+{% endblock %}

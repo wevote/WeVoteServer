@@ -13,7 +13,10 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception
+    handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
+from import_export_vote_smart.models import VoteSmartRatingOneCandidate
+from import_export_vote_smart.votesmart_local import VotesmartApiError
+from position.models import PositionEntered
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import wevote_functions.admin
@@ -54,9 +57,10 @@ def candidate_list_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     try:
-        candidate_list = CandidateCampaign.objects.order_by('candidate_name')
+        candidate_list = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+        candidate_list = candidate_list.order_by('candidate_name')[:500]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
         pass
@@ -97,9 +101,35 @@ def candidate_edit_view(request, candidate_id):
         pass
 
     if candidate_on_stage_found:
+        # Working with Vote Smart data
+        try:
+            vote_smart_candidate_id = candidate_on_stage.vote_smart_id
+            rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
+            rating_list = rating_list_query.filter(candidateId=vote_smart_candidate_id)
+        except VotesmartApiError as error_instance:
+            # Catch the error message coming back from Vote Smart and pass it in the status
+            error_message = error_instance.args
+            status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+            print_to_log(logger=logger, exception_message_optional=status)
+            rating_list = []
+
+        # Working with We Vote Positions
+        candidate_position_list_found = False
+        try:
+            candidate_position_list = PositionEntered.objects.order_by('stance')
+            candidate_position_list = candidate_position_list.filter(candidate_campaign_id=candidate_id)
+            # if positive_value_exists(google_civic_election_id):
+            #     organization_position_list = candidate_position_list.filter(
+            #         google_civic_election_id=google_civic_election_id)
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            candidate_position_list = []
+
         template_values = {
-            'messages_on_stage': messages_on_stage,
-            'candidate': candidate_on_stage,
+            'messages_on_stage':        messages_on_stage,
+            'candidate':                candidate_on_stage,
+            'rating_list':              rating_list,
+            'candidate_position_list':  candidate_position_list,
         }
     else:
         template_values = {
