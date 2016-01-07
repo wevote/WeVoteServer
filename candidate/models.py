@@ -351,6 +351,15 @@ class CandidateCampaignManager(models.Model):
         return candidate_campaign_manager.retrieve_candidate_campaign(
             candidate_campaign_id, we_vote_id, candidate_maplight_id)
 
+    def retrieve_candidate_campaign_from_vote_smart_id(self, candidate_vote_smart_id):
+        candidate_campaign_id = 0
+        we_vote_id = ''
+        candidate_maplight_id = ''
+        candidate_name = ''
+        candidate_campaign_manager = CandidateCampaignManager()
+        return candidate_campaign_manager.retrieve_candidate_campaign(
+            candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
+
     def retrieve_candidate_campaign_from_candidate_name(self, candidate_name):
         candidate_campaign_id = 0
         we_vote_id = ''
@@ -383,7 +392,8 @@ class CandidateCampaignManager(models.Model):
 
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_candidate_campaign(
-            self, candidate_campaign_id, we_vote_id=None, candidate_maplight_id=None, candidate_name=None):
+            self, candidate_campaign_id, we_vote_id=None, candidate_maplight_id=None,
+            candidate_name=None, candidate_vote_smart_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -402,6 +412,10 @@ class CandidateCampaignManager(models.Model):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(maplight_id=candidate_maplight_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_MAPLIGHT_ID"
+            elif positive_value_exists(candidate_vote_smart_id):
+                candidate_campaign_on_stage = CandidateCampaign.objects.get(vote_smart_id=candidate_vote_smart_id)
+                candidate_campaign_id = candidate_campaign_on_stage.id
+                status = "RETRIEVE_CANDIDATE_FOUND_BY_VOTE_SMART_ID"
             elif positive_value_exists(candidate_name):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
                 candidate_campaign_id = candidate_campaign_on_stage.id

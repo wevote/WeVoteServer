@@ -46,7 +46,8 @@
     <tr>
         <td><a href="{% url 'organization:organization_position_edit' organization.id organization_position.id %}">
             {{ organization_position.candidate_campaign.candidate_name }}</a></td>
-        <td>{{ organization_position.get_stance_display }}</td>
+        <td>{{ organization_position.get_stance_display }}
+            {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
         <td>{{ organization_position.election.election_day_text }}</td>
     </tr>
     {% endfor %}

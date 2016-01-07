@@ -42,7 +42,8 @@ def position_list_for_ballot_item_doc_template_values(url_root):
             'name':         'stance',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Default is ANY_STANCE. '
-                            'Other options include SUPPORT, STILL_DECIDING, INFO_ONLY, NO_STANCE, OPPOSE',
+                            'Other options include SUPPORT, STILL_DECIDING, INFO_ONLY, NO_STANCE, OPPOSE, '
+                            'PERCENT_RATING',
         },
         {
             'name':         'show_positions_this_voter_follows',

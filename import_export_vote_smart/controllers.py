@@ -8,11 +8,14 @@ from .models import VoteSmartCandidate, VoteSmartCandidateManager, vote_smart_ca
     VoteSmartOfficial, VoteSmartOfficialManager, vote_smart_official_object_filter, \
     VoteSmartRating, VoteSmartRatingCategoryLink, vote_smart_candidate_rating_filter, vote_smart_rating_list_filter, \
     VoteSmartRatingOneCandidate, vote_smart_rating_one_candidate_filter, \
-    VoteSmartSpecialInterestGroup, vote_smart_special_interest_group_filter, \
+    VoteSmartSpecialInterestGroup, VoteSmartSpecialInterestGroupManager, vote_smart_special_interest_group_filter, \
     vote_smart_special_interest_group_list_filter, \
     VoteSmartState, vote_smart_state_filter
 from .votesmart_local import votesmart, VotesmartApiError
+from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
+import copy
+from position.models import PositionEnteredManager, PERCENT_RATING
 import requests
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, positive_value_exists
@@ -302,21 +305,26 @@ def retrieve_vote_smart_ratings_by_candidate_into_local_db(vote_smart_candidate_
                     defaults=one_rating_filtered)
 
             # We start with one_rating_filtered, and add additional data with each loop below
-            one_category = one_rating.categories['category']
-            # Now save the category/categories for this rating
-            rating_values_for_category_save = dict(one_rating_filtered)
-            rating_values_for_category_save['categoryId'] = one_category['categoryId']
-            rating_values_for_category_save['categoryName'] = one_category['name']  # Change "name" to "categoryName"
-            del rating_values_for_category_save['ratingText']
-            del rating_values_for_category_save['ratingName']
-            del rating_values_for_category_save['rating']
-            vote_smart_category_link, category_link_created = VoteSmartRatingCategoryLink.objects.update_or_create(
-                    ratingId=one_rating_filtered['ratingId'],
-                    sigId=one_rating_filtered['sigId'],
-                    candidateId=one_rating_filtered['candidateId'],
-                    timeSpan=one_rating_filtered['timeSpan'],
-                    categoryId=one_category['categoryId'],
-                    defaults=rating_values_for_category_save)
+            category_branch = one_rating.categories['category']
+            if type(category_branch) is list:
+                category_list = category_branch
+            else:
+                category_list = [category_branch]
+            for one_category in category_list:
+                # Now save the category/categories for this rating
+                rating_values_for_category_save = copy.deepcopy(one_rating_filtered)
+                rating_values_for_category_save['categoryId'] = one_category['categoryId']
+                rating_values_for_category_save['categoryName'] = one_category['name']  # Changed to "categoryName"
+                del rating_values_for_category_save['ratingText']
+                del rating_values_for_category_save['ratingName']
+                del rating_values_for_category_save['rating']
+                vote_smart_category_link, category_link_created = VoteSmartRatingCategoryLink.objects.update_or_create(
+                        ratingId=one_rating_filtered['ratingId'],
+                        sigId=one_rating_filtered['sigId'],
+                        candidateId=one_rating_filtered['candidateId'],
+                        timeSpan=one_rating_filtered['timeSpan'],
+                        categoryId=one_category['categoryId'],
+                        defaults=rating_values_for_category_save)
             status = "VOTE_SMART_RATINGS_BY_CANDIDATE_PROCESSED"
         success = True
     except VotesmartApiError as error_instance:
@@ -473,3 +481,111 @@ def make_request(cls, method, **kwargs):
         return resp.json()
     else:
         return resp.text
+
+
+def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id):
+    candidate_manager = CandidateCampaignManager()
+    candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(candidate_campaign_id)
+
+    if candidate_results['candidate_campaign_found']:
+        # Working with Vote Smart data
+        candidate_campaign = candidate_results['candidate_campaign']
+        if not positive_value_exists(candidate_campaign.vote_smart_id):
+            status = "VOTE_SMART_ID_HAS_NOT_BEEN_RETRIEVED_YET_FOR_THIS_CANDIDATE: " \
+                     "{candidate_campaign_id}".format(candidate_campaign_id=candidate_campaign_id)
+            success = False
+            results = {
+                'status':   status,
+                'success':  success,
+            }
+            return results
+        else:
+            try:
+                rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
+                rating_list = rating_list_query.filter(candidateId=candidate_campaign.vote_smart_id)
+            except Exception as error_instance:
+                # Catch the error message coming back from Vote Smart and pass it in the status
+                error_message = error_instance.args
+                status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
+                success = False
+                results = {
+                    'status':   status,
+                    'success':  success,
+                }
+                return results
+
+        ratings_status = ""
+        position_manager = PositionEnteredManager()
+        special_interest_group_manager = VoteSmartSpecialInterestGroupManager()
+        for one_candidate_rating in rating_list:
+            # Make sure we have all of the required variables
+            if not one_candidate_rating.sigId:
+                ratings_status += "MISSING_SPECIAL_INTEREST_GROUP_ID-{ratingId} * " \
+                                  "".format(ratingId=one_candidate_rating.ratingId)
+                continue
+            # Make sure an organization exists and is updated with Vote Smart info
+            update_results = special_interest_group_manager.update_or_create_we_vote_organization(
+                one_candidate_rating.sigId)
+            if not update_results['organization_found']:
+                # TRY AGAIN: Reach out to Vote Smart and try to retrieve this special interest group by sigId
+                one_group_results = retrieve_vote_smart_special_interest_group_into_local_db(one_candidate_rating.sigId)
+
+                if one_group_results['success']:
+                    update_results = special_interest_group_manager.update_or_create_we_vote_organization(
+                        one_candidate_rating.sigId)
+
+            if not update_results['organization_found']:
+                ratings_status += "COULD_NOT_FIND_OR_SAVE_NEW_SIG-{sigId}-{status} * " \
+                                  "".format(sigId=one_candidate_rating.sigId,
+                                            status=update_results['status'])
+                continue
+            else:
+                we_vote_organization = update_results['organization']
+
+            # Check to see if a position already exists
+            # TODO DALE Note: we need to consider searching with a time span variable
+            # (in addition to just org and candidate identifiers) since I believe
+            # Google Civic gives a person a new candidate campaign ID each election,
+            # while Vote Smart uses the same candidateId from year to year
+            organization_position_results = position_manager.retrieve_organization_candidate_campaign_position(
+                we_vote_organization.id, candidate_campaign_id)
+
+            if positive_value_exists(organization_position_results['position_found']):
+                # For now, we only want to create positions that don't exist
+                continue
+            else:
+                position_results = position_manager.update_or_create_position(
+                    position_id=0,
+                    position_we_vote_id=False,
+                    organization_we_vote_id=we_vote_organization.we_vote_id,
+                    public_figure_we_vote_id=False,
+                    voter_we_vote_id=False,
+                    google_civic_election_id=False,
+                    ballot_item_display_name=candidate_campaign.candidate_name,
+                    office_we_vote_id=False,
+                    candidate_we_vote_id=candidate_campaign.we_vote_id,
+                    measure_we_vote_id=False,
+                    stance=PERCENT_RATING,
+                    statement_text=one_candidate_rating.ratingText,
+                    statement_html=False,
+                    more_info_url=False,
+                    vote_smart_time_span=one_candidate_rating.timeSpan,
+                    vote_smart_rating_id=one_candidate_rating.ratingId,
+                    vote_smart_rating=one_candidate_rating.rating,
+                    vote_smart_rating_name=one_candidate_rating.ratingName,
+                )
+
+                if not positive_value_exists(position_results['success']):
+                    ratings_status += "COULD_NOT_CREATE_POSITION-{sigId}-{status} * " \
+                                      "".format(sigId=one_candidate_rating.sigId,
+                                                status=position_results['status'])
+
+    success = True
+    status = "TRANSFER_PROCESS_COMPLETED: " + ratings_status
+
+    results = {
+        'status':   status,
+        'success':  success,
+    }
+
+    return results

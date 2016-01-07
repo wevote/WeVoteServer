@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from candidate.models import CandidateCampaignManager
 from follow.models import FollowOrganizationList
 from organization.models import OrganizationManager
-from .models import ANY_STANCE, SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECIDING, OPPOSE, \
+from .models import ANY_STANCE, SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECIDING, OPPOSE, PERCENT_RATING, \
     PositionListManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
@@ -24,7 +24,7 @@ def positions_related_to_candidate_campaign_view(request, candidate_campaign_id,
     :param candidate_campaign_id:
     :return:
     """
-    if stance_we_are_looking_for not in(SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECIDING, OPPOSE):
+    if stance_we_are_looking_for not in(SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECIDING, OPPOSE, PERCENT_RATING):
         logger.debug(stance_we_are_looking_for)
         return JsonResponse({0: "stance not recognized"})
 

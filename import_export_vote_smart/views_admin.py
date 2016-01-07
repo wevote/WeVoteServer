@@ -7,11 +7,13 @@ from .controllers import retrieve_vote_smart_candidates_into_local_db, \
     retrieve_vote_smart_position_categories_into_local_db, \
     retrieve_vote_smart_officials_into_local_db, retrieve_and_save_vote_smart_states, \
     retrieve_vote_smart_ratings_by_candidate_into_local_db, retrieve_vote_smart_ratings_by_group_into_local_db, \
-    retrieve_vote_smart_special_interest_group_into_local_db, retrieve_vote_smart_special_interest_groups_into_local_db
+    retrieve_vote_smart_special_interest_group_into_local_db, \
+    retrieve_vote_smart_special_interest_groups_into_local_db, \
+    transfer_vote_smart_ratings_to_positions_for_candidate
 from .models import VoteSmartCategory, VoteSmartRating, VoteSmartRatingOneCandidate, VoteSmartSpecialInterestGroup,\
     VoteSmartState
 from .votesmart_local import VotesmartApiError
-from candidate.models import CandidateCampaign
+from candidate.models import CandidateCampaign, CandidateCampaignManager
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
@@ -36,34 +38,24 @@ def import_one_candidate_ratings_view(request, vote_smart_candidate_id):
                                                       "(error: {error_message})"
                                                       "".format(error_message=one_group_results['status']))
 
-    candidate_campaign_id = 6065  # TODO DALE
-
-    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
+    candidate_manager = CandidateCampaignManager()
+    results = candidate_manager.retrieve_candidate_campaign_from_vote_smart_id(vote_smart_candidate_id)
+    if results['candidate_campaign_found']:
+        candidate = results['candidate_campaign']
+        candidate_campaign_id = candidate.id
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
+    else:
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
 
 def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candidate_campaign_id):
-    try:
-        candidate_on_stage = CandidateCampaign.objects.get(id=we_vote_candidate_id)
-        candidate_on_stage_found = True
-    except CandidateCampaign.MultipleObjectsReturned as e:
-        messages.add_message(request, messages.ERROR, "Multiple candidates and there should only be one. ")
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
-    except CandidateCampaign.DoesNotExist:
-        messages.add_message(request, messages.ERROR, "Could not find candidate. ")
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
 
-    if candidate_on_stage_found:
-        # Working with Vote Smart data
-        try:
-            vote_smart_candidate_id = candidate_on_stage.vote_smart_id
-            rating_list_query = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')  # Desc order
-            rating_list = rating_list_query.filter(candidateId=vote_smart_candidate_id)  # TODO DALE
-        except VotesmartApiError as error_instance:
-            # Catch the error message coming back from Vote Smart and pass it in the status
-            error_message = error_instance.args
-            status = "EXCEPTION_RAISED: {error_message}".format(error_message=error_message)
-            print_to_log(logger=logger, exception_message_optional=status)
-            rating_list = []
+    results = transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id)
+
+    if results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        messages.add_message(request, messages.ERROR, results['status'])
 
     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
 

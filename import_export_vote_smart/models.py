@@ -683,7 +683,7 @@ def vote_smart_rating_one_candidate_filter(rating_one_candidate):
 class VoteSmartRatingCategoryLink(models.Model):
     """http://api.votesmart.org/docs/Rating.html
     """
-    ratingId = models.CharField(max_length=15, primary_key=True)
+    ratingId = models.CharField(max_length=15)
     sigId = models.CharField(verbose_name="group id for this rating", max_length=15)
     candidateId = models.CharField(verbose_name="vote smart candidate id for this rating", max_length=15)
     timeSpan = models.CharField(max_length=255)
@@ -760,8 +760,10 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
         # See if we can find an existing We Vote organization with vote_smart_special_interest_group_id
         if not positive_value_exists(vote_smart_special_interest_group_id):
             results = {
-                'success':  False,
-                'status':   "SPECIAL_INTEREST_GROUP_ID_MISSING"
+                'success':              False,
+                'status':               "SPECIAL_INTEREST_GROUP_ID_MISSING",
+                'organization_found':   False,
+                'organization':         Organization(),
             }
             return results
 
@@ -778,8 +780,10 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
 
         if not vote_smart_organization_found:
             results = {
-                'success':  False,
-                'status':   "SPECIAL_INTEREST_GROUP_MISSING"
+                'success':              False,
+                'status':               "SPECIAL_INTEREST_GROUP_MISSING",
+                'organization_found':   False,
+                'organization':         Organization(),
             }
             return results
 
@@ -791,20 +795,13 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
                                                                      vote_smart_special_interest_group_id)
 
         if results['organization_found']:
-            we_vote_organization_found = True
             success = True
             status = "NOT UPDATING RIGHT NOW"
+            we_vote_organization_found = True
+            we_vote_organization = results['organization']
+            # Update existing organization entry
         else:
-            # If here, a We Vote organization with the Vote Smart ID wasn't found, so we want to check against other
-            # fields that might match.
-            pass
-
-        if we_vote_organization_found:  # TODO DALE FINISH THIS
-            pass
-        else:
-            success = False
-            status = "CREATING_NEW_ORGANIZATION_FROM_VOTE_SMART"
-            # Create new organization
+            # Create new organization, or find existing org via other fields
             try:
                 defaults_from_vote_smart = {
                     'organization_name': vote_smart_organization.name,
@@ -822,24 +819,31 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
                     'state_served_code': vote_smart_organization.stateId,
                     'vote_smart_id': vote_smart_organization.sigId,
                 }
-                Organization.update_or_create(
+                we_vote_organization, created = Organization.objects.update_or_create(
                     organization_name=vote_smart_organization.name,
-                    organization_website=vote_smart_organization.url,
-                    organization_email=vote_smart_organization.email,
+                    # organization_website=vote_smart_organization.url,
+                    # organization_email=vote_smart_organization.email,
                     defaults=defaults_from_vote_smart,
                 )
                 success = True
                 status = "UPDATE_OR_CREATE_ORGANIZATION_FROM_VOTE_SMART"
+                we_vote_organization_found = True
             except Organization.MultipleObjectsReturned as e:
                 success = False
                 status = "UPDATE_OR_CREATE_ORGANIZATION_FROM_VOTE_SMART_MULTIPLE_FOUND"
-            except Exception as e:
+                we_vote_organization = Organization()
+            except Exception as error_instance:
+                error_message = error_instance.args
+                status = "UPDATE_OR_CREATE_ORGANIZATION_FROM_VOTE_SMART_FAILED: " \
+                         "{error_message}".format(error_message=error_message)
                 success = False
-                status = "UPDATE_OR_CREATE_ORGANIZATION_FROM_VOTE_SMART_FAILED"
+                we_vote_organization = Organization()
 
         results = {
-            'success':  success,
-            'status':   status,
+            'success':              success,
+            'status':               status,
+            'organization_found':   we_vote_organization_found,
+            'organization':         we_vote_organization,
         }
         return results
 

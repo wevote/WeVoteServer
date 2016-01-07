@@ -18,7 +18,7 @@ from organization.controllers import organization_retrieve_for_api, organization
     organization_search_for_api
 from position.controllers import position_list_for_ballot_item_for_api, position_retrieve_for_api, \
     position_save_for_api, voter_position_retrieve_for_api, voter_position_comment_save_for_api
-from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE
+from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
 from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
 from quick_info.controllers import quick_info_retrieve_for_api
@@ -230,7 +230,7 @@ def position_list_for_ballot_item_view(request):
     candidate_id = request.GET.get('candidate_id', 0)
     measure_id = request.GET.get('measure_id', 0)
     stance = request.GET.get('stance', ANY_STANCE)
-    if stance in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE):
+    if stance in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
         stance_we_are_looking_for = stance
     else:
         stance_we_are_looking_for = ANY_STANCE
