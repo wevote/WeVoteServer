@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from election.models import Election
+from election.models import Election, TIME_SPAN_LIST
 from organization.models import Organization, OrganizationManager
 from position.models import PositionEntered
 from wevote_functions.models import positive_value_exists
@@ -42,8 +42,24 @@ def generate_voter_guides_view(request):
                     google_civic_election_id=google_civic_election_id).count()
                 if positions_count > 0:
                     voter_guide_manager = VoterGuideManager()
-                    results = voter_guide_manager.update_or_create_organization_voter_guide(
-                        election.google_civic_election_id, organization.we_vote_id)
+                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                        organization.we_vote_id, election.google_civic_election_id)
+                    if results['success']:
+                        if results['new_voter_guide_created']:
+                            voter_guide_created_count += 1
+                        else:
+                            voter_guide_updated_count += 1
+
+            for time_span in TIME_SPAN_LIST:
+                # organization hasn't had voter guides stored yet.
+                # Search for positions with this organization_id and time_span
+                positions_count = PositionEntered.objects.filter(
+                    organization_id=organization.id,
+                    vote_smart_time_span=time_span).count()
+                if positions_count > 0:
+                    voter_guide_manager = VoterGuideManager()
+                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
+                        organization.we_vote_id, time_span)
                     if results['success']:
                         if results['new_voter_guide_created']:
                             voter_guide_created_count += 1

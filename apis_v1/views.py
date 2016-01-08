@@ -4,13 +4,14 @@
 
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
     organization_stop_following, voter_count, voter_create, \
-    voter_guides_to_follow_retrieve
+    voter_guides_to_follow_retrieve_for_api
 from ballot.controllers import ballot_item_options_retrieve_for_api, voter_ballot_items_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from django.http import HttpResponse
 from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
+from import_export_google_civic.models import fetch_google_civic_election_id_for_voter_id
 import json
 from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
@@ -377,6 +378,12 @@ def voter_address_save_view(request):
 
 
 def voter_ballot_items_retrieve_view(request):
+    """
+    (voterBallotItemsRetrieve) Request a skeleton of ballot data for this voter location,
+    so that the web_app has all of the ids it needs to make more requests for data about each ballot item.
+    :param request:
+    :return:
+    """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     # If passed in, we want to look at
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
@@ -388,7 +395,7 @@ def voter_ballot_items_retrieve_view(request):
         # We look in the cookies for google_civic_election_id
         google_civic_election_id = get_google_civic_election_id_from_cookie(request)
 
-    # This 'voter_ballot_items_retrieve' lives in ballot/controllers.py
+    # This 'voter_ballot_items_retrieve_for_api' lives in apis_v1/controllers.py
     results = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
@@ -453,14 +460,29 @@ def voter_guide_possibility_save_view(request):
 
 def voter_guides_to_follow_retrieve_view(request):
     """
-    Retrieve a list of voter_guides that a voter might want to follow
+    Retrieve a list of voter_guides that a voter might want to follow (voterGuidesToFollow)
     :param request:
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    # We look in the cookies for google_civic_election_id
-    google_civic_election_id = get_google_civic_election_id_from_cookie(request)
-    results = voter_guides_to_follow_retrieve(voter_device_id, google_civic_election_id)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    use_test_election = request.GET.get('use_test_election', False)
+
+    if positive_value_exists(ballot_item_we_vote_id):
+        google_civic_election_id = 0
+    if use_test_election:
+        google_civic_election_id = 2000  # The Google Civic API Test election
+    elif not positive_value_exists(google_civic_election_id):
+        # We look in the cookies for google_civic_election_id
+        google_civic_election_id = get_google_civic_election_id_from_cookie(request)
+        # TODO DALE Consider getting this to work
+        # # If the google_civic_election_id was found cached in a cookie and passed in, use that
+        # # If not, fetch it for this voter by looking in the BallotItem table
+        # if not positive_value_exists(google_civic_election_id):
+        #     google_civic_election_id = fetch_google_civic_election_id_for_voter_id(voter_id)
+
+    results = voter_guides_to_follow_retrieve_for_api(voter_device_id, ballot_item_we_vote_id, google_civic_election_id)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     # Save google_civic_election_id with fresh version that we retrieved from BallotItem table (if not passed in)

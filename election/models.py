@@ -8,6 +8,16 @@ import wevote_functions.admin
 from wevote_functions.models import extract_state_from_ocd_division_id
 
 
+TIME_SPAN_LIST = [
+    '2016',
+    '2015',
+    '2014-2015',
+    '2014',
+    '2013-2014',
+    '2013',
+    '2012',
+]
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 

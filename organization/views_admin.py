@@ -480,8 +480,8 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
     # If the position was saved, then update the voter_guide entry
     if success:
         voter_guide_manager = VoterGuideManager()
-        results = voter_guide_manager.update_or_create_organization_voter_guide(
-            google_civic_election_id, organization_on_stage.we_vote_id)
+        results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+            organization_on_stage.we_vote_id, google_civic_election_id)
         # if results['success']:
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_on_stage.id,)))

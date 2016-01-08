@@ -20,11 +20,26 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
+        {
+            'name':         'ballot_item_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for a particular ballot item. If this variable is provided, '
+                            'we want to retrieve all of the voter guides that have something to say about this '
+                            'particular ballot item.',
+        },
+        {
+            'name':         'google_civic_election_id',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'The unique identifier for a particular election. If not provided, use the most recent '
+                            'ballot for the voter\'s address.',
+        },
+        {
+            'name':         'use_test_election',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'If you need to request a test election, pass this with the value \'True\'. Note that '
+                            'text_for_map_search (either passed into this API endpoint as a value, or previously saved '
+                            'with voterAddressSave) is required with every election, including the test election.',
+        },
     ]
 
     potential_status_codes_list = [
