@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import PositionEntered, PositionEnteredManager, PositionListManager, ANY_STANCE
+from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -37,7 +38,7 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'success':                  False,
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
-            'ballot_item_label':        '',
+            'ballot_item_display_name': '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -84,7 +85,7 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'status':                   results['status'],
             'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
-            'ballot_item_label':        position.ballot_item_label,
+            'ballot_item_display_name': position.ballot_item_display_name,
             'is_support':               results['is_support'],
             'is_oppose':                results['is_oppose'],
             'is_information_only':      results['is_information_only'],
@@ -107,7 +108,7 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'success':                  False,
             'position_id':              position_id,
             'position_we_vote_id':      we_vote_id,
-            'ballot_item_label':        '',
+            'ballot_item_display_name': '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -132,7 +133,7 @@ def position_save_for_api(
         public_figure_we_vote_id,
         voter_we_vote_id,
         google_civic_election_id,
-        ballot_item_label,
+        ballot_item_display_name,
         office_we_vote_id,
         candidate_we_vote_id,
         measure_we_vote_id,
@@ -168,7 +169,7 @@ def position_save_for_api(
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
-            'ballot_item_label':        ballot_item_label,
+            'ballot_item_display_name': ballot_item_display_name,
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -193,7 +194,7 @@ def position_save_for_api(
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
-            'ballot_item_label':        ballot_item_label,
+            'ballot_item_display_name': ballot_item_display_name,
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -219,7 +220,7 @@ def position_save_for_api(
         public_figure_we_vote_id=public_figure_we_vote_id,
         voter_we_vote_id=voter_we_vote_id,
         google_civic_election_id=google_civic_election_id,
-        ballot_item_label=ballot_item_label,
+        ballot_item_display_name=ballot_item_display_name,
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
@@ -238,7 +239,7 @@ def position_save_for_api(
             'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
             'new_position_created':     save_results['new_position_created'],
-            'ballot_item_label':        position.ballot_item_label,
+            'ballot_item_display_name': position.ballot_item_display_name,
             'is_support':               position.is_support(),
             'is_oppose':                position.is_oppose(),
             'is_information_only':      position.is_information_only(),
@@ -263,7 +264,7 @@ def position_save_for_api(
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
-            'ballot_item_label':        '',
+            'ballot_item_display_name': '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -320,17 +321,17 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
     if positive_value_exists(candidate_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 candidate_id, stance_we_are_looking_for)
-        kind_of_ballot_item = 'CANDIDATE'
+        kind_of_ballot_item = CANDIDATE
         ballot_item_id = candidate_id
     elif positive_value_exists(measure_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
                 measure_id, stance_we_are_looking_for)
-        kind_of_ballot_item = 'MEASURE'
+        kind_of_ballot_item = MEASURE
         ballot_item_id = measure_id
     elif positive_value_exists(office_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
                 office_id, stance_we_are_looking_for)
-        kind_of_ballot_item = 'OFFICE'
+        kind_of_ballot_item = OFFICE
         ballot_item_id = measure_id
     else:
         position_list = []

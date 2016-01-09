@@ -58,6 +58,7 @@ def ballot_item_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
+        'kind_of_ballot_item': 'CANDIDATE',
         'ballot_item_we_vote_id': 'wv01cand1755',
     }
 

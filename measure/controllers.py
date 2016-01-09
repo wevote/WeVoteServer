@@ -2,10 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from measure.models import ContestMeasureManager
+from .models import ContestMeasureManager
+from ballot.models import MEASURE
 from config.base import get_environment_variable
 from django.http import HttpResponse
-from exception.models import handle_exception, handle_record_not_found_exception, handle_record_not_saved_exception
 import json
 import wevote_functions.admin
 from wevote_functions.models import positive_value_exists
@@ -31,8 +31,9 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  False,
-            'measure_id':               measure_id,
-            'measure_we_vote_id':       measure_we_vote_id,
+            'kind_of_ballot_item':      MEASURE,
+            'id':                       measure_id,
+            'we_vote_id':               measure_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -51,8 +52,9 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  False,
-            'measure_id':               measure_id,
-            'measure_we_vote_id':       measure_we_vote_id,
+            'kind_of_ballot_item':      MEASURE,
+            'id':                       measure_id,
+            'we_vote_id':               measure_we_vote_id,
             'google_civic_election_id': 0,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -62,10 +64,11 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  True,
-            'measure_id':               contest_measure.id,
-            'measure_we_vote_id':       contest_measure.we_vote_id,
+            'kind_of_ballot_item':      MEASURE,
+            'id':                       contest_measure.id,
+            'we_vote_id':               contest_measure.we_vote_id,
             'google_civic_election_id': contest_measure.google_civic_election_id,
-            'measure_title':            contest_measure.measure_title,
+            'ballot_item_display_name': contest_measure.measure_title,
             'measure_subtitle':         contest_measure.measure_subtitle,
             'maplight_id':              contest_measure.maplight_id,
             'measure_text':             contest_measure.measure_text,
@@ -78,8 +81,9 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):
         json_data = {
             'status':                   status,
             'success':                  False,
-            'measure_id':               measure_id,
-            'measure_we_vote_id':       measure_we_vote_id,
+            'kind_of_ballot_item':      MEASURE,
+            'id':                       measure_id,
+            'we_vote_id':               measure_we_vote_id,
             'google_civic_election_id': 0,
         }
 

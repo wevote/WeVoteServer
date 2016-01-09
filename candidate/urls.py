@@ -13,6 +13,10 @@ urlpatterns = [
     url(r'^export/', views_admin.ExportCandidateCampaignDataView.as_view(), name='candidates_export'),
     url(r'^new/$', views_admin.candidate_new_view, name='candidate_new'),
     url(r'^(?P<candidate_id>[0-9]+)/edit/$', views_admin.candidate_edit_view, name='candidate_edit'),
+    url(r'^(?P<candidate_id>[0-9]+)/retrieve_photos/$',
+        views_admin.candidate_retrieve_photos_view, name='candidate_retrieve_photos'),
+    url(r'^(?P<election_id>[0-9]+)/photos_for_election/$',
+        views_admin.retrieve_candidate_photos_for_election_view, name='photos_for_election'),
     url(r'^(?P<candidate_id>[0-9]+)/summary/$', views_admin.candidate_summary_view,
         name='candidate_summary'),
 ]

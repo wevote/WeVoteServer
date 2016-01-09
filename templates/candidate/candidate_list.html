@@ -27,6 +27,7 @@
 {% if candidate_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
+            <td>&nbsp;</td>
             <td>Candidate Name</td>
             <td>State</td>
             <td>Election</td>
@@ -36,7 +37,14 @@
         </tr>
     {% for candidate in candidate_list %}
         <tr>
-            <td><a href="{% url 'candidate:candidate_summary' candidate.id %}">{{ candidate.candidate_name }}</a></td>
+            <td>
+                {% if candidate.fetch_photo_url %}
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}">
+                    <img src='{{ candidate.fetch_photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a></td>
             <td>{{ candidate.get_candidate_state }}</td>
             <td>{{ candidate.election.election_name }}</td>
             <td><a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a></td>
@@ -50,6 +58,13 @@
     <p>
         <a href="{% url 'candidate:candidates_export' %}?format=json" target="_blank" >Export Candidates</a>
 {#        <a href="{% url 'candidate:candidates_import' %}" >Import Candidates</a>#}
+        <br />
+        {% if google_civic_election_id %}
+            <a href="{% url 'candidate:photos_for_election' google_civic_election_id %}" target="_blank" >
+            Retrieve Candidate Photos for this Election
+            </a>
+        {% endif %}
+
     </p>
 {% else %}
     <p>(no candidates found)</p>

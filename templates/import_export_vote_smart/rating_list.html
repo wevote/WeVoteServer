@@ -1,0 +1,46 @@
+{# templates/import_export_vote_smart/rating_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Rating List{% endblock %}
+
+{%  block content %}
+
+<p><a href="{% url 'import_export_vote_smart:vote_smart_index' %}">< Back to Vote Smart Index</a></p>
+
+<h1>Vote Smart Rating List</h1>
+
+<p><a href="{% url 'import_export_vote_smart:import_group_ratings' %}">Import All Vote Smart Ratings by Group</a></p>
+
+{% if rating_list %}
+    <table border="1">
+    <tr>
+        <td>ratingId</td>
+        <td>sigId</td>
+        <td>ratingName</td>
+        <td>timeSpan</td>
+    </tr>
+
+    {% for special_interest_group_rating in rating_list %}
+    <tr>
+        <td>{{ special_interest_group_rating.ratingId }}</td>
+        <td><a href="{% url 'import_export_vote_smart:special_interest_group_rating_list' special_interest_group_rating.sigId %}" target="_blank">
+            {{ special_interest_group_rating.sigId }}</a></td>
+        <td>{{ special_interest_group_rating.ratingName }}</td>
+        <td>{{ special_interest_group_rating.timeSpan }}</td>
+    </tr>
+    {% endfor %}
+
+    </table>
+{% else %}
+    <p>(no special interest group ratings found)</p>
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

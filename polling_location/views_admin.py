@@ -124,6 +124,7 @@ def polling_location_list_view(request):
 
     state_list = {
         'CA':   'CA',
+        'RI':   'RI',
         'VA':   'VA',
     }
 

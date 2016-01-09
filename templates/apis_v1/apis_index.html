@@ -14,50 +14,58 @@
 <table border="1" cellpadding="5" cellspacing="1">
     <thead>
         <td>Method</td>
+        <td>Static</td>
         <td>Description</td>
     </thead>
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Voter Basic Data</strong></td>
+        <td colspan="3"><strong>Voter Basic Data</strong></td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:deviceIdGenerateDocs' %}">deviceIdGenerate</a></td>
+        <td></td>
         <td>Generate a device_id (store in cookie) that can be linked to a voter_id</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterAddressRetrieveDocs' %}">voterAddressRetrieve</a></td>
+        <td></td>
         <td>Retrieve an address for a voter that has previously been saved.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterAddressSaveDocs' %}">voterAddressSave</a></td>
+        <td></td>
         <td>Save or update address for an existing voter. The front end should call
         voterBallotItemsRetrieveFromGoogleCivic (asynchronously) immediately following an address change. (If
         the address has actually changed.)</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterCountDocs' %}">voterCount</a></td>
+        <td>static</td>
         <td>Count the number of voters in the database.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterCreateDocs' %}">voterCreate</a></td>
+        <td></td>
         <td>Create an empty voter entry attached to a voter_device_id</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve/?format=json</a></td>
+        <td></td>
         <td>Export raw voter data to JSON format</td>
     </tr>
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>GeoLocation</strong></td>
+        <td colspan="3"><strong>GeoLocation</strong></td>
     </tr>
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Ballot Contest Data</strong></td>
+        <td colspan="3"><strong>Ballot Contest Data</strong></td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:ballotItemOptionsRetrieveDocs' %}">ballotItemOptionsRetrieve</a></td>
+        <td>static c3</td>
         <td>Retrieve a complete list of offices, candidates or measures in the specified election(s).
         This information is not organized in a hierarchy, but is instead provided in a simple list to help
             with auto-complete and browser-side quick search features.
@@ -65,16 +73,19 @@
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:electionsRetrieveDocs' %}">electionsRetrieve</a></td>
+        <td>static c3</td>
         <td>Export the raw elections data stored in the database to JSON format.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveDocs' %}">voterBallotItemsRetrieve</a></td>
+        <td>c3</td>
         <td>Retrieve a list of ballot items to display for the current voter from the We Vote database. These entries
             would have been previously retrieved from Google Civic with voterBallotItemsRetrieveFromGoogleCivic.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveFromGoogleCivicDocs' %}">
             voterBallotItemsRetrieveFromGoogleCivic</a></td>
+        <td>c3</td>
         <td>Tell the We Vote server to reach out to the Google Civic API and retrieve a list of ballot items
             for the current voter (based on the address saved with voterAddressSave), and store them in
             the We Vote database so we can display them
@@ -83,175 +94,210 @@
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Offices, Candidates &amp; Measures</strong></td>
+        <td colspan="3"><strong>Offices, Candidates &amp; Measures</strong></td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:ballotItemRetrieveDocs' %}">ballotItemRetrieve</a></td>
+        <td>static c3</td>
         <td>Retrieve details about one office, candidate or measure. This is a wrapper for officeRetrieve,
         candidateRetrieve and measureRetrieve.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:officeRetrieveDocs' %}">officeRetrieve</a></td>
+        <td>static c3</td>
         <td>Retrieve details about one office. Alternate to ballotItemRetrieve.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:candidateRetrieveDocs' %}">candidateRetrieve</a></td>
+        <td>static c3</td>
         <td>Retrieve details about one candidate. Alternate to ballotItemRetrieve.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:candidatesRetrieveDocs' %}">candidatesRetrieve</a></td>
+        <td>static c3</td>
         <td>Retrieve a list of candidates (summary information) competing for an office.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:measureRetrieveDocs' %}">measureRetrieve</a></td>
+        <td>static c3</td>
         <td>Retrieve details about one measure. Alternate to ballotItemRetrieve.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:quickInfoRetrieveDocs' %}">quickInfoRetrieve</a></td>
+        <td>static c3</td>
         <td>Information necessary to populate a bubble next to a ballot item.</td>
     </tr>
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Positions (Support, Oppose, Info Only), Stars and Like's</strong></td>
+        <td colspan="3"><strong>Positions (Support, Oppose, Info Only), Stars and Like's</strong></td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionListForBallotItemDocs' %}">positionListForBallotItem</a></td>
+        <td></td>
         <td>A list of all positions (support/oppose/info) for this Ballot Item (Office, Candidate or Measure)
             from organizations, friends, and public figures this voter follows.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionSupportCountForBallotItemDocs' %}">positionSupportCountForBallotItem</a></td>
+        <td></td>
         <td>A single number showing the total supporters for this Ballot Item (Candidate or Measure) from organizations,
             friends, and public figures this voter follows.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionOpposeCountForBallotItemDocs' %}">positionOpposeCountForBallotItem</a></td>
+        <td></td>
         <td>A single number showing the total that oppose this Ballot Item (Candidate or Measure) from organizations,
             friends, and public figures this voter follows.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionRetrieveDocs' %}">positionRetrieve</a></td>
-        <td>Retrieve one position based on unique position identifier.</td>
+        <td>static/ public c3</td>
+        <td>Retrieve one position based on unique position identifier. (Public positions can be served by c3 network.
+            Private positions served by other network.)</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionSaveDocs' %}">positionSave</a></td>
+        <td>c3</td>
         <td>Save a new position or update an existing position. Mostly for volunteer tools and voter guides. For the
         typical voter, we use voterPositionCommentSave, voterSupportingSave, voterOpposingSave,
             voterStopSupportingSave, and voterStopOpposingSave.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterPositionRetrieveDocs' %}">voterPositionRetrieve</a></td>
+        <td></td>
         <td>Retrieve the voter's position based on voter_device_id and ballot item id.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterPositionCommentSaveDocs' %}">voterPositionCommentSave</a></td>
+        <td></td>
         <td>Save the voter's comment based on voter_device_id and ballot item id.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterPositionLikeOnSaveDocs' %}">voterPositionLikeOnSave</a></td>
+        <td></td>
         <td>Mark that the voter wants to 'Like' this position.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterPositionLikeOffSaveDocs' %}">voterPositionLikeOffSave</a></td>
+        <td></td>
         <td>Remove a Like that the voter set on a position.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterPositionLikeStatusRetrieveDocs' %}">voterPositionLikeStatusRetrieve</a></td>
+        <td></td>
         <td>Has this voter 'Liked' this position?</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionLikeCountDocs' %}">positionLikeCount</a></td>
+        <td></td>
         <td>The total number of Likes that a position has received, either from the perspective of
             your network of friends, or the entire network.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterSupportingSaveDocs' %}">voterSupportingSave</a></td>
+        <td></td>
         <td>Save or update one voter's support for one candidate or measure</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterStopSupportingSaveDocs' %}">voterStopSupportingSave</a></td>
+        <td></td>
         <td>Save or update one voter's lack of support for one candidate or measure</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterOpposingSaveDocs' %}">voterOpposingSave</a></td>
+        <td></td>
         <td>Save or update one voter's opposition for one candidate or measure</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterStopOpposingSaveDocs' %}">voterStopOpposingSave</a></td>
+        <td></td>
         <td>Save or update one voter's lack of opposition for one candidate or measure</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterStarOnSaveDocs' %}">voterStarOnSave</a></td>
+        <td></td>
         <td>Save or create private 'star on' state for the current voter for a measure, an office or candidate.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterStarOffSaveDocs' %}">voterStarOffSave</a></td>
+        <td></td>
         <td>Save or create private 'star off' state for the current voter for a measure, an office or candidate.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterStarStatusRetrieveDocs' %}">voterStarStatusRetrieve</a></td>
+        <td></td>
         <td>Has the voter starred this measure, office or candidate?</td>
     </tr>
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Organizations, People &amp; Voter Guides</strong></td>
+        <td colspan="3"><strong>Organizations, People &amp; Voter Guides</strong></td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:organizationCountDocs' %}">organizationCount</a></td>
+        <td>static</td>
         <td>Count the number of organizations in the database.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:organizationFollowDocs' %}">organizationFollow</a></td>
+        <td></td>
         <td>Store that the voter wants to follow this organization.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:organizationFollowIgnoreDocs' %}">organizationFollowIgnore</a></td>
+        <td></td>
         <td>Store that the voter wants to ignore this organization.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:organizationStopFollowingDocs' %}">organizationStopFollowing</a></td>
+        <td></td>
         <td>Store that the voter wants to stop following this organization.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:organizationRetrieveDocs' %}">organizationRetrieve</a></td>
+        <td>static</td>
         <td>Retrieve one organization based on unique identifier.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:organizationSaveDocs' %}">organizationSave</a></td>
+        <td>c3</td>
         <td>Save a new organization or update an existing organization.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:organizationSearchDocs' %}">organizationSearch</a></td>
+        <td>c3</td>
         <td>Search for organizations to find any organization that contains any of the search terms.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterGuidePossibilityRetrieveDocs' %}">voterGuidePossibilityRetrieve</a></td>
+        <td></td>
         <td>Has a volunteer marked this URL as a voter guide?</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterGuidePossibilitySaveDocs' %}">voterGuidePossibilitySave</a></td>
+        <td></td>
         <td>Mark this URL as a voter guide.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterGuidesToFollowRetrieveDocs' %}">voterGuidesToFollowRetrieve</a></td>
+        <td></td>
         <td>Retrieve a list of voter guides that a voter might want to follow.</td>
     </tr>
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Voter Friends</strong></td>
+        <td colspan="3"><strong>Voter Friends</strong></td>
     </tr>
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Voter Language</strong></td>
+        <td colspan="3"><strong>Voter Language</strong></td>
     </tr>
 
     {###  ###}
     <tr>
-        <td colspan="2"><strong>Messages</strong></td>
+        <td colspan="3"><strong>Messages</strong></td>
     </tr>
 </table>
 

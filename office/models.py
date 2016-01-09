@@ -299,10 +299,10 @@ class ContestOfficeList(models.Model):
         if office_list_found:
             for office in office_list_objects:
                 one_office = {
-                    'ballot_item_label':    office.office_name,
-                    'measure_we_vote_id':   '',
-                    'office_we_vote_id':    office.we_vote_id,
-                    'candidate_we_vote_id': '',
+                    'ballot_item_display_name': office.office_name,
+                    'measure_we_vote_id':       '',
+                    'office_we_vote_id':        office.we_vote_id,
+                    'candidate_we_vote_id':     '',
                 }
                 office_list_light.append(one_office.copy())
 

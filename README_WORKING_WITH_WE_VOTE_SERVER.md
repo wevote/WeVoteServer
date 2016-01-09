@@ -1,4 +1,4 @@
-# Working with WeVoteServer
+# Working with WeVoteServer API Endpoints
 
 ## Staying Synchronized with Latest Code
 
@@ -15,9 +15,8 @@ Pull the latest code from the repository. Then:
 Compare your local version of "config/environment_variables.json" with the master template version 
 "[config/environment_variables-template.json](config/environment_variables-template.json)" and add or remove entries.
 
-## Daily Commands
 
-### API Endpoints - Start up the Django server
+## Start up the Django server
 
 Here are some commands we use quite a lot:
 
@@ -29,28 +28,16 @@ Find API admin tools here [http://localhost:8000/admin](http://localhost:8000/ad
 
 Find documentation for all of the APIs here [http://localhost:8000/apis/v1/docs](http://localhost:8000/apis/v1/docs)
 
-### Test Data
+## Test Data
 
 In order to effectively work with WeVoteServer, you will need election data. We have made it easy to set up your 
 database with initial data that will help you do development. Visit the Admin Menu 
 [http://localhost:8000/admin](http://localhost:8000/admin) on your local machine and click the
 "Import Test Data" link. The first time this runs, it can take 60-120 seconds.
 
-### Web App - Startup the Web App servers
 
-Open a new terminal/console, and do the following:
-
-    cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/web_app
-    npm run build:dev
-
-Wait for the first compilation is successful, then in another terminal/console, start the 
-node.js server in development mode.
-
-    cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/web_app
-    npm run start:dev
-
-Visit the Web App in a browser
-[http://127.0.0.1:9090/](http://127.0.0.1:9090/) or [http://localhost:9090/](http://localhost:9090/)
+## Working with WebApp 
+See notes on working with the [Node/React/Flux WebApp mobile website](README_WORKING_WITH_WE_VOTE_SERVER.md) day-to-day
 
 ## Coding Standards
 

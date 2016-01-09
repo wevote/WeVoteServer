@@ -40,7 +40,7 @@ def position_save_doc_template_values(url_root):
                             'position_id, position_we_vote_id)',
         },
         {
-            'name':         'ballot_item_label',
+            'name':         'ballot_item_display_name',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Text we display for the name of this office, candidate or measure. '
                             'If missing, we look it up internally and fill it in.',
@@ -163,7 +163,7 @@ def position_save_doc_template_values(url_root):
 
     try_now_link_variables_dict = {
         'organization_we_vote_id': 'wv85org1',
-        'ballot_item_label': 'Test Ballot Item Label',
+        'ballot_item_display_name': 'Test Ballot Item Label',
         'candidate_we_vote_id': 'wv01cand1755',
         'stance': 'SUPPORT',
         'statement_text': 'This is what I believe...',
@@ -177,7 +177,7 @@ def position_save_doc_template_values(url_root):
                    '  "position_id": integer (the internal id of the position found),\n' \
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "new_position_created": boolean,\n' \
-                   '  "ballot_item_label": string (either measure name or candidate name),\n' \
+                   '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
                    '  "is_support": boolean,\n' \
                    '  "is_oppose": boolean,\n' \
                    '  "is_information_only": boolean,\n' \

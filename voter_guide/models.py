@@ -16,7 +16,8 @@ class VoterGuideManager(models.Manager):
     """
     A class for working with the VoterGuide model
     """
-    def update_or_create_organization_voter_guide(self, google_civic_election_id, organization_we_vote_id):
+    def update_or_create_organization_voter_guide_by_election_id(self, organization_we_vote_id,
+                                                                 google_civic_election_id):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         new_voter_guide = VoterGuide()
         voter_guide_owner_type = new_voter_guide.ORGANIZATION
@@ -36,7 +37,6 @@ class VoterGuideManager(models.Manager):
                 }
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
-                    voter_guide_owner_type__exact=voter_guide_owner_type,
                     organization_we_vote_id__exact=organization_we_vote_id,
                     defaults=updated_values)
                 success = True
@@ -48,6 +48,48 @@ class VoterGuideManager(models.Manager):
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
                 status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION'
+                exception_multiple_object_returned = True
+                new_voter_guide_created = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'voter_guide_saved':        success,
+            'new_voter_guide_created':  new_voter_guide_created,
+        }
+        return results
+
+    def update_or_create_organization_voter_guide_by_time_span(self, organization_we_vote_id, vote_smart_time_span):
+        new_voter_guide = VoterGuide()
+        voter_guide_owner_type = new_voter_guide.ORGANIZATION
+        exception_multiple_object_returned = False
+        if not vote_smart_time_span or not organization_we_vote_id:
+            status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE_BY_TIME_SPAN'
+            success = False
+            new_voter_guide_created = False
+        else:
+            try:
+                updated_values = {
+                    # Values we search against below
+                    'vote_smart_time_span': vote_smart_time_span,
+                    'voter_guide_owner_type': voter_guide_owner_type,
+                    'organization_we_vote_id': organization_we_vote_id,
+                    # The rest of the values
+                }
+                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
+                    vote_smart_time_span__exact=vote_smart_time_span,
+                    organization_we_vote_id__exact=organization_we_vote_id,
+                    defaults=updated_values)
+                success = True
+                if new_voter_guide_created:
+                    status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION_BY_TIME_SPAN'
+                else:
+                    status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION_BY_TIME_SPAN'
+            except VoterGuide.MultipleObjectsReturned as e:
+                handle_record_found_more_than_one_exception(e, logger=logger)
+                success = False
+                status = 'MULTIPLE_MATCHING_VOTER_GUIDES_FOUND_FOR_ORGANIZATION_BY_TIME_SPAN'
                 exception_multiple_object_returned = True
                 new_voter_guide_created = False
 
@@ -260,7 +302,12 @@ class VoterGuide(models.Model):
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(
-        verbose_name="google civic election id", null=False)
+        verbose_name="google civic election id", null=True)
+
+    # Usually in one of these two formats 2015, 2014-2015
+    vote_smart_time_span = models.CharField(
+        verbose_name="the period in which the organization stated this position", max_length=255, null=True,
+        blank=True, unique=False)
 
     ORGANIZATION = 'O'
     PUBLIC_FIGURE = 'P'
@@ -303,12 +350,44 @@ class VoterGuide(models.Model):
 # organization, public figure, or voter
 class VoterGuideList(models.Model):
     """
-    A way to retrieve a list of voter_guides
+    A set of methods to retrieve a list of voter_guides
     """
 
+    def retrieve_voter_guides_to_follow_by_ballot_item(self, ballot_item_we_vote_id):
+        success = False
+        status = "TO_BE_DETERMINED"
+        voter_guide_list = []
+        voter_guide_list_found = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    def retrieve_voter_guides_to_follow_by_election(self, google_civic_election_id):
+        success = False
+        status = "TO_BE_DETERMINED"
+        voter_guide_list = []
+        voter_guide_list_found = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    # NOTE: This is extremely simple way to retrieve voter guides. Being replaced by:
+    #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND
+    #  retrieve_voter_guides_by_election(google_civic_election_id)
     def retrieve_voter_guides_for_election(self, google_civic_election_id):
         voter_guide_list = []
         voter_guide_list_found = False
+
         try:
             voter_guide_queryset = VoterGuide.objects.order_by('last_updated')
             voter_guide_list = voter_guide_queryset.filter(

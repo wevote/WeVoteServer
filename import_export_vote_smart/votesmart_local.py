@@ -2,8 +2,6 @@
     Project Vote Smart's API (http://www.votesmart.org/services_api.php)
     provides rich biographical data, including data on votes, committee
     assignments, and much more.
-    TODO Modified to work with Python 3. TODO: Get this working in either Python 2 or 3 and
-    suggest changes to: https://github.com/votesmart/python-votesmart
 """
 
 __author__ = "James Turk <jturk@sunlightfoundation.com>"
@@ -12,8 +10,11 @@ __copyright__ = "Copyright (c) 2012 Sunlight Labs"
 __license__ = "BSD"
 
 import urllib
-# import urllib2  # Python 2
-from urllib.request import urlopen  # Python 3
+# The following added to support Python 3
+try:
+    from urllib.request import urlopen
+except ImportError:
+    import urllib2
 
 # The following added to support Python 3
 try:
@@ -25,6 +26,7 @@ try:
     import json
 except ImportError:
     import simplejson as json
+import sys
 
 class VotesmartApiError(Exception):
     """ Exception for Sunlight API errors """
@@ -152,6 +154,14 @@ class Rating(VotesmartApiObject):
     def __str__(self):
         return self.ratingText
 
+class RatingOneCandidate(VotesmartApiObject):
+    def __str__(self):
+        return ': '.join((self.candidateId, self.rating))
+
+class Ratings(VotesmartApiObject):
+    def __str__(self):
+        return ': '.join((self.ratingId, self.ratingName))
+
 class State(VotesmartApiObject):
     def __str__(self):
         return ' '.join((self.stateId, self.name))
@@ -216,25 +226,34 @@ class votesmart(object):
         if votesmart.apikey is None:
             raise VotesmartApiError('Missing Project Vote Smart apikey')
 
-        # params = dict([(k,v) for (k,v) in params.iteritems() if v])  # Python 2
-        params = dict([(k,v) for (k,v) in params.items() if v])  # Python 3
-        url = 'http://api.votesmart.org/%s?o=JSON&key=%s&%s' % (func,
-            votesmart.apikey, urlencode(params))  # Python 3
-            # votesmart.apikey, urllib.urlencode(params))  # Former Python 2
-        try:
-            # response = urllib2.urlopen(url).read()  # Python 2
-            response = urlopen(url).read().decode('utf-8')  # Python 3
-            obj = json.loads(response)
-            if 'error' in obj:
-                raise VotesmartApiError(obj['error']['errorMessage'])
-            else:
-                return obj
-        # except urllib2.HTTPError, e:  # Python 2
-        except urllib.error.HTTPError as e:
-            raise VotesmartApiError(e)
-        # except ValueError, e:  # Python 2
-        except ValueError:
-            raise VotesmartApiError('Invalid Response')
+        if sys.version_info > (3, 0):
+            # Python 3 code in this block
+            params = dict([(k,v) for (k,v) in params.items() if v])
+            url = 'http://api.votesmart.org/%s?o=JSON&key=%s&%s' % (func, votesmart.apikey, urlencode(params))
+            try:
+                response = urlopen(url).read().decode('utf-8')
+                obj = json.loads(response)
+                if 'error' in obj:
+                    raise VotesmartApiError(obj['error']['errorMessage'])
+                else:
+                    return obj
+            except urllib.error.HTTPError as e:
+                raise VotesmartApiError(e)
+            except ValueError:
+                raise VotesmartApiError('Invalid Response')
+        else:
+            # Python 2 code in this block
+            params = dict([(k,v) for (k,v) in params.iteritems() if v])
+            url = 'http://api.votesmart.org/%s?o=JSON&key=%s&%s' % (func, votesmart.apikey, urllib.urlencode(params))
+            try:
+                response = urllib2.urlopen(url).read()
+                obj = json.loads(response)
+                if 'error' in obj:
+                    raise VotesmartApiError(obj['error']['errorMessage'])
+                else:
+                    return obj
+            except:
+                raise VotesmartApiError('Invalid Response')  # TODO I was getting error trying to run in 2.7
 
     class address(object):
         @staticmethod
@@ -554,6 +573,18 @@ class votesmart(object):
             params = {'candidateId':candidateId, 'sigId':sigId}
             result = votesmart._apicall('Rating.getCandidateRating', params)
             return _result_to_obj(Rating, result['candidateRating']['rating'])
+
+        @staticmethod
+        def getRating(ratingId):
+            params = {'ratingId':ratingId}
+            result = votesmart._apicall('Rating.getRating', params)
+            return _result_to_obj(RatingOneCandidate, result['rating']['candidateRating'])
+
+        @staticmethod
+        def getSigRatings(sigId):
+            params = {'sigId':sigId}
+            result = votesmart._apicall('Rating.getSigRatings', params)
+            return _result_to_obj(Ratings, result['sigRatings']['rating'])
 
     class state(object):
         @staticmethod

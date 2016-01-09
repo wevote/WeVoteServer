@@ -32,6 +32,7 @@
         <tr>
             <td>Organization</td>
             <td>Election</td>
+            <td>Time Span</td>
             <td>Last Updated</td>
         </tr>
     {% for voter_guide in voter_guide_list %}
@@ -45,6 +46,7 @@
             <td><a href="#">Voter</a></td>
         {% endif %}
             <td>{{ voter_guide.google_civic_election_id }}</td>
+            <td>{{ voter_guide.vote_smart_time_span }}</td>
             <td>{{ voter_guide.last_updated }}</td>
         </tr>
     {% endfor %}

@@ -64,9 +64,10 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "candidate_id": integer,\n' \
-                   '  "candidate_we_vote_id": string,\n' \
-                   '  "candidate_display_name": string,\n' \
+                   '  "kind_of_ballot_item": string,\n' \
+                   '  "id": integer,\n' \
+                   '  "we_vote_id": string,\n' \
+                   '  "ballot_item_display_name": string,\n' \
                    '  "candidate_photo_url": string,\n' \
                    '  "order_on_ballot": integer,\n' \
                    '  "google_civic_election_id": integer,\n' \

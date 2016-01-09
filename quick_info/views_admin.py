@@ -2,11 +2,11 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import KIND_OF_BALLOT_ITEM_CHOICES, LANGUAGE_CHOICES, QuickInfo, QuickInfoManager, \
+from .models import LANGUAGE_CHOICES, QuickInfo, QuickInfoManager, \
     QuickInfoMaster, QuickInfoMasterManager, \
     SPANISH, ENGLISH, TAGALOG, VIETNAMESE, CHINESE, \
-    OFFICE, CANDIDATE, MEASURE, POLITICIAN, \
     NOT_SPECIFIED
+from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE, KIND_OF_BALLOT_ITEM_CHOICES
 from .serializers import QuickInfoSerializer, QuickInfoMasterSerializer
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from django.http import HttpResponseRedirect
@@ -89,7 +89,7 @@ def quick_info_new_view(request):
     language = request.POST.get('language', ENGLISH)
     info_text = request.POST.get('info_text', "")
     info_html = request.POST.get('info_html', "")
-    ballot_item_label = request.POST.get('ballot_item_label', "")
+    ballot_item_display_name = request.POST.get('ballot_item_display_name', "")
     more_info_credit = request.POST.get('more_info_credit', "")
     more_info_url = request.POST.get('more_info_url', "")
 
@@ -117,7 +117,7 @@ def quick_info_new_view(request):
     quick_info.language = language
     # See below: quick_info.info_text = info_text
     # See below: quick_info.info_html = info_html
-    quick_info.ballot_item_label = ballot_item_label
+    quick_info.ballot_item_display_name = ballot_item_display_name
     quick_info.contest_office_we_vote_id = contest_office_we_vote_id
     quick_info.candidate_campaign_we_vote_id = candidate_campaign_we_vote_id
     quick_info.politician_we_vote_id = politician_we_vote_id
@@ -211,7 +211,7 @@ def quick_info_edit_view(request, quick_info_id):
         language = request.POST.get('language', False)
         info_text = request.POST.get('info_text', False)
         info_html = request.POST.get('info_html', False)
-        ballot_item_label = request.POST.get('ballot_item_label', False)
+        ballot_item_display_name = request.POST.get('ballot_item_display_name', False)
         more_info_credit = request.POST.get('more_info_credit', False)
         more_info_url = request.POST.get('more_info_url', False)
 
@@ -232,8 +232,8 @@ def quick_info_edit_view(request, quick_info_id):
             quick_info.language = language
         # See below: quick_info.info_text = info_text
         # See below: quick_info.info_html = info_html
-        if ballot_item_label is not False:
-            quick_info.ballot_item_label = ballot_item_label
+        if ballot_item_display_name is not False:
+            quick_info.ballot_item_display_name = ballot_item_display_name
         if more_info_credit is not False:
             quick_info.more_info_credit = more_info_credit
         if more_info_url is not False:
@@ -350,7 +350,7 @@ def quick_info_edit_process_view(request):
     language = request.POST.get('language', False)
     info_text = request.POST.get('info_text', False)
     info_html = request.POST.get('info_html', False)
-    ballot_item_label = request.POST.get('ballot_item_label', False)
+    ballot_item_display_name = request.POST.get('ballot_item_display_name', False)
     more_info_credit = request.POST.get('more_info_credit', False)
     more_info_url = request.POST.get('more_info_url', False)
 
@@ -437,34 +437,34 @@ def quick_info_edit_process_view(request):
         quick_info_master_we_vote_id = ""
 
     # Figure out what text to use for the Ballot Item Label
-    if not positive_value_exists(ballot_item_label):
+    if not positive_value_exists(ballot_item_display_name):
         if positive_value_exists(contest_office_we_vote_id):
             contest_office_manager = ContestOfficeManager()
             results = contest_office_manager.retrieve_contest_office_from_we_vote_id(contest_office_we_vote_id)
             if results['success']:
                 contest_office = results['contest_office']
-                ballot_item_label = contest_office.office_name
+                ballot_item_display_name = contest_office.office_name
             else:
-                ballot_item_label = ''
+                ballot_item_display_name = ''
         elif positive_value_exists(candidate_campaign_we_vote_id):
             candidate_campaign_manager = CandidateCampaignManager()
             results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
                 candidate_campaign_we_vote_id)
             if results['success']:
                 candidate_campaign = results['candidate_campaign']
-                ballot_item_label = candidate_campaign.candidate_name
+                ballot_item_display_name = candidate_campaign.candidate_name
             else:
-                ballot_item_label = ''
+                ballot_item_display_name = ''
         # if positive_value_exists(politician_we_vote_id):
-        #     ballot_item_label = ''
+        #     ballot_item_display_name = ''
         elif positive_value_exists(contest_measure_we_vote_id):
             contest_measure_manager = ContestMeasureManager()
             results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(contest_measure_we_vote_id)
             if results['success']:
                 contest_measure = results['contest_measure']
-                ballot_item_label = contest_measure.measure_title
+                ballot_item_display_name = contest_measure.measure_title
             else:
-                ballot_item_label = ""
+                ballot_item_display_name = ""
 
     last_editor_we_vote_id = ""  # TODO We need to calculate this
 
@@ -472,7 +472,7 @@ def quick_info_edit_process_view(request):
     results = quick_info_manager.update_or_create_quick_info(
         quick_info_id=quick_info_id,
         quick_info_we_vote_id=quick_info_we_vote_id,
-        ballot_item_label=ballot_item_label,
+        ballot_item_display_name=ballot_item_display_name,
         contest_office_we_vote_id=contest_office_we_vote_id,
         candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
         politician_we_vote_id=politician_we_vote_id,

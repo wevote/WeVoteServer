@@ -6,9 +6,11 @@ from django.db import models
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from office.models import ContestOffice
+import re
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.models import extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.models import extract_first_name_from_full_name, extract_last_name_from_full_name, \
+    extract_state_from_ocd_division_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -115,10 +117,10 @@ class CandidateCampaignList(models.Model):
         if candidate_list_found:
             for candidate in candidate_list_objects:
                 one_candidate = {
-                    'ballot_item_label':    candidate.candidate_name,
-                    'candidate_we_vote_id': candidate.we_vote_id,
-                    'office_we_vote_id':    candidate.contest_office_we_vote_id,
-                    'measure_we_vote_id':   '',
+                    'ballot_item_display_name': candidate.candidate_name,
+                    'candidate_we_vote_id':     candidate.we_vote_id,
+                    'office_we_vote_id':        candidate.contest_office_we_vote_id,
+                    'measure_we_vote_id':       '',
                 }
                 candidate_list_light.append(one_candidate.copy())
 
@@ -144,6 +146,8 @@ class CandidateCampaign(models.Model):
         blank=True, unique=True)
     maplight_id = models.CharField(
         verbose_name="maplight candidate id", max_length=255, default=None, null=True, blank=True, unique=True)
+    vote_smart_id = models.CharField(
+        verbose_name="vote smart candidate id", max_length=15, default=None, null=True, blank=True, unique=False)
     # The internal We Vote id for the ContestOffice that this candidate is competing for. During setup we need to allow
     # this to be null.
     contest_office_id = models.CharField(
@@ -167,7 +171,10 @@ class CandidateCampaign(models.Model):
     party = models.CharField(verbose_name="party", max_length=255, null=True, blank=True)
     # A URL for a photo of the candidate.
     photo_url = models.CharField(verbose_name="photoUrl", max_length=255, null=True, blank=True)
-    photo_url_from_maplight = models.URLField(verbose_name='candidate portrait url of candidate', blank=True, null=True)
+    photo_url_from_maplight = models.URLField(
+        verbose_name='candidate portrait url of candidate from maplight', blank=True, null=True)
+    photo_url_from_vote_smart = models.URLField(
+        verbose_name='candidate portrait url of candidate from vote smart', blank=True, null=True)
     # The order the candidate appears on the ballot relative to other candidates for this contest.
     order_on_ballot = models.CharField(verbose_name="order on ballot", max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
@@ -216,6 +223,8 @@ class CandidateCampaign(models.Model):
     def fetch_photo_url(self):
         if self.photo_url_from_maplight:
             return self.photo_url_from_maplight
+        elif self.photo_url_from_vote_smart:
+            return self.photo_url_from_vote_smart_large()
         elif self.photo_url:
             return self.photo_url
         else:
@@ -225,6 +234,15 @@ class CandidateCampaign(models.Model):
         #     politician_manager = PoliticianManager()
         #     return politician_manager.fetch_photo_url(self.politician_id)
 
+    def photo_url_from_vote_smart_large(self):
+        if positive_value_exists(self.photo_url_from_vote_smart):
+            # Use regex to replace '.jpg' with '_lg.jpg'
+            # Vote smart returns the link to the small photo, but we want to use the large photo
+            photo_url_from_vote_smart_large = re.sub(r'.jpg', r'_lg.jpg', self.photo_url_from_vote_smart)
+            return photo_url_from_vote_smart_large
+        else:
+            return ""
+
     def fetch_twitter_handle(self):
         # TODO extract the twitter handle from twitter_url if we don't have it stored as a handle yet
         return self.twitter_url
@@ -233,6 +251,14 @@ class CandidateCampaign(models.Model):
         # Pull this from ocdDivisionId
         ocd_division_id = self.ocd_division_id
         return extract_state_from_ocd_division_id(ocd_division_id)
+
+    def extract_first_name(self):
+        full_name = self.candidate_name
+        return extract_first_name_from_full_name(full_name)
+
+    def extract_last_name(self):
+        full_name = self.candidate_name
+        return extract_last_name_from_full_name(full_name)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -325,6 +351,15 @@ class CandidateCampaignManager(models.Model):
         return candidate_campaign_manager.retrieve_candidate_campaign(
             candidate_campaign_id, we_vote_id, candidate_maplight_id)
 
+    def retrieve_candidate_campaign_from_vote_smart_id(self, candidate_vote_smart_id):
+        candidate_campaign_id = 0
+        we_vote_id = ''
+        candidate_maplight_id = ''
+        candidate_name = ''
+        candidate_campaign_manager = CandidateCampaignManager()
+        return candidate_campaign_manager.retrieve_candidate_campaign(
+            candidate_campaign_id, we_vote_id, candidate_maplight_id, candidate_name, candidate_vote_smart_id)
+
     def retrieve_candidate_campaign_from_candidate_name(self, candidate_name):
         candidate_campaign_id = 0
         we_vote_id = ''
@@ -357,7 +392,8 @@ class CandidateCampaignManager(models.Model):
 
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_candidate_campaign(
-            self, candidate_campaign_id, we_vote_id=None, candidate_maplight_id=None, candidate_name=None):
+            self, candidate_campaign_id, we_vote_id=None, candidate_maplight_id=None,
+            candidate_name=None, candidate_vote_smart_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -376,6 +412,10 @@ class CandidateCampaignManager(models.Model):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(maplight_id=candidate_maplight_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_MAPLIGHT_ID"
+            elif positive_value_exists(candidate_vote_smart_id):
+                candidate_campaign_on_stage = CandidateCampaign.objects.get(vote_smart_id=candidate_vote_smart_id)
+                candidate_campaign_id = candidate_campaign_on_stage.id
+                status = "RETRIEVE_CANDIDATE_FOUND_BY_VOTE_SMART_ID"
             elif positive_value_exists(candidate_name):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
                 candidate_campaign_id = candidate_campaign_on_stage.id

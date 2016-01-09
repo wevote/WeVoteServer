@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import QuickInfo, QuickInfoManager, QuickInfoMasterManager, OFFICE, CANDIDATE, POLITICIAN, MEASURE
+from .models import QuickInfo, QuickInfoManager, QuickInfoMasterManager
+from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -26,7 +27,7 @@ def quick_info_save_for_api(  # TODO to be converted
         public_figure_we_vote_id,
         voter_we_vote_id,
         google_civic_election_id,
-        ballot_item_label,
+        ballot_item_display_name,
         office_we_vote_id,
         candidate_we_vote_id,
         measure_we_vote_id,
@@ -62,7 +63,7 @@ def quick_info_save_for_api(  # TODO to be converted
             'quick_info_id':              quick_info_id,
             'quick_info_we_vote_id':      quick_info_we_vote_id,
             'new_quick_info_created':     False,
-            'ballot_item_label':        ballot_item_label,
+            'ballot_item_display_name':        ballot_item_display_name,
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -87,7 +88,7 @@ def quick_info_save_for_api(  # TODO to be converted
             'quick_info_id':              quick_info_id,
             'quick_info_we_vote_id':      quick_info_we_vote_id,
             'new_quick_info_created':     False,
-            'ballot_item_label':        ballot_item_label,
+            'ballot_item_display_name':        ballot_item_display_name,
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -113,7 +114,7 @@ def quick_info_save_for_api(  # TODO to be converted
         public_figure_we_vote_id=public_figure_we_vote_id,
         voter_we_vote_id=voter_we_vote_id,
         google_civic_election_id=google_civic_election_id,
-        ballot_item_label=ballot_item_label,
+        ballot_item_display_name=ballot_item_display_name,
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
@@ -132,7 +133,7 @@ def quick_info_save_for_api(  # TODO to be converted
             'quick_info_id':              quick_info.id,
             'quick_info_we_vote_id':      quick_info.we_vote_id,
             'new_quick_info_created':     save_results['new_quick_info_created'],
-            'ballot_item_label':        quick_info.ballot_item_label,
+            'ballot_item_display_name':        quick_info.ballot_item_display_name,
             'is_support':               quick_info.is_support(),
             'is_oppose':                quick_info.is_oppose(),
             'is_information_only':      quick_info.is_information_only(),
@@ -157,7 +158,7 @@ def quick_info_save_for_api(  # TODO to be converted
             'quick_info_id':              quick_info_id,
             'quick_info_we_vote_id':      quick_info_we_vote_id,
             'new_quick_info_created':     False,
-            'ballot_item_label':        '',
+            'ballot_item_display_name':        '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -320,7 +321,7 @@ def quick_info_retrieve_for_api(kind_of_ballot_item, ballot_item_we_vote_id):
             'language':                         '',
             'info_text':                        '',
             'info_html':                        '',
-            'ballot_item_label':                '',
+            'ballot_item_display_name':         '',
             'more_info_credit_text':            '',
             'more_info_url':                    '',
             'last_updated':                     '',
@@ -375,7 +376,7 @@ def quick_info_retrieve_for_api(kind_of_ballot_item, ballot_item_we_vote_id):
             'language':                         '',
             'info_text':                        '',
             'info_html':                        '',
-            'ballot_item_label':                '',
+            'ballot_item_display_name':         '',
             'more_info_credit_text':            '',
             'more_info_url':                    '',
             'last_updated':                     '',
@@ -453,7 +454,7 @@ def quick_info_retrieve_for_api(kind_of_ballot_item, ballot_item_we_vote_id):
             'quick_info_we_vote_id':            quick_info.we_vote_id,
             'kind_of_ballot_item':              kind_of_ballot_item,
             'ballot_item_we_vote_id':           ballot_item_we_vote_id,
-            'ballot_item_label':                quick_info.ballot_item_label,
+            'ballot_item_display_name':         quick_info.ballot_item_display_name,
             'language':                         quick_info.language,
             'info_text':                        info_text,
             'info_html':                        info_html,
@@ -481,7 +482,7 @@ def quick_info_retrieve_for_api(kind_of_ballot_item, ballot_item_we_vote_id):
             'language':                         '',
             'info_text':                        '',
             'info_html':                        '',
-            'ballot_item_label':                '',
+            'ballot_item_display_name':         '',
             'more_info_credit_text':            '',
             'more_info_url':                    '',
             'last_updated':                     '',
