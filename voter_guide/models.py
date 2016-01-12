@@ -11,6 +11,16 @@ from wevote_functions.models import convert_to_int, convert_to_str, positive_val
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+ORGANIZATION = 'O'
+PUBLIC_FIGURE = 'P'
+VOTER = 'V'
+UNKNOWN_VOTER_GUIDE = 'U'
+VOTER_GUIDE_TYPE_CHOICES = (
+    (ORGANIZATION, 'Organization'),
+    (PUBLIC_FIGURE, 'Public Figure or Politician'),
+    (VOTER, 'Voter'),
+)
+
 
 class VoterGuideManager(models.Manager):
     """
@@ -20,7 +30,7 @@ class VoterGuideManager(models.Manager):
                                                                  google_civic_election_id):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         new_voter_guide = VoterGuide()
-        voter_guide_owner_type = new_voter_guide.ORGANIZATION
+        voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
         if not google_civic_election_id or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE'
@@ -62,7 +72,7 @@ class VoterGuideManager(models.Manager):
 
     def update_or_create_organization_voter_guide_by_time_span(self, organization_we_vote_id, vote_smart_time_span):
         new_voter_guide = VoterGuide()
-        voter_guide_owner_type = new_voter_guide.ORGANIZATION
+        voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
         if not vote_smart_time_span or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE_BY_TIME_SPAN'
@@ -189,7 +199,7 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
-    def retrieve_voter_guide(self, voter_guide_id=0, google_civic_election_id=0,
+    def retrieve_voter_guide(self, voter_guide_id=0, google_civic_election_id=0, vote_smart_time_span=None,
                              organization_we_vote_id=None, public_figure_we_vote_id=None, owner_we_vote_id=None):
         voter_guide_id = convert_to_int(voter_guide_id)
         google_civic_election_id = convert_to_int(google_civic_election_id)
@@ -215,6 +225,12 @@ class VoterGuideManager(models.Manager):
                                                               organization_we_vote_id=organization_we_vote_id)
                 voter_guide_on_stage_id = voter_guide_on_stage.id
                 status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID"
+            elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
+                status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN"
+                voter_guide_on_stage = VoterGuide.objects.get(vote_smart_time_span=vote_smart_time_span,
+                                                              organization_we_vote_id=organization_we_vote_id)
+                voter_guide_on_stage_id = voter_guide_on_stage.id
+                status = "VOTER_GUIDE_FOUND_WITH_ORGANIZATION_WE_VOTE_ID_AND_TIME_SPAN"
             elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
                 status = "ERROR_RETRIEVING_VOTER_GUIDE_WITH_PUBLIC_FIGURE_WE_VOTE_ID"  # Set this in case the get fails
                 voter_guide_on_stage = VoterGuide.objects.get(google_civic_election_id=google_civic_election_id,
@@ -309,15 +325,6 @@ class VoterGuide(models.Model):
         verbose_name="the period in which the organization stated this position", max_length=255, null=True,
         blank=True, unique=False)
 
-    ORGANIZATION = 'O'
-    PUBLIC_FIGURE = 'P'
-    VOTER = 'V'
-    VOTER_GUIDE_TYPE_CHOICES = (
-        (ORGANIZATION, 'Organization'),
-        (PUBLIC_FIGURE, 'Public Figure or Politician'),
-        (VOTER, 'Voter'),
-    )
-
     voter_guide_owner_type = models.CharField(
         verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,
         default=ORGANIZATION)
@@ -352,34 +359,6 @@ class VoterGuideList(models.Model):
     """
     A set of methods to retrieve a list of voter_guides
     """
-
-    def retrieve_voter_guides_to_follow_by_ballot_item(self, ballot_item_we_vote_id):
-        success = False
-        status = "TO_BE_DETERMINED"
-        voter_guide_list = []
-        voter_guide_list_found = False
-
-        results = {
-            'success':                      success,
-            'status':                       status,
-            'voter_guide_list_found':       voter_guide_list_found,
-            'voter_guide_list':             voter_guide_list,
-        }
-        return results
-
-    def retrieve_voter_guides_to_follow_by_election(self, google_civic_election_id):
-        success = False
-        status = "TO_BE_DETERMINED"
-        voter_guide_list = []
-        voter_guide_list_found = False
-
-        results = {
-            'success':                      success,
-            'status':                       status,
-            'voter_guide_list_found':       voter_guide_list_found,
-            'voter_guide_list':             voter_guide_list,
-        }
-        return results
 
     # NOTE: This is extremely simple way to retrieve voter guides. Being replaced by:
     #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND
@@ -653,16 +632,6 @@ class VoterGuidePossibility(models.Model):
 
     # The unique ID of this election. (Provided by Google Civic)
     google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
-
-    # TODO Convert these to refer to the values set in VoterGuide so we don't duplicate them here
-    ORGANIZATION = 'O'
-    PUBLIC_FIGURE = 'P'
-    VOTER = 'V'
-    VOTER_GUIDE_TYPE_CHOICES = (
-        (ORGANIZATION, 'Organization'),
-        (PUBLIC_FIGURE, 'Public Figure or Politician'),
-        (VOTER, 'Voter'),
-    )
 
     voter_guide_owner_type = models.CharField(
         verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,

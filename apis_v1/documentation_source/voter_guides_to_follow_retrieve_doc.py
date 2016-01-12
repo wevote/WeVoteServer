@@ -21,6 +21,12 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
+            'name':         'kind_of_ballot_item',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'What is the type of ballot item that we are retrieving? '
+                            '(kind_of_ballot_item is either "OFFICE", "CANDIDATE", "POLITICIAN" or "MEASURE")',
+        },
+        {
             'name':         'ballot_item_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for a particular ballot item. If this variable is provided, '
@@ -58,7 +64,8 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        # 'organization_we_vote_id': 'wv85org1',
+        'kind_of_ballot_item': 'CANDIDATE',
+        'ballot_item_we_vote_id': 'wv01cand2897',
     }
 
     api_response = '{\n' \
@@ -67,11 +74,9 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "voter_guides": list\n' \
                    '   [\n' \
-                   '     "google_civic_election_id": integer,\n' \
-                   '     "voter_guide_owner_type": one character (O = Organization, P = Public Figure, V = Voter),\n' \
-                   '     "organization_we_vote_id": string (a unique We Vote ID if owner type is "O"),\n' \
-                   '     "public_figure_we_vote_id": string (a unique We Vote ID if owner type is "P"),\n' \
-                   '     "owner_voter_id": integer (a unique integer id if owner type is "V"),\n' \
+                   '     "speaker_label": string (Name of this org or person),\n' \
+                   '     "speaker_type": ORGANIZATION, PUBLIC_FIGURE, VOTER),\n' \
+                   '     "we_vote_id": string (a unique We Vote ID),\n' \
                    '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
                    '   ],\n' \
                    '  "google_civic_election_id": integer,\n' \

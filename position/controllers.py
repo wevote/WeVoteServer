@@ -13,6 +13,7 @@ from follow.models import FollowOrganizationList
 from organization.models import OrganizationManager
 import json
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
+from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, is_voter_device_id_valid, positive_value_exists
 
@@ -319,18 +320,21 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
 
     position_list_manager = PositionListManager()
     if positive_value_exists(candidate_id):
+        candidate_we_vote_id = ''
         all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                candidate_id, stance_we_are_looking_for)
+                candidate_id, candidate_we_vote_id, stance_we_are_looking_for)
         kind_of_ballot_item = CANDIDATE
         ballot_item_id = candidate_id
     elif positive_value_exists(measure_id):
+        measure_we_vote_id = ''
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
-                measure_id, stance_we_are_looking_for)
+                measure_id, measure_we_vote_id, stance_we_are_looking_for)
         kind_of_ballot_item = MEASURE
         ballot_item_id = measure_id
     elif positive_value_exists(office_id):
+        office_we_vote_id = ''
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
-                office_id, stance_we_are_looking_for)
+                office_id, office_we_vote_id, stance_we_are_looking_for)
         kind_of_ballot_item = OFFICE
         ballot_item_id = measure_id
     else:
@@ -366,22 +370,22 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
     for one_position in position_objects:
         # Whose position is it?
         if positive_value_exists(one_position.organization_we_vote_id):
-            speaker_type = "ORGANIZATION"
+            speaker_type = ORGANIZATION
             speaker_id = one_position.organization_id
             speaker_we_vote_id = one_position.organization_we_vote_id
             one_position_success = True
         elif positive_value_exists(one_position.voter_id):
-            speaker_type = "VOTER"
+            speaker_type = VOTER
             speaker_id = one_position.voter_id
             speaker_we_vote_id = one_position.voter_we_vote_id
             one_position_success = True
         elif positive_value_exists(one_position.public_figure_we_vote_id):
-            speaker_type = "PUBLIC_FIGURE"
+            speaker_type = PUBLIC_FIGURE
             speaker_id = one_position.public_figure_id
             speaker_we_vote_id = one_position.public_figure_we_vote_id
             one_position_success = True
         else:
-            speaker_type = "UNKNOWN"
+            speaker_type = UNKNOWN_VOTER_GUIDE
             speaker_id = None
             speaker_we_vote_id = None
             one_position_success = False

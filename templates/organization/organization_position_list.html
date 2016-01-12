@@ -40,6 +40,7 @@
         <td>Candidate/Measure</td>
         <td>Stance</td>
         <td>Election</td>
+        <td>Time Span</td>
     </tr>
 
     {% for organization_position in organization_position_list %}
@@ -49,6 +50,7 @@
         <td>{{ organization_position.get_stance_display }}
             {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
         <td>{{ organization_position.election.election_day_text }}</td>
+        <td>{{ organization_position.vote_smart_time_span }}</td>
     </tr>
     {% endfor %}
 

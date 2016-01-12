@@ -465,27 +465,38 @@ class PositionListManager(models.Model):
 
         return positions_not_followed_by_voter
 
-    def retrieve_all_positions_for_candidate_campaign(self, candidate_campaign_id, stance_we_are_looking_for):
+    def retrieve_all_positions_for_candidate_campaign(self, candidate_campaign_id, candidate_campaign_we_vote_id,
+                                                      stance_we_are_looking_for):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
             return position_list
 
-        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
-        #  all stances
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
+        #  which means we want to return all stances
+
+        if not positive_value_exists(candidate_campaign_id) and not \
+                positive_value_exists(candidate_campaign_we_vote_id):
+            position_list = []
+            return position_list
 
         # Retrieve the support positions for this candidate_campaign_id
-        position_list = PositionEntered()
+        position_list = []
         position_list_found = False
         try:
             position_list = PositionEntered.objects.order_by('date_entered')
-            position_list = position_list.filter(candidate_campaign_id=candidate_campaign_id)
+            if positive_value_exists(candidate_campaign_id):
+                position_list = position_list.filter(candidate_campaign_id=candidate_campaign_id)
+            else:
+                position_list = position_list.filter(candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
                 position_list = position_list.filter(stance=stance_we_are_looking_for)
+            # Limit to positions in the last x years
             # position_list = position_list.filter(election_id=election_id)
             if len(position_list):
+                position_count = len(position_list)
                 position_list_found = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
@@ -496,7 +507,8 @@ class PositionListManager(models.Model):
             position_list = []
             return position_list
 
-    def retrieve_all_positions_for_contest_measure(self, contest_measure_id, stance_we_are_looking_for):
+    def retrieve_all_positions_for_contest_measure(self, contest_measure_id, contest_measure_we_vote_id,
+                                                   stance_we_are_looking_for):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -505,11 +517,19 @@ class PositionListManager(models.Model):
         # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
         #  all stances
 
+        if not positive_value_exists(contest_measure_id) and not \
+                positive_value_exists(contest_measure_we_vote_id):
+            position_list = []
+            return position_list
+
         # Retrieve the support positions for this contest_measure_id
         position_list_found = False
         try:
             position_list = PositionEntered.objects.order_by('date_entered')
-            position_list = position_list.filter(contest_measure_id=contest_measure_id)
+            if positive_value_exists(contest_measure_id):
+                position_list = position_list.filter(contest_measure_id=contest_measure_id)
+            else:
+                position_list = position_list.filter(contest_measure_we_vote_id=contest_measure_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list

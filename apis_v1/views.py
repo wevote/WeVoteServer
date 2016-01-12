@@ -3,8 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
-    organization_stop_following, voter_count, voter_create, \
-    voter_guides_to_follow_retrieve_for_api
+    organization_stop_following, voter_count, voter_create
 from ballot.controllers import ballot_item_options_retrieve_for_api, voter_ballot_items_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from django.http import HttpResponse
@@ -32,7 +31,8 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_address_save_for_api, voter_retrieve_list_for_api
 from voter.serializers import VoterSerializer
-from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api
+from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
+    voter_guides_to_follow_retrieve_for_api
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
     get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie, positive_value_exists
 import wevote_functions.admin
@@ -465,6 +465,7 @@ def voter_guides_to_follow_retrieve_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', '')
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     use_test_election = request.GET.get('use_test_election', False)
@@ -482,7 +483,8 @@ def voter_guides_to_follow_retrieve_view(request):
         # if not positive_value_exists(google_civic_election_id):
         #     google_civic_election_id = fetch_google_civic_election_id_for_voter_id(voter_id)
 
-    results = voter_guides_to_follow_retrieve_for_api(voter_device_id, ballot_item_we_vote_id, google_civic_election_id)
+    results = voter_guides_to_follow_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
+                                                      google_civic_election_id)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     # Save google_civic_election_id with fresh version that we retrieved from BallotItem table (if not passed in)

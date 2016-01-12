@@ -32,9 +32,10 @@ def positions_related_to_candidate_campaign_view(request, candidate_campaign_id,
     #  application layer
 
     position_list_manager = PositionListManager()
+    candidate_campaign_we_vote_id = ''
     all_positions_list_for_candidate_campaign = \
         position_list_manager.retrieve_all_positions_for_candidate_campaign(
-            candidate_campaign_id, stance_we_are_looking_for)
+            candidate_campaign_id, candidate_campaign_we_vote_id, stance_we_are_looking_for)
 
     voter_device_id = get_voter_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)

@@ -70,9 +70,10 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, stance_we_are
     #  application layer
 
     position_list_manager = PositionListManager()
+    candidate_we_vote_id = ''
     all_positions_list_for_candidate_campaign = \
         position_list_manager.retrieve_all_positions_for_candidate_campaign(
-            candidate_id, stance_we_are_looking_for)
+            candidate_id, candidate_we_vote_id, stance_we_are_looking_for)
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
@@ -116,9 +117,10 @@ def positions_count_for_contest_measure(voter_id, measure_id, stance_we_are_look
     #  application layer
 
     position_list_manager = PositionListManager()
+    measure_we_vote_id = ''
     all_positions_list_for_contest_measure = \
         position_list_manager.retrieve_all_positions_for_contest_measure(
-            measure_id, stance_we_are_looking_for)
+            measure_id, measure_we_vote_id, stance_we_are_looking_for)
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
