@@ -669,9 +669,22 @@ def voter_star_off_save_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    office_id = request.GET.get('office_id', 0)
-    candidate_id = request.GET.get('candidate_id', 0)
-    measure_id = request.GET.get('measure_id', 0)
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    ballot_item_id = request.GET.get('ballot_item_id', 0)
+    # Coming soon
+    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    if kind_of_ballot_item == OFFICE:
+        office_id = ballot_item_id
+        candidate_id = 0
+        measure_id = 0
+    elif kind_of_ballot_item == CANDIDATE:
+        office_id = 0
+        candidate_id = ballot_item_id
+        measure_id = 0
+    elif kind_of_ballot_item == MEASURE:
+        office_id = 0
+        candidate_id = 0
+        measure_id = ballot_item_id
     return voter_star_off_save_for_api(
         voter_device_id=voter_device_id, office_id=office_id, candidate_id=candidate_id, measure_id=measure_id)
 
@@ -683,9 +696,22 @@ def voter_star_on_save_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    office_id = request.GET.get('office_id', 0)
-    candidate_id = request.GET.get('candidate_id', 0)
-    measure_id = request.GET.get('measure_id', 0)
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    ballot_item_id = request.GET.get('ballot_item_id', 0)
+    # Coming soon
+    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    if kind_of_ballot_item == OFFICE:
+        office_id = ballot_item_id
+        candidate_id = 0
+        measure_id = 0
+    elif kind_of_ballot_item == CANDIDATE:
+        office_id = 0
+        candidate_id = ballot_item_id
+        measure_id = 0
+    elif kind_of_ballot_item == MEASURE:
+        office_id = 0
+        candidate_id = 0
+        measure_id = ballot_item_id
     return voter_star_on_save_for_api(
         voter_device_id=voter_device_id, office_id=office_id, candidate_id=candidate_id, measure_id=measure_id)
 
@@ -697,9 +723,22 @@ def voter_star_status_retrieve_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    office_id = request.GET.get('office_id', 0)
-    candidate_id = request.GET.get('candidate_id', 0)
-    measure_id = request.GET.get('measure_id', 0)
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    ballot_item_id = request.GET.get('ballot_item_id', 0)
+    # Coming soon
+    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    if kind_of_ballot_item == OFFICE:
+        office_id = ballot_item_id
+        candidate_id = 0
+        measure_id = 0
+    elif kind_of_ballot_item == CANDIDATE:
+        office_id = 0
+        candidate_id = ballot_item_id
+        measure_id = 0
+    elif kind_of_ballot_item == MEASURE:
+        office_id = 0
+        candidate_id = 0
+        measure_id = ballot_item_id
     return voter_star_status_retrieve_for_api(
         voter_device_id=voter_device_id,
         office_id=office_id,

@@ -23,14 +23,14 @@ def ballot_item_retrieve_doc_template_values(url_root):
             'name':         'ballot_item_id',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'The unique internal identifier for this ballot_item '
-                            '(either candidate_id OR candidate_we_vote_id required -- not both. '
-                            'If it exists, candidate_id is used instead of candidate_we_vote_id)',
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
+                            'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
         {
             'name':         'ballot_item_we_vote_id',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'The unique identifier for this candidate across all networks '
-                            '(either candidate_id OR candidate_we_vote_id required -- not both.) '
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both.) '
                             'NOTE: In the future we might support other identifiers used in the industry.',
         },
     ]

@@ -20,23 +20,36 @@ def voter_star_on_save_doc_template_values(url_root):
                             'a voter record on the server',
         },
         {
-            'name':         'office_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The office that the voter is starring. '
-                            '(Either office_id, candidate_id or measure_id must exist)',
+            'name':         'kind_of_ballot_item',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'What is the type of ballot item for which we are saving the \'on\' status? '
+                            '(kind_of_ballot_item is either "OFFICE", "CANDIDATE", "POLITICIAN" or "MEASURE")',
         },
         {
-            'name':         'candidate_id',
+            'name':         'ballot_item_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The candidate that the voter is supporting. '
-                            '(Either office_id, candidate_id or measure_id must exist)',
+            'description':  'The unique internal identifier for this ballot_item '
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
+                            'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
-        {
-            'name':         'measure_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The measure that the voter is supporting. '
-                            '(Either office_id, candidate_id or measure_id must exist)',
-        },
+        # {
+        #     'name':         'office_id',
+        #     'value':        'integer',  # boolean, integer, long, string
+        #     'description':  'The office that the voter is starring. '
+        #                     '(Either office_id, candidate_id or measure_id must exist)',
+        # },
+        # {
+        #     'name':         'candidate_id',
+        #     'value':        'integer',  # boolean, integer, long, string
+        #     'description':  'The candidate that the voter is supporting. '
+        #                     '(Either office_id, candidate_id or measure_id must exist)',
+        # },
+        # {
+        #     'name':         'measure_id',
+        #     'value':        'integer',  # boolean, integer, long, string
+        #     'description':  'The measure that the voter is supporting. '
+        #                     '(Either office_id, candidate_id or measure_id must exist)',
+        # },
     ]
     optional_query_parameter_list = [
         # {
@@ -70,7 +83,8 @@ def voter_star_on_save_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        'candidate_id': '5655',
+        'kind_of_ballot_item': 'CANDIDATE',
+        'ballot_item_id': '5655',
     }
 
     api_response = '{\n' \
