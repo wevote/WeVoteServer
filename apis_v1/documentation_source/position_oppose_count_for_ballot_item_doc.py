@@ -19,17 +19,31 @@ def position_oppose_count_for_ballot_item_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
-            'name':         'candidate_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The candidate we want the oppose count for. '
-                            '(Either measure_id or candidate_id must exist)',
+            'name':         'kind_of_ballot_item',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The kind of ballot item we want the oppose count for. '
+                            '(kind_of_ballot_item is either "CANDIDATE", "POLITICIAN" or "MEASURE")',
         },
         {
-            'name':         'measure_id',
+            'name':         'ballot_item_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The measure we want the oppose count for. (Either measure_id or candidate_id must exist. '
-                            'We ignore measure_id if candidate_id exists.)',
+            'description':  'The unique internal identifier of the ballot item we want the oppose count for. '
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
+                            'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
+        # {
+        #     'name':         'candidate_id',
+        #     'value':        'integer',  # boolean, integer, long, string
+        #     'description':  'The candidate we want the oppose count for. '
+        #                     '(Either measure_id or candidate_id must exist)',
+        # },
+        # {
+        #     'name':         'measure_id',
+        #     'value':        'integer',  # boolean, integer, long, string
+        #     'description':  'The measure we want the oppose count for. '
+        #                     '(Either measure_id or candidate_id must exist. '
+        #                     'We ignore measure_id if candidate_id exists.)',
+        # },
     ]
     optional_query_parameter_list = [
         # {
@@ -63,7 +77,8 @@ def position_oppose_count_for_ballot_item_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        'candidate_id': '5655',
+        'kind_of_ballot_item': 'CANDIDATE',
+        'ballot_item_id': '5655',
     }
 
     api_response = '{\n' \
