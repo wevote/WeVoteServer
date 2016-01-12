@@ -20,17 +20,30 @@ def voter_stop_opposing_save_doc_template_values(url_root):
                             'a voter record on the server',
         },
         {
-            'name':         'candidate_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The candidate that the voter wants to stop opposing. '
-                            '(Either measure_id or candidate_id must exist)',
+            'name':         'kind_of_ballot_item',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The kind of ballot item the voter wants to stop opposing. '
+                            '(kind_of_ballot_item is either "CANDIDATE", "POLITICIAN" or "MEASURE")',
         },
         {
-            'name':         'measure_id',
+            'name':         'ballot_item_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The measure that the voter wants to stop opposing. '
-                            '(Either measure_id or candidate_id must exist)',
+            'description':  'The unique internal identifier of the ballot item the voter wants to stop opposing. '
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
+                            'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
+        # {
+        #     'name':         'candidate_id',
+        #     'value':        'integer',  # boolean, integer, long, string
+        #     'description':  'The candidate that the voter wants to stop opposing. '
+        #                     '(Either measure_id or candidate_id must exist)',
+        # },
+        # {
+        #     'name':         'measure_id',
+        #     'value':        'integer',  # boolean, integer, long, string
+        #     'description':  'The measure that the voter wants to stop opposing. '
+        #                     '(Either measure_id or candidate_id must exist)',
+        # },
     ]
     optional_query_parameter_list = [
         # {
@@ -88,7 +101,8 @@ def voter_stop_opposing_save_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        'candidate_id': '5655',
+        'kind_of_ballot_item': 'CANDIDATE',
+        'ballot_item_id': '5655',
     }
 
     api_response = '{\n' \
