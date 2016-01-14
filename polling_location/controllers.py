@@ -12,6 +12,14 @@ def import_and_save_all_polling_locations_data():
     # and download the first zip file.
     # https://data.votinginfoproject.org/feeds/STATE/?order=D
 
+    # Alaska
+    xml_file_location = 'polling_location/import_data/ak/vipFeed-02-2014-11-04-AK.xml'
+    ak1_results = import_and_save_polling_location_data(xml_file_location)
+
+    # Arizona
+    xml_file_location = 'polling_location/import_data/az/vipFeed-04-2015-11-03-AZ.xml'
+    az1_results = import_and_save_polling_location_data(xml_file_location)
+
     # ##################
     # California
     xml_file_location = 'polling_location/import_data/ca/vipFeed-06-2015-11-03-short.xml'
@@ -38,6 +46,34 @@ def import_and_save_all_polling_locations_data():
     xml_file_location = 'polling_location/import_data/ca/vipFeed-6115-2014-11-04-short.xml'
     ca8_results = import_and_save_polling_location_data(xml_file_location)
 
+    # North Carolina
+    xml_file_location = 'polling_location/import_data/nc/vipFeed-37-2015-04-07.xml'
+    nc1_results = import_and_save_polling_location_data(xml_file_location)
+
+    #
+    xml_file_location = 'polling_location/import_data/nd/vipFeed-38-2014-11-04.xml'
+    nd1_results = import_and_save_polling_location_data(xml_file_location)
+
+    #
+    xml_file_location = 'polling_location/import_data/ne/vipFeed-31-2014-11-04.xml'
+    ne1_results = import_and_save_polling_location_data(xml_file_location)
+
+    # New Hampshire
+    xml_file_location = 'polling_location/import_data/nh/vipFeed-33-2012-11-06.xml'
+    nh1_results = import_and_save_polling_location_data(xml_file_location)
+
+    # New Jersey
+    xml_file_location = 'polling_location/import_data/nj/vipFeed-34-2015-11-03.xml'
+    nj1_results = import_and_save_polling_location_data(xml_file_location)
+
+    # Nevada
+    xml_file_location = 'polling_location/import_data/nv/vipFeed-32-2014-11-04.xml'
+    nv1_results = import_and_save_polling_location_data(xml_file_location)
+
+    # New York
+    xml_file_location = 'polling_location/import_data/ny/vipFeed-36-2015-11-03.xml'
+    ny1_results = import_and_save_polling_location_data(xml_file_location)
+
     # ##################
     # Rhode Island
     xml_file_location = 'polling_location/import_data/ri/vipFeed-44-2015-12-15-short.xml'
@@ -52,12 +88,32 @@ def import_and_save_all_polling_locations_data():
     # ##################
     # Virginia
     xml_file_location = 'polling_location/import_data/va/vipFeed-51-2015-11-03-short.xml'
-    va_results = import_and_save_polling_location_data(xml_file_location)
+    va1_results = import_and_save_polling_location_data(xml_file_location)
 
-    return merge_polling_location_results(ca1_results, ca2_results, ca3_results, ca4_results, ca5_results, ca6_results,
+    # Washington
+    xml_file_location = 'polling_location/import_data/wa/vipFeed-53-2015-08-04.xml'
+    wa1_results = import_and_save_polling_location_data(xml_file_location)
+
+    # Wisconsin
+    xml_file_location = 'polling_location/import_data/wi/vipFeed-55-2015-04-07.xml'
+    wi1_results = import_and_save_polling_location_data(xml_file_location)
+
+    # West Virginia
+    xml_file_location = 'polling_location/import_data/wv/vipFeed-54-2015-05-16.xml'
+    wv1_results = import_and_save_polling_location_data(xml_file_location)
+
+    # Wyoming
+    xml_file_location = 'polling_location/import_data/wy/vipFeed-56-2016-11-08.xml'
+    wy1_results = import_and_save_polling_location_data(xml_file_location)
+
+    return merge_polling_location_results(ak1_results, az1_results,
+                                          ca1_results, ca2_results, ca3_results, ca4_results, ca5_results, ca6_results,
                                           ca7_results, ca8_results,
+                                          nc1_results, nd1_results,
+                                          ne1_results, nh1_results, nj1_results, nv1_results, ny1_results,
                                           ri1_results, ri2_results, ri3_results,
-                                          va_results)
+                                          va1_results, wa1_results, wi1_results, wv1_results, wy1_results
+                                          )
 
 
 def merge_polling_location_results(*dict_args):
@@ -106,6 +162,9 @@ def retrieve_polling_locations_data_from_xml(xml_file_location):
             line1_text = line1.text if line1 is not None else ''
             city = address.find('city')
             city_text = city.text if city is not None else ''
+            if city_text == 'A BALLOT FOR EACH ELECTION':
+                # We don't want to save this polling location
+                continue
             state = address.find('state')
             state_text = state.text if state is not None else ''
             zip_long = address.find('zip')

@@ -84,7 +84,7 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, stance_we_are
             voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
         positions_followed_count = len(positions_followed)
         json_data = {
-            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_FOLLOWED',
+            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_FOLLOWED_CC',
             'success': True,
             'count': positions_followed_count,
         }
@@ -97,7 +97,7 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, stance_we_are
             all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
         positions_not_followed_count = len(positions_not_followed)
         json_data = {
-            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED',
+            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED_CC',
             'success': True,
             'count': positions_not_followed_count,
         }
