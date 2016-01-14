@@ -1,0 +1,1030 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>MARICOPA COUNTY BOARD OF ELECTIONS</name>
+  <vip_id>4013000</vip_id>
+  <datetime>2015-10-29T17:28:21.373000</datetime>
+  <description>The Maricopa County Board of Elections is the official source of election information for Maricopa County AZ</description>
+  <organization_url>http://recorder.maricopa.gov/web/elections.aspx</organization_url>
+</source>
+<polling_location id="55010226">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>AVONDALE</city>
+    <line1>1001 N CENTRAL AVE</line1>
+    <state>AZ</state>
+    <location_name>FIRST SOUTHERN BAPTIST CHURCH/AVONDALE</location_name>
+    <zip>85323</zip>
+  </address>
+</polling_location>
+<polling_location id="55013792">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>AVONDALE</city>
+    <line1>11301 W INDIAN SCHOOL RD</line1>
+    <state>AZ</state>
+    <location_name>CORNERSTONE CHRISTIAN CENTER</location_name>
+    <zip>85392</zip>
+  </address>
+</polling_location>
+<polling_location id="55014907">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>AVONDALE</city>
+    <line1>3300 N SANTA FE TRL</line1>
+    <state>AZ</state>
+    <location_name>CORTE SIERRA SCHOOL</location_name>
+    <zip>85392</zip>
+  </address>
+</polling_location>
+<polling_location id="55014755">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>AVONDALE</city>
+    <line1>350 S 118TH AVE</line1>
+    <state>AZ</state>
+    <location_name>COLLIER SCHOOL</location_name>
+    <zip>85323</zip>
+  </address>
+</polling_location>
+<polling_location id="55010274">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>BUCKEYE</city>
+    <line1>1000 E NARRAMORE AVE</line1>
+    <state>AZ</state>
+    <location_name>BUCKEYE UNION HIGH SCH/DIST OFICE #201</location_name>
+    <zip>85326</zip>
+  </address>
+</polling_location>
+<polling_location id="55011686">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>BUCKEYE</city>
+    <line1>10700 S PALO VERDE RD</line1>
+    <state>AZ</state>
+    <location_name>PALO VERDE SCH/DISTRICT OFFICE</location_name>
+    <zip>85326</zip>
+  </address>
+</polling_location>
+<polling_location id="55014503">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>BUCKEYE</city>
+    <line1>19716 W NARRAMORE RD</line1>
+    <state>AZ</state>
+    <location_name>RAINBOW VALLEY SCHOOL</location_name>
+    <zip>85326</zip>
+  </address>
+</polling_location>
+<polling_location id="55015122">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>BUCKEYE</city>
+    <line1>22150 W SUNDANCE S PKWY</line1>
+    <state>AZ</state>
+    <location_name>FREEDOM SCHOOL #25</location_name>
+    <zip>85326</zip>
+  </address>
+</polling_location>
+<polling_location id="55015466">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>BUCKEYE</city>
+    <line1>23601 W DURANGO ST</line1>
+    <state>AZ</state>
+    <location_name>INCA SCHOOL</location_name>
+    <zip>85326</zip>
+  </address>
+</polling_location>
+<polling_location id="55015468">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>BUCKEYE</city>
+    <line1>29677 W INDIANOLA AVE</line1>
+    <state>AZ</state>
+    <location_name>TARTESSO SCHOOL</location_name>
+    <zip>85396</zip>
+  </address>
+</polling_location>
+<polling_location id="55012806">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>CAVE CREEK</city>
+    <line1>29811 N TATUM BLVD</line1>
+    <state>AZ</state>
+    <location_name>TATUM RANCH COMMUNITY CENTER</location_name>
+    <zip>85331</zip>
+  </address>
+</polling_location>
+<polling_location id="55012226">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>CAVE CREEK</city>
+    <line1>37622 N CAVE CREEK RD</line1>
+    <state>AZ</state>
+    <location_name>CAVE CREEK TOWN HALL</location_name>
+    <zip>85331</zip>
+  </address>
+</polling_location>
+<polling_location id="55011705">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>EL MIRAGE</city>
+    <line1>11405 N DYSART RD</line1>
+    <state>AZ</state>
+    <location_name>DYSART HIGH SCHOOL</location_name>
+    <zip>85335</zip>
+  </address>
+</polling_location>
+<polling_location id="55015203">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>EL MIRAGE</city>
+    <line1>14414 N EL MIRAGE RD</line1>
+    <state>AZ</state>
+    <location_name>DYSART COMMUNITY CENTER</location_name>
+    <zip>85335</zip>
+  </address>
+</polling_location>
+<polling_location id="55010873">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>11232 N 65TH AVE</line1>
+    <state>AZ</state>
+    <location_name>COPPERWOOD SCHOOL</location_name>
+    <zip>85304</zip>
+  </address>
+</polling_location>
+<polling_location id="55010856">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>11611 N 51ST AVE</line1>
+    <state>AZ</state>
+    <location_name>APOLLO BAPTIST CHURCH</location_name>
+    <zip>85304</zip>
+  </address>
+</polling_location>
+<polling_location id="55014795">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>17417 N 63RD AVE</line1>
+    <state>AZ</state>
+    <location_name>HOPE CHAPEL</location_name>
+    <zip>85308</zip>
+  </address>
+</polling_location>
+<polling_location id="55013051">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>24220 N 43RD AVE</line1>
+    <state>AZ</state>
+    <location_name>HAPPY VALLEY BAPTIST CHR</location_name>
+    <zip>85310</zip>
+  </address>
+</polling_location>
+<polling_location id="55014168">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>5035 W PARADISE LN</line1>
+    <state>AZ</state>
+    <location_name>COMMUNITY OF CHRIST</location_name>
+    <zip>85306</zip>
+  </address>
+</polling_location>
+<polling_location id="55013847">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>5805 W ALAMEDA RD</line1>
+    <state>AZ</state>
+    <location_name>LAS BRISAS SCHOOL</location_name>
+    <zip>85310</zip>
+  </address>
+</polling_location>
+<polling_location id="55011363">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>6330 W GREENWAY RD</line1>
+    <state>AZ</state>
+    <location_name>CACTUS HIGH SCHOOL</location_name>
+    <zip>85306</zip>
+  </address>
+</polling_location>
+<polling_location id="55013841">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>6801 W DEER VALLEY RD</line1>
+    <state>AZ</state>
+    <location_name>DEER VALLEY FIRE STATION #156</location_name>
+    <zip>85308</zip>
+  </address>
+</polling_location>
+<polling_location id="55014063">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>7020 W OCOTILLO RD</line1>
+    <state>AZ</state>
+    <location_name>DESERT GARDEN SCHOOL</location_name>
+    <zip>85303</zip>
+  </address>
+</polling_location>
+<polling_location id="55013881">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>7925 W BETHANY HOME RD</line1>
+    <state>AZ</state>
+    <location_name>WESTSIDE CHURCH OF GOD</location_name>
+    <zip>85303</zip>
+  </address>
+</polling_location>
+<polling_location id="55010390">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GLENDALE</city>
+    <line1>8530 N 55TH AVE</line1>
+    <state>AZ</state>
+    <location_name>GLENDALE AMERICAN SCHOOL</location_name>
+    <zip>85302</zip>
+  </address>
+</polling_location>
+<polling_location id="55014950">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>GOODYEAR</city>
+    <line1>2131 S 157TH AVE</line1>
+    <state>AZ</state>
+    <location_name>DESERT STAR SCHOOL</location_name>
+    <zip>85338</zip>
+  </address>
+</polling_location>
+<polling_location id="55011622">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>LAVEEN</city>
+    <line1>5036 W DOBBINS RD</line1>
+    <state>AZ</state>
+    <location_name>LAVEEN BAPTIST CHURCH</location_name>
+    <zip>85339</zip>
+  </address>
+</polling_location>
+<polling_location id="55015265">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>LAVEEN</city>
+    <line1>7275 W VINEYARD RD</line1>
+    <state>AZ</state>
+    <location_name>TRAILSIDE POINT SCHOOL</location_name>
+    <zip>85339</zip>
+  </address>
+</polling_location>
+<polling_location id="55014933">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>LITCHFIELD PARK</city>
+    <line1>13335 W MISSOURI AVE</line1>
+    <state>AZ</state>
+    <location_name>DREAMING SUMMIT SCHOOL</location_name>
+    <zip>85340</zip>
+  </address>
+</polling_location>
+<polling_location id="55012005">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>LITCHFIELD PARK</city>
+    <line1>18706 W THOMAS RD</line1>
+    <state>AZ</state>
+    <location_name>SCOTT LIBBY SCHOOL</location_name>
+    <zip>85340</zip>
+  </address>
+</polling_location>
+<polling_location id="55010647">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>LITCHFIELD PARK</city>
+    <line1>300 N OLD LITCHFIELD RD</line1>
+    <state>AZ</state>
+    <location_name>CHURCH AT LITCHFIELD PARK</location_name>
+    <zip>85340</zip>
+  </address>
+</polling_location>
+<polling_location id="55012087">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>NEW RIVER</city>
+    <line1>48827 N BLACK CANYON HWY</line1>
+    <state>AZ</state>
+    <location_name>NEW RIVER SCHOOL</location_name>
+    <zip>85087</zip>
+  </address>
+</polling_location>
+<polling_location id="55010024">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PARADISE VALLEY</city>
+    <line1>3535 E LINCOLN DR</line1>
+    <state>AZ</state>
+    <location_name>PALO CRISTI PRESBYTERIAN CHURCH</location_name>
+    <zip>85253</zip>
+  </address>
+</polling_location>
+<polling_location id="55012092">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PEORIA</city>
+    <line1>10935 W OLIVE AVE</line1>
+    <state>AZ</state>
+    <location_name>WEST OLIVE CHURCH OF CHRIST</location_name>
+    <zip>85345</zip>
+  </address>
+</polling_location>
+<polling_location id="55013897">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PEORIA</city>
+    <line1>15585 N 91ST AVE</line1>
+    <state>AZ</state>
+    <location_name>DESERT HARBOR SCHOOL</location_name>
+    <zip>85382</zip>
+  </address>
+</polling_location>
+<polling_location id="55012187">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PEORIA</city>
+    <line1>19251 N WESTBROOK PKWY</line1>
+    <state>AZ</state>
+    <location_name>LAKES REC CTR @ WESTBROOK VILLAGE</location_name>
+    <zip>85382</zip>
+  </address>
+</polling_location>
+<polling_location id="55014241">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PEORIA</city>
+    <line1>21180 N 87TH AVE</line1>
+    <state>AZ</state>
+    <location_name>COYOTE HILLS SCHOOL</location_name>
+    <zip>85382</zip>
+  </address>
+</polling_location>
+<polling_location id="55015155">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PEORIA</city>
+    <line1>27501 N LAKE PLEASANT PKWY</line1>
+    <state>AZ</state>
+    <location_name>CIBOLA VISTA RESORT</location_name>
+    <zip>85383</zip>
+  </address>
+</polling_location>
+<polling_location id="55015104">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PEORIA</city>
+    <line1>30009 N SUNRISE POINT</line1>
+    <state>AZ</state>
+    <location_name>VISTANCIA SCHOOL</location_name>
+    <zip>85383</zip>
+  </address>
+</polling_location>
+<polling_location id="55012159">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PEORIA</city>
+    <line1>7841 W SWEETWATER AVE</line1>
+    <state>AZ</state>
+    <location_name>OASIS SCHOOL</location_name>
+    <zip>85381</zip>
+  </address>
+</polling_location>
+<polling_location id="55013873">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PEORIA</city>
+    <line1>8335 W JEFFERSON ST</line1>
+    <state>AZ</state>
+    <location_name>PEORIA COMMUNITY CENTER</location_name>
+    <zip>85345</zip>
+  </address>
+</polling_location>
+<polling_location id="55010941">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>12835 N 33RD AVE</line1>
+    <state>AZ</state>
+    <location_name>SAHUARO SCHOOL</location_name>
+    <zip>85029</zip>
+  </address>
+</polling_location>
+<polling_location id="55014105">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>14201 N 32ND ST</line1>
+    <state>AZ</state>
+    <location_name>CALVARY CHAPEL NORTH PHOENIX</location_name>
+    <zip>85032</zip>
+  </address>
+</polling_location>
+<polling_location id="55010258">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>1428 S 13TH AVE</line1>
+    <state>AZ</state>
+    <location_name>ST JOHN INSTITUTIONAL BAPTIST CHURCH</location_name>
+    <zip>85007</zip>
+  </address>
+</polling_location>
+<polling_location id="55010298">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>15025 N 19TH AVE</line1>
+    <state>AZ</state>
+    <location_name>NORTH HILLS CHURCH</location_name>
+    <zip>85023</zip>
+  </address>
+</polling_location>
+<polling_location id="55014098">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>18220 N 20TH ST</line1>
+    <state>AZ</state>
+    <location_name>NORTH VALLEY FREE WILL BAPTIST CHURCH</location_name>
+    <zip>85022</zip>
+  </address>
+</polling_location>
+<polling_location id="55012812">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>19021 N 32ND ST</line1>
+    <state>AZ</state>
+    <location_name>SHILOH COMMUNITY CHURCH</location_name>
+    <zip>85050</zip>
+  </address>
+</polling_location>
+<polling_location id="55011240">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>1954 N 24TH ST</line1>
+    <state>AZ</state>
+    <location_name>ST AGNES PARISH CENTER</location_name>
+    <zip>85008</zip>
+  </address>
+</polling_location>
+<polling_location id="55013477">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2001 W WAHALLA LN</line1>
+    <state>AZ</state>
+    <location_name>DEER VALLEY COMMUNITY CENTER</location_name>
+    <zip>85027</zip>
+  </address>
+</polling_location>
+<polling_location id="55015546">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>20817 N 19TH AVE</line1>
+    <state>AZ</state>
+    <location_name>DEER VALLEY WORSHIP CENTER</location_name>
+    <zip>85027</zip>
+  </address>
+</polling_location>
+<polling_location id="55010651">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>212 E ALTA VISTA RD</line1>
+    <state>AZ</state>
+    <location_name>SOUTH MOUNTAIN COMMUNITY CENTER</location_name>
+    <zip>85042</zip>
+  </address>
+</polling_location>
+<polling_location id="55012793">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2727 E CACTUS RD</line1>
+    <state>AZ</state>
+    <location_name>PARADISE VALLEY 7TH DAY ADV CHR</location_name>
+    <zip>85032</zip>
+  </address>
+</polling_location>
+<polling_location id="55010534">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3100 W CAMELBACK RD</line1>
+    <state>AZ</state>
+    <location_name>FIRST SOUTHERN BAPTIST CHURCH/PHOENIX</location_name>
+    <zip>85017</zip>
+  </address>
+</polling_location>
+<polling_location id="55011280">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3201 N 51ST AVE</line1>
+    <state>AZ</state>
+    <location_name>MARYVALE CHURCH OF THE NAZARENE</location_name>
+    <zip>85031</zip>
+  </address>
+</polling_location>
+<polling_location id="55010979">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>322 W TAMARISK AVE</line1>
+    <state>AZ</state>
+    <location_name>HAYDEN PARK COMMUNITY CENTER</location_name>
+    <zip>85041</zip>
+  </address>
+</polling_location>
+<polling_location id="55010770">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3220 W GREENWAY RD</line1>
+    <state>AZ</state>
+    <location_name>OUR LADY OF THE VALLEY CATHOLIC CHURCH</location_name>
+    <zip>85053</zip>
+  </address>
+</polling_location>
+<polling_location id="55010819">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3225 W OCOTILLO RD</line1>
+    <state>AZ</state>
+    <location_name>OCOTILLO SCHOOL</location_name>
+    <zip>85017</zip>
+  </address>
+</polling_location>
+<polling_location id="55012362">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>34835 N 7TH ST</line1>
+    <state>AZ</state>
+    <location_name>DESERT HILLS COMMUNITY CHURCH</location_name>
+    <zip>85086</zip>
+  </address>
+</polling_location>
+<polling_location id="55012757">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>35 W DUNLAP AVE</line1>
+    <state>AZ</state>
+    <location_name>SUNNYSLOPE HIGH SCHOOL #205</location_name>
+    <zip>85021</zip>
+  </address>
+</polling_location>
+<polling_location id="55011660">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3530 N 32ND ST</line1>
+    <state>AZ</state>
+    <location_name>ALDERSGATE UNITED METHODIST CHURCH</location_name>
+    <zip>85018</zip>
+  </address>
+</polling_location>
+<polling_location id="55011527">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3630 N 71ST AVE</line1>
+    <state>AZ</state>
+    <location_name>ST AUGUSTINE CHURCH</location_name>
+    <zip>85033</zip>
+  </address>
+</polling_location>
+<polling_location id="55015337">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3775 E LONE CACTUS DR</line1>
+    <state>AZ</state>
+    <location_name>FIRESIDE AT DESERT RIDGE</location_name>
+    <zip>85050</zip>
+  </address>
+</polling_location>
+<polling_location id="55010055">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3802 N 91ST AVE</line1>
+    <state>AZ</state>
+    <location_name>PENDERGAST SCHOOL/DIST OFFICE</location_name>
+    <zip>85037</zip>
+  </address>
+</polling_location>
+<polling_location id="55012808">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>4041 E PHELPS RD</line1>
+    <state>AZ</state>
+    <location_name>CORNERSTONE BAPTIST CH</location_name>
+    <zip>85032</zip>
+  </address>
+</polling_location>
+<polling_location id="55014944">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>40410 N GAVILAN PEAK PKWY</line1>
+    <state>AZ</state>
+    <location_name>NORTH VALLEY REGIONAL LIBRARY/ANTHEM</location_name>
+    <zip>85086</zip>
+  </address>
+</polling_location>
+<polling_location id="55011316">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>4141 E THOMAS RD</line1>
+    <state>AZ</state>
+    <location_name>MEMORIAL PRESBYTERIAN CHURCH</location_name>
+    <zip>85018</zip>
+  </address>
+</polling_location>
+<polling_location id="55010233">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>4309 E BELLEVIEW ST</line1>
+    <state>AZ</state>
+    <location_name>BALSZ SCHOOL</location_name>
+    <zip>85008</zip>
+  </address>
+</polling_location>
+<polling_location id="55012726">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>4735 N 19TH AVE</line1>
+    <state>AZ</state>
+    <location_name>WESTMINSTER PRESBYTERIAN CH</location_name>
+    <zip>85015</zip>
+  </address>
+</polling_location>
+<polling_location id="55014136">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>510 S 3RD AVE</line1>
+    <state>AZ</state>
+    <location_name>MCTEC - REPLACEMENT BALLOT ONLY</location_name>
+    <zip>85003</zip>
+  </address>
+</polling_location>
+<polling_location id="55011747">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>5201 W THOMAS RD</line1>
+    <state>AZ</state>
+    <location_name>IGLESIA LUTERANA SANTO TOMAS</location_name>
+    <zip>85031</zip>
+  </address>
+</polling_location>
+<polling_location id="55010913">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>5536 N 6TH ST</line1>
+    <state>AZ</state>
+    <location_name>THE GATHERING PLACE</location_name>
+    <zip>85012</zip>
+  </address>
+</polling_location>
+<polling_location id="55013020">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>555 W GLENDALE AVE</line1>
+    <state>AZ</state>
+    <location_name>CHURCH OF THE BEATITUDES</location_name>
+    <zip>85021</zip>
+  </address>
+</polling_location>
+<polling_location id="55014752">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>632 N 3RD AVE</line1>
+    <state>AZ</state>
+    <location_name>SALVATION ARMY PHOENIX CITADEL CORP</location_name>
+    <zip>85003</zip>
+  </address>
+</polling_location>
+<polling_location id="55010403">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>6707 W VAN BUREN ST</line1>
+    <state>AZ</state>
+    <location_name>FOWLER SCHOOL</location_name>
+    <zip>85043</zip>
+  </address>
+</polling_location>
+<polling_location id="55010235">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>6801 N 43RD AVE</line1>
+    <state>AZ</state>
+    <location_name>GLENDALE 7TH DAY ADVENTIST CHR &amp; SCH</location_name>
+    <zip>85019</zip>
+  </address>
+</polling_location>
+<polling_location id="55011283">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>7040 S 40TH ST</line1>
+    <state>AZ</state>
+    <location_name>GREATER BETHEL A.M.E CHURCH</location_name>
+    <zip>85042</zip>
+  </address>
+</polling_location>
+<polling_location id="55012788">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>7145 N BLACK CANYON HWY</line1>
+    <state>AZ</state>
+    <location_name>BLACK CANYON CHURCH OF CHRIST</location_name>
+    <zip>85021</zip>
+  </address>
+</polling_location>
+<polling_location id="55012667">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>8801 N 43RD AVE</line1>
+    <state>AZ</state>
+    <location_name>CHRIST THE REDEEMER LUTHERAN CH</location_name>
+    <zip>85051</zip>
+  </address>
+</polling_location>
+<polling_location id="55011528">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>906 W PEORIA AVE</line1>
+    <state>AZ</state>
+    <location_name>COVENANT OF GRACE CHRISTIAN CHURCH</location_name>
+    <zip>85029</zip>
+  </address>
+</polling_location>
+<polling_location id="55012114">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>RIO VERDE</city>
+    <line1>18816 E FOUR PEAKS BLVD</line1>
+    <state>AZ</state>
+    <location_name>RIO VERDE COMMUNITY ASSOC</location_name>
+    <zip>85263</zip>
+  </address>
+</polling_location>
+<polling_location id="55014387">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>10101 E THOMPSON PEAK PKWY</line1>
+    <state>AZ</state>
+    <location_name>COPPER RIDGE SCHOOL</location_name>
+    <zip>85255</zip>
+  </address>
+</polling_location>
+<polling_location id="55010999">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>10585 N 100TH ST</line1>
+    <state>AZ</state>
+    <location_name>SCOTTSDALE RANCH COMM ASSOC.</location_name>
+    <zip>85258</zip>
+  </address>
+</polling_location>
+<polling_location id="55013866">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>11180 N 132ND ST</line1>
+    <state>AZ</state>
+    <location_name>RIO MONTANA PARK (COMMUNITY CTR)</location_name>
+    <zip>85259</zip>
+  </address>
+</polling_location>
+<polling_location id="55012219">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>11735 N SCOTTSDALE RD</line1>
+    <state>AZ</state>
+    <location_name>NORTH SCOTTSDALE UNITED METHODIST CHURCH</location_name>
+    <zip>85254</zip>
+  </address>
+</polling_location>
+<polling_location id="55013859">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>15444 N 100TH ST</line1>
+    <state>AZ</state>
+    <location_name>HORIZON COMMUNITY CENTER</location_name>
+    <zip>85260</zip>
+  </address>
+</polling_location>
+<polling_location id="55013771">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>25150 N PIMA RD</line1>
+    <state>AZ</state>
+    <location_name>PINNACLE PRESBYTERIAN CHURCH</location_name>
+    <zip>85255</zip>
+  </address>
+</polling_location>
+<polling_location id="55015298">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>34575 N LEGEND TRAIL PKWY</line1>
+    <state>AZ</state>
+    <location_name>LEGEND TRAIL COMMUNITY CENTER</location_name>
+    <zip>85262</zip>
+  </address>
+</polling_location>
+<polling_location id="55010781">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>4300 N 82ND ST</line1>
+    <state>AZ</state>
+    <location_name>BETHANY LUTHERAN CHURCH</location_name>
+    <zip>85251</zip>
+  </address>
+</polling_location>
+<polling_location id="55013455">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>5334 E THUNDERBIRD RD</line1>
+    <state>AZ</state>
+    <location_name>TREE OF LIFE CONGREGATION</location_name>
+    <zip>85254</zip>
+  </address>
+</polling_location>
+<polling_location id="55012827">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>6017 E GREENWAY RD</line1>
+    <state>AZ</state>
+    <location_name>IMMANUEL BIBLE CHURCH</location_name>
+    <zip>85254</zip>
+  </address>
+</polling_location>
+<polling_location id="55010518">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>6250 N 82ND ST</line1>
+    <state>AZ</state>
+    <location_name>SAGUARO HIGH SCHOOL</location_name>
+    <zip>85250</zip>
+  </address>
+</polling_location>
+<polling_location id="55013839">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>6535 E OSBORN RD</line1>
+    <state>AZ</state>
+    <location_name>PAIUTE PARK NEIGHBORHOOD CTR</location_name>
+    <zip>85251</zip>
+  </address>
+</polling_location>
+<polling_location id="55010568">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>8451 E OAK ST</line1>
+    <state>AZ</state>
+    <location_name>HOHOKAM SCHOOL</location_name>
+    <zip>85257</zip>
+  </address>
+</polling_location>
+<polling_location id="55010983">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SCOTTSDALE</city>
+    <line1>9405 N 84TH ST</line1>
+    <state>AZ</state>
+    <location_name>COCHISE SCHOOL</location_name>
+    <zip>85258</zip>
+  </address>
+</polling_location>
+<polling_location id="55015248">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SURPRISE</city>
+    <line1>11405 N GREER RANCH PKWY</line1>
+    <state>AZ</state>
+    <location_name>SONORAN HEIGHTS SCHOOL</location_name>
+    <zip>85379</zip>
+  </address>
+</polling_location>
+<polling_location id="55014841">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SURPRISE</city>
+    <line1>14898 W ACOMA DR</line1>
+    <state>AZ</state>
+    <location_name>ASHTON RANCH SCHOOL</location_name>
+    <zip>85379</zip>
+  </address>
+</polling_location>
+<polling_location id="55013056">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SURPRISE</city>
+    <line1>15150 W MONDELL RD</line1>
+    <state>AZ</state>
+    <location_name>KINGSWOOD SCHOOL</location_name>
+    <zip>85374</zip>
+  </address>
+</polling_location>
+<polling_location id="55015037">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SURPRISE</city>
+    <line1>15272 W GABRIELA DR</line1>
+    <state>AZ</state>
+    <location_name>RANCHO GABRIELA SCHOOL</location_name>
+    <zip>85379</zip>
+  </address>
+</polling_location>
+<polling_location id="55014819">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SURPRISE</city>
+    <line1>17100 W CLEARVIEW BLVD</line1>
+    <state>AZ</state>
+    <location_name>CIMARRON CTR @ SUN CITY GRAND</location_name>
+    <zip>85387</zip>
+  </address>
+</polling_location>
+<polling_location id="55015258">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>SURPRISE</city>
+    <line1>17225 N CITRUS RD</line1>
+    <state>AZ</state>
+    <location_name>ARIZONA TRADITIONS COMMUNITY</location_name>
+    <zip>85374</zip>
+  </address>
+</polling_location>
+<polling_location id="55011289">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>TOLLESON</city>
+    <line1>3834 S 91ST AVE</line1>
+    <state>AZ</state>
+    <location_name>UNION ELEM/MIDDLE SCHOOL DISTRICT</location_name>
+    <zip>85353</zip>
+  </address>
+</polling_location>
+<polling_location id="55015089">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>TONOPAH</city>
+    <line1>38201 W INDIAN SCHOOL RD</line1>
+    <state>AZ</state>
+    <location_name>TONOPAH VALLEY HIGH SCHOOL</location_name>
+    <zip>85354</zip>
+  </address>
+</polling_location>
+</vip_object>
