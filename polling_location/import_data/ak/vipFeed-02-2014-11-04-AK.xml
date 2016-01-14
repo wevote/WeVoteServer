@@ -1,0 +1,3536 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>State of Alaska Division of Elections</name>
+  <vip_id>2</vip_id>
+  <datetime>2014-10-06T10:41:00</datetime>
+</source>
+<polling_location id="333001">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>1800 COLLEGE RD</line1>
+    <state>AK</state>
+    <location_name>AGRICULTURAL MUSEUM-FAIRGROUNDS</location_name>
+  </address>
+</polling_location>
+<polling_location id="333002">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>809 PIONEER RD</line1>
+    <state>AK</state>
+    <location_name>FAIRBANKS NORTH STAR BOROUGH BLD</location_name>
+  </address>
+</polling_location>
+<polling_location id="333003">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>330 3RD AVE</line1>
+    <state>AK</state>
+    <location_name>GOLDEN TOWERS</location_name>
+  </address>
+</polling_location>
+<polling_location id="333004">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>1215 COWLES STREET</line1>
+    <state>AK</state>
+    <location_name>NOEL WIEN LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333005">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>202 WIEN STREET</line1>
+    <state>AK</state>
+    <location_name>NATIONAL GUARD ARMORY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333006">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>2300 AIRPORT WAY</line1>
+    <state>AK</state>
+    <location_name>PIONEER PARK CENTENNIAL CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333007">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>1255 AIRPORT WAY</line1>
+    <state>AK</state>
+    <location_name>SHOPPERS FORUM</location_name>
+  </address>
+</polling_location>
+<polling_location id="333008">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>2400 RICKERT STREET</line1>
+    <state>AK</state>
+    <location_name>JP JONES COMMUNITY DEV CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333009">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>2300 AIRPORT WAY</line1>
+    <state>AK</state>
+    <location_name>PIONEER PARK CENTENNIAL CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333010">
+  <address>
+    <city>NORTH POLE</city>
+    <line1>771 BADGER ROAD</line1>
+    <state>AK</state>
+    <location_name>MCPEAK'S BADGER STORE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333011">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>250 3RD STREET SUITE 6</line1>
+    <state>AK</state>
+    <location_name>FRONTIER OUTFITTERS/GAVORA MALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333012">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>600 TRAINOR GATE ROAD</line1>
+    <state>AK</state>
+    <location_name>TANANA MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333013">
+  <address>
+    <city>FORT WAINWRIGHT</city>
+    <line1>1044 APPLE STREET</line1>
+    <state>AK</state>
+    <location_name>LAST FRONTIER COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333014">
+  <address>
+    <city>NORTH POLE</city>
+    <line1>2371 BRADWAY ROAD</line1>
+    <state>AK</state>
+    <location_name>NEW HOPE METH-PRES CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333015">
+  <address>
+    <city>NORTH POLE</city>
+    <line1>101 5TH AVE</line1>
+    <state>AK</state>
+    <location_name>SANTA SENIOR CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333016">
+  <address>
+    <city>NORTH POLE</city>
+    <line1>301 N SANTA CLAUS LN</line1>
+    <state>AK</state>
+    <location_name>NORTH POLE PLAZA</location_name>
+  </address>
+</polling_location>
+<polling_location id="333017">
+  <address>
+    <city>NORTH POLE</city>
+    <line1>125 SNOWMAN LANE</line1>
+    <state>AK</state>
+    <location_name>NORTH POLE CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333018">
+  <address>
+    <city>NORTH POLE</city>
+    <line1>301 N SANTA CLAUS LANE</line1>
+    <state>AK</state>
+    <location_name>NORTH POLE PLAZA</location_name>
+  </address>
+</polling_location>
+<polling_location id="333019">
+  <address>
+    <city>ESTER</city>
+    <line1>3570 OLD NENANA HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>ESTER FIRE STATION</location_name>
+  </address>
+</polling_location>
+<polling_location id="333020">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>1811 FARMERS LOOP ROAD</line1>
+    <state>AK</state>
+    <location_name>SEVENTH-DAY ADVENTIST GYMNASIUM</location_name>
+  </address>
+</polling_location>
+<polling_location id="333021">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>1300 GOLDSTREAM ROAD</line1>
+    <state>AK</state>
+    <location_name>CHENA GOLDSTREAM FIRE STATION 3</location_name>
+  </address>
+</polling_location>
+<polling_location id="333022">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>2591A GOLDSTREAM ROAD</line1>
+    <state>AK</state>
+    <location_name>KEN KUNKEL COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333023">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>32 COLLEGE ROAD</line1>
+    <state>AK</state>
+    <location_name>BENTLEY MALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333024">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>32 COLLEGE ROAD</line1>
+    <state>AK</state>
+    <location_name>BENTLEY MALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333025">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>601 LOFTUS ROAD</line1>
+    <state>AK</state>
+    <location_name>EFFIE KOKRINE CHARTER SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333026">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>1850 HOSELTON ROAD</line1>
+    <state>AK</state>
+    <location_name>PIKE'S WATERFRONT LODGE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333027">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>910 CHENA PUMP ROAD</line1>
+    <state>AK</state>
+    <location_name>FAITH BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333028">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>1197 UNIVERSITY AVE</line1>
+    <state>AK</state>
+    <location_name>UNIVERSITY BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333029">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>3400 S CUSHMAN STREET</line1>
+    <state>AK</state>
+    <location_name>GENE'S CHRYSLER CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333030">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>4782 DALE ROAD</line1>
+    <state>AK</state>
+    <location_name>J.A. KORNFEIND TRAINING CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333031">
+  <address>
+    <city>NORTH POLE</city>
+    <line1>2358 BRADWAY RD</line1>
+    <state>AK</state>
+    <location_name>NORTH STAR FIRE STATION #1</location_name>
+  </address>
+</polling_location>
+<polling_location id="333032">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>3480 COLLEGE RD</line1>
+    <state>AK</state>
+    <location_name>BEAVER SPORTS</location_name>
+  </address>
+</polling_location>
+<polling_location id="333033">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>UNIVERSITY OF ALASKA CAMPUS</line1>
+    <state>AK</state>
+    <location_name>PATTY CENTER LOBBY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333034">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>5000 PALO VERDE DRIVE</line1>
+    <state>AK</state>
+    <location_name>WOODRIVER ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333035">
+  <address>
+    <city>ANDERSON</city>
+    <line1>1ST AVENUE</line1>
+    <state>AK</state>
+    <location_name>ANDERSON CITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333036">
+  <address>
+    <city>ARCTIC VILLAGE</city>
+    <line1>ARCTIC VILLAGE COUNCIL OFFICE</line1>
+    <state>AK</state>
+    <location_name>ARCTIC VILLAGE COUNCIL OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333037">
+  <address>
+    <city>BEAVER</city>
+    <line1>BEAVER COUNCIL HOUSE</line1>
+    <state>AK</state>
+    <location_name>BEAVER COUNCIL HOUSE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333038">
+  <address>
+    <city>CANTWELL</city>
+    <line1>CANTWELL COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>CANTWELL COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333039">
+  <address>
+    <city>CENTRAL</city>
+    <line1>STEESE HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>CIRCLE DISTRICT HIST SOCIETY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333040">
+  <address>
+    <city>SLANA</city>
+    <line1>MILE 64 TOK CUTOFF</line1>
+    <state>AK</state>
+    <location_name>SLANA LEAGUE BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333041">
+  <address>
+    <city>CIRCLE</city>
+    <line1>CIRCLE TRIBAL COUNCIL OFFICE</line1>
+    <state>AK</state>
+    <location_name>CIRCLE TRIBAL COUNCIL OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333042">
+  <address>
+    <city>ANDERSON</city>
+    <line1>MILE 280 PARKS HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>ROCHESTER LODGE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333043">
+  <address>
+    <city>COPPER CENTER</city>
+    <line1>OLD RICHARDSON HWY</line1>
+    <state>AK</state>
+    <location_name>NATIVE VILLAGE OF KLUTI-KAAH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333044">
+  <address>
+    <city>DENALI PARK</city>
+    <line1>MILE 230 PARKS HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>DENALI PARK COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333045">
+  <address>
+    <city>DOT LAKE</city>
+    <line1>DOT LAKE VILLAGE COUNCIL OFFICE</line1>
+    <state>AK</state>
+    <location_name>DOT LAKE VILLAGE COUNCIL OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333046">
+  <address>
+    <city>EAGLE</city>
+    <line1>EAGLE PUBLIC LIBRARY</line1>
+    <state>AK</state>
+    <location_name>EAGLE PUBLIC LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333047">
+  <address>
+    <city>FORT YUKON</city>
+    <line1>EAST 3RD AVENUE</line1>
+    <state>AK</state>
+    <location_name>KZPA RADIO STATION LOBBY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333048">
+  <address>
+    <city>GAKONA</city>
+    <line1>MI 2.2 TOK CUTOFF</line1>
+    <state>AK</state>
+    <location_name>GAKONA VOLUNTEER FIRE DEPT</location_name>
+  </address>
+</polling_location>
+<polling_location id="333049">
+  <address>
+    <city>HEALY</city>
+    <line1>USIBELLI SPUR ROAD</line1>
+    <state>AK</state>
+    <location_name>TRI-VALLEY COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333050">
+  <address>
+    <city>KENNY LAKE</city>
+    <line1>KENNY LAKE COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>KENNY LAKE COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333051">
+  <address>
+    <city>MANLEY HOT SPRINGS</city>
+    <line1>MANLEY HOT SPRINGS COMM HALL</line1>
+    <state>AK</state>
+    <location_name>MANLEY HOT SPRINGS COMM HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333052">
+  <address>
+    <city>MENTASTA</city>
+    <line1>MENTASTA LAKE SCHOOL</line1>
+    <state>AK</state>
+    <location_name>MENTASTA LAKE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333053">
+  <address>
+    <city>MINTO</city>
+    <line1>MINTO LAKEVIEW LODGE</line1>
+    <state>AK</state>
+    <location_name>MINTO LAKEVIEW LODGE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333054">
+  <address>
+    <city>NENANA</city>
+    <line1>A STREET</line1>
+    <state>AK</state>
+    <location_name>NENANA CIVIC CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333055">
+  <address>
+    <city>NORTHWAY</city>
+    <line1>NORTHWAY COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>NORTHWAY COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333056">
+  <address>
+    <city>STEVENS VILLAGE</city>
+    <line1>STEVENS VILLAGE COUNCIL OFFICE</line1>
+    <state>AK</state>
+    <location_name>STEVENS VILLAGE COUNCIL OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333057">
+  <address>
+    <city>TANACROSS</city>
+    <line1>TANACROSS COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>TANACROSS COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333058">
+  <address>
+    <city>TANANA</city>
+    <line1>TANANA CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>TANANA CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333059">
+  <address>
+    <city>TETLIN</city>
+    <line1>TETLIN COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>TETLIN COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333060">
+  <address>
+    <city>TOK</city>
+    <line1>TOK SENIOR CENTER</line1>
+    <state>AK</state>
+    <location_name>TOK SENIOR CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333061">
+  <address>
+    <city>VENETIE</city>
+    <line1>VENETIE COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>VENETIE COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333062">
+  <address>
+    <city>EIELSON AFB</city>
+    <line1>675 RAVENS WAY</line1>
+    <state>AK</state>
+    <location_name>BEN EIELSON JR/SR HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333063">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>2098 OLD STEESE HWY N</line1>
+    <state>AK</state>
+    <location_name>TURTLE CLUB</location_name>
+  </address>
+</polling_location>
+<polling_location id="333064">
+  <address>
+    <city>MOOSE CREEK</city>
+    <line1>3483 OLD RICHARDSON HWY</line1>
+    <state>AK</state>
+    <location_name>NORTH STAR FIRE STATION 35</location_name>
+  </address>
+</polling_location>
+<polling_location id="333065">
+  <address>
+    <city>SALCHA</city>
+    <line1>8530 RICHARDSON HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>SALCHA ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333066">
+  <address>
+    <city>FAIRBANKS</city>
+    <line1>270 FAIRHILL ROAD</line1>
+    <state>AK</state>
+    <location_name>DOOR OF HOPE ONE:8 CAFE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333067">
+  <address>
+    <city>TWO RIVERS</city>
+    <line1>400 TWO RIVERS ROAD</line1>
+    <state>AK</state>
+    <location_name>TWO RIVERS K8 SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333068">
+  <address>
+    <city>WASILLA</city>
+    <line1>5981 E EEK ST</line1>
+    <state>AK</state>
+    <location_name>FINGER LAKE ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333069">
+  <address>
+    <city>PALMER</city>
+    <line1>1959 N STRINGFIELD RD</line1>
+    <state>AK</state>
+    <location_name>PIONEER PEAK ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333070">
+  <address>
+    <city>WASILLA</city>
+    <line1>3401 E BOGARD RD</line1>
+    <state>AK</state>
+    <location_name>ALCANTRA NATIONAL GUARD ARMORY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333071">
+  <address>
+    <city>WASILLA</city>
+    <line1>800 N SEWARD MERIDIAN PKWY</line1>
+    <state>AK</state>
+    <location_name>COTTONWOOD CREEK ELEMENTARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333072">
+  <address>
+    <city>WASILLA</city>
+    <line1>1301 S CENTURY CIR</line1>
+    <state>AK</state>
+    <location_name>WASILLA SENIOR CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333073">
+  <address>
+    <city>WASILLA</city>
+    <line1>290 E HERNING AVE</line1>
+    <state>AK</state>
+    <location_name>WASILLA CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333074">
+  <address>
+    <city>WASILLA</city>
+    <line1>1001 S MACK DR</line1>
+    <state>AK</state>
+    <location_name>MENARD SPORTS CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333075">
+  <address>
+    <city>WASILLA</city>
+    <line1>1741 N PITTMAN RD</line1>
+    <state>AK</state>
+    <location_name>MEADOW LAKES ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333076">
+  <address>
+    <city>WASILLA</city>
+    <line1>1685 N PITTMAN RD</line1>
+    <state>AK</state>
+    <location_name>MEADOW LAKE PUBLIC SAFETY BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="333077">
+  <address>
+    <city>WASILLA</city>
+    <line1>6350 W HOLLYWOOD RD</line1>
+    <state>AK</state>
+    <location_name>KNIK ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333078">
+  <address>
+    <city>WASILLA</city>
+    <line1>6400 W HOLLYWOOD RD</line1>
+    <state>AK</state>
+    <location_name>GOOSEBAY ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333079">
+  <address>
+    <city>WASILLA</city>
+    <line1>6865W DEWLAP CIR</line1>
+    <state>AK</state>
+    <location_name>SETTLERS BAY COMMUNITY CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333080">
+  <address>
+    <city>BIG LAKE</city>
+    <line1>2942 S LIONS CIR</line1>
+    <state>AK</state>
+    <location_name>BIG LAKE LIONS CLUB</location_name>
+  </address>
+</polling_location>
+<polling_location id="333081">
+  <address>
+    <city>DELTA JUNCTION</city>
+    <line1>2287 DEBORAH STREET</line1>
+    <state>AK</state>
+    <location_name>DELTA JUNCTION COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333082">
+  <address>
+    <city>DELTA JUNCTION</city>
+    <line1>2287 DEBORAH STREET</line1>
+    <state>AK</state>
+    <location_name>DELTA JUNCTION COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333083">
+  <address>
+    <city>PALMER</city>
+    <line1>5900 N FARM LOOP ROAD</line1>
+    <state>AK</state>
+    <location_name>FARM LOOP CHRISTIAN CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333084">
+  <address>
+    <city>PALMER</city>
+    <line1>8200 E TURNER ROAD</line1>
+    <state>AK</state>
+    <location_name>FISHHOOK PUBLIC SAFETY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333085">
+  <address>
+    <city>GLENNALLEN</city>
+    <line1>MILE 186 GLENN HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>COPPER VALLEY COMMUNITY LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333086">
+  <address>
+    <city>SHEEP MOUNTAIN</city>
+    <line1>MILE 104 GLENN HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>GLACIER VIEW SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333087">
+  <address>
+    <city>SUTTON</city>
+    <line1>11301 N CHICKALOON WAY</line1>
+    <state>AK</state>
+    <location_name>SUTTON LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333088">
+  <address>
+    <city>VALDEZ</city>
+    <line1>414 W HANAGITA STREET</line1>
+    <state>AK</state>
+    <location_name>VALDEZ TEEN CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333089">
+  <address>
+    <city>VALDEZ</city>
+    <line1>212 CHENEGA DRIVE</line1>
+    <state>AK</state>
+    <location_name>VALDEZ CITY COUNCIL CHAMBERS</location_name>
+  </address>
+</polling_location>
+<polling_location id="333090">
+  <address>
+    <city>VALDEZ</city>
+    <line1>124 RIVER DRIVE</line1>
+    <state>AK</state>
+    <location_name>ROBE RIVER FIRE HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333091">
+  <address>
+    <city>WHITTIER</city>
+    <line1>KENAI STREET</line1>
+    <state>AK</state>
+    <location_name>BEGICH TOWERS PTARMIGAN ROOM</location_name>
+  </address>
+</polling_location>
+<polling_location id="333092">
+  <address>
+    <city>PALMER</city>
+    <line1>9550 E COLONY SCHOOLS DR</line1>
+    <state>AK</state>
+    <location_name>COLONY HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333093">
+  <address>
+    <city>WASILLA</city>
+    <line1>1221 N CHURCH RD</line1>
+    <state>AK</state>
+    <location_name>LAMB OF GOD LUTHERAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333094">
+  <address>
+    <city>WASILLA</city>
+    <line1>2550 N LUCILLE ST</line1>
+    <state>AK</state>
+    <location_name>TANAINA ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333095">
+  <address>
+    <city>HOUSTON</city>
+    <line1>13878 W ARMSTRONG RD</line1>
+    <state>AK</state>
+    <location_name>HOUSTON CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333096">
+  <address>
+    <city>WASILLA</city>
+    <line1>3571 W MACHEN RD</line1>
+    <state>AK</state>
+    <location_name>CHURCH ON THE ROCK</location_name>
+  </address>
+</polling_location>
+<polling_location id="333097">
+  <address>
+    <city>TALKEETNA</city>
+    <line1>16463 HELENA AVE</line1>
+    <state>AK</state>
+    <location_name>UPPER SUSITNA SENIOR &amp; CIVIC CTR</location_name>
+  </address>
+</polling_location>
+<polling_location id="333098">
+  <address>
+    <city>TALKEETNA</city>
+    <line1>13930 E TIMBERWOLF LOOP</line1>
+    <state>AK</state>
+    <location_name>TALKEETNA ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333099">
+  <address>
+    <city>TRAPPER CREEK</city>
+    <line1>6742 E PETERSVILLE RD</line1>
+    <state>AK</state>
+    <location_name>TRAPPER CREEK ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333100">
+  <address>
+    <city>WILLOW</city>
+    <line1>MILE 69 PARKS HWY</line1>
+    <state>AK</state>
+    <location_name>WILLOW COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333101">
+  <address>
+    <city>WASILLA</city>
+    <line1>4180 TWEED CT</line1>
+    <state>AK</state>
+    <location_name>AMERICAN LEGION POST 35</location_name>
+  </address>
+</polling_location>
+<polling_location id="333102">
+  <address>
+    <city>WASILLA</city>
+    <line1>2722 E SELDON RD</line1>
+    <state>AK</state>
+    <location_name>LARSON ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333103">
+  <address>
+    <city>PALMER</city>
+    <line1>9250 E COLONY SCHOOL DR</line1>
+    <state>AK</state>
+    <location_name>COLONY MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333104">
+  <address>
+    <city>PALMER</city>
+    <line1>RAILROAD DEPOT 610 S VALLEY WAY</line1>
+    <state>AK</state>
+    <location_name>PALMER COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333105">
+  <address>
+    <city>PALMER</city>
+    <line1>8295 E COLLEGE DR</line1>
+    <state>AK</state>
+    <location_name>MATANUSKA-SUSITNA COLLEGE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333106">
+  <address>
+    <city>PALMER</city>
+    <line1>350 E DAHLIA AVE</line1>
+    <state>AK</state>
+    <location_name>MAT-SU BOROUGH BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333107">
+  <address>
+    <city>PALMER</city>
+    <line1>1132 S CHUGACH ST</line1>
+    <state>AK</state>
+    <location_name>PALMER SENIOR CITIZENS CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333108">
+  <address>
+    <city>PALMER</city>
+    <line1>7744 E VISITORS VIEW COURT</line1>
+    <state>AK</state>
+    <location_name>MAT-SU CONVENTION &amp; VISTIORS CNT</location_name>
+  </address>
+</polling_location>
+<polling_location id="333109">
+  <address>
+    <city>WASILLA</city>
+    <line1>4800 E PALMER WASILLA HWY</line1>
+    <state>AK</state>
+    <location_name>GOSPEL OUTREACH CHRISTIAN CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333110">
+  <address>
+    <city>PALMER</city>
+    <line1>2238 S INNER SPRINGER LP</line1>
+    <state>AK</state>
+    <location_name>PALMER 7TH DAY ADVENTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333111">
+  <address>
+    <city>PALMER</city>
+    <line1>16005 E SHAWN DR</line1>
+    <state>AK</state>
+    <location_name>LAZY MOUNTAIN BIBLE CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333112">
+  <address>
+    <city>WASILLA</city>
+    <line1>2001 W FAIRVIEW LP</line1>
+    <state>AK</state>
+    <location_name>SNOWSHOE ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333113">
+  <address>
+    <city>WASILLA</city>
+    <line1>4961 E NELSON RD</line1>
+    <state>AK</state>
+    <location_name>MACHETANZ ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333114">
+  <address>
+    <city>WASILLA</city>
+    <line1>5137 W FAIRVIEW LP</line1>
+    <state>AK</state>
+    <location_name>CHRIST FIRST UNITED METHODIST</location_name>
+  </address>
+</polling_location>
+<polling_location id="333115">
+  <address>
+    <city>PALMER</city>
+    <line1>3355 S OLD GLENN HWY</line1>
+    <state>AK</state>
+    <location_name>BUTTE PUBLIC SAFETY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333116">
+  <address>
+    <city>CHUGIAK</city>
+    <line1>22901 LAKE HILL DR</line1>
+    <state>AK</state>
+    <location_name>MIRROR LAKE MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333117">
+  <address>
+    <city>CHUGIAK</city>
+    <line1>20640 CHAPEL DR</line1>
+    <state>AK</state>
+    <location_name>PETERS CREEK CHRISTIAN CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333118">
+  <address>
+    <city>CHUGIAK</city>
+    <line1>20640 CHAPEL DR</line1>
+    <state>AK</state>
+    <location_name>PETERS CREEK CHRISTIAN CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333119">
+  <address>
+    <city>CHUGIAK</city>
+    <line1>16525 BIRCHWOOD LOOP RD</line1>
+    <state>AK</state>
+    <location_name>CHUGIAK HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333120">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>13801 HARRY MCDONALD RD</line1>
+    <state>AK</state>
+    <location_name>FIRE LAKE ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333121">
+  <address>
+    <city>FT RICHARDSON</city>
+    <line1>454 DYEA ST</line1>
+    <state>AK</state>
+    <location_name>URSA MAJOR ELEMENTARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333122">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>12001 BUSINESS BLVD #123</line1>
+    <state>AK</state>
+    <location_name>EAGLE RIVER PARKS &amp; REC</location_name>
+  </address>
+</polling_location>
+<polling_location id="333123">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>18239 N EAGLE RIVER LOOP RD</line1>
+    <state>AK</state>
+    <location_name>SKYLINE FAMILY FELLOWSHIP</location_name>
+  </address>
+</polling_location>
+<polling_location id="333124">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>9131 CENTENNIAL CIR</line1>
+    <state>AK</state>
+    <location_name>CENTENNIAL VILLAGE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333125">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>10900 OLD EAGLE RIVER RD</line1>
+    <state>AK</state>
+    <location_name>EAGLE RIVER ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333126">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>18001 BARONOFF AVE</line1>
+    <state>AK</state>
+    <location_name>HOMESTEAD ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333127">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>10111 E EAGLE RIVER LOOP RD</line1>
+    <state>AK</state>
+    <location_name>JOY LUTHERAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333128">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>9601 LEE ST</line1>
+    <state>AK</state>
+    <location_name>GRUENING MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333129">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>10336 E EAGLE RIVER LOOP RD</line1>
+    <state>AK</state>
+    <location_name>KINGS WAY MINISTRY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333130">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>9500 WREN CIRCLE</line1>
+    <state>AK</state>
+    <location_name>RAVENWOOD ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333131">
+  <address>
+    <city>EAGLE RIVER</city>
+    <line1>19201 DRIFTWOOD BAY DR</line1>
+    <state>AK</state>
+    <location_name>ALPENGLOW ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333132">
+  <address>
+    <city>ELMENDORF AFB</city>
+    <line1>8414 MCGUIRE AVE</line1>
+    <state>AK</state>
+    <location_name>MT SPURR ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333133">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>7500 E 6TH AVE</line1>
+    <state>AK</state>
+    <location_name>CREEKSIDE PARK ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333134">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>525 CHERRY ST</line1>
+    <state>AK</state>
+    <location_name>MULDOON ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333135">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>382 MULDOON RD</line1>
+    <state>AK</state>
+    <location_name>MULDOON ROAD BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333136">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1101 N MULDOON RD</line1>
+    <state>AK</state>
+    <location_name>BARTLETT HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333137">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2100 BONIFACE PKWY</line1>
+    <state>AK</state>
+    <location_name>ZION LUTHERAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333138">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1905 TWINING DR</line1>
+    <state>AK</state>
+    <location_name>NUNAKA VALLEY ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333139">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>6724 E 4TH AVE</line1>
+    <state>AK</state>
+    <location_name>ST INNOCENT ORTHODOX CATHEDRAL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333140">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3101 SUNFLOWER ST</line1>
+    <state>AK</state>
+    <location_name>COLLEGE GATE ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333141">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>5530 E NORTHERN LIGHTS BLVD</line1>
+    <state>AK</state>
+    <location_name>ANCHORAGE SCHOOL DISTRICT BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="333142">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3600 BAXTER RD</line1>
+    <state>AK</state>
+    <location_name>BAXTER ROAD BIBLE CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333143">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>5101 E 4TH AVE</line1>
+    <state>AK</state>
+    <location_name>WONDER PARK ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333144">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1400 E NORTHERN LIGHTS BLVD</line1>
+    <state>AK</state>
+    <location_name>ROGERS PARK ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333145">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3331 LAKE OTIS PKWY</line1>
+    <state>AK</state>
+    <location_name>LAKE OTIS ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333146">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4500 DIPLOMACY DR</line1>
+    <state>AK</state>
+    <location_name>UAA DIPLOMACY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333147">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>5353 LAKE OTIS PKWY</line1>
+    <state>AK</state>
+    <location_name>ANCHORAGE COMMUNITY YMCA</location_name>
+  </address>
+</polling_location>
+<polling_location id="333148">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1666 CACHE DR</line1>
+    <state>AK</state>
+    <location_name>TUDOR ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333149">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4313 WRIGHT ST</line1>
+    <state>AK</state>
+    <location_name>UNIVERSITY BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333150">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4025 E NORTHERN LIGHTS BLVD</line1>
+    <state>AK</state>
+    <location_name>EAST HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333151">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1700 HILLCREST DR</line1>
+    <state>AK</state>
+    <location_name>WEST HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333152">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2500 MINNESOTA DR</line1>
+    <state>AK</state>
+    <location_name>ROMIG MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333153">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2300 W 36TH AVE</line1>
+    <state>AK</state>
+    <location_name>BOYS &amp; GIRLS CLUB</location_name>
+  </address>
+</polling_location>
+<polling_location id="333154">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1004 W TUDOR RD</line1>
+    <state>AK</state>
+    <location_name>WILLOW CREST ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333155">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1400 W NORTHERN LIGHTS BLVD</line1>
+    <state>AK</state>
+    <location_name>ALASKA CLUB WEST</location_name>
+  </address>
+</polling_location>
+<polling_location id="333156">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>605 W FIREWEED LN</line1>
+    <state>AK</state>
+    <location_name>NORTH STAR ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333157">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2508 BLUEBERRY RD</line1>
+    <state>AK</state>
+    <location_name>STELLER SECONDARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333158">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>855 E 20TH AVE</line1>
+    <state>AK</state>
+    <location_name>SHILOH BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333159">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3600 DENALI ST</line1>
+    <state>AK</state>
+    <location_name>LOUSSAC LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333160">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1200 E 27TH AVE</line1>
+    <state>AK</state>
+    <location_name>FIRST AMERICAN BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333161">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4005 MCPHEE AVE</line1>
+    <state>AK</state>
+    <location_name>MT VIEW ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333162">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>315 PRICE ST</line1>
+    <state>AK</state>
+    <location_name>MT VIEW BOYS &amp; GIRLS CLUB</location_name>
+  </address>
+</polling_location>
+<polling_location id="333163">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1200 SAN ANTONIO ST</line1>
+    <state>AK</state>
+    <location_name>WILLIWAW ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333164">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>825 KLEVIN ST</line1>
+    <state>AK</state>
+    <location_name>ST ANTHONY'S CATHOLIC CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333165">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1510 ALDER DR</line1>
+    <state>AK</state>
+    <location_name>AIRPORT HEIGHTS ELEMENTARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333166">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3000 E 16TH AVE</line1>
+    <state>AK</state>
+    <location_name>TRINITY CHRISTIAN REFORMED CHRCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333167">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>525 E BLUFF DR</line1>
+    <state>AK</state>
+    <location_name>GOVERNMENT HILL ELEMENTARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333168">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1300 E 19TH AVE</line1>
+    <state>AK</state>
+    <location_name>ANCHORAGE SENIOR CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333169">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>725 W 9TH AVE</line1>
+    <state>AK</state>
+    <location_name>FIRST UNITED METHODIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333170">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>923 W 11TH AVE</line1>
+    <state>AK</state>
+    <location_name>ANCHORAGE PIONEER HOME</location_name>
+  </address>
+</polling_location>
+<polling_location id="333171">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>616 W 10TH AVE</line1>
+    <state>AK</state>
+    <location_name>FIRST PRESBYTERIAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333172">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1420 CORDOVA ST</line1>
+    <state>AK</state>
+    <location_name>CENTRAL LUTHERAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333173">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1219 N ST</line1>
+    <state>AK</state>
+    <location_name>INLET VIEW ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333174">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1405 E ST</line1>
+    <state>AK</state>
+    <location_name>CENTRAL MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333175">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1121 E 10TH AVE</line1>
+    <state>AK</state>
+    <location_name>FAIRVIEW RECREATION CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333176">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3300 W NORTHERN LIGHTS BLVD</line1>
+    <state>AK</state>
+    <location_name>TURNAGAIN UNITED METHODIST CHRCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333177">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3340 RASPBERRY RD</line1>
+    <state>AK</state>
+    <location_name>FILIPINO BIBLE CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333178">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>7001 CRANBERRY ST</line1>
+    <state>AK</state>
+    <location_name>GLADYS WOOD ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333179">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>7434 JEWEL LAKE RD</line1>
+    <state>AK</state>
+    <location_name>SAND LAKE BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333180">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2020 W 48TH AVE</line1>
+    <state>AK</state>
+    <location_name>SPENARD RECREATION CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333181">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3601 W 40TH AVE</line1>
+    <state>AK</state>
+    <location_name>LAKE HOOD ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333182">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3900 WISCONSIN ST</line1>
+    <state>AK</state>
+    <location_name>OUR LADY OF GUADALUPE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333183">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3500 W NORTHERN LIGHTS BLVD</line1>
+    <state>AK</state>
+    <location_name>TURNAGAIN ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333184">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2902 W 88TH AVE</line1>
+    <state>AK</state>
+    <location_name>DIMOND HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333185">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4900 RASPBERRY RD</line1>
+    <state>AK</state>
+    <location_name>KINCAID ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333186">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4025 W 88TH AVE</line1>
+    <state>AK</state>
+    <location_name>JEWEL LAKE COMMUNITY CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333187">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3101 W 88TH AVE</line1>
+    <state>AK</state>
+    <location_name>CHINOOK ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333188">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3616 W DIMOND BLVD</line1>
+    <state>AK</state>
+    <location_name>DIMOND BLVD BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333189">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>8427 JEWEL LAKE RD</line1>
+    <state>AK</state>
+    <location_name>GLORIA DEI LUTHERAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333190">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>7500 JEWEL LAKE RD</line1>
+    <state>AK</state>
+    <location_name>SAND LAKE ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333191">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4807 NORTHWOOD DR</line1>
+    <state>AK</state>
+    <location_name>NORTHWOOD ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333192">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>610 W 54TH AVE</line1>
+    <state>AK</state>
+    <location_name>PLUMBERS &amp; STEAMFITTERS HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333193">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3801 OLD SEWARD HWY</line1>
+    <state>AK</state>
+    <location_name>UNIVERSITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333194">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>701 E 72ND AVE</line1>
+    <state>AK</state>
+    <location_name>TAKU ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333195">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>7206 ROVENA ST</line1>
+    <state>AK</state>
+    <location_name>CAMPBELL ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333196">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>8225 SPRING ST</line1>
+    <state>AK</state>
+    <location_name>FINLANDIA HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333197">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>8100 ARCTIC BLVD</line1>
+    <state>AK</state>
+    <location_name>ANCHOR LUTHERAN SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333198">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1200 W DIMOND BLVD</line1>
+    <state>AK</state>
+    <location_name>DIMOND ESTATES REC HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333199">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1148 HUFFMAN RD</line1>
+    <state>AK</state>
+    <location_name>HUFFMAN FIRE STATION</location_name>
+  </address>
+</polling_location>
+<polling_location id="333200">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>12130 OLD SEWARD HWY</line1>
+    <state>AK</state>
+    <location_name>SUNSET HILLS BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333201">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>11900 PUMA ST</line1>
+    <state>AK</state>
+    <location_name>KLATT ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333202">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2700 W 100TH AVE</line1>
+    <state>AK</state>
+    <location_name>MEARS MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333203">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>11911 JOHNS RD</line1>
+    <state>AK</state>
+    <location_name>OCEAN VIEW ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333204">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1612 OCEANVIEW DR</line1>
+    <state>AK</state>
+    <location_name>CHRIST OUR SAVIOR LUTHERAN CHRCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333205">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>11500 BAYSHORE DR</line1>
+    <state>AK</state>
+    <location_name>BAYSHORE ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333206">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2424 E DOWLING RD</line1>
+    <state>AK</state>
+    <location_name>NORTHERN LIGHTS ABC ELEMENTARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333207">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>7348 ELMORE RD</line1>
+    <state>AK</state>
+    <location_name>ANCHORAGE BIBLE FELLOWSHIP</location_name>
+  </address>
+</polling_location>
+<polling_location id="333208">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>5577 ABBOTT RD</line1>
+    <state>AK</state>
+    <location_name>SERVICE HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333209">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4000 E 68TH AVE</line1>
+    <state>AK</state>
+    <location_name>KASUUN ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333210">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1801 E 68TH AVE</line1>
+    <state>AK</state>
+    <location_name>INDEPENDENT BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333211">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>8427 LAKE OTIS PKWY</line1>
+    <state>AK</state>
+    <location_name>ABBOTT LOOP ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333212">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4700 ELMORE RD</line1>
+    <state>AK</state>
+    <location_name>MOA PUBLIC WORKS DEPT</location_name>
+  </address>
+</polling_location>
+<polling_location id="333213">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>9911 LAKE OTIS PKWY</line1>
+    <state>AK</state>
+    <location_name>SPRING HILL ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333214">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4731 O'MALLEY RD</line1>
+    <state>AK</state>
+    <location_name>ALASKA ZOO</location_name>
+  </address>
+</polling_location>
+<polling_location id="333215">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>12407 PINTAIL ST</line1>
+    <state>AK</state>
+    <location_name>GRACE CHRISTIAN SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333216">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2901 E HUFFMAN RD</line1>
+    <state>AK</state>
+    <location_name>ST ELIZABETH ANN SETON CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333217">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>11100 ROCKRIDGE DR</line1>
+    <state>AK</state>
+    <location_name>O'MALLEY ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333218">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>10121 LAKE OTIS PKWY</line1>
+    <state>AK</state>
+    <location_name>HANSHEW MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333219">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>10955 ELMORE RD</line1>
+    <state>AK</state>
+    <location_name>AMAZING GRACE LUTHERAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333220">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>10931 O'MALLEY CENTRE DR</line1>
+    <state>AK</state>
+    <location_name>THE ALASKA CLUB SOUTH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333221">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>1660 PATTERSON ST</line1>
+    <state>AK</state>
+    <location_name>EAST ANCHORAGE UNITED METHODIST</location_name>
+  </address>
+</polling_location>
+<polling_location id="333222">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>7500 TYONE CT</line1>
+    <state>AK</state>
+    <location_name>SUSITNA ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333223">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2111 MULDOON RD</line1>
+    <state>AK</state>
+    <location_name>ST PATRICK'S PARISH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333224">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>7801 E 32ND AVE</line1>
+    <state>AK</state>
+    <location_name>WAYLAND BAPTIST UNIVERSITY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333225">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4515 CAMPBELL AIRSTRIP RD</line1>
+    <state>AK</state>
+    <location_name>BENSON SECONDARY/SEARCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333226">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3933 PATTERSON ST</line1>
+    <state>AK</state>
+    <location_name>SCENIC PARK ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333227">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>2991 BAXTER RD</line1>
+    <state>AK</state>
+    <location_name>BAXTER ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333228">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>4501 CAMPBELL AIRSTRIP RD</line1>
+    <state>AK</state>
+    <location_name>FIRE STATION NO. 14</location_name>
+  </address>
+</polling_location>
+<polling_location id="333229">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>13650 LAKE OTIS PKWY</line1>
+    <state>AK</state>
+    <location_name>RABBIT CREEK ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333230">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>3401 RABBIT CREEK RD</line1>
+    <state>AK</state>
+    <location_name>RABBIT CREEK COMMUNITY CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333231">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>12000 LORRAINE ST</line1>
+    <state>AK</state>
+    <location_name>HUFFMAN ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333232">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>12310 LORRAINE ST</line1>
+    <state>AK</state>
+    <location_name>TRINITY PRESBYTERIAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333233">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>15001 MOUNTAIN AIR DR</line1>
+    <state>AK</state>
+    <location_name>BEAR VALLEY ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333234">
+  <address>
+    <city>INDIAN</city>
+    <line1>29135 SEWARD HWY</line1>
+    <state>AK</state>
+    <location_name>VALLEY BIBLE CHALET</location_name>
+  </address>
+</polling_location>
+<polling_location id="333235">
+  <address>
+    <city>GIRDWOOD</city>
+    <line1>250 EGLOFF ST</line1>
+    <state>AK</state>
+    <location_name>GIRDWOOD COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333236">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>15800 GOLDEN VIEW DR</line1>
+    <state>AK</state>
+    <location_name>GOLDENVIEW MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333237">
+  <address>
+    <city>ANCHORAGE</city>
+    <line1>6100 O'MALLEY RD</line1>
+    <state>AK</state>
+    <location_name>SEVENTH DAY ADVENTIST CONF OFFIC</location_name>
+  </address>
+</polling_location>
+<polling_location id="333238">
+  <address>
+    <city>SEWARD</city>
+    <line1>MI 5 SEWARD HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>BEAR CREEK FIRE HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333239">
+  <address>
+    <city>COOPER LANDING</city>
+    <line1>BEAN CREEK ROAD</line1>
+    <state>AK</state>
+    <location_name>COOPER LANDING COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333240">
+  <address>
+    <city>SOLDOTNA</city>
+    <line1>35850 PIONEER ACCESS</line1>
+    <state>AK</state>
+    <location_name>FUNNY RIVER COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333241">
+  <address>
+    <city>HOPE</city>
+    <line1>MAIN ST</line1>
+    <state>AK</state>
+    <location_name>HOPE SOCIAL HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333242">
+  <address>
+    <city>SOLDOTNA</city>
+    <line1>144 N BINKLEY</line1>
+    <state>AK</state>
+    <location_name>KPB OFFICES - ASSEMBLY CHAMBERS</location_name>
+  </address>
+</polling_location>
+<polling_location id="333243">
+  <address>
+    <city>MOOSE PASS</city>
+    <line1>MI 29 SEWARD HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>MOOSE PASS COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333244">
+  <address>
+    <city>NIKISKI</city>
+    <line1>50097 KENAI SPUR HWY</line1>
+    <state>AK</state>
+    <location_name>NIKISKI COMMUNITY REC CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333245">
+  <address>
+    <city>NIKISKI</city>
+    <line1>MI 17.9 KENAI SPUR HWY</line1>
+    <state>AK</state>
+    <location_name>NIKISKI FIRE STATION</location_name>
+  </address>
+</polling_location>
+<polling_location id="333246">
+  <address>
+    <city>SEWARD</city>
+    <line1>125 3RD AVENUE</line1>
+    <state>AK</state>
+    <location_name>KM RAE MARINE EDUCATION BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333247">
+  <address>
+    <city>STERLING</city>
+    <line1>35040 STERLING HIGHWAY MILE 83.5</line1>
+    <state>AK</state>
+    <location_name>STERLING COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333248">
+  <address>
+    <city>STERLING</city>
+    <line1>35040 STERLING HIGHWAY MILE 83.5</line1>
+    <state>AK</state>
+    <location_name>STERLING COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333249">
+  <address>
+    <city>SOLDOTNA</city>
+    <line1>538 ARENA DRIVE</line1>
+    <state>AK</state>
+    <location_name>SOLDOTNA SPORTS CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333250">
+  <address>
+    <city>KENAI</city>
+    <line1>37699 K-BEACH ROAD MILE 13.5</line1>
+    <state>AK</state>
+    <location_name>K BEACH FIRE STATION</location_name>
+  </address>
+</polling_location>
+<polling_location id="333251">
+  <address>
+    <city>KENAI</city>
+    <line1>11312 KENAI SPUR HWY</line1>
+    <state>AK</state>
+    <location_name>KENAI MALL (OLD CARRS MALL)</location_name>
+  </address>
+</polling_location>
+<polling_location id="333252">
+  <address>
+    <city>KENAI</city>
+    <line1>9711 KENAI SPUR HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>CHALLENGER LEARNING CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333253">
+  <address>
+    <city>KENAI</city>
+    <line1>361 SENIOR COURT</line1>
+    <state>AK</state>
+    <location_name>KENAI SENIOR CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333254">
+  <address>
+    <city>SOLDOTNA</city>
+    <line1>177 N BIRCH ST</line1>
+    <state>AK</state>
+    <location_name>SOLDOTNA CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333255">
+  <address>
+    <city>ANCHOR POINT</city>
+    <line1>MI .25 MILO FRITZ AVENUE</line1>
+    <state>AK</state>
+    <location_name>ANCHOR POINT SENIOR CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333256">
+  <address>
+    <city>HOMER</city>
+    <line1>201 STERLING HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>HOMER CHAMBER OF COMMERCE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333257">
+  <address>
+    <city>HOMER</city>
+    <line1>53048 ASHWOOD AVE</line1>
+    <state>AK</state>
+    <location_name>KACHEMAK EMERGENCY SERVICES</location_name>
+  </address>
+</polling_location>
+<polling_location id="333258">
+  <address>
+    <city>SOLDOTNA</city>
+    <line1>144 N BINKLEY</line1>
+    <state>AK</state>
+    <location_name>KPB OFFICES - ASSEMBLY CHAMBERS</location_name>
+  </address>
+</polling_location>
+<polling_location id="333259">
+  <address>
+    <city>HOMER</city>
+    <line1>491 E PIONEER AVENUE</line1>
+    <state>AK</state>
+    <location_name>HOMER CITY COUNCIL CHAMBERS</location_name>
+  </address>
+</polling_location>
+<polling_location id="333260">
+  <address>
+    <city>HOMER</city>
+    <line1>3935 SVEDLUND ST</line1>
+    <state>AK</state>
+    <location_name>HOMER SENIOR CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333261">
+  <address>
+    <city>HOMER</city>
+    <line1>59906 BEAR CREEK DRIVE</line1>
+    <state>AK</state>
+    <location_name>KACHEMAK COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333262">
+  <address>
+    <city>KASILOF</city>
+    <line1>58260 STERLING HWY</line1>
+    <state>AK</state>
+    <location_name>KASILOF FIRE STATION</location_name>
+  </address>
+</polling_location>
+<polling_location id="333263">
+  <address>
+    <city>NINILCHIK</city>
+    <line1>66265 ASPEN AVE</line1>
+    <state>AK</state>
+    <location_name>NINILCHIK SENIOR CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333264">
+  <address>
+    <city>CHINIAK</city>
+    <line1>CHINIAK TSUNAMI CENTER</line1>
+    <state>AK</state>
+    <location_name>CHINIAK COMMUNITY LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333265">
+  <address>
+    <city>CORDOVA</city>
+    <line1>FIRST STREET</line1>
+    <state>AK</state>
+    <location_name>CORDOVA LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333266">
+  <address>
+    <city>KODIAK</city>
+    <line1>538 SARGENT CREEK ROAD</line1>
+    <state>AK</state>
+    <location_name>WOMENS BAY FIRE HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333267">
+  <address>
+    <city>LARSEN BAY</city>
+    <line1>LARSEN BAY COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>LARSEN BAY COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333268">
+  <address>
+    <city>KODIAK</city>
+    <line1>403 MARINE WAY WEST</line1>
+    <state>AK</state>
+    <location_name>HARBORMASTER BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333269">
+  <address>
+    <city>KODIAK</city>
+    <line1>410 CEDAR STREET</line1>
+    <state>AK</state>
+    <location_name>COMMUNITY TEEN CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333270">
+  <address>
+    <city>KODIAK</city>
+    <line1>4606 E REZANOF DRIVE</line1>
+    <state>AK</state>
+    <location_name>BAYSIDE FIRE HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333271">
+  <address>
+    <city>OLD HARBOR</city>
+    <line1>THREE SAINTS AVENUE</line1>
+    <state>AK</state>
+    <location_name>OLD HARBOR SENIOR CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333272">
+  <address>
+    <city>OUZINKIE</city>
+    <line1>3RD STREET</line1>
+    <state>AK</state>
+    <location_name>OUZINKIE COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333273">
+  <address>
+    <city>PORT LIONS</city>
+    <line1>207 SPRUCE DRIVE</line1>
+    <state>AK</state>
+    <location_name>PORT LIONS COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333274">
+  <address>
+    <city>SELDOVIA</city>
+    <line1>260 SELDOVIA STREET</line1>
+    <state>AK</state>
+    <location_name>SELDOVIA LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333275">
+  <address>
+    <city>TATITLEK</city>
+    <line1>TATITLEK COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>TATITLEK COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333276">
+  <address>
+    <city>TYONEK</city>
+    <line1>100 A ST</line1>
+    <state>AK</state>
+    <location_name>TYONEK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333277">
+  <address>
+    <city>YAKUTAT</city>
+    <line1>609 FOREST HWY 10</line1>
+    <state>AK</state>
+    <location_name>YAKUTAT PUBLIC SAFETY BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="333278">
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1016 3RD STREET</line1>
+    <state>AK</state>
+    <location_name>DOUGLAS PUBLIC LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333279">
+  <address>
+    <city>GUSTAVUS</city>
+    <line1>GUSTAVUS ROAD</line1>
+    <state>AK</state>
+    <location_name>GUSTAVUS PUBLIC LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333280">
+  <address>
+    <city>JUNEAU</city>
+    <line1>350 WHITTIER AVE</line1>
+    <state>AK</state>
+    <location_name>JUNEAU ARTS/HUMANITIES BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333281">
+  <address>
+    <city>JUNEAU</city>
+    <line1>400 W 11TH ST</line1>
+    <state>AK</state>
+    <location_name>NORTHERN LIGHT UNITED CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333282">
+  <address>
+    <city>JUNEAU</city>
+    <line1>3260 HOSPITAL DR</line1>
+    <state>AK</state>
+    <location_name>BARTLETT REGIONAL HOSPITAL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333283">
+  <address>
+    <city>JUNEAU</city>
+    <line1>5601 TONSGARD CT</line1>
+    <state>AK</state>
+    <location_name>ALASKA ELECTRIC LIGHT &amp; POWER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333284">
+  <address>
+    <city>JUNEAU</city>
+    <line1>820 GLACIER AVENUE</line1>
+    <state>AK</state>
+    <location_name>JUNEAU FIRE STATION</location_name>
+  </address>
+</polling_location>
+<polling_location id="333285">
+  <address>
+    <city>SKAGWAY</city>
+    <line1>700 SPRING STREET</line1>
+    <state>AK</state>
+    <location_name>SKAGWAY BOROUGH OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333286">
+  <address>
+    <city>HAINES</city>
+    <line1>113 HAINES HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>AMERICAN BALD EAGLE FOUNDATION</location_name>
+  </address>
+</polling_location>
+<polling_location id="333287">
+  <address>
+    <city>HAINES</city>
+    <line1>MOSQUITO LAKE ROAD</line1>
+    <state>AK</state>
+    <location_name>KLEHINI VALLEY FIRE DEPARTMENT</location_name>
+  </address>
+</polling_location>
+<polling_location id="333288">
+  <address>
+    <city>KLUKWAN</city>
+    <line1>KLUKWAN ANS HALL</line1>
+    <state>AK</state>
+    <location_name>KLUKWAN ANS HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333289">
+  <address>
+    <city>JUNEAU</city>
+    <line1>MI 12.4 GLACIER HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>AUKE BAY FIRE STATION</location_name>
+  </address>
+</polling_location>
+<polling_location id="333290">
+  <address>
+    <city>JUNEAU</city>
+    <line1>8745 GLACIER HIGHWAY SUITE #328</line1>
+    <state>AK</state>
+    <location_name>NUGGET MALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333291">
+  <address>
+    <city>JUNEAU</city>
+    <line1>13.8 MILE GLACIER HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>AUKE BAY FERRY TERMINAL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333292">
+  <address>
+    <city>JUNEAU</city>
+    <line1>9105 MENDENHALL MALL ROAD</line1>
+    <state>AK</state>
+    <location_name>MENDENHALL MALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333293">
+  <address>
+    <city>JUNEAU</city>
+    <line1>9161 CINEMA DR</line1>
+    <state>AK</state>
+    <location_name>ALDERSGATE METHODIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333294">
+  <address>
+    <city>JUNEAU</city>
+    <line1>3921 MENDENHALL LOOP ROAD</line1>
+    <state>AK</state>
+    <location_name>GLACIER VALLEY BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="333295">
+  <address>
+    <city>JUNEAU</city>
+    <line1>4212 MENDENHALL LOOP ROAD</line1>
+    <state>AK</state>
+    <location_name>SHEPHERD OF THE VALLEY LUTHERAN</location_name>
+  </address>
+</polling_location>
+<polling_location id="333296">
+  <address>
+    <city>ANGOON</city>
+    <line1>315 HEENDAE STREET</line1>
+    <state>AK</state>
+    <location_name>ANGOON CITY OFFICE COURT ROOM</location_name>
+  </address>
+</polling_location>
+<polling_location id="333297">
+  <address>
+    <city>CRAIG</city>
+    <line1>500 THIRD STREET</line1>
+    <state>AK</state>
+    <location_name>CRAIG CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333298">
+  <address>
+    <city>HOONAH</city>
+    <line1>300 GARTEENI HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>HOONAH CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333299">
+  <address>
+    <city>KAKE</city>
+    <line1>264 FRONT ST</line1>
+    <state>AK</state>
+    <location_name>KAKE CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333300">
+  <address>
+    <city>KASAAN</city>
+    <line1>PEELE &amp; JONES STREET</line1>
+    <state>AK</state>
+    <location_name>KASAAN COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333301">
+  <address>
+    <city>KLAWOCK</city>
+    <line1>609 SUMMIT STREET</line1>
+    <state>AK</state>
+    <location_name>KLAWOCK CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333302">
+  <address>
+    <city>COFFMAN COVE</city>
+    <line1>106 DENALI ALLEY</line1>
+    <state>AK</state>
+    <location_name>CITY LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333303">
+  <address>
+    <city>PELICAN</city>
+    <line1>SALMON WAY</line1>
+    <state>AK</state>
+    <location_name>PELICAN CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333304">
+  <address>
+    <city>PETERSBURG</city>
+    <line1>109 CHARLES W STREET</line1>
+    <state>AK</state>
+    <location_name>AQUATIC CENTER LOBBY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333305">
+  <address>
+    <city>PORT ALEXANDER</city>
+    <line1>BEAR HALL COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>BEAR HALL COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333306">
+  <address>
+    <city>SITKA</city>
+    <line1>330 HARBOR DRIVE</line1>
+    <state>AK</state>
+    <location_name>HARRIGAN CENTENNIAL HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333307">
+  <address>
+    <city>SITKA</city>
+    <line1>330 HARBOR DRIVE</line1>
+    <state>AK</state>
+    <location_name>HARRIGAN CENTENNIAL HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333308">
+  <address>
+    <city>TENAKEE SPRINGS</city>
+    <line1>TENAKEE AVENUE</line1>
+    <state>AK</state>
+    <location_name>TENAKEE COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333309">
+  <address>
+    <city>THORNE BAY</city>
+    <line1>120 FREEMAN DR</line1>
+    <state>AK</state>
+    <location_name>THORNE BAY CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333310">
+  <address>
+    <city>KETCHIKAN</city>
+    <line1>217 SCHOENBAR ROAD</line1>
+    <state>AK</state>
+    <location_name>SCHOENBAR MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333311">
+  <address>
+    <city>KETCHIKAN</city>
+    <line1>2417 TONGASS AVENUE SUITE 215</line1>
+    <state>AK</state>
+    <location_name>PLAZA MALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333312">
+  <address>
+    <city>KETCHIKAN</city>
+    <line1>3501 TONGASS AVENUE</line1>
+    <state>AK</state>
+    <location_name>KETCHIKAN FERRY TERMINAL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333313">
+  <address>
+    <city>KETCHIKAN</city>
+    <line1>7550 N TONGASS HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>NORTH TONGASS FIRE STATION NO 6</location_name>
+  </address>
+</polling_location>
+<polling_location id="333314">
+  <address>
+    <city>KETCHIKAN</city>
+    <line1>13110 N TONGASS HIGHWAY</line1>
+    <state>AK</state>
+    <location_name>NORTH TONGASS FIRE STATION NO 8</location_name>
+  </address>
+</polling_location>
+<polling_location id="333315">
+  <address>
+    <city>SAXMAN</city>
+    <line1>2841 S TONGASS HWY</line1>
+    <state>AK</state>
+    <location_name>SAXMAN COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333316">
+  <address>
+    <city>KETCHIKAN</city>
+    <line1>400 OLD HOMESTEAD ROAD</line1>
+    <state>AK</state>
+    <location_name>FAWN MOUNTAIN SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333317">
+  <address>
+    <city>HYDABURG</city>
+    <line1>EIGHTH ST EXTENSION</line1>
+    <state>AK</state>
+    <location_name>HYDABURG MUNICIPAL BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333318">
+  <address>
+    <city>METLAKATLA</city>
+    <line1>UPPER MILTON STREET</line1>
+    <state>AK</state>
+    <location_name>METLAKATLA TOWN HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333319">
+  <address>
+    <city>WRANGELL</city>
+    <line1>296 CAMPBELL DR</line1>
+    <state>AK</state>
+    <location_name>JAMES &amp; ELSIE NOLAN CIVIC CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333320">
+  <address>
+    <city>ANVIK</city>
+    <line1>ANVIK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>ANVIK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333321">
+  <address>
+    <city>GRAYLING</city>
+    <line1>GRAYLING COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>GRAYLING COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333322">
+  <address>
+    <city>HOLY CROSS</city>
+    <line1>HOLY CROSS COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>HOLY CROSS COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333323">
+  <address>
+    <city>MCGRATH</city>
+    <line1>MCGRATH COMMUNITY LIBRARY</line1>
+    <state>AK</state>
+    <location_name>MCGRATH COMMUNITY LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333324">
+  <address>
+    <city>NIKOLAI</city>
+    <line1>NIKOLAI CITY LIBRARY</line1>
+    <state>AK</state>
+    <location_name>NIKOLAI CITY LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="333325">
+  <address>
+    <city>SHAGELUK</city>
+    <line1>SHAGELUK CITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>SHAGELUK CITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333326">
+  <address>
+    <city>TAKOTNA</city>
+    <line1>TWITCHELL BUILDING</line1>
+    <state>AK</state>
+    <location_name>TWITCHELL BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333327">
+  <address>
+    <city>AKUTAN</city>
+    <line1>AKUTAN CITY HALL</line1>
+    <state>AK</state>
+    <location_name>AKUTAN CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333328">
+  <address>
+    <city>ALEKNAGIK</city>
+    <line1>ALEKNAGIK CITY HALL</line1>
+    <state>AK</state>
+    <location_name>ALEKNAGIK CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333329">
+  <address>
+    <city>ADAK</city>
+    <line1>BOB REEVES HIGH SCHOOL</line1>
+    <state>AK</state>
+    <location_name>BOB REEVES HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333330">
+  <address>
+    <city>UNALASKA</city>
+    <line1>43 RAVEN WAY</line1>
+    <state>AK</state>
+    <location_name>UNALASKA CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333331">
+  <address>
+    <city>CHIGNIK</city>
+    <line1>CHIGNIK CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>CHIGNIK CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333332">
+  <address>
+    <city>CLARK'S POINT</city>
+    <line1>CLARK'S PT. VILLAGE COUNCIL OFC</line1>
+    <state>AK</state>
+    <location_name>CLARK'S PT. VILLAGE COUNCIL OFC</location_name>
+  </address>
+</polling_location>
+<polling_location id="333333">
+  <address>
+    <city>COLD BAY</city>
+    <line1>COLD BAY MUNICIPAL BUILDING</line1>
+    <state>AK</state>
+    <location_name>COLD BAY MUNICIPAL BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333334">
+  <address>
+    <city>DILLINGHAM</city>
+    <line1>141 MAIN ST</line1>
+    <state>AK</state>
+    <location_name>DILLINGHAM CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333335">
+  <address>
+    <city>EGEGIK</city>
+    <line1>EGEGIK CITY HALL</line1>
+    <state>AK</state>
+    <location_name>EGEGIK CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333336">
+  <address>
+    <city>EKWOK</city>
+    <line1>EKWOK CITY HALL</line1>
+    <state>AK</state>
+    <location_name>EKWOK CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333337">
+  <address>
+    <city>KING COVE</city>
+    <line1>KING COVE CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>KING COVE CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333338">
+  <address>
+    <city>KING SALMON</city>
+    <line1>KING SALMON VILLAGE COUNCIL BLDG</line1>
+    <state>AK</state>
+    <location_name>KING SALMON VILLAGE COUNCIL BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="333339">
+  <address>
+    <city>KOLIGANEK</city>
+    <line1>KOLIGANEK VILLAGE COUNCIL BLDG</line1>
+    <state>AK</state>
+    <location_name>KOLIGANEK VILLAGE COUNCIL BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="333340">
+  <address>
+    <city>NEWHALEN</city>
+    <line1>NEWHALEN CITY HALL</line1>
+    <state>AK</state>
+    <location_name>NEWHALEN CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333341">
+  <address>
+    <city>KOKHANOK</city>
+    <line1>KOKHANOK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>KOKHANOK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333342">
+  <address>
+    <city>LEVELOCK</city>
+    <line1>LEVELOCK RAINBOW HALL</line1>
+    <state>AK</state>
+    <location_name>LEVELOCK RAINBOW HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333343">
+  <address>
+    <city>MANOKOTAK</city>
+    <line1>MANOKOTAK CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>MANOKOTAK CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333344">
+  <address>
+    <city>NAKNEK</city>
+    <line1>BOROUGH BUILDING ASSEMBLY ROOM</line1>
+    <state>AK</state>
+    <location_name>BOROUGH BUILDING ASSEMBLY ROOM</location_name>
+  </address>
+</polling_location>
+<polling_location id="333345">
+  <address>
+    <city>NEW STUYAHOK</city>
+    <line1>NEW STUYAHOK CITY HALL</line1>
+    <state>AK</state>
+    <location_name>NEW STUYAHOK CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333346">
+  <address>
+    <city>NONDALTON</city>
+    <line1>NONDALTON COMMUNITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>NONDALTON COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333347">
+  <address>
+    <city>PEDRO BAY</city>
+    <line1>PEDRO BAY VILLAGE COUNCIL BLDG</line1>
+    <state>AK</state>
+    <location_name>PEDRO BAY VILLAGE COUNCIL BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="333348">
+  <address>
+    <city>PORT HEIDEN</city>
+    <line1>PORT HEIDEN COMMUNITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>PORT HEIDEN COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333349">
+  <address>
+    <city>SAND POINT</city>
+    <line1>SAND POINT CITY HALL</line1>
+    <state>AK</state>
+    <location_name>SAND POINT CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333350">
+  <address>
+    <city>SLEETMUTE</city>
+    <line1>SLEETMUTE OFFICE BUILDING</line1>
+    <state>AK</state>
+    <location_name>SLEETMUTE OFFICE BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333351">
+  <address>
+    <city>SOUTH NAKNEK</city>
+    <line1>SOUTH NAKNEK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>SOUTH NAKNEK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333352">
+  <address>
+    <city>ST GEORGE ISLAND</city>
+    <line1>ST GEORGE CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>ST GEORGE CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333353">
+  <address>
+    <city>ST PAUL ISLAND</city>
+    <line1>ST PAUL CITY AUDITORIUM</line1>
+    <state>AK</state>
+    <location_name>ST PAUL CITY AUDITORIUM</location_name>
+  </address>
+</polling_location>
+<polling_location id="333354">
+  <address>
+    <city>TOGIAK</city>
+    <line1>TOGIAK CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>TOGIAK CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333355">
+  <address>
+    <city>AKIACHAK</city>
+    <line1>AKIACHAK RECREATION BUILDING</line1>
+    <state>AK</state>
+    <location_name>AKIACHAK RECREATION BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333356">
+  <address>
+    <city>AKIAK</city>
+    <line1>AKIAK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>AKIAK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333357">
+  <address>
+    <city>ANIAK</city>
+    <line1>ANIAK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>ANIAK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333358">
+  <address>
+    <city>ATMAUTLUAK</city>
+    <line1>ATMAUTLUAK COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>ATMAUTLUAK COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333359">
+  <address>
+    <city>BETHEL</city>
+    <line1>1004 RON EDWARDS WAY</line1>
+    <state>AK</state>
+    <location_name>LOWER KUSKOKWIM SCHOOL DIST OFC</location_name>
+  </address>
+</polling_location>
+<polling_location id="333360">
+  <address>
+    <city>BETHEL</city>
+    <line1>420 CHIEF EDDIE HOFFMAN HWY</line1>
+    <state>AK</state>
+    <location_name>YUPIIT PICIRYARAIT CULTURAL CTR</location_name>
+  </address>
+</polling_location>
+<polling_location id="333361">
+  <address>
+    <city>CHEFORNAK</city>
+    <line1>CHEFORNAK COMPLEX BUILDING</line1>
+    <state>AK</state>
+    <location_name>CHEFORNAK COMPLEX BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333362">
+  <address>
+    <city>CHUATHBALUK</city>
+    <line1>CHUATHBALUK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>CHUATHBALUK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333363">
+  <address>
+    <city>CROOKED CREEK</city>
+    <line1>CROOKED CREEK VILLAGE OFFICE</line1>
+    <state>AK</state>
+    <location_name>CROOKED CREEK VILLAGE OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333364">
+  <address>
+    <city>EEK</city>
+    <line1>EEK CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>EEK CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333365">
+  <address>
+    <city>GOODNEWS BAY</city>
+    <line1>GOODNEWS BAY COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>GOODNEWS BAY COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333366">
+  <address>
+    <city>KASIGLUK</city>
+    <line1>KASIGLUK COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>KASIGLUK COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333367">
+  <address>
+    <city>KIPNUK</city>
+    <line1>KANGANAK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>KANGANAK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333368">
+  <address>
+    <city>KONGIGANAK</city>
+    <line1>KONGIGANAK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>KONGIGANAK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333369">
+  <address>
+    <city>KWETHLUK</city>
+    <line1>KWETHLUK CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>KWETHLUK CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333370">
+  <address>
+    <city>KWIGILLINGOK</city>
+    <line1>KWIGILLINGOK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>KWIGILLINGOK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333371">
+  <address>
+    <city>LOWER KALSKAG</city>
+    <line1>LOWER KALSKAG COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>LOWER KALSKAG COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333372">
+  <address>
+    <city>MARSHALL</city>
+    <line1>MARSHALL COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>MARSHALL COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333373">
+  <address>
+    <city>MEKORYUK</city>
+    <line1>MEKORYUK OLD CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>MEKORYUK OLD CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333374">
+  <address>
+    <city>NAPAKIAK</city>
+    <line1>NAPAKIAK BINGO HALL</line1>
+    <state>AK</state>
+    <location_name>NAPAKIAK BINGO HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333375">
+  <address>
+    <city>NAPASKIAK</city>
+    <line1>NAPASKIAK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>NAPASKIAK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333376">
+  <address>
+    <city>NEWTOK</city>
+    <line1>NEWTOK COMMUNITY QUYURRVIK HALL</line1>
+    <state>AK</state>
+    <location_name>NEWTOK COMMUNITY QUYURRVIK HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333377">
+  <address>
+    <city>NIGHTMUTE</city>
+    <line1>NIGHTMUTE COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>NIGHTMUTE COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333378">
+  <address>
+    <city>NUNAPITCHUK</city>
+    <line1>NUNAPITCHUK BINGO HALL</line1>
+    <state>AK</state>
+    <location_name>NUNAPITCHUK BINGO HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333379">
+  <address>
+    <city>QUINHAGAK</city>
+    <line1>QUINHAGAK BINGO HALL</line1>
+    <state>AK</state>
+    <location_name>QUINHAGAK BINGO HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333380">
+  <address>
+    <city>RUSSIAN MISSION</city>
+    <line1>RUSSIAN MISSION CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>RUSSIAN MISSION CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333381">
+  <address>
+    <city>TOKSOOK BAY</city>
+    <line1>BILLY LINCOLN SR MEMORIAL BLDG</line1>
+    <state>AK</state>
+    <location_name>BILLY LINCOLN SR MEMORIAL BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="333382">
+  <address>
+    <city>TULUKSAK</city>
+    <line1>TULUKSAK RECREATION BUILDING</line1>
+    <state>AK</state>
+    <location_name>TULUKSAK RECREATION BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333383">
+  <address>
+    <city>TUNTUTULIAK</city>
+    <line1>TUNTUTULIAK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>TUNTUTULIAK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333384">
+  <address>
+    <city>TUNUNAK</city>
+    <line1>TUNUNAK IRA BUILDING</line1>
+    <state>AK</state>
+    <location_name>TUNUNAK IRA BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333385">
+  <address>
+    <city>KALSKAG</city>
+    <line1>MULTI-FACILITY BLDG TRIBAL OFC</line1>
+    <state>AK</state>
+    <location_name>MULTI-FACILITY BLDG TRIBAL OFC</location_name>
+  </address>
+</polling_location>
+<polling_location id="333386">
+  <address>
+    <city>GALENA</city>
+    <line1>GALENA CITY HALL</line1>
+    <state>AK</state>
+    <location_name>GALENA CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333387">
+  <address>
+    <city>HUSLIA</city>
+    <line1>HUSLIA COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>HUSLIA COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333388">
+  <address>
+    <city>KALTAG</city>
+    <line1>KALTAG CITY HALL</line1>
+    <state>AK</state>
+    <location_name>KALTAG CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333389">
+  <address>
+    <city>KOYUKUK</city>
+    <line1>KOYUKUK CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>KOYUKUK CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333390">
+  <address>
+    <city>NULATO</city>
+    <line1>NULATO ACTIVITY CENTER</line1>
+    <state>AK</state>
+    <location_name>NULATO ACTIVITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333391">
+  <address>
+    <city>RUBY</city>
+    <line1>RUBY VILLAGE WASHETERIA</line1>
+    <state>AK</state>
+    <location_name>RUBY VILLAGE WASHETERIA</location_name>
+  </address>
+</polling_location>
+<polling_location id="333392">
+  <address>
+    <city>ALAKANUK</city>
+    <line1>ALAKANUK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>ALAKANUK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333393">
+  <address>
+    <city>BREVIG MISSION</city>
+    <line1>BREVIG MISSION COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>BREVIG MISSION COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333394">
+  <address>
+    <city>CHEVAK</city>
+    <line1>JVP BUILDING</line1>
+    <state>AK</state>
+    <location_name>JVP BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333395">
+  <address>
+    <city>DIOMEDE</city>
+    <line1>DIOMEDE COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>DIOMEDE COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333396">
+  <address>
+    <city>ELIM</city>
+    <line1>ELIM CITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>ELIM CITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333397">
+  <address>
+    <city>EMMONAK</city>
+    <line1>EMMONAK COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>EMMONAK COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333398">
+  <address>
+    <city>GAMBELL</city>
+    <line1>QERNGUGHVIK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>QERNGUGHVIK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333399">
+  <address>
+    <city>GOLOVIN</city>
+    <line1>GOLOVIN COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>GOLOVIN COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333400">
+  <address>
+    <city>HOOPER BAY</city>
+    <line1>BROWN COUNCIL BUILDING</line1>
+    <state>AK</state>
+    <location_name>BROWN COUNCIL BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333401">
+  <address>
+    <city>KOTLIK</city>
+    <line1>KOTLIK CITY HALL</line1>
+    <state>AK</state>
+    <location_name>KOTLIK CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333402">
+  <address>
+    <city>KOYUK</city>
+    <line1>KOYUK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>KOYUK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333403">
+  <address>
+    <city>MOUNTAIN VILLAGE</city>
+    <line1>MOUNTAIN VILLAGE COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>MOUNTAIN VILLAGE COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333404">
+  <address>
+    <city>NOME</city>
+    <line1>407 BERING ST</line1>
+    <state>AK</state>
+    <location_name>OLD ST. JOE'S</location_name>
+  </address>
+</polling_location>
+<polling_location id="333405">
+  <address>
+    <city>NOME</city>
+    <line1>407 BERING ST</line1>
+    <state>AK</state>
+    <location_name>OLD ST. JOE'S</location_name>
+  </address>
+</polling_location>
+<polling_location id="333406">
+  <address>
+    <city>NUNAM IQUA</city>
+    <line1>NUNAM IQUA COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>NUNAM IQUA COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333407">
+  <address>
+    <city>PILOT STATION</city>
+    <line1>TUTALGAQ COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>TUTALGAQ COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333408">
+  <address>
+    <city>SAVOONGA</city>
+    <line1>SAVOONGA MUNICIPAL BUILDING</line1>
+    <state>AK</state>
+    <location_name>SAVOONGA MUNICIPAL BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333409">
+  <address>
+    <city>SCAMMON BAY</city>
+    <line1>SCAMMON BAY TRADITIONAL COUNCIL</line1>
+    <state>AK</state>
+    <location_name>SCAMMON BAY TRADITIONAL COUNCIL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333410">
+  <address>
+    <city>SHAKTOOLIK</city>
+    <line1>SHAKTOOLIK CITY HALL</line1>
+    <state>AK</state>
+    <location_name>SHAKTOOLIK CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333411">
+  <address>
+    <city>SHISHMAREF</city>
+    <line1>SHISHMAREF COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>SHISHMAREF COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333412">
+  <address>
+    <city>ST. MARY'S</city>
+    <line1>ST. MARY'S CITY HALL</line1>
+    <state>AK</state>
+    <location_name>ST. MARY'S CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333413">
+  <address>
+    <city>ST. MICHAEL</city>
+    <line1>ST. MICHAEL CITY OFFICE BUILDING</line1>
+    <state>AK</state>
+    <location_name>ST. MICHAEL CITY OFFICE BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333414">
+  <address>
+    <city>STEBBINS</city>
+    <line1>STEBBINS COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>STEBBINS COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333415">
+  <address>
+    <city>TELLER</city>
+    <line1>TELLER COMMUNITY/BINGO HALL</line1>
+    <state>AK</state>
+    <location_name>TELLER COMMUNITY/BINGO HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333416">
+  <address>
+    <city>UNALAKLEET</city>
+    <line1>COMMUNITY BUILDING MEMORIAL HALL</line1>
+    <state>AK</state>
+    <location_name>COMMUNITY BUILDING MEMORIAL HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333417">
+  <address>
+    <city>WALES</city>
+    <line1>WALES MULTI-PURPOSE BUILDING</line1>
+    <state>AK</state>
+    <location_name>WALES MULTI-PURPOSE BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333418">
+  <address>
+    <city>WHITE MOUNTAIN</city>
+    <line1>NEW COMMUNITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>NEW COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333419">
+  <address>
+    <city>AMBLER</city>
+    <line1>AMBLER IRA BUILDING</line1>
+    <state>AK</state>
+    <location_name>AMBLER IRA BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333420">
+  <address>
+    <city>ANAKTUVUK PASS</city>
+    <line1>CITY OFFICE/RECREATION BLDG</line1>
+    <state>AK</state>
+    <location_name>CITY OFFICE/RECREATION BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="333421">
+  <address>
+    <city>ATQASUK</city>
+    <line1>ATQASUK COMMUNITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>ATQASUK COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333422">
+  <address>
+    <city>BARROW</city>
+    <line1>1274 AGVIK ST</line1>
+    <state>AK</state>
+    <location_name>NORTH SLOPE BOROUGH BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333423">
+  <address>
+    <city>BROWERVILLE</city>
+    <line1>5421 NORTH STAR STREET</line1>
+    <state>AK</state>
+    <location_name>INUPIAT HERITAGE CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333424">
+  <address>
+    <city>BUCKLAND</city>
+    <line1>BUCKLAND COMMUNITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>BUCKLAND COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333425">
+  <address>
+    <city>DEERING</city>
+    <line1>DEERING COMMUNITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>DEERING COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333426">
+  <address>
+    <city>KAKTOVIK</city>
+    <line1>KAKTOVIK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>KAKTOVIK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333427">
+  <address>
+    <city>KIANA</city>
+    <line1>KIANA COMMUNITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>KIANA COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333428">
+  <address>
+    <city>KIVALINA</city>
+    <line1>KIVALINA COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>KIVALINA COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333429">
+  <address>
+    <city>KOBUK</city>
+    <line1>KOBUK COMMUNITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>KOBUK COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333430">
+  <address>
+    <city>KOTZEBUE</city>
+    <line1>163 LAGOON STREET</line1>
+    <state>AK</state>
+    <location_name>NORTHWEST ARCTIC BOROUGH BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="333431">
+  <address>
+    <city>NOATAK</city>
+    <line1>NOATAK IRA BUILDING</line1>
+    <state>AK</state>
+    <location_name>NOATAK IRA BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333432">
+  <address>
+    <city>NOORVIK</city>
+    <line1>NOORVIK COMMUNITY BUILDING</line1>
+    <state>AK</state>
+    <location_name>NOORVIK COMMUNITY BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="333433">
+  <address>
+    <city>NUIQSUT</city>
+    <line1>KISIK COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>KISIK COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333434">
+  <address>
+    <city>POINT HOPE</city>
+    <line1>POINT HOPE CITY HALL</line1>
+    <state>AK</state>
+    <location_name>POINT HOPE CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333435">
+  <address>
+    <city>POINT LAY</city>
+    <line1>POINT LAY COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>POINT LAY COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333436">
+  <address>
+    <city>SELAWIK</city>
+    <line1>SELAWIK COMMUNITY HALL</line1>
+    <state>AK</state>
+    <location_name>SELAWIK COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="333437">
+  <address>
+    <city>SHUNGNAK</city>
+    <line1>COFFEE HOUSE</line1>
+    <state>AK</state>
+    <location_name>COFFEE HOUSE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333438">
+  <address>
+    <city>WAINWRIGHT</city>
+    <line1>WAINWRIGHT COMMUNITY CENTER</line1>
+    <state>AK</state>
+    <location_name>WAINWRIGHT COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="333439">
+  <address>
+    <city>ALLAKAKET</city>
+    <line1>ALLAKAKET CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>ALLAKAKET CITY OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="333440">
+  <address>
+    <city>BETTLES</city>
+    <line1>BETTLES FIRE STATION</line1>
+    <state>AK</state>
+    <location_name>BETTLES FIRE STATION</location_name>
+  </address>
+</polling_location>
+<polling_location id="333441">
+  <address>
+    <city>HUGHES</city>
+    <line1>HUGHES CITY OFFICE</line1>
+    <state>AK</state>
+    <location_name>HUGHES CITY OFFICE</location_name>
+  </address>
+</polling_location>
+</vip_object>
