@@ -15,6 +15,7 @@
 {% if special_interest_group_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
+            <td></td>
             <td>sigId</td>
             <td>name</td>
             <td>stateId</td>
@@ -22,6 +23,7 @@
         </tr>
     {% for special_interest_group in special_interest_group_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td>{{ special_interest_group.sigId }}</td>
             <td><a href="{% url 'import_export_vote_smart:special_interest_group_rating_list' special_interest_group.sigId %}">{{ special_interest_group.name }}</a></td>
             <td>{{ special_interest_group.stateId }}</td>

@@ -75,9 +75,10 @@ class PollingLocationManager(models.Model):
         elif not state:
             success = False
             status = 'MISSING_POLLING_LOCATION_STATE'
-        elif not zip_long:
-            success = False
-            status = 'MISSING_POLLING_LOCATION_ZIP'
+        # Note: It turns out that some states, like Alaska, do not provide ZIP codes
+        # elif not zip_long:
+        #     success = False
+        #     status = 'MISSING_POLLING_LOCATION_ZIP'
         else:
             try:
                 updated_values = {

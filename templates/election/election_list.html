@@ -7,11 +7,13 @@
 <a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 
 <h1>Elections</h1>
-<p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections</a></p>
+<p><a href="{% url 'election:election_remote_retrieve' %}">Retrieve all elections</a>.
+    VIP <a href="https://www.votinginfoproject.org/news/vip-expands-election-support/" target="_blank">elections supported for 2016.</a></p>
 
 {% if election_list %}
     <table border="1" cellpadding="10">
         <tr>
+            <td></td>
             <td>Election Name</td>
             <td>Date</td>
             <td>Google Civic ID</td>
@@ -19,6 +21,7 @@
         </tr>
     {% for election in election_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'election:election_summary' election.id %}">{{ election.election_name }}</a></td>
             <td>{{ election.election_day_text }}</td>
             <td align="middle">{{ election.google_civic_election_id }}</td>

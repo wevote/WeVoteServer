@@ -21,7 +21,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
+from wevote_functions.models import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 
 ORGANIZATION_STANCE_CHOICES = (
@@ -51,6 +51,7 @@ def organization_list_view(request):
     template_values = {
         'messages_on_stage': messages_on_stage,
         'organization_list': organization_list,
+        'state_list':        STATE_CODE_MAP,
     }
     return render(request, 'organization/organization_list.html', template_values)
 

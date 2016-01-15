@@ -7,7 +7,8 @@
 <a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 
 <h1>Positions / Public Opinions</h1>
-<p>Also see positions listed under <a href="{% url 'organization:organization_list' %}">Organizations</a></p>
+<p>Also see positions listed under <a href="{% url 'organization:organization_list' %}">Organizations</a>.
+    Vote Smart ratings <a href="{% url 'import_export_vote_smart:vote_smart_index' %}">here</a>.</p>
 
 {% if election_list %}
     <form name="organization_position_choose_election" method="get" action="{% url 'position:position_list' %}">
@@ -28,6 +29,7 @@
 {% if position_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
+            <td></td>
             <td>ID</td>
             <td>Organization</td>
             <td>Stance</td>
@@ -36,6 +38,7 @@
         </tr>
     {% for position in position_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td>{{ position.we_vote_id }}</td>
             <td>{% if position.organization %}{{ position.organization.organization_name }}{% endif %}</td>
             <td>{% if position.organization %}

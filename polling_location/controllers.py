@@ -20,6 +20,9 @@ def import_and_save_all_polling_locations_data():
     xml_file_location = 'polling_location/import_data/az/vipFeed-04-2015-11-03-AZ.xml'
     az1_results = import_and_save_polling_location_data(xml_file_location)
 
+    xml_file_location = 'polling_location/import_data/az/vipFeed-04-2015-08-25.xml'
+    az2_results = import_and_save_polling_location_data(xml_file_location)
+
     # ##################
     # California
     xml_file_location = 'polling_location/import_data/ca/vipFeed-06-2015-11-03-short.xml'
@@ -106,7 +109,7 @@ def import_and_save_all_polling_locations_data():
     xml_file_location = 'polling_location/import_data/wy/vipFeed-56-2016-11-08.xml'
     wy1_results = import_and_save_polling_location_data(xml_file_location)
 
-    return merge_polling_location_results(ak1_results, az1_results,
+    return merge_polling_location_results(ak1_results, az1_results, az2_results,
                                           ca1_results, ca2_results, ca3_results, ca4_results, ca5_results, ca6_results,
                                           ca7_results, ca8_results,
                                           nc1_results, nd1_results,
@@ -163,6 +166,9 @@ def retrieve_polling_locations_data_from_xml(xml_file_location):
             city = address.find('city')
             city_text = city.text if city is not None else ''
             if city_text == 'A BALLOT FOR EACH ELECTION':
+                # We don't want to save this polling location
+                continue
+            if city_text == '0':
                 # We don't want to save this polling location
                 continue
             state = address.find('state')
