@@ -17,6 +17,25 @@ import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+STATE_LIST_IMPORT = {
+    'AK':   'AK',
+    'AZ':   'AZ',
+    'CA':   'CA',
+    'NC':   'NC',
+    'ND':   'ND',
+    'NE':   'NE',
+    'NH':   'NH',
+    'NJ':   'NJ',
+    'NV':   'NV',
+    'NY':   'NY',
+    'RI':   'RI',
+    'VA':   'VA',
+    'WA':   'WA',
+    'WI':   'WI',
+    'WV':   'WV',
+    'WY':   'WY',
+}
+
 
 # @login_required()  # Commented out while we are developing login process()
 def import_polling_locations_view(request):
@@ -122,11 +141,7 @@ def polling_location_list_view(request):
         polling_location_query = polling_location_query.order_by('city')[:100]
     polling_location_list = polling_location_query
 
-    state_list = {
-        'CA':   'CA',
-        'RI':   'RI',
-        'VA':   'VA',
-    }
+    state_list = STATE_LIST_IMPORT
 
     messages_on_stage = get_messages(request)
 

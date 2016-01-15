@@ -1,0 +1,2986 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>State of North Dakota</name>
+  <vip_id>38</vip_id>
+  <datetime>2014-10-16T08:47:19</datetime>
+  <organization_url>www.nd.gov/sos</organization_url>
+</source>
+<state id="38">
+  <name>State of North Dakota</name>
+  <election_administration_id>40038</election_administration_id>
+</state>
+<polling_location id="6005122">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>2800 Ithica Dr</line1>
+    <state>ND</state>
+    <location_name>Centennial School</location_name>
+    <zip>58503</zip>
+  </address>
+</polling_location>
+<polling_location id="6005132">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Lincoln</city>
+    <line1>74 Santee Dr</line1>
+    <state>ND</state>
+    <location_name>Lincoln City Hall</location_name>
+    <zip>58504</zip>
+  </address>
+</polling_location>
+<polling_location id="6007225">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Carrington</city>
+    <line1>103 10th Ave N</line1>
+    <state>ND</state>
+    <location_name>Carrington City Hall</location_name>
+    <zip>58421</zip>
+  </address>
+</polling_location>
+<polling_location id="600904">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Ray</city>
+    <line1>5505 113th Dr NW</line1>
+    <state>ND</state>
+    <location_name>Beaver Creek Lutheran Church</location_name>
+    <zip>58849</zip>
+  </address>
+</polling_location>
+<polling_location id="600630">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Ryder</city>
+    <line1>Main Street</line1>
+    <state>ND</state>
+    <location_name>Ryder Senior Citizens Center</location_name>
+    <zip>58779</zip>
+  </address>
+</polling_location>
+<polling_location id="600634">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax: 839-1256</line2>
+    <city>Surrey</city>
+    <line1>100 Pleasant Ave S</line1>
+    <state>ND</state>
+    <location_name>Surrey City Hall</location_name>
+    <zip>58785</zip>
+  </address>
+</polling_location>
+<polling_location id="6001816">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Sanborn</city>
+    <line1>604 5th Ave</line1>
+    <state>ND</state>
+    <location_name>Sanborn Commu. Hall 09</location_name>
+    <zip>58480</zip>
+  </address>
+</polling_location>
+<polling_location id="6001819">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Valley City</city>
+    <line1>101 College St SW</line1>
+    <state>ND</state>
+    <location_name>V.C. University 03</location_name>
+    <zip>58072</zip>
+  </address>
+</polling_location>
+<polling_location id="600309">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Emerado</city>
+    <line1>300 Main St</line1>
+    <state>ND</state>
+    <location_name>Emerado Community Hall</location_name>
+    <zip>58228</zip>
+  </address>
+</polling_location>
+<polling_location id="6006">
+  <directions>Main entrance is on the south side.  There is a side entrance available on the east side of the building.. Parking is available on the street, both on the south and east sides of the building.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Buffalo</city>
+    <line1>507 Main St</line1>
+    <state>ND</state>
+    <location_name>Buffalo Community Center</location_name>
+    <zip>58011</zip>
+  </address>
+</polling_location>
+<polling_location id="60041">
+  <directions>Enter through the main entrance on the south side of the building.  Voting is located in the FACS room down the main corridor.. Parking is located on the south side of the school, directly in front of the main entrance.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Hunter</city>
+    <line1>16021 18th St Se</line1>
+    <state>ND</state>
+    <location_name>Northern Cass PSD</location_name>
+    <zip>58048</zip>
+  </address>
+</polling_location>
+<polling_location id="6003920">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Fort Totten</city>
+    <line1>816 3rd Ave. N</line1>
+    <state>ND</state>
+    <location_name>Precinct 7 - Ft. Totten Community Center</location_name>
+    <zip>58335</zip>
+  </address>
+</polling_location>
+<polling_location id="6006024">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Noonan</city>
+    <line1>605 MAIN ST S</line1>
+    <state>ND</state>
+    <location_name>Precinct 4-Noonan Community Center</location_name>
+    <zip>58765</zip>
+  </address>
+</polling_location>
+<polling_location id="6006327">
+  <directions>New Multi-Purpose Room.</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>101 High St NW</line2>
+    <city>Killdeer</city>
+    <line1>Killdeer School</line1>
+    <state>ND</state>
+    <location_name>Killdeer Unorganized - Killdeer School</location_name>
+    <zip>58640</zip>
+  </address>
+</polling_location>
+<polling_location id="60014456">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>212 3rd St NE</line2>
+    <city>Jamestown</city>
+    <line1>Jamestown Civic Center</line1>
+    <state>ND</state>
+    <location_name>Precinct J2 - Jamestown Civic Center</location_name>
+    <zip>58401</zip>
+  </address>
+</polling_location>
+<polling_location id="60014457">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>212 3rd St NE</line2>
+    <city>Jamestown</city>
+    <line1>Jamestown Civic Center</line1>
+    <state>ND</state>
+    <location_name>Precinct J3 - Jamestown Civic Center</location_name>
+    <zip>58401</zip>
+  </address>
+</polling_location>
+<polling_location id="60014449">
+  <directions>Or Jamestown Civic Center 212 3rd St NE Jamestown ND 58401.</directions>
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>1760 Hwy 281 SE</line2>
+    <city>Pingree</city>
+    <line1>Pingree Community Center</line1>
+    <state>ND</state>
+    <location_name>Precinct 1 - Pingree Community Center</location_name>
+    <zip>58476</zip>
+  </address>
+</polling_location>
+<polling_location id="60032644">
+  <directions>LaMoure County Courthouse
+202 4th Ave NE
+LaMoure ND 58458
+
+Edgeley National Guard Armory
+508 1st Ave West
+Edgeley ND 58433.</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <location_name>Vbm Polling Place - Lamoure &amp;amp; Edgeley</location_name>
+  </address>
+</polling_location>
+<polling_location id="6002710">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>3717 High St</line2>
+    <city>Fryburg</city>
+    <line1>Billings County Fire Hall</line1>
+    <state>ND</state>
+    <location_name>Fryburg</location_name>
+    <zip>58622</zip>
+  </address>
+</polling_location>
+<polling_location id="60032705">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Towner</city>
+    <line1>407 Main St S</line1>
+    <state>ND</state>
+    <location_name>McHenry County Courthouse</location_name>
+    <zip>58788</zip>
+  </address>
+</polling_location>
+<polling_location id="6005134">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Menoken</city>
+    <line1>412 Bismarck St N</line1>
+    <state>ND</state>
+    <location_name>Menoken School</location_name>
+    <zip>58558</zip>
+  </address>
+</polling_location>
+<polling_location id="60032701">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Hannover</city>
+    <line1>2095 Highway 31</line1>
+    <state>ND</state>
+    <location_name>St Peter's Lutheran Church</location_name>
+    <zip>58563</zip>
+  </address>
+</polling_location>
+<polling_location id="6009637">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>New Town</city>
+    <line1>200 Chief Four Bears Ave</line1>
+    <state>ND</state>
+    <location_name>Four Bears Community Center</location_name>
+    <zip>58763</zip>
+  </address>
+</polling_location>
+<polling_location id="60032544">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Harvey</city>
+    <line1>120 W 8th St</line1>
+    <state>ND</state>
+    <location_name>1 Harvey City Hall</location_name>
+    <zip>58341</zip>
+  </address>
+</polling_location>
+<polling_location id="60011141">
+  <directions>NEED CLAIM VOUCHER.</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Palermo</city>
+    <line1>249 Broadway St</line1>
+    <state>ND</state>
+    <location_name>Pct 4 Palermo Corporation Building</location_name>
+    <zip>58769</zip>
+  </address>
+</polling_location>
+<polling_location id="60011146">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Plaza</city>
+    <line1>403 Covell St</line1>
+    <state>ND</state>
+    <location_name>Pct 9 Plaza City Senior Citizens Building</location_name>
+    <zip>58771</zip>
+  </address>
+</polling_location>
+<polling_location id="60011440">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Center</city>
+    <line1>312 Lincoln Ave N</line1>
+    <state>ND</state>
+    <location_name>Civic Center East Room</location_name>
+    <zip>58530</zip>
+  </address>
+</polling_location>
+<polling_location id="60013847">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Amidon</city>
+    <line1>206 S Main St</line1>
+    <state>ND</state>
+    <location_name>Slope County Courthouse</location_name>
+    <zip>58620</zip>
+  </address>
+</polling_location>
+<polling_location id="60012946">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Rolla</city>
+    <line1>14 1st ST SE</line1>
+    <state>ND</state>
+    <location_name>Rolla City Hall</location_name>
+    <zip>58367</zip>
+  </address>
+</polling_location>
+<polling_location id="60032550">
+  <directions>Polling place for Precinct Four and Five..</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Strasburg</city>
+    <line1>622 Main St.</line1>
+    <state>ND</state>
+    <location_name>The Blue Room</location_name>
+    <zip>58573</zip>
+  </address>
+</polling_location>
+<polling_location id="60032654">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Williston</city>
+    <line1>1002 11th Street W</line1>
+    <state>ND</state>
+    <location_name>Raymond Family Community Center</location_name>
+    <zip>58801</zip>
+  </address>
+</polling_location>
+<polling_location id="60032655">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Finley</city>
+    <line1>201 Washington Ave W</line1>
+    <state>ND</state>
+    <location_name>Steele County Courthouse</location_name>
+    <zip>58230</zip>
+  </address>
+</polling_location>
+<polling_location id="60032784">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Northwood</city>
+    <line1>6 Raymond St</line1>
+    <state>ND</state>
+    <location_name>Northwood Community Center</location_name>
+    <zip>58267</zip>
+  </address>
+</polling_location>
+<polling_location id="60057">
+  <directions>Voting will take place in the gymnasium on the .</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>West Fargo</city>
+    <line1>945 7th Ave W</line1>
+    <state>ND</state>
+    <location_name>Westside Elementary</location_name>
+    <zip>58078</zip>
+  </address>
+</polling_location>
+<polling_location id="60032788">
+  <directions>Also called Water Chief Hall.</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Mandaree</city>
+    <line1>212 Ridge Road</line1>
+    <state>ND</state>
+    <location_name>Mandaree Community Center</location_name>
+    <zip>58757</zip>
+  </address>
+</polling_location>
+<polling_location id="60032764">
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>5225 31st Ave S</line1>
+    <state>ND</state>
+    <location_name>Scheels Arena</location_name>
+    <zip>58104</zip>
+  </address>
+</polling_location>
+<polling_location id="60032815">
+  <directions>Main Entrance.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>4451 40th Ave S</line1>
+    <state>ND</state>
+    <location_name>Living Waters Church</location_name>
+    <zip>58104</zip>
+  </address>
+</polling_location>
+<polling_location id="60032625">
+  <directions>Entrances are available on the south and east sides of the building with stairs to the main level.  A handicapped accessible entrance equipped with an elevator is available on the north side of the building, just off of 2nd Avenue South.  Voting will take place in the gymnasium on the main level toward the north end of the building.. Parking is available on the south side of the building.  Additional parking is available on the street along 11th St S as well as along 2nd Ave S.  Handicapped parking will be made available along the north side of the building off of 2nd Ave S.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>1104 2nd Avenue South</line1>
+    <state>ND</state>
+    <location_name>Robert Johnson Rec Ctr</location_name>
+    <zip>58103</zip>
+  </address>
+</polling_location>
+<polling_location id="6005422">
+  <directions>Pioneer Community Center.</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Rhame</city>
+    <line1>56 Main Street North</line1>
+    <state>ND</state>
+    <location_name>West - Rhame # 3 - Rhame American Legion Hall</location_name>
+    <zip>58651</zip>
+  </address>
+</polling_location>
+<polling_location id="6005125">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>3225 N 14th St</line1>
+    <state>ND</state>
+    <location_name>Evangel Assembly of God</location_name>
+    <zip>58503</zip>
+  </address>
+</polling_location>
+<polling_location id="6005128">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>716 W St Benedict Dr</line1>
+    <state>ND</state>
+    <location_name>Grimsrud School</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="6005144">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>315 N 20th St</line1>
+    <state>ND</state>
+    <location_name>Senior Center</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="600910">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Ray</city>
+    <line1>N of Ray Mall</line1>
+    <state>ND</state>
+    <location_name>Ray City Hall</location_name>
+    <zip>58849</zip>
+  </address>
+</polling_location>
+<polling_location id="600605">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax number 701-857-1545</line2>
+    <city>Minot</city>
+    <line1>2501 Burdick Expressway West</line1>
+    <state>ND</state>
+    <location_name>SW Minot - Maysa Arena</location_name>
+    <zip>58701</zip>
+  </address>
+</polling_location>
+<polling_location id="600625">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax: 385-3292</line2>
+    <city>Kenmare</city>
+    <line1>5 3rd St NE</line1>
+    <state>ND</state>
+    <location_name>Kenmare Memorial Hall</location_name>
+    <zip>58746</zip>
+  </address>
+</polling_location>
+<polling_location id="6001812">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Kathryn</city>
+    <line1>305 1st Ave</line1>
+    <state>ND</state>
+    <location_name>Kathryn Fire Hall 14</location_name>
+    <zip>58049</zip>
+  </address>
+</polling_location>
+<polling_location id="6001215">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wahpeton</city>
+    <line1>1202 Loy Ave</line1>
+    <state>ND</state>
+    <location_name>Wahpeton Middle School Library</location_name>
+    <zip>58075</zip>
+  </address>
+</polling_location>
+<polling_location id="600305">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>1601 17th Ave S</line1>
+    <state>ND</state>
+    <location_name>Hope Evangelical Church</location_name>
+    <zip>58201</zip>
+  </address>
+</polling_location>
+<polling_location id="6005">
+  <directions>Enter using the south door closest to the parking lot.. Parking is available on the south side of the church.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>2702 30th Ave S</line1>
+    <state>ND</state>
+    <location_name>Bethel Evangelical</location_name>
+    <zip>58103</zip>
+  </address>
+</polling_location>
+<polling_location id="60027">
+  <directions>Enter through the main entrance on 5th Avenue North.. Parking is available on on the street on both sides of 5th Avenue North.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Kindred</city>
+    <line1>31 5th Ave N</line1>
+    <state>ND</state>
+    <location_name>Kindred City Hall</location_name>
+    <zip>58051</zip>
+  </address>
+</polling_location>
+<polling_location id="60032651">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Forman</city>
+    <line1>355 Main St S</line1>
+    <state>ND</state>
+    <location_name>Sargent County Courthouse</location_name>
+    <zip>58032</zip>
+  </address>
+</polling_location>
+<polling_location id="6006324">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>102 Central Ave</line2>
+    <city>Dodge</city>
+    <line1>Dodge City Auditorium</line1>
+    <state>ND</state>
+    <location_name>Dodge/loring - Dodge City</location_name>
+    <zip>58625</zip>
+  </address>
+</polling_location>
+<polling_location id="60032694">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bowbells</city>
+    <line1>103 Main St NW</line1>
+    <state>ND</state>
+    <location_name>Burke County Courthouse-Vote by Mail Polling Place</location_name>
+    <zip>58721</zip>
+  </address>
+</polling_location>
+<polling_location id="60010837">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Almont</city>
+    <line1>108 Burt Ave</line1>
+    <state>ND</state>
+    <location_name>Almont Memorial Hall</location_name>
+    <zip>58520</zip>
+  </address>
+</polling_location>
+<polling_location id="60010844">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Mandan</city>
+    <line1>1400 Collins Ave</line1>
+    <state>ND</state>
+    <location_name>Eagles Club</location_name>
+    <zip>58554</zip>
+  </address>
+</polling_location>
+<polling_location id="6009634">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Arnegard</city>
+    <line1>211 Frontage Rd</line1>
+    <state>ND</state>
+    <location_name>Arnegard City Hall</location_name>
+    <zip>58835</zip>
+  </address>
+</polling_location>
+<polling_location id="60010545">
+  <directions>White Shield Complex.</directions>
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Whiteshield</city>
+    <line1>1620 61st Ave NW</line1>
+    <state>ND</state>
+    <location_name>White Shield Complex</location_name>
+    <zip>58540</zip>
+  </address>
+</polling_location>
+<polling_location id="60010854">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Saint Anthony</city>
+    <line1>2332 Co Rd 136</line1>
+    <state>ND</state>
+    <location_name>St. Anthony Hall</location_name>
+    <zip>58566</zip>
+  </address>
+</polling_location>
+<polling_location id="60011142">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Stanley</city>
+    <line1>8103 61st St NW</line1>
+    <state>ND</state>
+    <location_name>Pct 5 Mountrail County South Complex</location_name>
+    <zip>58784</zip>
+  </address>
+</polling_location>
+<polling_location id="60011742">
+  <directions>Contains the Townships of Sandale, Elling, Girard, Rosedale, Ness, Jefferson, Tuscarora, Reno Valley, Balta, Elverum and the City of Balta..</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Rugby</city>
+    <line1>1015 S Main Ave</line1>
+    <state>ND</state>
+    <location_name>Precinct 3- Rugby Armory</location_name>
+    <zip>58368</zip>
+  </address>
+</polling_location>
+<polling_location id="60012947">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>St John</city>
+    <line1>200 Foussard Ave SW</line1>
+    <state>ND</state>
+    <location_name>St John Senior Center</location_name>
+    <zip>58369</zip>
+  </address>
+</polling_location>
+<polling_location id="60012948">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Rolette</city>
+    <line1>503 2nd Ave</line1>
+    <state>ND</state>
+    <location_name>WWI Memorial Building</location_name>
+    <zip>58366</zip>
+  </address>
+</polling_location>
+<polling_location id="60014453">
+  <directions>Or Jamestown Civic Center 212 3rd St NE Jamestown ND 58401.</directions>
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>104 2nd Ave SW</line2>
+    <city>Medina</city>
+    <line1>Medina City Hall</line1>
+    <state>ND</state>
+    <location_name>Precinct 5 - Medina City Hall</location_name>
+    <zip>58467</zip>
+  </address>
+</polling_location>
+<polling_location id="60014460">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>212 3rd St NE</line2>
+    <city>Jamestown</city>
+    <line1>Jamestown Civic Center</line1>
+    <state>ND</state>
+    <location_name>Precinct J6 - Jamestown Civic Center</location_name>
+    <zip>58401</zip>
+  </address>
+</polling_location>
+<polling_location id="6001809">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Valley City</city>
+    <line1>1525 12th St NW</line1>
+    <state>ND</state>
+    <location_name>Barnes Co. Hwy. Department 10</location_name>
+    <zip>58072</zip>
+  </address>
+</polling_location>
+<polling_location id="60012645">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>205 Main St E</line2>
+    <city>Mohall</city>
+    <line1>Renville County Courthouse</line1>
+    <state>ND</state>
+    <location_name>Renville County Courthouse</location_name>
+    <zip>58761</zip>
+  </address>
+</polling_location>
+<polling_location id="6006023">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Fortuna</city>
+    <line1>250 MAIN ST</line1>
+    <state>ND</state>
+    <location_name>Precinct 3-Fortuna Senior Citizens</location_name>
+    <zip>58844</zip>
+  </address>
+</polling_location>
+<polling_location id="60032811">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Larimore</city>
+    <line1>116 Towner Ave</line1>
+    <state>ND</state>
+    <location_name>Larimore Senior Citizens Center</location_name>
+    <zip>58251</zip>
+  </address>
+</polling_location>
+<polling_location id="60032820">
+  <directions>.</directions>
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>American Legion Hall, 23 2nd Ave W, Turtle Lake</line2>
+    <line3>Washburn Memorial Bldg, 805 Main Ave, Washburn</line3>
+    <line1>Garrison City Auditorium, 15 Main St S, Garrison</line1>
+    <state>ND</state>
+    <location_name>McLean Vote Centers</location_name>
+  </address>
+</polling_location>
+<polling_location id="60032947">
+  <directions>New Multi Purpose Room.</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Killdeer</city>
+    <line1>101 High Street NW</line1>
+    <state>ND</state>
+    <location_name>Killdeer 36 - Killdeer School</location_name>
+    <zip>58640</zip>
+  </address>
+</polling_location>
+<polling_location id="60014450">
+  <directions>Or Jamestown Civic Center 212 3rd St NE Jamestown ND 58401.</directions>
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>404 Main Ave</line2>
+    <city>Kensal</city>
+    <line1>Kensal Memorial Hall</line1>
+    <state>ND</state>
+    <location_name>Precinct 2 - Kensal Memorial Hall</location_name>
+    <zip>58455</zip>
+  </address>
+</polling_location>
+<polling_location id="60032781">
+  <directions>County Courthouse
+112 NE 1st St
+Ashley, ND 58413
+OR
+National Guard Armory
+1210 1st Ave S
+Wishek, ND 58495.</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <state>ND</state>
+    <location_name>McIntosh County Polling Places</location_name>
+  </address>
+</polling_location>
+<polling_location id="600913">
+  <directions>For more information, please contact the Williams County Auditor's office: 701-577-4500</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Trenton</city>
+    <line1>West of Williston on Hwy 2 then south on 18</line1>
+    <state>ND</state>
+    <location_name>Trenton Twp Hall 55</location_name>
+    <zip>58853</zip>
+  </address>
+</polling_location>
+<polling_location id="60032944">
+  <directions>Parking for the Election will be made available at no charge in the city lot across the street from the Library.  Use the South end of the lot.  Voting will be held in the Community Room on the main floor..</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>102 3rd ST N</line1>
+    <state>ND</state>
+    <location_name>Fargo Public Library</location_name>
+    <zip>58102</zip>
+  </address>
+</polling_location>
+<polling_location id="600606">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax number 701-838-2469</line2>
+    <city>Minot</city>
+    <line1>1805 2nd St SE</line1>
+    <state>ND</state>
+    <location_name>SE Minot - First Assembly of God Church</location_name>
+    <zip>58701</zip>
+  </address>
+</polling_location>
+<polling_location id="6005419">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bowman</city>
+    <line1>101 First St NE</line1>
+    <state>ND</state>
+    <location_name>Bowman City # 1 - Bowman City Hall</location_name>
+    <zip>58623</zip>
+  </address>
+</polling_location>
+<polling_location id="6005143">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>613 W Avenue B</line1>
+    <state>ND</state>
+    <location_name>Roosevelt School</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="6005146">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>1215 N 19th St</line1>
+    <state>ND</state>
+    <location_name>Simle Middle School</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="6005149">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Sterling</city>
+    <line1>118 McKenzie St</line1>
+    <state>ND</state>
+    <location_name>Sterling School</location_name>
+    <zip>58572</zip>
+  </address>
+</polling_location>
+<polling_location id="600623">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>no fax</line2>
+    <city>Des Lacs</city>
+    <line1>1 Main St S</line1>
+    <state>ND</state>
+    <location_name>Des Lacs Community Hall</location_name>
+    <zip>58733</zip>
+  </address>
+</polling_location>
+<polling_location id="600627">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax: 852-6971</line2>
+    <city>Minot</city>
+    <line1>6900 Hwy 2 East</line1>
+    <state>ND</state>
+    <location_name>Nedrose School</location_name>
+    <zip>58701</zip>
+  </address>
+</polling_location>
+<polling_location id="6001818">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Valley City</city>
+    <line1>216 2nd Ave</line1>
+    <state>ND</state>
+    <location_name>V.C. Police Station 02</location_name>
+    <zip>58072</zip>
+  </address>
+</polling_location>
+<polling_location id="6001213">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Mooreton</city>
+    <line1>201 Mooreton Ave S</line1>
+    <state>ND</state>
+    <location_name>Mooreton Fire Hall</location_name>
+    <zip>58061</zip>
+  </address>
+</polling_location>
+<polling_location id="6003012">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>New England</city>
+    <line1>1200 Main Street</line1>
+    <state>ND</state>
+    <location_name>New England #3 - New England Public School</location_name>
+    <zip>58647</zip>
+  </address>
+</polling_location>
+<polling_location id="600319">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>3000 Cherry St</line1>
+    <state>ND</state>
+    <location_name>Kelly Elementary School</location_name>
+    <zip>58201</zip>
+  </address>
+</polling_location>
+<polling_location id="6006332">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>101 High St NW</line2>
+    <city>Killdeer</city>
+    <line1>Killdeer School</line1>
+    <state>ND</state>
+    <location_name>Oakdale - Killdeer School</location_name>
+    <zip>58640</zip>
+  </address>
+</polling_location>
+<polling_location id="60014452">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>212 3rd St NE</line2>
+    <city>Jamestown</city>
+    <line1>Jamestown Civic Center</line1>
+    <state>ND</state>
+    <location_name>Precinct 4 - Jamestown Civic Center</location_name>
+    <zip>58401</zip>
+  </address>
+</polling_location>
+<polling_location id="60013550">
+  <polling_hours>12:00 PM - 07:00 PM</polling_hours>
+  <address>
+    <line2>5300 Wiyohiyanpta Street</line2>
+    <city>Porcupine</city>
+    <line1>Community Center</line1>
+    <state>ND</state>
+    <location_name>Porcupine Community Center</location_name>
+    <zip>58569</zip>
+  </address>
+</polling_location>
+<polling_location id="6005127">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>2700 State St</line1>
+    <state>ND</state>
+    <location_name>Gateway Mall</location_name>
+    <zip>58503</zip>
+  </address>
+</polling_location>
+<polling_location id="6005140">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>406 S Anderson St</line1>
+    <state>ND</state>
+    <location_name>Riverside School</location_name>
+    <zip>58504</zip>
+  </address>
+</polling_location>
+<polling_location id="60032643">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Cavalier</city>
+    <line1>310 Dakota St W</line1>
+    <state>ND</state>
+    <location_name>Pembina Co Courthouse Meeting Rm-Vbm Polling Place</location_name>
+    <zip>58220</zip>
+  </address>
+</polling_location>
+<polling_location id="6001205">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Abercrombie</city>
+    <line1>516 Broadway</line1>
+    <state>ND</state>
+    <location_name>Abercrombie Community Hall</location_name>
+    <zip>58001</zip>
+  </address>
+</polling_location>
+<polling_location id="600914">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Williston</city>
+    <line1>14120 Hwy 2</line1>
+    <state>ND</state>
+    <location_name>Ernie French Center 48</location_name>
+    <zip>58801</zip>
+  </address>
+</polling_location>
+<polling_location id="60010851">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Mandan</city>
+    <line1>4490 Hwy 6</line1>
+    <state>ND</state>
+    <location_name>Mandan Airport</location_name>
+    <zip>58554</zip>
+  </address>
+</polling_location>
+<polling_location id="60010852">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>New Salem</city>
+    <line1>400 Main Ave</line1>
+    <state>ND</state>
+    <location_name>New Salem City Auditorium</location_name>
+    <zip>58563</zip>
+  </address>
+</polling_location>
+<polling_location id="60013849">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Scranton</city>
+    <line1>13001 73rd St SW</line1>
+    <state>ND</state>
+    <location_name>Pierce Congregational Church</location_name>
+    <zip>58653</zip>
+  </address>
+</polling_location>
+<polling_location id="60012945">
+  <directions>1/2 mile west of Belcourt on Hwy 5, south side of hwy.
+
+Check with Clarence to reserve hall, then pick up key at LaDot's..</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Belcourt</city>
+    <line1>4330 Hwy 281</line1>
+    <state>ND</state>
+    <location_name>Knights Of Columbus Hall</location_name>
+    <zip>58316</zip>
+  </address>
+</polling_location>
+<polling_location id="60015654">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Fessenden</city>
+    <line1>500 N 2nd St</line1>
+    <state>ND</state>
+    <location_name>6 Fessenden-Bowdon High School</location_name>
+    <zip>58438</zip>
+  </address>
+</polling_location>
+<polling_location id="6005721">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Fullerton</city>
+    <line1>33 North Monroe</line1>
+    <state>ND</state>
+    <location_name>Precinct 2 - Fullerton - Fullerton City Hall</location_name>
+    <zip>58441</zip>
+  </address>
+</polling_location>
+<polling_location id="60032627">
+  <directions>Voting is in the Governor's Ballroom located on the 2nd floor.  You can enter through the main entrance on the south side and go up the stairs.  An elevator is also available to the right of the main entrance.. Parking is available on the south side near the main entrance.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Casselton</city>
+    <line1>2050 Governor's Drive</line1>
+    <state>ND</state>
+    <location_name>Days Inn Casselton</location_name>
+    <zip>58012</zip>
+  </address>
+</polling_location>
+<polling_location id="60032630">
+  <directions>The entrance is on the east side of the building.. Parking is to the east of the church in the gravel lot.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>West Fargo</city>
+    <line1>2198 2nd Avenue East</line1>
+    <state>ND</state>
+    <location_name>Meadowridge Chapel</location_name>
+    <zip>58078</zip>
+  </address>
+</polling_location>
+<polling_location id="6001808">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Valley City</city>
+    <line1>230 4th St NW</line1>
+    <state>ND</state>
+    <location_name>Barnes Co. Courthouse 11</location_name>
+    <zip>58072</zip>
+  </address>
+</polling_location>
+<polling_location id="600306">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>5367 Gateway Dr</line1>
+    <state>ND</state>
+    <location_name>Bible Baptist Church</location_name>
+    <zip>58203</zip>
+  </address>
+</polling_location>
+<polling_location id="60032809">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>1400 24th Ave S</line1>
+    <state>ND</state>
+    <location_name>Faith Evangelical Church</location_name>
+    <zip>58201</zip>
+  </address>
+</polling_location>
+<polling_location id="60032810">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line1>801 Princeton Street</line1>
+    <state>ND</state>
+    <location_name>UND Wellness Center</location_name>
+    <zip>58203</zip>
+  </address>
+</polling_location>
+<polling_location id="6003011">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Mott</city>
+    <line1>507 Brown Ave</line1>
+    <state>ND</state>
+    <location_name>Mott #1 - National Guard Armory</location_name>
+    <zip>58646</zip>
+  </address>
+</polling_location>
+<polling_location id="60032762">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Sykeston</city>
+    <line1>129 Main Ave N</line1>
+    <state>ND</state>
+    <location_name>4 Sykeston City &amp;amp; Fire Hall</location_name>
+    <zip>58486</zip>
+  </address>
+</polling_location>
+<polling_location id="60032807">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Leal</city>
+    <line1>244 2nd Ave</line1>
+    <state>ND</state>
+    <location_name>Edna Fire Hall 08</location_name>
+    <zip>58479</zip>
+  </address>
+</polling_location>
+<polling_location id="60032802">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>3800 Nickerson Ave</line1>
+    <state>ND</state>
+    <location_name>Sunrise School</location_name>
+    <zip>58503</zip>
+  </address>
+</polling_location>
+<polling_location id="60032804">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>3715 E Bismarck Expressway</line1>
+    <state>ND</state>
+    <location_name>Burleigh County 4H Building</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="60032805">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>3315 University Dr</line1>
+    <state>ND</state>
+    <location_name>United Tribes Technical College</location_name>
+    <zip>58504</zip>
+  </address>
+</polling_location>
+<polling_location id="600626">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>no fax; cell phones don't work here</line2>
+    <city>Makoti</city>
+    <line1>Main Street</line1>
+    <state>ND</state>
+    <location_name>Makoti Pioneer Sr Citizen Club</location_name>
+    <zip>58756</zip>
+  </address>
+</polling_location>
+<polling_location id="60032824">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Watford City</city>
+    <line1>213 2nd ST NE</line1>
+    <state>ND</state>
+    <location_name>Watford City City Hall</location_name>
+    <zip>58854</zip>
+  </address>
+</polling_location>
+<polling_location id="60049">
+  <directions>Shiloh Evangelical Free Church is located off the I-94 interchange at Horace.  If is off of Sheyenne Steet, south of 21st Avenue East.  The main entrance is located on the south side of the church.  . Parking is available on the south side of the church.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>West Fargo</city>
+    <line1>2200 Shiloh St</line1>
+    <state>ND</state>
+    <location_name>Shiloh Evangelical</location_name>
+    <zip>58078</zip>
+  </address>
+</polling_location>
+<polling_location id="60056">
+  <directions>The main entrance to city hall is located on the south side of the building.  There are 3 entrances to the building.  Use the middle entrance.  Voting will take place in the training room.. Parking is available to the south of city hall.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>West Fargo</city>
+    <line1>800 4th Ave E</line1>
+    <state>ND</state>
+    <location_name>West Fargo City Hall</location_name>
+    <zip>58078</zip>
+  </address>
+</polling_location>
+<polling_location id="6005420">
+  <directions>Community Room
+Scranton Fire Hall.</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Scranton</city>
+    <line1>103 Main Street</line1>
+    <state>ND</state>
+    <location_name>East - Scranton # 4 - Scranton Fire Hall</location_name>
+    <zip>58653</zip>
+  </address>
+</polling_location>
+<polling_location id="6005129">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>1200 Prairie Dr</line1>
+    <state>ND</state>
+    <location_name>Highland Acres School</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="6005136">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>1400 E Braman Ave</line1>
+    <state>ND</state>
+    <location_name>Pioneer School</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="600915">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Williston</city>
+    <line1>15051 58th Street NW</line1>
+    <state>ND</state>
+    <location_name>West Prairie Luth Ch 45</location_name>
+    <zip>58801</zip>
+  </address>
+</polling_location>
+<polling_location id="6001208">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Colfax</city>
+    <line1>209 Broadway St</line1>
+    <state>ND</state>
+    <location_name>Colfax Community Hall</location_name>
+    <zip>58018</zip>
+  </address>
+</polling_location>
+<polling_location id="600334">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>724 N 47th St</line1>
+    <state>ND</state>
+    <location_name>Public Works Facility</location_name>
+    <zip>58203</zip>
+  </address>
+</polling_location>
+<polling_location id="6003921">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Warwick</city>
+    <line1>215 Griffin St.</line1>
+    <state>ND</state>
+    <location_name>Precinct 8 - Warwick Fire Hall</location_name>
+    <zip>58381</zip>
+  </address>
+</polling_location>
+<polling_location id="6004818">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Langdon</city>
+    <line1>901 3rd Street</line1>
+    <state>ND</state>
+    <location_name>Cavalier County Courthouse</location_name>
+    <zip>58249</zip>
+  </address>
+</polling_location>
+<polling_location id="6005722">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Oakes</city>
+    <line1>124 5th St S</line1>
+    <state>ND</state>
+    <location_name>Precinct 3 -Oakes - Oakes Armory</location_name>
+    <zip>58474</zip>
+  </address>
+</polling_location>
+<polling_location id="6006322">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>7997 7A St NW</line2>
+    <city>Twin Buttes</city>
+    <line1>Twin Buttes School</line1>
+    <state>ND</state>
+    <location_name>Antelope - Twin Buttes - Twin Buttes School</location_name>
+    <zip>58636</zip>
+  </address>
+</polling_location>
+<polling_location id="6006323">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>32 E Main St</line2>
+    <city>Halliday</city>
+    <line1>Halliday City Hall</line1>
+    <state>ND</state>
+    <location_name>Collins/halliday - Halliday City Hall</location_name>
+    <zip>58636</zip>
+  </address>
+</polling_location>
+<polling_location id="6006329">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>205 Owens St.</line2>
+    <city>Manning</city>
+    <line1>Dunn County Courthouse</line1>
+    <state>ND</state>
+    <location_name>Manning - Dunn County Courthouse</location_name>
+    <zip>58642</zip>
+  </address>
+</polling_location>
+<polling_location id="6006927">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Sheyenne</city>
+    <line1>222 Main St. S</line1>
+    <state>ND</state>
+    <location_name>Precinct 3 - Osby Hall</location_name>
+    <zip>58374</zip>
+  </address>
+</polling_location>
+<polling_location id="6005148">
+  <directions>West Entrance</directions>
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>West Entrance</line2>
+    <city>Bismarck</city>
+    <line1>600 E Boulevard Ave</line1>
+    <state>ND</state>
+    <location_name>State Capitol Building</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="60010839">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Glen Ullin</city>
+    <line1>119 Main St S</line1>
+    <state>ND</state>
+    <location_name>Glen Ullin Municipal Building</location_name>
+    <zip>58631</zip>
+  </address>
+</polling_location>
+<polling_location id="60011138">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Stanley</city>
+    <line1>118 4th Ave SW</line1>
+    <state>ND</state>
+    <location_name>Pct 1 Stanley Grade School Gym</location_name>
+    <zip>58784</zip>
+  </address>
+</polling_location>
+<polling_location id="60011139">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>New Town</city>
+    <line1>103 Soo Place</line1>
+    <state>ND</state>
+    <location_name>Pct 2 New Town Civic Center Auditorium</location_name>
+    <zip>58763</zip>
+  </address>
+</polling_location>
+<polling_location id="60011143">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>White Earth</city>
+    <line1>23 Hill St</line1>
+    <state>ND</state>
+    <location_name>Pct 6 White Earth City Hall</location_name>
+    <zip>58794</zip>
+  </address>
+</polling_location>
+<polling_location id="60011743">
+  <directions>Contains the Townships of Tofte and Torgerson and that part of the City of Rugby lying East and North of the line described as the middle of main avenue running south from the north boundary of the City of Rugby to the intersection of the midline of 4th Street thence East along 4th Street to the city boundary..</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Rugby</city>
+    <line1>1015 S Main Ave</line1>
+    <state>ND</state>
+    <location_name>Precinct 4- 1st Ward 1st- Rugby Armory</location_name>
+    <zip>58368</zip>
+  </address>
+</polling_location>
+<polling_location id="60014459">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>212 3rd St NE</line2>
+    <city>Jamestown</city>
+    <line1>Jamestown Civic Center</line1>
+    <state>ND</state>
+    <location_name>Precinct J5 - Jamestown Civic Center</location_name>
+    <zip>58401</zip>
+  </address>
+</polling_location>
+<polling_location id="6009937">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Napoleon</city>
+    <line1>69 Broadway</line1>
+    <state>ND</state>
+    <location_name>Napoleon American Legion</location_name>
+    <zip>58561</zip>
+  </address>
+</polling_location>
+<polling_location id="60032633">
+  <directions>Voting is located on the 2nd Floor in Meeting Rooms 202 &amp;amp; 203.  These meeting rooms are located at the top of the escalators.  You can also take the elevator up to the 2nd floor and you will come up just a short distance down the hall from the meeting rooms.  It is recommended that you enter through the main entrance on the east side of the FargoDome.. Parking is recommended on the east side of the FargoDome as you will want to enter through the main entrance on the east side as well.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>1800 University Drive North</line1>
+    <state>ND</state>
+    <location_name>FargoDome</location_name>
+    <zip>58102</zip>
+  </address>
+</polling_location>
+<polling_location id="6001820">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Valley City</city>
+    <line1>730 8th Ave SW</line1>
+    <state>ND</state>
+    <location_name>W.E. Osmon Field House 04</location_name>
+    <zip>58072</zip>
+  </address>
+</polling_location>
+<polling_location id="600302">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>1001 S 17th Ave</line1>
+    <state>ND</state>
+    <location_name>Holy Family</location_name>
+    <zip>58201</zip>
+  </address>
+</polling_location>
+<polling_location id="600604">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Minot</city>
+    <line1>2215 8th St NW</line1>
+    <state>ND</state>
+    <location_name>NW Minot -lewis &amp;amp; Clark School</location_name>
+    <zip>58701</zip>
+  </address>
+</polling_location>
+<polling_location id="60032760">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wahpeton</city>
+    <line1>304 5th St S</line1>
+    <state>ND</state>
+    <location_name>Wahpeton Community Center</location_name>
+    <zip>58075</zip>
+  </address>
+</polling_location>
+<polling_location id="600632">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax: 722-3280</line2>
+    <city>Minot</city>
+    <line1>100 177th Ave SW</line1>
+    <state>ND</state>
+    <location_name>South Prairie School</location_name>
+    <zip>58701</zip>
+  </address>
+</polling_location>
+<polling_location id="6009635">
+  <polling_hours>12:00 PM - 07:00 PM</polling_hours>
+  <address>
+    <city>East Sidney</city>
+    <line1>493 ND Highway 16 N</line1>
+    <state>ND</state>
+    <location_name>Squaw Gap Multipurpose Center</location_name>
+    <zip>59270</zip>
+  </address>
+</polling_location>
+<polling_location id="60032716">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Ellendale</city>
+    <line1>67 1st Ave S</line1>
+    <state>ND</state>
+    <location_name>Precinct 1 -Ellendale City - Senior Citizen Center</location_name>
+    <zip>58436</zip>
+  </address>
+</polling_location>
+<polling_location id="60032890">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <state>ND</state>
+    <location_name>Hankinson Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="60032812">
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Davenport</city>
+    <line1>120 Main Street</line1>
+    <state>ND</state>
+    <location_name>Davenport Community Center</location_name>
+    <zip>58021</zip>
+  </address>
+</polling_location>
+<polling_location id="60032763">
+  <directions>Traill County Courthouse Community Room
+114 W Caledonia
+Hillsboro, ND 58045
+or
+Mayville Armory
+332 Center Ave S
+Mayville, ND 58257.</directions>
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line1>Traill County Courthouse OR Mayville Armory</line1>
+    <state>ND</state>
+    <location_name>Vote-By-Mail Polling Places: Hillsboro &amp;amp; Mayville</location_name>
+  </address>
+</polling_location>
+<polling_location id="6005152">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wing</city>
+    <line1>2 2nd Ave W</line1>
+    <state>ND</state>
+    <location_name>Wing Fire Hall</location_name>
+    <zip>58494</zip>
+  </address>
+</polling_location>
+<polling_location id="600905">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Epping</city>
+    <line1>301 Lawrence St</line1>
+    <state>ND</state>
+    <location_name>Epping City Hall 62</location_name>
+    <zip>58843</zip>
+  </address>
+</polling_location>
+<polling_location id="600620">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax: 838-2060</line2>
+    <city>Minot</city>
+    <line1>3705 11th St SW</line1>
+    <state>ND</state>
+    <location_name>Afton Our Savior Lutheran</location_name>
+    <zip>58701</zip>
+  </address>
+</polling_location>
+<polling_location id="600631">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax: 624-5690</line2>
+    <city>Sawyer</city>
+    <line1>104 Dakota Ave S</line1>
+    <state>ND</state>
+    <location_name>Sawyer City Hall</location_name>
+    <zip>58781</zip>
+  </address>
+</polling_location>
+<polling_location id="600633">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax: 838-7180</line2>
+    <city>Minot</city>
+    <line1>5901 Hwy 52 South</line1>
+    <state>ND</state>
+    <location_name>Sundre Bell School</location_name>
+    <zip>58701</zip>
+  </address>
+</polling_location>
+<polling_location id="6001807">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Valley City</city>
+    <line1>979 Central Ave N</line1>
+    <state>ND</state>
+    <location_name>Sheyenne Care Center 05</location_name>
+    <zip>58072</zip>
+  </address>
+</polling_location>
+<polling_location id="6006022">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Crosby</city>
+    <line1>605 4TH ST SE</line1>
+    <state>ND</state>
+    <location_name>Precinct 2-Divide County High School</location_name>
+    <zip>58730</zip>
+  </address>
+</polling_location>
+<polling_location id="6006325">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>3 Main St West</line2>
+    <city>Dunn Center</city>
+    <line1>Dunn Center City Hall</line1>
+    <state>ND</state>
+    <location_name>Dunn Center/decorah - Dunn Center City Hall</location_name>
+    <zip>58626</zip>
+  </address>
+</polling_location>
+<polling_location id="6006331">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>9385 BIA Route 12</line2>
+    <city>Mandaree</city>
+    <line1>St. Anthony Mission</line1>
+    <state>ND</state>
+    <location_name>North Fox - St Anthony Mission</location_name>
+    <zip>58757</zip>
+  </address>
+</polling_location>
+<polling_location id="6006926">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Tolna</city>
+    <line1>9241 22nd St NE</line1>
+    <state>ND</state>
+    <location_name>Precinct 4 - Colvin Shop</location_name>
+    <zip>58380</zip>
+  </address>
+</polling_location>
+<polling_location id="600338">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Thompson</city>
+    <line1>306 Pacific Ave</line1>
+    <state>ND</state>
+    <location_name>Thompson Community Center</location_name>
+    <zip>58278</zip>
+  </address>
+</polling_location>
+<polling_location id="60032707">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Hettinger</city>
+    <line1>602 Adams Ave</line1>
+    <state>ND</state>
+    <location_name>Adams County Courthouse</location_name>
+    <zip>58639</zip>
+  </address>
+</polling_location>
+<polling_location id="60010838">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Flasher</city>
+    <line1>105 Main St N</line1>
+    <state>ND</state>
+    <location_name>Flasher Community Credit Union</location_name>
+    <zip>58535</zip>
+  </address>
+</polling_location>
+<polling_location id="60010842">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Mandan</city>
+    <line1>3327 Memorial Hwy</line1>
+    <state>ND</state>
+    <location_name>Midway Lanes</location_name>
+    <zip>58554</zip>
+  </address>
+</polling_location>
+<polling_location id="6001209">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Fairmount</city>
+    <line1>113 Main Ave</line1>
+    <state>ND</state>
+    <location_name>Fairmount Community Center</location_name>
+    <zip>58030</zip>
+  </address>
+</polling_location>
+<polling_location id="6009633">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Alexander</city>
+    <line1>112 Manning Ave</line1>
+    <state>ND</state>
+    <location_name>Alexander City Hall</location_name>
+    <zip>58831</zip>
+  </address>
+</polling_location>
+<polling_location id="60032542">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bowdon</city>
+    <line1>121 Warrington Ave</line1>
+    <state>ND</state>
+    <location_name>3 Bowdon Community Center</location_name>
+    <zip>58418</zip>
+  </address>
+</polling_location>
+<polling_location id="60011145">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>New Town</city>
+    <line1>103 Soo Place</line1>
+    <state>ND</state>
+    <location_name>Pct 8 New Town Civic Center Auditorium</location_name>
+    <zip>58763</zip>
+  </address>
+</polling_location>
+<polling_location id="60014454">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>212 3rd St NE</line2>
+    <city>Jamestown</city>
+    <line1>Jamestown Civic Center</line1>
+    <state>ND</state>
+    <location_name>Precinct 6 - Jamestown Civic Center</location_name>
+    <zip>58401</zip>
+  </address>
+</polling_location>
+<polling_location id="60032623">
+  <directions>The entrance is located right on Morton Avenue.. Parking is available along both sides of Morton Avenue.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Page</city>
+    <line1>124 Morton Avenue</line1>
+    <state>ND</state>
+    <location_name>Page Senior Center</location_name>
+    <zip>58064</zip>
+  </address>
+</polling_location>
+<polling_location id="60032635">
+  <directions>Use the west entrance and proceed to the gymnasium.. Park in the west parking lot and enter using the west door.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>4601 University Drive South</line1>
+    <state>ND</state>
+    <location_name>Atonement Lutheran</location_name>
+    <zip>58104</zip>
+  </address>
+</polling_location>
+<polling_location id="6001814">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Litchville</city>
+    <line1>507 3rd Ave</line1>
+    <state>ND</state>
+    <location_name>Litchville Commu. Hall 15</location_name>
+    <zip>58461</zip>
+  </address>
+</polling_location>
+<polling_location id="60032880">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Manvel</city>
+    <line1>801 Oldham Ave</line1>
+    <state>ND</state>
+    <location_name>Manvel Public School</location_name>
+    <zip>58256</zip>
+  </address>
+</polling_location>
+<polling_location id="60032943">
+  <directions>Use entrance on the North Side of the building.  Handicapped entrance is the ramp at the back of the building on the East side.  Parking for all will be on the North side of The Bowler..</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>2630 University Dr S</line1>
+    <state>ND</state>
+    <location_name>The Bowler</location_name>
+    <zip>58103</zip>
+  </address>
+</polling_location>
+<polling_location id="6005130">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>500 Ash Coulee Dr</line1>
+    <state>ND</state>
+    <location_name>Horizon Middle School</location_name>
+    <zip>58503</zip>
+  </address>
+</polling_location>
+<polling_location id="6005135">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>1727 N 3rd St</line1>
+    <state>ND</state>
+    <location_name>Northridge School</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="6005142">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>1989 N 20th St</line1>
+    <state>ND</state>
+    <location_name>Robert Miller School</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="600622">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>fax: 852-5928</line2>
+    <city>Burlington</city>
+    <line1>225 Wallace St N</line1>
+    <state>ND</state>
+    <location_name>Burlington City Hall</location_name>
+    <zip>58722</zip>
+  </address>
+</polling_location>
+<polling_location id="6001811">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Valley City</city>
+    <line1>220 3rd St NE</line1>
+    <state>ND</state>
+    <location_name>Valley City City Hall 01</location_name>
+    <zip>58072</zip>
+  </address>
+</polling_location>
+<polling_location id="6002711">
+  <directions>Indian Springs needs either another polling place sign, or a way to put another sign on the opposite side of the current one so that it can be seen from both sides of the road.
+
+May need to have Sheriff's Department Security while children are in school..</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Fairfield</city>
+    <line1>12825 20th St SW</line1>
+    <state>ND</state>
+    <location_name>Fairfield Firehall</location_name>
+    <zip>58627</zip>
+  </address>
+</polling_location>
+<polling_location id="6001211">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Lidgerwood</city>
+    <line1>23 Wiley Ave. N</line1>
+    <state>ND</state>
+    <location_name>Lidgerwood American Legion Hall</location_name>
+    <zip>58053</zip>
+  </address>
+</polling_location>
+<polling_location id="6001214">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wahpeton</city>
+    <line1>1900 4th St</line1>
+    <state>ND</state>
+    <location_name>Wahpeton City Hall</location_name>
+    <zip>58075</zip>
+  </address>
+</polling_location>
+<polling_location id="6001218">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Walcott</city>
+    <line1>537 3rd St</line1>
+    <state>ND</state>
+    <location_name>Walcott Lutheran Church</location_name>
+    <zip>58077</zip>
+  </address>
+</polling_location>
+<polling_location id="6003013">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Regent</city>
+    <line1>222 Main Street</line1>
+    <state>ND</state>
+    <location_name>Regent #2 - American Legion Hall</location_name>
+    <zip>58650</zip>
+  </address>
+</polling_location>
+<polling_location id="600313">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Gilby</city>
+    <line1>207 Main Ave</line1>
+    <state>ND</state>
+    <location_name>Gilby Community Center</location_name>
+    <zip>58235</zip>
+  </address>
+</polling_location>
+<polling_location id="600337">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>800 32nd Ave S</line1>
+    <state>ND</state>
+    <location_name>Schroeder Middle School</location_name>
+    <zip>58201</zip>
+  </address>
+</polling_location>
+<polling_location id="6003">
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Arthur</city>
+    <line1>550 Main St</line1>
+    <state>ND</state>
+    <location_name>Arthur Community Hall</location_name>
+    <zip>58006</zip>
+  </address>
+</polling_location>
+<polling_location id="60017">
+  <directions>Voting is located in the gymnasium on the northeast side of the church.  Please use the side entrance on the northeast side off of 25th Street South.. Ample parking is available on the northeast side of the building just off of 25th Street South.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>3401 25th St S</line1>
+    <state>ND</state>
+    <location_name>First Assembly</location_name>
+    <zip>58104</zip>
+  </address>
+</polling_location>
+<polling_location id="6006021">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Crosby</city>
+    <line1>605 4TH ST SE</line1>
+    <state>ND</state>
+    <location_name>Precinct 1-Divide County High School</location_name>
+    <zip>58730</zip>
+  </address>
+</polling_location>
+<polling_location id="6006330">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>313 Lafayette Street</line2>
+    <city>New Hradec</city>
+    <line1>Catholic Workman Hall</line1>
+    <state>ND</state>
+    <location_name>New Hradec - Catholic Workman Hall</location_name>
+    <zip>58601</zip>
+  </address>
+</polling_location>
+<polling_location id="6006925">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>New Rockford</city>
+    <line1>621 Central</line1>
+    <state>ND</state>
+    <location_name>Precinct 2 - Brown Memorial</location_name>
+    <zip>58356</zip>
+  </address>
+</polling_location>
+<polling_location id="60032703">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Fort Yates</city>
+    <line1>303 2nd Ave</line1>
+    <state>ND</state>
+    <location_name>Sioux County Courthouse</location_name>
+    <zip>58538</zip>
+  </address>
+</polling_location>
+<polling_location id="600912">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Tioga</city>
+    <line1>17 N Benson</line1>
+    <state>ND</state>
+    <location_name>Tioga Senior Center</location_name>
+    <zip>58852</zip>
+  </address>
+</polling_location>
+<polling_location id="60010841">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Mandan</city>
+    <line1>801 1st St SE</line1>
+    <state>ND</state>
+    <location_name>Spirit of Life Catholic Church</location_name>
+    <zip>58554</zip>
+  </address>
+</polling_location>
+<polling_location id="6005126">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>205 43rd Ave NE</line1>
+    <state>ND</state>
+    <location_name>First Evangelical</location_name>
+    <zip>58503</zip>
+  </address>
+</polling_location>
+<polling_location id="6008131">
+  <directions>Kidder County Ambulance Building in Steele City.</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Steele</city>
+    <line1>120 Mitchell Ave N</line1>
+    <state>ND</state>
+    <location_name>Steele Ambulance Building</location_name>
+    <zip>58482</zip>
+  </address>
+</polling_location>
+<polling_location id="6009642">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Cartwright</city>
+    <line1>213 Main St</line1>
+    <state>ND</state>
+    <location_name>Cartwright Hall</location_name>
+    <zip>58838</zip>
+  </address>
+</polling_location>
+<polling_location id="60032545">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Fessenden</city>
+    <line1>500 N 2nd St</line1>
+    <state>ND</state>
+    <location_name>2 Fessenden-Bowdon High School</location_name>
+    <zip>58438</zip>
+  </address>
+</polling_location>
+<polling_location id="60011745">
+  <directions>Contains the Townships of Barton, East Barton, Spring Lake, Dewey, Walsh, and that part of the City of Rugby lying West and North of a line described as the middle of Main Avenue running South from the North boundary of the City of Rugby to intersection of the mid-line of 4th Street, thence East along intersection of 4th Street to mid-line of 2nd Avenue Southeast, thence South on intersection 2nd Avenue to the intersection of the mid-line of 6th street southeast, thence west along 6th street to the city boundary..</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Rugby</city>
+    <line1>1015 S Main Ave</line1>
+    <state>ND</state>
+    <location_name>Precinct 6 -2nd Ward -Rugby Armory</location_name>
+    <zip>58368</zip>
+  </address>
+</polling_location>
+<polling_location id="60012944">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Dunseith</city>
+    <line1>101 Peace Garden Ave</line1>
+    <state>ND</state>
+    <location_name>Dunseith City Hall</location_name>
+    <zip>58329</zip>
+  </address>
+</polling_location>
+<polling_location id="60014455">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>212 3rd St NE</line2>
+    <city>Jamestown</city>
+    <line1>Jamestown Civic Center</line1>
+    <state>ND</state>
+    <location_name>Precinct J1 - Jamestown Civic Center</location_name>
+    <zip>58401</zip>
+  </address>
+</polling_location>
+<polling_location id="60014458">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>212 3rd St NE</line2>
+    <city>Jamestown</city>
+    <line1>Jamestown Civic Center</line1>
+    <state>ND</state>
+    <location_name>Precinct J4 - Jamestown Civic Center</location_name>
+    <zip>58401</zip>
+  </address>
+</polling_location>
+<polling_location id="6009636">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Keene</city>
+    <line1>104 2nd Ave</line1>
+    <state>ND</state>
+    <location_name>Keene Community Buillding</location_name>
+    <zip>58847</zip>
+  </address>
+</polling_location>
+<polling_location id="6009640">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grassy Butte</city>
+    <line1>501 Main St N</line1>
+    <state>ND</state>
+    <location_name>Grassy Butte Community Hall</location_name>
+    <zip>58634</zip>
+  </address>
+</polling_location>
+<polling_location id="60032631">
+  <directions>Enter through the main entrance on the west side of the building.. Parking available on the west side of the builidng off of 3rd Street North.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>1429 3rd Street North</line1>
+    <state>ND</state>
+    <location_name>El Zagal Shrine</location_name>
+    <zip>58102</zip>
+  </address>
+</polling_location>
+<polling_location id="60032637">
+  <directions>Voting is located in the Woodland South room.  The recommended entrance is the east side, but the handicapped accessible entrance will be through the main entrance on the south side.. Parking is recommended on the east side, but parking is also available by the main entrance.  Handicapped parking is provided at the main entrance.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>3333 13th Avenue South</line1>
+    <state>ND</state>
+    <location_name>Doublewood Inn</location_name>
+    <zip>58103</zip>
+  </address>
+</polling_location>
+<polling_location id="60032638">
+  <directions>Nelson County Courthouse Community Room.</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Lakota</city>
+    <line1>210 B Ave W</line1>
+    <state>ND</state>
+    <location_name>Nelson County Courthouse-Community Room</location_name>
+    <zip>58344</zip>
+  </address>
+</polling_location>
+<polling_location id="60011740">
+  <directions>Contains the Townships of Juniata, Wolford, Union, Hurricane Lake, Rush Lake and City of Wolford..</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wolford</city>
+    <line1>203 3rd Ave NW</line1>
+    <state>ND</state>
+    <location_name>Precinct 1-Wolford Fire Hall</location_name>
+    <zip>58385</zip>
+  </address>
+</polling_location>
+<polling_location id="6005720">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Ellendale</city>
+    <line1>67 1st Ave. S</line1>
+    <state>ND</state>
+    <location_name>Precinct 1 -Ellendale - Senior Citizen Center</location_name>
+    <zip>58436</zip>
+  </address>
+</polling_location>
+<polling_location id="60032939">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Watford City</city>
+    <line1>701 4th Ave NW</line1>
+    <state>ND</state>
+    <location_name>Whiting Oil Office Building</location_name>
+    <zip>58854</zip>
+  </address>
+</polling_location>
+<polling_location id="60032919">
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Reiles Acres</city>
+    <line1>4635 35th Ave N</line1>
+    <state>ND</state>
+    <location_name>Reiles Acres Community Center</location_name>
+    <zip>58102</zip>
+  </address>
+</polling_location>
+<polling_location id="60032813">
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Tower City</city>
+    <line1>507 Broadway St</line1>
+    <state>ND</state>
+    <location_name>Tower City Community Center</location_name>
+    <zip>58071</zip>
+  </address>
+</polling_location>
+<polling_location id="60032814">
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Alice</city>
+    <line1>307 3rd St</line1>
+    <state>ND</state>
+    <location_name>Nu Tech Seed Office, Alice</location_name>
+    <zip>58031</zip>
+  </address>
+</polling_location>
+<polling_location id="6006623">
+  <directions>Polling place for voters in Precinct one..</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Hazelton</city>
+    <line1>342 Main St.</line1>
+    <state>ND</state>
+    <location_name>Hazelton City Hall</location_name>
+    <zip>58544</zip>
+  </address>
+</polling_location>
+<polling_location id="60032940">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>3501 University Avenue</line1>
+    <state>ND</state>
+    <location_name>Gorecki Alumni Center</location_name>
+    <zip>58203</zip>
+  </address>
+</polling_location>
+<polling_location id="60032945">
+  <directions>Beulah Civic Center
+Hazen City Hall
+Stanton Civic Center.</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <state>ND</state>
+    <location_name>Mercer County Vote Centers</location_name>
+  </address>
+</polling_location>
+<polling_location id="60032629">
+  <directions>Voting will take place in the common area in front of Macy's.  You can enter through the food court and proceed down the main corridor of the mall, directly to this common area.  This area can also be accessed through the other entrances of the mall, but this will place you at a further distance from the voting area.. Parking is available on all sides of the mall, however, the closest area would be the main entrance by the food court.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>3920 13th Avenue South</line1>
+    <state>ND</state>
+    <location_name>West Acres</location_name>
+    <zip>58103</zip>
+  </address>
+</polling_location>
+<polling_location id="6005421">
+  <directions>Four Seasons Building.</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bowman</city>
+    <line1>12 Hwy 12 East</line1>
+    <state>ND</state>
+    <location_name>South - Four Seasons # 2 - Bowman Four Seasons Bld</location_name>
+    <zip>58623</zip>
+  </address>
+</polling_location>
+<polling_location id="6005147">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>325 Munich Dr</line1>
+    <state>ND</state>
+    <location_name>Solheim School</location_name>
+    <zip>58504</zip>
+  </address>
+</polling_location>
+<polling_location id="600603">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>no fax number</line2>
+    <city>Minot</city>
+    <line1>1000 3rd St NE</line1>
+    <state>ND</state>
+    <location_name>NE Minot - First Presbyterian Church</location_name>
+    <zip>58701</zip>
+  </address>
+</polling_location>
+<polling_location id="600624">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Minot</city>
+    <line1>315 3rd St SE</line1>
+    <state>ND</state>
+    <location_name>Harrison Court House</location_name>
+    <zip>58701</zip>
+  </address>
+</polling_location>
+<polling_location id="600629">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Glenburn</city>
+    <line1>18301 Hwy 83 North</line1>
+    <state>ND</state>
+    <location_name>Ruthville Lynch Immanuel Church</location_name>
+    <zip>58740</zip>
+  </address>
+</polling_location>
+<polling_location id="6001810">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Fingal</city>
+    <line1>320 3rd St</line1>
+    <state>ND</state>
+    <location_name>Fingal City Hall 13</location_name>
+    <zip>58031</zip>
+  </address>
+</polling_location>
+<polling_location id="6001815">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Oriska</city>
+    <line1>502 2nd Ave</line1>
+    <state>ND</state>
+    <location_name>Oriska Public School 12</location_name>
+    <zip>58063</zip>
+  </address>
+</polling_location>
+<polling_location id="600304">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>319 5th St S</line1>
+    <state>ND</state>
+    <location_name>St. Paul's Episcopal Church</location_name>
+    <zip>58201</zip>
+  </address>
+</polling_location>
+<polling_location id="600344">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>1412 5th Ave N</line1>
+    <state>ND</state>
+    <location_name>Winship Elementary School</location_name>
+    <zip>58203</zip>
+  </address>
+</polling_location>
+<polling_location id="60023">
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>West Fargo</city>
+    <line1>1420 16th St E</line1>
+    <state>ND</state>
+    <location_name>Holy Cross Church</location_name>
+    <zip>58078</zip>
+  </address>
+</polling_location>
+<polling_location id="60025">
+  <directions>The main entrance is located on the south side of the senior center.. Parking is available on the south and east sides of the senior center.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Horace</city>
+    <line1>214 Thue Ct</line1>
+    <state>ND</state>
+    <location_name>Horace Senior Ctr</location_name>
+    <zip>58047</zip>
+  </address>
+</polling_location>
+<polling_location id="60047">
+  <directions>Voting is in the main corridor.  Enter using the main entrance on the west side of the building.. Parking is located along the west side of the building.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>5300 12th St S</line1>
+    <state>ND</state>
+    <location_name>Riverview Place</location_name>
+    <zip>58104</zip>
+  </address>
+</polling_location>
+<polling_location id="60032647">
+  <directions>National Guard Armory
+46 Museum Drive
+Dickinson ND 58601
+
+Badlands Activity Center (BAC)
+398 State Ave N
+Dickinson ND 58601
+
+Richardton American Legion
+122 North Ave W
+Richardton ND 58552
+
+Belfield Memorial Hall
+107 2nd Ave NE
+Belfield ND 58622.</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <state>ND</state>
+    <location_name>Stark Vote Centers</location_name>
+  </address>
+</polling_location>
+<polling_location id="6004215">
+  <directions>Bottineau County Courthouse 
+314 W 5th St, Bottineau
+OR
+Gateway Hotel
+95 1st Ave W, Westhope.</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>Gateway Hotel 95 1st Ave W, Westhope</line2>
+    <line3>Bottineau County Courthouse 314 W 5th St Bottineau</line3>
+    <state>ND</state>
+    <location_name>Bottineau County Vote Centers</location_name>
+  </address>
+</polling_location>
+<polling_location id="600342">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>1009 N 3rd St</line1>
+    <state>ND</state>
+    <location_name>Wilder Elementary School</location_name>
+    <zip>58203</zip>
+  </address>
+</polling_location>
+<polling_location id="600916">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wildrose</city>
+    <state>ND</state>
+    <location_name>Wildrose Fire Hall 65</location_name>
+    <zip>58795</zip>
+  </address>
+</polling_location>
+<polling_location id="60010853">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Mandan</city>
+    <line1>4209 Old Red Trail</line1>
+    <state>ND</state>
+    <location_name>First Church of the Nazarene</location_name>
+    <zip>58554</zip>
+  </address>
+</polling_location>
+<polling_location id="60032699">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Center</city>
+    <line1>312 Lincoln Ave N</line1>
+    <state>ND</state>
+    <location_name>Civic Center</location_name>
+    <zip>58530</zip>
+  </address>
+</polling_location>
+<polling_location id="60011144">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Ross</city>
+    <line1>300 Main St</line1>
+    <state>ND</state>
+    <location_name>Pct 7 Ross Community Building</location_name>
+    <zip>58776</zip>
+  </address>
+</polling_location>
+<polling_location id="60011744">
+  <directions>Contains that part of the City of Rugby bounded on the south by a line described as beginning at the east boundary of the City of Rugby and thence west along the middle of 6th street and 5th avenue southeast thence north to the mid-line of 4th street, thence east along 4th street to the city boundary..</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Rugby</city>
+    <line1>1015 S Main Ave</line1>
+    <state>ND</state>
+    <location_name>Precinct 5- 1st Ward 2nd - Rugby Armory</location_name>
+    <zip>58368</zip>
+  </address>
+</polling_location>
+<polling_location id="60011747">
+  <directions>Contains that part of the City of Rugby lying East and North of a line commencing at the South boundary of the city at a point of intersection with the mid-line of U.S. Highway #3, thence North to the intersection of the mid-line of 10th Street, thence East to the intersection of the mid-line of 3rd Avenue, thence North to the intersection of the mid-line of 6th Street, thence East on 6th Street to city boundary and the townships of Christenson and Meyer..</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Rugby</city>
+    <line1>1015 S Main</line1>
+    <state>ND</state>
+    <location_name>Precinct 8- 4th Ward -Rugby Armory</location_name>
+    <zip>58368</zip>
+  </address>
+</polling_location>
+<polling_location id="60013546">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Cannon Ball</city>
+    <line1>440 Horseshoe Road</line1>
+    <state>ND</state>
+    <location_name>Cannonball Activity Center</location_name>
+    <zip>58528</zip>
+  </address>
+</polling_location>
+<polling_location id="60014750">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Cando</city>
+    <line1>408 5th Ave</line1>
+    <state>ND</state>
+    <location_name>Precinct 1 Cando Armory</location_name>
+    <zip>58324</zip>
+  </address>
+</polling_location>
+<polling_location id="60032598">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>East Fairview</city>
+    <line1>301 2nd St S</line1>
+    <state>ND</state>
+    <location_name>East Fairview School</location_name>
+    <zip>59221</zip>
+  </address>
+</polling_location>
+<polling_location id="600906">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grenora</city>
+    <line1>E Main Street</line1>
+    <state>ND</state>
+    <location_name>Grenora Senior Center 67</location_name>
+    <zip>58845</zip>
+  </address>
+</polling_location>
+<polling_location id="6001207">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Christine</city>
+    <line1>201 Main St</line1>
+    <state>ND</state>
+    <location_name>Christine Community Center</location_name>
+    <zip>58015</zip>
+  </address>
+</polling_location>
+<polling_location id="60032636">
+  <directions>Use the entrance on the west side (rear) of the church.  There are two doors on the back.  Use the door on the right which will take you down a short hallway to the community room.. Parking is available at the rear of the church off of 31st Avenue North and 7th Street North.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>3030 Broadway North</line1>
+    <state>ND</state>
+    <location_name>Knollbrook Covenant</location_name>
+    <zip>58102</zip>
+  </address>
+</polling_location>
+<polling_location id="6001821">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wimbledon</city>
+    <line1>208 Central St</line1>
+    <state>ND</state>
+    <location_name>Wimbledon Commu. Hall 07</location_name>
+    <zip>58492</zip>
+  </address>
+</polling_location>
+<polling_location id="60032775">
+  <directions>The Emmons County Courthouse is a Voting Center where all voters from all five precincts can vote. .</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>100 4th St NW</line2>
+    <city>Linton</city>
+    <line1>Emmons County Courthouse</line1>
+    <state>ND</state>
+    <location_name>Emmons County Voting Center</location_name>
+    <zip>58552</zip>
+  </address>
+</polling_location>
+<polling_location id="60010840">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Hebron</city>
+    <line1>600 Washington Ave</line1>
+    <state>ND</state>
+    <location_name>Hebron Community Center</location_name>
+    <zip>58638</zip>
+  </address>
+</polling_location>
+<polling_location id="60032717">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Oakes</city>
+    <line1>124 5th St S</line1>
+    <state>ND</state>
+    <location_name>Precinct 3 -Oakes City - Oakes Armory</location_name>
+    <zip>58474</zip>
+  </address>
+</polling_location>
+<polling_location id="60032718">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Devils  Lake</city>
+    <line1>524 4th Ave NE</line1>
+    <state>ND</state>
+    <location_name>Memorial Building/Ramsey County Courthouse</location_name>
+    <zip>58301</zip>
+  </address>
+</polling_location>
+<polling_location id="60032960">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>3220 N 19th Street</line1>
+    <state>ND</state>
+    <location_name>The Element</location_name>
+    <zip>58503</zip>
+  </address>
+</polling_location>
+<polling_location id="6005120">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>601 E Sweet Ave</line1>
+    <state>ND</state>
+    <location_name>Bismarck Civic Center</location_name>
+    <zip>58504</zip>
+  </address>
+</polling_location>
+<polling_location id="6005123">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wilton</city>
+    <line1>30300 93rd St NE</line1>
+    <state>ND</state>
+    <location_name>Wilton County Shop</location_name>
+    <zip>58579</zip>
+  </address>
+</polling_location>
+<polling_location id="600628">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Glenburn</city>
+    <line1>18301 Hwy 83 North</line1>
+    <state>ND</state>
+    <location_name>North Central Lynch Immanuel Church</location_name>
+    <zip>58740</zip>
+  </address>
+</polling_location>
+<polling_location id="6001817">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Sibley</city>
+    <line1>11922 14th St SE</line1>
+    <state>ND</state>
+    <location_name>Sibley Sodbusters Club 06</location_name>
+    <zip>58429</zip>
+  </address>
+</polling_location>
+<polling_location id="6002712">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Medora</city>
+    <line1>495 4th St</line1>
+    <state>ND</state>
+    <location_name>Medora Courthouse Courtroom</location_name>
+    <zip>58645</zip>
+  </address>
+</polling_location>
+<polling_location id="6001217">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wahpeton</city>
+    <line1>413 3rd Ave N</line1>
+    <state>ND</state>
+    <location_name>Richland County Law Enforcement Center</location_name>
+    <zip>58075</zip>
+  </address>
+</polling_location>
+<polling_location id="600303">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Grand Forks</city>
+    <line1>1200 42nd St S</line1>
+    <state>ND</state>
+    <location_name>Alerus Center</location_name>
+    <zip>58201</zip>
+  </address>
+</polling_location>
+<polling_location id="6002">
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Argusville</city>
+    <line1>107 Northern Dr</line1>
+    <state>ND</state>
+    <location_name>Argusville Community Center</location_name>
+    <zip>58005</zip>
+  </address>
+</polling_location>
+<polling_location id="60022">
+  <directions>Voting is in the community center.  The main entrance is just off main avenue on the east side of the building.. Parking is available along main avenue near the main entrance.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Hickson</city>
+    <line1>Main St</line1>
+    <state>ND</state>
+    <location_name>Hickson Community Ctr</location_name>
+    <zip>58047</zip>
+  </address>
+</polling_location>
+<polling_location id="60052">
+  <directions>Use the main entrance on the north side of the arena.. Parking is available along the north side of Veteran's Memorial Arena.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>West Fargo</city>
+    <line1>1201 7th Ave E</line1>
+    <state>ND</state>
+    <location_name>Veterans Memorial Arena</location_name>
+    <zip>58078</zip>
+  </address>
+</polling_location>
+<polling_location id="6006326">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>165 Railroad St</line2>
+    <city>Killdeer</city>
+    <line1>Killdeer City Hall</line1>
+    <state>ND</state>
+    <location_name>Killdeer City 39 - Killdeer School</location_name>
+    <zip>58640</zip>
+  </address>
+</polling_location>
+<polling_location id="6006328">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>32 E Main St.</line2>
+    <city>Halliday</city>
+    <line1>Halliday City Hall</line1>
+    <state>ND</state>
+    <location_name>Kyseth - Halliday City Hall</location_name>
+    <zip>58636</zip>
+  </address>
+</polling_location>
+<polling_location id="6006924">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>New Rockford</city>
+    <line1>3  7th Street South</line1>
+    <state>ND</state>
+    <location_name>Precinct 1 - Brown Memorial</location_name>
+    <zip>58356</zip>
+  </address>
+</polling_location>
+<polling_location id="60014451">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>212 3rd St NE</line2>
+    <city>Jamestown</city>
+    <line1>Jamestown Civic Center</line1>
+    <state>ND</state>
+    <location_name>Precinct 3 - Jamestown Civic Center</location_name>
+    <zip>58401</zip>
+  </address>
+</polling_location>
+<polling_location id="60032704">
+  <polling_hours>12:00 PM - 07:00 PM</polling_hours>
+  <address>
+    <city>Solen</city>
+    <line1>306 Leach St</line1>
+    <state>ND</state>
+    <location_name>Solen Firehouse</location_name>
+    <zip>58570</zip>
+  </address>
+</polling_location>
+<polling_location id="60013551">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Selfridge</city>
+    <line1>210 2nd Ave S</line1>
+    <state>ND</state>
+    <location_name>Selfridge High School</location_name>
+    <zip>58568</zip>
+  </address>
+</polling_location>
+<polling_location id="6005133">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Bismarck</city>
+    <line1>1143 N 26th St</line1>
+    <state>ND</state>
+    <location_name>Lord of Life Lutheran Church</location_name>
+    <zip>58501</zip>
+  </address>
+</polling_location>
+<polling_location id="60032702">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>204 5th Ave W</line2>
+    <city>Lisbon</city>
+    <line1>Ranson County Courthouse Community Room</line1>
+    <state>ND</state>
+    <location_name>Ransom County Courthouse-Community Room</location_name>
+    <zip>58054</zip>
+  </address>
+</polling_location>
+<polling_location id="6001219">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Wyndmere</city>
+    <line1>306 Cedar Ave</line1>
+    <state>ND</state>
+    <location_name>Wyndmere Fire Hall</location_name>
+    <zip>58081</zip>
+  </address>
+</polling_location>
+<polling_location id="60010847">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Mandan</city>
+    <line1>408 9th St NW</line1>
+    <state>ND</state>
+    <location_name>First Lutheran Church</location_name>
+    <zip>58554</zip>
+  </address>
+</polling_location>
+<polling_location id="60013247">
+  <directions>No 3 - McClusky City.</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>117 Ave B East</line2>
+    <city>McClusky</city>
+    <line1>McClusky City Hall</line1>
+    <state>ND</state>
+    <location_name>McClusky City Hall</location_name>
+    <zip>58463</zip>
+  </address>
+</polling_location>
+<polling_location id="6008430">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Cooperstown</city>
+    <line1>611 9th St NE</line1>
+    <state>ND</state>
+    <location_name>Cooperstown City Hall</location_name>
+    <zip>58425</zip>
+  </address>
+</polling_location>
+<polling_location id="60011140">
+  <directions>NEED CLAIM VOUCHER.</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Parshall</city>
+    <line1>16 Main St N</line1>
+    <state>ND</state>
+    <location_name>Pct 3 Parshall American Legion Building</location_name>
+    <zip>58770</zip>
+  </address>
+</polling_location>
+<polling_location id="60011741">
+  <directions>Contains the Townships of Antelope Lake, Hillside, Alexanter, White, Truman, Hagel..</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Selz</city>
+    <line1>29 Girard St NW</line1>
+    <state>ND</state>
+    <location_name>Precinct 2- St. Anthony's Hall</location_name>
+    <zip>58341</zip>
+  </address>
+</polling_location>
+<polling_location id="60013848">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Marmarth</city>
+    <line1>911 Main St</line1>
+    <state>ND</state>
+    <location_name>Marmarth Community Center</location_name>
+    <zip>58643</zip>
+  </address>
+</polling_location>
+<polling_location id="60015653">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Harvey</city>
+    <line1>120 W 8th St</line1>
+    <state>ND</state>
+    <location_name>5 Harvey City Hall</location_name>
+    <zip>58341</zip>
+  </address>
+</polling_location>
+<polling_location id="60032621">
+  <directions>Entrances are available on 3 sides of the church.  The main entrance is off of the large parking lot on the north side of the church.  You will then follow the signage down the hallway toward the south side of the church to the Fellowship hall.  There is an entrance on the east side of the building with some parking by this door, however, this parking lot and entrance are used for the daycare, so they prefer you use the main parking lot and entrance.  There is also a side entrance on the south side of the church with limited parking on the street.. The main parking lot is located on the north side of the church off of University Dr S and 13th Ave S.  There is a small parking lot to the rear of the church (east side), but this is used for the daycare, so they prefer you use the main parking lot.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>1330 University Drive South</line1>
+    <state>ND</state>
+    <location_name>Olivet Lutheran</location_name>
+    <zip>58103</zip>
+  </address>
+</polling_location>
+<polling_location id="60032628">
+  <directions>Enter through the main entrance on the southeast side of the church.. Parking available on the east side of the church.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Fargo</city>
+    <line1>4575 45th Street South</line1>
+    <state>ND</state>
+    <location_name>Calvary United Methodist</location_name>
+    <zip>58104</zip>
+  </address>
+</polling_location>
+<polling_location id="60032769">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Minnewaukan</city>
+    <line1>311 B Ave S</line1>
+    <state>ND</state>
+    <location_name>Benson County Courthouse</location_name>
+    <zip>58351</zip>
+  </address>
+</polling_location>
+<polling_location id="60032806">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Regent</city>
+    <line1>222 Main Street</line1>
+    <state>ND</state>
+    <location_name>Indian Creek # 4 - American Legiona Hall Regent</location_name>
+    <zip>58650</zip>
+  </address>
+</polling_location>
+<polling_location id="60011746">
+  <directions>Contains that part of the City of Rugby bounded on the North by a line described as beginning at the West boundary of the City of Rugby and thence East along the middle of 6th Street to the intersection of the mid-line of 2nd Avenue southeast, thence North to the intersection of 2nd Avenue and 4th Street, thence East to the mid-line of 4th Street, thence South on 5th Avenue, thence West to midline of 3rd Avenue Southeast, thence South on 3rd Avenue to mid-line of 10th Street SE, thence West along mid-line of 10th Street to mid-line of U.S. Highway #3, thence South on U.S. Highway #3 to the City boundary..</directions>
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <city>Rugby</city>
+    <line1>1015 S Main Ave</line1>
+    <state>ND</state>
+    <location_name>Precinct 7-3rd Ward - Rugby Armory</location_name>
+    <zip>58368</zip>
+  </address>
+</polling_location>
+<polling_location id="60032920">
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Harwood</city>
+    <line1>210 Freedland Drive</line1>
+    <state>ND</state>
+    <location_name>Harwood Community Center</location_name>
+    <zip>58042</zip>
+  </address>
+</polling_location>
+<polling_location id="60032715">
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>600 Cooper Ave</line2>
+    <city>Grafton</city>
+    <line1>Walsh County Courthouse</line1>
+    <state>ND</state>
+    <location_name>Walsh County Courthouse</location_name>
+    <zip>58237</zip>
+  </address>
+</polling_location>
+<polling_location id="60032777">
+  <directions>Grant County Courthouse
+106 2nd Ave NE
+Carson, ND 58529
+OR
+Elgin Community Center 
+305 Main St N
+Elgin, ND 58533.</directions>
+  <polling_hours>09:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <location_name>Grant County Vote-By-mail Polling Places</location_name>
+  </address>
+</polling_location>
+<polling_location id="600621">
+  <polling_hours>07:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line2>no fax</line2>
+    <city>Berthold</city>
+    <line1>Main Street</line1>
+    <state>ND</state>
+    <location_name>Berthold Sr Citizen Center</location_name>
+    <zip>58718</zip>
+  </address>
+</polling_location>
+<polling_location id="60032887">
+  <polling_hours>08:00 AM - 07:00 PM</polling_hours>
+  <address>
+    <line1>153 Main St.</line1>
+    <state>ND</state>
+    <location_name>Beach Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="60033">
+  <directions>Main entrance is off of 2nd Street on the south side of the building.  Voting is in the community center.. Parking is available along 2nd Street as well as Meridian Road.</directions>
+  <polling_hours>07:00 AM - 08:00 PM</polling_hours>
+  <address>
+    <city>Mapleton</city>
+    <line1>615 2nd St</line1>
+    <state>ND</state>
+    <location_name>Mapleton Community Ctr</location_name>
+    <zip>58059</zip>
+  </address>
+</polling_location>
+</vip_object>

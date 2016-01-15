@@ -1,0 +1,3714 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>State of Wyoming</name>
+  <vip_id>56</vip_id>
+  <datetime>2015-11-13T01:11:42</datetime>
+</source>
+<state id="101056">
+  <name>STATE OF WYOMING</name>
+</state>
+<polling_location id="10061">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>140 EAST K ST</line1>
+    <state>WY</state>
+    <location_name>ROOSEVELT HS</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="100610">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>1700 FAIRGROUNDS RD</line1>
+    <state>WY</state>
+    <location_name>CYJHS (OLD LOCATION) @ THE FAIRGROUNDS</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="1006101">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SYBILLE CANYON</city>
+    <line1>2362 STATE HWY 34</line1>
+    <state>WY</state>
+    <location_name>SYBILLE WILDLIFE RESEARCH UNIT</location_name>
+    <zip>82201</zip>
+  </address>
+</polling_location>
+<polling_location id="1006102">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>1355 N 22ND ST</line1>
+    <state>WY</state>
+    <location_name>LARAMIE JUNIOR HIGH SCHOOL</location_name>
+    <zip>82072</zip>
+  </address>
+</polling_location>
+<polling_location id="1006106">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>2111 WILLETT DR</line1>
+    <state>WY</state>
+    <location_name>AMERICAN HERITAGE CENTER</location_name>
+    <zip>82072</zip>
+  </address>
+</polling_location>
+<polling_location id="1006107">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>20 LEWIS RD</line1>
+    <state>WY</state>
+    <location_name>HARMONY SCHOOL</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="1006108">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CENTENNIAL</city>
+    <line1>2771 STATE HWY 130</line1>
+    <state>WY</state>
+    <location_name>CENTENNIAL SCHOOL</location_name>
+    <zip>82055</zip>
+  </address>
+</polling_location>
+<polling_location id="1006109">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>120 S JOHNSON ST</line1>
+    <state>WY</state>
+    <location_name>LINFORD ELEM. SCHOOL</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="100611">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>1600 WEST 29TH ST</line1>
+    <state>WY</state>
+    <location_name>SOUTHRIDGE SCHOOL</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="100612">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>1501 W 39TH ST</line1>
+    <state>WY</state>
+    <location_name>CASPER SHRINE CLUB</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="100613">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>22 MAGNOLIA</line1>
+    <state>WY</state>
+    <location_name>PARADISE VALLEY SCHOOL</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="1006131">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>EVANSTON</city>
+    <line1>1440 MAIN ST</line1>
+    <state>WY</state>
+    <location_name>THE MACHINE SHOP</location_name>
+    <zip>82930</zip>
+  </address>
+</polling_location>
+<polling_location id="1006132">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LYMAN</city>
+    <line1>100 E SAGE</line1>
+    <state>WY</state>
+    <location_name>LYMAN TOWN HALL CHAMBERS</location_name>
+    <zip>82937</zip>
+  </address>
+</polling_location>
+<polling_location id="1006135">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>EVANSTON</city>
+    <line1>701 MAIN ST</line1>
+    <state>WY</state>
+    <location_name>EVANSTON LIBRARY</location_name>
+    <zip>82930</zip>
+  </address>
+</polling_location>
+<polling_location id="1006138">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MOUNTAIN VIEW</city>
+    <line1>405 N HWY 414</line1>
+    <state>WY</state>
+    <location_name>MT. VIEW TOWN HALL</location_name>
+    <zip>82939</zip>
+  </address>
+</polling_location>
+<polling_location id="1006139">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BEAR RIVER</city>
+    <line1>81 ELK DR</line1>
+    <state>WY</state>
+    <location_name>BEAR RIVER TOWN HALL</location_name>
+    <zip>82930</zip>
+  </address>
+</polling_location>
+<polling_location id="100614">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>6332 BUCKBOARD RD</line1>
+    <state>WY</state>
+    <location_name>OREGON TRAIL SCHOOL</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="1006140">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>EVANSTON</city>
+    <line1>1440 MAIN ST</line1>
+    <state>WY</state>
+    <location_name>THE MACHINE SHOP</location_name>
+    <zip>82930</zip>
+  </address>
+</polling_location>
+<polling_location id="1006143">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MOUNTAIN VIEW</city>
+    <line1>129 W 2ND ST</line1>
+    <state>WY</state>
+    <location_name>MT. VIEW SCHOOL ADMIN BLDG</location_name>
+    <zip>82939</zip>
+  </address>
+</polling_location>
+<polling_location id="100615">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>60 MAGNOLIA</line1>
+    <state>WY</state>
+    <location_name>SHEPHERD OF VALLEY CARE CENTER</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="100616">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>3030 S POPLAR</line1>
+    <state>WY</state>
+    <location_name>BETHEL BAPTIST CHURCH</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="100617">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>600 N HUBER</line1>
+    <state>WY</state>
+    <location_name>UNIVERSITY PARK SCHOOL</location_name>
+    <zip>82609</zip>
+  </address>
+</polling_location>
+<polling_location id="100618">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>639 PAYNE AVE</line1>
+    <state>WY</state>
+    <location_name>PINEVIEW SCHOOL</location_name>
+    <zip>82609</zip>
+  </address>
+</polling_location>
+<polling_location id="1006181">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>107 E ALGER</line1>
+    <state>WY</state>
+    <location_name>ED HAMMER INC</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006182">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>1660 BIGHORN AVE.</line1>
+    <state>WY</state>
+    <location_name>CALVARY BAPTIST CHURCH</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006183">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>1831 S. SHERIDAN AVE</line1>
+    <state>WY</state>
+    <location_name>WATER PRODUCTS INC.</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006184">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>I-90 OFF 5TH STREET</line1>
+    <state>WY</state>
+    <location_name>TOURIST INFORMATION CENTER</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006186">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>4 BECKTON ROAD</line1>
+    <state>WY</state>
+    <location_name>BECKTON SCHOOL HOUSE BUILDING</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006187">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>STORY</city>
+    <line1>28 NORTH PINEY</line1>
+    <state>WY</state>
+    <location_name>STORY WOMAN'S CLUB</location_name>
+    <zip>82842</zip>
+  </address>
+</polling_location>
+<polling_location id="1006188">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ARVADA</city>
+    <line1>ARVADA</line1>
+    <state>WY</state>
+    <location_name>POWDER RIVER COMMUNITY CENTER</location_name>
+    <zip>82831</zip>
+  </address>
+</polling_location>
+<polling_location id="1006189">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CLEARMONT</city>
+    <line1>CLEARMONT</line1>
+    <state>WY</state>
+    <location_name>CLEARMONT TOWN HALL</location_name>
+    <zip>82835</zip>
+  </address>
+</polling_location>
+<polling_location id="100619">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>2451 SHATTUCK AVE</line1>
+    <state>WY</state>
+    <location_name>SAGEWOOD SCHOOL</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="1006190">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>1753 VICTORIA-FAIRGROUNDS</line1>
+    <state>WY</state>
+    <location_name>EXHIBIT HALL</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006191">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>5135 COFFEEN AVE</line1>
+    <state>WY</state>
+    <location_name>BETHESDA WORSHIP</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006192">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BIG HORN</city>
+    <line1>BIG HORN</line1>
+    <state>WY</state>
+    <location_name>BIG HORN WOMEN'S CLUB</location_name>
+    <zip>82833</zip>
+  </address>
+</polling_location>
+<polling_location id="1006193">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>665 WYARNO ROAD</line1>
+    <state>WY</state>
+    <location_name>WYARNO FIRE HALL</location_name>
+    <zip>82845</zip>
+  </address>
+</polling_location>
+<polling_location id="1006194">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>RANCHESTER</city>
+    <line1>RANCHESTER</line1>
+    <state>WY</state>
+    <location_name>RANCHESTER TOWN HALL</location_name>
+    <zip>82839</zip>
+  </address>
+</polling_location>
+<polling_location id="1006195">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>MEADE CREEK ROAD &amp; HWY 14</line1>
+    <state>WY</state>
+    <location_name>PRAIRIE DOG COMMUNITY CENTER</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006196">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DAYTON</city>
+    <line1>DAYTON</line1>
+    <state>WY</state>
+    <location_name>DAYTON TOWN HALL</location_name>
+    <zip>82836</zip>
+  </address>
+</polling_location>
+<polling_location id="1006197">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>211 SMITH STREET</line1>
+    <state>WY</state>
+    <location_name>SENIOR CITIZENS CENTER</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006198">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>224 S. MAIN STREET</line1>
+    <state>WY</state>
+    <location_name>COUNTY COURTHOUSE</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006199">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>260 E LOUCKS</line1>
+    <state>WY</state>
+    <location_name>HOLY NAME CHURCH</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="100620">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>411 S WALSH DR</line1>
+    <state>WY</state>
+    <location_name>KW @ RESTORATION CHURCH</location_name>
+    <zip>82609</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHERIDAN</city>
+    <line1>1100 BIG HORN AVE</line1>
+    <state>WY</state>
+    <location_name>THE ROCK CHURCH</location_name>
+    <zip>82801</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000000">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LUSK</city>
+    <line1>19609 US HWY 85</line1>
+    <state>WY</state>
+    <location_name>RENNARD'S GARAGE</location_name>
+    <zip>82225</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000001">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LUSK</city>
+    <line1>899 STAGE RD.</line1>
+    <state>WY</state>
+    <location_name>STAGE STATION</location_name>
+    <zip>82225</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000002">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LANCE CREEEK</city>
+    <line1>325 20 MILE ROAD</line1>
+    <state>WY</state>
+    <location_name>LANCE CREEK ELEMENTARY SCHOOL</location_name>
+    <zip>82222</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000003">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LUSK</city>
+    <line1>310 US HWY 20</line1>
+    <state>WY</state>
+    <location_name>NIOBRARA CO FAIRGROUNDS 6-1</location_name>
+    <zip>82225</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000004">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LUSK</city>
+    <line1>310 US HWY 20</line1>
+    <state>WY</state>
+    <location_name>NIOBRARA CO FAIRGROUNDS 6-2</location_name>
+    <zip>82225</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000005">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MANVILLE</city>
+    <line1>651 5TH ST.</line1>
+    <state>WY</state>
+    <location_name>MANVILLE TOWN HALL</location_name>
+    <zip>82227</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000006">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>TORRINGTON</city>
+    <line1>PRAIRIE CENTER SCHOOL</line1>
+    <state>WY</state>
+    <location_name>PRAIRIE CENTER</location_name>
+    <zip>82240</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000007">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JAY EM</city>
+    <line1>FOREST MOUND CHAPEL</line1>
+    <state>WY</state>
+    <location_name>JAY EM</location_name>
+    <zip>82219</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000008">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LINGLE</city>
+    <line1>TOWN HALL</line1>
+    <state>WY</state>
+    <location_name>LINGLE</location_name>
+    <zip>82223</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000009">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>TORRINGTON</city>
+    <line1>RENDEZVOUS CENTER</line1>
+    <state>WY</state>
+    <location_name>TORRINGTON</location_name>
+    <zip>82240</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000010">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>VETERAN</city>
+    <line1>LEGION POST</line1>
+    <state>WY</state>
+    <location_name>VETERAN</location_name>
+    <zip>82243</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000011">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>HUNTLEY</city>
+    <line1>TABLE MOUNTAIN VINEYARDS 
+5933 ROAD 48</line1>
+    <state>WY</state>
+    <location_name>HUNTLEY</location_name>
+    <zip>82218</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000012">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>HAWK SPRINGS</city>
+    <line1>COMMUNITY CENTER</line1>
+    <state>WY</state>
+    <location_name>HAWK SPRINGS</location_name>
+    <zip>82217</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000020">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>FORT LARAMIE</city>
+    <line1>TOWN HALL</line1>
+    <state>WY</state>
+    <location_name>FORT LARAMIE</location_name>
+    <zip>82212</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000021">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>YODER</city>
+    <line1>COMMUNITY CENTER</line1>
+    <state>WY</state>
+    <location_name>YODER</location_name>
+    <zip>82244</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000022">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LA GRANGE</city>
+    <line1>MEMORIAL BUILDING</line1>
+    <state>WY</state>
+    <location_name>LA GRANGE</location_name>
+    <zip>82221</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000023">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>IOWA CENTER</city>
+    <line1>JACKSON HOME</line1>
+    <state>WY</state>
+    <location_name>IOWA CENTER</location_name>
+    <zip>82240</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000045">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2811 HOUSE AVE</line1>
+    <state>WY</state>
+    <location_name>1-08 STOREY GYM</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000046">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2011 E LINCOLNWAY</line1>
+    <state>WY</state>
+    <location_name>1-09 AMERICAN LEGION POST #6</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000047">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1317 PARSLEY BLVD</line1>
+    <state>WY</state>
+    <location_name>1-10 DAVID R ROMERO PARK</location_name>
+    <zip>82007</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000048">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>4603 LIONS PARK DR</line1>
+    <state>WY</state>
+    <location_name>2-01 KIWANIS COMMUNITY HOUSE</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000049">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>4603 LIONS PARK DR</line1>
+    <state>WY</state>
+    <location_name>2-02 KIWANIS COMMUNITY HOUSE</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000050">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>4603 LIONS PARK DR</line1>
+    <state>WY</state>
+    <location_name>2-03 KIWANIS COMMUNITY HOUSE</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000051">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>4603 LIONS PARK DR</line1>
+    <state>WY</state>
+    <location_name>2-04 KIWANIS COMMUNITY HOUSE</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000052">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>5716 POWDERHOUSE RD</line1>
+    <state>WY</state>
+    <location_name>2-05 CHEYENNE BEREAN CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000053">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2015 TRANQUILITY RD</line1>
+    <state>WY</state>
+    <location_name>2-06 NORTH CHRISTIAN CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000054">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>5716 POWDERHOUSE RD</line1>
+    <state>WY</state>
+    <location_name>2-07 CHEYENNE BEREAN CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000055">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>5716 POWDERHOUSE RD</line1>
+    <state>WY</state>
+    <location_name>2-08 CHEYENNE BEREAN CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000056">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>5200 RIDGE RD</line1>
+    <state>WY</state>
+    <location_name>2-09 CHEYENNE ALLIANCE CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000057">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2015 TRANQUILITY RD</line1>
+    <state>WY</state>
+    <location_name>2-10 NORTH CHRISTIAN CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000058">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>5200 RIDGE RD</line1>
+    <state>WY</state>
+    <location_name>2-11 CHEYENNE ALLIANCE CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000059">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>4723 GRIFFITH AVE</line1>
+    <state>WY</state>
+    <location_name>2-12 NORTHWOODS PRESBYTERIAN CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000061">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>5200 RIDGE RD</line1>
+    <state>WY</state>
+    <location_name>2-13 CHEYENNE ALLIANCE CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000062">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2811 HOUSE AVE</line1>
+    <state>WY</state>
+    <location_name>3-01 STOREY GYM</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000063">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2001 E LINCOLNWAY</line1>
+    <state>WY</state>
+    <location_name>3-02 AMERICAN LEGION POST #6</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000064">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>3501 FOREST DR</line1>
+    <state>WY</state>
+    <location_name>3-03 FIRST CONGREGATIONAL CHURCH</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000065">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>3501 FOREST DR</line1>
+    <state>WY</state>
+    <location_name>3-04 FIRST CONGREGATIONAL CHURCH</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000066">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2001 E LINCOLNWAY</line1>
+    <state>WY</state>
+    <location_name>3-05 AMERICAN LEGION POST #6</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000067">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>3501 FOREST DR</line1>
+    <state>WY</state>
+    <location_name>3-06 FIRST CONGREGATIONAL CHURCH</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000068">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>5200 RIDGE RD</line1>
+    <state>WY</state>
+    <location_name>3-07 CHEYENNE ALLIANCE CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000087">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>307 E 2ND ST</line1>
+    <state>WY</state>
+    <location_name>NATRONA COUNTY LIBRARY</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000089">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>1653 N 28TH ST</line1>
+    <state>WY</state>
+    <location_name>INDIAN PAINTBRUSH SCHOOL</location_name>
+    <zip>82072</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000090">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>2111 WILLETT DR</line1>
+    <state>WY</state>
+    <location_name>AMERICAN HERITAGE CENTER</location_name>
+    <zip>82072</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000220">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LYMAN</city>
+    <line1>129 SOUTH FRANKLIN STREET</line1>
+    <state>WY</state>
+    <location_name>LYMAN LIBRARY</location_name>
+    <zip>82937</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000240">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>RECLUSE</city>
+    <line1>110 GREENOUGH ROAD</line1>
+    <state>WY</state>
+    <location_name>RECLUSE COMMUNITY HALL</location_name>
+    <zip>82725</zip>
+  </address>
+</polling_location>
+<polling_location id="1006200000301">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>2901 ARMORY ROAD</line1>
+    <state>WY</state>
+    <location_name>NATIONAL GUARD ARMORY</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="1006201">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JACKSON</city>
+    <line1>3240 W ADAMS CANYON</line1>
+    <state>WY</state>
+    <location_name>TC EMERGENCY OPERATIONS CENTER (EOC)</location_name>
+    <zip>83001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006203">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JACKSON</city>
+    <line1>2820 RUNGIUS ROAD</line1>
+    <state>WY</state>
+    <location_name>NATIONAL MUSEUM OF WILDLIFE ART</location_name>
+    <zip>83001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006204">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JACKSON</city>
+    <line1>155 E. GILL AVE.</line1>
+    <state>WY</state>
+    <location_name>RECREATION CENTER</location_name>
+    <zip>83001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006205">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JACKSON</city>
+    <line1>305 W. SNOW KING AVE.</line1>
+    <state>WY</state>
+    <location_name>FAIR BUILDING</location_name>
+    <zip>83001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006206">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JACKSON</city>
+    <line1>1251 SOUTH PARK LOOP ROAD</line1>
+    <state>WY</state>
+    <location_name>PRESBYTERIAN CHURCH</location_name>
+    <zip>83001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006207">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JACKSON</city>
+    <line1>3205 W. BIG TRAIL DRIVE</line1>
+    <state>WY</state>
+    <location_name>CHAPEL AT RIVER CROSSING</location_name>
+    <zip>83001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006208">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JACKSON</city>
+    <line1>830 EAST HANSEN AVE.</line1>
+    <state>WY</state>
+    <location_name>SENIOR CENTER</location_name>
+    <zip>83001</zip>
+  </address>
+</polling_location>
+<polling_location id="100621">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>3201 E 15TH ST</line1>
+    <state>WY</state>
+    <location_name>MANOR HEIGHTS SCHOOL</location_name>
+    <zip>82609</zip>
+  </address>
+</polling_location>
+<polling_location id="1006210">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JACKSON</city>
+    <line1>7575 S HIGHWAY 89</line1>
+    <state>WY</state>
+    <location_name>TC WEED AND PEST</location_name>
+    <zip>83001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006212">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JACKSON</city>
+    <line1>2820 RUNGIUS ROAD</line1>
+    <state>WY</state>
+    <location_name>NATIONAL</location_name>
+    <zip>83001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006213">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MORAN</city>
+    <line1>#1 MAIN ST.</line1>
+    <state>WY</state>
+    <location_name>MORAN SCHOOL</location_name>
+    <zip>83013</zip>
+  </address>
+</polling_location>
+<polling_location id="1006215">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WILSON</city>
+    <line1>2505 N. MOOSE/WILSON RD.</line1>
+    <state>WY</state>
+    <location_name>WILSON FIRE HOUSE STATION 6</location_name>
+    <zip>83014</zip>
+  </address>
+</polling_location>
+<polling_location id="1006216">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WILSON</city>
+    <line1>5675 W. MAIN STREET</line1>
+    <state>WY</state>
+    <location_name>OLD WILSON SCHOOL COMMUNITY CENTER</location_name>
+    <zip>83014</zip>
+  </address>
+</polling_location>
+<polling_location id="1006217">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>TETON VILLAGE</city>
+    <line1>7648 GRANITE RIDGE LOOP ROAD</line1>
+    <state>WY</state>
+    <location_name>TETON VILLAGE FIRE HOUSE</location_name>
+    <zip>83025</zip>
+  </address>
+</polling_location>
+<polling_location id="1006218">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ALTA</city>
+    <line1>15 ALTA SCHOOL ROAD</line1>
+    <state>WY</state>
+    <location_name>ALTA SCHOOL</location_name>
+    <zip>83414</zip>
+  </address>
+</polling_location>
+<polling_location id="100622">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>2300 E 15TH ST</line1>
+    <state>WY</state>
+    <location_name>PRINCE OF PEACE LUTHERAN CHURCH</location_name>
+    <zip>82609</zip>
+  </address>
+</polling_location>
+<polling_location id="1006221">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GILLETTE</city>
+    <line1>4101 MAVERICK DRIVE</line1>
+    <state>WY</state>
+    <location_name>CAM-PLEX WYOMING CENTER</location_name>
+    <zip>82718</zip>
+  </address>
+</polling_location>
+<polling_location id="100623">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>701 CARRIAGE LN</line1>
+    <state>WY</state>
+    <location_name>VERDA JAMES SCHOOL</location_name>
+    <zip>82609</zip>
+  </address>
+</polling_location>
+<polling_location id="100624">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>5000 BLACKMORE RD</line1>
+    <state>WY</state>
+    <location_name>COMMUNITY HEALTH CENTER</location_name>
+    <zip>82609</zip>
+  </address>
+</polling_location>
+<polling_location id="1006243">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROZET</city>
+    <line1>14054 HWY 51</line1>
+    <state>WY</state>
+    <location_name>ROZET SCHOOL</location_name>
+    <zip>82727</zip>
+  </address>
+</polling_location>
+<polling_location id="1006245">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GILLETTE</city>
+    <line1>200 PROSPECTOR PKWY</line1>
+    <state>WY</state>
+    <location_name>RAWHIDE SCHOOL</location_name>
+    <zip>82716</zip>
+  </address>
+</polling_location>
+<polling_location id="1006247">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WESTON</city>
+    <line1>15902 HWY 59 N</line1>
+    <state>WY</state>
+    <location_name>LITTLE POWDER SCHOOL</location_name>
+    <zip>82731</zip>
+  </address>
+</polling_location>
+<polling_location id="1006248">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GILLETTE</city>
+    <line1>2000 W LAKEWAY</line1>
+    <state>WY</state>
+    <location_name>1ST UNITED METHODIST CHURCH</location_name>
+    <zip>82718</zip>
+  </address>
+</polling_location>
+<polling_location id="1006249">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WRIGHT</city>
+    <line1>201 WRIGHT BLVD</line1>
+    <state>WY</state>
+    <location_name>WRIGHT TOWN HALL</location_name>
+    <zip>82732</zip>
+  </address>
+</polling_location>
+<polling_location id="100625">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>EVANSVILLE</city>
+    <line1>71 CURTIS</line1>
+    <state>WY</state>
+    <location_name>EVANSVILLE COMMUNITY CENTER - IN</location_name>
+    <zip>82636</zip>
+  </address>
+</polling_location>
+<polling_location id="1006250">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GILLETTE</city>
+    <line1>2830A HWY 50</line1>
+    <state>WY</state>
+    <location_name>4-J SCHOOL</location_name>
+    <zip>82718</zip>
+  </address>
+</polling_location>
+<polling_location id="1006254">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GILLETTE</city>
+    <line1>7991 GROUSE AVE</line1>
+    <state>WY</state>
+    <location_name>ANTELOPE VALLEY CHURCH</location_name>
+    <zip>82718</zip>
+  </address>
+</polling_location>
+<polling_location id="100626">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>EVANSVILLE</city>
+    <line1>71 CURTIS ST</line1>
+    <state>WY</state>
+    <location_name>EVANSVILLE COMMUNITY CENTER - OUT</location_name>
+    <zip>82636</zip>
+  </address>
+</polling_location>
+<polling_location id="1006261">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>NEWCASTLE</city>
+    <line1>431 DELAWARE AVENUE</line1>
+    <state>WY</state>
+    <location_name>STATE FORESTRY BLDG</location_name>
+    <zip>82701</zip>
+  </address>
+</polling_location>
+<polling_location id="1006262">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>OSAGE</city>
+    <line1>551 METZ</line1>
+    <state>WY</state>
+    <location_name>KITTY MOATS</location_name>
+    <zip>82723</zip>
+  </address>
+</polling_location>
+<polling_location id="100627">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>7910 HAT SIX RD</line1>
+    <state>WY</state>
+    <location_name>HAT SIX RANCH</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="100628">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MIDWEST</city>
+    <line1>531 PEAKE</line1>
+    <state>WY</state>
+    <location_name>MIDWEST TOWN HALL</location_name>
+    <zip>82643</zip>
+  </address>
+</polling_location>
+<polling_location id="1006281">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SUNDANCE</city>
+    <line1>309 CLEVELAND STREET</line1>
+    <state>WY</state>
+    <location_name>COURTHOUSE BASEMENT</location_name>
+    <zip>82729</zip>
+  </address>
+</polling_location>
+<polling_location id="1006282">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BEULAH</city>
+    <line1>5860 OLD HWY 14</line1>
+    <state>WY</state>
+    <location_name>BEULAH COMMUNITY BUILDING</location_name>
+    <zip>82712</zip>
+  </address>
+</polling_location>
+<polling_location id="1006283">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ALADDIN</city>
+    <line1>3997 STATE HWY 24</line1>
+    <state>WY</state>
+    <location_name>ALADDIN COMMUNITY BUILDING</location_name>
+    <zip>82710</zip>
+  </address>
+</polling_location>
+<polling_location id="1006284">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ALVA</city>
+    <line1>11 MAIN STREET</line1>
+    <state>WY</state>
+    <location_name>ALVA CHURCH</location_name>
+    <zip>82711</zip>
+  </address>
+</polling_location>
+<polling_location id="1006285">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SUNDANCE</city>
+    <line1>18048 US HWY 14</line1>
+    <state>WY</state>
+    <location_name>RAM CENTER</location_name>
+    <zip>82729</zip>
+  </address>
+</polling_location>
+<polling_location id="1006286">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SUNDANCE</city>
+    <line1>48 INYAN KARA CREEK ROAD</line1>
+    <state>WY</state>
+    <location_name>BARTON RANCH VOTING BOOTH</location_name>
+    <zip>82729</zip>
+  </address>
+</polling_location>
+<polling_location id="1006287">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>HULETT</city>
+    <line1>145 MAIN STREET</line1>
+    <state>WY</state>
+    <location_name>HULETT CIVIC CENTER</location_name>
+    <zip>82720</zip>
+  </address>
+</polling_location>
+<polling_location id="1006288">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>PINE HAVEN</city>
+    <line1>24 WATERS DRIVE</line1>
+    <state>WY</state>
+    <location_name>PINE HAVEN TOWN HALL</location_name>
+    <zip>82721</zip>
+  </address>
+</polling_location>
+<polling_location id="100629">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>EDGERTON</city>
+    <line1>311 N 2ND</line1>
+    <state>WY</state>
+    <location_name>EDGERTON TOWN HALL</location_name>
+    <zip>82635</zip>
+  </address>
+</polling_location>
+<polling_location id="1006290">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MOORCROFT</city>
+    <line1>111 WEST CONVERSE STREET</line1>
+    <state>WY</state>
+    <location_name>MOORCROFT PUBLIC SAFETY BUILDING</location_name>
+    <zip>82721</zip>
+  </address>
+</polling_location>
+<polling_location id="1006291">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>NEW HAVEN</city>
+    <line1>99 MULE CREEK ROAD</line1>
+    <state>WY</state>
+    <location_name>NEW HAVEN COMMUNITY BUILDING</location_name>
+    <zip>82720</zip>
+  </address>
+</polling_location>
+<polling_location id="1006292">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>COLONY</city>
+    <line1>471 US HWY 212</line1>
+    <state>WY</state>
+    <location_name>COLONY COMMUNITY BUILDING</location_name>
+    <zip>57717</zip>
+  </address>
+</polling_location>
+<polling_location id="1006293">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>OSHOTO</city>
+    <line1>1101 CABIN CREEK ROAD</line1>
+    <state>WY</state>
+    <location_name>OSHOTO COMMUNITY BUILDING</location_name>
+    <zip>82721</zip>
+  </address>
+</polling_location>
+<polling_location id="10063">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>1440 S. ELM</line1>
+    <state>WY</state>
+    <location_name>DEAN MORGAN JHS</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="100630">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>401 WASATCH</line1>
+    <state>WY</state>
+    <location_name>MILLS COMMUNITY CENTER</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="100631">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>400 N 3RD AVE</line1>
+    <state>WY</state>
+    <location_name>MOUNTAIN VIEW SCHOOL</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="100632">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>4150 SALT CREEK HWY</line1>
+    <state>WY</state>
+    <location_name>WARDWELL WATER &amp; SEWER</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="1006321">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>KEMMERER</city>
+    <line1>215 WYOMING HWY 233</line1>
+    <state>WY</state>
+    <location_name>SOUTH LINCOLN TRAINING AND EVENTS CENTER</location_name>
+    <zip>83101</zip>
+  </address>
+</polling_location>
+<polling_location id="1006322">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>KEMMERER</city>
+    <line1>215 WYOMING HWY 233</line1>
+    <state>WY</state>
+    <location_name>SOUTH LINCOLN TRAINING AND EVENTS CENTER</location_name>
+    <zip>83101</zip>
+  </address>
+</polling_location>
+<polling_location id="1006323">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>KEMMERER</city>
+    <line1>215 WYOMING HWY 233</line1>
+    <state>WY</state>
+    <location_name>SOUTH LINCOLN TRAINING AND EVENTS CENTER</location_name>
+    <zip>83101</zip>
+  </address>
+</polling_location>
+<polling_location id="1006324">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DIAMONDVILLE</city>
+    <line1>11 ADAVILLE DR.</line1>
+    <state>WY</state>
+    <location_name>SCHOOL ADMINISTRATION BLDG.</location_name>
+    <zip>83116</zip>
+  </address>
+</polling_location>
+<polling_location id="1006326">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>OPAL</city>
+    <line1>651 N. FRONT ST.</line1>
+    <state>WY</state>
+    <location_name>OPAL TOWN HALL</location_name>
+    <zip>83124</zip>
+  </address>
+</polling_location>
+<polling_location id="1006327">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LABARGE</city>
+    <line1>228 S. LABARGE ST.</line1>
+    <state>WY</state>
+    <location_name>LABARGE TOWN HALL</location_name>
+    <zip>83123</zip>
+  </address>
+</polling_location>
+<polling_location id="1006328">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>AFTON</city>
+    <line1>150 S. WASHINGTON</line1>
+    <state>WY</state>
+    <location_name>AFTON CIVIC CENTER</location_name>
+    <zip>83110</zip>
+  </address>
+</polling_location>
+<polling_location id="1006329">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ALPINE</city>
+    <line1>121 HWY 89</line1>
+    <state>WY</state>
+    <location_name>ALPINE CIVIC CENTER</location_name>
+    <zip>83128</zip>
+  </address>
+</polling_location>
+<polling_location id="100633">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>8188 ZERO RD</line1>
+    <state>WY</state>
+    <location_name>CHRISTIAN CHURCH OF CASPER</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="1006330">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>THAYNE</city>
+    <line1>115 PETERSEN PARKWAY</line1>
+    <state>WY</state>
+    <location_name>THAYNE TOWN HALL</location_name>
+    <zip>83127</zip>
+  </address>
+</polling_location>
+<polling_location id="1006331">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>COKEVILLE</city>
+    <line1>110 PINE ST.</line1>
+    <state>WY</state>
+    <location_name>COKEVILLE TOWN HALL</location_name>
+    <zip>83114</zip>
+  </address>
+</polling_location>
+<polling_location id="1006332">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>STAR VALLEY RANCH</city>
+    <line1>171 VISTA DRIVE</line1>
+    <state>WY</state>
+    <location_name>STAR VALLEY RANCH TOWN HALL</location_name>
+    <zip>83127</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000051">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2816 E 7TH ST</line1>
+    <state>WY</state>
+    <location_name>3-12 VFW #1881</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006333">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>KEMMERER</city>
+    <line1>215 WYOMING HWY 233</line1>
+    <state>WY</state>
+    <location_name>SOUTH LINCOLN TRAINING AND EVENTS CENTER</location_name>
+    <zip>83101</zip>
+  </address>
+</polling_location>
+<polling_location id="1006334">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>AFTON</city>
+    <line1>150 S. WASHINGTON</line1>
+    <state>WY</state>
+    <location_name>AFTON CIVIC CENTER</location_name>
+    <zip>83110</zip>
+  </address>
+</polling_location>
+<polling_location id="1006335">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BEDFORD</city>
+    <line1>219 B ST.</line1>
+    <state>WY</state>
+    <location_name>BEDFORD WATER &amp; SEWER BLDG.</location_name>
+    <zip>83112</zip>
+  </address>
+</polling_location>
+<polling_location id="1006336">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ETNA</city>
+    <line1>107736 N US 89</line1>
+    <state>WY</state>
+    <location_name>STAR VALLEY COMMUNITY COMPLEX</location_name>
+    <zip>83118</zip>
+  </address>
+</polling_location>
+<polling_location id="1006337">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>AFTON</city>
+    <line1>150 S. WASHINGTON</line1>
+    <state>WY</state>
+    <location_name>AFTON CIVIC CENTER</location_name>
+    <zip>83110</zip>
+  </address>
+</polling_location>
+<polling_location id="1006338">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>AFTON</city>
+    <line1>150 S. WASHINGTON</line1>
+    <state>WY</state>
+    <location_name>AFTON CIVIC CENTER</location_name>
+    <zip>83110</zip>
+  </address>
+</polling_location>
+<polling_location id="100634">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BAR NUNN</city>
+    <line1>2050 SIEBKE DR</line1>
+    <state>WY</state>
+    <location_name>BAR NUNN SCHOOL</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="1006341">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>TEN SLEEP</city>
+    <line1>204 SECOND STREET</line1>
+    <state>WY</state>
+    <location_name>TEN SLEEP SENIOR CENTER</location_name>
+    <zip>82442</zip>
+  </address>
+</polling_location>
+<polling_location id="1006344">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WORLAND</city>
+    <line1>1200 CULBERTSON AVE</line1>
+    <state>WY</state>
+    <location_name>COMMUNITY CENTER COMPLEX</location_name>
+    <zip>82401</zip>
+  </address>
+</polling_location>
+<polling_location id="100635">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>3030 ENERGY LN</line1>
+    <state>WY</state>
+    <location_name>WY GAME AND FISH</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="100636">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>5818 BATES CREEK RT</line1>
+    <state>WY</state>
+    <location_name>RED CREEK SCHOOL</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="100637">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ALCOVA</city>
+    <line1>22000 RECLAMATION DR</line1>
+    <state>WY</state>
+    <location_name>ALCOVA SCHOOL</location_name>
+    <zip>82620</zip>
+  </address>
+</polling_location>
+<polling_location id="100638">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>8200 SPEAS ROAD</line1>
+    <state>WY</state>
+    <location_name>FISH HATCHERY</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="100639">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>14200 POISON SPIDER RD</line1>
+    <state>WY</state>
+    <location_name>POISON SPIDER SCHOOL</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="10064">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>THUNDERBIRD GYM</line1>
+    <state>WY</state>
+    <location_name>CASPER COLLEGE</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="100640">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>4700 S POPLAR</line1>
+    <state>WY</state>
+    <location_name>ST. STEPHEN'S CHURCH</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="1006401">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BASIN</city>
+    <line1>315 EAST HOLDREGE AVE</line1>
+    <state>WY</state>
+    <location_name>BASIN-FAIR GROUNDS</location_name>
+    <zip>82410</zip>
+  </address>
+</polling_location>
+<polling_location id="1006402">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BURLINGTON</city>
+    <line1>109 N. MAIN STREET</line1>
+    <state>WY</state>
+    <location_name>BURLINGTON-FIRE HALL</location_name>
+    <zip>82411</zip>
+  </address>
+</polling_location>
+<polling_location id="1006403">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BURLINGTON</city>
+    <line1>109 N. MAIN STREET</line1>
+    <state>WY</state>
+    <location_name>OTTO-BURLINGTON FIRE HALL</location_name>
+    <zip>82411</zip>
+  </address>
+</polling_location>
+<polling_location id="1006404">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>EMBLEM</city>
+    <line1>989 HIGHWAY 20 W</line1>
+    <state>WY</state>
+    <location_name>EMBLEM-GREYBULL VALLEY IRRIGATION DISTRICT OFFICE</location_name>
+    <zip>82422</zip>
+  </address>
+</polling_location>
+<polling_location id="1006405">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>HYATTVILLE</city>
+    <line1>308 S MAIN STREET</line1>
+    <state>WY</state>
+    <location_name>HYATTVILLE-COMMUNITY CENTER</location_name>
+    <zip>82428</zip>
+  </address>
+</polling_location>
+<polling_location id="1006406">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MANDERSON</city>
+    <line1>100 W RAILWAY ST</line1>
+    <state>WY</state>
+    <location_name>MANDERSON-TOWN HALL</location_name>
+    <zip>82432</zip>
+  </address>
+</polling_location>
+<polling_location id="1006407">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GREYBULL</city>
+    <line1>622 GREYBULL AVE</line1>
+    <state>WY</state>
+    <location_name>GREYBULL ELKS LODGE</location_name>
+    <zip>82426</zip>
+  </address>
+</polling_location>
+<polling_location id="1006408">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHELL</city>
+    <line1>201 SMITH AVE</line1>
+    <state>WY</state>
+    <location_name>SHELL-COMMUNITY HALL</location_name>
+    <zip>82441</zip>
+  </address>
+</polling_location>
+<polling_location id="1006409">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LOVELL</city>
+    <line1>1925 HIGHWAY  310</line1>
+    <state>WY</state>
+    <location_name>LOVELL-COMMUNITY CENTER</location_name>
+    <zip>82431</zip>
+  </address>
+</polling_location>
+<polling_location id="100641">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>7750 33 MILE RD</line1>
+    <state>WY</state>
+    <location_name>BRESSLER RANCH</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="1006410">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>COWLEY</city>
+    <line1>55 EAST 1ST STREET SOUTH</line1>
+    <state>WY</state>
+    <location_name>COWLEY-LOG GYM</location_name>
+    <zip>82420</zip>
+  </address>
+</polling_location>
+<polling_location id="1006411">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BYRON</city>
+    <line1>35 S PRYOR ST</line1>
+    <state>WY</state>
+    <location_name>BYRON-TOWN COMPLEX</location_name>
+    <zip>82412</zip>
+  </address>
+</polling_location>
+<polling_location id="1006412">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DEAVER</city>
+    <line1>113 1ST AVE. W.</line1>
+    <state>WY</state>
+    <location_name>DEAVER-COMMUNITY HALL</location_name>
+    <zip>82421</zip>
+  </address>
+</polling_location>
+<polling_location id="1006413">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>FRANNIE</city>
+    <line1>305 5TH STREET</line1>
+    <state>WY</state>
+    <location_name>FRANNIE-COMMUNITY CENTER</location_name>
+    <zip>82423</zip>
+  </address>
+</polling_location>
+<polling_location id="1006414">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BASIN</city>
+    <line1>PO BOX 31</line1>
+    <state>WY</state>
+    <location_name>ELECTION ROOM-ABSENTEE</location_name>
+    <zip>82410</zip>
+  </address>
+</polling_location>
+<polling_location id="100642">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>35348 W US HWY 20-26</line1>
+    <state>WY</state>
+    <location_name>POWDER RIVER SCHOOL</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="1006421">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CLARK</city>
+    <line1>321 RD 1AB</line1>
+    <state>WY</state>
+    <location_name>CLARK/PIONEER RECREATION CENTER (1-1)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="1006422">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1240 BECK AVE</line1>
+    <state>WY</state>
+    <location_name>CODY AUDITORIUM (2-1)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006423">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1240 BECK AVE</line1>
+    <state>WY</state>
+    <location_name>CODY AUDITORIUM (2-2)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006424">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1402 HEART MOUNTAIN STREET</line1>
+    <state>WY</state>
+    <location_name>CODY RECREATION CENTER (3-1)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006425">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1402 HEART MOUNTAIN STREET</line1>
+    <state>WY</state>
+    <location_name>CODY RECREATION CENTER (3-2)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006426">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>#3 RD 6NQ</line1>
+    <state>WY</state>
+    <location_name>SOUTHFORK FIRE HALL (4-1)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006427">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1402 HEART MOUNTAIN ST</line1>
+    <state>WY</state>
+    <location_name>CODY RECREATION CENTER (4-2)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006428">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GARLAND</city>
+    <line1>900 SHERIDAN</line1>
+    <state>WY</state>
+    <location_name>GARLAND COMMUNITY CHURCH (6-1)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="100643">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LONE BEAR</city>
+    <line1>24135 W WILLOW CREEK RD</line1>
+    <state>WY</state>
+    <location_name>UPPER WILLOW CREEK</location_name>
+    <zip>82639</zip>
+  </address>
+</polling_location>
+<polling_location id="1006430">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MEETEETSE</city>
+    <line1>1105 PARK AVE</line1>
+    <state>WY</state>
+    <location_name>MEETEETSE SENIOR CENTER (8-1)</location_name>
+    <zip>82433</zip>
+  </address>
+</polling_location>
+<polling_location id="1006431">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MEETEETSE</city>
+    <line1>1105 PARK AVE</line1>
+    <state>WY</state>
+    <location_name>MEETEETSE SENIOR CENTER (8-2)</location_name>
+    <zip>82433</zip>
+  </address>
+</polling_location>
+<polling_location id="1006432">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MEETEETSE</city>
+    <line1>1105 PARK AVE</line1>
+    <state>WY</state>
+    <location_name>MEETEETSE SENIOR CENTER (8-3)</location_name>
+    <zip>82433</zip>
+  </address>
+</polling_location>
+<polling_location id="1006433">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POWELL</city>
+    <line1>231 W 6TH ST</line1>
+    <state>WY</state>
+    <location_name>NORTHWEST COLLEGE (9-1)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="1006434">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POWELL</city>
+    <line1>231 W 6TH ST</line1>
+    <state>WY</state>
+    <location_name>NORTHWEST COLLEGE (9-2)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="1006435">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POWELL</city>
+    <line1>231 W 6TH ST</line1>
+    <state>WY</state>
+    <location_name>NORTHWEST COLLEGE (9-4)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="1006436">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POWELL</city>
+    <line1>231 W 6TH ST</line1>
+    <state>WY</state>
+    <location_name>NORTHWEST COLLEGE (9-5)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="1006437">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POWELL</city>
+    <line1>231 W 6TH ST</line1>
+    <state>WY</state>
+    <location_name>NORTHWEST COLLEGE (9-7)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="1006438">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POWELL</city>
+    <line1>353 S FAIR ST</line1>
+    <state>WY</state>
+    <location_name>POWELL VFW (10-1)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="1006439">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POWELL</city>
+    <line1>353 S FAIR ST</line1>
+    <state>WY</state>
+    <location_name>POWELL VFW (10-2)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="100644">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER,</city>
+    <line1>1230 W 15TH ST</line1>
+    <state>WY</state>
+    <location_name>COTTONWOOD SCHOOL</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="1006440">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1002 SHERIDAN AVE</line1>
+    <state>WY</state>
+    <location_name>PARK COUNTY COURTHOUSE (11-2)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006441">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>3167 NORTHFORK HWY</line1>
+    <state>WY</state>
+    <location_name>WAPITI SCHOOL HOUSE (16-1)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006442">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POWELL</city>
+    <line1>970 RD 18</line1>
+    <state>WY</state>
+    <location_name>MOUNTAIN VIEW CLUB (21-1)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="1006443">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POWELL</city>
+    <line1>353 S FAIR ST</line1>
+    <state>WY</state>
+    <location_name>POWELL VFW (23-1)</location_name>
+    <zip>82435</zip>
+  </address>
+</polling_location>
+<polling_location id="1006444">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1240 BECK AVE</line1>
+    <state>WY</state>
+    <location_name>CODY AUDITORIUM (24-1)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006445">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1240 BECK AVE</line1>
+    <state>WY</state>
+    <location_name>CODY AUDITORIUM (24-2)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006446">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1240 BECK AVE</line1>
+    <state>WY</state>
+    <location_name>CODY AUDITORIUM (24-3)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006447">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1240 BECK AVE</line1>
+    <state>WY</state>
+    <location_name>CODY AUDITORIUM (25-1)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006448">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1240 BECK AVE</line1>
+    <state>WY</state>
+    <location_name>CODY AUDITORIUM (25-2)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="1006449">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>1240 BECK AVE</line1>
+    <state>WY</state>
+    <location_name>CODY AUDITORIUM (25-3)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="100645">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>Casper</city>
+    <line1>4445 S. POPLAR</line1>
+    <state>WY</state>
+    <location_name>CREST HILL SCHOOL</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="1006450">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CODY</city>
+    <line1>#3 RD 6NQ</line1>
+    <state>WY</state>
+    <location_name>SOUTHFORK FIRE HALL (7-2)</location_name>
+    <zip>82414</zip>
+  </address>
+</polling_location>
+<polling_location id="100646">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>Casper</city>
+    <line1>129 N ELK ST</line1>
+    <state>WY</state>
+    <location_name>WILLARD SCHOOL</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="1006461">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>2935 SWEETWATER DRIVE</line1>
+    <state>WY</state>
+    <location_name>RS WHITE MOUNTAIN LIBRARY</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006462">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>430 WEST BLAIR</line1>
+    <state>WY</state>
+    <location_name>RS SWEETWATER COUNTY GARAGE</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006463">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>1275 ADAMS AVENUE</line1>
+    <state>WY</state>
+    <location_name>RS 1ST CONGREGATION CHURCH</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006464">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>RELIANCE</city>
+    <line1>1016 3RD STREET</line1>
+    <state>WY</state>
+    <location_name>RELIANCE FIRE STATION</location_name>
+    <zip>82943</zip>
+  </address>
+</polling_location>
+<polling_location id="1006465">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SUPERIOR</city>
+    <line1>3 N. MAIN</line1>
+    <state>WY</state>
+    <location_name>SUPERIOR ADMINISTRATION BUILDING</location_name>
+    <zip>82945</zip>
+  </address>
+</polling_location>
+<polling_location id="1006466">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>POINT OF ROCKS</city>
+    <line1>101 ARWOOD</line1>
+    <state>WY</state>
+    <location_name>POINT OF ROCK ROGER VARLEY RES</location_name>
+    <zip>82942</zip>
+  </address>
+</polling_location>
+<polling_location id="1006467">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WAMSUTTER</city>
+    <line1>231 MCCORMICK ST</line1>
+    <state>WY</state>
+    <location_name>WAMSUTTER TOWN  HALL</location_name>
+    <zip>82336</zip>
+  </address>
+</polling_location>
+<polling_location id="1006468">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BAIROIL</city>
+    <line1>BAIROIL TOWN HALL</line1>
+    <state>WY</state>
+    <location_name>BAIROIL TOWN HALL</location_name>
+    <zip>82322</zip>
+  </address>
+</polling_location>
+<polling_location id="1006470">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>1515 EDGAR STREET</line1>
+    <state>WY</state>
+    <location_name>RS 1ST UNITED METHODIST CHURCH</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006471">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>410 N STREET</line1>
+    <state>WY</state>
+    <location_name>RS CIVIC CENTER</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006472">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>3320 A YELLOWSTONE ROAD</line1>
+    <state>WY</state>
+    <location_name>RS COUNTY EVENTS COMPLEX</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006473">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>109 THIRD STREET</line1>
+    <state>WY</state>
+    <location_name>RS SOUTH SIDE PARISH CENTER</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006474">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>600 COLLEGE DRIVE</line1>
+    <state>WY</state>
+    <location_name>RS FIRE STATION # 1</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006475">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>2500 COLLEGE DRIVE</line1>
+    <state>WY</state>
+    <location_name>RS WESTERN WYOMING COLLEGE</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006476">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>3550 FOOTHILL BLVD</line1>
+    <state>WY</state>
+    <location_name>RS SCHOOL ADMINISTRATION BLDG</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006478">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GREEN RIVER</city>
+    <line1>300 MONROE AVENUE</line1>
+    <state>WY</state>
+    <location_name>GR LINCOLN MIDDLE SCHOOL</location_name>
+    <zip>82935</zip>
+  </address>
+</polling_location>
+<polling_location id="1006480">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GREEN RIVER</city>
+    <line1>350 MANSFACE DRIVE</line1>
+    <state>WY</state>
+    <location_name>GR MANSFACE CHURCH</location_name>
+    <zip>82935</zip>
+  </address>
+</polling_location>
+<polling_location id="1006483">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>FARSON</city>
+    <line1>39 B N HIGHWAY 28</line1>
+    <state>WY</state>
+    <location_name>FARSON COMMUNITY HALL</location_name>
+    <zip>82932</zip>
+  </address>
+</polling_location>
+<polling_location id="1006484">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JAMESTOWN</city>
+    <line1>249 WILSON</line1>
+    <state>WY</state>
+    <location_name>JAMESTOWN K-MOTIVE BUILDING</location_name>
+    <zip>82935</zip>
+  </address>
+</polling_location>
+<polling_location id="1006485">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GREEN RIVER</city>
+    <line1>300 NORTH FIRST EAST</line1>
+    <state>WY</state>
+    <location_name>GR SWEETWATER COUNTY LIBRARY</location_name>
+    <zip>82935</zip>
+  </address>
+</polling_location>
+<polling_location id="1006486">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GREEN RIVER</city>
+    <line1>1775 HITCHING POST</line1>
+    <state>WY</state>
+    <location_name>GR RECREATION CENTER</location_name>
+    <zip>82935</zip>
+  </address>
+</polling_location>
+<polling_location id="1006487">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GREEN RIVER</city>
+    <line1>1055 WEST TETON BLVD</line1>
+    <state>WY</state>
+    <location_name>GR TRUMAN SCHOOL</location_name>
+    <zip>82935</zip>
+  </address>
+</polling_location>
+<polling_location id="1006488">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WASHAM</city>
+    <line1>CO RD 13</line1>
+    <state>WY</state>
+    <location_name>WASHAM FON SLAGOWSKI RESIDENCE</location_name>
+    <zip>82938</zip>
+  </address>
+</polling_location>
+<polling_location id="1006489">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MCKINNON</city>
+    <line1>10 1/2 OLD HIGHWAY 414</line1>
+    <state>WY</state>
+    <location_name>MCKINNON SCHOOL BUILDING</location_name>
+    <zip>82938</zip>
+  </address>
+</polling_location>
+<polling_location id="1006490">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GRANGER</city>
+    <line1>76 SPRUCE</line1>
+    <state>WY</state>
+    <location_name>GRANGER TOWN HALL</location_name>
+    <zip>82934</zip>
+  </address>
+</polling_location>
+<polling_location id="1006492">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>663 BRIDGER AVENUE</line1>
+    <state>WY</state>
+    <location_name>RS NORTH SIDE PARISH CENTER</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="1006493">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK SPRINGS</city>
+    <line1>731 C STREET</line1>
+    <state>WY</state>
+    <location_name>RS COUNTY OFFICE BUILDING</location_name>
+    <zip>82901</zip>
+  </address>
+</polling_location>
+<polling_location id="10065">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>522 S JEFFERSON</line1>
+    <state>WY</state>
+    <location_name>JEFFERSON SCHOOL</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="1006502">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>RAWLINS</city>
+    <line1>3RD &amp; SPRUCE ST.</line1>
+    <state>WY</state>
+    <location_name>JEFFREY CENTER</location_name>
+    <zip>82301</zip>
+  </address>
+</polling_location>
+<polling_location id="1006507">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>RAWLINS</city>
+    <line1>3RD &amp; SPRUCE ST.</line1>
+    <state>WY</state>
+    <location_name>JEFFREY CENTER</location_name>
+    <zip>82301</zip>
+  </address>
+</polling_location>
+<polling_location id="1006508">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SINCLAIR</city>
+    <line1>100 E. LINCOLN AVE.</line1>
+    <state>WY</state>
+    <location_name>SINCLAIR TOWN HALL</location_name>
+    <zip>82334</zip>
+  </address>
+</polling_location>
+<polling_location id="1006510">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MEDICINE BOW</city>
+    <line1>520 UTAH ST.</line1>
+    <state>WY</state>
+    <location_name>MEDICINE BOW SENIOR CENTER</location_name>
+    <zip>82329</zip>
+  </address>
+</polling_location>
+<polling_location id="1006511">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>HANNA</city>
+    <line1>301 S. ADAMS ST.</line1>
+    <state>WY</state>
+    <location_name>HANNA TOWN HALL</location_name>
+    <zip>82327</zip>
+  </address>
+</polling_location>
+<polling_location id="1006512">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ELK MOUNTAIN</city>
+    <line1>208 BRIDGE ST.</line1>
+    <state>WY</state>
+    <location_name>ELK MOUNTAIN SENIOR CENTER</location_name>
+    <zip>82324</zip>
+  </address>
+</polling_location>
+<polling_location id="1006513">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MCFADDEN</city>
+    <line1>HIGHWAY 13</line1>
+    <state>WY</state>
+    <location_name>MCFADDEN FIRE STA</location_name>
+    <zip>82083</zip>
+  </address>
+</polling_location>
+<polling_location id="1006514">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SARATOGA</city>
+    <line1>210 W. ELM ST.</line1>
+    <state>WY</state>
+    <location_name>PLATTE VALLEY COMMUNITY CENTER</location_name>
+    <zip>82331</zip>
+  </address>
+</polling_location>
+<polling_location id="1006516">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ENCAMPMENT</city>
+    <line1>1311 FREDRICK</line1>
+    <state>WY</state>
+    <location_name>ENCAMPMENT TOWN HALL</location_name>
+    <zip>82325</zip>
+  </address>
+</polling_location>
+<polling_location id="1006517">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>RIVERSIDE</city>
+    <line1>FIELD ST</line1>
+    <state>WY</state>
+    <location_name>RIVERSIDE TOWN HALL</location_name>
+    <zip>82325</zip>
+  </address>
+</polling_location>
+<polling_location id="1006518">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DIXON</city>
+    <line1>4TH ST</line1>
+    <state>WY</state>
+    <location_name>DIXON SENIOR CENTER</location_name>
+    <zip>82323</zip>
+  </address>
+</polling_location>
+<polling_location id="1006519">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BAGGS</city>
+    <line1>340 WHIPPOORWILL ST.</line1>
+    <state>WY</state>
+    <location_name>VALLEY COMMUNITY CENTER</location_name>
+    <zip>82321</zip>
+  </address>
+</polling_location>
+<polling_location id="1006521">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WHEATLAND</city>
+    <line1>1405 16TH ST</line1>
+    <state>WY</state>
+    <location_name>FSB CONFERENCE CENTER</location_name>
+    <zip>82201</zip>
+  </address>
+</polling_location>
+<polling_location id="1006522">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WHEATLAND</city>
+    <line1>59 ANTELOPE GAP RD</line1>
+    <state>WY</state>
+    <location_name>4-H BUILDING</location_name>
+    <zip>82201</zip>
+  </address>
+</polling_location>
+<polling_location id="1006523">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GLENDO</city>
+    <line1>114 S YELLOWSTONE HWY</line1>
+    <state>WY</state>
+    <location_name>GLENDO TOWN HALL</location_name>
+    <zip>82213</zip>
+  </address>
+</polling_location>
+<polling_location id="1006524">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHUGWATER</city>
+    <line1>311 2ND ST</line1>
+    <state>WY</state>
+    <location_name>CHUGWATER COMMUNITY CENTER</location_name>
+    <zip>82210</zip>
+  </address>
+</polling_location>
+<polling_location id="1006581">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>400 W CENTER ST 
+WY STATE FAIRGROUNDS</line1>
+    <state>WY</state>
+    <location_name>01-01 WY STATE FAIRGROUNDS</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006582">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>02-02 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006583">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1641 ESTERBROOK RD</line1>
+    <state>WY</state>
+    <location_name>03-01 WHITE SCHOOL</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006584">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>04-04 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006585">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GLENROCK</city>
+    <line1>412 S 4TH</line1>
+    <state>WY</state>
+    <location_name>06-06 GLNRK REC CNTR</location_name>
+    <zip>82637</zip>
+  </address>
+</polling_location>
+<polling_location id="1006586">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>07-07 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006587">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>400 W CENTER ST 
+WY STATE FAIRGROUNDS</line1>
+    <state>WY</state>
+    <location_name>08-08 WY STATE FAIRGROUNDS</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006588">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GLENROCK</city>
+    <line1>412 S 4TH</line1>
+    <state>WY</state>
+    <location_name>09-01 GLNRK REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006589">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GLENROCK</city>
+    <line1>412 S 4TH</line1>
+    <state>WY</state>
+    <location_name>09-02 GLNRK REC CNTR</location_name>
+    <zip>82637</zip>
+  </address>
+</polling_location>
+<polling_location id="1006590">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GLENROCK</city>
+    <line1>412 S 4TH</line1>
+    <state>WY</state>
+    <location_name>10-10 GLNRK REC CNTR</location_name>
+    <zip>82637</zip>
+  </address>
+</polling_location>
+<polling_location id="1006591">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GLENROCK</city>
+    <line1>412 S 4TH</line1>
+    <state>WY</state>
+    <location_name>11-11 GLNRK REC CNTR</location_name>
+    <zip>82637</zip>
+  </address>
+</polling_location>
+<polling_location id="1006592">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BILL</city>
+    <line1>3545 HWY 59</line1>
+    <state>WY</state>
+    <location_name>13-13 DRY CREEK SCHL</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006593">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>20-20 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006594">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>23-01 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006595">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>23-02 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006596">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>23-03 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006597">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>23-04 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006598">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>23-05 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="1006599">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DOUGLAS</city>
+    <line1>1701 HAMILTON</line1>
+    <state>WY</state>
+    <location_name>23-06 DGLS REC CNTR</location_name>
+    <zip>82633</zip>
+  </address>
+</polling_location>
+<polling_location id="10066">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>1536 S OAKCREST</line1>
+    <state>WY</state>
+    <location_name>GRANT SCHOOL</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000010">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BUFFALO</city>
+    <line1>16 FAIRGROUNDS RD</line1>
+    <state>WY</state>
+    <location_name>JOHNSON COUNTY FAIRGROUNDS</location_name>
+    <zip>82834</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000011">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BUFFALO</city>
+    <line1>532 N LOBBAN AVE</line1>
+    <state>WY</state>
+    <location_name>CATHOLIC REC HALL</location_name>
+    <zip>82834</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000012">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>KAYCEE</city>
+    <line1>603 NOLAN AVE</line1>
+    <state>WY</state>
+    <location_name>HAROLD JARRARD PARK</location_name>
+    <zip>82639</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000013">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>THERMOPOLIS</city>
+    <line1>627 SPRINGVIEW</line1>
+    <state>WY</state>
+    <location_name>1 HOT SPRINGS COUNTY FAIR BUILDING</location_name>
+    <zip>82443</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000014">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>THERMOPOLIS</city>
+    <line1>627 SPRINGVIEW</line1>
+    <state>WY</state>
+    <location_name>2 HOT SPRINGS COUNTY FAIR BUILDING</location_name>
+    <zip>82443</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000015">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>THERMOPOLIS</city>
+    <line1>700 BROADWAY</line1>
+    <state>WY</state>
+    <location_name>HOT SPRINGS COUNTY MUSEUM</location_name>
+    <zip>82443</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000033">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>THERMOPOLIS</city>
+    <line1>FAIR GROUNDS</line1>
+    <state>WY</state>
+    <location_name>ARMORY</location_name>
+    <zip>82443</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000034">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>PINEDALE</city>
+    <line1>665 N TYLER AVENUE</line1>
+    <state>WY</state>
+    <location_name>WRANGLER GYM</location_name>
+    <zip>82941</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000035">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BOULDER</city>
+    <line1>210 ADAMS AVENUE</line1>
+    <state>WY</state>
+    <location_name>BOULDER COMM CTR</location_name>
+    <zip>82923</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000038">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DANIEL</city>
+    <line1>18 SCHOOL HOUSE LANE</line1>
+    <state>WY</state>
+    <location_name>DANIEL SCHOOL HOUSE</location_name>
+    <zip>83115</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000039">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BONDURANT</city>
+    <line1>14224 U S HWY 189 &amp; 191</line1>
+    <state>WY</state>
+    <location_name>BONDURANT ELEM SCH</location_name>
+    <zip>82922</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000040">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1317 PARSLEY BLVD</line1>
+    <state>WY</state>
+    <location_name>1-01 DAVID R ROMERO PARK</location_name>
+    <zip>82007</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000041">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1317 PARSLEY BLVD</line1>
+    <state>WY</state>
+    <location_name>1-02 DAVID R ROMERO PARK</location_name>
+    <zip>82007</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000042">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2811 HOUSE AVE</line1>
+    <state>WY</state>
+    <location_name>1-03 STOREY GYM</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000043">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2811 HOUSE AVE</line1>
+    <state>WY</state>
+    <location_name>1-04 STOREY GYM</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000044">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2811 HOUSE AVE</line1>
+    <state>WY</state>
+    <location_name>1-05 STOREY GYM</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000045">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2811 HOUSE AVE</line1>
+    <state>WY</state>
+    <location_name>1-06 STOREY GYM</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000046">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2811 HOUSE AVE</line1>
+    <state>WY</state>
+    <location_name>1-07 STOREY GYM</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000047">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>4723 GRIFFITH AVE</line1>
+    <state>WY</state>
+    <location_name>3-08 NORTHWOODS PRESBYTERIAN CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000048">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2816 E 7TH ST</line1>
+    <state>WY</state>
+    <location_name>3-09 VFW #1881</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000049">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>2816 E 7TH ST</line1>
+    <state>WY</state>
+    <location_name>3-10 VFW #1881</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000050">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>7505 US 30</line1>
+    <state>WY</state>
+    <location_name>3-11 CHEYENNE HILLS CHURCH</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000052">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>645 HARRIMAN RD</line1>
+    <state>WY</state>
+    <location_name>4-01 WILLADSEN ELEMENTARY SCHOOL</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000053">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1108 HAPPY JACK RD</line1>
+    <state>WY</state>
+    <location_name>4-02 GILCHRIST ELEMENTARY SCHOOL</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000054">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1971 ROAD 109</line1>
+    <state>WY</state>
+    <location_name>4-03 IRON MOUNTAIN COUNTRY CHURCH</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000055">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>9204 YELLOWSTONE RD</line1>
+    <state>WY</state>
+    <location_name>4-04 YELLOWSTONE BAPTIST CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000056">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>9204 YELLOWSTONE RD</line1>
+    <state>WY</state>
+    <location_name>4-05 YELLOWSTONE BAPTIST CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000057">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>7006 N COLLEGE DR</line1>
+    <state>WY</state>
+    <location_name>4-06 CHEYENNE EVANGELICAL FREE CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000058">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1317 PARSLEY BLVD</line1>
+    <state>WY</state>
+    <location_name>4-07 DAVID R ROMERO PARK</location_name>
+    <zip>82007</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000059">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1400 E COLLEGE DR</line1>
+    <state>WY</state>
+    <location_name>4-08 LARAMIE COUNTY COMMUNITY COLLEGE</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000060">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1400 E COLLEGE DR</line1>
+    <state>WY</state>
+    <location_name>4-09 LARAMIE COUNTY COMMUNITY COLLEGE</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000061">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1400 E COLLEGE DR</line1>
+    <state>WY</state>
+    <location_name>5-01 LARAMIE COUNTY COMMUNITY COLLEGE</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000062">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>9204 YELLOWSTONE RD</line1>
+    <state>WY</state>
+    <location_name>5-02 YELLOWSTONE BAPTIST CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000063">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>7006 N COLLEGE DR</line1>
+    <state>WY</state>
+    <location_name>5-03 CHEYENNE EVANGELICAL FREE CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000064">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>3967 ARCHER PARKWAY "M" BLDG</line1>
+    <state>WY</state>
+    <location_name>5-04 LARAMIE COUNTY FAIR</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000065">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>7505 US 30</line1>
+    <state>WY</state>
+    <location_name>5-05 CHEYENNE HILLS CHURCH</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000066">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CARPENTER</city>
+    <line1>4832 MAIN AVE</line1>
+    <state>WY</state>
+    <location_name>6-01 CARPENTER FIRE STATION</location_name>
+    <zip>82054</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000067">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>BURNS</city>
+    <line1>327 S MAIN ST</line1>
+    <state>WY</state>
+    <location_name>6-02 BURNS PLEX</location_name>
+    <zip>82053</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000068">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>PINE BLUFFS</city>
+    <line1>708 LAWSON</line1>
+    <state>WY</state>
+    <location_name>6-03 PINE BLUFFS COMMUNITY CENTER</location_name>
+    <zip>82082</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000069">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ALBIN</city>
+    <line1>430 5TH AVE</line1>
+    <state>WY</state>
+    <location_name>6-04 ALBIN COMMUNITY CENTER</location_name>
+    <zip>82050</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000070">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ALBIN</city>
+    <line1>430 5TH AVE</line1>
+    <state>WY</state>
+    <location_name>6-05 ALBIN COMMUNITY CENTER</location_name>
+    <zip>82050</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000071">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1400 E COLLEGE DR</line1>
+    <state>WY</state>
+    <location_name>7-01 LARAMIE COUNTY COMMUNITY COLLEGE</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000072">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>9204 YELLOWSTONE RD</line1>
+    <state>WY</state>
+    <location_name>7-02 YELLOWSTONE BAPTIST CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000073">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>3501 FOREST DR</line1>
+    <state>WY</state>
+    <location_name>7-03 FIRST CONGREGATIONAL CHURCH</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000074">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1400 E COLLEGE DR</line1>
+    <state>WY</state>
+    <location_name>7-04 LARAMIE COUNTY COMMUNITY COLLEGE</location_name>
+    <zip>82007</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000131">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>UPTON</city>
+    <line1>917 N HWY 116</line1>
+    <state>WY</state>
+    <location_name>UPTON COMMUNITY CNTR</location_name>
+    <zip>82730</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000197">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GUERNSEY</city>
+    <line1>172 BURLINGTON</line1>
+    <state>WY</state>
+    <location_name>GUERNSEY SUNRISE SCHOOL</location_name>
+    <zip>82214</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000236">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>MARBLETON</city>
+    <line1>429 E SECOND STREET</line1>
+    <state>WY</state>
+    <location_name>MARBLETON SENIOR CENTER</location_name>
+    <zip>83113</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000237">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CORA</city>
+    <line1>2470 ST HWY 352</line1>
+    <state>WY</state>
+    <location_name>KENDALL VALLEY FIRE HALL</location_name>
+    <zip>82925</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000257">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>1971 ROAD 109</line1>
+    <state>WY</state>
+    <location_name>4-10 IRON MOUNTAIN COUNTRY CHURCH</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000258">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>EVANSTON</city>
+    <line1>1500 MAIN STREET</line1>
+    <state>WY</state>
+    <location_name>ROUNDHOUSE 1-3</location_name>
+    <zip>82930</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000259">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>EVANSTON</city>
+    <line1>1500 MAIN STREET</line1>
+    <state>WY</state>
+    <location_name>ROUNDHOUSE 1-4</location_name>
+    <zip>82930</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000276">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>7505 US 30</line1>
+    <state>WY</state>
+    <location_name>3-13 CHEYENNE HILLS CHURCH</location_name>
+    <zip>82001</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000277">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CHEYENNE</city>
+    <line1>9204 YELLOWSTONE RD</line1>
+    <state>WY</state>
+    <location_name>4-11 YELLOWSTONE BAPTIST CHURCH</location_name>
+    <zip>82009</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000298">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>365 W GRAND AVE</line1>
+    <state>WY</state>
+    <location_name>LINCOLN COMMUNITY CENTER</location_name>
+    <zip>82072</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000316">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>1275 N 11TH ST</line1>
+    <state>WY</state>
+    <location_name>LARAMIE HIGH SCHOOL</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="1006600000318">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>920 BOULDER DR</line1>
+    <state>WY</state>
+    <location_name>LARAMIE RECREATION CENTER</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="100661">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LANDER</city>
+    <line1>405 BALDWIN CREEK RD</line1>
+    <state>WY</state>
+    <location_name>BOB CAREY MEMORIAL FIELDHOUSE</location_name>
+    <zip>82520</zip>
+  </address>
+</polling_location>
+<polling_location id="100662">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>HUDSON</city>
+    <line1>333 SOUTH MAIN</line1>
+    <state>WY</state>
+    <location_name>2-1 HUDSON TOWN HALL</location_name>
+    <zip>82515</zip>
+  </address>
+</polling_location>
+<polling_location id="100663">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>RIVERTON</city>
+    <line1>1010 FAIRGROUNDS RD</line1>
+    <state>WY</state>
+    <location_name>FREMONT CENTER (FAIR OFFICE)</location_name>
+    <zip>82501</zip>
+  </address>
+</polling_location>
+<polling_location id="100664">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>FT. WASHAKIE</city>
+    <line1>90 ETHTE RD</line1>
+    <state>WY</state>
+    <location_name>4-1 FT WASHAKIE SCHOOL ADMINSTRATION</location_name>
+    <zip>82514</zip>
+  </address>
+</polling_location>
+<polling_location id="100665">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>DUBOIS</city>
+    <line1>20 STALNAKER</line1>
+    <state>WY</state>
+    <location_name>7-1 HEADWATERS CTR</location_name>
+    <zip>82513</zip>
+  </address>
+</polling_location>
+<polling_location id="100666">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ARAPAHOE</city>
+    <line1>445 LITTLE WR BTM RD</line1>
+    <state>WY</state>
+    <location_name>8-1 ARAPAHOE SCHOOL</location_name>
+    <zip>82510</zip>
+  </address>
+</polling_location>
+<polling_location id="100667">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHOSHONI</city>
+    <line1>300 MISSOURI VLY RD</line1>
+    <state>WY</state>
+    <location_name>9-1 MISSOURI VALLEY FIRE</location_name>
+    <zip>82649</zip>
+  </address>
+</polling_location>
+<polling_location id="100668">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>JEFFREY CITY</city>
+    <line1>34 COYOTE DR.</line1>
+    <state>WY</state>
+    <location_name>12-1 JEFFREY CITY FIRE HALL</location_name>
+    <zip>82310</zip>
+  </address>
+</polling_location>
+<polling_location id="100669">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ETHETE</city>
+    <line1>638 BLUE SKY HWY.</line1>
+    <state>WY</state>
+    <location_name>13-1 WY INDIAN HIGH TECH CTR</location_name>
+    <zip>82520</zip>
+  </address>
+</polling_location>
+<polling_location id="10067">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>1831 E 4TH ST</line1>
+    <state>WY</state>
+    <location_name>SENIOR CITIZENS' CENTER</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="100670">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>PAVILLION</city>
+    <line1>424 S. MAIN</line1>
+    <state>WY</state>
+    <location_name>14-1 WIND RIVER REC CTR</location_name>
+    <zip>82523</zip>
+  </address>
+</polling_location>
+<polling_location id="100671">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>KINNEAR</city>
+    <line1>11521 HWY 26</line1>
+    <state>WY</state>
+    <location_name>16-1 KINNEAR FIRE HALL</location_name>
+    <zip>82516</zip>
+  </address>
+</polling_location>
+<polling_location id="100672">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>RIVERTON</city>
+    <line1>705 FAIRGROUNDS DR</line1>
+    <state>WY</state>
+    <location_name>HERITAGE HALL (FAIRGRNDS)</location_name>
+    <zip>82501</zip>
+  </address>
+</polling_location>
+<polling_location id="100674">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CROWHEART</city>
+    <line1>8434 HWY 26</line1>
+    <state>WY</state>
+    <location_name>19-1 CROWHEART SCHOOL GYM</location_name>
+    <zip>82519</zip>
+  </address>
+</polling_location>
+<polling_location id="100675">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>SHOSHONI</city>
+    <line1>214 E SECOND</line1>
+    <state>WY</state>
+    <location_name>20-1 SENIOR CITIZEN CTR</location_name>
+    <zip>82649</zip>
+  </address>
+</polling_location>
+<polling_location id="100676">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LYSITE</city>
+    <line1>30 WYOMING ST</line1>
+    <state>WY</state>
+    <location_name>22-1 LYSITE FIRE HALL</location_name>
+    <zip>82642</zip>
+  </address>
+</polling_location>
+<polling_location id="100677">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ATLANTIC CITY</city>
+    <line1>46 S DEXTER AVE</line1>
+    <state>WY</state>
+    <location_name>24-1 ATLANTIC CITY FIRE HALL</location_name>
+    <zip>82520</zip>
+  </address>
+</polling_location>
+<polling_location id="10068">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>2657 CASPER MTN RD</line1>
+    <state>WY</state>
+    <location_name>7TH DAY ADVENTIST SCHOOL</location_name>
+    <zip>82601</zip>
+  </address>
+</polling_location>
+<polling_location id="100682">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>WHEATLAND</city>
+    <line1>1836 COTTONWOOD PARK RD</line1>
+    <state>WY</state>
+    <location_name>LARAMIE PEAK FIRE HALL</location_name>
+    <zip>82201</zip>
+  </address>
+</polling_location>
+<polling_location id="100683">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>1212 BAKER ST</line1>
+    <state>WY</state>
+    <location_name>SLADE SCHOOL</location_name>
+    <zip>82072</zip>
+  </address>
+</polling_location>
+<polling_location id="100687">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>1203 RUSSELL ST</line1>
+    <state>WY</state>
+    <location_name>SPRING CREEK ELEM. SCHOOL</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="100688">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>810 S 24TH ST</line1>
+    <state>WY</state>
+    <location_name>WHITING HIGH SCHOOL</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="10069">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>CASPER</city>
+    <line1>1700 FAIRGROUNDS RD</line1>
+    <state>WY</state>
+    <location_name>WESTWOOD SCHOOL @ THE FAIRGROUNDS</location_name>
+    <zip>82604</zip>
+  </address>
+</polling_location>
+<polling_location id="100690">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>310 S 8TH ST</line1>
+    <state>WY</state>
+    <location_name>ALBANY COUNTY PUBLIC LIBRARY</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="100691">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>310 S 8TH ST</line1>
+    <state>WY</state>
+    <location_name>ALBANY COUNTY PUBLIC LIBRARY</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="100693">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>811 S 17TH ST</line1>
+    <state>WY</state>
+    <location_name>BEITEL SCHOOL</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="100694">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GARRETT</city>
+    <line1>550 GARRETT RD</line1>
+    <state>WY</state>
+    <location_name>CINDY SHIVY'S HOME</location_name>
+    <zip>82058</zip>
+  </address>
+</polling_location>
+<polling_location id="100695">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>3520 US HWY 287</line1>
+    <state>WY</state>
+    <location_name>ALBANY COUNTY FAIRGROUNDS</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="100696">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>310 S 8TH ST</line1>
+    <state>WY</state>
+    <location_name>ALBANY COUNTY PUBLIC LIBRARY</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="100697">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>LARAMIE</city>
+    <line1>1203 RUSSELL ST</line1>
+    <state>WY</state>
+    <location_name>SPRING CREEK SCHOOL</location_name>
+    <zip>82070</zip>
+  </address>
+</polling_location>
+<polling_location id="100698">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>GARRETT</city>
+    <line1>NORTHERN ALBANY COUNTY</line1>
+    <state>WY</state>
+    <location_name>NORTH ALBANY COMMUNITY HALL</location_name>
+    <zip>82058</zip>
+  </address>
+</polling_location>
+<polling_location id="100699">
+  <photo_url>Gen</photo_url>
+  <address>
+    <city>ROCK RIVER</city>
+    <line1>386 AVE D</line1>
+    <state>WY</state>
+    <location_name>ROCK RIVER TOWN HALL</location_name>
+    <zip>82083</zip>
+  </address>
+</polling_location>
+</vip_object>

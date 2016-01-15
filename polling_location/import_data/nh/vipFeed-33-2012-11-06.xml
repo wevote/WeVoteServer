@@ -1,0 +1,3132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>33</vip_id>
+  <datetime>2012-10-12T22:30:00</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+</source>
+<state id="33">
+  <name>New Hampshire</name>
+</state>
+<polling_location id="4400010001">
+  <polling_hours>10:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ACWORTH</city>
+    <line1>13 Town Hall Rd</line1>
+    <state>NH</state>
+    <location_name>Acworth Town Hall</location_name>
+    <zip>03601</zip>
+  </address>
+</polling_location>
+<polling_location id="4400020001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ALBANY</city>
+    <line1>1972 Route 16</line1>
+    <state>NH</state>
+    <location_name>Albany Town Hall</location_name>
+    <zip>03818</zip>
+  </address>
+</polling_location>
+<polling_location id="4400030001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ALEXANDRIA</city>
+    <line1>45 Washburn Rd</line1>
+    <state>NH</state>
+    <location_name>Old Town Hall</location_name>
+    <zip>03222</zip>
+  </address>
+</polling_location>
+<polling_location id="4400040001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ALLENSTOWN</city>
+    <line1>10 School St</line1>
+    <state>NH</state>
+    <location_name>St Jean The Baptist Parish Hall</location_name>
+    <zip>03275</zip>
+  </address>
+</polling_location>
+<polling_location id="4400050001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ALSTEAD</city>
+    <line1>9 Main St</line1>
+    <state>NH</state>
+    <location_name>Town Hall</location_name>
+    <zip>03602</zip>
+  </address>
+</polling_location>
+<polling_location id="4400060001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ALTON</city>
+    <line1>242 Suncook Valley Rd</line1>
+    <state>NH</state>
+    <location_name>Prospect Mtn. High School</location_name>
+    <zip>03809</zip>
+  </address>
+</polling_location>
+<polling_location id="4400070001">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>AMHERST</city>
+    <line1>412 Boston Post Rd</line1>
+    <state>NH</state>
+    <location_name>Souhegan High School</location_name>
+    <zip>03031</zip>
+  </address>
+</polling_location>
+<polling_location id="4400080001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ANDOVER</city>
+    <line1>20 School St</line1>
+    <state>NH</state>
+    <location_name>Andover Elementary Middle School</location_name>
+    <zip>03216</zip>
+  </address>
+</polling_location>
+<polling_location id="4400090001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ANTRIM</city>
+    <line1>66 Main St</line1>
+    <state>NH</state>
+    <location_name>Antrim Town Hall</location_name>
+    <zip>03440</zip>
+  </address>
+</polling_location>
+<polling_location id="4400100001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ASHLAND</city>
+    <line1>37 Main St</line1>
+    <state>NH</state>
+    <location_name>Dupuis Cross Post #15 Legion Hall</location_name>
+    <zip>03217</zip>
+  </address>
+</polling_location>
+<polling_location id="4400110001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>ATKINSON</city>
+    <line1>4 Main St</line1>
+    <state>NH</state>
+    <location_name>Atkinson Community Center</location_name>
+    <zip>03811</zip>
+  </address>
+</polling_location>
+<polling_location id="4400120001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>AUBURN</city>
+    <line1>11 Eaton Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Auburn Village School</location_name>
+    <zip>03032</zip>
+  </address>
+</polling_location>
+<polling_location id="4400130001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BARNSTEAD</city>
+    <line1>108 S Barnstead Rd</line1>
+    <state>NH</state>
+    <location_name>Barnstead Town Hall</location_name>
+    <zip>03225</zip>
+  </address>
+</polling_location>
+<polling_location id="4400140001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BARRINGTON</city>
+    <line1>51 Haley Dr</line1>
+    <state>NH</state>
+    <location_name>Barrington Middle School</location_name>
+    <zip>03825</zip>
+  </address>
+</polling_location>
+<polling_location id="4400150001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BARTLETT</city>
+    <line1>56 Town Hall Rd</line1>
+    <state>NH</state>
+    <location_name>Bartlett Town Hall</location_name>
+    <zip>03845</zip>
+  </address>
+</polling_location>
+<polling_location id="4400160001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BATH</city>
+    <line1>61 Lisbon Rd</line1>
+    <state>NH</state>
+    <location_name>Bath Village School</location_name>
+    <zip>03740</zip>
+  </address>
+</polling_location>
+<polling_location id="4400170001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BEDFORD</city>
+    <line1>47 Nashua Rd</line1>
+    <state>NH</state>
+    <location_name>Bedford High School</location_name>
+    <zip>03110</zip>
+  </address>
+</polling_location>
+<polling_location id="4400180001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BELMONT</city>
+    <line1>255 Seavey Rd</line1>
+    <state>NH</state>
+    <location_name>Belmont High School</location_name>
+    <zip>03220</zip>
+  </address>
+</polling_location>
+<polling_location id="4400190001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BENNINGTON</city>
+    <line1>19 Main St</line1>
+    <state>NH</state>
+    <location_name>Pierce School</location_name>
+    <zip>03442</zip>
+  </address>
+</polling_location>
+<polling_location id="4400200001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BENTON</city>
+    <line1>221 Coventry Rd</line1>
+    <state>NH</state>
+    <location_name>Benton Town Building</location_name>
+    <zip>03785</zip>
+  </address>
+</polling_location>
+<polling_location id="4400210001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BERLIN</city>
+    <line1>672 First Ave</line1>
+    <state>NH</state>
+    <location_name>Precinct  1 - Berlin Recreation Center - First Avenue Entrance</location_name>
+    <zip>03570</zip>
+  </address>
+</polling_location>
+<polling_location id="4400210002">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BERLIN</city>
+    <line1>200 State St</line1>
+    <state>NH</state>
+    <location_name>Precinct 2 - Berlin Junior High School - High Street Entrance</location_name>
+    <zip>03570</zip>
+  </address>
+</polling_location>
+<polling_location id="4400210003">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BERLIN</city>
+    <line1>190 Norway St</line1>
+    <state>NH</state>
+    <location_name>Precinct 3 - Brown School Cafeteria - Eighth Street Entrance</location_name>
+    <zip>03570</zip>
+  </address>
+</polling_location>
+<polling_location id="4400210004">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BERLIN</city>
+    <line1>593 Sullivan St</line1>
+    <state>NH</state>
+    <location_name>Precinct 4 - Community Bible Church - Sullivan Street Entrance</location_name>
+    <zip>03570</zip>
+  </address>
+</polling_location>
+<polling_location id="4400220001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BETHLEHEM</city>
+    <line1>2155 Main St</line1>
+    <state>NH</state>
+    <location_name>Bethlehem Town Hall</location_name>
+    <zip>03574</zip>
+  </address>
+</polling_location>
+<polling_location id="4400230001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BOSCAWEN</city>
+    <line1>12 High St</line1>
+    <state>NH</state>
+    <location_name>Boscawen Town Hall</location_name>
+    <zip>03303</zip>
+  </address>
+</polling_location>
+<polling_location id="4400240001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BOW</city>
+    <line1>2 Knox Rd</line1>
+    <state>NH</state>
+    <location_name>Bow Community Center</location_name>
+    <zip>03304</zip>
+  </address>
+</polling_location>
+<polling_location id="4400250001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BRADFORD</city>
+    <line1>163 Old Warner Rd</line1>
+    <state>NH</state>
+    <location_name>Kearsarge Regional Elementary School</location_name>
+    <zip>03221</zip>
+  </address>
+</polling_location>
+<polling_location id="4400260001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BRENTWOOD</city>
+    <line1>190 Rte 125</line1>
+    <state>NH</state>
+    <location_name>Brentwood Recreation Center</location_name>
+    <zip>03833</zip>
+  </address>
+</polling_location>
+<polling_location id="4400270001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BRIDGEWATER</city>
+    <line1>297 Mayhew Tpke</line1>
+    <state>NH</state>
+    <location_name>Bridgewater Town Hall</location_name>
+    <zip>03222</zip>
+  </address>
+</polling_location>
+<polling_location id="4400280001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BRISTOL</city>
+    <line1>45 Summer St</line1>
+    <state>NH</state>
+    <location_name>Bristol Old Town Hall</location_name>
+    <zip>03222</zip>
+  </address>
+</polling_location>
+<polling_location id="4400290001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>BROOKFIELD</city>
+    <line1>267 Wentworth Rd</line1>
+    <state>NH</state>
+    <location_name>Brookfield Office Building</location_name>
+    <zip>03872</zip>
+  </address>
+</polling_location>
+<polling_location id="4400300001">
+  <polling_hours>07:00:00 - 19:30:00</polling_hours>
+  <address>
+    <city>BROOKLINE</city>
+    <line1>24 Townsend Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Captain Samuel Douglas Academy</location_name>
+    <zip>03033</zip>
+  </address>
+</polling_location>
+<polling_location id="4400310001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ERROL</city>
+    <line1>33 Main St</line1>
+    <state>NH</state>
+    <location_name>Errol Town Hall</location_name>
+    <zip>03579</zip>
+  </address>
+</polling_location>
+<polling_location id="4400320001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CAMPTON</city>
+    <line1>1110 Nh Rt 175</line1>
+    <state>NH</state>
+    <location_name>Campton Elementary School</location_name>
+    <zip>03223</zip>
+  </address>
+</polling_location>
+<polling_location id="4400330001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CANAAN</city>
+    <line1>62 Nh Rt 118</line1>
+    <state>NH</state>
+    <location_name>Canaan Fire Station</location_name>
+    <zip>03741</zip>
+  </address>
+</polling_location>
+<polling_location id="4400340001">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CANDIA</city>
+    <line1>12 Deerfield Rd</line1>
+    <state>NH</state>
+    <location_name>Henry W Moore School</location_name>
+    <zip>03034</zip>
+  </address>
+</polling_location>
+<polling_location id="4400350001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CANTERBURY</city>
+    <line1>11 Center Rd</line1>
+    <state>NH</state>
+    <location_name>Old Town Hall</location_name>
+    <zip>03224</zip>
+  </address>
+</polling_location>
+<polling_location id="4400360001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CARROLL</city>
+    <line1>92 School St</line1>
+    <state>NH</state>
+    <location_name>Carroll Town Hall/Twin Mountain</location_name>
+    <zip>03595</zip>
+  </address>
+</polling_location>
+<polling_location id="4400370001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CENTER HARBOR</city>
+    <line1>36 Main St</line1>
+    <state>NH</state>
+    <location_name>Center Harbor Town Office</location_name>
+    <zip>03226</zip>
+  </address>
+</polling_location>
+<polling_location id="4400380001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CHARLESTOWN</city>
+    <line1>26 Railroad St</line1>
+    <state>NH</state>
+    <location_name>Library-Municipal Building</location_name>
+    <zip>03603</zip>
+  </address>
+</polling_location>
+<polling_location id="4400390001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CHATHAM</city>
+    <line1>1071 Main Rd</line1>
+    <state>NH</state>
+    <location_name>Chatham Town Hall</location_name>
+    <zip>03813</zip>
+  </address>
+</polling_location>
+<polling_location id="4400400001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CHESTER</city>
+    <line1>84 Chester St</line1>
+    <state>NH</state>
+    <location_name>Chester Municipal Office</location_name>
+    <zip>03036</zip>
+  </address>
+</polling_location>
+<polling_location id="4400410001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CHESTERFIELD</city>
+    <line1>518 Route 63</line1>
+    <state>NH</state>
+    <location_name>Chesterfield Town Hall</location_name>
+    <zip>03443</zip>
+  </address>
+</polling_location>
+<polling_location id="4400420001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CHICHESTER</city>
+    <line1>54 Main St</line1>
+    <state>NH</state>
+    <location_name>Chichester Town Hall</location_name>
+    <zip>03258</zip>
+  </address>
+</polling_location>
+<polling_location id="4400430001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CLAREMONT</city>
+    <line1>107 South St</line1>
+    <state>NH</state>
+    <location_name>Claremont Middle School</location_name>
+    <zip>03743</zip>
+  </address>
+</polling_location>
+<polling_location id="4400430002">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CLAREMONT</city>
+    <line1>107 South St</line1>
+    <state>NH</state>
+    <location_name>Claremont Middle School</location_name>
+    <zip>03743</zip>
+  </address>
+</polling_location>
+<polling_location id="4400430003">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CLAREMONT</city>
+    <line1>160 Hanover St</line1>
+    <state>NH</state>
+    <location_name>Disnard Elementary School</location_name>
+    <zip>03743</zip>
+  </address>
+</polling_location>
+<polling_location id="4400440001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CLARKSVILLE</city>
+    <line1>408 Nh Rt 145</line1>
+    <state>NH</state>
+    <location_name>Clarksville Town Hall</location_name>
+    <zip>03592</zip>
+  </address>
+</polling_location>
+<polling_location id="4400450001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>COLEBROOK</city>
+    <line1>27 Dumont St</line1>
+    <state>NH</state>
+    <location_name>Colebrook Elementary School Gym</location_name>
+    <zip>03576</zip>
+  </address>
+</polling_location>
+<polling_location id="4400460001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>COLUMBIA</city>
+    <line1>1919 Us Route 3</line1>
+    <state>NH</state>
+    <location_name>Columbia Town Hall</location_name>
+    <zip>03576</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>9 Bonney St</line1>
+    <state>NH</state>
+    <location_name>Immaculate Conception Church</location_name>
+    <zip>03303</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470002">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>499 North State St</line1>
+    <state>NH</state>
+    <location_name>West Congregational Church</location_name>
+    <zip>03301</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470003">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>1 Beaver Meadow St</line1>
+    <state>NH</state>
+    <location_name>Beaver Meadow Golf Course</location_name>
+    <zip>03301</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470004">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>135 North State St</line1>
+    <state>NH</state>
+    <location_name>St Peters Church</location_name>
+    <zip>03301</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470005">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>39 Green St</line1>
+    <state>NH</state>
+    <location_name>Green Street Community Center</location_name>
+    <zip>03301</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470006">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>72 South Main St</line1>
+    <state>NH</state>
+    <location_name>St John's Church</location_name>
+    <zip>03301</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470007">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>41 West St</line1>
+    <state>NH</state>
+    <location_name>West Street Ward House</location_name>
+    <zip>03301</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470008">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>189 Pembroke Rd</line1>
+    <state>NH</state>
+    <location_name>Bektash Temple</location_name>
+    <zip>03301</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470009">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>33 Christian Ave</line1>
+    <state>NH</state>
+    <location_name>Havenwood</location_name>
+    <zip>03301</zip>
+  </address>
+</polling_location>
+<polling_location id="4400470010">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONCORD</city>
+    <line1>123 Portsmouth St</line1>
+    <state>NH</state>
+    <location_name>Broken Ground School</location_name>
+    <zip>03301</zip>
+  </address>
+</polling_location>
+<polling_location id="4400480001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CONWAY</city>
+    <line1>409 Eagle's Way</line1>
+    <state>NH</state>
+    <location_name>Kennett High School</location_name>
+    <zip>03860</zip>
+  </address>
+</polling_location>
+<polling_location id="4400490001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CORNISH</city>
+    <line1>994 Town House Rd</line1>
+    <state>NH</state>
+    <location_name>Cornish Elementary School</location_name>
+    <zip>03745</zip>
+  </address>
+</polling_location>
+<polling_location id="4400500001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>CROYDON</city>
+    <line1>879 Nh Route 10</line1>
+    <state>NH</state>
+    <location_name>Croydon Town Hall</location_name>
+    <zip>03773</zip>
+  </address>
+</polling_location>
+<polling_location id="4400510001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DALTON</city>
+    <line1>756 Dalton Rd</line1>
+    <state>NH</state>
+    <location_name>Dalton Municipal Building</location_name>
+    <zip>03598</zip>
+  </address>
+</polling_location>
+<polling_location id="4400520001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DANBURY</city>
+    <line1>23 High St</line1>
+    <state>NH</state>
+    <location_name>Danbury Town Hall</location_name>
+    <zip>03230</zip>
+  </address>
+</polling_location>
+<polling_location id="4400530001">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>DANVILLE</city>
+    <line1>169 Main St</line1>
+    <state>NH</state>
+    <location_name>Danville Fire Association Hall</location_name>
+    <zip>03819</zip>
+  </address>
+</polling_location>
+<polling_location id="4400540001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DEERFIELD</city>
+    <line1>10 Church St</line1>
+    <state>NH</state>
+    <location_name>Deerfield Town Hall</location_name>
+    <zip>03037</zip>
+  </address>
+</polling_location>
+<polling_location id="4400550001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DEERING</city>
+    <line1>762 Deering Center Rd</line1>
+    <state>NH</state>
+    <location_name>Deering Town Hall</location_name>
+    <zip>03244</zip>
+  </address>
+</polling_location>
+<polling_location id="4400560001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>DERRY</city>
+    <line1>5 Pinkerton Academy St</line1>
+    <state>NH</state>
+    <location_name>Pinkerton Academy Dist #1</location_name>
+    <zip>03038</zip>
+  </address>
+</polling_location>
+<polling_location id="4400560002">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>DERRY</city>
+    <line1>145 Hampstead Rd</line1>
+    <state>NH</state>
+    <location_name>Calvary Bible School  #2</location_name>
+    <zip>03038</zip>
+  </address>
+</polling_location>
+<polling_location id="4400560003">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>DERRY</city>
+    <line1>5 Pinkerton Academy Sts</line1>
+    <state>NH</state>
+    <location_name>Pinkerton Academy  Dist #3</location_name>
+    <zip>03038</zip>
+  </address>
+</polling_location>
+<polling_location id="4400560004">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>DERRY</city>
+    <line1>5 Hood Rd</line1>
+    <state>NH</state>
+    <location_name>Gilbert H Hood Middle School Dist #4</location_name>
+    <zip>03038</zip>
+  </address>
+</polling_location>
+<polling_location id="4400570001">
+  <polling_hours>00:00:00 - 00:05:00</polling_hours>
+  <address>
+    <city>DIXVILLE</city>
+    <line1>10 Wilderness Rd</line1>
+    <state>NH</state>
+    <location_name>Wilderness Ski Lodge</location_name>
+    <zip>03576</zip>
+  </address>
+</polling_location>
+<polling_location id="4400580001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DORCHESTER</city>
+    <line1>24 Town House Rd</line1>
+    <state>NH</state>
+    <location_name>Dorchester Town House</location_name>
+    <zip>03266</zip>
+  </address>
+</polling_location>
+<polling_location id="4400590001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DOVER</city>
+    <line1>21 Chestnut St</line1>
+    <state>NH</state>
+    <location_name>Saint Mary's Church Hall</location_name>
+    <zip>03820</zip>
+  </address>
+</polling_location>
+<polling_location id="4400590002">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DOVER</city>
+    <line1>218 Central Ave</line1>
+    <state>NH</state>
+    <location_name>First Parish Congregational Church</location_name>
+    <zip>03820</zip>
+  </address>
+</polling_location>
+<polling_location id="4400590003">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DOVER</city>
+    <line1>60 Middle Rd</line1>
+    <state>NH</state>
+    <location_name>Langdon Place</location_name>
+    <zip>03820</zip>
+  </address>
+</polling_location>
+<polling_location id="4400590004">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DOVER</city>
+    <line1>282 Durham Rd</line1>
+    <state>NH</state>
+    <location_name>Elks Lodge</location_name>
+    <zip>03820</zip>
+  </address>
+</polling_location>
+<polling_location id="4400590005">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DOVER</city>
+    <line1>28 Cataract Ave</line1>
+    <state>NH</state>
+    <location_name>Saint John's Methodist Church</location_name>
+    <zip>03820</zip>
+  </address>
+</polling_location>
+<polling_location id="4400590006">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DOVER</city>
+    <line1>276 County Farm Rd</line1>
+    <state>NH</state>
+    <location_name>Riverside Rest Home</location_name>
+    <zip>03820</zip>
+  </address>
+</polling_location>
+<polling_location id="4400600001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DUBLIN</city>
+    <line1>1120 Main St</line1>
+    <state>NH</state>
+    <location_name>Dublin Town Hall</location_name>
+    <zip>03444</zip>
+  </address>
+</polling_location>
+<polling_location id="4400610001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DUMMER</city>
+    <line1>75 Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Dummer Town Hall</location_name>
+    <zip>03588</zip>
+  </address>
+</polling_location>
+<polling_location id="4400620001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DUNBARTON</city>
+    <line1>20 Robert Rogers Rd</line1>
+    <state>NH</state>
+    <location_name>Dunbarton Community Center</location_name>
+    <zip>03046</zip>
+  </address>
+</polling_location>
+<polling_location id="4400630001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>DURHAM</city>
+    <line1>55 Coe Dr</line1>
+    <state>NH</state>
+    <location_name>Oyster River High School</location_name>
+    <zip>03824</zip>
+  </address>
+</polling_location>
+<polling_location id="4400640001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>EAST KINGSTON</city>
+    <line1>5 Andrews Ln</line1>
+    <state>NH</state>
+    <location_name>East Kingston Elementary School (Multi-Purpose Room)</location_name>
+    <zip>03827</zip>
+  </address>
+</polling_location>
+<polling_location id="4400650001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>EASTON</city>
+    <line1>1060 Easton Valley Rd</line1>
+    <state>NH</state>
+    <location_name>Easton Town Hall</location_name>
+    <zip>03580</zip>
+  </address>
+</polling_location>
+<polling_location id="4400660001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>EATON</city>
+    <line1>83 Brownfield Rd</line1>
+    <state>NH</state>
+    <location_name>Evans Memorial Bldg - Eaton Town Hall</location_name>
+    <zip>03849</zip>
+  </address>
+</polling_location>
+<polling_location id="4400670001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>EFFINGHAM</city>
+    <line1>6 Partridge Cove Rd</line1>
+    <state>NH</state>
+    <location_name>Effingham Elementary School</location_name>
+    <zip>03882</zip>
+  </address>
+</polling_location>
+<polling_location id="4400680001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ELLSWORTH</city>
+    <line1>3 Ellsworth Pond Rd</line1>
+    <state>NH</state>
+    <location_name>Ellsworth Town Hall</location_name>
+    <zip>03223</zip>
+  </address>
+</polling_location>
+<polling_location id="4400690001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ENFIELD</city>
+    <line1>23 Main St</line1>
+    <state>NH</state>
+    <location_name>Whitney Hall</location_name>
+    <zip>03748</zip>
+  </address>
+</polling_location>
+<polling_location id="4400700001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>EPPING</city>
+    <line1>21 Academy St</line1>
+    <state>NH</state>
+    <location_name>Epping Middle School Gym</location_name>
+    <zip>03042</zip>
+  </address>
+</polling_location>
+<polling_location id="4400710001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>EPSOM</city>
+    <line1>282 Black Hall Rd</line1>
+    <state>NH</state>
+    <location_name>Epsom Central School</location_name>
+    <zip>03234</zip>
+  </address>
+</polling_location>
+<polling_location id="4400720001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ERROL</city>
+    <line1>33 Main St</line1>
+    <state>NH</state>
+    <location_name>Errol Town Hall</location_name>
+    <zip>03579</zip>
+  </address>
+</polling_location>
+<polling_location id="4400730001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>EXETER</city>
+    <line1>30 Linden St</line1>
+    <state>NH</state>
+    <location_name>Talbot Gym</location_name>
+    <zip>03833</zip>
+  </address>
+</polling_location>
+<polling_location id="4400740001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>FARMINGTON</city>
+    <line1>531 Main St</line1>
+    <state>NH</state>
+    <location_name>Farmington Town Hall Gymnasium</location_name>
+    <zip>03835</zip>
+  </address>
+</polling_location>
+<polling_location id="4400750001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>FITZWILLIAM</city>
+    <line1>13 Templeton Tpke</line1>
+    <state>NH</state>
+    <location_name>Fitzwilliam Town Hall</location_name>
+    <zip>03447</zip>
+  </address>
+</polling_location>
+<polling_location id="4400760001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>FRANCESTOWN</city>
+    <line1>27 Main St</line1>
+    <state>NH</state>
+    <location_name>Town Office Building Lower Level</location_name>
+    <zip>03043</zip>
+  </address>
+</polling_location>
+<polling_location id="4400770001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>FRANCONIA</city>
+    <line1>421 Main St</line1>
+    <state>NH</state>
+    <location_name>Franconia Town Hall</location_name>
+    <zip>03580</zip>
+  </address>
+</polling_location>
+<polling_location id="4400780001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>FRANKLIN</city>
+    <line1>47 South Main St</line1>
+    <state>NH</state>
+    <location_name>Thompson Hall</location_name>
+    <zip>03235</zip>
+  </address>
+</polling_location>
+<polling_location id="4400780002">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>FRANKLIN</city>
+    <line1>316 Central St</line1>
+    <state>NH</state>
+    <location_name>City Hall</location_name>
+    <zip>03235</zip>
+  </address>
+</polling_location>
+<polling_location id="4400780003">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>FRANKLIN</city>
+    <line1>200 Sanborn St</line1>
+    <state>NH</state>
+    <location_name>Franklin Middle School</location_name>
+    <zip>03235</zip>
+  </address>
+</polling_location>
+<polling_location id="4400790001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>FREEDOM</city>
+    <line1>16 Elm St</line1>
+    <state>NH</state>
+    <location_name>Freedom Town Hall</location_name>
+    <zip>03836</zip>
+  </address>
+</polling_location>
+<polling_location id="4400800001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>FREMONT</city>
+    <line1>432 Main St</line1>
+    <state>NH</state>
+    <location_name>Ellis School</location_name>
+    <zip>03044</zip>
+  </address>
+</polling_location>
+<polling_location id="4400810001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GILFORD</city>
+    <line1>72 Alvah Wilson Rd</line1>
+    <state>NH</state>
+    <location_name>Gilford Middle School</location_name>
+    <zip>03249</zip>
+  </address>
+</polling_location>
+<polling_location id="4400820001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GILMANTON</city>
+    <line1>503 Province Rd</line1>
+    <state>NH</state>
+    <location_name>Gilmanton Academy Building</location_name>
+    <zip>03237</zip>
+  </address>
+</polling_location>
+<polling_location id="4400830001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GILSUM</city>
+    <line1>640 Route 10</line1>
+    <state>NH</state>
+    <location_name>Gilsum Community Center</location_name>
+    <zip>03448</zip>
+  </address>
+</polling_location>
+<polling_location id="4400840001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GOFFSTOWN</city>
+    <line1>27 Wallace Rd</line1>
+    <state>NH</state>
+    <location_name>Goffstown High School</location_name>
+    <zip>03045</zip>
+  </address>
+</polling_location>
+<polling_location id="4400840002">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GOFFSTOWN</city>
+    <line1>689 Mast Rd</line1>
+    <state>NH</state>
+    <location_name>Bartlett Elementary School</location_name>
+    <zip>03102</zip>
+  </address>
+</polling_location>
+<polling_location id="4400850001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GORHAM</city>
+    <line1>20 Park St</line1>
+    <state>NH</state>
+    <location_name>Gorham Town Hall</location_name>
+    <zip>03581</zip>
+  </address>
+</polling_location>
+<polling_location id="4400860001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GOSHEN</city>
+    <line1>54 Mill Village Rd N</line1>
+    <state>NH</state>
+    <location_name>Goshen Town Hall</location_name>
+    <zip>03752</zip>
+  </address>
+</polling_location>
+<polling_location id="4400870001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GRAFTON</city>
+    <line1>10 Library Rd</line1>
+    <state>NH</state>
+    <location_name>Grafton Fire And Ambulance Station</location_name>
+    <zip>03240</zip>
+  </address>
+</polling_location>
+<polling_location id="4400880001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GRANTHAM</city>
+    <line1>300 Route 10 S</line1>
+    <state>NH</state>
+    <location_name>Grantham Town Hall</location_name>
+    <zip>03753</zip>
+  </address>
+</polling_location>
+<polling_location id="4400890001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GREENFIELD</city>
+    <line1>776 Forest Rd</line1>
+    <state>NH</state>
+    <location_name>Greenfield Meeting House</location_name>
+    <zip>03047</zip>
+  </address>
+</polling_location>
+<polling_location id="4400900001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GREENLAND</city>
+    <line1>70 Post Rd</line1>
+    <state>NH</state>
+    <location_name>Greenland Central School</location_name>
+    <zip>03840</zip>
+  </address>
+</polling_location>
+<polling_location id="4400910001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GREENVILLE</city>
+    <line1>16 Adams St</line1>
+    <state>NH</state>
+    <location_name>Greenville Elementary School</location_name>
+    <zip>03048</zip>
+  </address>
+</polling_location>
+<polling_location id="4400920001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>GROTON</city>
+    <line1>754 N Groton Rd</line1>
+    <state>NH</state>
+    <location_name>Groton Town House</location_name>
+    <zip>03241</zip>
+  </address>
+</polling_location>
+<polling_location id="4400930001">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>HAMPSTEAD</city>
+    <line1>28 School St</line1>
+    <state>NH</state>
+    <location_name>Hampstead Middle School</location_name>
+    <zip>03841</zip>
+  </address>
+</polling_location>
+<polling_location id="4400940001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>HAMPTON</city>
+    <line1>4 Marston Way</line1>
+    <state>NH</state>
+    <location_name>Marston School</location_name>
+    <zip>mpton</zip>
+  </address>
+</polling_location>
+<polling_location id="4400950001">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>HAMPTON FALLS</city>
+    <line1>1 Drinkwater Rd</line1>
+    <state>NH</state>
+    <location_name>Hampton Falls Town Office</location_name>
+    <zip>03844</zip>
+  </address>
+</polling_location>
+<polling_location id="4400960001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HANCOCK</city>
+    <line1>50 Main St</line1>
+    <state>NH</state>
+    <location_name>Hancock Town Office</location_name>
+    <zip>03449</zip>
+  </address>
+</polling_location>
+<polling_location id="4400970001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HANOVER</city>
+    <line1>41 Lebanon St</line1>
+    <state>NH</state>
+    <location_name>Hanover High School Gym</location_name>
+    <zip>03755</zip>
+  </address>
+</polling_location>
+<polling_location id="4400980001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HARRISVILLE</city>
+    <line1>705 Chesham Rd</line1>
+    <state>NH</state>
+    <location_name>Town Office Building</location_name>
+    <zip>03450</zip>
+  </address>
+</polling_location>
+<polling_location id="4400990001">
+  <polling_hours>00:00:00 - 00:15:00</polling_hours>
+  <address>
+    <city>HART'S LOCATION</city>
+    <line1>979 Route 302</line1>
+    <state>NH</state>
+    <location_name>Town Hall</location_name>
+    <zip>03812</zip>
+  </address>
+</polling_location>
+<polling_location id="4401000001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HAVERHILL</city>
+    <line1>2975 Dartmouth College Hwy</line1>
+    <state>NH</state>
+    <location_name>Town Municipal Building</location_name>
+    <zip>03774</zip>
+  </address>
+</polling_location>
+<polling_location id="4401010001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HEBRON</city>
+    <line1>16 Church Ln</line1>
+    <state>NH</state>
+    <location_name>Community Hall - Basement Of Union Congregational Church</location_name>
+    <zip>03241</zip>
+  </address>
+</polling_location>
+<polling_location id="4401020001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HENNIKER</city>
+    <line1>51 Western Ave</line1>
+    <state>NH</state>
+    <location_name>Henniker Community School</location_name>
+    <zip>03242</zip>
+  </address>
+</polling_location>
+<polling_location id="4401030001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HILL</city>
+    <line1>30 Crescent St</line1>
+    <state>NH</state>
+    <location_name>Hill Public Library</location_name>
+    <zip>03243</zip>
+  </address>
+</polling_location>
+<polling_location id="4401040001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HILLSBOROUGH</city>
+    <line1>6 Hillcat Dr</line1>
+    <state>NH</state>
+    <location_name>Hillsboro-Deering Middle School Auditorium</location_name>
+    <zip>03244</zip>
+  </address>
+</polling_location>
+<polling_location id="4401050001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HINSDALE</city>
+    <line1>19 Main St</line1>
+    <state>NH</state>
+    <location_name>Hinsdale Community Center</location_name>
+    <zip>03451</zip>
+  </address>
+</polling_location>
+<polling_location id="4401060001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HOLDERNESS</city>
+    <line1>1089 Us Rt 3</line1>
+    <state>NH</state>
+    <location_name>Holderness Town Hall</location_name>
+    <zip>03245</zip>
+  </address>
+</polling_location>
+<polling_location id="4401070001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HOLLIS</city>
+    <line1>24 Cavalier Ct</line1>
+    <state>NH</state>
+    <location_name>Hollis/Brookline Co-Operative High School</location_name>
+    <zip>03049</zip>
+  </address>
+</polling_location>
+<polling_location id="4401080001">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HOOKSETT</city>
+    <line1>89 Whitehall Rd</line1>
+    <state>NH</state>
+    <location_name>Cawley Middle School</location_name>
+    <zip>03106</zip>
+  </address>
+</polling_location>
+<polling_location id="4401090001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>HOPKINTON</city>
+    <line1>297 Park Ave</line1>
+    <state>NH</state>
+    <location_name>Hopkinton High School</location_name>
+    <zip>03229</zip>
+  </address>
+</polling_location>
+<polling_location id="4401100001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>HUDSON</city>
+    <line1>12 Lions Ave</line1>
+    <state>NH</state>
+    <location_name>Hudson Community Center</location_name>
+    <zip>03051</zip>
+  </address>
+</polling_location>
+<polling_location id="4401110001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>JACKSON</city>
+    <line1>16 Black Mountain Rd</line1>
+    <state>NH</state>
+    <location_name>Whitney Community Center</location_name>
+    <zip>03846</zip>
+  </address>
+</polling_location>
+<polling_location id="4401120001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>JAFFREY</city>
+    <line1>12 Hathorn Rd</line1>
+    <state>NH</state>
+    <location_name>Jaffrey Vfw</location_name>
+    <zip>03452</zip>
+  </address>
+</polling_location>
+<polling_location id="4401130001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>JEFFERSON</city>
+    <line1>698 Presidential Hwy</line1>
+    <state>NH</state>
+    <location_name>Jefferson Town Hall</location_name>
+    <zip>03583</zip>
+  </address>
+</polling_location>
+<polling_location id="4401140001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>KEENE</city>
+    <line1>400 Marlboro St</line1>
+    <state>NH</state>
+    <location_name>Michael E.J. Blastos Community Room</location_name>
+    <zip>03431</zip>
+  </address>
+</polling_location>
+<polling_location id="4401140002">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>KEENE</city>
+    <line1>312 Washington St</line1>
+    <state>NH</state>
+    <location_name>Keene Parks And Recreation Center</location_name>
+    <zip>03431</zip>
+  </address>
+</polling_location>
+<polling_location id="4401140003">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>KEENE</city>
+    <line1>422 Elm St</line1>
+    <state>NH</state>
+    <location_name>Fuller School</location_name>
+    <zip>03431</zip>
+  </address>
+</polling_location>
+<polling_location id="4401140004">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>KEENE</city>
+    <line1>79 Park Ave</line1>
+    <state>NH</state>
+    <location_name>Symonds School</location_name>
+    <zip>03431</zip>
+  </address>
+</polling_location>
+<polling_location id="4401140005">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>KEENE</city>
+    <line1>43 Arch St</line1>
+    <state>NH</state>
+    <location_name>Keene High School</location_name>
+    <zip>03431</zip>
+  </address>
+</polling_location>
+<polling_location id="4401150001">
+  <polling_hours>08:00:00 - 19:30:00</polling_hours>
+  <address>
+    <city>KENSINGTON</city>
+    <line1>122 Amesbury Rd</line1>
+    <state>NH</state>
+    <location_name>Kensington Elementary School</location_name>
+    <zip>03833</zip>
+  </address>
+</polling_location>
+<polling_location id="4401160001">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>KINGSTON</city>
+    <line1>178 Main St</line1>
+    <state>NH</state>
+    <location_name>Swasey Gym</location_name>
+    <zip>03848</zip>
+  </address>
+</polling_location>
+<polling_location id="4401170001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LACONIA</city>
+    <line1>30 County Dr</line1>
+    <state>NH</state>
+    <location_name>Belknap County Nursing Home</location_name>
+    <zip>03246</zip>
+  </address>
+</polling_location>
+<polling_location id="4401170002">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LACONIA</city>
+    <line1>12 Gilford Ave</line1>
+    <state>NH</state>
+    <location_name>Sacred Heart Parish Hall</location_name>
+    <zip>03246</zip>
+  </address>
+</polling_location>
+<polling_location id="4401170003">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LACONIA</city>
+    <line1>150 Mcgrath St</line1>
+    <state>NH</state>
+    <location_name>Laconia Middle School - Multi-Purpose Room</location_name>
+    <zip>03246</zip>
+  </address>
+</polling_location>
+<polling_location id="4401170004">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LACONIA</city>
+    <line1>31 Lindsay Ct</line1>
+    <state>NH</state>
+    <location_name>New Covenant Christian Church @ Memorial Park Clubhouse</location_name>
+    <zip>03246</zip>
+  </address>
+</polling_location>
+<polling_location id="4401170005">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LACONIA</city>
+    <line1>225 Winter St</line1>
+    <state>NH</state>
+    <location_name>Woodland Heights Elementary School - Gymnasium</location_name>
+    <zip>03246</zip>
+  </address>
+</polling_location>
+<polling_location id="4401170006">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LACONIA</city>
+    <line1>334 Elm St</line1>
+    <state>NH</state>
+    <location_name>Leavitt Park Clubhouse</location_name>
+    <zip>03246</zip>
+  </address>
+</polling_location>
+<polling_location id="4401180001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LANCASTER</city>
+    <line1>25 Main St</line1>
+    <state>NH</state>
+    <location_name>Lancaster Town Hall Auditorium</location_name>
+    <zip>03584</zip>
+  </address>
+</polling_location>
+<polling_location id="4401190001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LANDAFF</city>
+    <line1>12 Center Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Landaff Town Hall</location_name>
+    <zip>03585</zip>
+  </address>
+</polling_location>
+<polling_location id="4401200001">
+  <polling_hours>10:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LANGDON</city>
+    <line1>122 Nh Route 12A</line1>
+    <state>NH</state>
+    <location_name>Langdon Municipal Building</location_name>
+    <zip>03602</zip>
+  </address>
+</polling_location>
+<polling_location id="4401210001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LEBANON</city>
+    <line1>80 Main St</line1>
+    <state>NH</state>
+    <location_name>Kilton Public Library</location_name>
+    <zip>03784</zip>
+  </address>
+</polling_location>
+<polling_location id="4401210002">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LEBANON</city>
+    <line1>18 School St</line1>
+    <state>NH</state>
+    <location_name>United Methodist Church Of Lebanon</location_name>
+    <zip>03766</zip>
+  </address>
+</polling_location>
+<polling_location id="4401210003">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LEBANON</city>
+    <line1>15 Hanover St</line1>
+    <state>NH</state>
+    <location_name>Lebanon College</location_name>
+    <zip>03766</zip>
+  </address>
+</polling_location>
+<polling_location id="4401220001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LEE</city>
+    <line1>20 George Bennett Rd</line1>
+    <state>NH</state>
+    <location_name>Lee Safety Complex</location_name>
+    <zip>03861</zip>
+  </address>
+</polling_location>
+<polling_location id="4401230001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LEMPSTER</city>
+    <line1>29 School Rd</line1>
+    <state>NH</state>
+    <location_name>Goshen-Lempster School</location_name>
+    <zip>03605</zip>
+  </address>
+</polling_location>
+<polling_location id="4401240001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LINCOLN</city>
+    <line1>148 Main St</line1>
+    <state>NH</state>
+    <location_name>Lincoln  Town Hall</location_name>
+    <zip>03251</zip>
+  </address>
+</polling_location>
+<polling_location id="4401250001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LISBON</city>
+    <line1>25 Highland Ave</line1>
+    <state>NH</state>
+    <location_name>Lisbon Regional School</location_name>
+    <zip>03585</zip>
+  </address>
+</polling_location>
+<polling_location id="4401260001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LITCHFIELD</city>
+    <line1>1 Highlander Ct</line1>
+    <state>NH</state>
+    <location_name>Campbell High School</location_name>
+    <zip>03052</zip>
+  </address>
+</polling_location>
+<polling_location id="4401270001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LITTLETON</city>
+    <line1>230 W Main St</line1>
+    <state>NH</state>
+    <location_name>Littleton Fire Station</location_name>
+    <zip>03561</zip>
+  </address>
+</polling_location>
+<polling_location id="4401280001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>LONDONDERRY</city>
+    <line1>295 Mammoth Rd</line1>
+    <state>NH</state>
+    <location_name>Londonderry High School Gym</location_name>
+    <zip>03053</zip>
+  </address>
+</polling_location>
+<polling_location id="4401290001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LOUDON</city>
+    <line1>433 Clough Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Loudon Town Hall</location_name>
+    <zip>03307</zip>
+  </address>
+</polling_location>
+<polling_location id="4401300001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LYMAN</city>
+    <line1>65 Parker Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Lyman Town Hall</location_name>
+    <zip>03585</zip>
+  </address>
+</polling_location>
+<polling_location id="4401310001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LYME</city>
+    <line1>35 Union St</line1>
+    <state>NH</state>
+    <location_name>Lyme Community Gymnasium</location_name>
+    <zip>03768</zip>
+  </address>
+</polling_location>
+<polling_location id="4401320001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>LYNDEBOROUGH</city>
+    <line1>9 Citizens Hall Rd</line1>
+    <state>NH</state>
+    <location_name>Citizens' Hall</location_name>
+    <zip>03082</zip>
+  </address>
+</polling_location>
+<polling_location id="4401330001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MADBURY</city>
+    <line1>13 Town Hall Rd</line1>
+    <state>NH</state>
+    <location_name>Madbury Town Hall</location_name>
+    <zip>03823</zip>
+  </address>
+</polling_location>
+<polling_location id="4401340001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MADISON</city>
+    <line1>2069 Village Rd</line1>
+    <state>NH</state>
+    <location_name>Madison Elementary School Gym</location_name>
+    <zip>03849</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350001">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>2519 Elm St</line1>
+    <state>NH</state>
+    <location_name>Webster School</location_name>
+    <zip>03104</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350002">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>112 Reservoir Ave</line1>
+    <state>NH</state>
+    <location_name>Hillside Middle School</location_name>
+    <zip>03104</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350003">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>1528 Elm St</line1>
+    <state>NH</state>
+    <location_name>Carol M. Rines Center</location_name>
+    <zip>03101</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350004">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>550 Lowell St</line1>
+    <state>NH</state>
+    <location_name>Mcdonough School</location_name>
+    <zip>03104</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350005">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>333 Beech St</line1>
+    <state>NH</state>
+    <location_name>Beech Street School</location_name>
+    <zip>03103</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350006">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>167 Sarto St</line1>
+    <state>NH</state>
+    <location_name>St. Pius Ccd Center</location_name>
+    <zip>03109</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350007">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>148 Belmont St</line1>
+    <state>NH</state>
+    <location_name>St. Anthony Community Center</location_name>
+    <zip>03103</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350008">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>1 Crusader Way</line1>
+    <state>NH</state>
+    <location_name>Memorial High School</location_name>
+    <zip>03103</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350009">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>30 S Elm St</line1>
+    <state>NH</state>
+    <location_name>Bishop Leo E. O'neil Youth Center</location_name>
+    <zip>03103</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350010">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>223 James A Pollock Dr</line1>
+    <state>NH</state>
+    <location_name>Parker Varney School</location_name>
+    <zip>03102</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350011">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>99 Sullivan St</line1>
+    <state>NH</state>
+    <location_name>Gossler School</location_name>
+    <zip>03102</zip>
+  </address>
+</polling_location>
+<polling_location id="4401350012">
+  <polling_hours>06:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MANCHESTER</city>
+    <line1>300 Youville St</line1>
+    <state>NH</state>
+    <location_name>Northwest Elementary School</location_name>
+    <zip>03102</zip>
+  </address>
+</polling_location>
+<polling_location id="4401360001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MARLBOROUGH</city>
+    <line1>160 Main St</line1>
+    <state>NH</state>
+    <location_name>Marlborough Community House</location_name>
+    <zip>03455</zip>
+  </address>
+</polling_location>
+<polling_location id="4401370001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MARLOW</city>
+    <line1>919 Nh Rt 10</line1>
+    <state>NH</state>
+    <location_name>John D. Perkins School</location_name>
+    <zip>03456</zip>
+  </address>
+</polling_location>
+<polling_location id="4401380001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MASON</city>
+    <line1>7 Meetinghouse Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Mason Town Hall</location_name>
+    <zip>03048</zip>
+  </address>
+</polling_location>
+<polling_location id="4401390001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MEREDITH</city>
+    <line1>1 Circle Dr</line1>
+    <state>NH</state>
+    <location_name>Meredith Community Center</location_name>
+    <zip>03253</zip>
+  </address>
+</polling_location>
+<polling_location id="4401400001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MERRIMACK</city>
+    <line1>38 Mcelwain St</line1>
+    <state>NH</state>
+    <location_name>Merrimack High School</location_name>
+    <zip>03054</zip>
+  </address>
+</polling_location>
+<polling_location id="4401410001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MIDDLETON</city>
+    <line1>200 Kings Hwy</line1>
+    <state>NH</state>
+    <location_name>Middleton Old Town Hall</location_name>
+    <zip>03887</zip>
+  </address>
+</polling_location>
+<polling_location id="4401420001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MILAN</city>
+    <line1>11 Bridge St</line1>
+    <state>NH</state>
+    <location_name>Milan Village School Gym</location_name>
+    <zip>03588</zip>
+  </address>
+</polling_location>
+<polling_location id="4401430001">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>MILFORD</city>
+    <line1>33 Osgood Rd</line1>
+    <state>NH</state>
+    <location_name>Milford Middle School</location_name>
+    <zip>03055</zip>
+  </address>
+</polling_location>
+<polling_location id="4401440001">
+  <polling_hours>18:30:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MILLSFIELD</city>
+    <line1>501 Us Route 26</line1>
+    <state>NH</state>
+    <location_name>Peace Of Heaven  Bed &amp; Breakfast</location_name>
+    <zip>03579</zip>
+  </address>
+</polling_location>
+<polling_location id="4401450001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MILTON</city>
+    <line1>424 White Mountain Hwy</line1>
+    <state>NH</state>
+    <location_name>Emma Ramsey Center</location_name>
+    <zip>03851</zip>
+  </address>
+</polling_location>
+<polling_location id="4401460001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MONROE</city>
+    <line1>50 Main St</line1>
+    <state>NH</state>
+    <location_name>Monroe Town Hall</location_name>
+    <zip>03771</zip>
+  </address>
+</polling_location>
+<polling_location id="4401470001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MONT VERNON</city>
+    <line1>1 Kittredge Rd</line1>
+    <state>NH</state>
+    <location_name>Mont Vernon Village School</location_name>
+    <zip>03057</zip>
+  </address>
+</polling_location>
+<polling_location id="4401480001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>MOULTONBOROUGH</city>
+    <line1>1035 Whittier Hwy</line1>
+    <state>NH</state>
+    <location_name>Moultonborough Public Safety Building</location_name>
+    <zip>03254</zip>
+  </address>
+</polling_location>
+<polling_location id="4401490001">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NASHUA</city>
+    <line1>390 Broad St</line1>
+    <state>NH</state>
+    <location_name>Broad Street Elementary School</location_name>
+    <zip>03063</zip>
+  </address>
+</polling_location>
+<polling_location id="4401490002">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NASHUA</city>
+    <line1>48 Charlotte Ave</line1>
+    <state>NH</state>
+    <location_name>Charlotte Avenue Elementary School</location_name>
+    <zip>03064</zip>
+  </address>
+</polling_location>
+<polling_location id="4401490003">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NASHUA</city>
+    <line1>71 Amherst St</line1>
+    <state>NH</state>
+    <location_name>Amherst Street School</location_name>
+    <zip>03064</zip>
+  </address>
+</polling_location>
+<polling_location id="4401490004">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NASHUA</city>
+    <line1>139 Ledge St</line1>
+    <state>NH</state>
+    <location_name>Ledge Street Elementary School</location_name>
+    <zip>03060</zip>
+  </address>
+</polling_location>
+<polling_location id="4401490005">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NASHUA</city>
+    <line1>20 Whitford Rd</line1>
+    <state>NH</state>
+    <location_name>Main Dunstable Elementary School</location_name>
+    <zip>03062</zip>
+  </address>
+</polling_location>
+<polling_location id="4401490006">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NASHUA</city>
+    <line1>27 Cleveland St</line1>
+    <state>NH</state>
+    <location_name>Fairgrounds Middle School</location_name>
+    <zip>03060</zip>
+  </address>
+</polling_location>
+<polling_location id="4401490007">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NASHUA</city>
+    <line1>50 Arlington St</line1>
+    <state>NH</state>
+    <location_name>Dr. Normand Crisp Elementary School</location_name>
+    <zip>03060</zip>
+  </address>
+</polling_location>
+<polling_location id="4401490008">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NASHUA</city>
+    <line1>296 East Dunstable Rd</line1>
+    <state>NH</state>
+    <location_name>Bicentennial Elementary School</location_name>
+    <zip>03062</zip>
+  </address>
+</polling_location>
+<polling_location id="4401490009">
+  <polling_hours>06:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NASHUA</city>
+    <line1>39 Shady Ln</line1>
+    <state>NH</state>
+    <location_name>New Searles Elementary School</location_name>
+    <zip>03062</zip>
+  </address>
+</polling_location>
+<polling_location id="4401500001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NELSON</city>
+    <line1>7 Nelson Common Rd</line1>
+    <state>NH</state>
+    <location_name>Nelson Town Hall</location_name>
+    <zip>03457</zip>
+  </address>
+</polling_location>
+<polling_location id="4401510001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEW BOSTON</city>
+    <line1>15 Central School Rd</line1>
+    <state>NH</state>
+    <location_name>New Boston Central Elementary School</location_name>
+    <zip>03070</zip>
+  </address>
+</polling_location>
+<polling_location id="4401520001">
+  <polling_hours>09:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>301 Wentworth Rd</line1>
+    <state>NH</state>
+    <location_name>New Castle Recreation Center</location_name>
+    <zip>03854</zip>
+  </address>
+</polling_location>
+<polling_location id="4401530001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEW DURHAM</city>
+    <line1>7 Old Bay Rd</line1>
+    <state>NH</state>
+    <location_name>New Durham School</location_name>
+    <zip>03855</zip>
+  </address>
+</polling_location>
+<polling_location id="4401540001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEW HAMPTON</city>
+    <line1>86 Town House Rd</line1>
+    <state>NH</state>
+    <location_name>New Hampton Town House</location_name>
+    <zip>03256</zip>
+  </address>
+</polling_location>
+<polling_location id="4401550001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEW IPSWICH</city>
+    <line1>175 Turnpike Rd</line1>
+    <state>NH</state>
+    <location_name>Mascenic Regional High School</location_name>
+    <zip>03071</zip>
+  </address>
+</polling_location>
+<polling_location id="4401560001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEW LONDON</city>
+    <line1>429 Main St</line1>
+    <state>NH</state>
+    <location_name>Whipple Memorial Town Hall</location_name>
+    <zip>03257</zip>
+  </address>
+</polling_location>
+<polling_location id="4401570001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEWBURY</city>
+    <line1>937 Route 103</line1>
+    <state>NH</state>
+    <location_name>Town Office Building</location_name>
+    <zip>03255</zip>
+  </address>
+</polling_location>
+<polling_location id="4401580001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEWFIELDS</city>
+    <line1>65 Main St</line1>
+    <state>NH</state>
+    <location_name>Newfields Town Hall</location_name>
+    <zip>03856</zip>
+  </address>
+</polling_location>
+<polling_location id="4401590001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEWINGTON</city>
+    <line1>205 Nimble Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Newington Town Hall</location_name>
+    <zip>03801</zip>
+  </address>
+</polling_location>
+<polling_location id="4401600001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NEWMARKET</city>
+    <line1>213 S Main St</line1>
+    <state>NH</state>
+    <location_name>Newmarket High School Gym</location_name>
+    <zip>03857</zip>
+  </address>
+</polling_location>
+<polling_location id="4401610001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NEWPORT</city>
+    <line1>20 Main St</line1>
+    <state>NH</state>
+    <location_name>Newport Town Hall</location_name>
+    <zip>03773</zip>
+  </address>
+</polling_location>
+<polling_location id="4401620001">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>NEWTON</city>
+    <line1>2 Town Hall Rd</line1>
+    <state>NH</state>
+    <location_name>Newton Town Hall</location_name>
+    <zip>03858</zip>
+  </address>
+</polling_location>
+<polling_location id="4401630001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NORTH HAMPTON</city>
+    <line1>201 Atlantic Ave</line1>
+    <state>NH</state>
+    <location_name>North Hampton School</location_name>
+    <zip>03862</zip>
+  </address>
+</polling_location>
+<polling_location id="4401640001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NORTHFIELD</city>
+    <line1>61 Summer St</line1>
+    <state>NH</state>
+    <location_name>Pines Community Center</location_name>
+    <zip>03276</zip>
+  </address>
+</polling_location>
+<polling_location id="4401650001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NORTHUMBERLAND</city>
+    <line1>10 Station Square St</line1>
+    <state>NH</state>
+    <location_name>Northumberland Town Hall</location_name>
+    <zip>03582</zip>
+  </address>
+</polling_location>
+<polling_location id="4401660001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NORTHWOOD</city>
+    <line1>844 1St Nh Tpke</line1>
+    <state>NH</state>
+    <location_name>St. Joseph's Parish Hall</location_name>
+    <zip>03261</zip>
+  </address>
+</polling_location>
+<polling_location id="4401670001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NOTTINGHAM</city>
+    <line1>139 Stage Rd</line1>
+    <state>NH</state>
+    <location_name>Community Center</location_name>
+    <zip>03290</zip>
+  </address>
+</polling_location>
+<polling_location id="4401680001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ORANGE</city>
+    <line1>8 Townhouse Rd</line1>
+    <state>NH</state>
+    <location_name>Orange Town House</location_name>
+    <zip>03741</zip>
+  </address>
+</polling_location>
+<polling_location id="4401690001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ORFORD</city>
+    <line1>2529 Route 25A</line1>
+    <state>NH</state>
+    <location_name>Orford Town Office/Niles Room</location_name>
+    <zip>03777</zip>
+  </address>
+</polling_location>
+<polling_location id="4401700001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>OSSIPEE</city>
+    <line1>55 Main St</line1>
+    <state>NH</state>
+    <location_name>Ossipee Town Hall</location_name>
+    <zip>03814</zip>
+  </address>
+</polling_location>
+<polling_location id="4401710001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>PELHAM</city>
+    <line1>85 Marsh Rd</line1>
+    <state>NH</state>
+    <location_name>Pelham High School</location_name>
+    <zip>03076</zip>
+  </address>
+</polling_location>
+<polling_location id="4401720001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>PEMBROKE</city>
+    <line1>243 Academy Rd</line1>
+    <state>NH</state>
+    <location_name>Pembroke Three Rivers School</location_name>
+    <zip>03275</zip>
+  </address>
+</polling_location>
+<polling_location id="4401730001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>PETERBOROUGH</city>
+    <line1>1 Grove St</line1>
+    <state>NH</state>
+    <location_name>Peterborough Town House</location_name>
+    <zip>03458</zip>
+  </address>
+</polling_location>
+<polling_location id="4401740001">
+  <polling_hours>10:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>PIERMONT</city>
+    <line1>129 Route 10</line1>
+    <state>NH</state>
+    <location_name>Old Church Building</location_name>
+    <zip>03779</zip>
+  </address>
+</polling_location>
+<polling_location id="4401750001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>PINKHAM'S GRANT</city>
+    <line1>6 Androscoggin St</line1>
+    <state>NH</state>
+    <location_name>American Legion Post 82</location_name>
+    <zip>03581</zip>
+  </address>
+</polling_location>
+<polling_location id="4401760001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>NORTH STRATFORD</city>
+    <line1>12 School St</line1>
+    <state>NH</state>
+    <location_name>Pittsburg High School</location_name>
+    <zip>03592</zip>
+  </address>
+</polling_location>
+<polling_location id="4401770001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>PITTSFIELD</city>
+    <line1>85 Main St</line1>
+    <state>NH</state>
+    <location_name>Pittsfield Town Hall</location_name>
+    <zip>03263</zip>
+  </address>
+</polling_location>
+<polling_location id="4401780001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>PLAINFIELD</city>
+    <line1>92 Bonner Rd</line1>
+    <state>NH</state>
+    <location_name>Plainfield Elementary School</location_name>
+    <zip>03770</zip>
+  </address>
+</polling_location>
+<polling_location id="4401790001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>PLAISTOW</city>
+    <line1>120 Main St</line1>
+    <state>NH</state>
+    <location_name>Pollard School Gym</location_name>
+    <zip>03865</zip>
+  </address>
+</polling_location>
+<polling_location id="4401800001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>PLYMOUTH</city>
+    <line1>43 Old Ward Bridge Rd</line1>
+    <state>NH</state>
+    <location_name>Plymouth Elementary School</location_name>
+    <zip>03264</zip>
+  </address>
+</polling_location>
+<polling_location id="4401810001">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>PORTSMOUTH</city>
+    <line1>1 Franklin Dr</line1>
+    <state>NH</state>
+    <location_name>New Franklin School</location_name>
+    <zip>03801</zip>
+  </address>
+</polling_location>
+<polling_location id="4401810002">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>PORTSMOUTH</city>
+    <line1>355 Spinney Rd</line1>
+    <state>NH</state>
+    <location_name>North Church Parish House</location_name>
+    <zip>03801</zip>
+  </address>
+</polling_location>
+<polling_location id="4401810003">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>PORTSMOUTH</city>
+    <line1>35 Sherburne Rd</line1>
+    <state>NH</state>
+    <location_name>Robert J. Lister Academy</location_name>
+    <zip>03801</zip>
+  </address>
+</polling_location>
+<polling_location id="4401810004">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>PORTSMOUTH</city>
+    <line1>50 Andrew Jarvis Dr</line1>
+    <state>NH</state>
+    <location_name>Portsmouth High School</location_name>
+    <zip>03801</zip>
+  </address>
+</polling_location>
+<polling_location id="4401810005">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>PORTSMOUTH</city>
+    <line1>50 Clough Dr</line1>
+    <state>NH</state>
+    <location_name>Little Harbour School</location_name>
+    <zip>03801</zip>
+  </address>
+</polling_location>
+<polling_location id="4401820001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>RANDOLPH</city>
+    <line1>130 Durand Rd</line1>
+    <state>NH</state>
+    <location_name>Randolph Town Hall</location_name>
+    <zip>03593</zip>
+  </address>
+</polling_location>
+<polling_location id="4401830001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>RAYMOND</city>
+    <line1>1 Stephen K Batchelder Pkwy</line1>
+    <state>NH</state>
+    <location_name>Iber Holmes Gove Middle School</location_name>
+    <zip>03077</zip>
+  </address>
+</polling_location>
+<polling_location id="4401840001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>RICHMOND</city>
+    <line1>150 Old Homestead Hwy</line1>
+    <state>NH</state>
+    <location_name>Veterans Hall</location_name>
+    <zip>03470</zip>
+  </address>
+</polling_location>
+<polling_location id="4401850001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>RINDGE</city>
+    <line1>58 School St</line1>
+    <state>NH</state>
+    <location_name>Rindge Memorial School</location_name>
+    <zip>03461</zip>
+  </address>
+</polling_location>
+<polling_location id="4401860001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ROCHESTER</city>
+    <line1>43 Highland St</line1>
+    <state>NH</state>
+    <location_name>Vfw Post 1772</location_name>
+    <zip>03868</zip>
+  </address>
+</polling_location>
+<polling_location id="4401860002">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ROCHESTER</city>
+    <line1>71 Lowell St</line1>
+    <state>NH</state>
+    <location_name>Saint Mary's Parish Center</location_name>
+    <zip>03867</zip>
+  </address>
+</polling_location>
+<polling_location id="4401860003">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ROCHESTER</city>
+    <line1>2 Roseberry Ln</line1>
+    <state>NH</state>
+    <location_name>Lilac City Estates Function Room</location_name>
+    <zip>03867</zip>
+  </address>
+</polling_location>
+<polling_location id="4401860004">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ROCHESTER</city>
+    <line1>280 North Main St</line1>
+    <state>NH</state>
+    <location_name>Rochester Home Depot</location_name>
+    <zip>03867</zip>
+  </address>
+</polling_location>
+<polling_location id="4401860005">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ROCHESTER</city>
+    <line1>1 Community Way</line1>
+    <state>NH</state>
+    <location_name>Rochester Community Center</location_name>
+    <zip>03867</zip>
+  </address>
+</polling_location>
+<polling_location id="4401860006">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ROCHESTER</city>
+    <line1>41 Columbus Ave</line1>
+    <state>NH</state>
+    <location_name>Elks Lodge 1393</location_name>
+    <zip>03867</zip>
+  </address>
+</polling_location>
+<polling_location id="4401870001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ROLLINSFORD</city>
+    <line1>551 Foundry St</line1>
+    <state>NH</state>
+    <location_name>American Legion Post 47</location_name>
+    <zip>03869</zip>
+  </address>
+</polling_location>
+<polling_location id="4401880001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ROXBURY</city>
+    <line1>3 Middletown Rd</line1>
+    <state>NH</state>
+    <location_name>Roxbury Town Hall</location_name>
+    <zip>03431</zip>
+  </address>
+</polling_location>
+<polling_location id="4401890001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>RUMNEY</city>
+    <line1>195 School St</line1>
+    <state>NH</state>
+    <location_name>Russell Elementary School</location_name>
+    <zip>03266</zip>
+  </address>
+</polling_location>
+<polling_location id="4401900001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>RYE</city>
+    <line1>461 Sagamore Rd</line1>
+    <state>NH</state>
+    <location_name>Rye Elementary School</location_name>
+    <zip>03870</zip>
+  </address>
+</polling_location>
+<polling_location id="4401910001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SALEM</city>
+    <line1>14 Main St</line1>
+    <state>NH</state>
+    <location_name>Fisk School</location_name>
+    <zip>03079</zip>
+  </address>
+</polling_location>
+<polling_location id="4401910002">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SALEM</city>
+    <line1>1 Sally Sweets Way</line1>
+    <state>NH</state>
+    <location_name>Senior Center</location_name>
+    <zip>03079</zip>
+  </address>
+</polling_location>
+<polling_location id="4401910003">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SALEM</city>
+    <line1>54 Millville St</line1>
+    <state>NH</state>
+    <location_name>Lancaster School</location_name>
+    <zip>03079</zip>
+  </address>
+</polling_location>
+<polling_location id="4401910004">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SALEM</city>
+    <line1>140 Zion Hill Rd</line1>
+    <state>NH</state>
+    <location_name>No. Salem School</location_name>
+    <zip>03079</zip>
+  </address>
+</polling_location>
+<polling_location id="4401920001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SALISBURY</city>
+    <line1>631 Old Turnpike Rd</line1>
+    <state>NH</state>
+    <location_name>Town Hall</location_name>
+    <zip>03268</zip>
+  </address>
+</polling_location>
+<polling_location id="4401930001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SANBORNTON</city>
+    <line1>4 Meetinghouse Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Sanbornton Old Town Hall</location_name>
+    <zip>03269</zip>
+  </address>
+</polling_location>
+<polling_location id="4401940001">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>SANDOWN</city>
+    <line1>320 Main St</line1>
+    <state>NH</state>
+    <location_name>Sandown Town Hall</location_name>
+    <zip>03873</zip>
+  </address>
+</polling_location>
+<polling_location id="4401950001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SANDWICH</city>
+    <line1>28 Squam Lake Rd</line1>
+    <state>NH</state>
+    <location_name>Sandwich Central School</location_name>
+    <zip>03227</zip>
+  </address>
+</polling_location>
+<polling_location id="4401960001">
+  <polling_hours>08:00:00-19:00:00</polling_hours>
+  <address>
+    <city>SARGENT'S PURCHASE</city>
+    <line1>1 No Address</line1>
+    <state>NH</state>
+    <location_name>Town Hall</location_name>
+    <zip>03581</zip>
+  </address>
+</polling_location>
+<polling_location id="4401970001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SEABROOK</city>
+    <line1>311 Lafayette Rd</line1>
+    <state>NH</state>
+    <location_name>Seabrook Community Center</location_name>
+    <zip>03874</zip>
+  </address>
+</polling_location>
+<polling_location id="4401980001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SHARON</city>
+    <line1>432 Rt 123</line1>
+    <state>NH</state>
+    <location_name>Sharon Meeting House</location_name>
+    <zip>03458</zip>
+  </address>
+</polling_location>
+<polling_location id="4401990001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SHELBURNE</city>
+    <line1>74 Village Rd</line1>
+    <state>NH</state>
+    <location_name>Shelburne Town Hall</location_name>
+    <zip>03581</zip>
+  </address>
+</polling_location>
+<polling_location id="4402000001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SOMERSWORTH</city>
+    <line1>1 Government Way</line1>
+    <state>NH</state>
+    <location_name>City Hall</location_name>
+    <zip>03878</zip>
+  </address>
+</polling_location>
+<polling_location id="4402000002">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SOMERSWORTH</city>
+    <line1>157 Main St</line1>
+    <state>NH</state>
+    <location_name>Summersworth Historical Museum</location_name>
+    <zip>03878</zip>
+  </address>
+</polling_location>
+<polling_location id="4402000003">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SOMERSWORTH</city>
+    <line1>25 Bartlett Ave</line1>
+    <state>NH</state>
+    <location_name>Flanagan Community Center</location_name>
+    <zip>03878</zip>
+  </address>
+</polling_location>
+<polling_location id="4402000004">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SOMERSWORTH</city>
+    <line1>28 Franklin St</line1>
+    <state>NH</state>
+    <location_name>Charpentier Apartments</location_name>
+    <zip>03878</zip>
+  </address>
+</polling_location>
+<polling_location id="4402000005">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SOMERSWORTH</city>
+    <line1>218 Main St</line1>
+    <state>NH</state>
+    <location_name>Romeo J Messier Building</location_name>
+    <zip>03878</zip>
+  </address>
+</polling_location>
+<polling_location id="4402010001">
+  <polling_hours>11:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>SOUTH HAMPTON</city>
+    <line1>3 Hilldale Ave</line1>
+    <state>NH</state>
+    <location_name>Town Hall</location_name>
+    <zip>03827</zip>
+  </address>
+</polling_location>
+<polling_location id="4402020001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SPRINGFIELD</city>
+    <line1>23 Four Corners Rd</line1>
+    <state>NH</state>
+    <location_name>Springfield Meeting House</location_name>
+    <zip>03284</zip>
+  </address>
+</polling_location>
+<polling_location id="4402030001">
+  <polling_hours>09:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>STARK</city>
+    <line1>1276 Stark Hwy</line1>
+    <state>NH</state>
+    <location_name>Stark Volunteer Fire Department</location_name>
+    <zip>03582</zip>
+  </address>
+</polling_location>
+<polling_location id="4402040001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>STEWARTSTOWN</city>
+    <line1>60 School St</line1>
+    <state>NH</state>
+    <location_name>Stewartstown Community School</location_name>
+    <zip>03597</zip>
+  </address>
+</polling_location>
+<polling_location id="4402050001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>STODDARD</city>
+    <line1>74 School St</line1>
+    <state>NH</state>
+    <location_name>James Faulkner Elementary School</location_name>
+    <zip>03464</zip>
+  </address>
+</polling_location>
+<polling_location id="4402060001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>STRAFFORD</city>
+    <line1>12 Mountain View Dr</line1>
+    <state>NH</state>
+    <location_name>Strafford Town Hall</location_name>
+    <zip>03884</zip>
+  </address>
+</polling_location>
+<polling_location id="4402070001">
+  <polling_hours>10:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>STRATFORD</city>
+    <line1>1956 Us Route 3</line1>
+    <state>NH</state>
+    <location_name>Fuller Town Hall</location_name>
+    <zip>03590</zip>
+  </address>
+</polling_location>
+<polling_location id="4402080001">
+  <polling_hours>08:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>STRATHAM</city>
+    <line1>10 Bunker Hill Ave</line1>
+    <state>NH</state>
+    <location_name>Stratham Municipal Center</location_name>
+    <zip>03885</zip>
+  </address>
+</polling_location>
+<polling_location id="4402090001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SUGAR HILL</city>
+    <line1>1411 Route 117</line1>
+    <state>NH</state>
+    <location_name>Carolina Crapo Building</location_name>
+    <zip>03586</zip>
+  </address>
+</polling_location>
+<polling_location id="4402100001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SULLIVAN</city>
+    <line1>452 Centre St</line1>
+    <state>NH</state>
+    <location_name>Sullivan Town Hall</location_name>
+    <zip>03445</zip>
+  </address>
+</polling_location>
+<polling_location id="4402110001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SUNAPEE</city>
+    <line1>561 Route 11</line1>
+    <state>NH</state>
+    <location_name>Sherburne Gymnasium</location_name>
+    <zip>03782</zip>
+  </address>
+</polling_location>
+<polling_location id="4402120001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SURRY</city>
+    <line1>1 Village Rd</line1>
+    <state>NH</state>
+    <location_name>Surry Town Hall</location_name>
+    <zip>03431</zip>
+  </address>
+</polling_location>
+<polling_location id="4402130001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SUTTON</city>
+    <line1>93 Main St</line1>
+    <state>NH</state>
+    <location_name>Sutton Town Hall</location_name>
+    <zip>03221</zip>
+  </address>
+</polling_location>
+<polling_location id="4402140001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>SWANZEY</city>
+    <line1>211 Whitcomb Rd</line1>
+    <state>NH</state>
+    <location_name>Christian Life Fellowship Church</location_name>
+    <zip>03446</zip>
+  </address>
+</polling_location>
+<polling_location id="4402150001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>TAMWORTH</city>
+    <line1>27 Cleveland Hill Rd</line1>
+    <state>NH</state>
+    <location_name>Tamworth Town House</location_name>
+    <zip>03886</zip>
+  </address>
+</polling_location>
+<polling_location id="4402160001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>TEMPLE</city>
+    <line1>19 Main St</line1>
+    <state>NH</state>
+    <location_name>Temple Town Hall</location_name>
+    <zip>03084</zip>
+  </address>
+</polling_location>
+<polling_location id="4402170001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>THORNTON</city>
+    <line1>16 Merrill Access Rd</line1>
+    <state>NH</state>
+    <location_name>Thornton Town Office Building</location_name>
+    <zip>03285</zip>
+  </address>
+</polling_location>
+<polling_location id="4402180001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>TILTON</city>
+    <line1>76 Winter St</line1>
+    <state>NH</state>
+    <location_name>Winnisquam Middle School Gymnasium</location_name>
+    <zip>03276</zip>
+  </address>
+</polling_location>
+<polling_location id="4402190001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>TROY</city>
+    <line1>44 School St</line1>
+    <state>NH</state>
+    <location_name>Troy Elementary School</location_name>
+    <zip>03465</zip>
+  </address>
+</polling_location>
+<polling_location id="4402200001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>TUFTONBORO</city>
+    <line1>247 Middle Rd</line1>
+    <state>NH</state>
+    <location_name>Tuftonboro Town House</location_name>
+    <zip>03816</zip>
+  </address>
+</polling_location>
+<polling_location id="4402210001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>UNITY</city>
+    <line1>896 2Nd Nh Tpke</line1>
+    <state>NH</state>
+    <location_name>Town Hall</location_name>
+    <zip>03603</zip>
+  </address>
+</polling_location>
+<polling_location id="4402220001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WAKEFIELD</city>
+    <line1>60 Taylor Way</line1>
+    <state>NH</state>
+    <location_name>Paul School</location_name>
+    <zip>03872</zip>
+  </address>
+</polling_location>
+<polling_location id="4402230001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WALPOLE</city>
+    <line1>34 Elm St</line1>
+    <state>NH</state>
+    <location_name>Walpole Town Hall</location_name>
+    <zip>03608</zip>
+  </address>
+</polling_location>
+<polling_location id="4402230002">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WALPOLE</city>
+    <line1>38 Church St</line1>
+    <state>NH</state>
+    <location_name>St Peters Church</location_name>
+    <zip>03609</zip>
+  </address>
+</polling_location>
+<polling_location id="4402240001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WARNER</city>
+    <line1>5 East Main St</line1>
+    <state>NH</state>
+    <location_name>Warner Town Hall</location_name>
+    <zip>03278</zip>
+  </address>
+</polling_location>
+<polling_location id="4402250001">
+  <polling_hours>09:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WARREN</city>
+    <line1>21 Water St</line1>
+    <state>NH</state>
+    <location_name>Town Hall</location_name>
+    <zip>03279</zip>
+  </address>
+</polling_location>
+<polling_location id="4402260001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>338 Millen Pond Rd</line1>
+    <state>NH</state>
+    <location_name>Camp Morgan Lodge</location_name>
+    <zip>03280</zip>
+  </address>
+</polling_location>
+<polling_location id="4402270001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WATERVILLE VALLEY</city>
+    <line1>11 Noon Peak Rd</line1>
+    <state>NH</state>
+    <location_name>Recreation Department</location_name>
+    <zip>03215</zip>
+  </address>
+</polling_location>
+<polling_location id="4402280001">
+  <polling_hours>07:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WEARE</city>
+    <line1>16 East Rd</line1>
+    <state>NH</state>
+    <location_name>Weare Middle School</location_name>
+    <zip>03281</zip>
+  </address>
+</polling_location>
+<polling_location id="4402290001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WEBSTER</city>
+    <line1>945 Battle St</line1>
+    <state>NH</state>
+    <location_name>Webster Town Hall</location_name>
+    <zip>03303</zip>
+  </address>
+</polling_location>
+<polling_location id="4402300001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WENTWORTH</city>
+    <line1>1247 Mount Moosilauke Hwy</line1>
+    <state>NH</state>
+    <location_name>Wentworth Elementary School</location_name>
+    <zip>03282</zip>
+  </address>
+</polling_location>
+<polling_location id="4402310001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>ERROL</city>
+    <line1>33 Main St</line1>
+    <state>NH</state>
+    <location_name>Errol Town Hall</location_name>
+    <zip>03579</zip>
+  </address>
+</polling_location>
+<polling_location id="4402320001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WESTMORELAND</city>
+    <line1>780 Route 63</line1>
+    <state>NH</state>
+    <location_name>Westmoreland Town Hall</location_name>
+    <zip>03467</zip>
+  </address>
+</polling_location>
+<polling_location id="4402330001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WHITEFIELD</city>
+    <line1>16 Highland St</line1>
+    <state>NH</state>
+    <location_name>Cd Mcintyre Auditorium</location_name>
+    <zip>03598</zip>
+  </address>
+</polling_location>
+<polling_location id="4402340001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WILMOT</city>
+    <line1>9 North Wilmot Rd</line1>
+    <state>NH</state>
+    <location_name>Wilmot Town Hall</location_name>
+    <zip>03287</zip>
+  </address>
+</polling_location>
+<polling_location id="4402350001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WILTON</city>
+    <line1>42 Main St</line1>
+    <state>NH</state>
+    <location_name>Wilton Town Hall</location_name>
+    <zip>03086</zip>
+  </address>
+</polling_location>
+<polling_location id="4402360001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WINCHESTER</city>
+    <line1>1 Richmond Rd</line1>
+    <state>NH</state>
+    <location_name>Town Hall</location_name>
+    <zip>03470</zip>
+  </address>
+</polling_location>
+<polling_location id="4402370001">
+  <polling_hours>07:00:00 - 20:00:00</polling_hours>
+  <address>
+    <city>WINDHAM</city>
+    <line1>24 London Bridge Rd</line1>
+    <state>NH</state>
+    <location_name>Windham High School</location_name>
+    <zip>03087</zip>
+  </address>
+</polling_location>
+<polling_location id="4402380001">
+  <polling_hours>11:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WINDSOR</city>
+    <line1>14 White Pond Rd</line1>
+    <state>NH</state>
+    <location_name>Windsor Town Hall</location_name>
+    <zip>03244</zip>
+  </address>
+</polling_location>
+<polling_location id="4402390001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WOLFEBORO</city>
+    <line1>258 S Main St</line1>
+    <state>NH</state>
+    <location_name>All Saints Church</location_name>
+    <zip>03894</zip>
+  </address>
+</polling_location>
+<polling_location id="4402400001">
+  <polling_hours>08:00:00 - 19:00:00</polling_hours>
+  <address>
+    <city>WOODSTOCK</city>
+    <line1>924 Daniel Webster Hwy</line1>
+    <state>NH</state>
+    <location_name>Woodstock Town Hall</location_name>
+    <zip>03262</zip>
+  </address>
+</polling_location>
+</vip_object>

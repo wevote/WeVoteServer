@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP Data Centralizer - WV</name>
+  <vip_id>54</vip_id>
+  <datetime>2015-05-04T16:04:49.563000</datetime>
+  <organization_url>http://www.sos.wv.gov/elections/pages/</organization_url>
+</source>
+<state id="54">
+  <name>WV</name>
+  <election_administration_id>54000999001</election_administration_id>
+</state>
+<polling_location id="540399879881">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>SO CHARLESTON</city>
+    <line1>RT 7 BOX 279 A</line1>
+    <state>WV</state>
+    <location_name>ALUM CREEK ELEMENTARY</location_name>
+    <zip>25309</zip>
+  </address>
+</polling_location>
+<polling_location id="540399879882">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CROSS LANES</city>
+    <line1>5445 BIG TYLER RD</line1>
+    <state>WV</state>
+    <location_name>ANDREW JACKSON MIDDLE SCHOOL</location_name>
+    <zip>25313</zip>
+  </address>
+</polling_location>
+<polling_location id="540399879883">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>RT 4 BOX 141 B</line1>
+    <state>WV</state>
+    <location_name>CAMP VIRGIL TATE LODGE</location_name>
+    <zip>25313</zip>
+  </address>
+</polling_location>
+<polling_location id="540399879884">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>1546 KANAWHA BLVD</line1>
+    <state>WV</state>
+    <location_name>CARROLL TERRACE</location_name>
+    <zip>25311</zip>
+  </address>
+</polling_location>
+<polling_location id="540399879885">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>200 BAKER LN</line1>
+    <state>WV</state>
+    <location_name>CATO PARK</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="540399879886">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>4901 VENABLE AVE</line1>
+    <state>WV</state>
+    <location_name>CHAMBERLAIN ELEMENTARY</location_name>
+    <zip>25304</zip>
+  </address>
+</polling_location>
+<polling_location id="540399879887">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>1900 SCHOOL STREET</line1>
+    <state>WV</state>
+    <location_name>CHANDLER ACADEMY</location_name>
+    <zip>25312</zip>
+  </address>
+</polling_location>
+<polling_location id="540399879888">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CLENDENIN</city>
+    <line1>MAYWOOD AVE</line1>
+    <state>WV</state>
+    <location_name>CLENDENIN ELEMENTARY</location_name>
+    <zip>25045</zip>
+  </address>
+</polling_location>
+<polling_location id="540399879889">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CROSS LANES</city>
+    <line1>5525 BIG TYLER RD</line1>
+    <state>WV</state>
+    <location_name>CROSS LANES ELEMENTARY</location_name>
+    <zip>25313</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798810">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>4190 WASHINGTON ST W</line1>
+    <state>WV</state>
+    <location_name>DEPT. OF HEALTH &amp; HUMAN RES.</location_name>
+    <zip>25313</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798811">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>4190 WASHINGTON ST W.</line1>
+    <state>WV</state>
+    <location_name>DEPT. OF HEALTH &amp; HUMAN RES.</location_name>
+    <zip>25313</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798812">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>300 BAKER LANE</line1>
+    <state>WV</state>
+    <location_name>EDGEWOOD SUMMIT</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798813">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>108 OAKWOOD RD</line1>
+    <state>WV</state>
+    <location_name>ELIZABETH MEM. METHODIST</location_name>
+    <zip>25314</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798814">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>3320 PENNSYLVANIA AVE</line1>
+    <state>WV</state>
+    <location_name>ELK ELEMENTARY CENTER</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798815">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>3320 PENNSYLVANINA AVE</line1>
+    <state>WV</state>
+    <location_name>ELK ELEMENTARY CENTER</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798816">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>SISSONVILLE</city>
+    <line1>2006 MCCLURE PARKWAY</line1>
+    <state>WV</state>
+    <location_name>FLINN ELEMENTARY</location_name>
+    <zip>25312</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798817">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>422 DICKINSON ST</line1>
+    <state>WV</state>
+    <location_name>GARNET ADULT CENTER</location_name>
+    <zip>25301</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798818">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>1522 TENNIS CLUB RD</line1>
+    <state>WV</state>
+    <location_name>GEORGE WASHINGTON HIGH</location_name>
+    <zip>25314</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798819">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>959 WOODWARD DR</line1>
+    <state>WV</state>
+    <location_name>GRANDVIEW ELEMENTARY</location_name>
+    <zip>25312</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798820">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>HERNSHAW</city>
+    <line1>2827  LENS CREEK RD</line1>
+    <state>WV</state>
+    <location_name>HERNSHAW METHODIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="5403998798821">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>1505 HAMPTON RD</line1>
+    <state>WV</state>
+    <location_name>HOLZ ELEMENTARY</location_name>
+    <zip>25314</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798822">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>4302 MACCORKLE AVE</line1>
+    <state>WV</state>
+    <location_name>HORACE MANN MIDDLE SCHOOL</location_name>
+    <zip>25304</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798823">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>800  INDINANA AVE</line1>
+    <state>WV</state>
+    <location_name>INT. BROTHERHOOD E. WORKERS</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798824">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>800 INDIANA AVE</line1>
+    <state>WV</state>
+    <location_name>INTER. BROTHERHOOD ELEC. WORKERS</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798825">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>824 CENTRAL AVE</line1>
+    <state>WV</state>
+    <location_name>JARRETT TERRACE</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798826">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>108 LEE ST E</line1>
+    <state>WV</state>
+    <location_name>KANAWHA CHAS. HEALTH DEPT</location_name>
+    <zip>25301</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798827">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>3601 STAUNTON AVE</line1>
+    <state>WV</state>
+    <location_name>KANAWHA CITY ELEMENTARY</location_name>
+    <zip>25304</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798828">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>198 EUREKA RD</line1>
+    <state>WV</state>
+    <location_name>KENNA ELEMENTARY</location_name>
+    <zip>25314</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798829">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>515 EDENS FORK RD</line1>
+    <state>WV</state>
+    <location_name>LOFTIS FIRE STATION</location_name>
+    <zip>25312</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798830">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>RT 2 BOX 266 B</line1>
+    <state>WV</state>
+    <location_name>LOUDENDALE COMMUNITY CENTER</location_name>
+    <zip>25314</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798831">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>4001 SALINAS DR</line1>
+    <state>WV</state>
+    <location_name>MALDEN ELEMENTARY</location_name>
+    <zip>25306</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798832">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>22 DONNALLY STREET</line1>
+    <state>WV</state>
+    <location_name>MARTIN LUTHER KING COMMUNITY CENTER</location_name>
+    <zip>25301</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798833">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>TAD</city>
+    <line1>P O BOX 367</line1>
+    <state>WV</state>
+    <location_name>MARY INGLES ELEM</location_name>
+    <zip>25201</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798834">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>TAD</city>
+    <line1>P O BOX 367</line1>
+    <state>WV</state>
+    <location_name>MARY INGLES ELEMENTARY</location_name>
+    <zip>25201</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798835">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>SO CHARLESTON</city>
+    <line1>631 MONTROSE DR</line1>
+    <state>WV</state>
+    <location_name>MONTROSE ELEMENTARY</location_name>
+    <zip>25303</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798836">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>1509 BIGLEY AVE</line1>
+    <state>WV</state>
+    <location_name>MOUNT CALVARY BAPTIST</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798837">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>SO CHARLESTON</city>
+    <line1>1201 CHESTNUT ST</line1>
+    <state>WV</state>
+    <location_name>MOUNTAIN HEIGHTS CHURCH</location_name>
+    <zip>25309</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798838">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>2009 7TH  AVE</line1>
+    <state>WV</state>
+    <location_name>NORTH CHARLESTON REC. CENTER</location_name>
+    <zip>25312</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798839">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <location_name>OLD GLORY FREEWILL BAPTIST C.</location_name>
+  </address>
+</polling_location>
+<polling_location id="5403998798840">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>218 OAKWOOD RD</line1>
+    <state>WV</state>
+    <location_name>OVERBROOK ELEMENTARY</location_name>
+    <zip>25314</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798841">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>203 BRADFORD ST</line1>
+    <state>WV</state>
+    <location_name>PIEDMONT ELEMENTARY</location_name>
+    <zip>25301</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798842">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CROSS LANES</city>
+    <line1>5312 BIG TYLER RD</line1>
+    <state>WV</state>
+    <location_name>POINT HARMONY ELEMENTARY</location_name>
+    <zip>25313</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798843">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>5701 CHURCH DR</line1>
+    <state>WV</state>
+    <location_name>RAND COMMUNITY CENTER</location_name>
+    <zip>25306</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798844">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <line1>STEELE ST</line1>
+    <state>WV</state>
+    <location_name>ROXALANA GOSPEL TAB. ACTIVITY BLDG.</location_name>
+  </address>
+</polling_location>
+<polling_location id="5403998798845">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>809 LITZ DR</line1>
+    <state>WV</state>
+    <location_name>RUFFNER ELEMENTARY</location_name>
+    <zip>25311</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798846">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>SO CHARLESTON</city>
+    <line1>RT 8 BOX 428</line1>
+    <state>WV</state>
+    <location_name>RUTHLAWN ELEMENTARY</location_name>
+    <zip>25309</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798847">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>301 TENNESSEE AVE</line1>
+    <state>WV</state>
+    <location_name>SALVATION ARMY</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798848">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>100 DUTCH RD</line1>
+    <state>WV</state>
+    <location_name>SHOALS ELEMENTARY</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798849">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>SISSONVILLE</city>
+    <line1>8324 SISSONVILLE DR</line1>
+    <state>WV</state>
+    <location_name>SISSONVILLE ELEMENTARY</location_name>
+    <zip>25320</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798850">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>6100 SISSONVILLE DR</line1>
+    <state>WV</state>
+    <location_name>SISSONVILLE HIGH</location_name>
+    <zip>25312</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798851">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>SO CHARLESTON</city>
+    <line1>601 JEFFERSON RD</line1>
+    <state>WV</state>
+    <location_name>SO CHAS., COMM. CENTER</location_name>
+    <zip>25309</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798852">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>1108 2ND ST</line1>
+    <state>WV</state>
+    <location_name>ST. PAUL AME CHURCH</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798853">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>36 NORWOOD RD</line1>
+    <state>WV</state>
+    <location_name>ST.MATHEWS EPISCOPAL CHURCH</location_name>
+    <zip>25314</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798854">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>812 PARK AVE</line1>
+    <state>WV</state>
+    <location_name>STONEWALL JACKSON MIDDLE SCH</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798855">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>812 PARK AVENUE</line1>
+    <state>WV</state>
+    <location_name>STONEWALL JACKSON MIDDLE SCHOOL</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798856">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>2106 KANAWHA BLVD</line1>
+    <state>WV</state>
+    <location_name>TERRACE PARK EAST</location_name>
+    <zip>25311</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798857">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>600 FLORIDA ST</line1>
+    <state>WV</state>
+    <location_name>TISKELWAH COMMUNITY CENTER</location_name>
+    <zip>25302</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798858">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <location_name>WASH. HIGH COMM CNTR</location_name>
+  </address>
+</polling_location>
+<polling_location id="5403998798859">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>SO CHARLESTON</city>
+    <line1>732 GORDON DR</line1>
+    <state>WV</state>
+    <location_name>WEBERWOOD ELEMENTARY</location_name>
+    <zip>25303</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798860">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>1121 WEBERWOOD DRIVE</line1>
+    <state>WV</state>
+    <location_name>WEBERWOOD FIRE STATION</location_name>
+    <zip>25303</zip>
+  </address>
+</polling_location>
+<polling_location id="5403998798861">
+  <polling_hours>6:30 am - 7:30 pm</polling_hours>
+  <address>
+    <city>CHARLESTON</city>
+    <line1>1707 COONSKIN DR</line1>
+    <state>WV</state>
+    <location_name>WV. NATIONAL GUARD ARMORY</location_name>
+    <zip>25311</zip>
+  </address>
+</polling_location>
+</vip_object>

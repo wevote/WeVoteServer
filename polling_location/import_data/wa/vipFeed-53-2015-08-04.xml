@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Washington Secretary of State / Elections Division</name>
+  <vip_id>53</vip_id>
+  <datetime>2015-07-10T10:53:28</datetime>
+  <description>The Elections Division of the Office of the Secretary of State is the official source of election information in Washington. This feed provides information on election dates, districts, offices, candidates, ballot measures, and precinct boundaries.</description>
+  <organization_url>http://www.vote.wa.gov</organization_url>
+  <feed_contact_id>5308000</feed_contact_id>
+</source>
+<state id="53">
+  <name>Washington</name>
+  <election_administration_id>5307000</election_administration_id>
+</state>
+<polling_location id="53100340114">
+  <polling_hours>The Auditor's Office is open M-F, 8:00 a.m. to 4:30 p.m., except on Election Day when hours are extended to 8:00 a.m. to 8:00 p.m.  Voters may pick up replacement ballots, use an AutoMARK, return their ballots, etc.</polling_hours>
+  <address>
+    <line2>2000 Lakeridge Drive SW</line2>
+    <city>Olympia</city>
+    <line1>Thurston County Courthouse</line1>
+    <state>WA</state>
+    <location_name>** On Election Day voting center open 8:00 am to 8:00 pm</location_name>
+    <zip>98502</zip>
+  </address>
+</polling_location>
+<polling_location id="53100010142">
+  <polling_hours>8:30 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Ritzville</city>
+    <line1>210 W Broadway Ave. Ste 200</line1>
+    <state>WA</state>
+    <location_name>Adams County Auditor's Office</location_name>
+    <zip>98512</zip>
+  </address>
+</polling_location>
+<polling_location id="53100020158">
+  <polling_hours>8:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Asotin</city>
+    <line1>135 Second St.</line1>
+    <state>WA</state>
+    <location_name>Asotin County Auditor's Office</location_name>
+    <zip>99402</zip>
+  </address>
+</polling_location>
+<polling_location id="53100040014">
+  <polling_hours>9:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Wenatchee</city>
+    <line1>350 Orondo Ave, Level 3</line1>
+    <state>WA</state>
+    <location_name>Chelan County Auditor - Elections</location_name>
+    <zip>98801</zip>
+  </address>
+</polling_location>
+<polling_location id="53100050284">
+  <polling_hours>8:30 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Port Angeles</city>
+    <line1>223 E 4th St, Suite 1</line1>
+    <state>WA</state>
+    <location_name>Clallam County Auditor's Office</location_name>
+    <zip>98362</zip>
+  </address>
+</polling_location>
+<polling_location id="53100060242">
+  <polling_hours>8:00AM to 8:00PM</polling_hours>
+  <address>
+    <city>Vancouver</city>
+    <line1>1408 Franklin Street</line1>
+    <state>WA</state>
+    <location_name>Clark County Elections Office</location_name>
+    <zip>98660</zip>
+  </address>
+</polling_location>
+<polling_location id="53100310238">
+  <polling_hours>Voting available Monday - Friday 9 am - 5pm.  On Election Day (Tuesday August 4, 2015) voting available 8am - 8pm.</polling_hours>
+  <address>
+    <city>Everett</city>
+    <line1>3000 Rockefeller Ave</line1>
+    <state>WA</state>
+    <location_name>County Auditor's Office - accessible voting</location_name>
+    <zip>98201</zip>
+  </address>
+</polling_location>
+<polling_location id="53100080157">
+  <polling_hours>8:30 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Kelso</city>
+    <line1>207 4th Avenue N. Rm 107</line1>
+    <state>WA</state>
+    <location_name>Cowlitz County Auditor's Office</location_name>
+    <zip>98626</zip>
+  </address>
+</polling_location>
+<polling_location id="53100090160">
+  <polling_hours>8:30 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Waterville</city>
+    <line1>213 S Rainier St</line1>
+    <state>WA</state>
+    <location_name>Douglas County Auditor's Office</location_name>
+    <zip>98858</zip>
+  </address>
+</polling_location>
+<polling_location id="53100220004">
+  <polling_hours>9:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Davenport</city>
+    <line1>450 Logan</line1>
+    <state>WA</state>
+    <location_name>Election Office</location_name>
+    <zip>99122</zip>
+  </address>
+</polling_location>
+<polling_location id="53100320034">
+  <polling_hours>8:30 AM  to 8:00 PM</polling_hours>
+  <address>
+    <city>Spokane</city>
+    <line1>1033 W Gardner Ave</line1>
+    <state>WA</state>
+    <location_name>Elections Office</location_name>
+    <zip>99201</zip>
+  </address>
+</polling_location>
+<polling_location id="53100280403">
+  <polling_hours>*Open 8:00 AM to 8:00 PM Election Day*</polling_hours>
+  <address>
+    <city>Friday Harbor</city>
+    <line1>55 Second Street, Suite A</line1>
+    <state>WA</state>
+    <location_name>Elections Office</location_name>
+    <zip>98250</zip>
+  </address>
+</polling_location>
+<polling_location id="53100110149">
+  <polling_hours>8:30AM to 8:00PM</polling_hours>
+  <address>
+    <city>Pasco</city>
+    <line1>1016 N. 4th Ave</line1>
+    <state>WA</state>
+    <location_name>Franklin County Auditor's Office</location_name>
+    <zip>99301</zip>
+  </address>
+</polling_location>
+<polling_location id="53100120161">
+  <polling_hours>8:30 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Pomeroy</city>
+    <line1>789 Main St</line1>
+    <state>WA</state>
+    <location_name>Garfield County Auditor's Office</location_name>
+    <zip>99347</zip>
+  </address>
+</polling_location>
+<polling_location id="53100270323">
+  <polling_hours>7 AM to 8 PM</polling_hours>
+  <address>
+    <city>Gig Harbor</city>
+    <line1>33510 Grandview St</line1>
+    <state>WA</state>
+    <location_name>Gig Harbor Civic Center</location_name>
+    <zip>98335</zip>
+  </address>
+</polling_location>
+<polling_location id="53100130162">
+  <polling_hours>8:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Ephrata</city>
+    <line1>35 C St NW</line1>
+    <state>WA</state>
+    <location_name>Grant County Auditor's Office</location_name>
+    <zip>98823</zip>
+  </address>
+</polling_location>
+<polling_location id="53100140135">
+  <polling_hours>9:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <line2>Ste 2</line2>
+    <city>Montesano</city>
+    <line1>100 W Broadway</line1>
+    <state>WA</state>
+    <location_name>Grays Harbor County Auditor</location_name>
+    <zip>98563</zip>
+  </address>
+</polling_location>
+<polling_location id="53100150163">
+  <polling_hours>Office is open Monday through Thursday.
+On Election Day only, the office is open until 8:00 p.m.</polling_hours>
+  <address>
+    <city>Coupeville</city>
+    <line1>400 North Main Street</line1>
+    <state>WA</state>
+    <location_name>Island County Auditor's Office</location_name>
+    <zip>98239</zip>
+  </address>
+</polling_location>
+<polling_location id="53100160241">
+  <directions>Jefferson &amp; Cass Streets</directions>
+  <polling_hours>Auditor's Office is located on the first floor of the County Courthouse. Election Day hours are 8:00 a.m. to 8:00 p.m.</polling_hours>
+  <address>
+    <city>Port Townsend</city>
+    <line1>1820 Jefferson St</line1>
+    <state>WA</state>
+    <location_name>Jefferson County Auditor</location_name>
+    <zip>98368</zip>
+  </address>
+</polling_location>
+<polling_location id="53100030056">
+  <polling_hours>8AM to 8PM</polling_hours>
+  <address>
+    <city>Kennewick</city>
+    <line1>5600 W Canal Dr</line1>
+    <state>WA</state>
+    <location_name>Kennewick Auditor's Office</location_name>
+    <zip>99336</zip>
+  </address>
+</polling_location>
+<polling_location id="53100190204">
+  <polling_hours>9:00AM to 8:00PM</polling_hours>
+  <address>
+    <city>Ellensburg</city>
+    <line1>205 W 5th, Ste 105</line1>
+    <state>WA</state>
+    <location_name>Kittitas County Auditor's Office</location_name>
+    <zip>98926</zip>
+  </address>
+</polling_location>
+<polling_location id="53100210143">
+  <directions>Take exit 77 from I-5...</directions>
+  <polling_hours>Auditor's Office is at the west end of the Historic Courthouse. The ballot drop box is located in the lobby and ballots can be dropped off between 8 am and 5 pm weekdays and until 8 p.m. on Election Day.</polling_hours>
+  <address>
+    <city>Chehalis</city>
+    <line1>351 N.W. North St.</line1>
+    <state>WA</state>
+    <location_name>Lewis County Auditor's Office</location_name>
+    <zip>98532</zip>
+  </address>
+</polling_location>
+<polling_location id="53100310289">
+  <polling_hours>10AM to 8PM</polling_hours>
+  <address>
+    <city>Lynnwood</city>
+    <line1>19200 44th Avenue W</line1>
+    <state>WA</state>
+    <location_name>Lynnwood Library - accessible voting</location_name>
+    <zip>98036</zip>
+  </address>
+</polling_location>
+<polling_location id="53100230137">
+  <polling_hours>8:30 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Shelton</city>
+    <line1>411 N 5th Street</line1>
+    <state>WA</state>
+    <location_name>Mason County Auditor's Office</location_name>
+    <zip>98584</zip>
+  </address>
+</polling_location>
+<polling_location id="53100180363">
+  <polling_hours>Open Election Day Only - 7 a.m. to 8 p.m.</polling_hours>
+  <address>
+    <line2>911 NE Liberty Rd</line2>
+    <city>Poulsbo</city>
+    <line1>Poulsbo Fire Station</line1>
+    <state>WA</state>
+    <location_name>North Kitsap</location_name>
+    <zip>98370</zip>
+  </address>
+</polling_location>
+<polling_location id="53100320038">
+  <polling_hours>7:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <line2>44 E Hawthorne Rd</line2>
+    <city>Spokane</city>
+    <line1>North Spokane Library</line1>
+    <state>WA</state>
+    <location_name>North Spokane</location_name>
+    <zip>99218</zip>
+  </address>
+</polling_location>
+<polling_location id="53100240185">
+  <polling_hours>Room 104, 1st floor
+
+Election Day only 8:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Okanogan</city>
+    <line1>149 3rd Ave N</line1>
+    <state>WA</state>
+    <location_name>Okanogan County Auditor</location_name>
+    <zip>98840</zip>
+  </address>
+</polling_location>
+<polling_location id="53100250039">
+  <directions>The Auditor's Office is located to the right, inside the main entrance.</directions>
+  <polling_hours>Ballots are accepted until 8 PM on election day.</polling_hours>
+  <address>
+    <city>South Bend</city>
+    <line1>300 Memorial Drive</line1>
+    <state>WA</state>
+    <location_name>Pacific County Courthouse</location_name>
+    <zip>98586</zip>
+  </address>
+</polling_location>
+<polling_location id="53100270324">
+  <directions>Located west of the Pierce County Annex.</directions>
+  <polling_hours>7 AM to 8 PM</polling_hours>
+  <address>
+    <city>Tacoma</city>
+    <line1>2501 S 35th St, Suite C</line1>
+    <state>WA</state>
+    <location_name>Pierce County Election Center</location_name>
+    <zip>98409</zip>
+  </address>
+</polling_location>
+<polling_location id="53100030055">
+  <polling_hours>8AM to 8PM</polling_hours>
+  <address>
+    <city>Prosser</city>
+    <line1>620 Market St</line1>
+    <state>WA</state>
+    <location_name>Prosser Auditor's Office</location_name>
+    <zip>99350</zip>
+  </address>
+</polling_location>
+<polling_location id="53100380051">
+  <polling_hours>8AM to 8PM</polling_hours>
+  <address>
+    <city>Pullman</city>
+    <line1>325 SE Paradise St</line1>
+    <state>WA</state>
+    <location_name>Pullman City Hall / 2nd floor</location_name>
+    <zip>99163</zip>
+  </address>
+</polling_location>
+<polling_location id="53100270326">
+  <directions>Located next to the Pavillion on Meridian Street.</directions>
+  <polling_hours>7 AM to 8 PM</polling_hours>
+  <address>
+    <city>Puyallup</city>
+    <line1>324 South Meridian</line1>
+    <state>WA</state>
+    <location_name>Puyallup Library</location_name>
+    <zip>98371</zip>
+  </address>
+</polling_location>
+<polling_location id="53100030054">
+  <directions>Replacement Ballots Available</directions>
+  <polling_hours>In the Fred Meyer Plaza
+
+Election Day Hours -- 7am - 8pm</polling_hours>
+  <address>
+    <city>Richland</city>
+    <line1>101 Wellsian Way Ste E</line1>
+    <state>WA</state>
+    <location_name>Richland Auditor's Office</location_name>
+    <zip>99352</zip>
+  </address>
+</polling_location>
+<polling_location id="53100290164">
+  <polling_hours>8:30 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Mt Vernon</city>
+    <line1>700 S 2nd St # 201</line1>
+    <state>WA</state>
+    <location_name>Skagit County Auditor's Office</location_name>
+    <zip>98273</zip>
+  </address>
+</polling_location>
+<polling_location id="53100300043">
+  <polling_hours>On Election Day, we are open 7:30 am to 8:00 pm.
+
+Office is open Monday through Thursday.</polling_hours>
+  <address>
+    <city>Stevenson</city>
+    <line1>240 NW Vancouver Ave</line1>
+    <state>WA</state>
+    <location_name>Skamania County Auditor's Office</location_name>
+    <zip>98648</zip>
+  </address>
+</polling_location>
+<polling_location id="53100320036">
+  <polling_hours>7:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <line2>316 E 24th Ave</line2>
+    <city>Spokane</city>
+    <line1>St. Mark's Church</line1>
+    <state>WA</state>
+    <location_name>South Hill</location_name>
+    <zip>99203</zip>
+  </address>
+</polling_location>
+<polling_location id="53100180329">
+  <polling_hours>Open 7:00 a.m. to 8:00 p.m. Election Day</polling_hours>
+  <address>
+    <line2>619 Division St</line2>
+    <city>Port Orchard</city>
+    <line1>County Administration Building</line1>
+    <state>WA</state>
+    <location_name>South Kitsap</location_name>
+    <zip>98366</zip>
+  </address>
+</polling_location>
+<polling_location id="53100320035">
+  <polling_hours>7:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <line2>2426 N Discovery Pl</line2>
+    <city>Spokane Valley</city>
+    <line1>Center Place</line1>
+    <state>WA</state>
+    <location_name>Spokane Valley</location_name>
+    <zip>99216</zip>
+  </address>
+</polling_location>
+<polling_location id="53100320175">
+  <polling_hours>7:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Spokane</city>
+    <line1>701 W Riverside</line1>
+    <state>WA</state>
+    <location_name>STA Plaza</location_name>
+    <zip>99201</zip>
+  </address>
+</polling_location>
+<polling_location id="53100330165">
+  <polling_hours>9:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Colville</city>
+    <line1>215 S Oak St # 104</line1>
+    <state>WA</state>
+    <location_name>Stevens County Auditor's Office</location_name>
+    <zip>99114</zip>
+  </address>
+</polling_location>
+<polling_location id="53100270327">
+  <directions>Located adjacent to the Tacoma Community College.</directions>
+  <polling_hours>7 AM to 8 PM</polling_hours>
+  <address>
+    <city>Tacoma</city>
+    <line1>6315 Soth 19th St</line1>
+    <state>WA</state>
+    <location_name>Tacoma Area Coalition of Individuals with Disabilities (TACID)</location_name>
+    <zip>98466</zip>
+  </address>
+</polling_location>
+<polling_location id="53100360377">
+  <polling_hours>9:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <city>Walla Walla</city>
+    <line1>310 W. Poplar St.</line1>
+    <state>WA</state>
+    <location_name>Walla Walla County Elections Center</location_name>
+    <zip>99362</zip>
+  </address>
+</polling_location>
+<polling_location id="53100320037">
+  <polling_hours>7:00 AM to 8:00 PM</polling_hours>
+  <address>
+    <line2>610 S First St</line2>
+    <city>Spokane</city>
+    <line1>Cheney Library</line1>
+    <state>WA</state>
+    <location_name>West Plains</location_name>
+    <zip>99004</zip>
+  </address>
+</polling_location>
+<polling_location id="53100370228">
+  <polling_hours>Office open from 8:30 a.m. to 8 p.m. on Election Day.</polling_hours>
+  <address>
+    <city>Bellingham</city>
+    <line1>311 Grand Ave</line1>
+    <state>WA</state>
+    <location_name>Whatcom County Auditor's Office</location_name>
+    <zip>98225</zip>
+  </address>
+</polling_location>
+<polling_location id="53100380049">
+  <polling_hours>Auditor's Office open 9AM to 5PM except on Election Day, the hours are 8 AM to 8 PM.</polling_hours>
+  <address>
+    <city>Colfax</city>
+    <line1>N 304 Main St</line1>
+    <state>WA</state>
+    <location_name>Whitman County Elections Center</location_name>
+    <zip>99111</zip>
+  </address>
+</polling_location>
+<polling_location id="53100390303">
+  <polling_hours>9AM to 8PM</polling_hours>
+  <address>
+    <city>Yakima</city>
+    <line1>128 N 2nd St Rm 117</line1>
+    <state>WA</state>
+    <location_name>Yakima County Auditor's Office</location_name>
+    <zip>98901</zip>
+  </address>
+</polling_location>
+</vip_object>

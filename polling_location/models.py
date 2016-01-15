@@ -16,13 +16,12 @@ class PollingLocation(models.Model):
     This is for storing polling location information from the Voting Information Project Feeds
     """
     # We rely on the default internal id field too
-    # The unique ID of this election from VIP. (It may not in fact be unique -- TBD.)
-    polling_location_id = models.CharField(max_length=255, verbose_name="vip polling_location id", null=False,
-                                           unique=True)
+    # The ID of this polling location from VIP. (It seems to only be unique within each state.)
+    polling_location_id = models.CharField(max_length=255, verbose_name="vip polling_location id", null=False)
     location_name = models.CharField(max_length=255, verbose_name="location name", null=True, blank=True)
     polling_hours_text = models.CharField(max_length=255, verbose_name="polling hours", null=True, blank=True)
-    directions_text = models.CharField(
-        max_length=255, verbose_name="directions to get to polling location", null=True, blank=True)
+    directions_text = models.TextField(
+        verbose_name="directions to get to polling location", null=True, blank=True)
     line1 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 1 returned from VIP')
     line2 = models.CharField(max_length=255, blank=True, null=True, verbose_name='address line 2 returned from VIP')
     city = models.CharField(max_length=255, blank=True, null=True, verbose_name='city returned from VIP')
