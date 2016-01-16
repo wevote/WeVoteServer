@@ -9,6 +9,7 @@ from candidate.controllers import candidate_retrieve_for_api, candidates_retriev
 from django.http import HttpResponse
 from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
+from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 import json
 from measure.controllers import measure_retrieve_for_api
@@ -526,6 +527,16 @@ def voter_guides_to_follow_retrieve_view(request):
     set_google_civic_election_id_cookie(request, response, results['google_civic_election_id'])
 
     return response
+
+
+def voter_location_retrieve_from_ip_view(request):
+    """
+    Take the IP address and return a location (voterLocationRetrieveFromIP)
+    :param request:
+    :return:
+    """
+    ip_address = request.GET.get('ip_address', '')
+    return voter_location_retrieve_from_ip_for_api(ip_address=ip_address)
 
 
 def voter_position_retrieve_view(request):
