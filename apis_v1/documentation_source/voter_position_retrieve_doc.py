@@ -19,26 +19,39 @@ def voter_position_retrieve_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
-            'name':         'office_we_vote_id',
+            'name':         'kind_of_ballot_item',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'Office We Vote unique identifier. '
-                            '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
-                            'measure_we_vote_id',
+            'description':  'What is the type of ballot item for which we need to know the voter\'s stance? '
+                            '(kind_of_ballot_item is either "CANDIDATE", "POLITICIAN" or "MEASURE")',
         },
         {
-            'name':         'candidate_we_vote_id',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'Candidate We Vote unique identifier. '
-                            '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
-                            'measure_we_vote_id',
+            'name':         'ballot_item_we_vote_id',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'The unique we_vote identifier for this ballot_item '
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
+                            'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
-        {
-            'name':         'measure_we_vote_id',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'Measure We Vote unique identifier. '
-                            '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
-                            'measure_we_vote_id',
-        },
+        # {
+        #     'name':         'office_we_vote_id',
+        #     'value':        'string',  # boolean, integer, long, string
+        #     'description':  'Office We Vote unique identifier. '
+        #                     '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
+        #                     'measure_we_vote_id',
+        # },
+        # {
+        #     'name':         'candidate_we_vote_id',
+        #     'value':        'string',  # boolean, integer, long, string
+        #     'description':  'Candidate We Vote unique identifier. '
+        #                     '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
+        #                     'measure_we_vote_id',
+        # },
+        # {
+        #     'name':         'measure_we_vote_id',
+        #     'value':        'string',  # boolean, integer, long, string
+        #     'description':  'Measure We Vote unique identifier. '
+        #                     '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
+        #                     'measure_we_vote_id',
+        # },
     ]
     optional_query_parameter_list = [
     ]
@@ -67,7 +80,8 @@ def voter_position_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        'candidate_we_vote_id': 'wv01cand1755',
+        'kind_of_ballot_item': 'CANDIDATE',
+        'ballot_item_we_vote_id': 'wv01cand1755',
     }
 
     api_response = '{\n' \

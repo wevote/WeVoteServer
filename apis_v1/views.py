@@ -535,9 +535,25 @@ def voter_position_retrieve_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    office_we_vote_id = request.GET.get('office_we_vote_id', '')
-    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
-    measure_we_vote_id = request.GET.get('measure_we_vote_id', '')
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    # ballot_item_id = request.GET.get('ballot_item_id', 0)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    if kind_of_ballot_item == OFFICE:
+        office_we_vote_id = ballot_item_we_vote_id
+        candidate_we_vote_id = ''
+        measure_we_vote_id = ''
+    elif kind_of_ballot_item == CANDIDATE:
+        office_we_vote_id = ''
+        candidate_we_vote_id = ballot_item_we_vote_id
+        measure_we_vote_id = ''
+    elif kind_of_ballot_item == MEASURE:
+        office_we_vote_id = ''
+        candidate_we_vote_id = ''
+        measure_we_vote_id = ballot_item_we_vote_id
+    else:
+        office_we_vote_id = ''
+        candidate_we_vote_id = ''
+        measure_we_vote_id = ''
     return voter_position_retrieve_for_api(
         voter_device_id=voter_device_id,
         office_we_vote_id=office_we_vote_id,
