@@ -104,6 +104,7 @@ INSTALLED_APPS = (
     'wevote_functions',
     'wevote_settings',
     'wevote_social',
+    'geoip',
 
 )
 
@@ -313,6 +314,6 @@ LOG_FILE_LEVEL = lookup_logging_level(get_environment_variable("LOG_FILE_LEVEL")
 
 # Using conventions from django.contrib:
 # https://docs.djangoproject.com/en/1.8/ref/contrib/gis/geoip/#geoip-settings
-GEOIP_PATH = os.path.join(BASE_DIR, 'geo', 'data')
+GEOIP_PATH = os.path.join(BASE_DIR, 'geoip', 'data')
 GEOIP_COUNTRY = 'GeoIP.dat'
 GEOIP_CITY = 'GeoLiteCity.dat'
