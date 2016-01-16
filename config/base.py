@@ -84,6 +84,7 @@ INSTALLED_APPS = (
     'election',
     'exception',
     'follow',
+    'geoip',
     'import_export_google_civic',
     'import_export_vote_smart',
     'measure',
@@ -104,7 +105,6 @@ INSTALLED_APPS = (
     'wevote_functions',
     'wevote_settings',
     'wevote_social',
-    'geoip',
 
 )
 

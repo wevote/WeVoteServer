@@ -125,6 +125,41 @@ specify the level assigned to each message. You can change this to info items by
 
     LOG_FILE_LEVEL = logging.INFO
 
+## Set up GeoIP
+
+###  Install the C library
+
+    $ git clone https://github.com/maxmind/geoip-api-c.git
+    $ cd geoip-api-c
+    $ ./bootstrap
+    $ ./configure
+    $ make
+    $ make check
+    $ make install
+    $ cd ..
+
+###  Run the command that downloads the GeoLite database from the WeVoteServer root folder (Where this README lives)
+
+    $ NOTE: THE FOLLOWING DID NOT WORK
+    $ python manage.py geoip/management/commands/update_geoip_data
+
+## Test that WeVoteServer is running
+
+Start up the webserver:
+
+    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    $ pip install -r requirements.txt
+    $ python manage.py runserver
+
+Find admin tools here:
+
+    http://localhost:8000/admin
+
+Find documentation for all of the APIs here:
+
+    http://localhost:8000/apis/v1/docs
+
 ## Setup - Database Creation
 
 If you would like to match the local database settings from the "config/environment_variables.json" file,
@@ -146,39 +181,6 @@ When prompted for a super user, enter your email address and a simple password. 
 If you are not prompted to create a superuser, run the following command:
 
     python manage.py createsuperuser
-
-#### Import GeoIP data (optional):
-
-#####  Install the C library
-
-    $ git clone https://github.com/maxmind/geoip-api-c.git
-    $ cd geoip-api-c
-    $ ./bootstrap
-    $ ./configure
-    $ make
-    $ make check
-    $ make install
-
-#####  Run the command that downloads the GeoLite database
-
-    $ python manage.py update_geoip_data
-
-## Test that WeVoteServer is running
-
-Start up the webserver:
-
-    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
-    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
-    $ pip install -r requirements.txt
-    $ python manage.py runserver
-
-Find admin tools here:
-
-    http://localhost:8000/admin
-
-Find documentation for all of the APIs here:
-
-    http://localhost:8000/apis/v1/docs
     
 ## Sample data and the GOOGLE_CIVIC_API_KEY
 Sample data is provided. You can load this data by clicking the "Import Test Data" link on this page (in the "Maintenance" section):

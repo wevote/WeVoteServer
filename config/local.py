@@ -14,7 +14,11 @@ DEBUG = True
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
+# Multiple Databases
+# DATABASE_NAME
+
 DATABASES = {
+    # social graph & voter specific info
     'default': {
         'ENGINE': get_environment_variable('DATABASE_ENGINE'),
         'NAME': get_environment_variable('DATABASE_NAME'),
@@ -23,6 +27,8 @@ DATABASES = {
         'HOST': get_environment_variable('DATABASE_HOST'),  # localhost
         'PORT': get_environment_variable('DATABASE_PORT'),  # 5432
     }
+    # ballot, organizations & opinions
+    # search
 }
 
 ALLOWED_HOSTS = ['localhost']
