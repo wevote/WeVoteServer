@@ -147,7 +147,19 @@ If you are not prompted to create a superuser, run the following command:
 
     python manage.py createsuperuser
 
-Import GeoIP data (optional):
+#### Import GeoIP data (optional):
+
+#####  Install the C library
+
+    $ git clone https://github.com/maxmind/geoip-api-c.git
+    $ cd geoip-api-c
+    $ ./bootstrap
+    $ ./configure
+    $ make
+    $ make check
+    $ make install
+
+#####  Run the command that downloads the GeoLite database
 
     $ python manage.py update_geoip_data
 
