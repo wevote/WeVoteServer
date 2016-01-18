@@ -164,7 +164,10 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
     if success:
         for voter_guide in voter_guide_list:
             one_voter_guide = {
+                'we_vote_id': voter_guide.we_vote_id,
                 'google_civic_election_id': voter_guide.google_civic_election_id,
+                'voter_guide_display_name': "Org or Public Figure Name TODO",  # TODO DALE Update with real data
+                'voter_guide_image_url': "https://upload.wikimedia.org/wikipedia/en/4/4d/American_Civil_Liberties_Union_logo.png",
                 'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
                 'organization_we_vote_id': voter_guide.organization_we_vote_id,
                 'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,

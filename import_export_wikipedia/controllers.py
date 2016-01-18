@@ -5,13 +5,13 @@
 from organization.models import Organization
 import re
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
-import wikipedia
+from wevote_functions.models import positive_value_exists
+import wikipedia  # https://pypi.python.org/pypi/wikipedia
 
 logger = wevote_functions.admin.get_logger(__name__)
 
-# VOTE_SMART_API_KEY = get_environment_variable("VOTE_SMART_API_KEY")
-# VOTE_SMART_API_URL = get_environment_variable("VOTE_SMART_API_URL")
+# NOTE: There are other wrappers to the MediaWiki API that we can use to access Ballotpedia:
+# https://www.mediawiki.org/wiki/API:Client_code#Python
 
 
 def retrieve_organization_logo_from_wikipedia(organization, force_retrieve=False):

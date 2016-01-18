@@ -30,13 +30,15 @@
 {% if voter_guide_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
-            <td>Organization</td>
+            <td></td>
+            <td>Owner Type</td>
             <td>Election</td>
             <td>Time Span</td>
             <td>Last Updated</td>
         </tr>
     {% for voter_guide in voter_guide_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
         {% if voter_guide.voter_guide_owner_type == voter_guide.ORGANIZATION %}
             <td><a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}">
                 {{ voter_guide.organization.organization_name }}</a></td>
@@ -44,6 +46,8 @@
             <td><a href="#">Public Figure</a></td>
         {% elif voter_guide.voter_guide_owner_type == voter_guide.VOTER %}
             <td><a href="#">Voter</a></td>
+            {% else %}
+            <td><a href="#">?Owner Type?</a></td>
         {% endif %}
             <td>{{ voter_guide.google_civic_election_id }}</td>
             <td>{{ voter_guide.vote_smart_time_span }}</td>

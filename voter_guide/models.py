@@ -8,6 +8,7 @@ from exception.models import handle_exception, handle_record_not_found_exception
 from organization.models import Organization
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, convert_to_str, positive_value_exists
+from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_last_voter_guide_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -297,6 +298,14 @@ class VoterGuideManager(models.Manager):
 class VoterGuide(models.Model):
     # We are relying on built-in Python id field
 
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our voter_guide
+    # info with other organizations running their own We Vote servers
+    # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
+    # then the string "vg" (for voter guide), and then a sequential integer like "123".
+    # We generate this id on initial save keep the last value in WeVoteSetting.we_vote_id_last_voter_guide_integer
+    we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True)
+
     # NOTE: We are using we_vote_id's instead of internal ids
     # The unique id of the organization. May be null if voter_guide owned by a public figure or voter instead of org.
     organization_we_vote_id = models.CharField(
@@ -332,6 +341,12 @@ class VoterGuide(models.Model):
     # The date of the last change to this voter_guide
     last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
+    # We want to map these here so they are available in the templates
+    ORGANIZATION = ORGANIZATION
+    PUBLIC_FIGURE = PUBLIC_FIGURE
+    VOTER = VOTER
+    UNKNOWN_VOTER_GUIDE = UNKNOWN_VOTER_GUIDE
+
     def __unicode__(self):
         return self.last_updated
 
@@ -351,6 +366,26 @@ class VoterGuide(models.Model):
             logger.error("voter_guide.organization did not find")
             return
         return organization
+
+    # We override the save function so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this voter_guide came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_last_voter_guide_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "vg" = tells us this is a unique id for a voter guide
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}vg{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+            # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+        super(VoterGuide, self).save(*args, **kwargs)
 
 
 # This is the class that we use to rapidly show lists of voter guides, regardless of whether they are from an
