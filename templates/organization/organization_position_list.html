@@ -15,10 +15,14 @@
     Website: {{ organization.organization_website }}<br />
     Twitter: {{ organization.organization_twitter_handle }}<br />
     Organization Type: {{ organization.get_organization_type_display }}<br />
+    {% if organization.wikipedia_page_title %}<a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a><br />{% endif %}
     <a href="{% url 'organization:organization_edit' organization.id %}">edit</a>
     </p>
+<p>
+    <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>
+</p>
 
-    {% if election_list %}
+{% if election_list %}
     <form name="organization_position_choose_election" method="get" action="{% url 'organization:organization_position_list' organization.id %}">
         {% csrf_token %}
 
@@ -32,7 +36,7 @@
     {% endfor %}
     </select>
     </form>
-    {% endif %}{# End of if election_list #}
+{% endif %}{# End of if election_list #}
 
 {% if organization_position_list %}
     <table border="1">
@@ -69,4 +73,18 @@
     </script>
 
 {% endif %}
+
+
+{% if organization %}
+    {% if organization.wikipedia_thumbnail_url %}
+        <img src="{{ organization.wikipedia_thumbnail_url }}"><br />
+        Thumbnail<br />
+    {% endif %}
+
+    {% if organization.wikipedia_photo_url %}
+        <img src="{{ organization.wikipedia_photo_url }}" width="100px"><br />
+        Full size<br />
+    {% endif %}
+{% endif %}
+
 {% endblock %}

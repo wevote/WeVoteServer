@@ -8,15 +8,15 @@
 
 # -*- coding: UTF-8 -*-
 
-import json
-import requests
 from .models import GoogleCivicApiCounterManager
 from ballot.models import BallotItemManager, BallotItemListManager
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from election.models import ElectionManager
+import json
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
+import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
 from wevote_functions.models import convert_state_text_to_state_code, extract_state_from_ocd_division_id, \
     is_voter_device_id_valid, logger, positive_value_exists

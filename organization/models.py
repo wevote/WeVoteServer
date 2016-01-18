@@ -2,10 +2,13 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.contrib import messages
 from django.db import models
 from django.db.models import Q
 from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
+import json
+import requests
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
@@ -436,6 +439,14 @@ class Organization(models.Model):
     organization_phone2 = models.CharField(max_length=255, null=True, blank=True)
     organization_fax = models.CharField(max_length=255, null=True, blank=True)
 
+    wikipedia_page_id = models.IntegerField(verbose_name="pageid", null=True, blank=True)
+    wikipedia_page_title = models.CharField(
+        verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
+    wikipedia_thumbnail_url = models.URLField(verbose_name='url of wikipedia logo thumbnail', blank=True, null=True)
+    wikipedia_thumbnail_width = models.IntegerField(verbose_name="width of photo", null=True, blank=True)
+    wikipedia_thumbnail_height = models.IntegerField(verbose_name="height of photo", null=True, blank=True)
+    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo thumbnail', blank=True, null=True)
+
     NONPROFIT_501C3 = '3'
     NONPROFIT_501C4 = '4'
     POLITICAL_ACTION_COMMITTEE = 'P'
@@ -512,3 +523,10 @@ class Organization(models.Model):
         return self.organization_type in (
             self.NONPROFIT_501C3, self.NONPROFIT_501C4, self.POLITICAL_ACTION_COMMITTEE,
             self.CORPORATION, self.NEWS_CORPORATION)
+
+    def generate_wikipedia_link(self):
+        if self.wikipedia_page_title:
+            encoded_page_title = self.wikipedia_page_title.replace(" ", "_")
+            return "https://en.wikipedia.org/wiki/{page_title}".format(page_title=encoded_page_title)
+        else:
+            return ''
