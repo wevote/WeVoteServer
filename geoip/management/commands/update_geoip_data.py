@@ -1,7 +1,6 @@
 import os
 import gzip
 import urllib
-import urlparse
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 from django.core.management.base import BaseCommand, CommandError
@@ -20,9 +19,9 @@ class Command(BaseCommand):
         for path in self.files:
             root, filepath = os.path.split(path)
             dowloadpath = os.path.join(download_folder, filepath)
-            downloadurl = urlparse.urljoin(self.base_url, path)
-            self.stdout.write('Downloading {} to {}\n'.format(downloadurl, dowloadpath))
-            urllib.urlretrieve(downloadurl, dowloadpath)
+            download_url = urllib.parse.urljoin(self.base_url, path)
+            self.stdout.write('Downloading {} to {}\n'.format(download_url, dowloadpath))
+            urllib.request.urlretrieve(download_url, dowloadpath)
             outfilepath, ext = os.path.splitext(dowloadpath)
             if ext != '.gz':
                 raise CommandError('Something went wrong while decompressing {}'.format(dowloadpath))
