@@ -535,7 +535,9 @@ def voter_location_retrieve_from_ip_view(request):
     :param request:
     :return:
     """
-    ip_address = request.GET.get('ip_address', '')
+    ip_address = request.GET.get('ip_address')
+    if ip_address is None:
+        return HttpResponse('missing ip_address request parameter', status=400)
     return voter_location_retrieve_from_ip_for_api(ip_address=ip_address)
 
 

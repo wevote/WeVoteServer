@@ -1,11 +1,11 @@
 # apis_v1/test_views_voter_address_save.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import json
 
 from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
 from django.http import SimpleCookie
-import json
 
 
 class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
