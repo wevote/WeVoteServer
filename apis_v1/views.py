@@ -104,7 +104,7 @@ def device_id_generate_view(request):
     voter_device_id = generate_voter_device_id()  # Stored in cookie elsewhere
     logger.debug("apis_v1/views.py, device_id_generate-voter_device_id: {voter_device_id}".format(
         voter_device_id=voter_device_id
-        ))
+    ))
 
     json_data = {
         'voter_device_id': voter_device_id,

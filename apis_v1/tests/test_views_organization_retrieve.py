@@ -25,7 +25,7 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
         #######################################
         # Check to see if there are 0 organizations
         response = self.client.get(self.organization_count_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         self.assertEqual('success' in json_data, True, "'success' expected in the json response, and not found")
         self.assertEqual('organization_count' in json_data, True,
@@ -56,7 +56,7 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
         #######################################
         # Check to see if there are 3 organizations
         response2 = self.client.get(self.organization_count_url)
-        json_data2 = json.loads(response2.content)
+        json_data2 = json.loads(response2.content.decode())
 
         self.assertEqual('success' in json_data2, True, "'success' expected in the json response, and not found")
         self.assertEqual('organization_count' in json_data2, True,
@@ -69,7 +69,7 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
         #######################################
         # Retrieve 1 organization without required variable
         response3 = self.client.get(self.organization_retrieve_url)
-        json_data3 = json.loads(response3.content)
+        json_data3 = json.loads(response3.content.decode())
 
         self.assertEqual('success' in json_data3, True,
                          "'success' variable expected in the organizationRetrieve json response, and not found")
@@ -91,7 +91,7 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
         #######################################
         # Retrieve 1 organization with required organization_id
         response4 = self.client.get(self.organization_retrieve_url, {'organization_id': organization1.id})
-        json_data4 = json.loads(response4.content)
+        json_data4 = json.loads(response4.content.decode())
 
         self.assertEqual('success' in json_data4, True,
                          "'success' variable expected in the organizationRetrieve json response, and not found")
@@ -113,7 +113,7 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
         #######################################
         # Retrieve 1 organization with required organization_we_vote_id
         response5 = self.client.get(self.organization_retrieve_url, {'organization_we_vote_id': organization1.we_vote_id})
-        json_data5 = json.loads(response5.content)
+        json_data5 = json.loads(response5.content.decode())
 
         self.assertEqual('success' in json_data5, True,
                          "'success' variable expected in the organizationRetrieve json response, and not found")
@@ -136,7 +136,7 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
         # Retrieve 1 organization with required organization_id even if organization_we_vote_id passed in
         response6 = self.client.get(self.organization_retrieve_url, {'organization_id': organization1.id,
                                                                      'organization_we_vote_id': organization1.we_vote_id})
-        json_data6 = json.loads(response6.content)
+        json_data6 = json.loads(response6.content.decode())
 
         self.assertEqual('success' in json_data6, True,
                          "'success' variable expected in the organizationRetrieve json response, and not found")
@@ -158,7 +158,7 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
         #######################################
         # FAIL: Try to retrieve 1 organization with required organization_id that is wrong
         response7 = self.client.get(self.organization_retrieve_url, {'organization_id': 888})
-        json_data7 = json.loads(response7.content)
+        json_data7 = json.loads(response7.content.decode())
 
         self.assertEqual('success' in json_data7, True,
                          "'success' variable expected in the organizationRetrieve json response, and not found")
@@ -181,7 +181,7 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
         #######################################
         # FAIL: Try to retrieve 1 organization with required organization_id that is wrong
         response8 = self.client.get(self.organization_retrieve_url, {'organization_we_vote_id': 'WV_Wrong'})
-        json_data8 = json.loads(response8.content)
+        json_data8 = json.loads(response8.content.decode())
 
         self.assertEqual('success' in json_data8, True,
                          "'success' variable expected in the organizationRetrieve json response, and not found")

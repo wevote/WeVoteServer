@@ -2,13 +2,11 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from django.contrib import messages
 from django.db import models
 from django.db.models import Q
+
 from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
-import json
-import requests
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix

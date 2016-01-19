@@ -18,7 +18,7 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
 
     def test_retrieve_with_no_cookie(self):
         response = self.client.get(self.voter_address_retrieve_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         #######################################
         # Without a cookie, we don't expect valid response
@@ -40,7 +40,7 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
         #######################################
         # Generate the voter_device_id cookie
         response = self.client.get(self.generate_voter_device_id_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         # Make sure we got back a voter_device_id we can use
         self.assertEqual('voter_device_id' in json_data, True,
@@ -54,7 +54,7 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
         #######################################
         # Create a voter so we can test retrieve
         response2 = self.client.get(self.voter_create_url)
-        json_data2 = json.loads(response2.content)
+        json_data2 = json.loads(response2.content.decode())
 
         self.assertEqual('status' in json_data2, True,
                          "status expected in the voterAddressRetrieveView json response but not found")
@@ -72,7 +72,7 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
         # Create a voter address so we can test retrieve
         response3 = self.client.post(self.voter_address_save_url, {'text_for_map_search':
                                                                    '123 Main Street, Oakland CA 94602'})
-        json_data3 = json.loads(response3.content)
+        json_data3 = json.loads(response3.content.decode())
 
         self.assertEqual('status' in json_data3, True,
                          "status expected in the voterAddressRetrieveView json response but not found")
@@ -89,7 +89,7 @@ class WeVoteAPIsV1TestsVoterAddressRetrieve(TestCase):
         #######################################
         # Test for expected response variables
         response4 = self.client.get(self.voter_address_retrieve_url)
-        json_data4 = json.loads(response4.content)
+        json_data4 = json.loads(response4.content.decode())
 
         # Are any expected fields missing?
         self.assertEqual('success' in json_data4, True,

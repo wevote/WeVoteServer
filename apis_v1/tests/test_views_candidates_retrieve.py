@@ -4,8 +4,7 @@
 
 from admin_tools.controllers import import_data_for_tests
 from django.core.urlresolvers import reverse
-from django.test import Client, TestCase
-from django.http import SimpleCookie
+from django.test import TestCase
 import json
 from office.models import ContestOffice, ContestOfficeManager
 
@@ -22,7 +21,7 @@ class WeVoteAPIsV1TestsCandidatesRetrieve(TestCase):
         #######################################
         # Without a cookie or required variables, we don't expect valid response
         response01 = self.client.get(self.candidates_retrieve_url)
-        json_data01 = json.loads(response01.content)
+        json_data01 = json.loads(response01.content.decode())
 
         self.assertEqual('status' in json_data01, True, "status expected in the json response, and not found")
         self.assertEqual('success' in json_data01, True, "success expected in the json response, and not found")
@@ -48,7 +47,7 @@ class WeVoteAPIsV1TestsCandidatesRetrieve(TestCase):
         self.assertEqual(json_data01['google_civic_election_id'], 0,
                          "google_civic_election_id: {google_civic_election_id} ('0' expected), ".format(
                              google_civic_election_id=json_data01['google_civic_election_id']))
-        self.assertItemsEqual(json_data01['candidate_list'], [],
+        self.assertListEqual(json_data01['candidate_list'], [],
                               "candidate_list: {candidate_list} (Empty list expected), ".format(
                 candidate_list=json_data01['candidate_list']))
 
@@ -76,7 +75,7 @@ class WeVoteAPIsV1TestsCandidatesRetrieve(TestCase):
         #######################################
         # We should get a valid response
         response02 = self.client.get(self.candidates_retrieve_url, {'office_we_vote_id': contest_office.we_vote_id})
-        json_data02 = json.loads(response02.content)
+        json_data02 = json.loads(response02.content.decode())
 
         self.assertEqual('status' in json_data02, True, "status expected in the json response, and not found")
         self.assertEqual('success' in json_data02, True, "success expected in the json response, and not found")

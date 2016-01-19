@@ -19,6 +19,10 @@ def voter_location_retrieve_from_ip_for_api(ip_address):
     :return:
     """
     g = GeoIP()
-    json_data = g.city(ip_address)
+    location = g.city(ip_address)
+    response_content = {
+        'success': True,
+        'voter_location': '{0[city]}, {0[region]} {0[postal_code]}'.format(location)
+    }
 
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return HttpResponse(json.dumps(response_content), content_type='application/json')

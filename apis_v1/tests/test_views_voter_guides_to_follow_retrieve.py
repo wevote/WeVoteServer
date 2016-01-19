@@ -21,7 +21,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         #######################################
         # Without a cookie, we don't expect valid response
         response = self.client.get(self.voter_guides_to_follow_retrieve_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data, True,
@@ -42,7 +42,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         #######################################
         # Generate the voter_device_id cookie
         response01 = self.client.get(self.generate_voter_device_id_url)
-        json_data01 = json.loads(response01.content)
+        json_data01 = json.loads(response01.content.decode())
 
         # Make sure we got back a voter_device_id we can use
         self.assertEqual('voter_device_id' in json_data01, True,
@@ -56,7 +56,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         #######################################
         # With a cookie, but without a voter_id in the database, we don't expect valid response
         response02 = self.client.get(self.voter_guides_to_follow_retrieve_url)
-        json_data02 = json.loads(response02.content)
+        json_data02 = json.loads(response02.content.decode())
 
         self.assertEqual('status' in json_data02, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data02, True,
@@ -71,7 +71,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         #######################################
         # Create a voter so we can test retrieve
         response03 = self.client.get(self.voter_create_url)
-        json_data03 = json.loads(response03.content)
+        json_data03 = json.loads(response03.content.decode())
 
         self.assertEqual('status' in json_data03, True,
                          "status expected in the voterCreateView json response but not found")
@@ -87,7 +87,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         #######################################
         # Test the response before any voter guides exist
         response04 = self.client.get(self.voter_guides_to_follow_retrieve_url)
-        json_data04 = json.loads(response04.content)
+        json_data04 = json.loads(response04.content.decode())
 
         self.assertEqual('status' in json_data04, True,
                          "status expected in the voterGuidesToFollowRetrieveView json response but not found")
@@ -113,7 +113,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         #######################################
         # Check to make sure there is 1 organization
         response10 = self.client.get(self.organization_count_url)
-        json_data10 = json.loads(response10.content)
+        json_data10 = json.loads(response10.content.decode())
 
         self.assertEqual('success' in json_data10, True, "'success' expected in the json response, and not found")
         self.assertEqual('organization_count' in json_data10, True,
@@ -132,7 +132,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         #######################################
         # Test the response with one voter guide
         response40 = self.client.get(self.voter_guides_to_follow_retrieve_url)
-        json_data40 = json.loads(response40.content)
+        json_data40 = json.loads(response40.content.decode())
 
         self.assertEqual('status' in json_data40, True,
                          "status expected in the voterGuidesToFollowRetrieveView json response but not found")
