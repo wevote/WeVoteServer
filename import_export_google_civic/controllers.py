@@ -381,7 +381,7 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
                                               use_test_election=False):
     # Request json file from Google servers
     # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
-    if use_test_election:
+    if positive_value_exists(use_test_election):
         request = requests.get(VOTER_INFO_URL, params={
             "key": GOOGLE_CIVIC_API_KEY,
             "address": text_for_map_search,

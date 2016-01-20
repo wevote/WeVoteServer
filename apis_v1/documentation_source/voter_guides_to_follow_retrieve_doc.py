@@ -46,6 +46,11 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                             'text_for_map_search (either passed into this API endpoint as a value, or previously saved '
                             'with voterAddressSave) is required with every election, including the test election.',
         },
+        {
+            'name':         'maximum_number_to_retrieve',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Defaults to 20 voter guides. Enter a value to set your own limit.',
+        },
     ]
 
     potential_status_codes_list = [

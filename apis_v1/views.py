@@ -424,8 +424,10 @@ def voter_ballot_items_retrieve_view(request):
     # If passed in, we want to look at
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     use_test_election = request.GET.get('use_test_election', False)
+    use_test_election = False if use_test_election == 'false' else use_test_election
+    use_test_election = False if use_test_election == 'False' else use_test_election
 
-    if use_test_election:
+    if positive_value_exists(use_test_election):
         google_civic_election_id = 2000  # The Google Civic API Test election
     elif not positive_value_exists(google_civic_election_id):
         # We look in the cookies for google_civic_election_id
@@ -447,6 +449,8 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     text_for_map_search = request.GET.get('text_for_map_search', '')
     use_test_election = request.GET.get('use_test_election', False)
+    use_test_election = False if use_test_election == 'false' else use_test_election
+    use_test_election = False if use_test_election == 'False' else use_test_election
 
     results = voter_ballot_items_retrieve_from_google_civic_for_api(
         voter_device_id, text_for_map_search, use_test_election)
@@ -505,10 +509,13 @@ def voter_guides_to_follow_retrieve_view(request):
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     use_test_election = request.GET.get('use_test_election', False)
+    use_test_election = False if use_test_election == 'false' else use_test_election
+    use_test_election = False if use_test_election == 'False' else use_test_election
+    maximum_number_to_retrieve = request.GET.get('maximum_number_to_retrieve', 20)
 
     if positive_value_exists(ballot_item_we_vote_id):
         google_civic_election_id = 0
-    if use_test_election:
+    if positive_value_exists(use_test_election):
         google_civic_election_id = 2000  # The Google Civic API Test election
     elif not positive_value_exists(google_civic_election_id):
         # We look in the cookies for google_civic_election_id
@@ -520,7 +527,7 @@ def voter_guides_to_follow_retrieve_view(request):
         #     google_civic_election_id = fetch_google_civic_election_id_for_voter_id(voter_id)
 
     results = voter_guides_to_follow_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
-                                                      google_civic_election_id)
+                                                      google_civic_election_id, maximum_number_to_retrieve)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     # Save google_civic_election_id with fresh version that we retrieved from BallotItem table (if not passed in)

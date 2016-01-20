@@ -5,6 +5,7 @@
 
 from candidate.models import CandidateCampaign
 from django.db import models
+from django.db.models import Q
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
@@ -492,9 +493,32 @@ class PositionListManager(models.Model):
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
-                position_list = position_list.filter(stance=stance_we_are_looking_for)
-            # Limit to positions in the last x years
+                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                    position_list = position_list.filter(
+                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+                else:
+                    position_list = position_list.filter(stance=stance_we_are_looking_for)
+            # Limit to positions in the last x years - currently we are not limiting
             # position_list = position_list.filter(election_id=election_id)
+
+            # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
+            if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                revised_position_list = []
+                for one_position in position_list:
+                    if stance_we_are_looking_for == SUPPORT:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_support():
+                                revised_position_list.append(one_position)
+                        else:
+                            revised_position_list.append(one_position)
+                    elif stance_we_are_looking_for == OPPOSE:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_oppose():
+                                revised_position_list.append(one_position)
+                        else:
+                            revised_position_list.append(one_position)
+                position_list = revised_position_list
+
             if len(position_list):
                 position_count = len(position_list)
                 position_list_found = True
@@ -535,6 +559,43 @@ class PositionListManager(models.Model):
                 # If we passed in the stance "ANY" it means we want to not filter down the list
                 position_list = position_list.filter(stance=stance_we_are_looking_for)
             # position_list = position_list.filter(election_id=election_id)
+            if len(position_list):
+                position_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        if position_list_found:
+            return position_list
+        else:
+            position_list = []
+            return position_list
+
+    def retrieve_all_positions_for_election(self, google_civic_election_id, stance_we_are_looking_for=ANY_STANCE):
+        if stance_we_are_looking_for not \
+                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            position_list = []
+            return position_list
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
+        #  all stances
+
+        if not positive_value_exists(google_civic_election_id):
+            position_list = []
+            return position_list
+
+        # We aren't going to search directly on google_civic_election_id, but instead assemble a list of the items
+        #  on the ballot and search on individual ids
+
+        # Retrieve the support positions for this contest_measure_id
+        position_list_found = False
+        try:
+            position_list = PositionEntered.objects.order_by('date_entered')
+            position_list = position_list.filter(candidate_campaign_we_vote_id__in=['wv01cand2897', 'wv01cand2899'])
+            # position_list = position_list.filter(contest_measure_we_vote_id=contest_measure_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY" it means we want to not filter down the list
+                position_list = position_list.filter(stance=stance_we_are_looking_for)
             if len(position_list):
                 position_list_found = True
         except Exception as e:

@@ -463,6 +463,13 @@ class Organization(models.Model):
     organization_type = models.CharField(
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
+    def organization_photo_url(self):
+        if self.organization_image:
+            return self.organization_image
+        elif self.wikipedia_photo_url:
+            return self.wikipedia_photo_url
+        return ''
+
     def __unicode__(self):
         return self.organization_name
 

@@ -275,6 +275,6 @@ def election_summary_view(request, election_local_id):
 # NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
 class ExportElectionDataView(APIView):
     def get(self, request, format=None):
-        contest_office_list = Election.objects.all()
-        serializer = ElectionSerializer(contest_office_list, many=True)
+        election_list = Election.objects.all()
+        serializer = ElectionSerializer(election_list, many=True)
         return Response(serializer.data)

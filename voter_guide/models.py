@@ -5,7 +5,7 @@
 from django.db import models
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception
-from organization.models import Organization
+from organization.models import Organization, OrganizationManager
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, convert_to_str, positive_value_exists
 from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_last_voter_guide_integer
@@ -334,9 +334,45 @@ class VoterGuide(models.Model):
         verbose_name="the period in which the organization stated this position", max_length=255, null=True,
         blank=True, unique=False)
 
+    display_name = models.CharField(
+        verbose_name="display title for this voter guide", max_length=255, null=True, blank=True, unique=False)
+
+    image_url = models.URLField(verbose_name='image url of logo/photo associated with voter guide',
+                                blank=True, null=True)
+
     voter_guide_owner_type = models.CharField(
         verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,
         default=ORGANIZATION)
+
+    # TODO DALE We want to cache the voter guide name, but in case we haven't, we force the lookup
+    def voter_guide_display_name(self):
+        if self.display_name:
+            return self.display_name
+        elif self.voter_guide_owner_type == ORGANIZATION:
+            organization_manager = OrganizationManager()
+            organization_id = 0
+            organization_we_vote_id = self.organization_we_vote_id
+            results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+            if results['organization_found']:
+                organization = results['organization']
+                organization_name = organization.organization_name
+                return organization_name
+        return ''
+
+    # TODO DALE We want to cache the image_url, but in case we haven't, we force the lookup
+    def voter_guide_image_url(self):
+        if self.image_url:
+            return self.image_url
+        elif self.voter_guide_owner_type == ORGANIZATION:
+            organization_manager = OrganizationManager()
+            organization_id = 0
+            organization_we_vote_id = self.organization_we_vote_id
+            results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+            if results['organization_found']:
+                organization = results['organization']
+                organization_photo_url = organization.organization_photo_url()
+                return organization_photo_url
+        return ''
 
     # The date of the last change to this voter_guide
     last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
