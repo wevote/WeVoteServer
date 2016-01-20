@@ -56,8 +56,11 @@ def voter_location_retrieve_from_ip_doc_template_values(url_root):
         'api_name': 'voterLocationRetrieveFromIP',
         'api_slug': 'voterLocationRetrieveFromIP',
         'api_introduction':
-            "Retrieve a printable string with the location of the voter, based on the browser's IP address. "
-            "Ex/ 'Oakland, CA 94602'",
+            """
+            Retrieve a printable string with the location of the voter, based on the browser's IP address.
+            Ex: 'Oakland, CA 94602' <br>
+            Requisite: set up <a href=https://github.com/wevote/WeVoteServer/blob/master/README_API_INSTALL.md#set-up-geoip> GeoIP </a>
+            """,
         'try_now_link': 'apis_v1:voterLocationRetrieveFromIPView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
