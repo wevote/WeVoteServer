@@ -140,8 +140,7 @@ specify the level assigned to each message. You can change this to info items by
 
 ###  Run the command that downloads the GeoLite database from the WeVoteServer root folder (Where this README lives)
 
-    $ NOTE: THE FOLLOWING DID NOT WORK
-    $ python manage.py geoip/management/commands/update_geoip_data
+    $ ./manage.py update_geoip_data
 
 ## Test that WeVoteServer is running
 
