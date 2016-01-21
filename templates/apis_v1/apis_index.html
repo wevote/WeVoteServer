@@ -277,6 +277,12 @@
         <td>Search for organizations to find any organization that contains any of the search terms.</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:organizationsFollowedRetrieveDocs' %}">organizationsFollowedRetrieve</a></td>
+        <td></td>
+        <td>Return a list of the organizations followed. See also voterGuidesFollowedRetrieve, which
+            returns the most recent voter guide for each organization the voter follows.</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:voterGuidePossibilityRetrieveDocs' %}">voterGuidePossibilityRetrieve</a></td>
         <td></td>
         <td>Has a volunteer marked this URL as a voter guide?</td>
@@ -290,6 +296,12 @@
         <td><a href="{% url 'apis_v1:voterGuidesToFollowRetrieveDocs' %}">voterGuidesToFollowRetrieve</a></td>
         <td></td>
         <td>Retrieve a list of voter guides that a voter might want to follow.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterGuidesFollowedRetrieveDocs' %}">voterGuidesFollowedRetrieve</a></td>
+        <td></td>
+        <td>Retrieve a list of the most recent voter guide from each organization the voter follows.
+            See also organizationsFollowedRetrieve, which returns a list of organizations the voter follows.</td>
     </tr>
 
     {###  ###}

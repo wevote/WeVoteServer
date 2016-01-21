@@ -42,7 +42,7 @@ def positions_related_to_candidate_campaign_view(request, candidate_campaign_id,
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_info_for_voter_simple_array(voter_id)
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     positions_followed = position_list_manager.calculate_positions_followed_by_voter(
         voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter)

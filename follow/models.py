@@ -41,10 +41,12 @@ class FollowOrganization(models.Model):
         voter_manager = VoterManager()
         return voter_manager.fetch_we_vote_id_from_local_id(self.voter_id)
 
-    # This is used when we want to export the organizations that a voter is following
-    def organization_we_vote_id(self):
-        organization_manager = OrganizationManager()
-        return organization_manager.fetch_we_vote_id_from_local_id(self.organization_id)
+    # # This is used when we want to export the organizations that a voter is following
+    # def organization_we_vote_id(self):
+    #     organization_manager = OrganizationManager()
+    #     return organization_manager.fetch_we_vote_id_from_local_id(self.organization_id)
+    organization_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
 
     def __unicode__(self):
         return self.organization_id
@@ -121,9 +123,11 @@ class FollowOrganizationManager(models.Model):
                 organization_manager = OrganizationManager()
                 results = organization_manager.retrieve_organization(organization_id)
                 if results['organization_found']:
+                    organization = results['organization']
                     follow_organization_on_stage = FollowOrganization(
                         voter_id=voter_id,
                         organization_id=organization_id,
+                        organization_we_vote_id=organization.we_vote_id,
                         following_status=following_status,
                         # We don't need to update here because set set auto_now=True in the field
                         # date_last_changed =
@@ -197,7 +201,7 @@ class FollowOrganizationList(models.Model):
     """
     A way to retrieve all of the follow_organization information
     """
-    def retrieve_follow_organization_info_for_voter(self, voter_id):
+    def retrieve_follow_organization_by_voter_id(self, voter_id):
         # Retrieve a list of follow_organization entries for this voter
         follow_organization_list_found = False
         following_status = FOLLOWING
@@ -217,17 +221,27 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = {}
             return follow_organization_list
 
-    def retrieve_follow_organization_info_for_voter_simple_array(self, voter_id):
+    def retrieve_follow_organization_by_voter_id_simple_id_array(self, voter_id):
         follow_organization_list_manager = FollowOrganizationList()
         follow_organization_list = \
-            follow_organization_list_manager.retrieve_follow_organization_info_for_voter(voter_id)
+            follow_organization_list_manager.retrieve_follow_organization_by_voter_id(voter_id)
         follow_organization_list_simple_array = []
         if len(follow_organization_list):
             for follow_organization in follow_organization_list:
                 follow_organization_list_simple_array.append(follow_organization.organization_id)
         return follow_organization_list_simple_array
 
-    def retrieve_follow_organization_info_for_organization(self, organization_id):
+    def retrieve_follow_organization_by_voter_id_simple_we_vote_id_array(self, voter_id):
+        follow_organization_list_manager = FollowOrganizationList()
+        follow_organization_list = \
+            follow_organization_list_manager.retrieve_follow_organization_by_voter_id(voter_id)
+        follow_organization_list_simple_array = []
+        if len(follow_organization_list):
+            for follow_organization in follow_organization_list:
+                follow_organization_list_simple_array.append(follow_organization.organization_we_vote_id)
+        return follow_organization_list_simple_array
+
+    def retrieve_follow_organization_by_organization_id(self, organization_id):
         # Retrieve a list of follow_organization entries for this organization
         follow_organization_list_found = False
         following_status = FOLLOWING

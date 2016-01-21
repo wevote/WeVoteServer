@@ -401,6 +401,58 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
+    def retrieve_organizations_by_id_list(self, organization_ids_followed_by_voter):
+        organization_list = []
+        organization_list_found = False
+
+        if not type(organization_ids_followed_by_voter) is list:
+            status = 'NO_ORGANIZATIONS_FOUND_MISSING_ORGANIZATION_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'organization_list_found':      organization_list_found,
+                'organization_list':            organization_list,
+            }
+            return results
+
+        if not len(organization_ids_followed_by_voter):
+            status = 'NO_ORGANIZATIONS_FOUND_NO_ORGANIZATIONS_IN_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'organization_list_found':      organization_list_found,
+                'organization_list':            organization_list,
+            }
+            return results
+
+        try:
+            organization_queryset = Organization.objects.all()
+            organization_queryset = organization_queryset.filter(
+                id__in=organization_ids_followed_by_voter)
+            organization_queryset = organization_queryset.order_by('organization_name')
+            organization_list = organization_queryset
+
+            if len(organization_list):
+                organization_list_found = True
+                status = 'ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
+            else:
+                status = 'NO_ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
+            success = True
+        except Exception as e:
+            status = 'retrieve_organizations_by_id_list: Unable to retrieve organizations from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'organization_list_found':      organization_list_found,
+            'organization_list':            organization_list,
+        }
+        return results
+
 
 class Organization(models.Model):
     # We are relying on built-in Python id field

@@ -5,7 +5,7 @@
 from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_retrieve_doc, candidate_retrieve_doc, \
     candidates_retrieve_doc, device_id_generate_doc, \
     elections_retrieve_doc, measure_retrieve_doc, office_retrieve_doc, \
-    organization_count_doc, \
+    organization_count_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
     position_like_count_doc, position_list_for_ballot_item_doc, position_oppose_count_for_ballot_item_doc, \
@@ -14,6 +14,7 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     voter_address_retrieve_doc, voter_address_save_doc, \
     voter_ballot_items_retrieve_doc, voter_ballot_items_retrieve_from_google_civic_doc, voter_count_doc, \
     voter_create_doc, voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
+    voter_guides_followed_retrieve_doc, \
     voter_guides_to_follow_retrieve_doc, voter_location_retrieve_from_ip_doc, \
     voter_position_like_off_save_doc, voter_position_like_on_save_doc, voter_position_like_status_retrieve_doc, \
     voter_position_comment_save_doc, voter_position_retrieve_doc, \
@@ -122,6 +123,15 @@ def organization_follow_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = organization_follow_doc.organization_follow_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organizations_followed_retrieve_doc_view(request):
+    """
+    Show documentation about organizationsFollowedRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = organizations_followed_retrieve_doc.organizations_followed_retrieve_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -300,6 +310,15 @@ def voter_guide_possibility_save_doc_view(request):
     """
     url_root = LOCALHOST_URL_ROOT
     template_values = voter_guide_possibility_save_doc.voter_guide_possibility_save_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_guides_followed_retrieve_doc_view(request):
+    """
+    Show documentation about organizationsFollowedRetrieve
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = voter_guides_followed_retrieve_doc.voter_guides_followed_retrieve_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

@@ -15,7 +15,7 @@ import json
 from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
-    organization_search_for_api
+    organization_search_for_api, organizations_followed_retrieve_for_api
 from position.controllers import position_list_for_ballot_item_for_api, position_retrieve_for_api, \
     position_save_for_api, voter_position_retrieve_for_api, voter_position_comment_save_for_api
 from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
@@ -32,9 +32,9 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
 from voter.controllers import voter_address_retrieve_for_api, voter_address_save_for_api, voter_retrieve_list_for_api
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
-    voter_guides_to_follow_retrieve_for_api
+    voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
-    get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie, positive_value_exists
+    get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie, positive_value_exists, convert_to_int
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -218,6 +218,26 @@ def organization_search_view(request):
                                        organization_twitter_handle=organization_twitter_handle,
                                        organization_website=organization_website,
                                        organization_email=organization_email)
+
+
+def organizations_followed_retrieve_api_view(request):
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
+    return organizations_followed_retrieve_for_api(voter_device_id=voter_device_id,
+                                                   maximum_number_to_retrieve=maximum_number_to_retrieve)
+
+
+def get_maximum_number_to_retrieve_from_request(request):
+    if 'maximum_number_to_retrieve' in request.GET:
+        maximum_number_to_retrieve = request.GET['maximum_number_to_retrieve']
+    else:
+        maximum_number_to_retrieve = 20
+    if maximum_number_to_retrieve is "":
+        maximum_number_to_retrieve = 20
+    else:
+        maximum_number_to_retrieve = convert_to_int(maximum_number_to_retrieve)
+
+    return maximum_number_to_retrieve
 
 
 def position_list_for_ballot_item_view(request):
@@ -498,6 +518,13 @@ def voter_guide_possibility_save_view(request):
                                                 voter_guide_possibility_url=voter_guide_possibility_url)
 
 
+def voter_guides_followed_retrieve_view(request):
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
+    return voter_guides_followed_retrieve_for_api(voter_device_id=voter_device_id,
+                                                  maximum_number_to_retrieve=maximum_number_to_retrieve)
+
+
 def voter_guides_to_follow_retrieve_view(request):
     """
     Retrieve a list of voter_guides that a voter might want to follow (voterGuidesToFollow)
@@ -511,7 +538,7 @@ def voter_guides_to_follow_retrieve_view(request):
     use_test_election = request.GET.get('use_test_election', False)
     use_test_election = False if use_test_election == 'false' else use_test_election
     use_test_election = False if use_test_election == 'False' else use_test_election
-    maximum_number_to_retrieve = request.GET.get('maximum_number_to_retrieve', 20)
+    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
 
     if positive_value_exists(ballot_item_we_vote_id):
         google_civic_election_id = 0

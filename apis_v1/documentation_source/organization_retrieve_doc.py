@@ -60,8 +60,10 @@ def organization_retrieve_doc_template_values(url_root):
         'organization_we_vote_id': 'wv85org1',
     }
 
+    # Changes made here should also be made in organizations_followed_retrieved
     api_response = '{\n' \
                    '  "success": boolean,\n' \
+                   '  "status": string,\n' \
                    '  "organization_id": integer (the id of the organization found),\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
                    '  "organization_name": string (value from Google),\n' \
@@ -69,6 +71,7 @@ def organization_retrieve_doc_template_values(url_root):
                    '  "organization_twitter_handle": string (twitter address),\n' \
                    '  "organization_email": string,\n' \
                    '  "organization_facebook": string,\n' \
+                   '  "organization_photo_url": string,\n' \
                    '}'
 
     template_values = {

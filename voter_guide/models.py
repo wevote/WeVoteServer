@@ -463,6 +463,59 @@ class VoterGuideList(models.Model):
         }
         return results
 
+    def retrieve_voter_guides_by_organization_list(self, organization_we_vote_ids_followed_by_voter):
+        voter_guide_list = []
+        voter_guide_list_found = False
+
+        if not type(organization_we_vote_ids_followed_by_voter) is list:
+            status = 'NO_VOTER_GUIDES_FOUND_MISSING_ORGANIZATION_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'voter_guide_list_found':       voter_guide_list_found,
+                'voter_guide_list':             voter_guide_list,
+            }
+            return results
+
+        if not len(organization_we_vote_ids_followed_by_voter):
+            status = 'NO_VOTER_GUIDES_FOUND_NO_ORGANIZATIONS_IN_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'voter_guide_list_found':       voter_guide_list_found,
+                'voter_guide_list':             voter_guide_list,
+            }
+            return results
+
+        try:
+            voter_guide_queryset = VoterGuide.objects.all()
+            voter_guide_queryset = voter_guide_queryset.filter(
+                organization_we_vote_id__in=organization_we_vote_ids_followed_by_voter)
+            voter_guide_queryset = voter_guide_queryset.order_by('last_updated')
+            voter_guide_list = voter_guide_queryset
+
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
     def retrieve_all_voter_guides(self):
         voter_guide_list = []
         voter_guide_list_found = False
