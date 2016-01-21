@@ -4,3 +4,13 @@ node_js:
     - "4.0"
     - "iojs"
     - "0.12"
+
+language: python
+    - "3.4.3"
+install:
+    - pip install -r requirements.txt
+before_script:
+    - ./manage.py makemigrations
+    - ./manage.py migrate
+script:
+    - ./manage.py test
