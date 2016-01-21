@@ -253,3 +253,13 @@ def fetch_next_we_vote_id_last_voter_integer():
     we_vote_id_last_voter_integer += 1
     we_vote_settings_manager.save_setting('we_vote_id_last_voter_integer', we_vote_id_last_voter_integer)
     return we_vote_id_last_voter_integer
+
+
+# Related to voter guide
+def fetch_next_we_vote_id_last_voter_guide_integer():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    we_vote_id_last_voter_guide_integer = we_vote_settings_manager.fetch_setting('we_vote_id_last_voter_guide_integer')
+    we_vote_id_last_voter_guide_integer = convert_to_int(we_vote_id_last_voter_guide_integer)
+    we_vote_id_last_voter_guide_integer += 1
+    we_vote_settings_manager.save_setting('we_vote_id_last_voter_guide_integer', we_vote_id_last_voter_guide_integer)
+    return we_vote_id_last_voter_guide_integer

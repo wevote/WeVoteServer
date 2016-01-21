@@ -14,6 +14,7 @@
 {% if rating_list %}
     <table border="1">
     <tr>
+        <td></td>
         <td>ratingId</td>
         <td>sigId</td>
         <td>ratingName</td>
@@ -22,6 +23,7 @@
 
     {% for special_interest_group_rating in rating_list %}
     <tr>
+        <td>{{ forloop.counter }}</td>
         <td>{{ special_interest_group_rating.ratingId }}</td>
         <td><a href="{% url 'import_export_vote_smart:special_interest_group_rating_list' special_interest_group_rating.sigId %}" target="_blank">
             {{ special_interest_group_rating.sigId }}</a></td>

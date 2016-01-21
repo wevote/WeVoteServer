@@ -9,7 +9,7 @@
 
 <h1>{{ api_name }}</h1>
 <p>
-    {{ api_introduction }}
+    {{ api_introduction|safe }}
     {% load template_filters %}
 
         <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% else %}post{% endif %}" action="{% url try_now_link %}" target="_blank">

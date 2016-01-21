@@ -4,6 +4,7 @@
 
 from candidate.models import CandidateCampaign
 from django.db import models
+from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.models import positive_value_exists
@@ -291,3 +292,19 @@ class BallotItemListManager(models.Model):
             'ballot_item_list':             ballot_item_list,
         }
         return results
+
+    def fetch_most_recent_google_civic_election_id(self):
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_elections_by_date()
+        if results['success']:
+            election_list = results['election_list']
+            for one_election in election_list:
+                ballot_item_queryset = BallotItem.objects.all()
+                ballot_item_queryset = ballot_item_queryset.filter(
+                    google_civic_election_id=one_election.google_civic_election_id)
+                number_found = ballot_item_queryset.count()
+                if positive_value_exists(number_found):
+                    # Since we are starting with the most recent election, as soon as we find
+                    # any election with ballot items, we can exit.
+                    return one_election.google_civic_election_id
+        return 0

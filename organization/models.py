@@ -4,6 +4,7 @@
 
 from django.db import models
 from django.db.models import Q
+
 from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
 import wevote_functions.admin
@@ -400,6 +401,58 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
+    def retrieve_organizations_by_id_list(self, organization_ids_followed_by_voter):
+        organization_list = []
+        organization_list_found = False
+
+        if not type(organization_ids_followed_by_voter) is list:
+            status = 'NO_ORGANIZATIONS_FOUND_MISSING_ORGANIZATION_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'organization_list_found':      organization_list_found,
+                'organization_list':            organization_list,
+            }
+            return results
+
+        if not len(organization_ids_followed_by_voter):
+            status = 'NO_ORGANIZATIONS_FOUND_NO_ORGANIZATIONS_IN_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'organization_list_found':      organization_list_found,
+                'organization_list':            organization_list,
+            }
+            return results
+
+        try:
+            organization_queryset = Organization.objects.all()
+            organization_queryset = organization_queryset.filter(
+                id__in=organization_ids_followed_by_voter)
+            organization_queryset = organization_queryset.order_by('organization_name')
+            organization_list = organization_queryset
+
+            if len(organization_list):
+                organization_list_found = True
+                status = 'ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
+            else:
+                status = 'NO_ORGANIZATIONS_FOUND_BY_ORGANIZATION_LIST'
+            success = True
+        except Exception as e:
+            status = 'retrieve_organizations_by_id_list: Unable to retrieve organizations from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'organization_list_found':      organization_list_found,
+            'organization_list':            organization_list,
+        }
+        return results
+
 
 class Organization(models.Model):
     # We are relying on built-in Python id field
@@ -436,6 +489,14 @@ class Organization(models.Model):
     organization_phone2 = models.CharField(max_length=255, null=True, blank=True)
     organization_fax = models.CharField(max_length=255, null=True, blank=True)
 
+    wikipedia_page_id = models.IntegerField(verbose_name="pageid", null=True, blank=True)
+    wikipedia_page_title = models.CharField(
+        verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
+    wikipedia_thumbnail_url = models.URLField(verbose_name='url of wikipedia logo thumbnail', blank=True, null=True)
+    wikipedia_thumbnail_width = models.IntegerField(verbose_name="width of photo", null=True, blank=True)
+    wikipedia_thumbnail_height = models.IntegerField(verbose_name="height of photo", null=True, blank=True)
+    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo thumbnail', blank=True, null=True)
+
     NONPROFIT_501C3 = '3'
     NONPROFIT_501C4 = '4'
     POLITICAL_ACTION_COMMITTEE = 'P'
@@ -453,6 +514,13 @@ class Organization(models.Model):
 
     organization_type = models.CharField(
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
+
+    def organization_photo_url(self):
+        if self.organization_image:
+            return self.organization_image
+        elif self.wikipedia_photo_url:
+            return self.wikipedia_photo_url
+        return ''
 
     def __unicode__(self):
         return self.organization_name
@@ -512,3 +580,10 @@ class Organization(models.Model):
         return self.organization_type in (
             self.NONPROFIT_501C3, self.NONPROFIT_501C4, self.POLITICAL_ACTION_COMMITTEE,
             self.CORPORATION, self.NEWS_CORPORATION)
+
+    def generate_wikipedia_link(self):
+        if self.wikipedia_page_title:
+            encoded_page_title = self.wikipedia_page_title.replace(" ", "_")
+            return "https://en.wikipedia.org/wiki/{page_title}".format(page_title=encoded_page_title)
+        else:
+            return ''

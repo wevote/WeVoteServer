@@ -8,15 +8,15 @@
 
 # -*- coding: UTF-8 -*-
 
-import json
-import requests
 from .models import GoogleCivicApiCounterManager
 from ballot.models import BallotItemManager, BallotItemListManager
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from election.models import ElectionManager
+import json
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
+import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
 from wevote_functions.models import convert_state_text_to_state_code, extract_state_from_ocd_division_id, \
     is_voter_device_id_valid, logger, positive_value_exists
@@ -381,7 +381,7 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
                                               use_test_election=False):
     # Request json file from Google servers
     # logger.info("Loading ballot for one address from voterInfoQuery from Google servers")
-    if use_test_election:
+    if positive_value_exists(use_test_election):
         request = requests.get(VOTER_INFO_URL, params={
             "key": GOOGLE_CIVIC_API_KEY,
             "address": text_for_map_search,

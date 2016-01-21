@@ -7,15 +7,48 @@
 <a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 
 <h1>Organizations</h1>
-<p><a href="{% url 'organization:organization_new' %}">Add New Organization</a></p>
+<p><a href="{% url 'organization:organization_new' %}">Add New Organization</a>.
+    Vote Smart special interest groups <a href="{% url 'import_export_vote_smart:vote_smart_index' %}">here</a>.</p>
+
+<p>
+    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}">Retrieve photos from Wikipedia</a>
+</p>
+
+{% if state_list %}
+    <form name="organization_state_form" method="get" action="{% url 'organization:organization_list' %}">
+        {% csrf_token %}
+
+    <select id="organization_state_id" name="organization_state">
+        <option value="" {% if '' == organization_state %} selected="selected"{% endif %}>
+            -- Filter by State Served (Not Filtering Yet) --</option>
+    {% for key, state in state_list.items %}
+        <option value="{{ key }}"
+                {% if state == organization_state %} selected="selected"{% endif %}>
+            {{ state }}</option>
+    {% endfor %}
+    </select>
+    </form>
+{% endif %}{# End of if state_list #}
 
 {% if organization_list %}
     <table cellpadding="5" cellspacing="5" border="1">
+        <tr>
+            <td></td>
+            <td></td>
+            <td>Organization</td>
+            <td>Twitter</td>
+            <td>Voter Smart ID</td>
+            <td>State</td>
+            <td></td>
+        </tr>
     {% for organization in organization_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{% if organization.wikipedia_photo_url %}<a href="{% url 'organization:organization_position_list' organization.id %}"><img src="{{ organization.wikipedia_photo_url }}" width="100px" /></a>{% endif %}</td>
             <td><a href="{% url 'organization:organization_position_list' organization.id %}">{{ organization.organization_name }}</a></td>
             <td>{{ organization.organization_twitter_handle }}</td>
             <td>{{ organization.vote_smart_id }}</td>
+            <td>{{ organization.state_served_code }}</td>
             <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">edit</a></td>
         </tr>
     {% endfor %}
@@ -32,4 +65,13 @@
 {#    <p>#}
 {#        <a href="{% url 'organization:organizations_import' %}" >Import Organizations</a>#}
 {#    </p>#}
+
+    <script>
+        $(function() {
+            $('#organization_state').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
 {% endblock %}

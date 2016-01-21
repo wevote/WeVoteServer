@@ -136,9 +136,9 @@ def polling_location_list_view(request):
     if positive_value_exists(polling_location_state):
         polling_location_query = polling_location_query.filter(state__iexact=polling_location_state)
     if no_limit:
-        polling_location_query = polling_location_query.order_by('city')
+        polling_location_query = polling_location_query.order_by('location_name')
     else:
-        polling_location_query = polling_location_query.order_by('city')[:100]
+        polling_location_query = polling_location_query.order_by('location_name')[:100]
     polling_location_list = polling_location_query
 
     state_list = STATE_LIST_IMPORT

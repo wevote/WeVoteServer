@@ -46,6 +46,11 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                             'text_for_map_search (either passed into this API endpoint as a value, or previously saved '
                             'with voterAddressSave) is required with every election, including the test election.',
         },
+        {
+            'name':         'maximum_number_to_retrieve',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Defaults to 20 voter guides. Enter a value to set your own limit.',
+        },
     ]
 
     potential_status_codes_list = [
@@ -72,14 +77,20 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "maximum_number_to_retrieve": integer,\n' \
                    '  "voter_guides": list\n' \
                    '   [\n' \
-                   '     "speaker_label": string (Name of this org or person),\n' \
-                   '     "speaker_type": ORGANIZATION, PUBLIC_FIGURE, VOTER),\n' \
-                   '     "we_vote_id": string (a unique We Vote ID),\n' \
+                   '     "voter_guide_display_name": string (Name of this org or person),\n' \
+                   '     "voter_guide_owner_type": ORGANIZATION, PUBLIC_FIGURE, VOTER),\n' \
+                   '     "we_vote_id": string (We Vote ID of the voter guide),\n' \
+                   '     "organization_we_vote_id": string (We Vote ID for the org that owns the voter guide),\n' \
+                   '     "public_figure_we_vote_id": string (We Vote ID for the person that owns the voter guide),\n' \
+                   '     "voter_guide_image_url": string (We Vote ID for the person that owns the voter guide),\n' \
                    '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
+                   '     "google_civic_election_id": integer,\n' \
+                   '     "owner_voter_id": integer TO BE DEPRECATED,\n' \
                    '   ],\n' \
-                   '  "google_civic_election_id": integer,\n' \
                    '}\n'
 
     template_values = {

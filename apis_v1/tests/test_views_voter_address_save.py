@@ -1,11 +1,11 @@
 # apis_v1/test_views_voter_address_save.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+import json
 
 from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
 from django.http import SimpleCookie
-import json
 
 
 class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
@@ -18,7 +18,7 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
     def test_save_with_no_cookie(self):
         response = self.client.post(self.voter_address_retrieve_url, {'text_for_map_search':
                                                                       '321 Main Street, Oakland CA 94602'})
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         #######################################
         # Without a cookie, we don't expect valid response
@@ -40,7 +40,7 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         #######################################
         # Generate the voter_device_id cookie
         response = self.client.get(self.generate_voter_device_id_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         # Make sure we got back a voter_device_id we can use
         self.assertEqual('voter_device_id' in json_data, True,
@@ -54,7 +54,7 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         #######################################
         # Create a voter so we can test retrieve
         response2 = self.client.get(self.voter_create_url)
-        json_data2 = json.loads(response2.content)
+        json_data2 = json.loads(response2.content.decode())
 
         self.assertEqual('status' in json_data2, True,
                          "status expected in the voterAddressSaveView json response but not found")
@@ -72,7 +72,7 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         # Create a voter address so we can test retrieve
         response2 = self.client.post(self.voter_address_save_url, {'text_for_map_search':
                                                                    '123 Main Street, Oakland CA 94602'})
-        json_data2 = json.loads(response2.content)
+        json_data2 = json.loads(response2.content.decode())
 
         self.assertEqual('status' in json_data2, True,
                          "status expected in the voterAddressSaveView json response but not found")
@@ -94,7 +94,7 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         # Try and save the voter address again
         response3 = self.client.post(self.voter_address_save_url, {'text_for_map_search':
                                                                    '321 Main Street, Oakland CA 94602'})
-        json_data3 = json.loads(response3.content)
+        json_data3 = json.loads(response3.content.decode())
 
         # First address update
         self.assertEqual(
@@ -106,7 +106,7 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         #######################################
         # Try and save the voter address without a post variable
         response4 = self.client.get(self.voter_address_save_url)
-        json_data4 = json.loads(response4.content)
+        json_data4 = json.loads(response4.content.decode())
 
         self.assertEqual('status' in json_data4, True,
                          "status expected in the voterAddressSaveView json response but not found (no POST var)")
@@ -124,7 +124,7 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         #######################################
         # Test to make sure the address has been saved in the database
         response4 = self.client.get(self.voter_address_retrieve_url)
-        json_data4 = json.loads(response4.content)
+        json_data4 = json.loads(response4.content.decode())
 
         # Are any expected fields missing?
         self.assertEqual('success' in json_data4, True,

@@ -60,11 +60,22 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
         }
         return results
 
+    ballot_item_list_manager = BallotItemListManager()
+    # If we get here without a google_civic_election_id, we need to choose one from the ballot items that are already
+    #  stored. If we proceed to retrieve_all_ballot_items_for_voter without a google_civic_election_id, we will get
+    #  ballot items from a variety of elections.
+    # This logic looks for all of the elections we have ballot information for, and displays the most recent election
+    #  (not counting the test election)
+    if not positive_value_exists(google_civic_election_id):
+        google_civic_election_id = ballot_item_list_manager.fetch_most_recent_google_civic_election_id()
+
+    # If an election id STILL wasn't found, then we probably don't have any ballot items stored locally, so we
+    #  need to go out to google civic. BUT we will proceed and attempt to retrieve ballot items without an election_id
+
     ballot_item_list = []
     ballot_items_to_display = []
     try:
-        ballot_item_list_object = BallotItemListManager()
-        results = ballot_item_list_object.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
+        results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
         success = results['success']
         status = results['status']
         ballot_item_list = results['ballot_item_list']

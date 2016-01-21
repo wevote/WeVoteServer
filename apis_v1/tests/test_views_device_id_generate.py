@@ -14,7 +14,7 @@ class WeVoteAPIsV1TestsDeviceIdGenerate(TestCase):
 
     def test_key(self):
         response = self.client.get(self.read_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         # With this json, is one of the keys 'voter_device_id'?
         # {"voter_device_id": "WAijDN5AbGovLCCKXaIJTfTRBT745Wgk4tkNnoKXJvSDOiAPGHCesT6xcLvsRoWBZVUHGGnTLhRWtEoHEnOrzyj"}
@@ -22,7 +22,7 @@ class WeVoteAPIsV1TestsDeviceIdGenerate(TestCase):
 
     def test_value_length(self):
         response = self.client.get(self.read_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         # Is the value at least 88 characters long?
         self.assertGreaterEqual(

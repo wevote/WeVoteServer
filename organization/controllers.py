@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception, \
     handle_record_not_saved_exception
-from follow.models import FollowOrganizationManager, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
+from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 import json
 from organization.models import Organization
 from voter.models import fetch_voter_id_from_voter_device_link
@@ -88,6 +88,83 @@ def organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOW
         'success': success,
         'voter_device_id': voter_device_id,
         'organization_id': organization_id,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0):
+    """
+    Return a list of the organizations followed. See also voter_guides_followed_retrieve_for_api, which starts with
+    organizations followed, but returns data as a list of voter guides.
+    :param voter_device_id:
+    :param maximum_number_to_retrieve:
+    :return:
+    """
+    if not positive_value_exists(voter_device_id):
+        json_data = {
+            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
+            'voter_guides': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status': 'VALID_VOTER_ID_MISSING',
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
+            'voter_guides': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = retrieve_organizations_followed(voter_id)
+    status = results['status']
+    organizations_for_api = []
+    if results['organization_list_found']:
+        organization_list = results['organization_list']
+        number_added_to_list = 0
+        for organization in organization_list:
+            one_organization = {
+                'organization_id': organization.id,
+                'organization_we_vote_id': organization.we_vote_id,
+                'organization_name':
+                    organization.organization_name if positive_value_exists(organization.organization_name) else '',
+                'organization_website': organization.organization_website if positive_value_exists(
+                    organization.organization_website) else '',
+                'organization_twitter_handle':
+                    organization.organization_twitter_handle if positive_value_exists(
+                        organization.organization_twitter_handle) else '',
+                'organization_email':
+                    organization.organization_email if positive_value_exists(organization.organization_email) else '',
+                'organization_facebook': organization.organization_facebook
+                    if positive_value_exists(organization.organization_facebook) else '',
+                'organization_photo_url': organization.organization_photo_url()
+                    if positive_value_exists(organization.organization_photo_url()) else '',
+          }
+            organizations_for_api.append(one_organization.copy())
+            if positive_value_exists(maximum_number_to_retrieve):
+                number_added_to_list += 1
+                if number_added_to_list >= maximum_number_to_retrieve:
+                    break
+
+        if len(organizations_for_api):
+            status = 'ORGANIZATIONS_FOLLOWED_RETRIEVED'
+            success = True
+        else:
+            status = 'NO_ORGANIZATIONS_FOLLOWED_FOUND'
+            success = True
+    else:
+        success = False
+
+    json_data = {
+        'status': status,
+        'success': success,
+        'voter_device_id': voter_device_id,
+        'organization_list': organizations_for_api,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -211,6 +288,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):
             'organization_website': '',
             'organization_twitter_handle': '',
             'organization_facebook': '',
+            'organization_photo_url': '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -235,6 +313,8 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):
                 organization.organization_email if positive_value_exists(organization.organization_email) else '',
             'organization_facebook':
                 organization.organization_facebook if positive_value_exists(organization.organization_facebook) else '',
+            'organization_photo_url': organization.organization_photo_url()
+                if positive_value_exists(organization.organization_photo_url()) else '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -248,6 +328,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):
             'organization_website': '',
             'organization_twitter_handle': '',
             'organization_facebook': '',
+            'organization_photo_url': '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -278,6 +359,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'organization_website': organization_website,
             'organization_twitter_handle': organization_twitter_handle,
             'organization_facebook': organization_facebook,
+            'organization_photo_url': organization_image,
         }
         return results
     elif not existing_unique_identifier_found and not required_variables_for_new_entry:
@@ -292,6 +374,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'organization_website': organization_website,
             'organization_twitter_handle': organization_twitter_handle,
             'organization_facebook': organization_facebook,
+            'organization_photo_url': organization_image,
         }
         return results
 
@@ -323,6 +406,8 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                     organization.organization_twitter_handle) else '',
             'organization_facebook':
                 organization.organization_facebook if positive_value_exists(organization.organization_facebook) else '',
+            'organization_photo_url': organization.organization_photo_url()
+                if positive_value_exists(organization.organization_photo_url()) else '',
         }
         return results
     else:
@@ -338,6 +423,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'organization_website':     organization_website,
             'organization_twitter_handle': organization_twitter_handle,
             'organization_facebook':    organization_facebook,
+            'organization_photo_url':   organization_image,
         }
         return results
 
@@ -392,3 +478,34 @@ def organization_search_for_api(organization_name, organization_twitter_handle, 
             'organizations_list':   [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def retrieve_organizations_followed(voter_id):
+    organization_list_found = False
+    organization_list = []
+
+    follow_organization_list_manager = FollowOrganizationList()
+    organization_ids_followed_by_voter = \
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+
+    organization_list_manager = OrganizationListManager()
+    results = organization_list_manager.retrieve_organizations_by_id_list(organization_ids_followed_by_voter)
+    if results['organization_list_found']:
+        organization_list = results['organization_list']
+        success = True
+        if len(organization_list):
+            organization_list_found = True
+            status = 'SUCCESSFUL_RETRIEVE_OF_ORGANIZATIONS_FOLLOWED'
+        else:
+            status = 'ORGANIZATIONS_FOLLOWED_NOT_FOUND'
+    else:
+        status = results['status']
+        success = results['success']
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'organization_list_found':      organization_list_found,
+        'organization_list':            organization_list,
+    }
+    return results

@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>State of ARIZONA</name>
+  <vip_id>4</vip_id>
+  <datetime>2015-08-07T12:23:13.087000</datetime>
+  <organization_url>WWW.AZSOS.GOV</organization_url>
+</source>
+<state id="4">
+  <name>State of ARIZONA</name>
+  <election_administration_id>400040004</election_administration_id>
+</state>
+<polling_location id="48954001000">
+  <directions>15th Ave / Encanto Blvd (North of Encanto Blvd)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2705 N 15th Ave</line1>
+    <state>AZ</state>
+    <location_name>2705 Building, Natural Resources Division</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001001">
+  <directions>43rd Ave / Thomas Rd</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>4115 W Thomas Rd</line1>
+    <state>AZ</state>
+    <location_name>Adam Diaz Senior Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001002">
+  <directions>Cave Creek Rd / Rancho Paloma Dr</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>33355 N Cave Creek Rd</line1>
+    <state>AZ</state>
+    <location_name>Black Mountain Police Precinct</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001003">
+  <directions>24th St / Broadway Rd</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2405 E Broadway Rd</line1>
+    <state>AZ</state>
+    <location_name>Broadway Heritage Neighborhood Resource Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001004">
+  <directions>Central Ave / McDowell Rd</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>1221 N Central Ave</line1>
+    <state>AZ</state>
+    <location_name>Burton Barr Central Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001005">
+  <directions>35th Ave / Baseline Rd</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3635 W Baseline Rd</line1>
+    <state>AZ</state>
+    <location_name>Cesar Chavez Branch Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001006">
+  <directions>19 th Ave / Lower Buckeye Rd (West of 19th Ave)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2640 S 22nd Ave</line1>
+    <state>AZ</state>
+    <location_name>City Clerk Department Customer Service Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001007">
+  <directions>19th Ave / Union Hills Dr (North of Union Hills Dr)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2001 W Wahalla Ln</line1>
+    <state>AZ</state>
+    <location_name>Deer Valley Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001008">
+  <directions>67th Ave / Encanto Blvd</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>6501 W Virginia Ave</line1>
+    <state>AZ</state>
+    <location_name>Desert West Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001009">
+  <directions>28th St / Indian School Rd (North of Indian School Rd)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2802 E Devonshire Ave</line1>
+    <state>AZ</state>
+    <location_name>Devonshire Senior Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001010">
+  <directions>99th Ave / Lower Buckeye Rd (North of Lower Buckeye Rd)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2111 S 99th Ave</line1>
+    <state>AZ</state>
+    <location_name>Estrella Mountain Police Precinct</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001011">
+  <directions>35th Ave / Pinnacle Peak Rd</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3435 W Pinnacle Peak Rd</line1>
+    <state>AZ</state>
+    <location_name>Goelet A.C. Beuf Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001012">
+  <directions>Scottsdale Rd / Bell Rd</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>16620 N Scottsdale Rd</line1>
+    <state>AZ</state>
+    <location_name>Hampton Inn &amp; Suites</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001013">
+  <directions>27th Ave / Northern Ave (South of Northern Ave)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>7600 N. 27th Ave</line1>
+    <state>AZ</state>
+    <location_name>Helen Drake Senior Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001014">
+  <directions>51 st Ave / Campbell Ave</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>4420 N 51st Ave</line1>
+    <state>AZ</state>
+    <location_name>Maryvale Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001015">
+  <directions>44th St / Thomas Rd</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>4141 E Thomas Rd</line1>
+    <state>AZ</state>
+    <location_name>Memorial Presbyterian Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001016">
+  <directions>Tatum Blvd / Cactus Rd (Paradise Valley Mall)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>4525 E Paradise Village Pkwy North</line1>
+    <state>AZ</state>
+    <location_name>Mesquite Branch Library</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001017">
+  <directions>12th St / Grovers Ave</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>1104 E Grovers Ave</line1>
+    <state>AZ</state>
+    <location_name>Mountain View Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001018">
+  <directions>Central Ave / Bethany Home Rd</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>5757 N Central Ave</line1>
+    <state>AZ</state>
+    <location_name>North Phoenix Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001019">
+  <directions>Cave Creek Rd / Rose Garden Ln (West of Cave Creek Rd)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2109 E Rose Garden Ln</line1>
+    <state>AZ</state>
+    <location_name>North Valley Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001020">
+  <directions>29th Ave / Greenway Rd (South of Greenway Rd)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>2828 W. Country Gables Dr</line1>
+    <state>AZ</state>
+    <location_name>Our Lady of Czestochowa Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001021">
+  <directions>40th St / Bell Rd (North of Bell Rd)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>17402 N 40th St</line1>
+    <state>AZ</state>
+    <location_name>Paradise Valley Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001022">
+  <directions>48th St / Pecos Rd (South of Pecos Rd)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>17010 S 48th St</line1>
+    <state>AZ</state>
+    <location_name>Pecos Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001023">
+  <directions>103rd Ave / Camelback Rd (South of Camelback Rd)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>10550 W Mariposa St</line1>
+    <state>AZ</state>
+    <location_name>Pendergast Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001024">
+  <directions>3rd Ave / Washington St</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>200 W Washington St</line1>
+    <state>AZ</state>
+    <location_name>Phoenix City Hall</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001025">
+  <directions>15th St / Jefferson St</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>1401 E Jefferson St</line1>
+    <state>AZ</state>
+    <location_name>Pilgrim Rest Baptist Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001026">
+  <directions>Central Ave / Southern Ave (South of Southern Ave)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>212 E Alta Vista Rd</line1>
+    <state>AZ</state>
+    <location_name>South Mountain Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001027">
+  <directions>7th St / Hatcher Rd (North of Hatcher Rd)</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>802 E Vogel Ave</line1>
+    <state>AZ</state>
+    <location_name>Sunnyslope Community Center</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="48954001028">
+  <directions>35th Ave / Peoria Ave</directions>
+  <polling_hours>10 a.m. to 4 p.m. Aug. 22; 9 a.m. to 6 p.m. Aug. 24; 6 a.m. until 7 p.m. Aug. 25</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>3420 W. Peoria Ave</line1>
+    <state>AZ</state>
+    <location_name>Trinity Bible Church</location_name>
+    <zip>00000</zip>
+  </address>
+</polling_location>
+<polling_location id="400020015553">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>Yuma</city>
+    <line1>6480 E. Highway 95</line1>
+    <state>AZ</state>
+    <location_name>Community Christian Church</location_name>
+    <zip>85365</zip>
+  </address>
+</polling_location>
+<polling_location id="400020015551">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>Yuma</city>
+    <line1>300 S. 13th Avenue</line1>
+    <state>AZ</state>
+    <location_name>Dr. Martin Luther King Jr. Neighborhood Center</location_name>
+    <zip>85364</zip>
+  </address>
+</polling_location>
+<polling_location id="400020015552">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>Yuma</city>
+    <line1>1440 W Desert Hills Drive</line1>
+    <state>AZ</state>
+    <location_name>Yuma Civic Center</location_name>
+    <zip>85365</zip>
+  </address>
+</polling_location>
+<polling_location id="4000200140331">
+  <directions>24 Hour Vote by mail drop-off location</directions> 
+  <polling_hours>24-hours</polling_hours>
+  <address>
+    <city>Prescott</city>
+    <line1>1015 Fair Street</line1>
+    <state>AZ</state>
+    <location_name>Yavapai County Administration Bldg.</location_name>
+    <zip>86305</zip>
+  </address>
+</polling_location>
+<polling_location id="4000200140332">
+  <directions>Vote by mail drop-off location</directions>
+  <polling_hours>8:00 a.m. - 5:00 p.m., Monday - Friday; Election Day 8:00 am - 7:00 pm</polling_hours>
+  <address>
+    <city>Prescott</city>
+    <line1>201 S. Cortez</line1>
+    <state>AZ</state>
+    <location_name>City Clerks Office</location_name>
+    <zip>86303</zip>
+  </address>
+</polling_location>
+<polling_location id="15551">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>CHANDLER</city>
+    <line1>175 S ARIZONA AVE</line1>
+    <state>AZ</state>
+    <location_name>'CHANDLER CITY HALL - REPLACEMENT BALLOT ONLY'</location_name>
+    <zip>85225</zip>
+  </address>
+</polling_location>
+<polling_location id="14136">
+  <polling_hours>6AM to 7PM</polling_hours>
+  <address>
+    <city>PHOENIX</city>
+    <line1>510 S 3RD AVE</line1>
+    <state>AZ</state>
+    <location_name>'MCTEC - REPLACEMENT BALLOT ONLY'</location_name>
+    <zip>85003</zip>
+  </address>
+</polling_location>
+</vip_object>

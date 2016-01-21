@@ -20,7 +20,7 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         #######################################
         # Without a cookie, we don't expect valid response
         response = self.client.get(self.voter_ballot_items_retrieve_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data, True,
@@ -41,7 +41,7 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         #######################################
         # Generate the voter_device_id cookie
         response01 = self.client.get(self.generate_voter_device_id_url)
-        json_data01 = json.loads(response01.content)
+        json_data01 = json.loads(response01.content.decode())
 
         # Make sure we got back a voter_device_id we can use
         self.assertEqual('voter_device_id' in json_data01, True,
@@ -55,7 +55,7 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         #######################################
         # With a cookie, but without a voter_id in the database, we don't expect valid response
         response02 = self.client.get(self.voter_ballot_items_retrieve_url)
-        json_data02 = json.loads(response02.content)
+        json_data02 = json.loads(response02.content.decode())
 
         self.assertEqual('status' in json_data02, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data02, True,
@@ -70,7 +70,7 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         #######################################
         # Create a voter so we can test retrieve
         response03 = self.client.get(self.voter_create_url)
-        json_data03 = json.loads(response03.content)
+        json_data03 = json.loads(response03.content.decode())
 
         self.assertEqual('status' in json_data03, True,
                          "status expected in the voterCreateView json response but not found")
@@ -91,7 +91,7 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         #######################################
         # Test the response before any ballot_items exist
         response05 = self.client.get(self.voter_ballot_items_retrieve_url)
-        json_data05 = json.loads(response05.content)
+        json_data05 = json.loads(response05.content.decode())
 
         self.assertEqual('status' in json_data05, True,
                          "status expected in the voterBallotItemsRetrieve json response but not found")

@@ -24,4 +24,19 @@
 <input type="submit" value="{% if organization %}Update Organization{% else %}Save New Organization{% endif %}" /></p>
 </form>
 
+
+{% if organization %}
+    {% if organization.wikipedia_thumbnail_url %}
+        <img src="{{ organization.wikipedia_thumbnail_url }}"><br />
+        Thumbnail<br />
+    {% endif %}
+
+    {% if organization.wikipedia_photo_url %}
+        <img src="{{ organization.wikipedia_photo_url }}"><br />
+        Full size<br />
+    {% endif %}
+
+
+{% endif %}
+
 {% endblock %}

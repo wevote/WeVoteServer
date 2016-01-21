@@ -28,6 +28,7 @@
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td>&nbsp;</td>
+            <td>&nbsp;</td>
             <td>Candidate Name</td>
             <td>State</td>
             <td>Election</td>
@@ -37,6 +38,7 @@
         </tr>
     {% for candidate in candidate_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td>
                 {% if candidate.fetch_photo_url %}
                 <a href="{% url 'candidate:candidate_edit' candidate.id %}">

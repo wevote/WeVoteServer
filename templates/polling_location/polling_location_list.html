@@ -8,6 +8,8 @@
 
 <h1>Polling Locations</h1>
 
+    <p><a href="{% url 'polling_location:import_polling_locations_process' %}">Import Polling Locations File Now</a> (this can take 60-90 seconds)</p>
+
     {% if state_list %}
     <form name="polling_location_state_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
         {% csrf_token %}
@@ -29,6 +31,7 @@
     <table border="0" cellpadding="10">
     {% for polling_location in polling_location_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'polling_location:polling_location_summary' polling_location.id %}">
             {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}missing location name{% endif %}</a>
             </td>
@@ -47,8 +50,6 @@
     <p>(no polling_locations found)</p>
 {% endif %}
 <br />
-    <p><a href="{% url 'polling_location:import_polling_locations_process' %}">Import Polling Locations File Now</a> (this can take 60-90 seconds)</p>
-
     <script>
         $(function() {
             $('#polling_location_state').change(function() {

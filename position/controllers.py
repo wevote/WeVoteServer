@@ -351,7 +351,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_info_for_voter_simple_array(voter_id)
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     if show_positions_this_voter_follows:
         position_objects = position_list_manager.calculate_positions_followed_by_voter(

@@ -45,7 +45,7 @@ def positions_count_for_api(voter_device_id, candidate_id, measure_id, stance_we
         json_data = results['json_data']
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     elif positive_value_exists(measure_id):
-        results = positions_count_for_contest_measure(voter_id, candidate_id, stance_we_are_looking_for,
+        results = positions_count_for_contest_measure(voter_id, measure_id, stance_we_are_looking_for,
                                                       show_positions_this_voter_follows)
         json_data = results['json_data']
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -77,14 +77,14 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, stance_we_are
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_info_for_voter_simple_array(voter_id)
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     if show_positions_this_voter_follows:
         positions_followed = position_list_manager.calculate_positions_followed_by_voter(
             voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
         positions_followed_count = len(positions_followed)
         json_data = {
-            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_FOLLOWED_CC',
+            'status': 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_FOLLOWED_RE_CANDIDATE',
             'success': True,
             'count': positions_followed_count,
         }
@@ -124,7 +124,7 @@ def positions_count_for_contest_measure(voter_id, measure_id, stance_we_are_look
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_info_for_voter_simple_array(voter_id)
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
     if show_positions_this_voter_follows:
         positions_followed = position_list_manager.calculate_positions_followed_by_voter(

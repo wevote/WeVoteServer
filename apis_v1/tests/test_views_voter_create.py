@@ -20,7 +20,7 @@ class WeVoteAPIsV1TestsVoterCreate(TestCase):
         :return:
         """
         response = self.client.get(self.voter_create_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data, True,
@@ -42,7 +42,7 @@ class WeVoteAPIsV1TestsVoterCreate(TestCase):
         #######################################
         # Generate the voter_device_id cookie
         response = self.client.get(self.generate_voter_device_id_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         # Make sure we got back a voter_device_id we can use
         self.assertEqual('voter_device_id' in json_data, True,
@@ -56,7 +56,7 @@ class WeVoteAPIsV1TestsVoterCreate(TestCase):
         #######################################
         # Test for status: VOTER_CREATED
         response2 = self.client.get(self.voter_create_url)
-        json_data2 = json.loads(response2.content)
+        json_data2 = json.loads(response2.content.decode())
 
         self.assertEqual('status' in json_data2, True,
                          "status expected in the voterCreateView json response but not found")
@@ -72,7 +72,7 @@ class WeVoteAPIsV1TestsVoterCreate(TestCase):
         #######################################
         # Test for status: VOTER_ALREADY_EXISTS
         response3 = self.client.get(self.voter_create_url)
-        json_data3 = json.loads(response3.content)
+        json_data3 = json.loads(response3.content.decode())
 
         self.assertEqual('status' in json_data3, True,
                          "status expected in the voterCreateView json response but not found")

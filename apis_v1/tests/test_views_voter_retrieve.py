@@ -6,11 +6,10 @@ from future.standard_library import install_aliases
 # from urllib.parse import urlparse, urlencode
 # from urllib.request import urlopen, Request, build_opener, ProxyHandler
 # from urllib.error import HTTPError
-from django.core.urlresolvers import resolve, reverse
+from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
-from django.http import HttpRequest, SimpleCookie
+from django.http import SimpleCookie
 import json
-import requests
 install_aliases()
 
 LOCALHOST_URL = "http://localhost:8000/"
@@ -26,33 +25,8 @@ class WeVoteAPIsV1TestsVoterRetrieve(TestCase):
 
     def test_retrieve_with_no_cookie(self):
         response = self.client.get(self.voter_retrieve_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
-        # Python3 solution?
-        # reader = codecs.getreader("utf-8")
-        # raw_string = response.decode('utf8')
-        # raw_page = urlopen(self.voter_retrieve_url).decode("utf-8")
-        # utf_page = raw_page
-        # json_data = json.load(raw_page)
-
-        # THIS GIVES: urllib.error.URLError: <urlopen error [Errno 61] Connection refused>
-        # req = Request(self.voter_retrieve_url)
-        # response = urlopen(req)
-        # json_data = response.read()
-
-        # THIS GIVES: urllib.error.URLError: <urlopen error [Errno 61] Connection refused>
-        # req = Request(self.voter_retrieve_url)
-        # opener = build_opener()
-        # f = opener.open(req)
-        # json_data = json.loads(f.read())
-
-        # THIS GIVES: urllib.error.URLError: <urlopen error [Errno 61] Connection refused>
-        # Didn't help with the refused connection
-        # proxy_support = ProxyHandler({})
-        # opener = build_opener(proxy_support)
-        # json_data = opener.open(self.voter_retrieve_url).read(100)
-
-        #######################################
         # Without a cookie, we don't expect valid response
         self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data, True,
@@ -72,7 +46,7 @@ class WeVoteAPIsV1TestsVoterRetrieve(TestCase):
         #######################################
         # Generate the voter_device_id cookie
         response = self.client.get(self.generate_voter_device_id_url)
-        json_data = json.loads(response.content)
+        json_data = json.loads(response.content.decode())
 
         # Make sure we got back a voter_device_id we can use
         self.assertEqual('voter_device_id' in json_data, True,
@@ -86,7 +60,7 @@ class WeVoteAPIsV1TestsVoterRetrieve(TestCase):
         #######################################
         # Create a voter so we can test retrieve
         response2 = self.client.get(self.voter_create_url)
-        json_data2 = json.loads(response2.content)
+        json_data2 = json.loads(response2.content.decode())
 
         self.assertEqual('status' in json_data2, True,
                          "status expected in the voterCreateView json response but not found")
@@ -102,7 +76,7 @@ class WeVoteAPIsV1TestsVoterRetrieve(TestCase):
         #######################################
         # Test for id, first_name, last_name, email
         response3 = self.client.get(self.voter_retrieve_url)
-        json_data3 = json.loads(response3.content)
+        json_data3 = json.loads(response3.content.decode())
 
         for one_voter in json_data3:
             self.assertEqual('id' in one_voter, True, "id expected in the voterRetrieveView json response but not found")

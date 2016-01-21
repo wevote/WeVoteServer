@@ -5,7 +5,7 @@
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.models import extract_state_from_ocd_division_id
+from wevote_functions.models import extract_state_from_ocd_division_id, positive_value_exists
 
 
 TIME_SPAN_LIST = [
@@ -94,5 +94,25 @@ class ElectionManager(models.Model):
             'status':                   status,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'new_election_created':     new_election_created,
+        }
+        return results
+
+    def retrieve_elections_by_date(self, include_test_election=False):
+        try:
+            election_list_query = Election.objects.all()
+            if not positive_value_exists(include_test_election):
+                election_list_query = election_list_query.exclude(google_civic_election_id=2000)
+            election_list_query = election_list_query.order_by('election_day_text').reverse()
+            election_list = election_list_query
+            status = 'ELECTIONS_FOUND'
+            success = True
+        except Election.DoesNotExist as e:
+            status = 'NO_ELECTIONS_FOUND'
+            success = True
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_list':    election_list,
         }
         return results

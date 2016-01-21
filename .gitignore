@@ -140,7 +140,9 @@ node_modules/
 
 # Other #
 #########
-/geo/data/
+/geoip/import_data/*
+!/geoip/import_data/__init__.py
+/**/geoip-api-c
 /**/migrations/*.py
 !/**/migrations/__init__.py
 config/environment_variables.json

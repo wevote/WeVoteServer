@@ -5,9 +5,10 @@
 from django.db import models
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception
-from organization.models import Organization
+from organization.models import Organization, OrganizationManager
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, convert_to_str, positive_value_exists
+from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vote_id_last_voter_guide_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -297,6 +298,14 @@ class VoterGuideManager(models.Manager):
 class VoterGuide(models.Model):
     # We are relying on built-in Python id field
 
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our voter_guide
+    # info with other organizations running their own We Vote servers
+    # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
+    # then the string "vg" (for voter guide), and then a sequential integer like "123".
+    # We generate this id on initial save keep the last value in WeVoteSetting.we_vote_id_last_voter_guide_integer
+    we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True)
+
     # NOTE: We are using we_vote_id's instead of internal ids
     # The unique id of the organization. May be null if voter_guide owned by a public figure or voter instead of org.
     organization_we_vote_id = models.CharField(
@@ -325,12 +334,54 @@ class VoterGuide(models.Model):
         verbose_name="the period in which the organization stated this position", max_length=255, null=True,
         blank=True, unique=False)
 
+    display_name = models.CharField(
+        verbose_name="display title for this voter guide", max_length=255, null=True, blank=True, unique=False)
+
+    image_url = models.URLField(verbose_name='image url of logo/photo associated with voter guide',
+                                blank=True, null=True)
+
     voter_guide_owner_type = models.CharField(
         verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,
         default=ORGANIZATION)
 
+    # TODO DALE We want to cache the voter guide name, but in case we haven't, we force the lookup
+    def voter_guide_display_name(self):
+        if self.display_name:
+            return self.display_name
+        elif self.voter_guide_owner_type == ORGANIZATION:
+            organization_manager = OrganizationManager()
+            organization_id = 0
+            organization_we_vote_id = self.organization_we_vote_id
+            results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+            if results['organization_found']:
+                organization = results['organization']
+                organization_name = organization.organization_name
+                return organization_name
+        return ''
+
+    # TODO DALE We want to cache the image_url, but in case we haven't, we force the lookup
+    def voter_guide_image_url(self):
+        if self.image_url:
+            return self.image_url
+        elif self.voter_guide_owner_type == ORGANIZATION:
+            organization_manager = OrganizationManager()
+            organization_id = 0
+            organization_we_vote_id = self.organization_we_vote_id
+            results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+            if results['organization_found']:
+                organization = results['organization']
+                organization_photo_url = organization.organization_photo_url()
+                return organization_photo_url
+        return ''
+
     # The date of the last change to this voter_guide
     last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
+    # We want to map these here so they are available in the templates
+    ORGANIZATION = ORGANIZATION
+    PUBLIC_FIGURE = PUBLIC_FIGURE
+    VOTER = VOTER
+    UNKNOWN_VOTER_GUIDE = UNKNOWN_VOTER_GUIDE
 
     def __unicode__(self):
         return self.last_updated
@@ -351,6 +402,26 @@ class VoterGuide(models.Model):
             logger.error("voter_guide.organization did not find")
             return
         return organization
+
+    # We override the save function so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this voter_guide came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_last_voter_guide_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "vg" = tells us this is a unique id for a voter guide
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}vg{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+            # TODO we need to deal with the situation where we_vote_id is NOT unique on save
+        super(VoterGuide, self).save(*args, **kwargs)
 
 
 # This is the class that we use to rapidly show lists of voter guides, regardless of whether they are from an
@@ -377,6 +448,59 @@ class VoterGuideList(models.Model):
                 status = 'VOTER_GUIDE_FOUND'
             else:
                 status = 'NO_VOTER_GUIDES_FOUND'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    def retrieve_voter_guides_by_organization_list(self, organization_we_vote_ids_followed_by_voter):
+        voter_guide_list = []
+        voter_guide_list_found = False
+
+        if not type(organization_we_vote_ids_followed_by_voter) is list:
+            status = 'NO_VOTER_GUIDES_FOUND_MISSING_ORGANIZATION_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'voter_guide_list_found':       voter_guide_list_found,
+                'voter_guide_list':             voter_guide_list,
+            }
+            return results
+
+        if not len(organization_we_vote_ids_followed_by_voter):
+            status = 'NO_VOTER_GUIDES_FOUND_NO_ORGANIZATIONS_IN_LIST'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'voter_guide_list_found':       voter_guide_list_found,
+                'voter_guide_list':             voter_guide_list,
+            }
+            return results
+
+        try:
+            voter_guide_queryset = VoterGuide.objects.all()
+            voter_guide_queryset = voter_guide_queryset.filter(
+                organization_we_vote_id__in=organization_we_vote_ids_followed_by_voter)
+            voter_guide_queryset = voter_guide_queryset.order_by('last_updated')
+            voter_guide_list = voter_guide_queryset
+
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST'
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)

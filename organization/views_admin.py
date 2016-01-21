@@ -15,13 +15,14 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
 from candidate.models import CandidateCampaign, CandidateCampaignList
 from election.models import Election
+from organization.models import OrganizationManager
 from position.models import PositionEntered, PositionEnteredManager, ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
+from wevote_functions.models import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 
 ORGANIZATION_STANCE_CHOICES = (
@@ -51,6 +52,7 @@ def organization_list_view(request):
     template_values = {
         'messages_on_stage': messages_on_stage,
         'organization_list': organization_list,
+        'state_list':        STATE_CODE_MAP,
     }
     return render(request, 'organization/organization_list.html', template_values)
 
@@ -485,3 +487,14 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
         # if results['success']:
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_on_stage.id,)))
+
+
+# def retrieve_organization_logos_from_wikipedia_view(request, organization_id):
+#     organization_id = convert_to_int(organization_id)
+#     organization_manager = OrganizationManager()
+#     results = organization_manager.retrieve_organization(organization_id)
+#     if results['success']:
+#         organization_on_stage = results['organization']
+#         organization_on_stage.retrieve_organization_logos_from_wikipedia()
+#
+#     return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_on_stage.id,)))
