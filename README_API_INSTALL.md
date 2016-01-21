@@ -19,7 +19,7 @@ Retrieve “WeVoteServer” into that folder.
 
 Mac instructions (Based on [this](http://joebergantine.com/blog/2015/apr/30/installing-python-2-and-python-3-alongside-each-ot/))
 
-Install Python 3 from package: https://www.python.org/downloads/ 
+Install Python 3.4 from package: https://www.python.org/downloads/ 
 This allows you to run python3 and pip3. 
 (Software gets installed into /Library/Frameworks/Python.framework/Versions/3.4/bin/.)
 
