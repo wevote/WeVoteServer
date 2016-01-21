@@ -54,6 +54,15 @@ class ContestMeasure(models.Model):
     # State code
     state_code = models.CharField(verbose_name="state this measure affects", max_length=2, null=True, blank=True)
 
+    wikipedia_page_id = models.IntegerField(verbose_name="pageid", null=True, blank=True)
+    wikipedia_page_title = models.CharField(
+        verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
+    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+
+    ballotpedia_page_title = models.CharField(
+        verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
+    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+
     def get_measure_state(self):
         if positive_value_exists(self.state_code):
             return self.state_code

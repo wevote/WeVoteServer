@@ -196,6 +196,15 @@ class CandidateCampaign(models.Model):
     # The voice phone number for the candidate's campaign office.
     candidate_phone = models.CharField(verbose_name="candidate campaign phone", max_length=255, null=True, blank=True)
 
+    wikipedia_page_id = models.IntegerField(verbose_name="pageid", null=True, blank=True)
+    wikipedia_page_title = models.CharField(
+        verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
+    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+
+    ballotpedia_page_title = models.CharField(
+        verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
+    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+
     def election(self):
         try:
             election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)

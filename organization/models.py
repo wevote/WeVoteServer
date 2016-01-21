@@ -495,7 +495,11 @@ class Organization(models.Model):
     wikipedia_thumbnail_url = models.URLField(verbose_name='url of wikipedia logo thumbnail', blank=True, null=True)
     wikipedia_thumbnail_width = models.IntegerField(verbose_name="width of photo", null=True, blank=True)
     wikipedia_thumbnail_height = models.IntegerField(verbose_name="height of photo", null=True, blank=True)
-    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo thumbnail', blank=True, null=True)
+    wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
+
+    ballotpedia_page_title = models.CharField(
+        verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
+    ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
 
     NONPROFIT_501C3 = '3'
     NONPROFIT_501C4 = '4'

@@ -3,13 +3,13 @@
 # -*- coding: UTF-8 -*-
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
-from candidate.models import CandidateCampaign
+from candidate.models import CandidateCampaign, CandidateCampaignList
 from django.db import models
 from django.db.models import Q
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
-from measure.models import ContestMeasure
+from measure.models import ContestMeasure, ContestMeasureList
 from office.models import ContestOffice
 from organization.models import Organization
 from twitter.models import TwitterUser
@@ -586,11 +586,32 @@ class PositionListManager(models.Model):
         # We aren't going to search directly on google_civic_election_id, but instead assemble a list of the items
         #  on the ballot and search on individual ids
 
-        # Retrieve the support positions for this contest_measure_id
+        # Candidate related positions
+        candidate_campaign_we_vote_ids = []
+        candidate_campaign_list_manager = CandidateCampaignList()
+        candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_upcoming_election(
+            google_civic_election_id)
+        if candidate_results['candidate_list_found']:
+            candidate_list_light = candidate_results['candidate_list_light']
+            for one_candidate in candidate_list_light:
+                candidate_campaign_we_vote_ids.append(one_candidate['candidate_we_vote_id'])
+
+        # Measure related positions
+        contest_measure_we_vote_ids = []
+        contest_measure_list_manager = ContestMeasureList()
+        measure_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(
+            google_civic_election_id)
+        if measure_results['measure_list_found']:
+            measure_list_light = measure_results['measure_list_light']
+            for one_measure in measure_list_light:
+                contest_measure_we_vote_ids.append(one_measure['measure_we_vote_id'])
+
         position_list_found = False
         try:
             position_list = PositionEntered.objects.order_by('date_entered')
-            position_list = position_list.filter(candidate_campaign_we_vote_id__in=['wv01cand2897', 'wv01cand2899'])
+            position_list = position_list.filter(
+                Q(candidate_campaign_we_vote_id__in=candidate_campaign_we_vote_ids) |
+                Q(contest_measure_we_vote_id__in=contest_measure_we_vote_ids))
             # position_list = position_list.filter(contest_measure_we_vote_id=contest_measure_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
