@@ -17,9 +17,9 @@
     <select id="polling_location_state" name="polling_location_state">
         <option value="" {% if '' == polling_location_state %} selected="selected"{% endif %}>
             -- Filter by State --</option>
-    {% for state in state_list %}
-        <option value="{{ state }}"
-                {% if state == polling_location_state %} selected="selected"{% endif %}>
+    {% for key, state in state_list.items %}
+        <option value="{{ key }}"
+                {% if key == polling_location_state %} selected="selected"{% endif %}>
             {{ state }}</option>
     {% endfor %}
     </select>

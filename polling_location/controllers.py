@@ -25,7 +25,6 @@ def import_and_save_all_polling_locations_data():
     return merge_polling_location_results(*all_results)
 
 
-
 def merge_polling_location_results(*dict_args):
     results = {
         'updated':          0,
