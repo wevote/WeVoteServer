@@ -311,7 +311,7 @@ def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_
 
     position_list_manager = PositionListManager()
     if positive_value_exists(google_civic_election_id):
-        all_positions_list = position_list_manager.retrieve_all_positions_for_election(
+        positions_list = position_list_manager.retrieve_all_positions_for_election(
             google_civic_election_id, ANY_STANCE)
     else:
         voter_guide_list = []
@@ -326,9 +326,14 @@ def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+    organizations_ignored_by_voter = \
+        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(voter_id)
+
+    positions_list = position_list_manager.remove_positions_ignored_by_voter(
+        positions_list, organizations_ignored_by_voter)
 
     positions_list = position_list_manager.calculate_positions_not_followed_by_voter(
-        all_positions_list, organizations_followed_by_voter)
+        positions_list, organizations_followed_by_voter)
 
     voter_guide_list = []
     # Cycle through the positions held by groups that you don't currently follow

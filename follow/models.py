@@ -221,6 +221,26 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = {}
             return follow_organization_list
 
+    def retrieve_ignore_organization_by_voter_id(self, voter_id):
+        # Retrieve a list of follow_organization entries for this voter
+        follow_organization_list_found = False
+        following_status = FOLLOW_IGNORE
+        follow_organization_list = {}
+        try:
+            follow_organization_list = FollowOrganization.objects.all()
+            follow_organization_list = follow_organization_list.filter(voter_id=voter_id)
+            follow_organization_list = follow_organization_list.filter(following_status=following_status)
+            if len(follow_organization_list):
+                follow_organization_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        if follow_organization_list_found:
+            return follow_organization_list
+        else:
+            follow_organization_list = {}
+            return follow_organization_list
+
     def retrieve_follow_organization_by_voter_id_simple_id_array(self, voter_id):
         follow_organization_list_manager = FollowOrganizationList()
         follow_organization_list = \
@@ -230,6 +250,16 @@ class FollowOrganizationList(models.Model):
             for follow_organization in follow_organization_list:
                 follow_organization_list_simple_array.append(follow_organization.organization_id)
         return follow_organization_list_simple_array
+
+    def retrieve_ignore_organization_by_voter_id_simple_id_array(self, voter_id):
+        follow_organization_list_manager = FollowOrganizationList()
+        ignore_organization_list = \
+            follow_organization_list_manager.retrieve_ignore_organization_by_voter_id(voter_id)
+        ignore_organization_list_simple_array = []
+        if len(ignore_organization_list):
+            for ignore_organization in ignore_organization_list:
+                ignore_organization_list_simple_array.append(ignore_organization.organization_id)
+        return ignore_organization_list_simple_array
 
     def retrieve_follow_organization_by_voter_id_simple_we_vote_id_array(self, voter_id):
         follow_organization_list_manager = FollowOrganizationList()

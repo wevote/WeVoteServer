@@ -12,10 +12,10 @@
 
     <p>
     We Vote ID: {{ organization.we_vote_id }}<br />
-    Website: {{ organization.organization_website }}<br />
+    Vote Smart ID: {{ organization.vote_smart_id }}<br />
+    Website: <a href={{ organization.organization_website }} target="_blank">{{ organization.organization_website }}</a><br />
     Twitter: {{ organization.organization_twitter_handle }}<br />
-    Organization Type: {{ organization.get_organization_type_display }}<br />
-    {% if organization.wikipedia_page_title %}<a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a><br />{% endif %}
+    Wikipedia Page: {% if organization.wikipedia_page_title %}<a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>{% endif %}<br />
     <a href="{% url 'organization:organization_edit' organization.id %}">edit</a>
     </p>
 <p>

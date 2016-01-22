@@ -298,7 +298,7 @@ def positive_value_exists(value):
     :return: bool
     """
     try:
-        if value is None:
+        if value in [None, '', 'None']:
             return False
         if sys.version_info > (3, 0):
             # Python 3 code in this block

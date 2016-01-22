@@ -466,6 +466,27 @@ class PositionListManager(models.Model):
 
         return positions_not_followed_by_voter
 
+    def remove_positions_ignored_by_voter(
+            self, positions_list, organizations_ignored_by_voter):
+        """
+        We need a list of positions that were NOT made by an organization, public figure or friend that this voter follows
+        :param positions_list:
+        :param organizations_ignored_by_voter:
+        :return:
+        """
+        positions_ignored_by_voter = []
+        # Only return the positions if they are from organizations the voter follows
+        for position in positions_list:
+            # Some positions are for individual voters, so we want to filter those out
+            if position.organization_id \
+                    and position.organization_id not in organizations_ignored_by_voter:
+                logger.debug("position {position_id} ignored by voter (org {org_id})".format(
+                    position_id=position.id, org_id=position.organization_id
+                ))
+                positions_ignored_by_voter.append(position)
+
+        return positions_ignored_by_voter
+
     def retrieve_all_positions_for_candidate_campaign(self, candidate_campaign_id, candidate_campaign_we_vote_id,
                                                       stance_we_are_looking_for):
         if stance_we_are_looking_for not \

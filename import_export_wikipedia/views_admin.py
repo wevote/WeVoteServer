@@ -25,7 +25,15 @@ def import_organization_logo_from_wikipedia_view(request, organization_id):
 
     organization = results['organization']
 
-    results = retrieve_organization_logo_from_wikipedia(organization)
+    # When looking up logos one at a time, we want to force a retrieve
+    force_retrieve = True
+    results = retrieve_organization_logo_from_wikipedia(organization, force_retrieve)
+
+    if positive_value_exists(force_retrieve):
+        if 'image_options' in results:
+            for one_image in results['image_options']:
+                link_to_image = "<a href='{one_image}' target='_blank'>{one_image}</a>".format(one_image=one_image)
+                messages.add_message(request, messages.INFO, link_to_image)
 
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])

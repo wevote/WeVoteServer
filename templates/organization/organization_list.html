@@ -39,6 +39,7 @@
             <td>Twitter</td>
             <td>Voter Smart ID</td>
             <td>State</td>
+            <td>Wikipedia?</td>
             <td></td>
         </tr>
     {% for organization in organization_list %}
@@ -46,9 +47,11 @@
             <td>{{ forloop.counter }}</td>
             <td>{% if organization.wikipedia_photo_url %}<a href="{% url 'organization:organization_position_list' organization.id %}"><img src="{{ organization.wikipedia_photo_url }}" width="100px" /></a>{% endif %}</td>
             <td><a href="{% url 'organization:organization_position_list' organization.id %}">{{ organization.organization_name }}</a></td>
-            <td>{{ organization.organization_twitter_handle }}</td>
-            <td>{{ organization.vote_smart_id }}</td>
+            <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }}{% endif %}</td>
+            <td>{% if organization.organization_twitter_handle %}{{ organization.vote_smart_id }}{% endif %}</td>
             <td>{{ organization.state_served_code }}</td>
+            <td>{% if organization.wikipedia_page_id %}
+                <a href="{{ organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
             <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">edit</a></td>
         </tr>
     {% endfor %}

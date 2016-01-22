@@ -101,8 +101,10 @@ def organization_edit_process_view(request):
     """
     organization_id = convert_to_int(request.POST['organization_id'])
     organization_name = request.POST['organization_name']
-    organization_twitter_handle = request.POST['organization_twitter_handle']
+    organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
     organization_website = request.POST['organization_website']
+    wikipedia_page_title = request.POST.get('wikipedia_page_title', '')
+    wikipedia_photo_url = request.POST.get('wikipedia_photo_url', '')
 
     # Check to see if this organization is already being used anywhere
     organization_on_stage_found = False
@@ -120,6 +122,8 @@ def organization_edit_process_view(request):
             organization_on_stage.organization_name = organization_name
             organization_on_stage.organization_twitter_handle = organization_twitter_handle
             organization_on_stage.organization_website = organization_website
+            organization_on_stage.wikipedia_page_title = wikipedia_page_title
+            organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             messages.add_message(request, messages.INFO, 'Organization updated.')
