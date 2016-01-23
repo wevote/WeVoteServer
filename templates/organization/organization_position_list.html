@@ -14,12 +14,16 @@
     We Vote ID: {{ organization.we_vote_id }}<br />
     Vote Smart ID: {{ organization.vote_smart_id }}<br />
     Website: <a href={{ organization.organization_website }} target="_blank">{{ organization.organization_website }}</a><br />
-    Twitter: {{ organization.organization_twitter_handle }}<br />
+    Twitter: {% if organization.generate_twitter_link %}<a href="{{ organization.generate_twitter_link }}" target="_blank">{{ organization.organization_twitter_handle }}</a> ({{ organization.twitter_followers_count }} Followers){% endif %}<br />
+    Twitter Name: {{ organization.twitter_name }}<br />
+    Twitter Description: {{ organization.twitter_description }}<br />
+    Twitter Location: {{ organization.twitter_location }}<br />
     Wikipedia Page: {% if organization.wikipedia_page_title %}<a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>{% endif %}<br />
     <a href="{% url 'organization:organization_edit' organization.id %}">edit</a>
     </p>
 <p>
-    <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>
+    <a href="{% url 'import_export_wikipedia:import_organization_logo' organization.id %}">Retrieve photos from Wikipedia</a>,
+    <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape org website for Twitter</a>
 </p>
 
 {% if election_list %}
@@ -78,12 +82,22 @@
 {% if organization %}
     {% if organization.wikipedia_thumbnail_url %}
         <img src="{{ organization.wikipedia_thumbnail_url }}"><br />
-        Thumbnail<br />
+        Wikipedia Thumbnail<br />
     {% endif %}
 
     {% if organization.wikipedia_photo_url %}
         <img src="{{ organization.wikipedia_photo_url }}" width="100px"><br />
-        Full size<br />
+        Wikipedia Full size<br />
+    {% endif %}
+
+    {% if organization.twitter_profile_image_url_https_bigger %}
+        <img src="{{ organization.twitter_profile_image_url_https_bigger }}"><br />
+        Twitter Image (Bigger)<br />
+    {% endif %}
+
+    {% if organization.twitter_profile_image_url_https_original %}
+        <img src="{{ organization.twitter_profile_image_url_https_original }}"><br />
+        Twitter Image (Original)<br />
     {% endif %}
 {% endif %}
 

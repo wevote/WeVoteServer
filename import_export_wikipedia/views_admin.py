@@ -2,20 +2,22 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import retrieve_all_organizations_logos_from_wikipedia, retrieve_organization_logo_from_wikipedia
+from .controllers import retrieve_all_organizations_logos_from_wikipedia, \
+    retrieve_organization_logo_from_wikipedia_page, retrieve_wikipedia_page_from_wikipedia
 from django.contrib import messages
-from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from organization.models import OrganizationManager
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
+from wevote_functions.models import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 # @login_required()  # Commented out while we are developing login process()
 def import_organization_logo_from_wikipedia_view(request, organization_id):
+    logo_found = False
+
     organization_manager = OrganizationManager()
     results = organization_manager.retrieve_organization(organization_id)
 
@@ -27,28 +29,43 @@ def import_organization_logo_from_wikipedia_view(request, organization_id):
 
     # When looking up logos one at a time, we want to force a retrieve
     force_retrieve = True
-    results = retrieve_organization_logo_from_wikipedia(organization, force_retrieve)
+    organization_results = retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve)
 
-    if positive_value_exists(force_retrieve):
-        if 'image_options' in results:
-            for one_image in results['image_options']:
-                link_to_image = "<a href='{one_image}' target='_blank'>{one_image}</a>".format(one_image=one_image)
-                messages.add_message(request, messages.INFO, link_to_image)
+    if organization_results['wikipedia_page_found']:
+        wikipedia_page = organization_results['wikipedia_page']
 
-    if not results['success']:
-        messages.add_message(request, messages.INFO, results['status'])
+        logo_results = retrieve_organization_logo_from_wikipedia_page(organization, wikipedia_page, force_retrieve)
+        if logo_results['logo_found']:
+            logo_found = True
+
+        if positive_value_exists(force_retrieve):
+            if 'image_options' in logo_results:
+                for one_image in logo_results['image_options']:
+                    link_to_image = "<a href='{one_image}' target='_blank'>{one_image}</a>".format(one_image=one_image)
+                    messages.add_message(request, messages.INFO, link_to_image)
+
+        if not logo_results['success']:
+            messages.add_message(request, messages.ERROR, logo_results['status'])
     else:
-        messages.add_message(request, messages.INFO, "Wikipedia information retrieved.")
+        messages.add_message(request, messages.ERROR, "Wikipedia page not found. " + organization_results['status'])
+
+    if logo_found:
+        messages.add_message(request, messages.INFO, "Wikipedia logo retrieved.")
+    else:
+        messages.add_message(request, messages.ERROR, "Wikipedia logo not retrieved.")
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
 
 
+# @login_required()  # Commented out while we are developing login process()
 def retrieve_all_organizations_logos_from_wikipedia_view(request):
     results = retrieve_all_organizations_logos_from_wikipedia()
 
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])
     else:
-        messages.add_message(request, messages.INFO, "Wikipedia information retrieved.")
+        logos_found = results['logos_found']
+        messages.add_message(request, messages.INFO, "Wikipedia logos retrieved. "
+                                                     "Logos found: {logos_found}".format(logos_found=logos_found))
 
     return HttpResponseRedirect(reverse('organization:organization_list', args=()))

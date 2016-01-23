@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^follow/', include('follow.urls', namespace="follow")),
     url(r'^import_export_google_civic/', include(
         'import_export_google_civic.urls', namespace="import_export_google_civic")),
+    url(r'^import_export_twitter/', include('import_export_twitter.urls', namespace="import_export_twitter")),
     url(r'^import_export_vote_smart/', include('import_export_vote_smart.urls', namespace="import_export_vote_smart")),
     url(r'^import_export_wikipedia/', include('import_export_wikipedia.urls', namespace="import_export_wikipedia")),
     url(r'^info/', include('quick_info.urls', namespace="quick_info")),

@@ -11,7 +11,8 @@
     Vote Smart special interest groups <a href="{% url 'import_export_vote_smart:vote_smart_index' %}">here</a>.</p>
 
 <p>
-    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}">Retrieve photos from Wikipedia</a>
+    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}">Retrieve photos from Wikipedia</a>,
+    <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}">Scrape social media for all orgs</a>
 </p>
 
 {% if state_list %}
@@ -45,7 +46,7 @@
     {% for organization in organization_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{% if organization.wikipedia_photo_url %}<a href="{% url 'organization:organization_position_list' organization.id %}"><img src="{{ organization.wikipedia_photo_url }}" width="100px" /></a>{% endif %}</td>
+            <td>{% if organization.organization_photo_url %}<a href="{% url 'organization:organization_position_list' organization.id %}"><img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
             <td><a href="{% url 'organization:organization_position_list' organization.id %}">{{ organization.organization_name }}</a></td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }}{% endif %}</td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.vote_smart_id }}{% endif %}</td>

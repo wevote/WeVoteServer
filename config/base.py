@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'follow',
     'geoip',
     'import_export_google_civic',
+    'import_export_twitter',  # See also twitter (below)
     'import_export_vote_smart',
     'import_export_wikipedia',
     'measure',
@@ -100,7 +101,7 @@ INSTALLED_APPS = (
     'support_oppose_deciding',
     'star',
     'tag',
-    'twitter',
+    'twitter',  # See also import_export_twitter
     'voter',  # See also AUTH_USER_MODEL in config/settings.py
     'voter_guide',
     'wevote_functions',

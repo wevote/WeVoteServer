@@ -31,6 +31,7 @@ selenium==2.45.0
 simplejson==3.6.5
 six==1.9.0
 static3==0.5.1
+tweepy==3.5.0
 Unipath==1.1
 uritemplate==0.6
 validate-email==1.3

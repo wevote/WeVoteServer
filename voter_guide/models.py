@@ -344,6 +344,9 @@ class VoterGuide(models.Model):
         verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,
         default=ORGANIZATION)
 
+    twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
+                                                  null=True, blank=True)
+
     # TODO DALE We want to cache the voter guide name, but in case we haven't, we force the lookup
     def voter_guide_display_name(self):
         if self.display_name:
@@ -439,7 +442,7 @@ class VoterGuideList(models.Model):
         voter_guide_list_found = False
 
         try:
-            voter_guide_queryset = VoterGuide.objects.order_by('last_updated')
+            voter_guide_queryset = VoterGuide.objects.order_by('-twitter_followers_count')
             voter_guide_list = voter_guide_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
 
@@ -493,7 +496,7 @@ class VoterGuideList(models.Model):
             voter_guide_queryset = VoterGuide.objects.all()
             voter_guide_queryset = voter_guide_queryset.filter(
                 organization_we_vote_id__in=organization_we_vote_ids_followed_by_voter)
-            voter_guide_queryset = voter_guide_queryset.order_by('last_updated')
+            voter_guide_queryset = voter_guide_queryset.order_by('-twitter_followers_count')
             voter_guide_list = voter_guide_queryset
 
             if len(voter_guide_list):
@@ -520,7 +523,7 @@ class VoterGuideList(models.Model):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
-            voter_guide_queryset = VoterGuide.objects.order_by('last_updated')
+            voter_guide_queryset = VoterGuide.objects.order_by('-twitter_followers_count')
             voter_guide_list = voter_guide_queryset
 
             if len(voter_guide_list):

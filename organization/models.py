@@ -285,6 +285,118 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    def update_organization_social_media(self, organization, organization_twitter_handle=False,
+                                         organization_facebook=False):
+        """
+        Update an organization entry with general social media data.
+        """
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        success = False
+        status = "ENTERING_UPDATE_OR_CREATE_ORGANIZATION"
+        values_changed = False
+
+        organization_twitter_handle = organization_twitter_handle.strip() if organization_twitter_handle else False
+        organization_facebook = organization_facebook.strip() if organization_facebook else False
+        # organization_image = organization_image.strip() if organization_image else False
+
+        if organization:
+            if organization_twitter_handle:
+                if organization_twitter_handle != organization.organization_twitter_handle:
+                    organization.organization_twitter_handle = organization_twitter_handle
+                    values_changed = True
+            if organization_facebook:
+                if organization_facebook != organization.organization_facebook:
+                    organization.organization_facebook = organization_facebook
+                    values_changed = True
+
+            if values_changed:
+                organization.save()
+                success = True
+                status = "SAVED_ORG_SOCIAL_MEDIA"
+            else:
+                success = True
+                status = "NO_CHANGES_SAVED_TO_ORG_SOCIAL_MEDIA"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'DoesNotExist':             exception_does_not_exist,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'organization':             organization,
+        }
+        return results
+
+    def update_organization_twitter_details(self, organization, twitter_json):
+        """
+        Update an organization entry with details retrieved from the Twitter API.
+        """
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        success = False
+        status = "ENTERING_UPDATE_ORGANIZATION_TWITTER_DETAILS"
+        values_changed = False
+
+        if organization:
+            if positive_value_exists(twitter_json['id']):
+                if convert_to_int(twitter_json['id']) != organization.twitter_user_id:
+                    organization.twitter_user_id = convert_to_int(twitter_json['id'])
+                    values_changed = True
+            if positive_value_exists(twitter_json['screen_name']):
+                if twitter_json['screen_name'] != organization.organization_twitter_handle:
+                    organization.organization_twitter_handle = twitter_json['screen_name']
+                    values_changed = True
+            if positive_value_exists(twitter_json['name']):
+                if twitter_json['name'] != organization.twitter_name:
+                    organization.twitter_name = twitter_json['name']
+                    values_changed = True
+            if positive_value_exists(twitter_json['followers_count']):
+                if convert_to_int(twitter_json['followers_count']) != organization.twitter_followers_count:
+                    organization.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+                    values_changed = True
+            if positive_value_exists(twitter_json['profile_image_url_https']):
+                if twitter_json['profile_image_url_https'] != organization.twitter_profile_image_url_https:
+                    organization.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+                    values_changed = True
+            if positive_value_exists(twitter_json['description']):
+                if twitter_json['description'] != organization.twitter_description:
+                    organization.twitter_description = twitter_json['description']
+                    values_changed = True
+            if positive_value_exists(twitter_json['location']):
+                if twitter_json['location'] != organization.twitter_location:
+                    organization.twitter_location = twitter_json['location']
+                    values_changed = True
+
+            if values_changed:
+                organization.save()
+                success = True
+                status = "SAVED_ORG_TWITTER_DETAILS"
+            else:
+                success = True
+                status = "NO_CHANGES_SAVED_TO_ORG_TWITTER_DETAILS"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'DoesNotExist':             exception_does_not_exist,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'organization':             organization,
+        }
+        return results
+
+    def update_social_media_statistics_in_other_tables(self, organization):
+        # TODO DALE Implement calls out to other tables that use any of these social media statistics
+        # twitter_followers_count - voter_guide uses this for sorting order
+        return
+        # results = {
+        #     'success':                  success,
+        #     'status':                   status,
+        #     'DoesNotExist':             exception_does_not_exist,
+        #     'MultipleObjectsReturned':  exception_multiple_object_returned,
+        #     'organization':             organization,
+        # }
+        # return results
+
     def delete_organization(self, organization_id):
         organization_id = convert_to_int(organization_id)
         organization_deleted = False
@@ -467,8 +579,6 @@ class Organization(models.Model):
     organization_name = models.CharField(
         verbose_name="organization name", max_length=255, null=False, blank=False)
     organization_website = models.URLField(verbose_name='url of the endorsing organization', blank=True, null=True)
-    organization_twitter_handle = models.CharField(
-        verbose_name='organization twitter handle', max_length=255, null=True, unique=False)
     organization_email = models.EmailField(
         verbose_name='organization contact email address', max_length=255, unique=False, null=True, blank=True)
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
@@ -488,6 +598,19 @@ class Organization(models.Model):
     organization_phone1 = models.CharField(max_length=255, null=True, blank=True)
     organization_phone2 = models.CharField(max_length=255, null=True, blank=True)
     organization_fax = models.CharField(max_length=255, null=True, blank=True)
+
+    twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
+    organization_twitter_handle = models.CharField(
+        verbose_name='organization twitter screen_name', max_length=255, null=True, unique=False)
+    twitter_name = models.CharField(
+        verbose_name="org name from twitter", max_length=255, null=True, blank=True)
+    twitter_location = models.CharField(
+        verbose_name="org location from twitter", max_length=255, null=True, blank=True)
+    twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
+                                                  null=True, blank=True)
+    twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
+    twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
+                                           max_length=255, null=True, blank=True)
 
     wikipedia_page_id = models.IntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
@@ -522,9 +645,23 @@ class Organization(models.Model):
     def organization_photo_url(self):
         if self.organization_image:
             return self.organization_image
+        elif self.twitter_profile_image_url_https:
+            return self.twitter_profile_image_url_https_bigger()
         elif self.wikipedia_photo_url:
             return self.wikipedia_photo_url
         return ''
+
+    def twitter_profile_image_url_https_bigger(self):
+        if self.twitter_profile_image_url_https:
+            return self.twitter_profile_image_url_https.replace("_normal", "_bigger")
+        else:
+            return ''
+
+    def twitter_profile_image_url_https_original(self):
+        if self.twitter_profile_image_url_https:
+            return self.twitter_profile_image_url_https.replace("_normal", "")
+        else:
+            return ''
 
     def __unicode__(self):
         return self.organization_name
@@ -584,6 +721,12 @@ class Organization(models.Model):
         return self.organization_type in (
             self.NONPROFIT_501C3, self.NONPROFIT_501C4, self.POLITICAL_ACTION_COMMITTEE,
             self.CORPORATION, self.NEWS_CORPORATION)
+
+    def generate_twitter_link(self):
+        if self.organization_twitter_handle:
+            return "https://twitter.com/{twitter_handle}".format(twitter_handle=self.organization_twitter_handle)
+        else:
+            return ''
 
     def generate_wikipedia_link(self):
         if self.wikipedia_page_title:
