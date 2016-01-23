@@ -30,4 +30,6 @@ class Command(BaseCommand):
                 outfile.writelines(infile)
             self.stdout.write('Deleting {}\n'.format(dowloadpath))
             os.remove(dowloadpath)
-            self.stdout.write('Done with {}'.format(path))
+            self.stdout.write('Done with {}\n'.format(path))
+
+            self.stdout.write('\nDownload the paid db from MaxMind for more precise results. Ask Dale for the credentials'.format(path))
