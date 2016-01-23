@@ -21,7 +21,7 @@ def voter_location_retrieve_from_ip_for_api(ip_address):
     g = GeoIP()
     location = g.city(ip_address)
     if location is None:
-        return HttpResponse('no matching location for this IP address', status=400)
+        return HttpResponse('no matching location for IP address {}'.format(ip_address), status=400)
     response_content = {
         'success': True,
         'voter_location': '{0[city]}, {0[region]} {0[postal_code]}'.format(location)

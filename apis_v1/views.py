@@ -1,12 +1,12 @@
 # apis_v1/views.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
+from django.http import HttpResponse
 
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
     organization_stop_following, voter_count, voter_create
 from ballot.controllers import ballot_item_options_retrieve_for_api, voter_ballot_items_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
-from django.http import HttpResponse
 from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
@@ -36,6 +36,8 @@ from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, vo
 from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
     get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie, positive_value_exists, convert_to_int
 import wevote_functions.admin
+from utils.api_utils import get_ip_from_headers
+
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -569,7 +571,7 @@ def voter_location_retrieve_from_ip_view(request):
     :param request:
     :return:
     """
-    ip_address = request.GET.get('ip_address')
+    ip_address = request.GET.get('ip_address') or get_ip_from_headers(request)
     if ip_address is None:
         return HttpResponse('missing ip_address request parameter', status=400)
     return voter_location_retrieve_from_ip_for_api(ip_address=ip_address)
