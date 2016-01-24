@@ -8,7 +8,7 @@ from import_export_google_civic.controllers import retrieve_from_google_civic_ap
     store_results_from_google_civic_api_election_query
 import json
 import wevote_functions.admin
-from wevote_functions.models import positive_value_exists
+from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

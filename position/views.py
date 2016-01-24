@@ -10,7 +10,7 @@ from .models import ANY_STANCE, SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECI
     PositionListManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, get_voter_device_id
+from wevote_functions.functions import convert_to_int, get_voter_device_id
 
 
 logger = wevote_functions.admin.get_logger(__name__)

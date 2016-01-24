@@ -7,7 +7,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_saved_exception
 import string
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, generate_random_string
+from wevote_functions.functions import convert_to_int, generate_random_string
 
 
 logger = wevote_functions.admin.get_logger(__name__)

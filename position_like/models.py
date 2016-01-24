@@ -8,7 +8,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
 from position.models import PositionEnteredManager
 from voter.models import VoterManager
 import wevote_functions.admin
-from wevote_functions.models import positive_value_exists
+from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

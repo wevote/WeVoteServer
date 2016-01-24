@@ -5,7 +5,7 @@
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.models import extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import extract_state_from_ocd_division_id, positive_value_exists
 
 
 TIME_SPAN_LIST = [

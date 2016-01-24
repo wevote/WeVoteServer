@@ -10,7 +10,7 @@ from measure.models import ContestMeasureList
 from office.models import ContestOfficeList
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
-from wevote_functions.models import is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

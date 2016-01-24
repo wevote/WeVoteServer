@@ -9,7 +9,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
     handle_record_not_saved_exception
 from validate_email import validate_email
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, generate_voter_device_id, get_voter_device_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fetch_site_unique_id_prefix
 
 
@@ -350,7 +350,7 @@ class VoterDeviceLink(models.Model):
     """
     # The id for this object is not used in any searches
     # A randomly generated identifier that gets stored as a cookie on a single device
-    # See wevote_functions.models, function generate_voter_device_id for a discussion of voter_device_id length
+    # See wevote_functions.functions, function generate_voter_device_id for a discussion of voter_device_id length
     voter_device_id = models.CharField(verbose_name='voter device id',
                                        max_length=255, null=False, blank=False, unique=True)
     # The voter_id associated with voter_device_id

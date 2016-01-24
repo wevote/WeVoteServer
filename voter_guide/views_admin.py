@@ -11,7 +11,7 @@ from django.shortcuts import render
 from election.models import Election, TIME_SPAN_LIST
 from organization.models import Organization, OrganizationManager
 from position.models import PositionEntered
-from wevote_functions.models import positive_value_exists
+from wevote_functions.functions import positive_value_exists
 
 
 # @login_required()  # Commented out while we are developing login process()

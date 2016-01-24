@@ -15,7 +15,7 @@ from organization.controllers import organizations_import_from_sample_file
 from polling_location.controllers import import_and_save_all_polling_locations_data
 from position.controllers import positions_import_from_sample_file
 from voter.models import Voter, voter_setup
-from wevote_functions.models import positive_value_exists, set_voter_device_id
+from wevote_functions.functions import positive_value_exists, set_voter_device_id
 
 
 def admin_home_view(request):

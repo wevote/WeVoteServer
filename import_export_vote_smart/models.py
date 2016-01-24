@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import Q
 from organization.models import OrganizationManager, Organization
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)

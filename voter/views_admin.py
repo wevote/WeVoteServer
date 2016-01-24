@@ -11,7 +11,7 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
-from wevote_functions.models import convert_to_int
+from wevote_functions.functions import convert_to_int
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)

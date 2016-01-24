@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import OrganizationManager
 import wevote_functions.admin
-from wevote_functions.models import positive_value_exists
+from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

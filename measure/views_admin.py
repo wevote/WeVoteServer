@@ -17,7 +17,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

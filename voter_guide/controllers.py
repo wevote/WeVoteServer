@@ -11,7 +11,7 @@ from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, 
 from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE, VoterGuideList, \
     VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
-from wevote_functions.models import is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

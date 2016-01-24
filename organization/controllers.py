@@ -14,7 +14,7 @@ from organization.models import Organization
 from voter.models import fetch_voter_id_from_voter_device_link
 from voter_guide.models import VoterGuide, VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

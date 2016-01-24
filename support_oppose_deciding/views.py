@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from position.models import PositionEnteredManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
-from wevote_functions.models import get_voter_device_id
+from wevote_functions.functions import get_voter_device_id
 
 
 logger = wevote_functions.admin.get_logger(__name__)

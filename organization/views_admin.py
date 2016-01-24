@@ -22,7 +22,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 
 ORGANIZATION_STANCE_CHOICES = (

@@ -5,7 +5,7 @@
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.models import extract_zip_formatted_from_zip9
+from wevote_functions.functions import extract_zip_formatted_from_zip9
 
 
 logger = wevote_functions.admin.get_logger(__name__)

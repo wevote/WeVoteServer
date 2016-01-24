@@ -6,7 +6,7 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
 from django.http import HttpResponse
 import json
 import wevote_functions.admin
-from wevote_functions.models import is_voter_device_id_valid
+from wevote_functions.functions import is_voter_device_id_valid
 
 logger = wevote_functions.admin.get_logger(__name__)
 

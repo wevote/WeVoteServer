@@ -7,7 +7,7 @@ from django.db import models
 from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.models import positive_value_exists
+from wevote_functions.functions import positive_value_exists
 
 OFFICE = 'OFFICE'
 CANDIDATE = 'CANDIDATE'

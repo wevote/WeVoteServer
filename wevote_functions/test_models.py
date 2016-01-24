@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.test import TestCase
-from .models import positive_value_exists
+from .functions import positive_value_exists
 
 
 class WeVoteFunctionsTestsModels(TestCase):

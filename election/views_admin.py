@@ -19,7 +19,7 @@ from polling_location.models import PollingLocation
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import wevote_functions.admin
-from wevote_functions.models import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

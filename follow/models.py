@@ -7,7 +7,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from organization.models import OrganizationManager
 import wevote_functions.admin
-from wevote_functions.models import positive_value_exists
+from wevote_functions.functions import positive_value_exists
 from voter.models import VoterManager
 
 

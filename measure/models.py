@@ -7,7 +7,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_measure_integer, \
     fetch_next_we_vote_id_last_measure_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.models import extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import extract_state_from_ocd_division_id, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)

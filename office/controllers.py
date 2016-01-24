@@ -8,7 +8,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse
 import json
 import wevote_functions.admin
-from wevote_functions.models import positive_value_exists
+from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 

@@ -9,7 +9,7 @@ from office.models import ContestOffice
 import re
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.models import extract_first_name_from_full_name, extract_last_name_from_full_name, \
+from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name, \
     extract_state_from_ocd_division_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
