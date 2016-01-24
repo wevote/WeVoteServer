@@ -60,6 +60,7 @@ def voter_guides_followed_retrieve_doc_template_values(url_root):
                    '     "voter_guide_image_url": string (We Vote ID for the person that owns the voter guide),\n' \
                    '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
                    '     "google_civic_election_id": integer,\n' \
+                   '     "twitter_followers_count": integer,\n' \
                    '     "owner_voter_id": integer TO BE DEPRECATED,\n' \
                    '   ],\n' \
                    '  "google_civic_election_id": integer,\n' \

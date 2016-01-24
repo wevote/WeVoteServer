@@ -180,6 +180,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
                 'organization_we_vote_id': voter_guide.organization_we_vote_id,
                 'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
+                'twitter_followers_count': voter_guide.twitter_followers_count,
                 'owner_voter_id': voter_guide.owner_voter_id,
                 'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
@@ -433,6 +434,7 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
                 'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
                 'organization_we_vote_id': voter_guide.organization_we_vote_id,
                 'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
+                'twitter_followers_count': voter_guide.twitter_followers_count,
                 'owner_voter_id': voter_guide.owner_voter_id,
                 'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }

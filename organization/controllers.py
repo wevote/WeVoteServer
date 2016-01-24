@@ -106,8 +106,7 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
             'status': 'VALID_VOTER_DEVICE_ID_MISSING',
             'success': False,
             'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
+            'organization_list': [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -117,8 +116,7 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
             'status': 'VALID_VOTER_ID_MISSING',
             'success': False,
             'voter_device_id': voter_device_id,
-            'maximum_number_to_retrieve': maximum_number_to_retrieve,
-            'voter_guides': [],
+            'organization_list': [],
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -139,6 +137,9 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
                 'organization_twitter_handle':
                     organization.organization_twitter_handle if positive_value_exists(
                         organization.organization_twitter_handle) else '',
+                'twitter_followers_count':
+                    organization.twitter_followers_count if positive_value_exists(
+                        organization.twitter_followers_count) else 0,
                 'organization_email':
                     organization.organization_email if positive_value_exists(organization.organization_email) else '',
                 'organization_facebook': organization.organization_facebook
@@ -288,6 +289,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):
             'organization_email': '',
             'organization_website': '',
             'organization_twitter_handle': '',
+            'twitter_followers_count': '',
             'organization_facebook': '',
             'organization_photo_url': '',
         }
@@ -310,6 +312,9 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):
             'organization_twitter_handle':
                 organization.organization_twitter_handle if positive_value_exists(
                     organization.organization_twitter_handle) else '',
+            'twitter_followers_count':
+                organization.twitter_followers_count if positive_value_exists(
+                    organization.twitter_followers_count) else 0,
             'organization_email':
                 organization.organization_email if positive_value_exists(organization.organization_email) else '',
             'organization_facebook':
@@ -328,6 +333,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):
             'organization_email': '',
             'organization_website': '',
             'organization_twitter_handle': '',
+            'twitter_followers_count': '',
             'organization_facebook': '',
             'organization_photo_url': '',
         }
