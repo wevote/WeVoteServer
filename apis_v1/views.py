@@ -527,7 +527,7 @@ def voter_guides_followed_retrieve_view(request):
                                                   maximum_number_to_retrieve=maximum_number_to_retrieve)
 
 
-def voter_guides_to_follow_retrieve_view(request):
+def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetrieve
     """
     Retrieve a list of voter_guides that a voter might want to follow (voterGuidesToFollow)
     :param request:

@@ -3,6 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from election.models import ElectionManager, TIME_SPAN_LIST
+
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception
 from organization.models import Organization, OrganizationManager
@@ -272,6 +274,91 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
+    def retrieve_most_recent_voter_guide_for_org(self, organization_we_vote_id):
+        status = 'ENTERING_RETRIEVE_MOST_RECENT_VOTER_GUIDE_FOR_ORG'
+        voter_guide_found = False
+        voter_guide = VoterGuide()
+        voter_guide_manager = VoterGuideManager()
+        for time_span in TIME_SPAN_LIST:
+            voter_guide_by_time_span_results = voter_guide_manager.retrieve_voter_guide(
+                vote_smart_time_span=time_span,
+                organization_we_vote_id=organization_we_vote_id)
+            if voter_guide_by_time_span_results['voter_guide_found']:
+                voter_guide_found = True
+                voter_guide = voter_guide_by_time_span_results['voter_guide']
+                status = 'MOST_RECENT_VOTER_GUIDE_FOUND_FOR_ORG_BY_TIME_SPAN'
+                results = {
+                    'success':              voter_guide_found,
+                    'status':               status,
+                    'voter_guide_found':    voter_guide_found,
+                    'voter_guide':          voter_guide,
+                }
+                return results
+
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_elections_by_date()
+        if results['success']:
+            election_list = results['election_list']
+            for one_election in election_list:
+                voter_guide_results = voter_guide_manager.retrieve_voter_guide(
+                    google_civic_election_id=one_election.google_civic_election_id,
+                    organization_we_vote_id=organization_we_vote_id)
+                if voter_guide_results['voter_guide_found']:
+                    voter_guide_found = True
+                    voter_guide = voter_guide_results['voter_guide']
+                    status = 'MOST_RECENT_VOTER_GUIDE_FOUND_FOR_ORG_BY_ELECTION_ID'
+                    results = {
+                        'success':              voter_guide_found,
+                        'status':               status,
+                        'voter_guide_found':    voter_guide_found,
+                        'voter_guide':          voter_guide,
+                    }
+                    return results
+
+        results = {
+            'success':              False,
+            'status':               status,
+            'voter_guide_found':    voter_guide_found,
+            'voter_guide':          voter_guide,
+        }
+        return results
+
+    def update_voter_guide_social_media_statistics(self, organization):
+        """
+        Update voter_guide entry with details retrieved from Twitter, Facebook, or ???
+        """
+        success = False
+        status = "ENTERING_UPDATE_VOTER_GUIDE_SOCIAL_MEDIA_STATISTICS"
+        values_changed = False
+        voter_guide = VoterGuide()
+
+        if organization:
+            if positive_value_exists(organization.twitter_followers_count):
+                results = self.retrieve_most_recent_voter_guide_for_org(organization_we_vote_id=organization.we_vote_id)
+
+                if results['voter_guide_found']:
+                    voter_guide = results['voter_guide']
+                    if positive_value_exists(voter_guide.id):
+                        if voter_guide.twitter_followers_count != organization.twitter_followers_count:
+                            voter_guide.twitter_followers_count = organization.twitter_followers_count
+                            values_changed = True
+
+            if positive_value_exists(values_changed):
+                voter_guide.save()
+                success = True
+                status = "SAVED_ORG_TWITTER_DETAILS"
+            else:
+                success = True
+                status = "NO_CHANGES_SAVED_TO_ORG_TWITTER_DETAILS"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'organization':             organization,
+            'voter_guide':              voter_guide,
+        }
+        return results
+
     def delete_voter_guide(self, voter_guide_id):
         voter_guide_id = convert_to_int(voter_guide_id)
         voter_guide_deleted = False
@@ -345,7 +432,7 @@ class VoterGuide(models.Model):
         default=ORGANIZATION)
 
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
-                                                  null=True, blank=True)
+                                                  null=False, blank=True, default=0)
 
     # TODO DALE We want to cache the voter guide name, but in case we haven't, we force the lookup
     def voter_guide_display_name(self):
@@ -545,6 +632,25 @@ class VoterGuideList(models.Model):
             'voter_guide_list':             voter_guide_list,
         }
         return results
+
+    def reorder_voter_guide_list(self, voter_guide_list, field_to_order_by, asc_or_desc='desc'):
+        def get_key_to_sort_by(voter_guide):
+            if field_to_order_by == 'twitter_followers_count':
+                return voter_guide.twitter_followers_count
+            else:
+                return voter_guide.twitter_followers_count
+
+        def getKey(voter_guide):
+            return voter_guide.twitter_followers_count
+
+        if not len(voter_guide_list):
+            return voter_guide_list
+
+        is_desc = True if asc_or_desc == 'desc' else False
+
+        voter_guide_list_sorted = sorted(voter_guide_list, key=getKey, reverse=True)
+
+        return voter_guide_list_sorted
 
 
 class VoterGuidePossibilityManager(models.Manager):

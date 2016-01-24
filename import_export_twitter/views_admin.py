@@ -7,6 +7,7 @@ from .controllers import retrieve_twitter_user_info, scrape_social_media_from_on
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import OrganizationManager
 import wevote_functions.admin
 from wevote_functions.models import positive_value_exists
@@ -58,7 +59,8 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
                 organization, results['twitter_json'])
 
             if save_results['success']:
-                results = organization_manager.update_social_media_statistics_in_other_tables(organization)
+                organization = save_results['organization']
+                results = update_social_media_statistics_in_other_tables(organization)
     # ######################################
 
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))

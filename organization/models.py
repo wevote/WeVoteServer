@@ -331,8 +331,6 @@ class OrganizationManager(models.Manager):
         """
         Update an organization entry with details retrieved from the Twitter API.
         """
-        exception_does_not_exist = False
-        exception_multiple_object_returned = False
         success = False
         status = "ENTERING_UPDATE_ORGANIZATION_TWITTER_DETAILS"
         values_changed = False
@@ -378,24 +376,9 @@ class OrganizationManager(models.Manager):
         results = {
             'success':                  success,
             'status':                   status,
-            'DoesNotExist':             exception_does_not_exist,
-            'MultipleObjectsReturned':  exception_multiple_object_returned,
             'organization':             organization,
         }
         return results
-
-    def update_social_media_statistics_in_other_tables(self, organization):
-        # TODO DALE Implement calls out to other tables that use any of these social media statistics
-        # twitter_followers_count - voter_guide uses this for sorting order
-        return
-        # results = {
-        #     'success':                  success,
-        #     'status':                   status,
-        #     'DoesNotExist':             exception_does_not_exist,
-        #     'MultipleObjectsReturned':  exception_multiple_object_returned,
-        #     'organization':             organization,
-        # }
-        # return results
 
     def delete_organization(self, organization_id):
         organization_id = convert_to_int(organization_id)

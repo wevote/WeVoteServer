@@ -5,6 +5,7 @@
 # See also WeVoteServer/twitter/controllers.py for routines that manage internal twitter data
 
 from config.base import get_environment_variable
+from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import Organization, OrganizationManager
 import re
 from socket import timeout
@@ -154,7 +155,7 @@ def scrape_and_save_social_media_from_all_organizations():
                     organization, results['twitter_json'])
 
                 if save_results['success']:
-                    results = organization_manager.update_social_media_statistics_in_other_tables(organization)
+                    results = update_social_media_statistics_in_other_tables(organization)
         # ######################################
 
         # temp_count += 1

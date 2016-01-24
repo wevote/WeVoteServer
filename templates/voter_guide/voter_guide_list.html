@@ -40,8 +40,14 @@
         <tr>
             <td>{{ forloop.counter }}</td>
         {% if voter_guide.voter_guide_owner_type == voter_guide.ORGANIZATION %}
-            <td><a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}">
-                {{ voter_guide.organization.organization_name }}</a></td>
+            <td>
+            {% if voter_guide.organization %}
+                <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}">
+                {{ voter_guide.organization.organization_name }}</a>
+            {% else %}
+                (no org found)
+            {% endif %}
+                </td>
         {% elif voter_guide.voter_guide_owner_type == voter_guide.PUBLIC_FIGURE %}
             <td><a href="#">Public Figure</a></td>
         {% elif voter_guide.voter_guide_owner_type == voter_guide.VOTER %}

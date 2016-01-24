@@ -161,6 +161,14 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         success = False
 
+    if len(voter_guide_list):
+        # We want to order these voter guides by most twitter followers to least twitter followers
+        # This serves as a rough indicator of the influence of the group
+        voter_guide_list_manager = VoterGuideList()
+        voter_guide_list = voter_guide_list_manager.reorder_voter_guide_list(voter_guide_list,
+                                                                             'twitter_followers_count',
+                                                                             'desc')
+
     if success:
         number_added_to_list = 0
         for voter_guide in voter_guide_list:
@@ -381,7 +389,7 @@ def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_
 
 def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0):
     """
-    Start with the organizations followed and return a list of voter_guides.
+    Start with the organizations followed and return a list of voter_guides. voterGuidesFollowedRetrieve
     See also organizations_followed_for_api, which returns a list of organizations.
 
     :param voter_device_id:

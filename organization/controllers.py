@@ -12,6 +12,7 @@ from follow.models import FollowOrganizationManager, FollowOrganizationList, FOL
 import json
 from organization.models import Organization
 from voter.models import fetch_voter_id_from_voter_device_link
+from voter_guide.models import VoterGuide, VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.models import convert_to_int, positive_value_exists
 
@@ -507,5 +508,31 @@ def retrieve_organizations_followed(voter_id):
         'status':                       status,
         'organization_list_found':      organization_list_found,
         'organization_list':            organization_list,
+    }
+    return results
+
+
+def update_social_media_statistics_in_other_tables(organization):
+    """
+    Update other tables that use any of these social media statistics
+    :param organization:
+    :return:
+    """
+
+    voter_guide_manager = VoterGuideManager()
+    voter_guide_results = voter_guide_manager.update_voter_guide_social_media_statistics(organization)
+
+    if voter_guide_results['success'] and voter_guide_results['voter_guide']:
+        voter_guide = voter_guide_results['voter_guide']
+    else:
+        voter_guide = VoterGuide()
+
+    status = "FINISHED_UPDATE_SOCIAL_MEDIA_STATISTICS_IN_OTHER_TABLES"
+
+    results = {
+        'success':      True,
+        'status':       status,
+        'organization': organization,
+        'voter_guide':  voter_guide,
     }
     return results
