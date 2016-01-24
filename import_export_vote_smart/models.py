@@ -767,7 +767,7 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
             }
             return results
 
-        # Retrieve Special Interest Group
+        # Retrieve Special Interest Group from local cache db
         try:
             vote_smart_organization = VoteSmartSpecialInterestGroup.objects.get(
                 sigId=vote_smart_special_interest_group_id)
@@ -783,6 +783,7 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
                 'success':              False,
                 'status':               "SPECIAL_INTEREST_GROUP_MISSING",
                 'organization_found':   False,
+                'organization_created': False,
                 'organization':         Organization(),
             }
             return results
@@ -791,6 +792,7 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
         organization_id = 0
         organization_we_vote_id = None
         we_vote_organization_found = False
+        we_vote_organization_created = False
         results = we_vote_organization_manager.retrieve_organization(organization_id, organization_we_vote_id,
                                                                      vote_smart_special_interest_group_id)
 
@@ -819,7 +821,7 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
                     'state_served_code': vote_smart_organization.stateId,
                     'vote_smart_id': vote_smart_organization.sigId,
                 }
-                we_vote_organization, created = Organization.objects.update_or_create(
+                we_vote_organization, we_vote_organization_created = Organization.objects.update_or_create(
                     organization_name=vote_smart_organization.name,
                     # organization_website=vote_smart_organization.url,
                     # organization_email=vote_smart_organization.email,
@@ -843,6 +845,7 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
             'success':              success,
             'status':               status,
             'organization_found':   we_vote_organization_found,
+            'organization_created': we_vote_organization_created,
             'organization':         we_vote_organization,
         }
         return results

@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import retrieve_twitter_user_info, scrape_social_media_from_one_site, \
+from .controllers import refresh_twitter_details, retrieve_twitter_user_info, scrape_social_media_from_one_site, \
     scrape_and_save_social_media_from_all_organizations
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -16,7 +16,24 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # @login_required()  # Commented out while we are developing login process()
+def refresh_twitter_details_view(request, organization_id):
+    organization_manager = OrganizationManager()
+    results = organization_manager.retrieve_organization(organization_id)
+
+    if not results['organization_found']:
+        messages.add_message(request, messages.INFO, results['status'])
+        return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)))
+
+    organization = results['organization']
+
+    results = refresh_twitter_details(organization)
+
+    return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
+
+
+# @login_required()  # Commented out while we are developing login process()
 def scrape_website_for_social_media_view(request, organization_id, force_retrieve=False):
+    facebook_page = False
     twitter_handle = False
 
     organization_manager = OrganizationManager()
@@ -32,7 +49,8 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
         messages.add_message(request, messages.ERROR, "No organizational website found.")
         return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
 
-    if (not positive_value_exists(organization.organization_twitter_handle)) or force_retrieve:
+    if (not positive_value_exists(organization.organization_twitter_handle)) or \
+            (not positive_value_exists(organization.organization_facebook)) or force_retrieve:
         scrape_results = scrape_social_media_from_one_site(organization.organization_website)
 
         if scrape_results['twitter_handle_found']:
@@ -41,10 +59,12 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
         else:
             messages.add_message(request, messages.INFO, "No Twitter handle found: " + scrape_results['status'])
 
-    organization_facebook = ''
+        if scrape_results['facebook_page_found']:
+            facebook_page = scrape_results['facebook_page']
+            messages.add_message(request, messages.INFO, "Facebook page found: " + facebook_page)
 
     save_results = organization_manager.update_organization_social_media(organization, twitter_handle,
-                                                                         organization_facebook)
+                                                                         facebook_page)
     if save_results['success']:
         organization = save_results['organization']
     else:
@@ -68,7 +88,9 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
 
 # @login_required()  # Commented out while we are developing login process()
 def scrape_social_media_from_all_organizations_view(request):
-    results = scrape_and_save_social_media_from_all_organizations()
+    organization_state_code = request.GET.get('organization_state', '')
+
+    results = scrape_and_save_social_media_from_all_organizations(state_code=organization_state_code)
 
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])
@@ -78,4 +100,5 @@ def scrape_social_media_from_all_organizations_view(request):
                              "Social media retrieved. Twitter handles found: {twitter_handles_found}".format(
                                  twitter_handles_found=twitter_handles_found))
 
-    return HttpResponseRedirect(reverse('organization:organization_list', args=()))
+    return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
+                                '?organization_state=' + organization_state_code)

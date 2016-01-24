@@ -9,8 +9,8 @@ from . import views, views_admin
 
 urlpatterns = [
     url(r'^$', views_admin.vote_smart_index_view, name='vote_smart_index',),
-    url(r'^(?P<vote_smart_candidate_id>[0-9]+)/import_one_candidate_ratings/$', views_admin.import_one_candidate_ratings_view,
-        name='import_one_candidate_ratings',),
+    url(r'^(?P<vote_smart_candidate_id>[0-9]+)/import_one_candidate_ratings/$',
+        views_admin.import_one_candidate_ratings_view, name='import_one_candidate_ratings',),
     url(r'^(?P<candidate_campaign_id>[0-9]+)/transfer_vote_smart_ratings_to_positions_for_candidate/$',
         views_admin.transfer_vote_smart_ratings_to_positions_for_candidate_view,
         name='transfer_vote_smart_ratings_to_positions_for_candidate',),
@@ -31,4 +31,6 @@ urlpatterns = [
         views_admin.vote_smart_special_interest_group_list_view, name='vote_smart_special_interest_group_list'),
     url(r'^(?P<special_interest_group_id>[0-9]+)/ratings/$', views_admin.special_interest_group_rating_list_view,
         name='special_interest_group_rating_list',),
+    url(r'^transfer_vote_smart_sigs_to_we_vote_orgs/$',
+        views_admin.transfer_vote_smart_sigs_to_we_vote_orgs_view, name='transfer_vote_smart_sigs_to_we_vote_orgs'),
 ]

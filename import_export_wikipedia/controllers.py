@@ -462,11 +462,15 @@ def retrieve_organization_logo_from_wikipedia_page(organization, wikipedia_page,
     return results
 
 
-def retrieve_all_organizations_logos_from_wikipedia():
+def retrieve_all_organizations_logos_from_wikipedia(state_code=''):
     logos_found = 0
     force_retrieve = False
 
-    organization_list = Organization.objects.order_by('organization_name')
+    organization_list_query = Organization.objects.order_by('organization_name')
+    if positive_value_exists(state_code):
+        organization_list_query = organization_list_query.filter(state_served_code=state_code)
+
+    organization_list = organization_list_query
     for organization in organization_list:
         organization_results = retrieve_wikipedia_page_from_wikipedia(organization, force_retrieve)
         if organization_results['wikipedia_page_found']:

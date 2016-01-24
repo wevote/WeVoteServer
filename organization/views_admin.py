@@ -46,13 +46,21 @@ class ExportOrganizationDataView(APIView):
 
 # @login_required()  # Commented out while we are developing login process()
 def organization_list_view(request):
+    organization_state_code = request.GET.get('organization_state')
+
     messages_on_stage = get_messages(request)
-    organization_list = Organization.objects.order_by('organization_name')
+    organization_list_query = Organization.objects.all()
+    if positive_value_exists(organization_state_code):
+        organization_list_query = organization_list_query.filter(state_served_code__iexact=organization_state_code)
+    organization_list_query = organization_list_query.order_by('organization_name')
+
+    organization_list = organization_list_query
 
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'organization_list': organization_list,
-        'state_list':        STATE_CODE_MAP,
+        'messages_on_stage':    messages_on_stage,
+        'organization_list':    organization_list,
+        'state_list':           STATE_CODE_MAP,
+        'organization_state':   organization_state_code,
     }
     return render(request, 'organization/organization_list.html', template_values)
 
@@ -102,6 +110,7 @@ def organization_edit_process_view(request):
     organization_id = convert_to_int(request.POST['organization_id'])
     organization_name = request.POST['organization_name']
     organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
+    organization_facebook = request.POST.get('organization_facebook', '')
     organization_website = request.POST['organization_website']
     wikipedia_page_title = request.POST.get('wikipedia_page_title', '')
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', '')
@@ -121,6 +130,7 @@ def organization_edit_process_view(request):
             # Update
             organization_on_stage.organization_name = organization_name
             organization_on_stage.organization_twitter_handle = organization_twitter_handle
+            organization_on_stage.organization_facebook = organization_facebook
             organization_on_stage.organization_website = organization_website
             organization_on_stage.wikipedia_page_title = wikipedia_page_title
             organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
@@ -133,7 +143,10 @@ def organization_edit_process_view(request):
             organization_on_stage = Organization(
                 organization_name=organization_name,
                 organization_twitter_handle=organization_twitter_handle,
-                organization_website=organization_website
+                organization_facebook=organization_facebook,
+                organization_website=organization_website,
+                wikipedia_page_title=wikipedia_page_title,
+                wikipedia_photo_url=wikipedia_photo_url,
             )
             organization_on_stage.save()
             organization_id = organization_on_stage.id

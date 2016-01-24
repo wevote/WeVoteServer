@@ -9,25 +9,25 @@ from .controllers import retrieve_vote_smart_candidates_into_local_db, \
     retrieve_vote_smart_ratings_by_candidate_into_local_db, retrieve_vote_smart_ratings_by_group_into_local_db, \
     retrieve_vote_smart_special_interest_group_into_local_db, \
     retrieve_vote_smart_special_interest_groups_into_local_db, \
+    transfer_vote_smart_special_interest_groups_to_we_vote_organizations, \
     transfer_vote_smart_ratings_to_positions_for_candidate
 from .models import VoteSmartCategory, VoteSmartRating, VoteSmartRatingOneCandidate, VoteSmartSpecialInterestGroup,\
     VoteSmartState
 from .votesmart_local import VotesmartApiError
-from candidate.models import CandidateCampaign, CandidateCampaignManager
+from candidate.models import CandidateCampaignManager
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception, \
-    print_to_log
+from exception.models import print_to_log
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from wevote_functions.functions import convert_to_int, STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+# @login_required()  # Commented out while we are developing login process()
 def import_one_candidate_ratings_view(request, vote_smart_candidate_id):
     one_group_results = retrieve_vote_smart_ratings_by_candidate_into_local_db(vote_smart_candidate_id)
 
@@ -48,18 +48,7 @@ def import_one_candidate_ratings_view(request, vote_smart_candidate_id):
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
 
-def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candidate_campaign_id):
-
-    results = transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id)
-
-    if results['success']:
-        messages.add_message(request, messages.INFO, results['status'])
-    else:
-        messages.add_message(request, messages.ERROR, results['status'])
-
-    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
-
-
+# @login_required()  # Commented out while we are developing login process()
 def import_group_ratings_view(request):
     # state_code = request.GET.get('state_code', 'NA')  # Default to national
     # category_id = request.GET.get('category_id', 0)
@@ -87,6 +76,7 @@ def import_group_ratings_view(request):
     return HttpResponseRedirect(reverse('import_export_vote_smart:vote_smart_rating_list', args=()))
 
 
+# @login_required()  # Commented out while we are developing login process()
 def import_one_group_ratings_view(request, special_interest_group_id):
     one_group_results = retrieve_vote_smart_ratings_by_group_into_local_db(special_interest_group_id)
 
@@ -140,6 +130,7 @@ def import_photo_view(request):
     return render(request, 'import_export_vote_smart/vote_smart_import.html', template_values)
 
 
+# @login_required()  # Commented out while we are developing login process()
 def import_special_interest_groups_view(request):
     # state_code = request.GET.get('state_code', 'NA')  # Default to national
     # category_id = request.GET.get('category_id', 0)
@@ -191,6 +182,7 @@ def import_special_interest_groups_view(request):
 # @login_required()  # Commented out while we are developing login process()
 def vote_smart_rating_list_view(request):
     messages_on_stage = get_messages(request)
+    rating_list = []
     rating_list_found = False
     try:
         rating_list = VoteSmartRating.objects.order_by('-timeSpan')[:1000]  # Descending order, and limited to 1000
@@ -225,6 +217,7 @@ def special_interest_group_rating_list_view(request, special_interest_group_id):
     messages_on_stage = get_messages(request)
     special_interest_group_id = convert_to_int(special_interest_group_id)
     # google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    special_interest_group = VoteSmartSpecialInterestGroup()
     special_interest_group_found = False
     try:
         special_interest_group_query = VoteSmartSpecialInterestGroup.objects.filter(sigId=special_interest_group_id)
@@ -243,6 +236,7 @@ def special_interest_group_rating_list_view(request, special_interest_group_id):
                              'Could not find special_interest_group when trying to retrieve ratings.')
         return HttpResponseRedirect(reverse('import_export_vote_smart:vote_smart_special_interest_group_list', args=()))
     else:
+        rating_list = []
         rating_list_found = False
         try:
             rating_list = VoteSmartRatingOneCandidate.objects.order_by('-timeSpan')
@@ -289,6 +283,7 @@ def vote_smart_special_interest_group_list_view(request):
     return render(request, 'import_export_vote_smart/special_interest_group_list.html', template_values)
 
 
+# @login_required()  # Commented out while we are developing login process()
 def import_vote_smart_position_categories_view(request):
     results = retrieve_vote_smart_position_categories_into_local_db()
     if not results['success']:
@@ -300,16 +295,29 @@ def import_vote_smart_position_categories_view(request):
 
 
 # @login_required()  # Commented out while we are developing login process()
-def vote_smart_position_category_list_view(request):
-    messages_on_stage = get_messages(request)
+def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candidate_campaign_id):
 
-    position_category_list = VoteSmartCategory.objects.order_by('name')
+    results = transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id)
 
-    template_values = {
-        'messages_on_stage': messages_on_stage,
-        'position_category_list': position_category_list,
-    }
-    return render(request, 'import_export_vote_smart/position_category_list.html', template_values)
+    if results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        messages.add_message(request, messages.ERROR, results['status'])
+
+    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
+
+
+# @login_required()  # Commented out while we are developing login process()
+def transfer_vote_smart_sigs_to_we_vote_orgs_view(request):
+
+    results = transfer_vote_smart_special_interest_groups_to_we_vote_organizations()
+
+    if results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        messages.add_message(request, messages.ERROR, results['status'])
+
+    return HttpResponseRedirect(reverse('import_export_vote_smart:vote_smart_special_interest_group_list', args=()))
 
 
 # @login_required()  # Commented out while we are developing login process()
@@ -332,3 +340,16 @@ def vote_smart_index_view(request):
     template_values = {
     }
     return render(request, 'import_export_vote_smart/index.html', template_values)
+
+
+# @login_required()  # Commented out while we are developing login process()
+def vote_smart_position_category_list_view(request):
+    messages_on_stage = get_messages(request)
+
+    position_category_list = VoteSmartCategory.objects.order_by('name')
+
+    template_values = {
+        'messages_on_stage': messages_on_stage,
+        'position_category_list': position_category_list,
+    }
+    return render(request, 'import_export_vote_smart/position_category_list.html', template_values)

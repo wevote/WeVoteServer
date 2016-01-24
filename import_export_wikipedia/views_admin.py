@@ -59,7 +59,9 @@ def import_organization_logo_from_wikipedia_view(request, organization_id):
 
 # @login_required()  # Commented out while we are developing login process()
 def retrieve_all_organizations_logos_from_wikipedia_view(request):
-    results = retrieve_all_organizations_logos_from_wikipedia()
+    organization_state_code = request.GET.get('organization_state', '')
+
+    results = retrieve_all_organizations_logos_from_wikipedia(organization_state_code)
 
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])
@@ -68,4 +70,5 @@ def retrieve_all_organizations_logos_from_wikipedia_view(request):
         messages.add_message(request, messages.INFO, "Wikipedia logos retrieved. "
                                                      "Logos found: {logos_found}".format(logos_found=logos_found))
 
-    return HttpResponseRedirect(reverse('organization:organization_list', args=()))
+    return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
+                                "?organization_state=" + organization_state_code)

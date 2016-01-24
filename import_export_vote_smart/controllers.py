@@ -589,3 +589,43 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
     }
 
     return results
+
+
+def transfer_vote_smart_special_interest_groups_to_we_vote_organizations():
+    organizations_errors = ''
+    number_of_we_vote_organizations_created = 0
+
+    special_interest_group_query = VoteSmartSpecialInterestGroup.objects.order_by('sigId')
+    special_interest_group_list = special_interest_group_query
+
+    special_interest_group_manager = VoteSmartSpecialInterestGroupManager()
+
+    # process_count = 0
+    for special_interest_group in special_interest_group_list:
+        # NOTE As of 2016-01-24 We are not updating -- only creating
+        update_results = special_interest_group_manager.update_or_create_we_vote_organization(
+            special_interest_group.sigId)
+
+        if not update_results['organization_found']:
+            organizations_errors += "FAILED-{sigId}-{status} * " \
+                              "".format(sigId=special_interest_group.sigId,
+                                        status=update_results['status'])
+
+        if update_results['organization_created']:
+            number_of_we_vote_organizations_created += 1
+        # process_count += 1
+        # if process_count > 50:  # TODO DALE Temp limit
+        #     break
+
+    success = True
+    status = "SIG_TRANSFER_PROCESS_COMPLETED, for {number_of_sigs} orgs. {organizations_errors}".format(
+        number_of_sigs=number_of_we_vote_organizations_created,
+        organizations_errors=organizations_errors
+    )
+
+    results = {
+        'status':   status,
+        'success':  success,
+    }
+
+    return results

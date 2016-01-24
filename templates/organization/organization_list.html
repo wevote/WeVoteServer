@@ -8,11 +8,13 @@
 
 <h1>Organizations</h1>
 <p><a href="{% url 'organization:organization_new' %}">Add New Organization</a>.
-    Vote Smart special interest groups <a href="{% url 'import_export_vote_smart:vote_smart_index' %}">here</a>.</p>
+    Vote Smart special interest groups
+    <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.</p>
 
 <p>
-    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}">Retrieve photos from Wikipedia</a>,
-    <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}">Scrape social media for all orgs</a>
+    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ organization_state }}">Retrieve photos from Wikipedia</a>,
+    <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ organization_state }}">
+        Scrape social media for these orgs</a>
 </p>
 
 {% if state_list %}
@@ -21,10 +23,10 @@
 
     <select id="organization_state_id" name="organization_state">
         <option value="" {% if '' == organization_state %} selected="selected"{% endif %}>
-            -- Filter by State Served (Not Filtering Yet) --</option>
+            -- Filter by State Served --</option>
     {% for key, state in state_list.items %}
         <option value="{{ key }}"
-                {% if state == organization_state %} selected="selected"{% endif %}>
+                {% if key == organization_state %} selected="selected"{% endif %}>
             {{ state }}</option>
     {% endfor %}
     </select>
@@ -48,8 +50,9 @@
             <td>{{ forloop.counter }}</td>
             <td>{% if organization.organization_photo_url %}<a href="{% url 'organization:organization_position_list' organization.id %}"><img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
             <td><a href="{% url 'organization:organization_position_list' organization.id %}">{{ organization.organization_name }}</a></td>
-            <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }}{% endif %}</td>
-            <td>{% if organization.organization_twitter_handle %}{{ organization.vote_smart_id }}{% endif %}</td>
+            <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
+                ({{ organization.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
             <td>{{ organization.state_served_code }}</td>
             <td>{% if organization.wikipedia_page_id %}
                 <a href="{{ organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
@@ -72,7 +75,7 @@
 
     <script>
         $(function() {
-            $('#organization_state').change(function() {
+            $('#organization_state_id').change(function() {
                 this.form.submit();
             });
         });

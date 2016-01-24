@@ -705,6 +705,12 @@ class Organization(models.Model):
             self.NONPROFIT_501C3, self.NONPROFIT_501C4, self.POLITICAL_ACTION_COMMITTEE,
             self.CORPORATION, self.NEWS_CORPORATION)
 
+    def generate_facebook_link(self):
+        if self.organization_facebook:
+            return "https://facebook.com/{facebook_page}".format(facebook_page=self.organization_facebook)
+        else:
+            return ''
+
     def generate_twitter_link(self):
         if self.organization_twitter_handle:
             return "https://twitter.com/{twitter_handle}".format(twitter_handle=self.organization_twitter_handle)

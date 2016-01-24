@@ -9,7 +9,11 @@
 <h1>Vote Smart Special Interest Groups</h1>
 <p>Also see <a href="{% url 'organization:organization_list' %}">We Vote Organizations</a></p>
 
-<p><a href="{% url 'import_export_vote_smart:import_special_interest_groups' %}">Import All Vote Smart Special Interest Groups</a></p>
+<p><a href="{% url 'import_export_vote_smart:import_special_interest_groups' %}">
+        Retrieve Special Interest Groups from Vote Smart Server</a>,
+   <a href="{% url 'import_export_vote_smart:transfer_vote_smart_sigs_to_we_vote_orgs' %}">
+        Transfer Special Interest Groups to We Vote Orgs</a>
+</p>
 
 
 {% if special_interest_group_list %}
