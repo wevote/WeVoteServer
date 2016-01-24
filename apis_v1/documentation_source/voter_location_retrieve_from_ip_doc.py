@@ -49,7 +49,9 @@ def voter_location_retrieve_from_ip_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
+                   '  "voter_location_found": boolean,\n' \
                    '  "voter_location": string (88 characters long),\n' \
+                   '  "ip_address": string,\n' \
                    '}'
 
     template_values = {

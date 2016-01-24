@@ -33,10 +33,9 @@ from voter.controllers import voter_address_retrieve_for_api, voter_address_save
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
-from wevote_functions.models import generate_voter_device_id, get_voter_device_id, \
+from wevote_functions.models import generate_voter_device_id, get_ip_from_headers, get_voter_device_id, \
     get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie, positive_value_exists, convert_to_int
 import wevote_functions.admin
-from utils.api_utils import get_ip_from_headers
 
 
 logger = wevote_functions.admin.get_logger(__name__)

@@ -192,6 +192,14 @@ def extract_last_name_from_full_name(full_name):
     return last_name
 
 
+def get_ip_from_headers(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[-1].strip()
+    else:
+        return request.META.get('REMOTE_ADDR')
+
+
 # http://stackoverflow.com/questions/1622793/django-cookies-how-can-i-set-them
 def set_cookie(response, cookie_name, cookie_value, days_expire=None):
     if days_expire is None:
