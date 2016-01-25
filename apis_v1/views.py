@@ -417,18 +417,69 @@ def voter_address_save_view(request):
     :return:
     """
 
+    status = ''
+
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     try:
         text_for_map_search = request.POST['text_for_map_search']
+        text_for_map_search = text_for_map_search.strip()
         address_variable_exists = True
     except KeyError:
         text_for_map_search = ''
         address_variable_exists = False
 
-    response = voter_address_save_for_api(voter_device_id, text_for_map_search, address_variable_exists)
+    results = voter_address_save_for_api(voter_device_id, text_for_map_search, address_variable_exists)
+    voter_address_saved = True if results['success'] else False
 
-    # Reset google_civic_election_id whenever we save a new address
-    google_civic_election_id = 0
+    if not positive_value_exists(text_for_map_search):
+        json_data = {
+            'status': results['status'],
+            'success': results['success'],
+            'voter_device_id': voter_device_id,
+            'text_for_map_search': text_for_map_search,
+            'voter_address_saved': voter_address_saved,
+            'google_civic_election_id': 0,
+        }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+
+        # Reset google_civic_election_id to 0 whenever we save an empty address
+        google_civic_election_id = 0
+        set_google_civic_election_id_cookie(request, response, google_civic_election_id)
+
+        return response
+
+    status += results['status'] + ", "
+    # If here, we saved a valid address
+
+    google_civic_election_id = get_google_civic_election_id_from_cookie(request)
+
+    if positive_value_exists(google_civic_election_id):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        if google_civic_election_id == 2000:
+            use_test_election = True
+        else:
+            use_test_election = False
+    else:
+        use_test_election = False
+
+    results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,
+                                                                    use_test_election)
+
+    status += results['status']
+    google_civic_election_id = results['google_civic_election_id']
+
+    json_data = {
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'text_for_map_search': text_for_map_search,
+        'voter_address_saved': voter_address_saved,
+        'google_civic_election_id': google_civic_election_id,
+    }
+
+    response = HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    # Reset google_civic_election_id to the new election whenever we save a new address
     set_google_civic_election_id_cookie(request, response, google_civic_election_id)
 
     return response

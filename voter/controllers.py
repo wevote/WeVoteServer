@@ -6,7 +6,7 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
 from django.http import HttpResponse
 import json
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid
+from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -56,26 +56,31 @@ def voter_address_retrieve_for_api(voter_device_id):
 
 
 def voter_address_save_for_api(voter_device_id, address_raw_text, address_variable_exists):
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+    device_id_results = is_voter_device_id_valid(voter_device_id)
+    if not device_id_results['success']:
+        results = {
+                'status': device_id_results['status'],
+                'success': False,
+                'voter_device_id': voter_device_id,
+            }
+        return results
 
     if not address_variable_exists:
-        json_data = {
+        results = {
                 'status': "MISSING_POST_VARIABLE-ADDRESS",
                 'success': False,
                 'voter_device_id': voter_device_id,
             }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return results
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if voter_id < 0:
-        json_data = {
+        results = {
             'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
             'success': False,
             'voter_device_id': voter_device_id,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return results
 
     # At this point, we have a valid voter
 
@@ -84,9 +89,15 @@ def voter_address_save_for_api(voter_device_id, address_raw_text, address_variab
 
     # We wrap get_or_create because we want to centralize error handling
     results = voter_address_manager.update_or_create_voter_address(voter_id, address_type, address_raw_text.strip())
+
     if results['success']:
-        json_data = {
-                'status': "VOTER_ADDRESS_SAVED",
+        if positive_value_exists(address_raw_text):
+            status = "VOTER_ADDRESS_SAVED"
+        else:
+            status = "VOTER_ADDRESS_EMPTY_SAVED"
+
+        results = {
+                'status': status,
                 'success': True,
                 'voter_device_id': voter_device_id,
                 'text_for_map_search': address_raw_text,
@@ -95,12 +106,12 @@ def voter_address_save_for_api(voter_device_id, address_raw_text, address_variab
     # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':
         # delete all currently matching addresses and save again
     else:
-        json_data = {
+        results = {
                 'status': results['status'],
                 'success': False,
                 'voter_device_id': voter_device_id,
             }
-    return HttpResponse(json.dumps(json_data), content_type='application/json')
+    return results
 
 
 def voter_retrieve_list_for_api(voter_device_id):

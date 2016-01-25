@@ -63,9 +63,11 @@ def voter_address_save_doc_template_values(url_root):
 
     api_response = '{\n' \
                    '  "status": string (description of what happened),\n' \
+                   '  "success": boolean (did the save and the google civic ballot retrieve happen?),\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
+                   '  "voter_address_saved": boolean (did the voter address save happen?),\n' \
                    '  "text_for_map_search": string (the value just saved),\n' \
-                   '  "success": boolean (did the save happen?),\n' \
+                   '  "google_civic_election_id": integer,\n' \
                    '}'
 
     template_values = {

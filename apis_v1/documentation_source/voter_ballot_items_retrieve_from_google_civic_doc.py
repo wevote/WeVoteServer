@@ -45,7 +45,7 @@ def voter_ballot_items_retrieve_from_google_civic_doc_template_values(url_root):
             'description':  'A valid voter_id was not found from voter_device_id. Cannot proceed.',
         },
         {
-            'code':         'RETRIEVED_AND_STORED_BALLOT_FOR_VOTER',
+            'code':         'RETRIEVED_FROM_GOOGLE_CIVIC_AND_STORED_BALLOT_FOR_VOTER',
             'description':  'Ballot items were found and saved.',
         },
         {

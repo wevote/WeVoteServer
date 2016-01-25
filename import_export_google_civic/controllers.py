@@ -667,7 +667,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
                 # We update VoterAddress with normalized address data in store_one_ballot_from_google_civic_api
                 store_one_ballot_results = store_one_ballot_from_google_civic_api(one_ballot_json, voter_id)
                 if store_one_ballot_results['success']:
-                    status += 'RETRIEVED_AND_STORED_BALLOT_FOR_VOTER '
+                    status += 'RETRIEVED_FROM_GOOGLE_CIVIC_AND_STORED_BALLOT_FOR_VOTER '
                     success = True
                     google_civic_election_id = store_one_ballot_results['google_civic_election_id']
                 else:
