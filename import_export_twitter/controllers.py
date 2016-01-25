@@ -24,7 +24,7 @@ FACEBOOK_BLACKLIST = ['group', 'group.php', 'None']
 
 # Only pays attention to https://twitter.com or http://twitter.com and ignores www.twitter.com
 RE_TWITTER = r'//twitter\.com/(?:#!/)?(\w+)'
-TWITTER_BLACKLIST = ['intent', 'search', 'share', 'twitterapi']
+TWITTER_BLACKLIST = ['home', 'https', 'intent', 'none', 'search', 'share', 'twitterapi']
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
@@ -46,6 +46,7 @@ class GetOutOfLoopLocal(Exception):
 
 def refresh_twitter_details(organization):
     organization_manager = OrganizationManager()
+    status = "ENTERING_REFRESH_TWITTER_DETAILS"
 
     if not organization:
         status = "ORGANIZATION_TWITTER_DETAILS_NOT_RETRIEVED-ORG_MISSING"
@@ -67,6 +68,14 @@ def refresh_twitter_details(organization):
             if save_results['success']:
                 results = update_social_media_statistics_in_other_tables(organization)
                 status = "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_AND_SAVED"
+    else:
+            status = "ORGANIZATION_TWITTER_DETAILS-CLEARING_DETAILS"
+            save_results = organization_manager.clear_organization_twitter_details(organization)
+
+            if save_results['success']:
+                results = update_social_media_statistics_in_other_tables(organization)
+                status = "ORGANIZATION_TWITTER_DETAILS_CLEARED_FROM_DB"
+
 
     results = {
         'success':                  True,
@@ -122,6 +131,8 @@ def scrape_social_media_from_one_site(site_url):
             'success':              success,
             'twitter_handle':       twitter_handle,
             'twitter_handle_found': twitter_handle_found,
+            'facebook_page':        facebook_page,
+            'facebook_page_found':  facebook_page_found,
         }
         return results
 

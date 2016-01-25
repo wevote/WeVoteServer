@@ -380,6 +380,33 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    def clear_organization_twitter_details(self, organization):
+        """
+        Update an organization entry with details retrieved from the Twitter API.
+        """
+        success = False
+        status = "ENTERING_UPDATE_ORGANIZATION_TWITTER_DETAILS"
+
+        if organization:
+            organization.twitter_user_id = 0
+            # We leave the handle in place
+            # organization.organization_twitter_handle = ""
+            organization.twitter_name = ''
+            organization.twitter_followers_count = 0
+            organization.twitter_profile_image_url_https = ''
+            organization.twitter_description = ''
+            organization.twitter_location = ''
+            organization.save()
+            success = True
+            status = "CLEARED_ORG_TWITTER_DETAILS"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'organization':             organization,
+        }
+        return results
+
     def delete_organization(self, organization_id):
         organization_id = convert_to_int(organization_id)
         organization_deleted = False
