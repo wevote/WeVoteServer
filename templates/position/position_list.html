@@ -8,7 +8,14 @@
 
 <h1>Positions / Public Opinions</h1>
 <p>Also see positions listed under <a href="{% url 'organization:organization_list' %}">Organizations</a>.
-    Vote Smart ratings <a href="{% url 'import_export_vote_smart:vote_smart_index' %}">here</a>.</p>
+    Vote Smart ratings <a href="{% url 'import_export_vote_smart:vote_smart_rating_list' %}">here</a>.<br/>
+
+    <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+    Retrieve Positions from Vote Smart for this Election</a>.
+    <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>.
+
+
+</p>
 
 {% if election_list %}
     <form name="organization_position_choose_election" method="get" action="{% url 'position:position_list' %}">
@@ -46,7 +53,8 @@
             {% endif %}
                 {{ position.get_stance_display }}</a></td>
             <td>{{ position.candidate_campaign.candidate_name }}</td>
-            <td>{{ position.election.election_day_text }}</td>
+            <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% endif %}
+                {% if position.vote_smart_time_span %}{{ position.vote_smart_time_span }}{% endif %}</td>
         </tr>
     {% endfor %}
     </table>

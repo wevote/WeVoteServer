@@ -1,0 +1,66 @@
+{# templates/import_export_vote_smart/candidate_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Vote Smart Candidates{% endblock %}
+
+{%  block content %}
+<p><a href="{% url 'import_export_vote_smart:vote_smart_index' %}">< Back to Vote Smart Index</a></p>
+
+<h1>Vote Smart Candidates</h1>
+
+    {% if election_list %}
+    <form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
+        {% csrf_token %}
+
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    </form>
+    {% endif %}{# End of if election_list #}
+
+
+
+{% if candidate_list %}
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>First Name</td>
+            <td>Last Name</td>
+            <td>Election Year</td>
+            <td>State Id</td>
+        </tr>
+    {% for candidate in candidate_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ candidate.candidateId }}</td>
+            <td>{{ candidate.firstName }}</td>
+            <td>{{ candidate.lastName }}</td>
+            <td>{{ candidate.electionYear }}</td>
+            <td>{{ candidate.officeStateId }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+
+{% else %}
+    <p>(no candidates found)</p>
+{% endif %}
+
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -8,6 +8,7 @@ from . import views, views_admin
 
 
 urlpatterns = [
+    url(r'^candidate_list/$', views_admin.vote_smart_candidate_list_view, name='vote_smart_candidate_list'),
     url(r'^$', views_admin.vote_smart_index_view, name='vote_smart_index',),
     url(r'^(?P<vote_smart_candidate_id>[0-9]+)/import_one_candidate_ratings/$',
         views_admin.import_one_candidate_ratings_view, name='import_one_candidate_ratings',),
@@ -23,6 +24,9 @@ urlpatterns = [
     url(r'^import_special_interest_groups/$',
         views_admin.import_special_interest_groups_view, name='import_special_interest_groups'),
     url(r'^import_states/$', views_admin.import_states_view, name='import_states'),
+    url(r'^retrieve_positions_from_vote_smart_for_election/$',
+        views_admin.retrieve_positions_from_vote_smart_for_election_view,
+        name='retrieve_positions_from_vote_smart_for_election'),
     url(r'^states/(?P<pk>[A-Z]+)/$', views_admin.state_detail_view, name='state_detail'),
     url(r'^position_category_list/$',
         views_admin.vote_smart_position_category_list_view, name='vote_smart_position_category_list'),

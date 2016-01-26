@@ -226,6 +226,8 @@ class PositionEntered(models.Model):
         return False
 
     def candidate_campaign(self):
+        if not self.candidate_campaign_id:
+            return
         try:
             candidate_campaign = CandidateCampaign.objects.get(id=self.candidate_campaign_id)
         except CandidateCampaign.MultipleObjectsReturned as e:
@@ -238,6 +240,8 @@ class PositionEntered(models.Model):
         return candidate_campaign
 
     def election(self):
+        if not self.google_civic_election_id:
+            return
         try:
             election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
         except Election.MultipleObjectsReturned as e:
@@ -250,6 +254,8 @@ class PositionEntered(models.Model):
         return election
 
     def organization(self):
+        if not self.organization_id:
+            return
         try:
             organization = Organization.objects.get(id=self.organization_id)
         except Organization.MultipleObjectsReturned as e:
