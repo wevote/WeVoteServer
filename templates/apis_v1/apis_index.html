@@ -158,6 +158,18 @@
             friends, and public figures this voter follows.</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:positionPublicSupportCountForBallotItemDocs' %}">positionPublicSupportCountForBallotItem</a></td>
+        <td>static/ public c3</td>
+        <td>A single number showing the total supporters for this Ballot Item (Candidate or Measure) from organizations
+            and public figures. (NOT specific to one voter.)</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionPublicOpposeCountForBallotItemDocs' %}">positionPublicOpposeCountForBallotItem</a></td>
+        <td>static/ public c3</td>
+        <td>A single number showing the total that oppose this Ballot Item (Candidate or Measure) from organizations
+            and public figures. (NOT specific to one voter.)</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:positionRetrieveDocs' %}">positionRetrieve</a></td>
         <td>static/ public c3</td>
         <td>Retrieve one position based on unique position identifier. (Public positions can be served by c3 network.

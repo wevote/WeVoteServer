@@ -9,8 +9,9 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
     position_like_count_doc, position_list_for_ballot_item_doc, position_oppose_count_for_ballot_item_doc, \
-    position_retrieve_doc, position_save_doc, \
-    position_support_count_for_ballot_item_doc, quick_info_retrieve_doc, \
+    position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
+    position_public_support_count_for_ballot_item_doc, position_support_count_for_ballot_item_doc, \
+    quick_info_retrieve_doc, \
     voter_address_retrieve_doc, voter_address_save_doc, \
     voter_ballot_items_retrieve_doc, voter_ballot_items_retrieve_from_google_civic_doc, voter_count_doc, \
     voter_create_doc, voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
@@ -226,6 +227,26 @@ def position_support_count_for_ballot_item_doc_view(request):
     url_root = LOCALHOST_URL_ROOT
     template_values = position_support_count_for_ballot_item_doc.\
         position_support_count_for_ballot_item_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def position_public_oppose_count_for_ballot_item_doc_view(request):
+    """
+    Show documentation about positionPublicOpposeCountForBallotItem
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = position_public_oppose_count_for_ballot_item_doc.\
+        position_public_oppose_count_for_ballot_item_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def position_public_support_count_for_ballot_item_doc_view(request):
+    """
+    Show documentation about positionPublicSupportCountForBallotItem
+    """
+    url_root = LOCALHOST_URL_ROOT
+    template_values = position_public_support_count_for_ballot_item_doc.\
+        position_public_support_count_for_ballot_item_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 

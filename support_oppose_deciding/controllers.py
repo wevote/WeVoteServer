@@ -159,6 +159,87 @@ def position_support_count_for_ballot_item_for_api(voter_device_id, candidate_id
     return positions_count_for_api(voter_device_id, candidate_id, measure_id, stance_we_are_looking_for)
 
 
+def position_public_oppose_count_for_ballot_item_for_api(candidate_id, measure_id):
+    stance_we_are_looking_for = OPPOSE
+    return positions_public_count_for_api(candidate_id, measure_id, stance_we_are_looking_for)
+
+
+def position_public_support_count_for_ballot_item_for_api(candidate_id, measure_id):
+    stance_we_are_looking_for = SUPPORT
+    return positions_public_count_for_api(candidate_id, measure_id, stance_we_are_looking_for)
+
+
+def positions_public_count_for_api(candidate_id, measure_id, stance_we_are_looking_for):
+    if positive_value_exists(candidate_id):
+        results = positions_public_count_for_candidate_campaign(candidate_id, stance_we_are_looking_for)
+        json_data = results['json_data']
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    elif positive_value_exists(measure_id):
+        results = positions_public_count_for_contest_measure(measure_id, stance_we_are_looking_for)
+        json_data = results['json_data']
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        status = 'UNABLE_TO_RETRIEVE-CANDIDATE_ID_AND_MEASURE_ID_MISSING'
+        success = False
+
+    json_data = {
+        'status': status,
+        'success': success,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def positions_public_count_for_candidate_campaign(candidate_id, stance_we_are_looking_for):
+    """
+    We want to return a JSON file with the number of orgs and public figures who support
+    this particular candidate's campaign
+    """
+    # This implementation is built to make only two database calls. All other calculations are done here in the
+    #  application layer
+
+    position_list_manager = PositionListManager()
+    candidate_we_vote_id = ''
+    all_positions_count_for_candidate_campaign = \
+        position_list_manager.retrieve_public_positions_count_for_candidate_campaign(
+            candidate_id,
+            candidate_we_vote_id,
+            stance_we_are_looking_for)
+
+    json_data = {
+        'status': 'SUCCESSFUL_RETRIEVE_OF_PUBLIC_POSITION_COUNT_RE_CANDIDATE',
+        'success': True,
+        'count': all_positions_count_for_candidate_campaign,
+    }
+    results = {
+        'json_data': json_data,
+    }
+    return results
+
+
+def positions_public_count_for_contest_measure(measure_id, stance_we_are_looking_for):
+    """
+    We want to return a JSON file with the number of orgs and public figures who support
+    this particular measure
+    """
+    # This implementation is built to make only two database calls. All other calculations are done here in the
+    #  application layer
+
+    position_list_manager = PositionListManager()
+    measure_we_vote_id = ''
+    all_positions_count_for_contest_measure = \
+        position_list_manager.retrieve_public_positions_count_for_contest_measure(
+            measure_id, measure_we_vote_id, stance_we_are_looking_for)
+    json_data = {
+        'status': 'SUCCESSFUL_RETRIEVE_OF_PUBLIC_POSITION_COUNT_FOR_CONTEST_MEASURE',
+        'success': True,
+        'count': all_positions_count_for_contest_measure,
+    }
+    results = {
+        'json_data': json_data,
+    }
+    return results
+
+
 def voter_opposing_save(voter_device_id, candidate_id, measure_id):
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
     results = is_voter_device_id_valid(voter_device_id)

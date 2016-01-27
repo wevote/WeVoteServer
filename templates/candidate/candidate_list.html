@@ -34,6 +34,8 @@
             <td>Election</td>
             <td>Office</td>
             <td>Twitter URL</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
             <td>Vote Smart Id</td>
             <td>&nbsp;</td>
         </tr>
@@ -52,6 +54,8 @@
             <td>{{ candidate.election.election_name }}</td>
             <td><a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a></td>
             <td>{{ candidate.twitter_url }}</td>
+            <td>{{ candidate.id }}</td>
+            <td>{{ candidate.we_vote_id }}</td>
             <td>{{ candidate.vote_smart_id }}</td>
             <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
         </tr>

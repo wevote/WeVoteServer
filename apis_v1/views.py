@@ -28,6 +28,8 @@ from rest_framework.views import APIView
 from star.controllers import voter_star_off_save_for_api, voter_star_on_save_for_api, voter_star_status_retrieve_for_api
 from support_oppose_deciding.controllers import position_oppose_count_for_ballot_item_for_api, \
     position_support_count_for_ballot_item_for_api, \
+    position_public_oppose_count_for_ballot_item_for_api, \
+    position_public_support_count_for_ballot_item_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_address_save_for_api, voter_retrieve_list_for_api
 from voter.serializers import VoterSerializer
@@ -386,6 +388,50 @@ def position_support_count_for_ballot_item_view(request):
         measure_id = 0
     return position_support_count_for_ballot_item_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id,
                                                           measure_id=measure_id)
+
+
+def position_public_oppose_count_for_ballot_item_view(request):
+    """
+    Retrieve the number of orgs and friends that oppose this (positionOpposeCountForBallotItem)
+    :param request:
+    :return:
+    """
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    ballot_item_id = request.GET.get('ballot_item_id', 0)
+    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    if kind_of_ballot_item == CANDIDATE:
+        candidate_id = ballot_item_id
+        measure_id = 0
+    elif kind_of_ballot_item == MEASURE:
+        candidate_id = 0
+        measure_id = ballot_item_id
+    else:
+        candidate_id = 0
+        measure_id = 0
+    return position_public_oppose_count_for_ballot_item_for_api(candidate_id=candidate_id,
+                                                                measure_id=measure_id)
+
+
+def position_public_support_count_for_ballot_item_view(request):
+    """
+    Retrieve the number of orgs and friends that support this (positionSupportCountForBallotItem)
+    :param request:
+    :return:
+    """
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    ballot_item_id = request.GET.get('ballot_item_id', 0)
+    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    if kind_of_ballot_item == CANDIDATE:
+        candidate_id = ballot_item_id
+        measure_id = 0
+    elif kind_of_ballot_item == MEASURE:
+        candidate_id = 0
+        measure_id = ballot_item_id
+    else:
+        candidate_id = 0
+        measure_id = 0
+    return position_public_support_count_for_ballot_item_for_api(candidate_id=candidate_id,
+                                                                 measure_id=measure_id)
 
 
 def quick_info_retrieve_view(request):

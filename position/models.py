@@ -655,6 +655,86 @@ class PositionListManager(models.Model):
             position_list = []
             return position_list
 
+    def retrieve_public_positions_count_for_candidate_campaign(self, candidate_campaign_id,
+                                                               candidate_campaign_we_vote_id,
+                                                               stance_we_are_looking_for):
+        if stance_we_are_looking_for not \
+                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            return 0
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
+        #  which means we want to return all stances
+
+        if not positive_value_exists(candidate_campaign_id) and not \
+                positive_value_exists(candidate_campaign_we_vote_id):
+            return 0
+
+        # Retrieve the support positions for this candidate_campaign_id
+        position_count = 0
+        try:
+            position_list = PositionEntered.objects.order_by('date_entered')
+            if positive_value_exists(candidate_campaign_id):
+                position_list = position_list.filter(candidate_campaign_id=candidate_campaign_id)
+            else:
+                position_list = position_list.filter(candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                if stance_we_are_looking_for == SUPPORT:
+                    position_list = position_list.filter(
+                        Q(stance=stance_we_are_looking_for) |
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__gte=66))  # Matches "is_support"
+                    )  # | Q(stance=GRADE_RATING))
+                elif stance_we_are_looking_for == OPPOSE:
+                    position_list = position_list.filter(
+                        Q(stance=stance_we_are_looking_for) |
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__lte=33))  # Matches "is_oppose"
+                    )  # | Q(stance=GRADE_RATING))
+                else:
+                    position_list = position_list.filter(stance=stance_we_are_looking_for)
+            # Limit to positions in the last x years - currently we are not limiting
+            # position_list = position_list.filter(election_id=election_id)
+
+            position_count = position_list.count()
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        return position_count
+
+    def retrieve_public_positions_count_for_contest_measure(self, contest_measure_id,
+                                                            contest_measure_we_vote_id,
+                                                            stance_we_are_looking_for):
+        if stance_we_are_looking_for not \
+                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            return 0
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY' which means we want to return
+        #  all stances
+
+        if not positive_value_exists(contest_measure_id) and not \
+                positive_value_exists(contest_measure_we_vote_id):
+            return 0
+
+        # Retrieve the support positions for this contest_measure_id
+        position_count = 0
+        try:
+            position_list = PositionEntered.objects.order_by('date_entered')
+            if positive_value_exists(contest_measure_id):
+                position_list = position_list.filter(contest_measure_id=contest_measure_id)
+            else:
+                position_list = position_list.filter(contest_measure_we_vote_id=contest_measure_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY" it means we want to not filter down the list
+                position_list = position_list.filter(stance=stance_we_are_looking_for)
+            # position_list = position_list.filter(election_id=election_id)
+
+            position_count = position_list.count()
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        return position_count
+
 
 class PositionEnteredManager(models.Model):
 
