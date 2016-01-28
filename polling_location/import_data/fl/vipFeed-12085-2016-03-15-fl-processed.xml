@@ -1,0 +1,417 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Martin County, FL</name>
+  <vip_id>12085</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>Hoke Library</location_name>
+      <line1>1150 NE Jack Williams Way</line1>
+      <city>Jensen Beach</city>
+      <state>FL</state>
+      <zip>34957</zip>
+   </address>
+   <directions>From Stuart: Head north on US-1. Take a right at NW Jack Wiliams Way. The Hoke Library will be on the right, before NW Goldenrod Rd.
+
+From Downtown Jensen Beach: Head west on Jensen Beach Blvd. Take a right at NW Goldenrod Rd, followed by a left at NW Jack Williams Way. The Hoke Library will be on the left. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>North Stuart Baptist Church</location_name>
+      <line1>1950 NW Federal Hwy</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34994</zip>
+   </address>
+   <directions>From Stuart: Head north on US-1. Take a left at the traffic light on NW Windemere Dr. Arrive at the North Stuart Baptist Church.
+
+From Jensen Beach: Head south on US-1. The North Stuart Baptist Church will be on your right when you get to the traffic light at NW Windemere Dr.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>St Martin de Porres Parish Center</location_name>
+      <line1>2555 NE Savannah Rd</line1>
+      <city>Jensen Beach</city>
+      <state>FL</state>
+      <zip>34957</zip>
+   </address>
+   <directions>From U.S. 1
+East on NW Jensen Beach Blvd for 2.2 miles.
+Turn right onto NE Savannah Rd for 0.6 miles.
+Turn left onto NE Cedar St
+Destination will be on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Langford Park</location_name>
+      <line1>2369 NE Dixie Hwy</line1>
+      <city>Jensen Beach</city>
+      <state>FL</state>
+      <zip>34957</zip>
+   </address>
+   <directions>From Downtown Jensen Beach: Head south on NE Indian River Dr. Veer to the right on NE Dixie Hwy. Langford Park will be on the right in about 0.5 miles.
+
+From Rio: Head east on NE Dixie Hwy. Follow around bend. Langford Park will be on the left. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Blake Library</location_name>
+      <line1>2351 SE Monterey Rd</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34996</zip>
+   </address>
+   <directions>From Indian Street: Head north on Old Dixie Hwy. Take a right on SE Monterey Rd. Follow bend past Witham Field. The Blake Library will be on your right.
+
+From SE St. Lucie Blvd: Head north. Take a left onto SE Ocean Blvd. Take a left onto SE Monterey Rd. The Blake Library will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Covenant Fellowship Church</location_name>
+      <line1>2880 SE Aster Ln</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34994</zip>
+   </address>
+   <directions>From Indian Street: Head west past US-1. Take a right on SE Aster Ln and follow to the end. Arrive at Covenant Fellowship.
+
+From Kanner Hwy: Head south on Kanner and take a left onto SE Indian Street. Take a left on SE Aster Ln and follow to the end. Arrive at Covenant Fellowship.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Women's Club of Stuart</location_name>
+      <line1>729 SE Ocean Blvd</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34994</zip>
+   </address>
+   <directions>From Downtown Stuart: Head east on SE Ocean Blvd. The Women’s Club of Stuart will be on the left on the corner of SE Ocean Blvd and SE Balboa Ave.
+
+From Stuart Beach: Head west on SE Ocean Blvd. The Women’s Club of Stuart will be on the right on the corner of SE Ocean Blvd and SE Balboa Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>10th Street Recreation Center</location_name>
+      <line1>724 SE 10th St</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34994</zip>
+   </address>
+   <directions>From SE Palm Beach Rd: Head West on E 10th Street. The 10th Street Rec Center will be on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Florida Oceanographic Center</location_name>
+      <line1>890 NE Ocean Blvd</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34996</zip>
+   </address>
+   <directions>From Jensen Beach Causeway: Head south on S Ocean Dr. The Florida Oceanographic Center is located on the right, next to Publix and across the street from Stuart Beach.
+
+From Stuart: Head east on NE Ocean Blvd. The Florida Oceanographic Center is located on the left, next to Publix and across the street from Stuart Beach.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Sewall's Point Town Hall</location_name>
+      <line1>1 S Sewall's Point Rd</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34996</zip>
+   </address>
+   <directions>From North Sewall’s Point: Head south on NE Indian River Drive. Cross SE Ocean Blvd and the Sewall’s Point Town Hall will be on the right at the corner of NE Ocean Blvd and S Sewalls Point Rd.
+
+From South Sewall’s Point: Head north on S Sewall’s Point Rd. Sewall’s Point Town Hall will be on your left just before NE Ocean Blvd. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Robert Morgade Library</location_name>
+      <line1>5851 SE Community Dr</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34997</zip>
+   </address>
+   <directions>From Cove Rd: Turn onto US-1 and head north. Turn left on SE Salerno Rd. Turn left on SE Community Dr. after the roundabout and the Morgade Library will be on your left.
+From Kanner Highway: Head northeast and take a right onto Salerno Road. Turn right on SE Community Dr., before the roundabout, and the Morgade Library will be on your left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Hobe Sound Library</location_name>
+      <line1>10595 SE Federal Hwy</line1>
+      <city>Hobe Sound</city>
+      <state>FL</state>
+      <zip>33455</zip>
+   </address>
+   <directions>From Stuart area: Head south on US-1. Take a left onto SE Rohl Way and the Hobe Sound Library is on the right.
+From Bridge Rd: Head north on US-1. Take a right onto SE Rohl Way and the Hobe Sound Library is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Peace Presbyterian Church</location_name>
+      <line1>4881 SE Cove Rd</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34997</zip>
+   </address>
+   <directions>From Kubin Ave: Take a left on Horseshoe Point Rd. Then take another left onto SE Manatee Cove Rd. Take a right onto Cove Rd. and the Peace Presbyterian Church will be on your right.
+From Port Salerno: Head South on SR-A1A/Dixie Hwy. Go left around the roundabout on Cove Rd. The Peace Presbyterian Church will be on your left, before SE Manatee Cove Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>Port Salerno Church of God</location_name>
+      <line1>4605 SE Cove Rd</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34997</zip>
+   </address>
+   <directions>From SR-A1A/Dixie Hwy: Head north. Go left around the roundabout on Cove Rd. The Port Salerno Church of God will be on your right.
+From South Stuart: Head north on US-1 and take a right on Cove Rd. The Port Salerno Church of God will be on the left before the railroad tracks.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Bethel Lutheran Church</location_name>
+      <line1>7905 SE Federal Hwy</line1>
+      <city>Hobe Sound</city>
+      <state>FL</state>
+      <zip>33455</zip>
+   </address>
+   <directions>From Seabranch Blvd: Head towards US-1. Take a right and head southbound. Bethel Lutheran Church will be on your left. If you see SE Poinciana Ln on your right, you’ve gone too far.
+From South Stuart: Head southbound on US-1. Bethel Lutheran Church will be on your left. If you see SE Poinciana Ln on your right, you’ve gone too far.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Martin County Fairgrounds</location_name>
+      <line1>2616 SE Dixie HWY</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34997</zip>
+   </address>
+   <directions>From Indian Street: Head north on SR-A1A/Dixie Hwy. The Fairgrounds will be on your left before Monterey Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>New Hope Fellowship Church</location_name>
+      <line1>3900 SW Citrus Blvd</line1>
+      <city>Palm City</city>
+      <state>FL</state>
+      <zip>34990</zip>
+   </address>
+   <directions>From Cobblestone/Stuart West:  Head towards Palm City on 714, turn right onto Citrus Blvd.  Church will be on your right
+From Indiantown:  Head toward Palm City on Citrus Blvd.  Church will be on your left before you reach 714
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>The Kane Center</location_name>
+      <line1>900 SE Salerno Rd</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34997</zip>
+   </address>
+   <directions>From South Stuart: Head North on US-1. Turn left on SE Salerno Rd. Go through the roundabout. The Kane Center will be on your left after Willoughby Dr.
+From Cove Rd: Turn onto Willoughby Dr. Take a left onto Salerno Rd. The Kane Center will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>1st United Methodist Church</location_name>
+      <line1>10100 SE Federal Hwy</line1>
+      <city>Hobe Sound</city>
+      <state>FL</state>
+      <zip>33455</zip>
+   </address>
+   <directions>From Bridge Rd: turn onto North US-1. The First United Methodist Church of Hobe Sound will be on your left before the Post Office.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>V.F.W. Post 10132</location_name>
+      <line1>6101 SE Dixie Hwy</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34997</zip>
+   </address>
+   <directions>From Hobe Sound Area: Head north on SR-A1A/Dixie Hwy. Follow the bend over the railroad tracks and the VFW will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>County Line Civic Center</location_name>
+      <line1>18530 SE County Line Rd</line1>
+      <city>Tequesta</city>
+      <state>FL</state>
+      <zip>33469</zip>
+   </address>
+   <directions>From the South County Fire Station: Continue heading north on County Line Rd. Follow the bend to the left past the satellites. The County Line Civic Center will be on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Knights of Columbus</location_name>
+      <line1>7251 SW Gaines Ave</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34997</zip>
+   </address>
+   <directions>From Pratt Whitney Rd: Take a right on SW Kanner Hwy and head past I-95. Take the first right after SE Cove Rd and the Knights of Columbus is located on the left of SW Gaines Ave.
+From Indian Street: Head southwest on SW Kanner Hwy and take a u-turn at the light for Cove Rd. Turn right onto SW Gaines Ave and the Knights of Columbus will be on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Tropical Farms Baptist Church</location_name>
+      <line1>1555 SW Kanner Hwy</line1>
+      <city>Stuart</city>
+      <state>FL</state>
+      <zip>34997</zip>
+   </address>
+   <directions>From Pratt Whitney Rd: Take a right on SW Kanner Hwy and take a left onto SW Tropical Ave. Follow the fork to the left and the Tropical Farms Baptist Church will be on the right.
+From Cove Rd: Head southwest on SW Kanner Hwy and take a right onto SW Tropical Ave. Follow the fork to the left and the Tropical Farms Baptist Church will be on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>Palm City Community Center</location_name>
+      <line1>2701 SW Cornell Ave</line1>
+      <city>Palm City</city>
+      <state>FL</state>
+      <zip>34990</zip>
+   </address>
+   <directions>From SW Martin Hwy: Head east and take a left on Mapp Rd. Follow to SW Martin Downs Blvd and take a right. Take a right on SW Cornell Ave and the Palm City Community Center will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>Immanuel Lutheran Church</location_name>
+      <line1>2655 SW Immanuel Dr</line1>
+      <city>Palm City</city>
+      <state>FL</state>
+      <zip>34990</zip>
+   </address>
+   <directions>From SW Martin Hwy: Head east and take a left on Mapp Rd. Follow to SW Martin Downs Blvd and take a left at the light. The Immanuel Lutheran Church will be on your right.
+From SW Murphy Road: Turn onto SW Matheson Ave and take a left when you get to SW Martin Downs Blvd. The Immanuel Lutheran Church will be on the left. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Cummings Library</location_name>
+      <line1>2551 SW Matheson Ave</line1>
+      <city>Palm City</city>
+      <state>FL</state>
+      <zip>34990</zip>
+   </address>
+   <directions>From SW Martin Hwy: Head east and take a left on Mapp Rd. Follow to SW Martin Downs Blvd and take a left at the light. Take a right onto SW Matheson Rd and the Cummings Library will be on your right.
+From the Florida Turnpike: Get onto SW Martin Downs Blvd and follow around curve. Take a left onto SW Matheson Ave and the Palm City Library will be on your right. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>Palm City Presbyterian Church</location_name>
+      <line1>2700 SW Martin Hwy</line1>
+      <city>Palm City</city>
+      <state>FL</state>
+      <zip>34990</zip>
+   </address>
+   <directions>From SW Martin Downs Blvd: Head West. Take a left onto SW High Meadows Ave. Take a left at SW Martin Hwy. The Palm City Presbyterian Church will be on your right, across from Hidden Oaks Middle School.
+From I-95: Take Palm City exit and head north on SW High Meadows Ave. Take a right at SW Martin Hwy. The Palm City Presbyterian Church will be on your right, across from Hidden Oaks Middle School.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>Jupiter Island Town Hall</location_name>
+      <line1>2 Bridge Rd</line1>
+      <city>Hobe Sound</city>
+      <state>FL</state>
+      <zip>33455</zip>
+   </address>
+   <directions>From N Beach Rd: Turn onto SE Bridge Rd and take a left before Gomez Rd and arrive at the Jupiter Island Town Hall.
+From Hobe Sound area: Follow SE Bridge Rd towards the Hobe Sound beach. Take the right after Gomez Rd and before the beach parking lot and arrive at the Jupiter Island Town Hall.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Elisabeth Lahti Library</location_name>
+      <line1>15200 SW Adams Ave</line1>
+      <city>Indiantown</city>
+      <state>FL</state>
+      <zip>34956</zip>
+   </address>
+   <directions>From Kanner Hwy: Take a left on SW Indiantown Ave. Turn right onto SW Warfield Blvd and follow to Adams Ave. Take a right on Adams Ave and the Indiantown Library will be on the left.
+From Dr. Martin Luther King Jr. Dr.: Head north towards the railroad. After you cross the railroad, take a right on SW Warfield Blvd. Take a left on Adams Ave, and the Indiantown Library will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>Mt. Zion Baptist Church</location_name>
+      <line1>14789 SW Dr. MLK Jr. Dr</line1>
+      <city>Indiantown</city>
+      <state>FL</state>
+      <zip>34956</zip>
+   </address>
+   <directions>From the Indiantown Government Center: take a left onto SW Warfield Blvd and then take another left onto SW Dr. Martin Luther King Jr. Dr. Follow past SW Magnolia St, and the Mt. Zion Baptist Church will be on your left. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Ridgeway Clubhouse</location_name>
+      <line1>8347 SE Swan Ave</line1>
+      <city>Hobe Sound</city>
+      <state>FL</state>
+      <zip>33455</zip>
+   </address>
+   <directions>From Seabranch Blvd: Head towards US-1. Take a right and head southbound. Take a left on SE Ridgeway Terrace. Follow to end and arrive at the Ridgeway Clubhouse.
+From Hobe Sound area: Head north on US-1. Take a right on SE Ridgeway Terrace. Follow to end and arrive at the Ridgeway Clubhouse.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

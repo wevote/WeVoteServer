@@ -1,0 +1,2693 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Polk County, FL</name>
+  <vip_id>12105</vip_id>
+  <datetime>2015-12-02T09:34:10</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>Outreach Baptist</location_name>
+      <line1>11425 Rockridge Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33809</zip>
+   </address>
+   <directions>From US Hwy 98 N, northeast on Rockridge Road. Polling location on southeast side of road, north of Ridge Meadow Drive.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Green Pond Baptist Church</location_name>
+      <line1>5995 Greenpond Church Rd</line1>
+      <city>Polk City</city>
+      <state>FL</state>
+      <zip>33868</zip>
+   </address>
+   <directions>North on Commonwealth Avenue, (Hwy 33 N). West on Greenpond Road, north on Greenpond Church Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Polo Park</location_name>
+      <line1>426 Polo Park Blvd</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33897</zip>
+   </address>
+   <directions>From US Highway 27 west onto Polo Park Blvd.  Polling location on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Polo Park East</location_name>
+      <line1>525 Polo Park East Blvd</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33837</zip>
+   </address>
+   <directions>North on Highway 27, east on Polo Park East Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Ridge Mobile Home Park Clubhouse</location_name>
+      <line1>49473 Highway 27</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33897</zip>
+   </address>
+   <directions>From Highway 27, east on Ridgeway Blvd, into The Ridge Mobile Home Park, continuing to the polling location. (south of Sand Mine Road).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Lion's Den Building</location_name>
+      <line1>6007 Central Ave NW</line1>
+      <city>Kathleen</city>
+      <state>FL</state>
+      <zip>33849</zip>
+   </address>
+   <directions>Corner of 1st Street NW and Central Avenue NW.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>New Life Community Church</location_name>
+      <line1>530 Commonwealth Ave SW</line1>
+      <city>Polk City</city>
+      <state>FL</state>
+      <zip>33868</zip>
+   </address>
+   <directions>From Commonwealth Avenue SW, north onto Pine Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>First Baptist Church</location_name>
+      <line1>212 Hamolia Ave</line1>
+      <city>Polk City</city>
+      <state>FL</state>
+      <zip>33868</zip>
+   </address>
+   <directions>From Commonwealth Avenue, southeast on Lakeshore Drive. North on Hamolia Avenue. Polling location on west side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Bethel Baptist Church</location_name>
+      <line1>3125 W Socrum Loop Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33810</zip>
+   </address>
+   <directions>US Hwy 98 N, west on W Socrum Loop Road. Polling location on corner of W Socrum Loop Road and N Campbell Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Our Savior Lutheran Church</location_name>
+      <line1>6920 N Socrum Loop Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33809</zip>
+   </address>
+   <directions>Corner of Marcum Road and N Socrum Loop Road. Polling location on west side of N Socrum Loop Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Abundant Life Church of God</location_name>
+      <line1>6725 N Socrum Loop Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33809</zip>
+   </address>
+   <directions>Corner of N Socrum Loop Road and Grady Mock Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Kathleen United Methodist</location_name>
+      <line1>3902 3rd St NW</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33810</zip>
+   </address>
+   <directions>Kathleen Road to Polk Avenue NW. Corner of Polk Avenue NW and 3rd Street.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>The Revolution Church of Lakeland</location_name>
+      <line1>7315 Kathleen Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33810</zip>
+   </address>
+   <directions>Corner of Kathleen Road and Duff Road.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>Cornerstone Baptist Church</location_name>
+      <line1>6725 Green Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33810</zip>
+   </address>
+   <directions>US Hwy 98 N, west on W Daughtery Road, north on Green Road. Corner of Green Road and Mann Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Lake Gibson United Methodist Church</location_name>
+      <line1>424 W Daughtery Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33809</zip>
+   </address>
+   <directions>From US HWY 98 N, east on W Daughtery Road. Corner of W Daughtery Road and Poinciana Avenue. 
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Believers' Fellowship Church</location_name>
+      <line1>5240 N Socrum Loop Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33809</zip>
+   </address>
+   <directions>Northwest side of N Socrum Loop Road. South of Old Combee Road.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Mount Tabor Baptist Church</location_name>
+      <line1>3504 Mount Tabor Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33810</zip>
+   </address>
+   <directions>From Kathleen Road, south on N Galloway Road. West on Mount Tabor Road, following Mount Tabor Road north to polling location. 
+
+
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Church of Jesus Christ L.D.S.</location_name>
+      <line1>1839 Gibsonia Galloway Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33809</zip>
+   </address>
+   <directions>US Hwy 98 N, west on Gib-Galloway Road. Polling location on north side of road between Sawyer Road and Dixie Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>The Estates at Carpenters</location_name>
+      <line1>1001 Carpenters Way</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33809</zip>
+   </address>
+   <directions>Hwy 98 N, east on Carpenters Way, polling location on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Victory Assembly of God</location_name>
+      <line1>1401 Griffin Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33810</zip>
+   </address>
+   <directions>US Hwy 98 N, west on Griffin Road. Polling location west of I-4 overpass on north side of road, entrances off Griffin Road or Mall Hill Drive.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>Good Shepherd United Methodist</location_name>
+      <line1>2815 N Galloway Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33810-0612</zip>
+   </address>
+   <directions>From Knights Station Road, south on N Galloway Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Ridgeview Plaza</location_name>
+      <line1>45665 Highway 27</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33897</zip>
+   </address>
+   <directions>One block north of Ronald Reagan Pkwy on Highway 27. Polling location is located on the east side of Highway 27 in the Ridgeview Plaza shopping center adjacent to Beef O'Brady's.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Florida Camp Inn</location_name>
+      <line1>48504 Highway 27</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33897</zip>
+   </address>
+   <directions>From Highway 27 turn west on Florida Avenue. Polling location on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>Lakeland Harbor - Rec Room</location_name>
+      <line1>4747 State Road 33 N</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33805</zip>
+   </address>
+   <directions>State Road 33 N (Lakeland Hills Blvd), south of Old Combee Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>Gapway Baptist Church</location_name>
+      <line1>1705 N Combee Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33801</zip>
+   </address>
+   <directions>N Combee Road, between Mineola Drive and Ralph Road. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Coleman-Bush Building</location_name>
+      <line1>1104 Martin L King Jr Ave</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33805</zip>
+   </address>
+   <directions>From Memorial Blvd, north on Martin L. King Jr Avenue. Corner of Martin L. King Jr. Avenue and Silver Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>Ewing Memorial 7th Day Adventist Church</location_name>
+      <line1>1201 N Webster Ave</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33805</zip>
+   </address>
+   <directions>Corner of W 6th Street and N Webster Avenue. Polling location entrance off 6th Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>Lakeland 7th Day Adventist Church</location_name>
+      <line1>1435 Gilmore Ave</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33805</zip>
+   </address>
+   <directions>From Memorial Blvd, north on Lakeland Hills Blvd to Parkview Place. East on Parkview Place to N Gilmore Avenue. North on N Gilmore Avenue to polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Lakewood Park United Methodist</location_name>
+      <line1>1140 N Combee Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33801</zip>
+   </address>
+   <directions>Corner of N Combee Road and Jungle Avenue, polling location on west side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>The Hamptons</location_name>
+      <line1>1094 US Highway 92 W</line1>
+      <city>Auburndale</city>
+      <state>FL</state>
+      <zip>33823</zip>
+   </address>
+   <directions>Between Old Dixie Hwy and Polk Parkway on the north side of US Highway 92 W. Follow Southampton Blvd to polling location.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Christ Community Church</location_name>
+      <line1>704 N Brunnell Pkwy</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33809</zip>
+   </address>
+   <directions>Corner of W Parker Street and N Brunnell Parkway. Polling location on west side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>First Baptist Institutional Church</location_name>
+      <line1>932 Martin L King Jr Ave</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33815</zip>
+   </address>
+   <directions>From Memorial Blvd, south on Martin L. King Jr Avenue. West on Quincy Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>Family Worship Center</location_name>
+      <line1>1350 E Main St</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33801-5715</zip>
+   </address>
+   <directions>From N Gary Road east on E Main Street. Polling location on the north side of E Main Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>Woodall's M. H. P.</location_name>
+      <line1>2121 New Tampa Hwy</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33815</zip>
+   </address>
+   <directions>North side of New Tampa Hwy (George Jenkins Blvd), west of  Wabash Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>Winston Baptist Church</location_name>
+      <line1>3233 Old Tampa Hwy</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33803</zip>
+   </address>
+   <directions>East of Airport Road, polling location on north side of Old Tampa Hwy.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>Trinity United Methodist Church</location_name>
+      <line1>715 Cornelia Ave</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33815</zip>
+   </address>
+   <directions>Corner of Ruby Street and Cornelia Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>Fla Presbyterian Homes McArthur Ctr</location_name>
+      <line1>811 Lakeside Ave</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33815</zip>
+   </address>
+   <directions>From S Florida Avenue, west on Cresap Street. North on Lakeside Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>Lake Mirror Center</location_name>
+      <line1>121 S Lake Ave</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33801</zip>
+   </address>
+   <directions>From E Main Street, south on S Lake Avenue, (behind Texas Cattle Company).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>All Faith Baptist Chapel</location_name>
+      <line1>302 Longfellow Blvd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33801</zip>
+   </address>
+   <directions>Corner of Bruce Street and Longfellow Blvd. Polling location on east side of road.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>Rhema Word of Faith International</location_name>
+      <line1>3330 Skyview Dr</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33801</zip>
+   </address>
+   <directions>Corner of Skyview Drive and Reynolds Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>Hilton Garden Inn</location_name>
+      <line1>3839 Don Emerson Dr</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33811</zip>
+   </address>
+   <directions>From Drane Field Road, south on Don Emerson Drive.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>Heatherwood Village</location_name>
+      <line1>1925 Harden Blvd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33803</zip>
+   </address>
+   <directions>Harden Blvd, west into Heatherwood Village MHP, (corner of Beacon Road and Harden Blvd).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>Beacon Hill Colony - Rec Hall</location_name>
+      <line1>1112 W Beacon Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33803</zip>
+   </address>
+   <directions>From W Beacon Road, south on Beacon Hill Drive. Polling location on west side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="48">
+   <address>
+      <location_name>College Heights Methodist Church</location_name>
+      <line1>942 South Blvd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33803</zip>
+   </address>
+   <directions>From South Florida Avenue, east on Frank Lloyd Wright Way (McDonald Street), south on South Blvd.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="49">
+   <address>
+      <location_name>Chapel in the Grove</location_name>
+      <line1>1540 New Jersey Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33803</zip>
+   </address>
+   <directions>From US Hwy 98, west on Edgewood Drive, north on New Jersey Road. Polling location on east side of road, across from E Norton Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="50">
+   <address>
+      <location_name>Church of Jesus Christ L.D.S.</location_name>
+      <line1>2337 S Crystal Lake Dr</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33801</zip>
+   </address>
+   <directions>From S Combee Road, west on S Crystal Lake Drive. Polling location on south side of the road, across for Hester Drive.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="51">
+   <address>
+      <location_name>Citrus Woods - Clubhouse Annex</location_name>
+      <line1>1610 Reynolds Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33801</zip>
+   </address>
+   <directions>From Reynolds Road (south of Skyview Drive), east on Woodland Drive. Polling location on east side of clubhouse.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="52">
+   <address>
+      <location_name>K-Ville Community Center</location_name>
+      <line1>1339 Payne St</line1>
+      <city>Auburndale</city>
+      <state>FL</state>
+      <zip>33823</zip>
+   </address>
+   <directions>Corner of County Road 542, (Main Street/K-Ville Avenue) and Payne Street in K-Ville. Polling location on east side of road.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="53">
+   <address>
+      <location_name>United Methodist Temple</location_name>
+      <line1>2700 S Florida Ave</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33803</zip>
+   </address>
+   <directions>From S Florida Avenue, east on Rogers Terrace. Across from Southgate Shopping Center.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="54">
+   <address>
+      <location_name>Kelly Recreation Complex</location_name>
+      <line1>404 Imperial Blvd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33803</zip>
+   </address>
+   <directions>From S Florida Avenue, west on Imperial Blvd. Complex on south side of road, behind Walmart.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="55">
+   <address>
+      <location_name>Cleveland Heights Baptist Church</location_name>
+      <line1>3120 Cleveland Heights Blvd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33803</zip>
+   </address>
+   <directions>From E Edgewood Drive, south on Cleveland Heights Blvd. Polling location on east side of road between Chatfield Street and Demmington Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="56">
+   <address>
+      <location_name>First Alliance Church</location_name>
+      <line1>1919 E Edgewood Dr</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33803</zip>
+   </address>
+   <directions>Corner of Balfour Avenue and Edgewood Drive. East of New Jersey Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="57">
+   <address>
+      <location_name>Church of the Resurrection</location_name>
+      <line1>3720 Old Rd 37</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>From S Florida Avenue, west on Terrace Way, (by Wendy's). Corner of Terrace Way and Old Road 37.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="58">
+   <address>
+      <location_name>Heritage Baptist Church</location_name>
+      <line1>4202 Pipkin Creek Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33801</zip>
+   </address>
+   <directions>From W Pipkin Road, north on S Pipkin Road, northeast on Pipkin Creek Road. Polling location on east side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="59">
+   <address>
+      <location_name>Fellowship Baptist Church</location_name>
+      <line1>4625 Cleveland Heights Blvd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>Between Lake Miriam Drive and Hallam Drive. Polling location on west side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="60">
+   <address>
+      <location_name>Highland Park Church of Nazarene</location_name>
+      <line1>4730 Lakeland Highland Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>East side of Lakeland Highlands Road, south of Hallam Drive.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="61">
+   <address>
+      <location_name>The Vineyard</location_name>
+      <line1>2023 W Pipkin Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33811</zip>
+   </address>
+   <directions>North side of Pipkin Road across from Lunn Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="62">
+   <address>
+      <location_name>Medulla Community Center</location_name>
+      <line1>1049 Parker Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33811</zip>
+   </address>
+   <directions>From Old Road 37, west on Parker Road. Polling location between Ivory Lane and Lily Road on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="63">
+   <address>
+      <location_name>Scott Lake Baptist Church</location_name>
+      <line1>5811 Scott Lake Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>From County Road 540A (Christina), north on Scott Lake Road. Polling location on west side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="64">
+   <address>
+      <location_name>Highlands Church of Christ</location_name>
+      <line1>5730 Lakeland Highlands Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>Corner of Lakeland Highlands Road and Peterson Road. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="65">
+   <address>
+      <location_name>Southside Baptist Church</location_name>
+      <line1>5330 Lakeland Highlands Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813-5212</zip>
+   </address>
+   <directions>Corner of Lakeland Highlands Road and Clubhouse Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="66">
+   <address>
+      <location_name>First Baptist Church</location_name>
+      <line1>5410 Yarborough Ln</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33812</zip>
+   </address>
+   <directions>Corner of Clubhouse Road and Yarborough Lane.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="67">
+   <address>
+      <location_name>Shepherds Community United Methodist</location_name>
+      <line1>6885 Chelsea Oaks Dr</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33811</zip>
+   </address>
+   <directions>From Highway 37 (S Florida Avenue), west on Shepherd Road, north on Chelsea Oaks Drive. Polling location on west side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="68">
+   <address>
+      <location_name>Willow Oak Baptist Church</location_name>
+      <line1>3390 Willow Oak Rd</line1>
+      <city>Mulberry</city>
+      <state>FL</state>
+      <zip>33860</zip>
+   </address>
+   <directions>From State Road 60, north on Willow Oak Road. Corner of Willis Road and Willow Oak Road. Polling location on west side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="69">
+   <address>
+      <location_name>Fortis Institute</location_name>
+      <line1>5925 Imperial Pkwy</line1>
+      <city>Mulberry</city>
+      <state>FL</state>
+      <zip>33860</zip>
+   </address>
+   <directions>From Shepherd Road, south on Imperial Parkway. Polling location on east side of road, southern part of parking lot.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="70">
+   <address>
+      <location_name>Mulberry Civic Center</location_name>
+      <line1>901 NE 5th St</line1>
+      <city>Mulberry</city>
+      <state>FL</state>
+      <zip>33860</zip>
+   </address>
+   <directions>From State Road 37 N (N Church Avenue), east on NE 5th Street. Center on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="71">
+   <address>
+      <location_name>St John Neumann Catholic Church</location_name>
+      <line1>501 E Carter Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>From Hwy 37, (S Florida Avenue) east on E Carter Road, (by Walmart). Polling location on south side of road across from Sunset Grove Court.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="72">
+   <address>
+      <location_name>Unity in the Grove Church</location_name>
+      <line1>6230 Lakeland Highlands Rd</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>From County Road 540A (Christina), south on Lakeland Highlands Road. Polling location on east side of road, across from Publix shopping center.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="73">
+   <address>
+      <location_name>Trinity Christian Center</location_name>
+      <line1>4416 E County Road 540A</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>From Bartow Road (US Hwy 98) west on E County Road 540A. Polling location on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="74">
+   <address>
+      <location_name>Bartow Civic Center</location_name>
+      <line1>2250 S Floral Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>South on S Broadway Avenue, west on W Clower Street, south on S Floral Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="75">
+   <address>
+      <location_name>Trinity Christian Center</location_name>
+      <line1>4416 E County Road 540A</line1>
+      <city>Lakeland</city>
+      <state>FL</state>
+      <zip>33813</zip>
+   </address>
+   <directions>From Bartow Road (US Hwy 98) west on E County Road 540A. Polling location on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="76">
+   <address>
+      <location_name>Emerald Lakes MHP Clubhouse</location_name>
+      <line1>200 Jeremy Dr</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33837</zip>
+   </address>
+   <directions>From Highway 27, west on Sandhill Road. Continue southwest on Jeremy Drive. Follow signs to polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="77">
+   <address>
+      <location_name>Lake Ariana Clubhouse</location_name>
+      <line1>321 Ramsgate Rd</line1>
+      <city>Auburndale</city>
+      <state>FL</state>
+      <zip>33823</zip>
+   </address>
+   <directions>East on Dixie Hwy. Clubhouse on the corner of Ariana Blvd and Dixie Hwy.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="78">
+   <address>
+      <location_name>Church at the Mall Auburndale</location_name>
+      <line1>380 State Road 559</line1>
+      <city>Auburndale</city>
+      <state>FL</state>
+      <zip>33823</zip>
+   </address>
+   <directions>From Polk City Road, (State Road 559), north of Lake Ariana. Polling location on northwest corner of Dickey Road and Polk City Road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="79">
+   <address>
+      <location_name>Knights of Columbus</location_name>
+      <line1>401 3rd St SW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>North on US Highway 17 S, (3rd St SW), continue on 3rd St SW. Polling location on west side of road, between Avenue D SW and Avenue E SW. (north of Lowe's, Belk's shopping plaza).
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="80">
+   <address>
+      <location_name>Chain Of Lakes Complex</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From Hwy 17 N, east on Cypress Gardens Blvd.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="81">
+   <address>
+      <location_name>Sweetwater Clubhouse</location_name>
+      <line1>4635 US Highway 17 92 W</line1>
+      <city>Haines City</city>
+      <state>FL</state>
+      <zip>33844</zip>
+   </address>
+   <directions>About a mile east of Century Drive, on US Highway 17 92 W, south on Sweetwater Blvd, follow signs to polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="82">
+   <address>
+      <location_name>Lena Vista United Methodist Church</location_name>
+      <line1>690 Berkley Rd</line1>
+      <city>Auburndale</city>
+      <state>FL</state>
+      <zip>33823</zip>
+   </address>
+   <directions>From US Highway 92 W, north on Berkley Road. Polling location on the corner of Seville Road and Berkley Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="83">
+   <address>
+      <location_name>Auburndale Civic Center</location_name>
+      <line1>115 W Park St</line1>
+      <city>Auburndale</city>
+      <state>FL</state>
+      <zip>33823</zip>
+   </address>
+   <directions>East on Pilaklakaha Avenue, north on W Park Street. Polling location across from city park and historic depot.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="84">
+   <address>
+      <location_name>First Church of God</location_name>
+      <line1>3025 US Highway 92</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>From US Highway 92 E, west of Palmetto Drive. Polling location on north side of US Highway 92.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="85">
+   <address>
+      <location_name>Champions Church</location_name>
+      <line1>1801 Havendale Blvd NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>North side of Havendale Blvd NW, across from 17th Street NW.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="86">
+   <address>
+      <location_name>Chain of Lakes Convention Center/Gym</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From 3rd Street SW, (US Highway 17 S), east on Cypress Gardens Blvd. Polling location on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="87">
+   <address>
+      <location_name>Chain Of Lakes Complex</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From Hwy 17 N, east on Cypress Gardens Blvd.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="88">
+   <address>
+      <location_name>Lake Alfred City Hall</location_name>
+      <line1>120 E Pomelo St</line1>
+      <city>Lake Alfred</city>
+      <state>FL</state>
+      <zip>33850</zip>
+   </address>
+   <directions>Corner of N Lake Shore Way and E Pomelo Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="89">
+   <address>
+      <location_name>The Rock of Winter Haven</location_name>
+      <line1>2901 Lucerne Park Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>From Havendale Blvd NW, north on 1st Street N. Northeast on Lucerne Park Road, (State Road 544). Follow signs to polling location on north side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="90">
+   <address>
+      <location_name>1st Baptist Church of Lucerne Park</location_name>
+      <line1>5650 State Road 544-L Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>From Lucerne Park Rd, (State Road 544), near Walmart Distribution Center.  Polling location on north side of road at
+ the corner of Lucerne Park Road and Lake Lucerne Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="91">
+   <address>
+      <location_name>1st Baptist Church of Lucerne Park</location_name>
+      <line1>5650 State Road 544</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>From Lucerne Park Road, (State Road 544), near Walmart Distribution Center. Polling location on north side of road on the corner of Lucerne Park Road and Old Lucerne Park Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="92">
+   <address>
+      <location_name>1st Baptist Church of Lucerne Park</location_name>
+      <line1>5650 State Road 544-L Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>From Lucerne Park Rd, (State Road 544), near Walmart Distribution Center.  Polling location on north side of road at
+ the corner of Lucerne Park Road and Lake Lucerne Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="93">
+   <address>
+      <location_name>K-Ville Community Center</location_name>
+      <line1>1339 Payne St</line1>
+      <city>Auburndale</city>
+      <state>FL</state>
+      <zip>33823</zip>
+   </address>
+   <directions>Corner of County Road 542, (Main Street/K-Ville Avenue) and Payne Street in K-Ville. Polling location on east side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="94">
+   <address>
+      <location_name>Havendale Christian Church</location_name>
+      <line1>3900 Lake Blue Dr</line1>
+      <city>Auburndale</city>
+      <state>FL</state>
+      <zip>33823</zip>
+   </address>
+   <directions>From Havendale Blvd, south on Lake Blue Drive, (east of 42nd Street). Polling location on the east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="95">
+   <address>
+      <location_name>Champions Church</location_name>
+      <line1>1801 Havendale Blvd NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>North side of Havendale Blvd NW, across from 17th Street NW.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="96">
+   <address>
+      <location_name>Champions Church</location_name>
+      <line1>1801 Havendale Blvd NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>North side of Havendale Blvd NW, across from 17th Street NW.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="97">
+   <address>
+      <location_name>Faith Baptist Church</location_name>
+      <line1>2140 Crystal Beach Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>Corner of County Road 540W (Winter Lake Rd) and Crystal Beach Road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="98">
+   <address>
+      <location_name>Chain of Lakes Complex</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>From Hwy 17 N, east on Cypress Gardens Blvd.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="99">
+   <address>
+      <location_name>Polk County Utilities Division</location_name>
+      <line1>1011 Jim Keene Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>North side of Winter Lake Road, (State Road 540 W), between Thornhill Road on west and Spirit Lake Road on east.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="100">
+   <address>
+      <location_name>The Way at Inwood</location_name>
+      <line1>1302 33rd St NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>Corner of Avenue M NW and 33rd St NW. Polling location on the north side of the road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="101">
+   <address>
+      <location_name>Winter Haven Senior Center</location_name>
+      <line1>250 S Lake Silver Dr NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From 1st Street N, west on S Lake Silver Drive.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="102">
+   <address>
+      <location_name>Westwood Missionary Baptist Church</location_name>
+      <line1>3210 Avenue G NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>Between 33rd Street NW and 32nd Street NW on Avenue G NW. Polling location on south side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="103">
+   <address>
+      <location_name>Winter Haven Senior Center</location_name>
+      <line1>250 S Lake Silver Dr NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From 1st Street N, west on S Lake Silver Drive.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="104">
+   <address>
+      <location_name>Winter Haven Senior Center</location_name>
+      <line1>250 S Lake Silver Dr NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From 1st Street N, west on S Lake Silver Drive. Polling location on south side of road.
+
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="105">
+   <address>
+      <location_name>Winter Haven Senior Center</location_name>
+      <line1>250 S Lake Silver Dr NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From 1st Street N, west on S Lake Silver Drive.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="106">
+   <address>
+      <location_name>Samson Masonic Lodge #142</location_name>
+      <line1>120 Avenue R NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>Corner of Avenue R NW and 1st Street N.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="107">
+   <address>
+      <location_name>Samson Masonic Lodge #142</location_name>
+      <line1>120 Avenue R NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>Corner of Avenue R NW and 1st Street N.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="108">
+   <address>
+      <location_name>Church of the Redeemer</location_name>
+      <line1>1410 Dundee Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Corner of 14th Street SE and Dundee Road. Polling location on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="109">
+   <address>
+      <location_name>Winter Haven Senior Center</location_name>
+      <line1>250 S Lake Silver Dr NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>From 1st Street N, west on S Lake Silver Drive.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="110">
+   <address>
+      <location_name>Faith Baptist Church</location_name>
+      <line1>2140 Crystal Beach Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>Corner of County Road 540 W, (Winter Lake Road) and Crystal Beach Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="111">
+   <address>
+      <location_name>Chain of Lakes Complex</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>From Hwy 17 N, east on Cypress Gardens Blvd.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="112">
+   <address>
+      <location_name>Spirit Lake Community Church</location_name>
+      <line1>2600 Spirit Lake Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>Between Country Place and Rolling Oaks Drive. Polling location on west side of Spirit Lake Road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="113">
+   <address>
+      <location_name>Chain of Lakes-Convention Center/Gym</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From 3rd Street SW, (US Highway 17 S), east on Cypress Gardens Blvd. Polling location on south side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="114">
+   <address>
+      <location_name>Chain Of Lakes Complex</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From Hwy 17 N, east on Cypress Gardens Blvd.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="115">
+   <address>
+      <location_name>Knights of Columbus</location_name>
+      <line1>401 3rd St SW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>North on US Highway 17 S, (3rd St SW), continue on 3rd St SW. Polling location on west side of road, between Avenue D SW and Avenue E SW. (north of Lowe's, Belk's shopping plaza).
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="116">
+   <address>
+      <location_name>Chain Of Lakes Complex</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From Hwy 17 N, east on Cypress Gardens Blvd.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="117">
+   <address>
+      <location_name>Thrive Church</location_name>
+      <line1>651 Carl Floyd Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From Cypress Gardens Blvd, northeast on Overlook Drive. North on Carl Floyd Road. Polling location on northwest corner of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="118">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr SE</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="119">
+   <address>
+      <location_name>Resurrection Lutheran Church</location_name>
+      <line1>4620 Cypress Gardens Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Polling location between Mahogany Run and Sterling Drive, on south side of Cypress Gardens Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="120">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr SE</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="121">
+   <address>
+      <location_name>Spirit Lake Community Church</location_name>
+      <line1>2600 Spirit Lake Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>Between Country Place and Rolling Oaks Drive. Polling location on west side of Spirit Lake Road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="122">
+   <address>
+      <location_name>Eagle Lake Church of Christ</location_name>
+      <line1>261 3rd St N</line1>
+      <city>Eagle Lake</city>
+      <state>FL</state>
+      <zip>33839</zip>
+   </address>
+   <directions>Corner of N 3rd Street and W Bay Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="123">
+   <address>
+      <location_name>Eagle Lake Community Complex</location_name>
+      <line1>75 N 7th St</line1>
+      <city>Eagle Lake</city>
+      <state>FL</state>
+      <zip>33839</zip>
+   </address>
+   <directions>From Hwy 17, east on E Eagle Avenue, north on N 7th Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="124">
+   <address>
+      <location_name>Chain of Lakes-Convention Center/Gym</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From 3rd Street SW, (US Highway 17 S), east on Cypress Gardens Blvd. Polling location on south side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="125">
+   <address>
+      <location_name>Chain Of Lakes Complex</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>From Hwy 17 N, east on Cypress Gardens Blvd.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="126">
+   <address>
+      <location_name>Hope Presbyterian Church</location_name>
+      <line1>2110 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>From Cypress Gardens Blvd, north on Duvall Dr SE, west on Alachua Drive. (Across from Lake Ina). 
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="127">
+   <address>
+      <location_name>Chain of Lakes Complex</location_name>
+      <line1>210 Cypress Gardens Blvd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>From Hwy 17 N, east on Cypress Gardens Blvd.  Center located on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="128">
+   <address>
+      <location_name>Holy Cross Episcopal Church</location_name>
+      <line1>201 Kipling Ln</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>East on Cypress Gardens Road, with a name change to Lake Ned Road, north on Kipling Lane.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="129">
+   <address>
+      <location_name>Eagle Lake Community Complex</location_name>
+      <line1>75 N 7th St</line1>
+      <city>Eagle Lake</city>
+      <state>FL</state>
+      <zip>33839</zip>
+   </address>
+   <directions>From US Highway 17, east on E Eagle Avenue, north on N 7th Street.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="130">
+   <address>
+      <location_name>Eagle Lake Community Complex</location_name>
+      <line1>75 N 7th St</line1>
+      <city>Eagle Lake</city>
+      <state>FL</state>
+      <zip>33839</zip>
+   </address>
+   <directions>From Hwy 17, east on E Eagle Avenue, north on N 7th Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="131">
+   <address>
+      <location_name>Orange Manor West M.H.P.</location_name>
+      <line1>18 Kinsmen Dr</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Corner of Eloise Loop Road and Kinsmen Drive. (Between Cypress Point E and Cypress Point W)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="132">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr SE</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="133">
+   <address>
+      <location_name>First Church of God</location_name>
+      <line1>3025 US Highway 92</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>From US Highway 92 E, west of Palmetto Drive. Polling location on north side of US Highway 92.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="134">
+   <address>
+      <location_name>Champions Church</location_name>
+      <line1>1801 Havendale Blvd NW</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33881</zip>
+   </address>
+   <directions>North side of Havendale Blvd NW, across from 17th Street NW.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="135">
+   <address>
+      <location_name>Sunlake Terrace Estates</location_name>
+      <line1>6555-16 Old Lake Wilson Rd</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33896</zip>
+   </address>
+   <directions>From Ronald Reagan Pkwy, (County Road 54), north onto Old Lake Wilson Road. West into mobile home community. Follow signs to polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="136">
+   <address>
+      <location_name>Four Corners Baptist Church</location_name>
+      <line1>125 Cottonwood Dr</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33837</zip>
+   </address>
+   <directions>From Highway 27, east on Cottonwood Drive. (North of Ridgewood Lakes Blvd.)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="137">
+   <address>
+      <location_name>Kissimmee South Carefree Resort</location_name>
+      <line1>3700 US Highway 17 92 N</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33837</zip>
+   </address>
+   <directions>Between Davenport and Loughman. From US Highway 17 92 N, southeast on Garman Avenue. Follow signs to polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="138">
+   <address>
+      <location_name>Davenport Community Center</location_name>
+      <line1>5 S Allapaha Ave</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33837</zip>
+   </address>
+   <directions>From US Highway 17 92 S, east on W Palmetto Street. North on S Allapaha Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="139">
+   <address>
+      <location_name>Davenport Community Center</location_name>
+      <line1>5 S Allapaha Ave</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33837</zip>
+   </address>
+   <directions>From US Highway 17 92 W, east on W Palmetto Street. Polling location on northeast corner of W Palmetto Street and S Allapaha Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="140">
+   <address>
+      <location_name>Parkview Christian Center - Hall</location_name>
+      <line1>3520 Baker Dairy Rd</line1>
+      <city>Haines City</city>
+      <state>FL</state>
+      <zip>33844</zip>
+   </address>
+   <directions>North on N 30th Street, east on Baker Dairy Road, (Baker Avenue). Polling location on north side of road, west of Powerline Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="141">
+   <address>
+      <location_name>Davenport Community Center</location_name>
+      <line1>5 S Allapaha Ave</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33844</zip>
+   </address>
+   <directions>From US Highway 17 92 W, east on W Palmetto Street. Polling location on northeast corner of W Palmetto Street and S Allapaha Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="142">
+   <address>
+      <location_name>Little Zion Primitive Baptist Church</location_name>
+      <line1>3333 County Road 547 N</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33837</zip>
+   </address>
+   <directions>From Davenport, north on County Road 547 N. Polling location on west side of the road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="143">
+   <address>
+      <location_name>Bethune Neighborhood Center</location_name>
+      <line1>915 Avenue E</line1>
+      <city>Haines City</city>
+      <state>FL</state>
+      <zip>33844</zip>
+   </address>
+   <directions>From N Lee Jackson Hwy, northwest on Dr Martin L KIng Jr Way. West on Citrus Avenue, north on N 8th Street, east on Avenue E. Polling location on south side of the road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="144">
+   <address>
+      <location_name>Trinity Worship Center Intl Ministry</location_name>
+      <line1>2795 N 10th St</line1>
+      <city>Haines City</city>
+      <state>FL</state>
+      <zip>33844</zip>
+   </address>
+   <directions>From Highway 27, east on Bates Road, south on 10th Street N. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="145">
+   <address>
+      <location_name>Haines City Community Center</location_name>
+      <line1>555 Ledwith Ave</line1>
+      <city>Haines City</city>
+      <state>FL</state>
+      <zip>33844</zip>
+   </address>
+   <directions>From US Highway 17 92 W, (E Hinson Avenue), south on S 5th Street to Ledwith Avenue. Polling location on south side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="146">
+   <address>
+      <location_name>Calvary First Assembly of God</location_name>
+      <line1>4550 E Johnson Ave</line1>
+      <city>Haines City</city>
+      <state>FL</state>
+      <zip>33844</zip>
+   </address>
+   <directions>From Powerline Road, east on Johnson Ave. Polling location on north side of Johnson Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="147">
+   <address>
+      <location_name>Solivita</location_name>
+      <line1>395 Village Dr</line1>
+      <city>Poinciana</city>
+      <state>FL</state>
+      <zip>34759</zip>
+   </address>
+   <directions>From Cypress Pkwy, south on Solivita Blvd, west on Village Drive. Follow signs to polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="148">
+   <address>
+      <location_name>Poinciana Community Center</location_name>
+      <line1>395 Marigold Ave</line1>
+      <city>Poinciana</city>
+      <state>FL</state>
+      <zip>34759</zip>
+   </address>
+   <directions>Corner of Marigold Avenue and Walnut Street. Entrance off Marigold Avenue or Walnut Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="149">
+   <address>
+      <location_name>Lake Hamilton Woman's Club</location_name>
+      <line1>85 N Omaha St</line1>
+      <city>Lake Hamilton</city>
+      <state>FL</state>
+      <zip>33851</zip>
+   </address>
+   <directions>Corner of N Omaha Street and W Main Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="150">
+   <address>
+      <location_name>Lake Hamilton Woman's Club</location_name>
+      <line1>85 N Omaha St</line1>
+      <city>Lake Hamilton</city>
+      <state>FL</state>
+      <zip>33851</zip>
+   </address>
+   <directions>Corner of N Omaha Street and W Main Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="151">
+   <address>
+      <location_name>Westgate Grenelefe Resort</location_name>
+      <line1>3200 State Road 546 E</line1>
+      <city>Haines City</city>
+      <state>FL</state>
+      <zip>33844</zip>
+   </address>
+   <directions>From County Road 544, aka Marion Road, south on State Road 546 E, aka Kokomo Road. East on Abbey Court, left on Camelot Drive. Polling location on east side of road.
+
+
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="152">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="153">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr SE</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="154">
+   <address>
+      <location_name>Dundee Community Center</location_name>
+      <line1>603 Lake Marie Dr</line1>
+      <city>Dundee</city>
+      <state>FL</state>
+      <zip>33838</zip>
+   </address>
+   <directions>Corner of Lake Marie Drive and N 8th Street. Polling location on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="155">
+   <address>
+      <location_name>Dundee Community Center</location_name>
+      <line1>603 Lake Marie Dr</line1>
+      <city>Dundee</city>
+      <state>FL</state>
+      <zip>33838</zip>
+   </address>
+   <directions>Corner of 6th Street and E Main Street (Hwy 17).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="156">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="157">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr SE</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="158">
+   <address>
+      <location_name>Nature's Edge Community Center</location_name>
+      <line1>7079 Tamarind Dr</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33898</zip>
+   </address>
+   <directions>From Canal Road, west on Alamanda Blvd, south on Tamarind Drive.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="159">
+   <address>
+      <location_name>Tuscany Preserve at Lake Marion</location_name>
+      <line1>1850 Pacific Rd</line1>
+      <city>Poinciana</city>
+      <state>FL</state>
+      <zip>34759</zip>
+   </address>
+   <directions>From Poinciana Pkwy, west on Pacific Road. Polling location on south side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="160">
+   <address>
+      <location_name>Solivita</location_name>
+      <line1>395 Village Dr</line1>
+      <city>Poinciana</city>
+      <state>FL</state>
+      <zip>34759</zip>
+   </address>
+   <directions>From Cypress Pkwy, south on Solivita Blvd, west on Village Drive. Follow signs to polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="161">
+   <address>
+      <location_name>Ridgeview Plaza</location_name>
+      <line1>45665 Highway 27</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33897</zip>
+   </address>
+   <directions>One block north of Ronald Reagan Parkway on Highway 27.  Polling location on east side of Highway 27 in the Ridgeview Plaza shopping center adjacent to Beef O'Brady's.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="162">
+   <address>
+      <location_name>Sunlake Terrace Estates</location_name>
+      <line1>6555-16 Old Lake Wilson Rd</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33896</zip>
+   </address>
+   <directions>From Ronald Reagan Pkwy, (County Road 54), north onto Old Lake Wilson Road. West into mobile home community. Follow signs to polling location.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="163">
+   <address>
+      <location_name>Lake Hamilton Woman's Club</location_name>
+      <line1>85 N Omaha St</line1>
+      <city>Lake Hamilton</city>
+      <state>FL</state>
+      <zip>33851</zip>
+   </address>
+   <directions>Corner of N Omaha Street and W Main Street</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="164">
+   <address>
+      <location_name>Dundee Community Center</location_name>
+      <line1>603 Lake Marie Dr</line1>
+      <city>Dundee</city>
+      <state>FL</state>
+      <zip>33838</zip>
+   </address>
+   <directions>Corner of Lake Marie Drive and N 8th Street. Polling location on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="165">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr SE</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33838</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="166">
+   <address>
+      <location_name>Good Hope Missionary Baptist Church</location_name>
+      <line1>3397 Old Bartow Eagle Rd</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>From Ernest M Smith Blvd, northeast on Old Bartow Eagle Lake Road. Polling location on northeast side of Griffin Road.
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="167">
+   <address>
+      <location_name>Polk Street Community Center</location_name>
+      <line1>1255 W Polk St</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>From Broadway Avenue, west on Polk Street. Polling location on southwest corner of Gordon Avenue and Polk Street. 
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="168">
+   <address>
+      <location_name>Bartow Civic Center</location_name>
+      <line1>2250 S Floral Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>South on S Broadway Avenue, west on W Clower Street, south on S Floral Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="169">
+   <address>
+      <location_name>First Baptist Church-Ministry Center</location_name>
+      <line1>410 E Church St</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>From Broadway Avenue, east on Church Street. Polling location on north side of road, between N Florida Avenue and N Hendry Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="170">
+   <address>
+      <location_name>Bartow Civic Center</location_name>
+      <line1>2250 S Floral Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>South on S Broadway Avenue, west on W Clower Street, south on S Floral Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="171">
+   <address>
+      <location_name>Bartow Assembly of God</location_name>
+      <line1>915 S Broadway Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>From Main Street, south on S Broadway Avenue. Polling location on west side of road, entrance off West Hooker Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="172">
+   <address>
+      <location_name>Bartow Civic Center</location_name>
+      <line1>2250 S Floral Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>South on S Broadway Avenue, west on W Clower Street, south on S Floral Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="173">
+   <address>
+      <location_name>Bartow Civic Center</location_name>
+      <line1>2250 S Floral Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>South on S Broadway Avenue, west on W Clower Street, south on S Floral Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="174">
+   <address>
+      <location_name>Bartow Civic Center</location_name>
+      <line1>2250 S Floral Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>South on S Broadway Avenue, west on W Clower Street, south on S Floral Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="175">
+   <address>
+      <location_name>St Thomas Aquinas Church</location_name>
+      <line1>1305 E Mann Rd</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>Corner of E Mann Road and S Kissengen Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="176">
+   <address>
+      <location_name>Bartow Civic Center</location_name>
+      <line1>2250 S Floral Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>South on S Broadway Avenue, west on W Clower Street, south on S Floral Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="177">
+   <address>
+      <location_name>Carver Center</location_name>
+      <line1>520 S Idlewood Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>South on US Highway 17 S, east on E Wabash Street, south on S Idlewood Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="178">
+   <address>
+      <location_name>Bartow Civic Center</location_name>
+      <line1>2250 S Floral Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>South on S Broadway Avenue, west on W Clower Street, south on S Floral Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="179">
+   <address>
+      <location_name>Centro Guadalupe Catholic Mission</location_name>
+      <line1>2150 Bomber Rd</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33880-5600</zip>
+   </address>
+   <directions>From US Highway 17 N, east on Bomber Road. Polling location on southwest corner of Bomber Road and Gerber Dairy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="180">
+   <address>
+      <location_name>Eagle Lake Community Complex</location_name>
+      <line1>75 N 7th St</line1>
+      <city>Eagle Lake</city>
+      <state>FL</state>
+      <zip>33880-5600</zip>
+   </address>
+   <directions>From Hwy 17, east on E Eagle Avenue, north on N 7th Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="181">
+   <address>
+      <location_name>First Baptist Church of Lake Garfield</location_name>
+      <line1>1170 80 Foot Rd</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>From State Road 60, south on 80 Foot Road. Polling location on the east side of the road, approximately 1.5 miles. 
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="182">
+   <address>
+      <location_name>1st Baptist Church of Bradley</location_name>
+      <line1>610 Pine St</line1>
+      <city>Bradley</city>
+      <state>FL</state>
+      <zip>33835</zip>
+   </address>
+   <directions>From State Road 37, east on Pine Street, south on Whidden Street, east on Pine Street. Polling location on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="183">
+   <address>
+      <location_name>Alturas Women's Club</location_name>
+      <line1>2670 Oak Dr</line1>
+      <city>Alturas</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>From State Road 60, south on Alturas Road, (County Road 655A), with a name change to Central Avenue, north on 3rd Street, east on Oak Drive. Polling location on corner of Oak Drive and Magnolia Avenue.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="184">
+   <address>
+      <location_name>First Baptist Church of Lake Garfield</location_name>
+      <line1>1170 80 Foot Rd</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>From State Road 60, south on 80 Foot Road. Polling location on the east side of the road, approximately 1.5 miles. 
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="185">
+   <address>
+      <location_name>Bartow Civic Center</location_name>
+      <line1>2250 S Floral Ave</line1>
+      <city>Bartow</city>
+      <state>FL</state>
+      <zip>33830</zip>
+   </address>
+   <directions>South on S Broadway Avenue, west on W Clower Street, south on S Floral Avenue. Polling location on east side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="186">
+   <address>
+      <location_name>American Legion</location_name>
+      <line1>825 N Charleston Ave</line1>
+      <city>Fort Meade</city>
+      <state>FL</state>
+      <zip>33841</zip>
+   </address>
+   <directions>From N Charleston Avenue (US Highway 17 N).  Polling location on west side of road between 9th Street NE and 8th Street NE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="187">
+   <address>
+      <location_name>Fort Meade Community Center</location_name>
+      <line1>10 SW 3rd St</line1>
+      <city>Fort Meade</city>
+      <state>FL</state>
+      <zip>33841</zip>
+   </address>
+   <directions>From N Charleston Avenue west on 3rd Street SW. Polling location on corner of N Charleston Avenue and 3rd Street SW.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="188">
+   <address>
+      <location_name>St. Elizabeth Catholic Church</location_name>
+      <line1>101 N Edgewood Dr</line1>
+      <city>Fort Meade</city>
+      <state>FL</state>
+      <zip>33841</zip>
+   </address>
+   <directions>From E Broadway Street, north on N Edgewood Drive. Polling location on west side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="189">
+   <address>
+      <location_name>Grace Baptist Church</location_name>
+      <line1>3530 N Scenic Hwy</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33898</zip>
+   </address>
+   <directions>East side of N Scenic Hwy. Polling location on the  corner of Grove Avenue and N Scenic Hwy. South of S Lake Starr Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="190">
+   <address>
+      <location_name>Lake Wales Municipal Complex</location_name>
+      <line1>201 W Central Ave</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33898</zip>
+   </address>
+   <directions>From HWY 27, east on W Central Ave, complex located on south side of road between S Sharp St and Dr. Martin Luther King, Jr Blvd S</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="191">
+   <address>
+      <location_name>New Life Assembly of God Church</location_name>
+      <line1>4226 Rifle Range Rd</line1>
+      <city>Wahneta</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>West side of Rifle Range Road, between 19th Wahneta Street W and Mages Lane.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="192">
+   <address>
+      <location_name>New Life Assembly of God Church</location_name>
+      <line1>4226 Rifle Range Rd</line1>
+      <city>Wahneta</city>
+      <state>FL</state>
+      <zip>33880</zip>
+   </address>
+   <directions>West side of Rifle Range Road, between 19th Wahneta Street W and Mages Lane.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="193">
+   <address>
+      <location_name>Traditions Clubhouse</location_name>
+      <line1>4100 Bedford Ave</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>From Thompson Nursery Road, north on Traditions Blvd N. (East of Lake Ruby Dr W). Follow signs to polling location. Or South on Lake Ruby Drive W, east on Bedford Avenue, follow signs to polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="194">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr SE</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33884</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="195">
+   <address>
+      <location_name>B Street Community Center</location_name>
+      <line1>230 B St</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From N Scenic Hwy, west on Lincoln Avenue, north on B Street. Polling location on east side of road, between Lincoln Avenue and Washington Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="196">
+   <address>
+      <location_name>Lake Wales Municipal Complex</location_name>
+      <line1>201 W Central Ave</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From HWY 27, east on W Central Ave, complex located on south side of road between S Sharp St and Dr. Martin Luther King, Jr Blvd S</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="197">
+   <address>
+      <location_name>Grace Baptist Church</location_name>
+      <line1>3530 N Scenic Hwy</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33898</zip>
+   </address>
+   <directions>East side of N Scenic Hwy. Polling location on the corner of Grove Avenue and N Scenic Hwy. South of S Lake Starr Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="198">
+   <address>
+      <location_name>Lake Wales Municipal Complex</location_name>
+      <line1>201 W Central Ave</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33898</zip>
+   </address>
+   <directions>From HWY 27, east on W Central Ave, complex located on south side of road between S Sharp St and Dr. Martin Luther King, Jr Blvd S</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="199">
+   <address>
+      <location_name>Lake Ashton Clubhouse</location_name>
+      <line1>4141 Ashton Club Dr</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From Hwy 27, west on Thompson Nursery Road. South on Lake Ashton Blvd to polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="200">
+   <address>
+      <location_name>Lake Wales Municipal Complex</location_name>
+      <line1>201 W Central Ave</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From HWY 27, east on W Central Ave, complex located on south side of road between S Sharp St and Dr. Martin Luther King, Jr Blvd S</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="201">
+   <address>
+      <location_name>First United Methodist Church</location_name>
+      <line1>230 N 5th St</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From N 1st Street, east on E Sessoms Avenue. Polling location on the corner of N 5th Street and E Sessoms Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="202">
+   <address>
+      <location_name>Lake Wales Municipal Complex</location_name>
+      <line1>201 W Central Ave</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From HWY 27, east on W Central Ave, complex located on south side of road between S Sharp St and Dr. Martin Luther King, Jr Blvd S</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="203">
+   <address>
+      <location_name>James P. Austin Jr Center</location_name>
+      <line1>315 Dr Martin Luther King Jr Blvd N</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From W Central Avenue, north on Dr Martin Luther King Jr Blvd N. Polling location on the northwest corner of Dr Martin Luther King Jr Blvd N and W Sessoms Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="204">
+   <address>
+      <location_name>Lake Wales Municipal Complex</location_name>
+      <line1>201 W Central Ave</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From HWY 27, east on W Central Ave, complex located on south side of road between S Sharp St and Dr. Martin Luther King, Jr Blvd S</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="205">
+   <address>
+      <location_name>Lake Ashton Clubhouse</location_name>
+      <line1>4141 Ashton Club Dr</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From Hwy 27, west on Thompson Nursery Road. South on Lake Ashton Blvd to the polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="206">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>2101 Overlook Dr SE</line1>
+      <city>Winter Haven</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>Corner of Overlook Drive (County Road 550) and Lake Daisy Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="207">
+   <address>
+      <location_name>Holy Spirit Catholic Church</location_name>
+      <line1>644 S 9th St</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From State Road 60 E, south on S 9th Street. Polling location south of Cohassett Avenue on the west side of the road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="208">
+   <address>
+      <location_name>Lake Wales Municipal Complex</location_name>
+      <line1>201 W Central Ave</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>From HWY 27, east on W Central Ave, complex located on south side of road between S Sharp St and Dr. Martin Luther King, Jr Blvd S</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="209">
+   <address>
+      <location_name>Crooked Lake Community Center</location_name>
+      <line1>233 Sunshine Dr</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33859</zip>
+   </address>
+   <directions>From Hwy 27, southeast on Sunshine Drive (Formerly - Central Drive). Polling location on the corner of Canal Drive and Sunshine Drive. 
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="210">
+   <address>
+      <location_name>Parakeet MHP-Rec Room</location_name>
+      <line1>2400 Parakeet Park Blvd</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33859</zip>
+   </address>
+   <directions>From S Scenic Hwy, southwest on Parakeet Park Blvd. (South of Hunt Brothers Road). Polling location on the west side of the road. 
+
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="211">
+   <address>
+      <location_name>Nalcrest Town Center</location_name>
+      <line1>67109 Nalcrest Rd</line1>
+      <city>Nalcrest</city>
+      <state>FL</state>
+      <zip>33856</zip>
+   </address>
+   <directions>From State Road 60 E, south on Doherty Road, (Nalcrest Fedhaven Road), west on Leisure Lane (with a name change to Nalcrest Road). Polling location across from fire station.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="212">
+   <address>
+      <location_name>Wayside Baptist Church</location_name>
+      <line1>7831 Camp Mack Rd</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33853</zip>
+   </address>
+   <directions>Camp Mack Road east of Reagan Blvd. Polling location on north side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="213">
+   <address>
+      <location_name>Crooked Lake Community Center</location_name>
+      <line1>233 Sunshine Dr</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33859</zip>
+   </address>
+   <directions>From Hwy 27, southeast on Sunshine Drive (Formerly - Central Drive). Polling location on the corner of Canal Drive and Sunshine Drive. 
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="214">
+   <address>
+      <location_name>Babson Park Community Church</location_name>
+      <line1>725 Rainbow Blvd</line1>
+      <city>Babson Park</city>
+      <state>FL</state>
+      <zip>33827</zip>
+   </address>
+   <directions>N Scenic Hwy to Rainbow Blvd. Polling location on corner of Rainbow Blvd and 5th Avenue S.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="215">
+   <address>
+      <location_name>First Baptist Church</location_name>
+      <line1>96 W B St</line1>
+      <city>Frostproof</city>
+      <state>FL</state>
+      <zip>33843</zip>
+   </address>
+   <directions>Polling location on south side of W B Street across from N Peachtree Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="216">
+   <address>
+      <location_name>First Baptist Church</location_name>
+      <line1>96 W B St</line1>
+      <city>Frostproof</city>
+      <state>FL</state>
+      <zip>33843</zip>
+   </address>
+   <directions>Polling location on south side of W B Street across from N Peachtree Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="217">
+   <address>
+      <location_name>Sun Ray United Methodist Church</location_name>
+      <line1>316 Raymond Ave</line1>
+      <city>Frostproof</city>
+      <state>FL</state>
+      <zip>33843</zip>
+   </address>
+   <directions>From Hwy 27, east on George Street, (Sun Ray Community), south on Raymond Avenue. Polling location on west side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="218">
+   <address>
+      <location_name>Sun Ray United Methodist Church</location_name>
+      <line1>316 Raymond Ave</line1>
+      <city>Frostproof</city>
+      <state>FL</state>
+      <zip>33843</zip>
+   </address>
+   <directions>From Hwy 27, east on George Street, (Sun Ray Community), south on Raymond Avenue. Polling location on west side of road.
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="219">
+   <address>
+      <location_name>First Baptist Church</location_name>
+      <line1>96 W B St</line1>
+      <city>Frostproof</city>
+      <state>FL</state>
+      <zip>33843</zip>
+   </address>
+   <directions>Polling location on south side of W B Street across from N Peachtree Avenue.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="220">
+   <address>
+      <location_name>Indian Lake Estates Clubhouse</location_name>
+      <line1>95 Red Grange Blvd</line1>
+      <city>Indian Lake Est</city>
+      <state>FL</state>
+      <zip>33855</zip>
+   </address>
+   <directions>From State Road 60 E, south on Deland Drive, northwest on Park Avenue, south on Red Grange Blvd, follow signs to polling location.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="221">
+   <address>
+      <location_name>Trinity Baptist Church</location_name>
+      <line1>2601 State Road 60 E</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33898</zip>
+   </address>
+   <directions>Polling location on north side of State Road 60 E, between Evergreen Drive and Clubhouse Drive.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="222">
+   <address>
+      <location_name>Lake Wales Municipal Complex</location_name>
+      <line1>201 W Central Ave</line1>
+      <city>Lake Wales</city>
+      <state>FL</state>
+      <zip>33898</zip>
+   </address>
+   <directions>From HWY 27, east on W Central Ave, complex located on south side of road between S Sharp St and Dr. Martin Luther King, Jr Blvd S</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

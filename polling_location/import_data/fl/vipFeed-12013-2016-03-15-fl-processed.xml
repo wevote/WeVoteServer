@@ -1,0 +1,81 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Calhoun County, FL</name>
+  <vip_id>12013</vip_id>
+  <datetime>2015-12-09T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>Neal Civic Center</location_name>
+      <line1>17773 NE Pear St</line1>
+      <city>Blountstown</city>
+      <state>FL</state>
+      <zip>32424</zip>
+   </address>
+   <directions>Blountstown, FL 32424
+                                                                                                                                                                                 </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Altha Community Center</location_name>
+      <line1>15552 NW Smith St</line1>
+      <city>Altha</city>
+      <state>FL</state>
+      <zip>32421</zip>
+   </address>
+   <directions>Altha, FL 32421</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Shelton Park Library</location_name>
+      <line1>25008 NW SR 73</line1>
+      <city>Altha</city>
+      <state>FL</state>
+      <zip>32421</zip>
+   </address>
+   <directions>Altha, FL 32421                                                                                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Carr-Clarksville VFD</location_name>
+      <line1>19024 NW SR 73</line1>
+      <city>Clarksville</city>
+      <state>FL</state>
+      <zip>32430</zip>
+   </address>
+   <directions>Clarksville, FL 32430                                                                                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Westside VFD</location_name>
+      <line1>18212 SR 20 WEST</line1>
+      <city>Blountstown</city>
+      <state>FL</state>
+      <zip>32424</zip>
+   </address>
+   <directions>Blountstown, FL 32424                                                                                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Kinard Public Library</location_name>
+      <line1>5416 SW SR 73</line1>
+      <city>Kinard</city>
+      <state>FL</state>
+      <zip>32449</zip>
+   </address>
+   <directions>Kinard, FL 32449</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

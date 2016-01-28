@@ -1,0 +1,129 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Baker County, FL</name>
+  <vip_id>12003</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+<polling_location id="4">
+   <address>
+      <location_name>Sanderson</location_name>
+      <line1>8274 Thomas Sweat Rd</line1>
+      <city>Sanderson</city>
+      <state>FL</state>
+      <zip>32087</zip>
+   </address>
+   <directions>8274 Thomas Sweat Road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>South Macclenny</location_name>
+      <line1>153 W Minnesota Ave</line1>
+      <city>Macclenny</city>
+      <state>FL</state>
+      <zip>32063</zip>
+   </address>
+   <directions>153 W Minnesota Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>North Macclenny</location_name>
+      <line1>1025 W MacClenny Ave</line1>
+      <city>Macclenny</city>
+      <state>FL</state>
+      <zip>32063</zip>
+   </address>
+   <directions>1025 W Macclenny Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Baxter</location_name>
+      <line1>27310 CR 127</line1>
+      <city>Sanderson</city>
+      <state>FL</state>
+      <zip>32087</zip>
+   </address>
+   <directions>27310 CR 127</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Taylor</location_name>
+      <line1>26465 CR 250</line1>
+      <city>Sanderson</city>
+      <state>FL</state>
+      <zip>32087</zip>
+   </address>
+   <directions>26465 CR 250</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Macedonia</location_name>
+      <line1>1025 W MacClenny Ave</line1>
+      <city>Macclenny</city>
+      <state>FL</state>
+      <zip>32063</zip>
+   </address>
+   <directions>1025 W Macclenny Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Cuyler</location_name>
+      <line1>11226 Osceola rd</line1>
+      <city>Glen St. Mary</city>
+      <state>FL</state>
+      <zip>32040</zip>
+   </address>
+   <directions>11226 Osceola Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Glen St. Mary</location_name>
+      <line1>6512 US 90</line1>
+      <city>Glen St. Mary</city>
+      <state>FL</state>
+      <zip>32040</zip>
+   </address>
+   <directions>6512 US 90</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Olustee</location_name>
+      <line1>23311 Lakeside Lane</line1>
+      <city>Olustee</city>
+      <state>FL</state>
+      <zip>32072</zip>
+   </address>
+   <directions>23311 Lakeside Lane</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Office</location_name>
+      <line1>32 N 5th St</line1>
+      <city>Macclenny</city>
+      <state>FL</state>
+      <zip>32063</zip>
+   </address>
+   <directions>32 N 5th Street</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+
+</vip_object>

@@ -1,0 +1,716 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Osceola County, FL</name>
+  <vip_id>12097</vip_id>
+  <datetime>2015-09-23T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>POINCIANA PENTECOSTAL CHURCH OF GOD</location_name>
+      <line1>4912 Old Pleasant Hill Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34759</zip>
+   </address>
+   <directions>South on Pleasant Hill Rd.,  left onto Old Pleasant Hill Rd, church will be on the right side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>BROADMOOR CLUBHOUSE</location_name>
+      <line1>234 Boscobel Dr</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34758</zip>
+   </address>
+   <directions>S on Ham Brown Rd, past Horizon Mid. school to Cattle Dr.(1st right after school). Right on Interprise.Cont., to the 2nd Boscobel Dr and turn right. Clubhouse on right. &lt;&gt;&lt;&gt;Al sur en Ham Brown Rd., pase Horizon Middle School hasta Cattle Dr. (Cattle Dr. es la primera derecha después de la escuela). Doble a la derecha en Interprise. Siga en Interprise hasta llegar.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>PLEASANT HILL ELEMENTARY SCHOOL</location_name>
+      <line1>1253 Pleasant Hill Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34741</zip>
+   </address>
+   <directions>From 17-92, turn North (right) onto Pleasant Hill Rd., school entrance will be on the right. &lt;&gt;&lt;&gt; Desde Hwy 17-92 doble a la derecha en Pleasant Hill Rd. La escuela está en el lado derecho de la calle.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>ORANGE GARDENS CIVIC CTR</location_name>
+      <line1>1114 George St</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34741</zip>
+   </address>
+   <directions>West on Oak St.  Right on George St or 1st right past Thacker Ave.  Center ahead on left. &lt;&gt;&lt;&gt; Al oeste de Oak St., doble hacia la derecha en George St. O la primera a la derecha pasando Thacker Ave., el centro está al lado derecho.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>FIRST CHRISTIAN CHURCH</location_name>
+      <line1>415 N Main St</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>On East side of Main Street.  1 block North of Neptune Rd. &lt;&gt;&lt;&gt; Ubicado al lado este de Main St., una cuadra al norte de Neptune Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>RAVENWOOD APARTMENTS</location_name>
+      <line1>1700 Ravenwood Cir</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34741</zip>
+   </address>
+   <directions>West Irlo Bronson Memorial Highway, turn North on John Young Parkway/ N. Bermuda Ave (go 2.1 miles), turn Left on Ravenwood Circle&lt; &gt;Al oeste de Irlo Bronson Memorial Highway, gire al norte en John Young Parkway/ N. Bermuda Ave (go 2.1 miles), gire a la izquierda en Ravenwood Circle.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>ALIANZA CRISTIANA MISIONERA</location_name>
+      <line1>2617 Michigan Ave</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>From Hwy 192, 1.3 miles North on Michigan Ave, Church is located on the Right side of the street,</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>BARNEY E. VEAL CENTER</location_name>
+      <line1>700 Generation Pt</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>East Irlo Bronson Memorial Highway, turn South onto Heritage Key Boulevard (by McDonalds) go to Generation Point and turn left, to the West side of the building. &lt;&gt;Este de Irlo Bronson Memorial Highway, gire hacia el Sur del Heritage Key Boulevard (por McDonalds) ir a la Generation Point y gire a la izquierda, al lado oeste del edificio.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>SCHOOL TRANSPORTATION FACILITY</location_name>
+      <line1>401 Simpson Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>On Simpson Rd across from county jail.  North of overpass.  East (right) side of Road. &lt;&gt;&lt;&gt; Ubicado en Simpson Rd., en frente de la cárcel del condado, al norte del puente, al lado este de la calle.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>IGLESIA CRISTIANA RENUEVO</location_name>
+      <line1>290 Competition Dr</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34743</zip>
+   </address>
+   <directions>Hwy 192, North on Simpson Rd/Boggy Creek Rd, Left on Buenaventura Blvd (1.9 miles), Left on Competition Drive, church is on the left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>BVL LIBRARY</location_name>
+      <line1>405 Buenaventura Blvd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34743</zip>
+   </address>
+   <directions>Located on North side of BVL Blvd.  Past Fire Station &amp; Gingerbread House Daycare. &lt;&gt;&lt;&gt; Ubicada al lado norte de BVL Blvd. La Biblioteca se encuentra al pasar la estación de Bomberos y Gingerbread House Daycare.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>ST CATHERINE OF SIENA CATHOLIC CH</location_name>
+      <line1>2750 E Osceola Pkwy</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34743</zip>
+   </address>
+   <directions>Church located at East end of Osceola Pkwy, South side of St.  Go thru red light at Waters Edge Dr. &lt;&gt;&lt;&gt; La Iglesia esta ubicada al final del lado este de Osceola Pkwy, al lado sur de la calle. Pase el semáforo hasta Waters Edge Dr.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>AUSTIN TINDALL REGIONAL PARK</location_name>
+      <line1>4100 Boggy Creek Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>Boggy Creek Road </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>17TH STREET CIVIC CENTER</location_name>
+      <line1>3001 17th St</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34769</zip>
+   </address>
+   <directions>From Hwy 192 turn South onto Budinger Blvd.  Turn right on 17th St.  Center ahead on left just past hospital. &lt;&gt;&lt;&gt; Desde Hwy. 192, doble hacia el sur en Budinger Blvd., doble a la derecha en 17th St. El centro está ubicado en el lado izquierdo de la calle después del Hospital.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>CHURCH OF GOD</location_name>
+      <line1>521 Dakota Ave</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34769</zip>
+   </address>
+   <directions>East 192, North (left) on Vermont Ave., East (left) on 8th St., North (right) on Dakota.  Church on right -- use fellowship hall.  (canal runs middle of street) &lt;&gt;&lt;&gt; Hacia el este en Hwy. 192, hacia el norte en Vermont Ave., hacia la izquierda en 8th St., y a la derecha en Dakota. La Iglesia se encuentra a la derecha. Use el Fellowship Hall.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>CANOE CREEK CHARTER SCHOOL</location_name>
+      <line1>3600 Canoe Creek Rd</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34772</zip>
+   </address>
+   <directions>Corner of Canoe Creek Rd &amp; Friars Cove Rd., West side of road.  It is South of Old Canoe Creek Rd. &amp; North of Deer Run Rd. &lt;&gt;&lt;&gt; En la esquina de Canoe Creek Rd., y Frias Cove Rd., el centro se encuentra al lado oeste de la calle. O hacia el sur en Old Canoe Creek Rd., vaya hacia el norte en Deer Run Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>COMMUNITY SENIOR CENTER</location_name>
+      <line1>700 Indiana Ave</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34769</zip>
+   </address>
+   <directions>From 13th St. (192) go North on Indiana Ave.  Located on West side between 7th &amp; 8th Streets. &lt;&gt;&lt;&gt; Desde Hwy. 192, vaya hacia el norte en Indiana Ave. Localizado en el lado oeste entre la  calle 7th y 8th.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>MASONIC LODGE</location_name>
+      <line1>901 Oregon Ave</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34769</zip>
+   </address>
+   <directions>From 13th St (192) turn North on Oregon Ave.  Bldg is on right of corner of Oregon Ave &amp; 9th Street. &lt;&gt;&lt;&gt; Desde el Hwy. 192, doble hacia el norte en Oregon Ave. El edificio está en el lado derecho en la esquina de Oregon Ave. y 9th St.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>FIRST BAPTIST CHURCH</location_name>
+      <line1>1717 13th St</line1>
+      <city>St Cloud</city>
+      <state>FL</state>
+      <zip>34769</zip>
+   </address>
+   <directions>Jnt w/pct 76/81.   Located on 13th St. between Missouri &amp; Wisconsin.  Use Blvd E behind church. &lt;&gt;&lt;&gt; La Iglesia está ubicada en Hwy. 192 entre las calles Missouri y Wisconsin. Use el edificio "E" que está ubicado detrás de la Iglesia.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>THE ALTAR ST CLOUD VINEYARD</location_name>
+      <line1>1215 Old Hickory Tree Rd</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34771</zip>
+   </address>
+   <directions>On corner of Old Hickory Tree Rd &amp; 192 (13th St). &lt;&gt;&lt;&gt; En la esquina de Old Hickory Tree Rd. y Hwy. 192 (13th St.).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>REUNION GOLF MAINTENANCE FACILITY</location_name>
+      <line1>7385 Osceola Polk Line Rd</line1>
+      <city>Davenport</city>
+      <state>FL</state>
+      <zip>33896</zip>
+   </address>
+   <directions>Located on Osceola Polk Line Rd. (CR 532) East of Old Lake Wilson Rd. North side of road. &lt;&gt;&lt;&gt; Ubicado en la carretera(CR532) que divide los condados de Osceola y Polk, al este de la carretera de Old Lake Wilson, al lado norte del camino.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>FIRE STATION 71 - W192</location_name>
+      <line1>8704 W Irlo Bronson Mem. Hwy</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34747</zip>
+   </address>
+   <directions>S side of W. Hwy 192.  Go thru traffic light at Orange Lake Blvd., past Vista De Largo. Fire station right before Lindfields subdivision. &lt;&gt;&lt;&gt; Al lado sur de W. Hwy. 192. Pase el semáforo de Orange Lake Blvd., pase la entrada de Vista De Largo. La Estación de Bomberos esta antes de la urbanización Lindfields.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>INTERCESSION CITY CIVIC CTR</location_name>
+      <line1>1531 Immokalee St</line1>
+      <city>Intercession City</city>
+      <state>FL</state>
+      <zip>33848</zip>
+   </address>
+   <directions>From 17-92, turn right on Immokalee St. go two blocks on Ctr is on the right, next to fire station. &lt;&gt;&lt;&gt; Desde Hwy 17-92, doble a la derecha en la calle Immokalee. El centro está a dos cuadras a la derecha, al lado de la Estación de Bomberos.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>FIRE STATION 42 - POINCIANA BLVD.</location_name>
+      <line1>2000 N Poinciana Blvd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34746</zip>
+   </address>
+   <directions>Hwy 192, turn South on Poinciana Blvd.  Station on right or west side of road. &lt;&gt;&lt;&gt; Desde Hwy 192, doble hacia el sur en Ponciana Blvd. La estación de Bomberos está en la derecha o al oeste de la calle.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>PLEASANT HILL ELEMENTARY SCHOOL</location_name>
+      <line1>1253 Pleasant Hill Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34741</zip>
+   </address>
+   <directions>From 17-92, turn North (right) onto Pleasant Hill Rd., school entrance will be on the right. &lt;&gt;&lt;&gt; Desde Hwy 17-92 doble a la derecha en Pleasant Hill Rd. La escuela está en el lado derecho de la calle.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>GOOD SAMARITAN COMMUNITY CTR</location_name>
+      <line1>1421 Hoeger Cir</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34746</zip>
+   </address>
+   <directions>From Hwy 17-92 enter Good Sam Retirement Center &amp; follow signs to Community Bldg. &lt;&gt;&lt;&gt; Desde Hwy 17-92, entre a Good Sam.Village y siga los avisos hasta el Community Bldg.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>SHINGLE CREEK UNITED METHODIST CHURCH</location_name>
+      <line1>2420 Old Vineland Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34746</zip>
+   </address>
+   <directions>Jnt pcts .   W on 192 past Wal-Mart. The street beside the Kissimmee Shopping Center is Old Vineland Rd. Turn right on Old Vineland.  Church on right across from Buddist Temple. &lt;&gt;&lt;&gt; Al oeste en Hwy. 192 pasando Wal-Mart. La calle al lado del Kissimmee Shopping Center es Old Vineland Rd. Doble a la derecha en Old Vineland. La Iglesia esta a la derecha frente al Templo Budista.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>FIRST BAPTIST CHURCH OF KISSIMMEE</location_name>
+      <line1>1700 N John Young Parkway</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34741</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>KISSIMMEE FIRE STATION 14</location_name>
+      <line1>101 Regatta Bay Blvd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34741</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>YMCA</location_name>
+      <line1>2117 Mabbette St</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34741</zip>
+   </address>
+   <directions>West end of Mabbette St. just off Thacker Ave. &lt;&gt;&lt;&gt; Al oeste de Mabbette St., justo al lado de Thacker Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>CENTRO DE LA FAMILIA CRISTIANA</location_name>
+      <line1>3250 Pleasant Hill Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34746</zip>
+   </address>
+   <directions>Hwy 17-92, South on Pleasant Hill Rd, go 4.3 miles, Church is on the Right side, just before Reaves Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>BELLALAGO AMENITY CENTER</location_name>
+      <line1>1220 Lago Vista Ct</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34746</zip>
+   </address>
+   <directions>Hwy 17-92 to Pleasant Hill Rd, go 5.5 miles, Bella Lago entrance will be on the left side, Turn left on Bellalago Dr., continue 2 miles to Lago Vista Ct. Polling will be in the Amenity Center.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>CELEBRATION HERITAGE HALL</location_name>
+      <line1>951 Spring Park St</line1>
+      <city>Celebration</city>
+      <state>FL</state>
+      <zip>34747</zip>
+   </address>
+   <directions>South on Celebration Ave., past Town Hall, high school &amp; Stetson U.  1 mile/Hall on corner of Spring Park and Celebration Ave. on Right. &lt;&gt;&lt;&gt; En el sur de la avenida Celebration. Pase el centro del pueblo hasta la escuela superior y Stetson U. El Heritage Hall se encuentra una milla adelante en la esquina de Spring Park y la avenida Celebretation, al lado derecho.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>ROBERT GUEVARA COMMUNITY CENTER</location_name>
+      <line1>501 Florida Pkwy</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34743</zip>
+   </address>
+   <directions>From BVL Blvd, turn West onto Florida Pkwy.  Center several blocks on left. &lt;&gt;&lt;&gt; Desde BVL Blvd., doble hacia el oeste en Florida Pkwy. Centro está ubicado varias Cuadras mas adelante al lado izquierdo de la calle.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>OSCEOLA HERITAGE PARK</location_name>
+      <line1>1901 Chief Osceola Trl</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>LIONS CLUB</location_name>
+      <line1>3050 Lions Ct</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>Jnt pct w 27. North on Michigan, turn right on Osceola Pkwy.  Turn right at first street (Lions Ct). Pct is on the right. &lt;&gt;&lt;&gt; Norte en Michigan, doble a la derecha en Osceola Pkwy. Doble a la derecha en la primera calle (Lions Ct.). El Pct esta a la derecha.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>WHISTLER'S PARK CLUBHOUSE</location_name>
+      <line1>2201 Whistler's Park Cir</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34743</zip>
+   </address>
+   <directions>Off Boggy Creek Rd, East of overpass, turn into Lakeside entrance-Whistler's Park entrance short distince on right. If inside Lakeside Sub. entrance is south of Lakeside. &lt;&gt;&lt;&gt; Desde Boggy Creek Rd., justo al este del Puente, doble en Lakeside Dr. La entrada a Whistler's Park esta a una corta distancia a la derecha. Si está dentro de la urbanización Lakeside, la entrada está al sur.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>FIRST CHURCH OF THE NAZARENE</location_name>
+      <line1>1550 Mill Slough Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>Turn off Michigan onto Mill Slough.  Church on right.  From Denn John Ln, left onto Mill Slough Rd.  Church on left. &lt;&gt;&lt;&gt; Doble en Michigan hasta Mill Slough. La Iglesia está al lado derecho de la calle. Desde Denn John Ln., doble hacia la izquierda en Mill Slough Rd. La Iglesia esta al lado izquierdo.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>POINCIANA CHRISTIAN CHURCH</location_name>
+      <line1>3181 Pleasant Hill Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34746</zip>
+   </address>
+   <directions>Hwy 17-92, South on Pleasant Hill Rd. 4.2 miles, Church is on the left side before you get to Reaves Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>POINCIANA LIBRARY</location_name>
+      <line1>101 N Doverplum Ave</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34758</zip>
+   </address>
+   <directions>From Cypress Pkwy, go North on Doverplum.  The bldg is on the right. &lt;&gt;&lt;&gt; Desde Cypress Pkwy., vaya hacia el norte en Doverplum. El edificio se encuentra al lado derecho de la calle.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>DEERWOOD ELEMENTARY SCHOOL</location_name>
+      <line1>3701 Marigold Ave</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34758</zip>
+   </address>
+   <directions>From Cypress Pkwy, North on Marigold Ave.  Go past San Miguel Rd.  School on right. &lt;&gt;&lt;&gt;Desde Cypress Pkwy., vaya hacia el norte en Marigold Ave., pase San Miguel Rd., la escuela se encuentra a la derecha.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>DISCOVERY INTERMEDIATE SCHOOL</location_name>
+      <line1>5350 San Miguel Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34758</zip>
+   </address>
+   <directions>From Cypress Pkwy, North on Marigold Ave.  Left on San Miguel Rd.  The school at end of street. &lt;&gt;&lt;&gt;Desde Cypress Pkwy., vaya hacia el norte en Marigold Ave., doble a la izquierda en San Miguel Rd., la escuela se encuentra al final de la calle.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>BROADMOOR CLUBHOUSE</location_name>
+      <line1>234 Boscobel Dr</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34758</zip>
+   </address>
+   <directions>S on Ham Brown Rd, past Horizon Mid. school to Cattle Dr.(1st right after school). Right on Interprise.Cont., to the 2nd Boscobel Dr and turn right. Clubhouse on right. &lt;&gt;&lt;&gt;Al sur en Ham Brown Rd., pase Horizon Middle School hasta Cattle Dr. (Cattle Dr. es la primera derecha después de la escuela). Doble a la derecha en Interprise. Siga en Interprise hasta llegar.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="48">
+   <address>
+      <location_name>THE VINE CHURCH</location_name>
+      <line1>1003 S John Young Pkwy</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34741</zip>
+   </address>
+   <directions>South on John Young Parkway, over the overpass on the left side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="49">
+   <address>
+      <location_name>17TH STREET CIVIC CENTER</location_name>
+      <line1>3001 17th St</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34769</zip>
+   </address>
+   <directions>From Hwy 192 turn South onto Budinger Blvd.  Turn right on 17th St.  Center ahead on left just past hospital. &lt;&gt;&lt;&gt; Desde Hwy. 192, doble hacia el sur en Budinger Blvd., doble a la derecha en 17th St. El centro está ubicado en el lado izquierdo de la calle después del Hospital.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="50">
+   <address>
+      <location_name>KNIGHTS OF COLUMBUS</location_name>
+      <line1>2000 Neptune Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>Neptune Rd  near intersection of Partin Settlement Rd &amp; Neptune.  Across road from Shell &amp; next to Faith Baptist Church. &lt;&gt;&lt;&gt; Neptune Rd., cerca de la intersección de Partin Settlement Rd. y Neptune Rd., al frente de la estación de gasolina Shell y al lado de la Iglesia Faith Baptist.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="51">
+   <address>
+      <location_name>FIRST CHRISTIAN CHURCH</location_name>
+      <line1>415 N Main St</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>On East side of Main Street.  1 block North of Neptune Rd. &lt;&gt;&lt;&gt; Ubicado al lado este de Main St., una cuadra al norte de Neptune Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="52">
+   <address>
+      <location_name>ST. JOHN'S EPISCOPAL CHURCH</location_name>
+      <line1>1709 N John Young Pkwy</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34741</zip>
+   </address>
+   <directions>Located on SE corner of John Young &amp; Columbia Ave.  Enter on Columbia Ave.  Use Fellowship Hall. &lt;&gt;&lt;&gt; Ubicada en la esquina al sureste de John Young Pkwy. y  Columbia Ave. Entre a Columbia Ave Use el Fellowship Hall.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="53">
+   <address>
+      <location_name>ST. LUKE MISSIONARY BAPTIST CHURCH</location_name>
+      <line1>400 E Columbia Ave</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>East off 441(OBT) onto Columbia.  Church 3-4 blocks on right. &lt;&gt;&lt;&gt; Doble al este desde la 441 (OBT) hacia Columbia Ave. La Iglesia está aproximadamente entre 3 a 4 cuadras a la derecha.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="54">
+   <address>
+      <location_name>KENANSVILLE COMMUNITY CENTER</location_name>
+      <line1>1150 S Canoe Creek Rd</line1>
+      <city>Kenansville</city>
+      <state>FL</state>
+      <zip>34739</zip>
+   </address>
+   <directions>On Canoe Creek Rd. in Kenansville, next to fire station. &lt;&gt;&lt;&gt; Canoe Creek Rd., en Kenansville, al lado de la estación de Bomberos.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="55">
+   <address>
+      <location_name>HOLOPAW COMMUNITY CENTER</location_name>
+      <line1>8801 Community Center Rd</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34773</zip>
+   </address>
+   <directions>In Holopaw, go South of flashing light on 441.  Turn Right on Community Center Rd., Community Center is on the Right side of the road next to the Fire Station.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="56">
+   <address>
+      <location_name>FIRE STATION 52 - PINE GROVE</location_name>
+      <line1>1420 Pine Grove Rd</line1>
+      <city>St Cloud</city>
+      <state>FL</state>
+      <zip>34771</zip>
+   </address>
+   <directions>Nova Road to Pine Grove Rd.  Right on Pine Grove Rd &amp; fire station on the right. Fm. 192 turn left on Pine Grove Rd. 2 miles on left. &lt;&gt;&lt;&gt; Desde Nova Rd. hasta Pine Grove Rd, doble a la derecha en Pine Grove Rd. y la estación de Bomberos estara al lado derecho. Desde 192, doble a la izquierda en Pine Grove Rd., la estación estara dos millas a la izquierda.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="57">
+   <address>
+      <location_name>AUSTIN TINDALL REGIONAL PARK</location_name>
+      <line1>4100 Boggy Creek Rd</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions>Boggy Creek Road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="58">
+   <address>
+      <location_name>NARCOOSSEE MIDDLE SCHOOL</location_name>
+      <line1>2700 N Narcoossee Rd</line1>
+      <city>Narcoossee</city>
+      <state>FL</state>
+      <zip>34771</zip>
+   </address>
+   <directions>North on Hwy 15 in Narcoossee.  School on left or West side of road. &lt;&gt;&lt;&gt; Al norte en Hwy. 15 en Narcoossee. La escuela está en el lado oeste o izquierdo de la carretera.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="59">
+   <address>
+      <location_name>ST CLOUD SENIOR CENTER ANNEX</location_name>
+      <line1>702 Indiana Ave</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34769</zip>
+   </address>
+   <directions>From 13th St. (192) go North on Indiana Ave.  Located on West side between 7th &amp; 8th Streets. &lt;&gt;&lt;&gt; Desde Hwy. 192, vaya hacia el norte en Indiana Ave. Localizado en el lado oeste entre la  calle 7th y 8th.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="60">
+   <address>
+      <location_name>FIRE STATION 53 - DEER RUN</location_name>
+      <line1>4070 Hickory Tree Rd</line1>
+      <city>St Cloud</city>
+      <state>FL</state>
+      <zip>34772</zip>
+   </address>
+   <directions>East end of Deer Run Rd.  Corner of Deer Run Rd. &amp; Hickory Tree Rd. &lt;&gt;&lt;&gt; Al final este de Deer Run Rd., en el lado sur de la calle, esquina de Rambler y Deer Run.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="61">
+   <address>
+      <location_name>CORNERSTONE BAPTIST CHURCH</location_name>
+      <line1>2925 Canoe Creek Rd</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34772</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="62">
+   <address>
+      <location_name>CANOE CREEK CHARTER SCHOOL</location_name>
+      <line1>3600 Canoe Creek Rd</line1>
+      <city>St. Cloud</city>
+      <state>FL</state>
+      <zip>34772</zip>
+   </address>
+   <directions>Corner of Canoe Creek Rd &amp; Friars Cove Rd., West side of road.  It is South of Old Canoe Creek Rd. &amp; North of Deer Run Rd. &lt;&gt;&lt;&gt; En la esquina de Canoe Creek Rd., y Frias Cove Rd., el centro se encuentra al lado oeste de la calle. O hacia el sur en Old Canoe Creek Rd., vaya hacia el norte en Deer Run Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="63">
+   <address>
+      <location_name>FEDERAL ELECTION OFFICE PRECINCT</location_name>
+      <line1>2509 E Irlo Bronson Memorial Hwy</line1>
+      <city>Kissimmee</city>
+      <state>FL</state>
+      <zip>34744</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

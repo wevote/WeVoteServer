@@ -1,0 +1,272 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Indian River County, FL</name>
+  <vip_id>12061</vip_id>
+  <datetime>2015-12-02T02:45:01</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>Fellsmere City Council Chambers</location_name>
+      <line1>21 S Cypress ST</line1>
+      <city>Fellsmere</city>
+      <state>FL</state>
+      <zip>32948</zip>
+   </address>
+   <directions>Corner of S. Cypress and CR 512 in the Fellsmere City Council Chambers</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Indian River Shores - Comm Center</location_name>
+      <line1>6001 Highway A1A</line1>
+      <city>Indian River Shores</city>
+      <state>FL</state>
+      <zip>32963</zip>
+   </address>
+   <directions>Turn west at stop light onto Fred Tuerk Rd - Located behind City Hall</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>St. Sebastian Catholic Church</location_name>
+      <line1>13075 US Highway 1</line1>
+      <city>Sebastian</city>
+      <state>FL</state>
+      <zip>32958</zip>
+   </address>
+   <directions>North of Main Street - Just North of Wal Mart on the West side of US 1</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>American Legion Hall Post 189</location_name>
+      <line1>807 Louisiana AVE</line1>
+      <city>Sebastian</city>
+      <state>FL</state>
+      <zip>32958</zip>
+   </address>
+   <directions>From County Road 512 East or West Bound. Turn on Louisiana Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Sebastian Elks Lodge No. 2714</location_name>
+      <line1>731 S Fleming ST</line1>
+      <city>Sebastian</city>
+      <state>FL</state>
+      <zip>32958</zip>
+   </address>
+   <directions>South onto Fleming St at Bank of America  /  Across from Chesser's Gap Shopping Center and the Family Dollar Store</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Sebastian Christian Church</location_name>
+      <line1>190 Day Dr</line1>
+      <city>Sebastian</city>
+      <state>FL</state>
+      <zip>32958</zip>
+   </address>
+   <directions>1 block north of Pelican Island Elementary - Turn right on Day Drive</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Liberty Magnet School</location_name>
+      <line1>6850 81st St</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32967</zip>
+   </address>
+   <directions>At the stop light From 66th Avenue, turn west on to 81st street</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Vero Beach Highlands P.O.A.</location_name>
+      <line1>625 Highland Dr SW</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32962</zip>
+   </address>
+   <directions>Highland Dr SW off of Old Dixie Hwy - just past flashing light - Across the street from golf course</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Royal Palm Clubhouse Vista Royale</location_name>
+      <line1>400 Woodland DR</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32962</zip>
+   </address>
+   <directions>Corner of Royal Oak Dr and Woodland Dr (In Vista Royale)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Morning Star Presbyterian Church</location_name>
+      <line1>698 Timber Ridge TRL SW</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32960</zip>
+   </address>
+   <directions>North side of Oslo Rd. West of Old Dixie Hwy 1/2 mile</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Unitarian Universalist Fellowship Hall</location_name>
+      <line1>1590 27th AVE</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32960</zip>
+   </address>
+   <directions>Corner of 27th Ave and 16th St (also known as the Emerson Center)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Our Savior Lutheran Church</location_name>
+      <line1>1850 6th Ave</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32960</zip>
+   </address>
+   <directions>From US 1 turn East on 17th St - then turn North on 6th Ave - building is on the right</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Christ By The Sea UMC</location_name>
+      <line1>3755 Highway A1A</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32963</zip>
+   </address>
+   <directions> North of Beachland Blvd - Church located on West side of Hwy A1A</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>St. Edwards Upper School</location_name>
+      <line1>1895 St. Edward's Dr</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32963</zip>
+   </address>
+   <directions>Turn west at light on A1A onto St. Edwards Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Indian River Estates</location_name>
+      <line1>2250 Indian Creek Blvd W</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32966</zip>
+   </address>
+   <directions>Located on North side of SR 60 Follow signs past guardhouse</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Gifford Community Center</location_name>
+      <line1>4855 43rd Ave</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32967</zip>
+   </address>
+   <directions>Corner of 43rd Ave and 49th St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Realtors Association of IRC</location_name>
+      <line1>3250 67th St</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32967</zip>
+   </address>
+   <directions>Off of US 1 East side (North Bound). Turn on 67th street for Entrance</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Unity Church of Vero Beach</location_name>
+      <line1>950 43rd Ave</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32960</zip>
+   </address>
+   <directions>North of 8th Street on 43rd Ave, East Side</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>Trinity Episcopal Great Hall</location_name>
+      <line1>2365 Pine Ave</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32960</zip>
+   </address>
+   <directions>From US 1 turn East on Royal Palm Blvd - then turn North on Pine Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Central Assembly of God</location_name>
+      <line1>6767 20th St</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32966</zip>
+   </address>
+   <directions> Church located on the south side of SR 60 (20th St) across from Vista Plantation</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>Lakewood Village Club House</location_name>
+      <line1>1455 90th Ave</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32966</zip>
+   </address>
+   <directions>From SR 60 turn south on 90TH AVE. Turn right at the second Lakewood Village sign on the right-hand side of street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Freedom Church</location_name>
+      <line1>455 58th AVE SW</line1>
+      <city>Vero Beach</city>
+      <state>FL</state>
+      <zip>32968</zip>
+   </address>
+   <directions>West side of 58th Ave (South Bound). South of 1st ST SW. North of 5th ST SW</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

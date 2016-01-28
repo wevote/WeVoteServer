@@ -1,0 +1,489 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Putnam County, FL</name>
+  <vip_id>12107</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>South Putnam Government Center</location_name>
+      <line1>115 N Summit St</line1>
+      <city>Crescent City</city>
+      <state>FL</state>
+      <zip>32112</zip>
+   </address>
+   <directions>On N Summit St between Eucalyptus and Florida Ave. Enter from back parking lot.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>South Putnam Government Center</location_name>
+      <line1>115 N Summit St</line1>
+      <city>Crescent City</city>
+      <state>FL</state>
+      <zip>32112</zip>
+   </address>
+   <directions>On N Summit St between Eucalyptus and Florida Ave. Enter from back parking lot</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Georgetown Community Center</location_name>
+      <line1>1413 County Road 309</line1>
+      <city>Georgetown</city>
+      <state>FL</state>
+      <zip>32139</zip>
+   </address>
+   <directions>On County Rd 309 next to the Volunteer Fire Station one tenth of a mile north of Georgetown Landing Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Welaka Town Hall</location_name>
+      <line1>400 4th Ave</line1>
+      <city>Welaka</city>
+      <state>FL</state>
+      <zip>32193</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Welaka Town Hall</location_name>
+      <line1>400 4th Ave</line1>
+      <city>Welaka</city>
+      <state>FL</state>
+      <zip>32193</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Pomona Park Community Center</location_name>
+      <line1>200 E Main St</line1>
+      <city>Pomona Park</city>
+      <state>FL</state>
+      <zip>32181</zip>
+   </address>
+   <directions>Head East on E Main St from US 17 at the flashing light to the corner of N Broward Ave. Community Center is on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Pomona Park Community Center</location_name>
+      <line1>200 E Main St</line1>
+      <city>Pomona Park</city>
+      <state>FL</state>
+      <zip>32181</zip>
+   </address>
+   <directions>Head East on E Main St from US 17 at the flashing light to the corner of N Broward Ave. Community Center is on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Satsuma Fire Dept</location_name>
+      <line1>103 S 1st St</line1>
+      <city>Satsuma</city>
+      <state>FL</state>
+      <zip>32189</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Satsuma Fire Dept</location_name>
+      <line1>103 S 1st St</line1>
+      <city>Satsuma</city>
+      <state>FL</state>
+      <zip>32189</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Dunns Creek Baptist Church</location_name>
+      <line1>686 S Highway 17</line1>
+      <city>San Mateo</city>
+      <state>FL</state>
+      <zip>32187</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Putnam County Ag Center</location_name>
+      <line1>111 Yelvington Rd</line1>
+      <city>East Palatka</city>
+      <state>FL</state>
+      <zip>32131</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Bostwick Community Center</location_name>
+      <line1>125 Tillman St</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Bostwick Community Center</location_name>
+      <line1>125 Tillman St</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>Bardin Fire Dept</location_name>
+      <line1>107 Johns Rd</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Bardin Fire Dept</location_name>
+      <line1>107 Johns Rd</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Living Hope Family Worship Center</location_name>
+      <line1>1109 State Rd 100</line1>
+      <city>Florahome</city>
+      <state>FL</state>
+      <zip>32140</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Living Hope Family Worship Center</location_name>
+      <line1>1109 State Rd 100</line1>
+      <city>Florahome</city>
+      <state>FL</state>
+      <zip>32140</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Trinity Episcopal Church</location_name>
+      <line1>204 State Rd 26</line1>
+      <city>Melrose</city>
+      <state>FL</state>
+      <zip>32666</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>Woodlawn Baptist Church</location_name>
+      <line1>818 County Rd 20A</line1>
+      <city>Hawthorne</city>
+      <state>FL</state>
+      <zip>32640</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Woodlawn Baptist Church</location_name>
+      <line1>818 County Rd 20A</line1>
+      <city>Hawthorne</city>
+      <state>FL</state>
+      <zip>32640</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>Interlachen Elementary School</location_name>
+      <line1>251 S County Rd 315</line1>
+      <city>Interlachen</city>
+      <state>FL</state>
+      <zip>32148</zip>
+   </address>
+   <directions>From the intersection of SR 20 and CR 315 head south on CR 315 approximatly 1.5 miles and turn right on E Strickland Rd. Turn right into school's 2nd entrance. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Dickerman Town Hall</location_name>
+      <line1>311 Atlantic Ave</line1>
+      <city>Intelachen</city>
+      <state>FL</state>
+      <zip>32148</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Interlachen Elementary School</location_name>
+      <line1>251 S County Rd 315</line1>
+      <city>Interlachen</city>
+      <state>FL</state>
+      <zip>32148</zip>
+   </address>
+   <directions>From the intersection of SR 20 and CR 315 head south on CR 315 approximatly 1.5 miles and turn right on E Strickland Rd. Turn right into school's 2nd entrance. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>Interlachen Elementary School</location_name>
+      <line1>251 S County Rd 315</line1>
+      <city>Interlachen</city>
+      <state>FL</state>
+      <zip>32148</zip>
+   </address>
+   <directions>From the intersection of SR 20 and CR 315 head south on CR 315 approximatly 1.5 miles and turn right on E Strickland Rd. Turn right into school's 2nd entrance. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>Grandin Lake Shores Community Center</location_name>
+      <line1>418 Holiday Dr</line1>
+      <city>Interlachen</city>
+      <state>FL</state>
+      <zip>32148</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Hollister Fire Dept</location_name>
+      <line1>617 State Rd 20</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>Grace Community Baptist Church</location_name>
+      <line1>161 Peniel Church Rd</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>Southwest Fire Dept</location_name>
+      <line1>3409 Park St</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions>From the intersection of Palm Ave and Silverlake Dr head south on Palm Ave to Balsam St. Turn right on Balsam St go 3 blocks fire station in on the corner of Balsam St and Park St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Southwest Fire Dept</location_name>
+      <line1>3409 Park St</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions>From the intersection of Palm Ave and Silverlake Dr head south on Palm Ave to Balsam St. Turn right on Balsam St go 3 blocks fire station in on the corner of Balsam St and Park St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>Edgar Johnson Senior Center</location_name>
+      <line1>1215 Westover Dr</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Edgar Johnson Senior Center</location_name>
+      <line1>1215 Westover Dr</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>Price Martin Community Center</location_name>
+      <line1>220 N 11th St</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>St Johns River State College</location_name>
+      <line1>5001 St Johns Ave</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>St Johns River State College</location_name>
+      <line1>5001 St Johns Ave</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>St Johns River State College</location_name>
+      <line1>5001 St Johns Ave</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>St Johns River State College</location_name>
+      <line1>5001 St Johns Ave</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>Palatka Woman's Club</location_name>
+      <line1>600 S 13th St</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions>On the corner of S 13th St and Crill Ave near the train overpass. Enter from S 13th St.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>Edgar Johnson Senior Center</location_name>
+      <line1>1215 Westover Dr</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>Palatka Woman's Club</location_name>
+      <line1>600 S 13th St</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions>On the corner of S 13th St and Crill Ave near the train overpass. Enter from S 13th St.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>Price Martin Community Center</location_name>
+      <line1>220 N 11th St</line1>
+      <city>Palatka</city>
+      <state>FL</state>
+      <zip>32177</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

@@ -1,0 +1,189 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Jefferson County, FL</name>
+  <vip_id>12065</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>New Bethel  Ame Church</location_name>
+      <line1>6496 Ashville Hwy</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions>HWY 146 NEXT TO WATSON'S STORE                                                                                                                                                                          </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>St Margaret's Catholic Church</location_name>
+      <line1>1565 E Washington St</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions>EAST HWY 90                                                                                                                                                                                             </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Aucilla Central Baptist</location_name>
+      <line1>655 Tindell Rd</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Church of The Nazarene</location_name>
+      <line1>1590 N Jefferson St</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions>US 19 NORTH                                                                                                                                                                                             </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Monticello Opera House</location_name>
+      <line1>185 W Washington St</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>The Masonic Lodge</location_name>
+      <line1>235 N olive St</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Macedonia Baptist Church</location_name>
+      <line1>3093 S Jefferson St</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Old J.C.H.S. Auditorium</location_name>
+      <line1>555 Tiger Lane</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Supt. of Schools Board Room</location_name>
+      <line1>1490 W Washington St</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Lloyd Baptist Church</location_name>
+      <line1>124 St. Louis St</line1>
+      <city>Lloyd</city>
+      <state>FL</state>
+      <zip>32337</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Waukeenah Church(Methodist)</location_name>
+      <line1>81 Methodist Church Rd</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions>intersection of us 27 snd CR 259                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Wacissa Volunteer Fire Dept</location_name>
+      <line1>14496 Waukeenah HWY</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions>HWY 259 Wassica                                                                                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Ebenezer Baptist Church</location_name>
+      <line1>446 Hatchett Rd</line1>
+      <city>Lamont</city>
+      <state>FL</state>
+      <zip>32336</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>Mt. Morilla Baptist Church</location_name>
+      <line1>9091 S Salt RD</line1>
+      <city>Lamont</city>
+      <state>FL</state>
+      <zip>32336</zip>
+   </address>
+   <directions>P.O. Box 144
+Lamont, Fl. 32336                                                                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Lloyd Woman's Club</location_name>
+      <line1>9109 Old Lloyd Rd</line1>
+      <city>Monticello</city>
+      <state>FL</state>
+      <zip>32344</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

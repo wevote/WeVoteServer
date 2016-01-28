@@ -1,0 +1,525 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Hernando County, FL</name>
+  <vip_id>12053</vip_id>
+  <datetime>2015-10-07T02:45:00</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>ISTACHATTA COMMUNITY CENTER</location_name>
+      <line1>16246 LINGLE RD</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34601</zip>
+   </address>
+   <directions>(Northeast corner of Lingle Rd &amp; Magnon Dr) From US 41 &amp; Lake Lindsey Rd/CR-476, go east on Lake Lindsey Rd to Lingle Rd/CR-439. Turn left. Bldg will be on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>EDEN BAPTIST CH FELLOWSHIP HL</location_name>
+      <line1>22308 LAKE LINDSEY RD</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34601</zip>
+   </address>
+   <directions>From US 41 &amp; Snow Memorial Hwy/CR-481, go north on Snow Memorial Hwy to Lake Lindsey Rd/CR-476. Turn left. Church is 1/2 mile on left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>JEROME BROWN COMMUNITY CENTER</location_name>
+      <line1>201 Howell Ave</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34601</zip>
+   </address>
+   <directions>From W Jefferson St/SR 50 &amp; Ponce De Leon Blvd/US 98, go west on W Jefferson St to Tom Varn Park. Turn left onto Darby Rd. Take first right onto Jerome Brown Pl. Building will be on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>FAITH EVANL PRESB. CHURCH</location_name>
+      <line1>200 MT FAIR AVE</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34601</zip>
+   </address>
+   <directions>From Courthouse,  Travel North on US41/Broad St. approx. 1 mile. Make a right on Mt. Fair Ave. church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>RIDGE MANOR COMMUNITY CENTER</location_name>
+      <line1>34240 CORTEZ BLVD</line1>
+      <city>RIDGE MANOR</city>
+      <state>FL</state>
+      <zip>33523</zip>
+   </address>
+   <directions>(Southeast corner of SR 50 &amp; Lakewood Dr) From US 301 &amp; SR 50, go 1 mile west on SR 50. Community Center will be on left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>SPRING LAKE UNITED METHODIST</location_name>
+      <line1>4191 SPRING LAKE HWY</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34601</zip>
+   </address>
+   <directions>(Southwest corner of Spring Lake Hwy &amp; Old Spring Lake Rd) From SR 50 &amp; Spring Lake Hwy, go south on Spring Lake Hwy 2 miles. Church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>GRACE WORLD OUTREACH CHURCH</location_name>
+      <line1>20366 CORTEZ BLVD</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34601</zip>
+   </address>
+   <directions>(Southwest corner of Cortez Blvd &amp; Hope Hill Rd) From Broad St/US 41 &amp; Cortez Blvd/SR 50, go east on Cortez Blvd 1/2 of a mile. Turn right into first parking lot of church.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>DEERFIELD CLUBHOUSE</location_name>
+      <line1>15471 ATWATER DR</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34604</zip>
+   </address>
+   <directions>From US 41 &amp; Spring Hill Dr, go west on Spring Hill Dr 1 and 1/4 miles, turn right on Candy Drive street will run into Atwater.  Candy Drive is on right (north) side, just past California also large sign on Spring Hill Dr with signage for Deerfield Development.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>BROOKSVILLE ELKS LODGE #2582</location_name>
+      <line1>13383 County Line Rd</line1>
+      <city>Brooksville</city>
+      <state>FL</state>
+      <zip>34604</zip>
+   </address>
+   <directions>(Between Linden Dr &amp; Suncoast Pkwy) From County Line Rd &amp; Suncoast Pkwy, go west on County Line Rd approx 1 mile. Lodge is on the right (north).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>HOLY CROSS LUTHERAN CHURCH</location_name>
+      <line1>6193 SPRING HILL DR</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions>(Northeast cornerof Spring Hill Dr &amp; Airmont Dr) From US19 and Spring Hill Dr, go 6/10 of a mile East on Spring Hill Dr. Turn left on Airmont Dr. Church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>THE HEATHER COMMUNITY CENTER</location_name>
+      <line1>9100 NAKOMA WAY</line1>
+      <city>WEEKI WACHEE</city>
+      <state>FL</state>
+      <zip>34613</zip>
+   </address>
+   <directions>From SR 50 &amp; US 19, go north on US 19 to the Heather entrance (St. Andrews Blvd).  Turn left onto St. Andrews Blvd. Turn right onto Nakoma Way. Center is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>HIGH POINT COMM. CLUB HOUSE</location_name>
+      <line1>12249 CLUB HOUSE RD</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34613</zip>
+   </address>
+   <directions>From US 19 &amp; Hwy 50, go east on Hwy 50 past Oak Hill Hospital to Highpoint Blvd. Turn left. Turn right to continue on Highpoint Blvd. Turn left on Eagle Dr. Clubhouse is on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>GRACE PRESBYTERIAN CHURCH</location_name>
+      <line1>8375 SPRING HILL DR</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34608</zip>
+   </address>
+   <directions>(Northeast corner of Spring Hill Dr &amp; Waterfall Dr) From Deltona Blvd &amp; Spring Hill Dr, go east on Spring Hill Dr to Waterfall Dr. Turn left. Take second entrance on right to Fellowship Hall in back.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>FELLOWSHIP COMMUNITY CHURCH</location_name>
+      <line1>11250 SPRING HILL DR</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34609</zip>
+   </address>
+   <directions>(Southwest corner of Spring Hill Dr &amp; Deering Ave) From Spring Hill Dr &amp; Mariner Blvd, go east on Spring Hill Dr about 2/10 of a mile. Church is on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>FOREST OAKS LUTHERAN CHURCH</location_name>
+      <line1>8555 FOREST OAKS BLVD</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions>(On Forest Oaks Blvd across from Post Office) From Deltona Blvd &amp; Forest Oaks Blvd, go west on Forest Oaks Blvd. Church is approx 2/10 of a mile on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>CHRISTIAN CHURCH IN THE WILDWOOD</location_name>
+      <line1>10051 COUNTRY RD</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34613</zip>
+   </address>
+   <directions>From US 19 &amp; SR 50, go north on US 19 to Country Rd (across from the Heather). Turn right. Go 1/2 mile. Church is on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>BROOKRIDGE CLUBHOUSE MIDDLE RM</location_name>
+      <line1>7300 Brookridge Central Blvd. ST</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34613</zip>
+   </address>
+   <directions>From Suncoast Pkwy &amp; SR 50/Cortez Blvd, go west on SR 50 to Brookridge Central Blvd. Turn right on Brookridge Blvd. Turn left on Weatherford Ave.  Turn left on Hampton St. Clubhouse is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>ST JOAN OF ARC CATHOLIC CHURCH</location_name>
+      <line1>13485 SPRING HILL DR</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34609</zip>
+   </address>
+   <directions>(Northwest corner of Spring Hill Dr &amp; Coronado Dr) From the corner of Spring Hill Dr &amp; Linden Dr, go east on Spring Hill Dr for 1 mile. Turn left on Cornado Dr. Church is on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>DAYSPRING PRESBYTERIAN CHURCH</location_name>
+      <line1>6000 MARINER BLVD</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34608</zip>
+   </address>
+   <directions>From Mariner Blvd &amp; Elgin Blvd, go north on Mariner Blvd 2/10 of a mile.  Church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>COAST GUARD AUXILIARY BLDG</location_name>
+      <line1>4340 CALIENTA ST</line1>
+      <city>HERNANDO BEACH</city>
+      <state>FL</state>
+      <zip>34607</zip>
+   </address>
+   <directions>(Corner of Shoal Line Blvd &amp; Calienta St) From US 19 &amp; Spring Hill Dr, go west on Osowaw Blvd (behind Wal-Mart) to Shoal Line Blvd. Turn right. Go approx 3 miles to Calienta St. Bldg on corner.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>TRUE HOLINESS CHURCH OF JESUS CHRIST</location_name>
+      <line1>15500 WISCON RD</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34601</zip>
+   </address>
+   <directions>Travel west on Cortez Blvd from Brooksville Regional Hospital, turn left onto California St, turn right onto Wiscon Rd, church is 0.5 miles down on left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>SPRING HILL CHURCH OF CHRIST</location_name>
+      <line1>5456 DELTONA BLVD</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34608</zip>
+   </address>
+   <directions>(Southeast corner of Deltona Blvd &amp; Elgin Blvd) From Deltona Blvd &amp; Cortez Blvd/SR 50, go south on Deltona Blvd. Pass Elgin Blvd 1/10 of a mile to Laramie Lane. Turn left. Church is on left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>NORTHCLIFFE BAPTIST CHURCH (HALL)</location_name>
+      <line1>10515 NORTHCLIFFE BLVD</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34608</zip>
+   </address>
+   <directions>From Northcliffe Blvd &amp; Mariner Blvd, go west on Northcliffe Blvd approx 1/2 mile. Church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>TIMBER PINES PERFORMING ARTS CENTER</location_name>
+      <line1>6872 TIMBER PINES BLVD</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions>From Timber Pines/Deltona entrance, go west on Abeline Rd. Turn right onto Grand Club Dr. Turn left onto Grand Pines Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>HILLSIDE COMMUNITY BAPTIST CHURCH</location_name>
+      <line1>27440 CORTEZ BLVD</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34602</zip>
+   </address>
+   <directions>From Spring Lake Hwy &amp; Cortez Blvd/SR 50, go east 1.3 miles on Cortez Blvd. Church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>HILLSIDE COUMMUNITY BAPTIST CHURCH</location_name>
+      <line1>27440 CORTEZ BLVD</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34602</zip>
+   </address>
+   <directions>From Spring Lake Hwy &amp; Cortez Blvd/SR 50, go east 1.3 miles on Cortez Blvd. Church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>REGENCY OAKS CLUB HOUSE</location_name>
+      <line1>4445 BREAKWATER BLVD</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34607</zip>
+   </address>
+   <directions>From US 19 &amp; Forest Oaks Blvd, go north on US 19 approx 1/2 mile to Breakwater Blvd (Perkins Restaurant on corner). Turn left. Clubhouse is on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>SH CAL. CHURCH OF THE NAZARENE</location_name>
+      <line1>235 COBBLESTONE DR</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions>(Southwest corner of Cobblestone Dr &amp; Clearwater Dr)From Spring Hill Dr &amp; Deltona Blvd, go west on Spring Hill Dr toCobblestone Dr Turn left. Church is on south side of ClearwaterDr at Cobblestone Dr.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>SH UNITED CHURCH OF CHRIST- HALL</location_name>
+      <line1>4244 MARINER BLVD</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34609</zip>
+   </address>
+   <directions>Southeast corner of Mariner Blvd &amp; Augustine Rd. From Mariner Blvd and Northcliffe Blvd, go left (north) on Mariner Blvd for 2/10 of a mile. Church is on the Right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>FAMILY FIRST ASSEMBLY</location_name>
+      <line1>12435 SPRING HILL DR</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34609</zip>
+   </address>
+   <directions>(Northeast corner of Spring Hill Dr &amp; Lema Dr) From the corner of Spring Hill Dr &amp; Linden Dr, go west on Spring Hill Dr approx 3/10 of a mile.  Church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>STERLING HILL CLUBHOUSE (NORTH)</location_name>
+      <line1>4411 STERLING HILL BL</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34609</zip>
+   </address>
+   <directions>From Mariner and Elgin go west on Elgin take a left on Sterling Hill Blvd and the 3rd entrance to the left will put you in front of the clubhouse </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>FAITH EVANGELICAL FREE CHURCH</location_name>
+      <line1>5338 FREEPORT DR</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions>From Northcliffe Blvd &amp; Deltona Blvd, go west on Northcliffe Blvd approx 1/2 mile to Freeport Dr. Turn right. Go approx 3/10 of a mile. Church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>TIMBER PINES PERF. ARTS CTR</location_name>
+      <line1>6872 Timber Pines Blvd</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions>From Timber Pines/Deltona entrance, go west on Abeline Rd. Turn right onto Grand Club Dr. Turn left onto Grand Pines Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>YMCA OF THE SUNCOAST</location_name>
+      <line1>1300 MARINER BLVD</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34609-4636</zip>
+   </address>
+   <directions>(Corner of Mariner Blvd &amp; Henderson St)  From Spring Hill Dr and Mariner Blvd, head south on Mariner Blvd 2/10 of a mile, make left turn at Henderson St. This is the entrance to the YMCA</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>WELLINGTON CLUBHOUSE</location_name>
+      <line1>400 WEXFORD BLVD</line1>
+      <city>SPRING HILL</city>
+      <state>FL</state>
+      <zip>34609</zip>
+   </address>
+   <directions>From Mariner Blvd &amp; County Line Rd, go north on Mariner Blvd to Wexford Blvd (the Wellington entrance). Turn right. Take second right to the clubhouse.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>HIGH POINT COMMUNITY CLUBHOUSE</location_name>
+      <line1>12249 CLUBHOUSE RD</line1>
+      <city>BROOKSVILLE</city>
+      <state>FL</state>
+      <zip>34613</zip>
+   </address>
+   <directions>From US 19 &amp; Hwy 50, go east on Hwy 50 past Oak Hill Hospital to Highpoint Blvd. Turn left. Turn right to continue on Highpoint Blvd. Turn left on Eagle Dr. Clubhouse is on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>INVALID ADDRESSES</location_name>
+      <line1>99 INVALID ST</line1>
+      <city>Invalid Address</city>
+      <state>FL</state>
+      <zip>00000</zip>
+   </address>
+   <directions>VOTER NEEDS TO SPEAK TO SOE AND PROVIDE MORE INFORMATION IN REGARD TO RESIDENTIAL ADDRESS. EITHER SOMETHING IS MISSING FROM THE ADDRESS OR THE PROPERTY APPRAISER STATES THE ADDRESS IS NOT A RESIDENTIAL ADDRESS.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>15, 19, 23, 30, 39, 47</location_name>
+      <line1>7443 FOREST OAKS BLVD</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>18, 25, 29, 31, 40, 44</location_name>
+      <line1>7443 FOREST OAKS BLVD</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>12, 14, 21, 27, 42, 48, 54</location_name>
+      <line1>7443 FOREST OAKS BLVD</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>17, 24, 33, 34, 38, 46</location_name>
+      <line1>7443 FOREST OAKS BLVD</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>8, 9, 10, 36</location_name>
+      <line1>7443 FOREST OAKS BLVD</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>1, 2, 4, 6</location_name>
+      <line1>7443 FORESR OAKS BLVD</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34606</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

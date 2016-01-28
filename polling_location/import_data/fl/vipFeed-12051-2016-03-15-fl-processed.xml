@@ -1,0 +1,128 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Hendry County, FL</name>
+  <vip_id>12051</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>Janet B. Taylor Auditorium</location_name>
+      <line1>1100 S Olympia St</line1>
+      <city>Clewiston</city>
+      <state>FL</state>
+      <zip>33440-4908</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Carlson Mem. United Church</location_name>
+      <line1>310 Campbell St</line1>
+      <city>LaBelle</city>
+      <state>FL</state>
+      <zip>33935-5269</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>LaBelle Civic Center</location_name>
+      <line1>481 W Hickpochee Ave</line1>
+      <city>LaBelle</city>
+      <state>FL</state>
+      <zip>33935-4763</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Big Cypress Senior Center</location_name>
+      <line1>31000 Josie Billie Hwy</line1>
+      <city>Clewiston</city>
+      <state>FL</state>
+      <zip>33440</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Felda Community Center</location_name>
+      <line1>1100 CR 830</line1>
+      <city>Felda</city>
+      <state>FL</state>
+      <zip>339300000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>John Boy Auditorium</location_name>
+      <line1>911 Evercane Rd</line1>
+      <city>Clewiston</city>
+      <state>FL</state>
+      <zip>33440-8477</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Youth Center</location_name>
+      <line1>110 W Osceola Ave</line1>
+      <city>Clewiston</city>
+      <state>FL</state>
+      <zip>33440-2910</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Pioneer Fire Station</location_name>
+      <line1>2001 10th Terr</line1>
+      <city>Clewiston</city>
+      <state>FL</state>
+      <zip>334400000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Grace Baptist Church</location_name>
+      <line1>4200 NE Eucalyptus Blvd</line1>
+      <city>LaBelle</city>
+      <state>FL</state>
+      <zip>33935</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Montura Clubhouse</location_name>
+      <line1>225 N Hacienda St</line1>
+      <city>Clewiston</city>
+      <state>FL</state>
+      <zip>33440</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

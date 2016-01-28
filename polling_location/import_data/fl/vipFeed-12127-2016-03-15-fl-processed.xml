@@ -1,0 +1,2437 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Volusia County, FL</name>
+  <vip_id>12127</vip_id>
+  <datetime>2015-07-29T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>Trinity United Methodist Church</location_name>
+      <line1>185 Lemon Rd</line1>
+      <city>Seville</city>
+      <state>FL</state>
+      <zip>32190</zip>
+   </address>
+   <directions>West off of US-17 onto Lake George Road (CR 305), at the corner of Church Street and Lemon Road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Pierson Community Building</location_name>
+      <line1>124 W Washington Ave</line1>
+      <city>Pierson</city>
+      <state>FL</state>
+      <zip>32180</zip>
+   </address>
+   <directions>West off US-17 (Center St) onto Washington Avenue, northwest corner of Washington Ave and US-17 (Center St)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Volusia Lodge #77 F &amp; AM</location_name>
+      <line1>210 E State Road 40</line1>
+      <city>Pierson</city>
+      <state>FL</state>
+      <zip>32180</zip>
+   </address>
+   <directions>East off US-17 onto SR 40, between Pine St and Church St on north side of SR 40</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Trinity United Methodist Church</location_name>
+      <line1>185 Lemon Rd</line1>
+      <city>Seville</city>
+      <state>FL</state>
+      <zip>32190</zip>
+   </address>
+   <directions>West off of N US Hwy 17 onto Lake George Road (CR 305), at the corner of Church Street and Lemon Road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Pierson Community Building</location_name>
+      <line1>124 W Washington Ave</line1>
+      <city>Pierson</city>
+      <state>FL</state>
+      <zip>32180</zip>
+   </address>
+   <directions>West off N US Hwy 17 (Center St) onto Washington Avenue, northwest corner of Washington Ave and N US Hwy 17 (Center St)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Volusia Lodge #77 F &amp; AM</location_name>
+      <line1>210 E State Road 40</line1>
+      <city>Pierson</city>
+      <state>FL</state>
+      <zip>32180</zip>
+   </address>
+   <directions>East off N US Hwy 17 onto SR 40, between Pine St and Church St on north side of SR 40</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Glenwood Presbyterian Church</location_name>
+      <line1>3190 Grand Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>West off of N Spring Garden Ave (FL-15) onto Glenwood Rd (CR 4088). North on Grand Ave (CR 4053) between Stone Rd and Depot St on west side of Grand Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>First Baptist Church of DeLeon Springs</location_name>
+      <line1>4995 Central Ave</line1>
+      <city>DeLeon Springs</city>
+      <state>FL</state>
+      <zip>32130</zip>
+   </address>
+   <directions>East off US-17 onto Reynolds Rd (CR 4038) or Broderick St, between Central Ave and Upson Ave on the south side of Webb St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>First Assembly of God Church</location_name>
+      <line1>1500 E International Speedway Blvd</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>On south side of US-92 (International Speedway Blvd) between Jacobs Rd (CR 4097) and Kepler Rd (CR 4101) Ave (CR 4053)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Kepler Road Baptist Church</location_name>
+      <line1>251 Kepler Rd</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>East side of Kepler Rd, North of SR 44 (New York Ave) or South of Minnesota Ave (CR 4096).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>St John's Lodge #37 F &amp; AM</location_name>
+      <line1>2557 N Spring Garden Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>Northeast corner of SR-15A (Spring Garden Ave) and Glenwood Rd (CR4088)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>First Christian Church</location_name>
+      <line1>1401 W New York Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>Northside of Sr 44 (W New York Ave), 4 blocks West of SR-15A (Spring Garden Ave) between Temple St and Woodward Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Florida Lutheran Retirement Center</location_name>
+      <line1>450 N McDonald Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>US Hwy(Woodland Blvd) ,East onto Wisconsin Ave. North onto McDonald Ave,Corner of McDonald Ave and Minnesota Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>First Assembly DeLand</location_name>
+      <line1>551 S Kepler Rd</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>From 472 go north on Martin Luther King Bltwy approx 11/2 miles northof Taylor Rd. On East side of street.(Martin luther King Bltwy turns into S Kepler Rd)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Wayne G Sanborn Activities Center</location_name>
+      <line1>815 S Alabama Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>East of US highway 17-92 (Woodland Blvd), East one block on Beresford Ave (CR 4112), North onto Alabama Ave or West on Beresford Ave to Alabama Ave - Earl Brown Park</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Glenwood Presbyterian Church</location_name>
+      <line1>3190 Grand Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>West off of N Spring Garden Ave (SR 15) onto Glenwood Rd (CR 4088). North on Grand Ave (CR 4053) between Stone Rd and Depot St on west side of Grand Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Chisholm Community Center</location_name>
+      <line1>520 S Clara Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>Two blocks west of US 17-92 (Woodland Blvd), between Euclid Ave (CR 4108) and Hubbard Ave on the west side of Clara Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Christ Community Church</location_name>
+      <line1>402 W New York Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>South side of SR 44 (W New York Ave), at its intersection with S Delaware Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>Hopkins Hall</location_name>
+      <line1>192 W Connecticut Ave</line1>
+      <city>Lake Helen</city>
+      <state>FL</state>
+      <zip>32744</zip>
+   </address>
+   <directions>South on Summit Ave (CR 4139), East on Connecticut Ave, corner of Euclid Ave or North on Lakeview Dr (CR 4138), west on Connecticut Ave, corner of Euclid Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>The Sanctuary Church of God</location_name>
+      <line1>401 E Taylor Rd</line1>
+      <city>Deland</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>East off of S.Woodland Blvd. onto Taylor Rd to it's intersection with Aquarius Ave.
+Poll is located is on Northeast corner of Taylor Rd &amp; Aquarius Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>First Baptist Church  (Fellowship Hall)</location_name>
+      <line1>4970 Upson Ave</line1>
+      <city>DeLeon Springs</city>
+      <state>FL</state>
+      <zip>32130</zip>
+   </address>
+   <directions>East off N US Hwy 17 onto Reynolds Rd (CR 4038) or Broderick St, go east 3 blocks  turn north or south onto Upson Ave Will be on the west side of street</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>First Assembly of God Church</location_name>
+      <line1>1500 E International Speedway Blvd</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>On south side of US-92 (International Speedway Blvd) between Jacobs Rd (CR 4097) and Kepler Rd (CR 4101) Ave (CR 4053)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Kepler Road Baptist Church</location_name>
+      <line1>251 Kepler Rd</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>East side of Kepler Rd(CR 4101), North of SR 44 (E New York Ave) or South of Minnesota Ave (CR 4096).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>St John's Lodge #37 F &amp; AM</location_name>
+      <line1>2557 N Spring Garden Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>Northeast corner of SR 15A (N Spring Garden Ave) and Glenwood Rd (CR4088)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>First Christian Church</location_name>
+      <line1>1401 W New York Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>Northside of Sr 44 (W New York Ave), 4 blocks West of SR 15A (Spring Garden Ave) between Temple St and Woodward Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Florida Lutheran Retirement Center</location_name>
+      <line1>450 N McDonald Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>US Hwy 17-92(N Woodland Blvd) ,East onto Wisconsin Ave. North onto McDonald Ave,Corner of McDonald Ave and Minnesota Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>First Assembly DeLand</location_name>
+      <line1>551 S Kepler Rd</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>From SR 472 go north on Martin Luther King Bltwy(CR 4101) approx 1 1/2 miles north of Taylor Rd. On East side of street.(Martin Luther King Bltwy turns into S Kepler Rd)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>Wayne G Sanborn Activities Center</location_name>
+      <line1>815 S Alabama Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>East of US Hwy 17-92 (S Woodland Blvd), East one block on Beresford Ave (CR 4112), North onto Alabama Ave or West on Beresford Ave to Alabama Ave - Earl Brown Park</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Chisholm Community Center</location_name>
+      <line1>520 S Clara Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>Two blocks west of US 17-92 (Woodland Blvd), between Euclid Ave (CR 4108) and Hubbard Ave on the west side of Clara Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>Christ Community Church</location_name>
+      <line1>402 W New York Ave</line1>
+      <city>DeLand</city>
+      <state>FL</state>
+      <zip>32720</zip>
+   </address>
+   <directions>South side of SR 44 (W New York Ave), at its intersection with S Delaware Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Hopkins Hall</location_name>
+      <line1>192 W Connecticut Ave</line1>
+      <city>Lake Helen</city>
+      <state>FL</state>
+      <zip>32744</zip>
+   </address>
+   <directions>South on Summit Ave (CR 4139), East on Connecticut Ave, corner of Euclid Ave or North on Lakeview Dr (CR 4138), west on Connecticut Ave, corner of Euclid Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>The Sanctuary Church of God</location_name>
+      <line1>401 E Taylor Rd</line1>
+      <city>Deland</city>
+      <state>FL</state>
+      <zip>32724</zip>
+   </address>
+   <directions>East off of US Hwy 17-92(S.Woodland Blvd.) onto Taylor Rd. to it's intersection with Aquarius Ave.
+Poll is located is on Northeast corner of Taylor Rd &amp; Aquarius Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>Orange City United Methodist Church</location_name>
+      <line1>396 E  University Ave</line1>
+      <city>Orange City</city>
+      <state>FL</state>
+      <zip>32763</zip>
+   </address>
+   <directions>South on US Highway 17-92 (Volusia Ave), East onto University Ave, 3 blocks - corner of University Ave and Thorpe Ave or South on Leavitt Ave, West onto University Ave, two blocks - corner of University Ave and Thorpe Ave </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>John Knox Village Activity Center</location_name>
+      <line1>130 Southlake Dr</line1>
+      <city>Orange City</city>
+      <state>FL</state>
+      <zip>32763</zip>
+   </address>
+   <directions>South off of Graves Ave (CR 4145) or West off of Veterans Memorial Parkway</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>St. Ann's Catholic Church</location_name>
+      <line1>26 Dogwood Trl</line1>
+      <city>DeBary</city>
+      <state>FL</state>
+      <zip>32713</zip>
+   </address>
+   <directions>US Highway 17-92, West onto Dogwood Trail, 2 blocks on the right or East on Highbanks Rd, North on US Hwy 17-92, West onto Dogwood Trail.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>Florence K. Little Town Hall</location_name>
+      <line1>12 Columba Rd</line1>
+      <city>DeBary</city>
+      <state>FL</state>
+      <zip>32713</zip>
+   </address>
+   <directions>US Highway 17-92 (Charles Richard Beall), East on Columba Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>First Presbyterian Church of DeBary</location_name>
+      <line1>267 E Highbanks Rd</line1>
+      <city>DeBary</city>
+      <state>FL</state>
+      <zip>32713</zip>
+   </address>
+   <directions>East on Highbanks Rd,just east of Floradana Dr on south side of the road. West of Woodbound Lake Subdivision</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>First Congregational Church</location_name>
+      <line1>201 W University Ave</line1>
+      <city>Orange City</city>
+      <state>FL</state>
+      <zip>32763</zip>
+   </address>
+   <directions>South off US Highway 17-92 (Volusia Ave), one block West on University Ave on the right (or East) on French (CR 4142), South 2 blocks on Carpenter Ave to University Ave, 2 blocks on the left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>Orange City Library Dickinson Hall</location_name>
+      <line1>148 Albertus Way</line1>
+      <city>Orange City</city>
+      <state>FL</state>
+      <zip>32763</zip>
+   </address>
+   <directions>US Highway 17-92 (Volusia Ave) 1 Block south of Graves Ave. Go east on Albertus Way, Library is on the south side of the road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>Orange City United Methodist Church</location_name>
+      <line1>396 E  University Ave</line1>
+      <city>Orange City</city>
+      <state>FL</state>
+      <zip>32763</zip>
+   </address>
+   <directions>South on US Hwy 17-92 (Volusia Ave), East onto University Ave, 3 blocks - corner of University Ave and Thorpe Ave or South on Leavitt Ave, West onto University Ave, two blocks - corner of University Ave and Thorpe Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>John Knox Village Activity Center</location_name>
+      <line1>130 Southlake Dr</line1>
+      <city>Orange City</city>
+      <state>FL</state>
+      <zip>32763</zip>
+   </address>
+   <directions>E.Graves Ave (CR 4145) turn South onto Trafford Ave.or Veterans Memorial Parkway turn West onto Southlake Dr.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>St. Ann's Catholic Church</location_name>
+      <line1>26 Dogwood Trl</line1>
+      <city>DeBary</city>
+      <state>FL</state>
+      <zip>32713</zip>
+   </address>
+   <directions>US Hwy 17-92,(N Charles R. Beall Blvd) West onto Dogwood Trail, 2 blocks on the right or East on Highbanks Rd, North on US Hwy 17-92,(Charles R. Beall Blvd) West onto Dogwood Trail.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>Florence K. Little Town Hall</location_name>
+      <line1>12 Columba Rd</line1>
+      <city>DeBary</city>
+      <state>FL</state>
+      <zip>32713</zip>
+   </address>
+   <directions>US Hwy.17-92 (S Charles Richard Beall), East on Columba Rd. Town Hall on left side off road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="48">
+   <address>
+      <location_name>First Presbyterian Church of DeBary</location_name>
+      <line1>267 E Highbanks Rd</line1>
+      <city>DeBary</city>
+      <state>FL</state>
+      <zip>32713</zip>
+   </address>
+   <directions>US Hwy 17-92,(Charles R. Beall Blvd)East on Highbanks Rd,just east of Floridana Dr on south side of the road. West of Woodbound Lakes Subdivision</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="49">
+   <address>
+      <location_name>First Congregational Church</location_name>
+      <line1>201 W University Ave</line1>
+      <city>Orange City</city>
+      <state>FL</state>
+      <zip>32763</zip>
+   </address>
+   <directions>US Hwy.17-92 (N Volusia Ave),West one block on University Ave poll on the right (or East) on French (CR 4142), South 2 blocks on Carpenter Ave to University Ave, 2 blocks on the left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="50">
+   <address>
+      <location_name>Orange City Library Dickinson Hall</location_name>
+      <line1>148 Albertus Way</line1>
+      <city>Orange City</city>
+      <state>FL</state>
+      <zip>32763</zip>
+   </address>
+   <directions>US Hwy 17-92 (S Volusia Ave) 1 Block south of Graves Ave. Go east on Albertus Way, Library is on the south side of the road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="51">
+   <address>
+      <location_name>Trinity Assembly of God - Gym</location_name>
+      <line1>875 Elkcam Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>Off of N Normandy Blvd, approximately 2 blocks East on Elkcam Blvd (CR 1443)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="52">
+   <address>
+      <location_name>New Hope Baptist Church</location_name>
+      <line1>2855 Lake Helen Osteen Rd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>East off of Lake Helen Osteen Rd, between Collingswood Dr to the South and Haulover Blvd to the North.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="53">
+   <address>
+      <location_name>Osteen Civic Center</location_name>
+      <line1>165 New Smyrna Blvd</line1>
+      <city>Osteen</city>
+      <state>FL</state>
+      <zip>32764</zip>
+   </address>
+   <directions>SR 415, East onto New Smyrna Blvd, Corner of New Smyrna Blvd and Florida Ave/Maytown Rd (CR 4164)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="54">
+   <address>
+      <location_name>Deltona Lakes Baptist Church</location_name>
+      <line1>2886 Elkcam Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>North side of Elkcam Blvd (Cr 4143), between Florida St and Kimberly Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="55">
+   <address>
+      <location_name>Deltona Regional Library</location_name>
+      <line1>2150 Eustace Ave</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>From I-4 go east on Howland Blvd(CR 4145) turn south on Providence Blvd turn west onto Eustace Ave Library is on the south of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="56">
+   <address>
+      <location_name>Deltona Christian Church</location_name>
+      <line1>960 E Normandy Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>On the Southeast corner of E Normandy Blvd and E Hancock Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="57">
+   <address>
+      <location_name>Life Fellowship Church of the Nazarene</location_name>
+      <line1>1420 Courtland Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>Courtland Blvd (CR 4153) and Howland Blvd (CR 4145), corner of Courtland Blvd and Partridge St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="58">
+   <address>
+      <location_name>Pine Ridge Fellowship Methodist Church</location_name>
+      <line1>935 Howland Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>On Howland Blvd, directly across from Pine Ridge High School. Approximately 7 blocks North of Ft. Smith Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="59">
+   <address>
+      <location_name>Fort Smith Blvd Baptist Church</location_name>
+      <line1>229 Fort Smith Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>Off of Ft Smith Blvd, one block East of Courtland Blvd (CR 4153) on the South side of the road at the corner of Ft Smith Blvd and Wilburton Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="60">
+   <address>
+      <location_name>Trinity Assembly of God - Gym</location_name>
+      <line1>875 Elkcam Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>Off of N Normandy Blvd, approximately 2 blocks East on Elkcam Blvd (CR 1443)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="61">
+   <address>
+      <location_name>Wes Crile Park</location_name>
+      <line1>1537 Norbert Ter</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>Fort Smith Blvd to Norbert Terrance, Between Newmark Dr and Providence Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="62">
+   <address>
+      <location_name>Deltona United Church of Christ</location_name>
+      <line1>1649 Providence Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>At the intersection of Providence Blvd (CR 4155) and Tivoli Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="63">
+   <address>
+      <location_name>Our Lady of the Lakes Catholic Church</location_name>
+      <line1>1310 Maximillian St</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>Off of Saxon Blvd (CR 4146), 4 blocks South of Tivoli Dr, West onto Maximillian St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="64">
+   <address>
+      <location_name>Deltona Community Center</location_name>
+      <line1>980 Lakeshore Dr</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>South on Providence Blvd (CR 4155), East onto Lakeshore Dr (CR 5758), approximately 1/2 mile on left-hand side</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="65">
+   <address>
+      <location_name>Fellowship Baptist Church</location_name>
+      <line1>114 Courtland Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>West on Doyle Rd (CR 4162), North onto Courtland Blvd (CR 4153) or South of Ft Smith Blvd on Courtland Blvd, approximately 1 block North of Doyle Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="66">
+   <address>
+      <location_name>Deltona Presbyterian Church</location_name>
+      <line1>2300 Howland Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>South on Howland Blvd (CR 4145) to Austin Ave or Northeast on Elkcam Blvd (CR4143) Northwest onto Howland Blvd (CR),to Austin Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="67">
+   <address>
+      <location_name>All Saints Episcopal Church</location_name>
+      <line1>155 Clark St</line1>
+      <city>Enterprise</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>South off of DeBary Ave onto Clark St, continue 3 blocks South, precinct is on left side of road or North on Clark St off of Jacob Brock Ave, precinct will be on right</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="68">
+   <address>
+      <location_name>New Hope Baptist Church</location_name>
+      <line1>2855 Lake Helen Osteen Rd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>East off of Lake Helen Osteen Rd, between Collingswood Dr to the South and Haulover Blvd to the North.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="69">
+   <address>
+      <location_name>Osteen Civic Center</location_name>
+      <line1>165 New Smyrna Blvd</line1>
+      <city>Osteen</city>
+      <state>FL</state>
+      <zip>32764</zip>
+   </address>
+   <directions>SR 415, East onto New Smyrna Blvd, Corner of New Smyrna Blvd and Florida Ave/Maytown Rd (CR 4164)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="70">
+   <address>
+      <location_name>Deltona Lakes Baptist Church</location_name>
+      <line1>2886 Elkcam Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>North side of Elkcam Blvd (Cr 4143), between Florida St and Kimberly Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="71">
+   <address>
+      <location_name>Deltona Regional Library</location_name>
+      <line1>2150 Eustace Ave</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>Off of Providence Blvd(CR 4155) between Howland Blvd(CR 4145) and Elkcam Blvd(4143) West onto Eustuce Ave from Providence Blvd Turn South into Library entrance.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="72">
+   <address>
+      <location_name>Deltona Christian Church</location_name>
+      <line1>960 E Normandy Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>On the Southeast corner of E Normandy Blvd and E Hancock Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="73">
+   <address>
+      <location_name>Life Fellowship Church of the Nazarene</location_name>
+      <line1>1420 Courtland Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>Courtland Blvd (CR 4153) and Howland Blvd (CR 4145),Northeast  along Courtland Blvd poll on Northside of street before Partridge St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="74">
+   <address>
+      <location_name>Pine Ridge Fellowship Methodist Church</location_name>
+      <line1>935 Howland Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>On Howland Blvd, directly across from Pine Ridge High School. Approximately 7 blocks North of Ft. Smith Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="75">
+   <address>
+      <location_name>Fort Smith Blvd Baptist Church</location_name>
+      <line1>229 Fort Smith Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>On the South side of Ft Smith Blvd(CR 4152), one block East of Courtland Blvd (CR 4153) at the corner of Ft Smith Blvd and Wilburton Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="76">
+   <address>
+      <location_name>Wes Crile Park</location_name>
+      <line1>1537 Norbert Ter</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>Fort Smith Blvd(CR 4152) to Norbert Terrance, Between Newmark Dr and Providence Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="77">
+   <address>
+      <location_name>Deltona United Church of Christ</location_name>
+      <line1>1649 Providence Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>At the intersection of Providence Blvd (CR 4155) and Tivoli Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="78">
+   <address>
+      <location_name>Our Lady of the Lakes Catholic Church</location_name>
+      <line1>1310 Maximillian St</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>Off of Saxon Blvd (CR 4146), 4 blocks South of Tivoli Dr, West onto Maximillian St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="79">
+   <address>
+      <location_name>Deltona Community Center</location_name>
+      <line1>980 Lakeshore Dr</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>South on Providence Blvd (CR 4155), East onto Lakeshore Dr (CR 5758), approximately 1/2 mile on left-hand side</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="80">
+   <address>
+      <location_name>Fellowship Baptist Church</location_name>
+      <line1>114 Courtland Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>West on Doyle Rd (CR 4162), North onto Courtland Blvd (CR 4153) or South of Ft Smith Blvd(CR 4152) on Courtland Blvd, approximately 1 block North of Doyle Rd(CR 4162)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="81">
+   <address>
+      <location_name>Deltona Presbyterian Church</location_name>
+      <line1>2300 Howland Blvd</line1>
+      <city>Deltona</city>
+      <state>FL</state>
+      <zip>32738</zip>
+   </address>
+   <directions>South on Howland Blvd (CR 4145) to Austin Ave or Northeast on Elkcam Blvd (CR 4143) Northwest onto Howland Blvd to Austin Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="82">
+   <address>
+      <location_name>All Saints Episcopal Church</location_name>
+      <line1>155 Clark St</line1>
+      <city>Enterprise</city>
+      <state>FL</state>
+      <zip>32725</zip>
+   </address>
+   <directions>South off of DeBary Ave(CR 4162) onto Clark St, continue 3 blocks South, poll is on left side of road or North on Clark St off of Jacob Brock Ave, poll will be on right</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="83">
+   <address>
+      <location_name>Ormond Lakes Clubhouse</location_name>
+      <line1>70 Ormond Lakes Blvd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>North or South on US Hwy 1, East onto Ormond Lakes Boulevard in the Ormond Lakes subdivision</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="84">
+   <address>
+      <location_name>Riverview United Methodist Church</location_name>
+      <line1>2253 John Anderson Dr</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32176</zip>
+   </address>
+   <directions>South on John Anderson Dr (CR 2803), between Buckingham Drive and St. Johns Place or South on Ocean Shore Blvd (SR A1A), West on Kathy Drive, North 1 1/2 blocks, East side of street</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="85">
+   <address>
+      <location_name>Ormond Beach Presbyterian Church</location_name>
+      <line1>105 Amsden Rd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32176</zip>
+   </address>
+   <directions>East on Granada Blvd over bridge (causeway?), North on Ocean Shore Blvd (SR A1A), turn West on Amsden, one block East of Royal Dunes Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="86">
+   <address>
+      <location_name>Ormond Beach Senior Center</location_name>
+      <line1>351 Andrews St</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>North on Hwy US 1 into Ormond Beach. Turn East on Wilmette Ave, North onto Andrews St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="87">
+   <address>
+      <location_name>Calvary Christian Center</location_name>
+      <line1>1687 W Granada Blvd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>On SR 40 (West Granada Blvd), Approximately 2 blocks West of Interstate 95</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="88">
+   <address>
+      <location_name>Coquina Presbyterian Church</location_name>
+      <line1>2085 W Granada Blvd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>East on SR 40 (W Granada Blvd), turn North just past Indian Springs Circle/Old Tomoka Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="89">
+   <address>
+      <location_name>Nova Community Park (Gym)</location_name>
+      <line1>440 N Nova Rd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>North on N Nova Rd, approximately 1/2 mile from Granada Blvd (SR 40) on the West side of the road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="90">
+   <address>
+      <location_name>Ormond Beach Riverside Church</location_name>
+      <line1>56 N Beach St</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>One block North of Granada Ave (SR 40), West of Beach St (CR 4011) or South on Beach St, West side just after Lincoln Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="91">
+   <address>
+      <location_name>Grace Lutheran Church</location_name>
+      <line1>338 Ocean Shore Blvd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32176</zip>
+   </address>
+   <directions>North of Granada Blvd (SR 40) on Ocean Shore Blvd (SR A1A), corner of Neptune Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="92">
+   <address>
+      <location_name>Ormond Lakes Clubhouse</location_name>
+      <line1>70 Ormond Lakes Blvd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>North or South on US Hwy 1, East onto Ormond Lakes Boulevard in the Ormond Lakes subdivision, Clubhouse is on left side of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="93">
+   <address>
+      <location_name>Ormond Beach Regional Library - Auditorium</location_name>
+      <line1>30 S Beach St</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>One block South of Granada Blvd (SR 40), West off of Beach St (CR 4011) or North on Beach St (CR 4011), on the West side just before Granada Blvd (SR 40)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="94">
+   <address>
+      <location_name>Tomoka United Methodist Church</location_name>
+      <line1>1000 Old Tomoka Rd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>Approximately 2 miles East of I-95, property skirts Granada Blvd (SR 40). Turn South on Old Tomoka Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="95">
+   <address>
+      <location_name>Prince of Peace Catholic Church</location_name>
+      <line1>600 S Nova Rd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>West off of Nova Rd (SR 5) between Hand Ave to the North and Division Ave to the South</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="96">
+   <address>
+      <location_name>United Brethren in Christ Church</location_name>
+      <line1>560 Flomich St</line1>
+      <city>Holly Hill</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>From Ridgewood Ave (US Hwy 1), West on Flomich St. approximately 7 blocks to Center St. The church sits on the corner of Flomich and Center St, East of Nova Rd (SR 5)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="97">
+   <address>
+      <location_name>Sica Hall</location_name>
+      <line1>1065 Daytona Ave</line1>
+      <city>Holly Hill</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>North or South on Ridgewood Ave (US Hwy 1), two blocks East on LPGA Blvd (CR 4019), 1/2 block South on Daytona Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="98">
+   <address>
+      <location_name>Daytona Beach Church of Christ</location_name>
+      <line1>1040 Derbyshire Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>West off of Derbyshire Rd (CR 4015), LPGA Blvd (CR 4019) to the North and 10th St to the South</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="99">
+   <address>
+      <location_name>Volusia County Fire Station #16</location_name>
+      <line1>3935 Old Dixie Hwy</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>East on Old Dixie Hwy (CR 4011) from I-95, across from Halifax Plantation</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="100">
+   <address>
+      <location_name>Riverview United Methodist Church</location_name>
+      <line1>2253 John Anderson Dr</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32176</zip>
+   </address>
+   <directions>South on John Anderson Dr (CR 2803), between Buckingham Drive and St. Johns Place or South on Ocean Shore Blvd (SR A1A), West on Kathy Drive, North 1 1/2 blocks, East side of street</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="101">
+   <address>
+      <location_name>Ormond Beach Presbyterian Church</location_name>
+      <line1>105 Amsden Rd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32176</zip>
+   </address>
+   <directions>East on Granada Blvd over bridge, North on Ocean Shore Blvd (SR A1A), turn West on Amsden, one block East of Royal Dunes Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="102">
+   <address>
+      <location_name>Ormond Beach Senior Center</location_name>
+      <line1>351 Andrews St</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>From SR 40(E.Granada Ave.) North onto US Hwy 1. Turn East on Wilmette Ave.(CR 2822), Turn North onto Andrews St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="103">
+   <address>
+      <location_name>Calvary Christian Center</location_name>
+      <line1>1687 W Granada Blvd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>On SR 40 (West Granada Blvd), Approximately 2 blocks West of Interstate 95</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="104">
+   <address>
+      <location_name>Coquina Presbyterian Church</location_name>
+      <line1>2085 W Granada Blvd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>East on SR 40 (W Granada Blvd), turn North just past Indian Springs Circle/Old Tomoka Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="105">
+   <address>
+      <location_name>Providence Church</location_name>
+      <line1>1151 W Granada Blvd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>West on SR 40 (W Granada Blvd) from its intersection with Nova Rd, turn North on Hidden Hills Dr.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="106">
+   <address>
+      <location_name>Ormond Beach Riverside Church</location_name>
+      <line1>56 N Beach St</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>E.Granada Ave (SR 40), Turn North on Beach St (CR 4011) one block Church on West side of road or South on Beach St, West side just after Lincoln Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="107">
+   <address>
+      <location_name>Grace Lutheran Church</location_name>
+      <line1>338 Ocean Shore Blvd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32176</zip>
+   </address>
+   <directions>E.Granada Blvd (SR 40) North on Ocean Shore Blvd (SR A1A), on the corner of Neptune Ave. West side of Ocean Shore Blvd (SR A1A)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="108">
+   <address>
+      <location_name>Ormond Beach Regional Library - Auditorium</location_name>
+      <line1>30 S Beach St</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>One block South of Granada Blvd (SR 40), West off of Beach St (CR 4011) or North on Beach St (CR 4011), on the West side just before Granada Blvd (SR 40)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="109">
+   <address>
+      <location_name>Tomoka United Methodist Church</location_name>
+      <line1>1000 Old Tomoka Rd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>Approximately 2 miles East of I-95, property skirts W Granada Blvd (SR 40). Turn South on Old Tomoka Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="110">
+   <address>
+      <location_name>Prince of Peace Catholic Church</location_name>
+      <line1>600 S Nova Rd</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>West off of S Nova Rd (SR 5) between Hand Ave to the North and Division Ave to the South</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="111">
+   <address>
+      <location_name>United Brethren in Christ Church</location_name>
+      <line1>560 Flomich St</line1>
+      <city>Holly Hill</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>From Ridgewood Ave (US Hwy 1), West on Flomich St. approximately 7 blocks to Center St. The church sits on the corner of Flomich and Center St, East of Nova Rd (SR 5)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="112">
+   <address>
+      <location_name>Sica Hall</location_name>
+      <line1>1065 Daytona Ave</line1>
+      <city>Holly Hill</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>North or South on Ridgewood Ave (US Hwy 1),Go East two blocks on LPGA Blvd(CR 4019),Go South 1/2 block on Daytona Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="113">
+   <address>
+      <location_name>Daytona Beach Church of Christ</location_name>
+      <line1>1040 Derbyshire Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>On West side of Derbyshire Rd (CR 4015), LPGA Blvd (CR 4019) to the North and 10th St to the South</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="114">
+   <address>
+      <location_name>Volusia County Fire Station #16</location_name>
+      <line1>3935 Old Dixie Hwy</line1>
+      <city>Ormond Beach</city>
+      <state>FL</state>
+      <zip>32174</zip>
+   </address>
+   <directions>East on Old Dixie Hwy (CR 4011) from I-95, across from Halifax Plantation on North side of road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="115">
+   <address>
+      <location_name>DB Seventh Day Adventist Church</location_name>
+      <line1>401 N Williamson Blvd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>North on N. Williamson Blvd (CR 4009), North of International Speedway Blvd (US Hwy 92), approximately 1 mile on East side of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="116">
+   <address>
+      <location_name>Living Faith World Ministries</location_name>
+      <line1>950 Derbyshire Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>West off of Derbyshire Rd (CR 4015), North of 8th St and South of 10th St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="117">
+   <address>
+      <location_name>Schnebly Recreation Center</location_name>
+      <line1>1101 N Atlantic Ave</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32118</zip>
+   </address>
+   <directions>West off of Atlantic Ave (SR A1A), North of University Blvd and South of Driftwood Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="118">
+   <address>
+      <location_name>Westside Baptist Church</location_name>
+      <line1>1085 Mason Ave</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>Corner of Mason Ave (CR 430) and Colfax Dr to the South, West of Nova Rd (SR 5A) and East of Derbyshire Rd (CR 4015)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="119">
+   <address>
+      <location_name>Mt Carmel Missionary Baptist Church</location_name>
+      <line1>703 George W Engram Blvd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>North off of George W Engram Blvd between Walnut St to the East and Dr. Martin Luther King Blvd to the West</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="120">
+   <address>
+      <location_name>BCU Center for Civic Engagement</location_name>
+      <line1>740 W Intn'l Speedway Blvd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>On the North side of W International Speedway Blvd (US Hwy 92), one block East of Lincoln St and one block West of Martin Luther King Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="121">
+   <address>
+      <location_name>Daytona Beach Regional Library</location_name>
+      <line1>105 E Magnolia Ave</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>South on Peninsula to Silver Beach Ave, West over bridge, North on City Island Pkwy continue North into library parking lot</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="122">
+   <address>
+      <location_name>Community United Methodist Church</location_name>
+      <line1>616 Harvey Ave</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32118</zip>
+   </address>
+   <directions>Off of Harvey Ave between Grandview Ave and Wild Olive Ave, North of International Speedway Blvd (US Hwy 92) and South of Main St (CR 4040)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="123">
+   <address>
+      <location_name>Windsor Apartments</location_name>
+      <line1>524 S Beach St</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>West off of Beach St (CR 4011), Cedar St to the South and Loomis Ave to the North</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="124">
+   <address>
+      <location_name>John H Dickerson Community Center</location_name>
+      <line1>308 S Martin Luther King Blvd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>West off of Martin Luther King Blvd, between Loomis Ave to the South and Orange Ave (CR 4050) to the North</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="125">
+   <address>
+      <location_name>Beville Road Church of Christ</location_name>
+      <line1>850 Beville Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>North side of Beville Rd (SR 400), between Nova Rd (SR 5A) to the West and Ridgewood Ave (US Hwy 1) to the East</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="126">
+   <address>
+      <location_name>Colonial Colony South</location_name>
+      <line1>1275 Beville Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32119</zip>
+   </address>
+   <directions>East of Clyde Morris Blvd (CR 483), onto Beville Rd (SR 400), South onto Colonial Dr, approximately 12 blocks to the South. Precinct located in Recreation Lounge.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="127">
+   <address>
+      <location_name>DB Christian &amp; Missionary Alliance Church</location_name>
+      <line1>1250 Beville Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>East of Clyde Morris Blvd (CR 483), West of Nova Rd (SR 5A), on the North side of Beville Rd (SR 400)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="128">
+   <address>
+      <location_name>DB Seventh Day Adventist Church</location_name>
+      <line1>401 N Williamson Blvd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>From W. International Speedway Blvd (US Hwy 92), Turn North on N. Williamson Blvd (CR 4009), approximately 1 mile on East side of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="129">
+   <address>
+      <location_name>Living Faith World Ministries</location_name>
+      <line1>950 Derbyshire Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>West side of road Derbyshire Rd (CR 4015), North of 8th St and South of 10th St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="130">
+   <address>
+      <location_name>Schnebly Recreation Center</location_name>
+      <line1>1101 N Atlantic Ave</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32118</zip>
+   </address>
+   <directions>West side of Atlantic Ave (SR A1A), North of University Blvd and South of Driftwood Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="131">
+   <address>
+      <location_name>Westside Baptist Church</location_name>
+      <line1>1085 Mason Ave</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32117</zip>
+   </address>
+   <directions>On the Southeast corner of Mason Ave (CR 430) and Colfax Dr. West of Nova Rd (SR 5A) and East of Derbyshire Rd (CR 4015)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="132">
+   <address>
+      <location_name>Mt Carmel Missionary Baptist Church</location_name>
+      <line1>703 George W Engram Blvd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>Southeast corner of George W Engram Blvd and Ellsworth St. between N.Lincoln St.(CR 4037) to the East and Jefferson St.to the West</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="133">
+   <address>
+      <location_name>BCU Center for Civic Engagement</location_name>
+      <line1>740 W Intn'l Speedway Blvd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>On the North side of W International Speedway Blvd (US Hwy 92), East of N. Franklin St and West of N.Lincoln St.(CR 4037)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="134">
+   <address>
+      <location_name>Daytona Beach Regional Library</location_name>
+      <line1>105 E Magnolia Ave</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>South on Peninsula to Silver Beach Ave, West over bridge, North on City Island Pkwy continue North into library parking lot, or S.Beach St.(CR 4029)then East on Magnolia Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="135">
+   <address>
+      <location_name>Community United Methodist Church</location_name>
+      <line1>616 Harvey Ave</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32118</zip>
+   </address>
+   <directions>South side of Harvey Ave between S.Grandview Ave to the East and S.Wild Olive Ave to the West, North of International Speedway Blvd (US Hwy 92) and South of Main St (CR 4040)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="136">
+   <address>
+      <location_name>Windsor Apartments</location_name>
+      <line1>524 S Beach St</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>West side of Beach St (CR 4011), North of Cedar St. and South of Loomis Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="137">
+   <address>
+      <location_name>John H Dickerson Community Center</location_name>
+      <line1>308 S Martin Luther King Blvd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>On the West side of S.Martin Luther King Blvd(CR 4035),North of Loomis Ave. And South of Orange Ave (CR 4050).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="138">
+   <address>
+      <location_name>Beville Road Church of Christ</location_name>
+      <line1>850 Beville Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>On the North side of Beville Rd (SR 400), between Nova Rd (SR 5A) to the West and Margina Ave. to the East</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="139">
+   <address>
+      <location_name>Colonial Colony South</location_name>
+      <line1>1275 Beville Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32119</zip>
+   </address>
+   <directions>East of Clyde Morris Blvd (CR 483), onto Beville Rd (SR 400), Turn South onto Colonial Dr, approximately 12 blocks to the South. Poll located in Recreation Lounge.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="140">
+   <address>
+      <location_name>DB Christian &amp; Missionary Alliance Church</location_name>
+      <line1>1250 Beville Rd</line1>
+      <city>Daytona Beach</city>
+      <state>FL</state>
+      <zip>32114</zip>
+   </address>
+   <directions>On the North side of Beville Rd (SR 400) East of S.Clyde Morris Blvd (CR 483), West of S. Nova Rd (SR 5A)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="141">
+   <address>
+      <location_name>South Daytona Christian Church</location_name>
+      <line1>2121 Kenilworth Ave</line1>
+      <city>South Daytona</city>
+      <state>FL</state>
+      <zip>32119</zip>
+   </address>
+   <directions>East off of Kenilworth Ave, Big Tree Rd (CR 4072) to the North and Ridge Blvd to the South</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="142">
+   <address>
+      <location_name>Piggotte Community Center</location_name>
+      <line1>504 Big Tree Rd</line1>
+      <city>South Daytona</city>
+      <state>FL</state>
+      <zip>32119</zip>
+   </address>
+   <directions>North off of Big Tree Rd (CR 4072), two blocks West of Ridgewood Ave (US Hwy 1)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="143">
+   <address>
+      <location_name>Westminster by the Sea Pres. Church</location_name>
+      <line1>3221 S Peninsula Dr</line1>
+      <city>Daytona Beach Shores</city>
+      <state>FL</state>
+      <zip>32118</zip>
+   </address>
+   <directions>East side of Peninsula Dr, one block South of Westminster Ave, 6 blocks North of the Dunlawton bridge</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="144">
+   <address>
+      <location_name>Daytona Bch Shores Community Center</location_name>
+      <line1>3048 S Atlantic Ave</line1>
+      <city>Daytona Beach Shores</city>
+      <state>FL</state>
+      <zip>32118</zip>
+   </address>
+   <directions>West side of Atlantic Ave (SR A1A), approximately 2 miles North of the Dunlawton bridge and approximately 5 miles South of the Silver Beach bridge</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="145">
+   <address>
+      <location_name>Epiphany Catholic Church</location_name>
+      <line1>201 Lafayette St</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>One block West of Ridgewood Ave (US Hwy 1), approximately one mile South of Dunlawton Ave (SR 421), West onto Flemming Ave, North of Commonwealth Blvd approximately 8 blocks</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="146">
+   <address>
+      <location_name>Port Orange Gym</location_name>
+      <line1>4655 City Center Cir</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32129</zip>
+   </address>
+   <directions>North off Dunlawton Ave (SR 421) onto City Center Parkway or east off of Clyde Morris Blvd (CR 483) onto City Center Blvd Or South off of Herbert St onto City Center Cir</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="147">
+   <address>
+      <location_name>Port Orange Presbyterian Church</location_name>
+      <line1>4662 Clyde Morris Blvd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32129</zip>
+   </address>
+   <directions>West off of Clyde Morris Blvd (CR 483), South of Herbert St and North of City Center Blvd/Willow Run Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="148">
+   <address>
+      <location_name>Spruce Creek Presbyterian Church</location_name>
+      <line1>1705 Taylor Rd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32128</zip>
+   </address>
+   <directions>From Taylor Rd, South on Beccaro Blvd, approximately one mile West of I-95</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="149">
+   <address>
+      <location_name>South Daytona Christian Church</location_name>
+      <line1>2121 Kenilworth Ave</line1>
+      <city>South Daytona</city>
+      <state>FL</state>
+      <zip>32119</zip>
+   </address>
+   <directions>East side of Kenilworth Ave, South of Big Tree Rd (CR 4072) and North of Ridge Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="150">
+   <address>
+      <location_name>Port Orange United Church of Christ</location_name>
+      <line1>651 Taylor Rd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>West off Country Ln, North off of Taylor Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="151">
+   <address>
+      <location_name>All Saints Lutheran Church</location_name>
+      <line1>751 Dunlawton Ave</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>East of Nova Rd (SR 5a), West onto Oak St off of Dunlawton Ave (SR 421), approximately two miles West of Ridgewood Ave (US Hwy 1)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="152">
+   <address>
+      <location_name>Parkwood Mobile Home Comm North</location_name>
+      <line1>4000 S Nova Rd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>South off of Nova Rd (SR 5A), West of Spruce Creek Rd and approximately one mile Southeast of Dunlawton Ave (SR 421)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="153">
+   <address>
+      <location_name>Intl Brotherhood Electric Workers</location_name>
+      <line1>5901 S Williamson Blvd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32128</zip>
+   </address>
+   <directions>South off of Taylor Rd (CR 421) onto Airport Rd, West of Interstate 95</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="154">
+   <address>
+      <location_name>Ponce Inlet Community Center</location_name>
+      <line1>4670 S Peninsula Dr</line1>
+      <city>Ponce Inlet</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>West off of Peninsula Dr, also West of Atlantic Ave (CR 4075), Cindy Ln to the South and Harbour Village Blvd to the North</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="155">
+   <address>
+      <location_name>Parkwood Mobile Home Comm- South</location_name>
+      <line1>601 Azalea Cir</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>North on Spruce Creek Rd,West to Taylor Rd, North onto Greenway Dr
+The clubhouse is directly in front of you
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="156">
+   <address>
+      <location_name>Cypress Head Homeowners Assn</location_name>
+      <line1>6251 Palm Vista St</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32128</zip>
+   </address>
+   <directions>South off Airport Rd onto Cypress Springs Pkwy or North off of Pioneer Trl (CR 4118) onto Cypress Springs Pkwy</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="157">
+   <address>
+      <location_name>Crane Lakes Golf &amp; Country Club</location_name>
+      <line1>1850 Crane Lakes Blvd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32128</zip>
+   </address>
+   <directions>Approximately two miles West of Interstate 95 on Taylor Rd (CR 421) or North on Tomoka Farms Rd (CR 415), East onto Taylor Rd, North onto Crane Lakes Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="158">
+   <address>
+      <location_name>Port Orange Christian Church</location_name>
+      <line1>904 Taylor Rd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>South off of Taylor Rd, West of Clyde Morris Blvd (CR 483), Southeast of Dunlawton Ave (SR 421)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="159">
+   <address>
+      <location_name>Piggotte Community Center</location_name>
+      <line1>504 Big Tree Rd</line1>
+      <city>South Daytona</city>
+      <state>FL</state>
+      <zip>32119</zip>
+   </address>
+   <directions>Turn North onto James St. off of Big Tree Rd (CR 4072),Poll is two blocks West of S.Ridgewood Ave (US Hwy 1)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="160">
+   <address>
+      <location_name>Westminster by the Sea Pres. Church</location_name>
+      <line1>3221 S Peninsula Dr</line1>
+      <city>Daytona Beach Shores</city>
+      <state>FL</state>
+      <zip>32118</zip>
+   </address>
+   <directions>On the East side of Peninsula Dr, 6 blocks North of the Dunlawton Blvd.,South of Westminster Ave.      </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="161">
+   <address>
+      <location_name>Daytona Bch Shores Community Center</location_name>
+      <line1>3048 S Atlantic Ave</line1>
+      <city>Daytona Beach Shores</city>
+      <state>FL</state>
+      <zip>32118</zip>
+   </address>
+   <directions>West side of Atlantic Ave (SR A1A), approximately 2 miles North of the Dunlawton Blvd. and approximately 5 miles South of the Silver Beach Ave.(CR 4050)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="162">
+   <address>
+      <location_name>Epiphany Catholic Church</location_name>
+      <line1>201 Lafayette St</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>Approximately one mile South of Dunlawton Ave (SR 421) along  Ridgewood Ave (US Hwy 1), Turn West onto Flemming Ave go 1 Block to poll. Approximately 8 blocks.North of Commonwealth Blvd </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="163">
+   <address>
+      <location_name>Port Orange Gym</location_name>
+      <line1>4655 City Center Cir</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32129</zip>
+   </address>
+   <directions>North off Dunlawton Ave (SR 421) onto City Center Parkway or east off of Clyde Morris Blvd (CR 483) onto City Center Blvd Or South off of Herbert St onto City Center Cir</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="164">
+   <address>
+      <location_name>Port Orange Presbyterian Church</location_name>
+      <line1>4662 Clyde Morris Blvd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32129</zip>
+   </address>
+   <directions>West side of Clyde Morris Blvd (CR 483), South of Herbert St and North of City Center Blvd/Willow Run Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="165">
+   <address>
+      <location_name>Spruce Creek Presbyterian Church</location_name>
+      <line1>1705 Taylor Rd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32128</zip>
+   </address>
+   <directions>South side Taylor Rd(CR 421), approximately one mile West of   I-95</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="166">
+   <address>
+      <location_name>Port Orange United Church of Christ</location_name>
+      <line1>651 Taylor Rd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>West of Clyde Morris Blvd. on the North side Taylor Rd.at its intersection with Country Ln.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="167">
+   <address>
+      <location_name>All Saints Lutheran Church</location_name>
+      <line1>751 Dunlawton Ave</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>East of Nova Rd (SR 5A), Turn West onto Oak St off of Dunlawton Ave (SR 421), approximately two miles West of Ridgewood Ave (US Hwy 1)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="168">
+   <address>
+      <location_name>Parkwood Mobile Home Comm North</location_name>
+      <line1>4000 S Nova Rd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>Turn South onto Palm Blvd off of Nova Rd (SR 5A) One block West of Spruce Creek Rd and approximately one mile Southeast of Dunlawton Ave (SR 421)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="169">
+   <address>
+      <location_name>Intl Brotherhood Electric Workers</location_name>
+      <line1>5901 S Williamson Blvd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32128</zip>
+   </address>
+   <directions>Turn South onto S. Williamson Blvd of off Taylor Rd.(CR 421), One Block West of Interstate 95</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="170">
+   <address>
+      <location_name>Ponce Inlet Community Center</location_name>
+      <line1>4670 S Peninsula Dr</line1>
+      <city>Ponce Inlet</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>West side of Peninsula Dr, Harbour Village Blvd to the North and Oceanview Ave to the South. Poll is one block due West of         S. Atlantic Ave.(CR 4075)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="171">
+   <address>
+      <location_name>Parkwood Mobile Home Comm- South</location_name>
+      <line1>601 Azalea Cir</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>North on Spruce Creek Rd, Turn West onto Taylor Rd, Then North onto Greenway Dr.
+The clubhouse is directly in front of you</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="172">
+   <address>
+      <location_name>Cypress Head Homeowners Assn</location_name>
+      <line1>6251 Palm Vista St</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32128</zip>
+   </address>
+   <directions>Turn South onto Cypress Springs Pkwy off of Airport Rd.or Turn North onto Cypress Springs Pkwy off of Pioneer Trl (CR 4118) Then East onto Palm Vista St.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="173">
+   <address>
+      <location_name>Crane Lakes Golf &amp; Country Club</location_name>
+      <line1>1850 Crane Lakes Blvd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32128</zip>
+   </address>
+   <directions>Approximately two miles West of Interstate 95 on Taylor Rd (CR 421) or South on Tomoka Farms Rd (CR 415), Turn East onto Taylor Rd, Then North onto Crane Lakes Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="174">
+   <address>
+      <location_name>Port Orange Christian Church</location_name>
+      <line1>904 Taylor Rd</line1>
+      <city>Port Orange</city>
+      <state>FL</state>
+      <zip>32127</zip>
+   </address>
+   <directions>Turn South off of Dunlawton Blvd(SR 421) onto Taylor Branch Rd Poll is on South side of Taylor Rd, Just West of Clyde Morris Blvd (CR 483),</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="175">
+   <address>
+      <location_name>Sugar Mill Country Club</location_name>
+      <line1>100 Club House Cir</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>North off of Pioneer Trl (CR 4118) onto Sugar Mill Dr, North onto Clubhouse Blvd or Southwest on Turnbull Bay Rd (CR 4093) and South onto Pioneer Trl, North onto Clubhouse Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="176">
+   <address>
+      <location_name>New Smyrna Beach Garden Club</location_name>
+      <line1>2000 Turnbull Bay Rd</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>Going North on Turnbull Bay Rd, polling location is on East side of road, between Industrial Park Ave to the South and Sunset Dr to the North</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="177">
+   <address>
+      <location_name>Coronado Civic Center</location_name>
+      <line1>223 Flagler Ave</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32169</zip>
+   </address>
+   <directions>South off of Flagler Ave between Peninsula Ave to the West and Pine St to the East</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="178">
+   <address>
+      <location_name>Lighthouse Worship Center</location_name>
+      <line1>190 Wallace Rd</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>North off of Canal St (SR 44) onto Wallace Rd (CR 4118), one block to Jungle Rd., Left onto Jungle Rd, left again back onto Wallace Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="179">
+   <address>
+      <location_name>United Church Of Christ</location_name>
+      <line1>203 Washington St</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions> East on SR 44 left  onto Canal St continue East to N Dixie Freeway(US Hwy1), North on N Dixie Freeway, two blocks, East onto Washington St , three blocks to Church on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="180">
+   <address>
+      <location_name>New Smyrna Beach Regional Library</location_name>
+      <line1>1001 S Dixie Frwy</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>South on S Dixie Freeway between 2nd and 3rd street located on the east side of the Freeway</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="181">
+   <address>
+      <location_name>Our Lady Star Sea Catholic Church</location_name>
+      <line1>4000 S Atlantic Ave</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32169</zip>
+   </address>
+   <directions>South off of Saxon Dr (CR 4133) or Atlantic Ave (CR A1A) with Sandpiper Ave to the North, East approximately 4 blocks, and Matthews Ave to the South</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="182">
+   <address>
+      <location_name>Silver Sands Civic Center</location_name>
+      <line1>5 Palm Dr</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32169</zip>
+   </address>
+   <directions>West off of Atlantic Ave (CR A1A), Northwest or Southwest onto Saxon Dr then South onto Palm Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="183">
+   <address>
+      <location_name>Fraternal Order of Police Lodge #40</location_name>
+      <line1>471 Old Mission Rd</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>East off of Old Mission Rd (CR 4137), just South of SR 44 (Lytle Ave), Findley St to the North and Mission Dr to the South</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="184">
+   <address>
+      <location_name>Space Coast Baptist Church</location_name>
+      <line1>223 N Samsula Dr</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>On SR 44 eastbound, turn North onto Samsula Dr it willl be on the east side of the road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="185">
+   <address>
+      <location_name>Sugar Mill Country Club</location_name>
+      <line1>100 Club House Cir</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>North onto Sugar Mill Dr. off of Pioneer Trl (CR 4118) then follow Sugar Mill Dr. to its intersection with Clubhouse Blvd then to Clubhouse Cir. and to the Poll</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="186">
+   <address>
+      <location_name>New Smyrna Beach Garden Club</location_name>
+      <line1>2000 Turnbull Bay Rd</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>Polling location is on East side Turnbull Bay Rd, located between Industrial Park Ave to the South and Sunset Dr to the North</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="187">
+   <address>
+      <location_name>Coronado Civic Center</location_name>
+      <line1>223 Flagler Ave</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32169</zip>
+   </address>
+   <directions>South side of Flagler Ave between Peninsula Ave to the West and Pine St to the East</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="188">
+   <address>
+      <location_name>Lighthouse Worship Center</location_name>
+      <line1>190 Wallace Rd</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>North onto Wallace Rd(CR 4118) off of Canal St (SR 44) one block North to Jungle Rd., Left onto Jungle Rd, left again back onto Wallace Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="189">
+   <address>
+      <location_name>United Church Of Christ</location_name>
+      <line1>203 Washington St</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions> East on SR 44 left  onto Canal St continue East to N Dixie Freeway(US Hwy1), North on N Dixie Freeway, two blocks, East onto Washington St , three blocks to Church on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="190">
+   <address>
+      <location_name>New Smyrna Beach Regional Library</location_name>
+      <line1>1001 S Dixie Frwy</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>South on S Dixie Freeway between 2nd and 3rd streets located on the East side of the S. Dixie Freeway.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="191">
+   <address>
+      <location_name>Our Lady Star Sea Catholic Church</location_name>
+      <line1>4000 S Atlantic Ave</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32169</zip>
+   </address>
+   <directions>West side Atlantic Ave (CR A1A) with E.30th Ave to the North, and Nassau Ct. to the South. From Saxon Dr.(CR 4133) go East on Schoolway Ave, Poll on South side of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="192">
+   <address>
+      <location_name>Silver Sands Civic Center</location_name>
+      <line1>5 Palm Dr</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32169</zip>
+   </address>
+   <directions>West off of S. Atlantic Ave (CR A1A), onto Saxon Dr then turn South onto Palm Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="193">
+   <address>
+      <location_name>Fraternal Order of Police Lodge #40</location_name>
+      <line1>471 Old Mission Rd</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>South off of SR 44 onto Old Mission Rd (CR 4137) poll on East side of road. Findley St to the North and Mission Dr to the South</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="194">
+   <address>
+      <location_name>Space Coast Baptist Church</location_name>
+      <line1>223 N Samsula Dr</line1>
+      <city>New Smyrna Beach</city>
+      <state>FL</state>
+      <zip>32168</zip>
+   </address>
+   <directions>On SR 44 eastbound, turn North onto Samsula Dr. North 1 block, poll is on East side of the road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="195">
+   <address>
+      <location_name>Edgewater Council Chambers</location_name>
+      <line1>102 N Riverside Dr</line1>
+      <city>Edgewater</city>
+      <state>FL</state>
+      <zip>32132</zip>
+   </address>
+   <directions>East of S.Ridgewood Ave(US Hwy1) and West of Riverside Dr on the Northeast corner of E Park Ave (CR 4136) and Riverside Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="196">
+   <address>
+      <location_name>Friendship Community Church</location_name>
+      <line1>2108 Hibiscus Dr</line1>
+      <city>Edgewater</city>
+      <state>FL</state>
+      <zip>32141</zip>
+   </address>
+   <directions>West off of Hibiscus Dr, South of Indian River Blvd (SR 442) and North of 22nd St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="197">
+   <address>
+      <location_name>FL Shores Property Owners Clubhouse</location_name>
+      <line1>2932 Lime Tree Dr</line1>
+      <city>Edgewater</city>
+      <state>FL</state>
+      <zip>32141</zip>
+   </address>
+   <directions>West off of Lime Tree Dr, between Kumquat Dr to the East and Mango Dr to the West, North of Roberts Rd/30th St, South of 29th St, West of Hibiscus Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="198">
+   <address>
+      <location_name>Edgewater Landing Clubhouse</location_name>
+      <line1>601 Homeport Ter</line1>
+      <city>Edgewater</city>
+      <state>FL</state>
+      <zip>32141</zip>
+   </address>
+   <directions>East off of US Hwy 1 (Ridgewood Ave) onto Homeport Ter, Roberts Rd to the South approximately 1/2 mile</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="199">
+   <address>
+      <location_name>First Baptist Church</location_name>
+      <line1>192 E Halifax Ave</line1>
+      <city>Oak Hill</city>
+      <state>FL</state>
+      <zip>32759</zip>
+   </address>
+   <directions>East off of US Hwy 1 onto Halifax Ave (CR 4164), just West of Gaines St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="200">
+   <address>
+      <location_name>Oak Hill City Hall</location_name>
+      <line1>234 S US Hwy 1</line1>
+      <city>Oak Hill</city>
+      <state>FL</state>
+      <zip>32759</zip>
+   </address>
+   <directions>West off of US Hwy 1, South of Church St and North of Putnam Grove Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="201">
+   <address>
+      <location_name>Edgewater Council Chambers</location_name>
+      <line1>102 N Riverside Dr</line1>
+      <city>Edgewater</city>
+      <state>FL</state>
+      <zip>32132</zip>
+   </address>
+   <directions>East of S.Ridgewood Ave(US Hwy1) and West of Riverside Dr on the Northeast corner of E Park Ave (CR 4136) and Riverside Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="202">
+   <address>
+      <location_name>Friendship Community Church</location_name>
+      <line1>2108 Hibiscus Dr</line1>
+      <city>Edgewater</city>
+      <state>FL</state>
+      <zip>32141</zip>
+   </address>
+   <directions>South on Hibiscus Dr. off of W. Indian River Blvd (SR 442) poll is on West side of road just North of 22nd St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="203">
+   <address>
+      <location_name>FL Shores Property Owners Clubhouse</location_name>
+      <line1>2932 Lime Tree Dr</line1>
+      <city>Edgewater</city>
+      <state>FL</state>
+      <zip>32141</zip>
+   </address>
+   <directions>West side of Lime Tree Dr, North of Roberts Rd/30th St between Kumquat Dr to the East and Mango Dr to the West.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="204">
+   <address>
+      <location_name>Edgewater Landing Clubhouse</location_name>
+      <line1>601 Homeport Ter</line1>
+      <city>Edgewater</city>
+      <state>FL</state>
+      <zip>32141</zip>
+   </address>
+   <directions>East onto Homeport Ter off of S. Ridgewood Ave (US Hwy1)  North of Roberts Rd approximately 1/2 mile.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="205">
+   <address>
+      <location_name>First Baptist Church</location_name>
+      <line1>192 E Halifax Ave</line1>
+      <city>Oak Hill</city>
+      <state>FL</state>
+      <zip>32759</zip>
+   </address>
+   <directions>East onto E Halifax Ave (CR 4164) off of US Hwy 1. Poll is on the Northwest corner of E Halifax Ave and N Gaines St.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="206">
+   <address>
+      <location_name>Oak Hill City Hall</location_name>
+      <line1>234 S US Hwy 1</line1>
+      <city>Oak Hill</city>
+      <state>FL</state>
+      <zip>32759</zip>
+   </address>
+   <directions>West side of US Hwy 1, South of W. Church St and North of N. Putnam Grove Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

@@ -1,0 +1,1342 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Pasco County, FL</name>
+  <vip_id>12101</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>First Baptist Church Dade City</location_name>
+      <line1>37511 Church Ave</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33525</zip>
+   </address>
+   <directions>North-side of Church Ave, South-side of Meridian Ave, East of 14th St, West of 13th St                                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Trilby Lodge No.141 F &amp; AM</location_name>
+      <line1>21049 Old Trilby Rd</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33523</zip>
+   </address>
+   <directions>West-side of Old Trilby Rd, South of US Highway 98, North of CR 575 (Trilby Rd), East of Withlacoochee State Trail                                                                                      </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Pasco-Hernando State College</location_name>
+      <line1>36727 Blanton Rd</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33523</zip>
+   </address>
+   <directions>East-side of Hwy 41, West of Lock St and 21st Street intersection</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Shepherd of the Hills Lutheran Church</location_name>
+      <line1>37015 Orange Valley Ln</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33525</zip>
+   </address>
+   <directions>North-side of Orange Valley Ln, South of Clinton Av, East of Ft King Rd                                                                                                                                 </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Country Aire Manor</location_name>
+      <line1>10249 US Hwy 98</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33525</zip>
+   </address>
+   <directions>South-side of US 98, West of the Overpass</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Alice Hall Community Center</location_name>
+      <line1>38116 5th Ave</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33542</zip>
+   </address>
+   <directions>South-side of 5th Ave, West-side of 4th St, East-side of Zephyr Park                                                                                                                                    </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Bridgeway Church</location_name>
+      <line1>30660 Wells Rd</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33545</zip>
+   </address>
+   <directions>North on Curly Rd, left onto Wells Rd, polling place on the left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Land O'Lakes Community Building</location_name>
+      <line1>5401 Land O' Lakes Blvd</line1>
+      <city>Land O' Lakes</city>
+      <state>FL</state>
+      <zip>34639</zip>
+   </address>
+   <directions>South-side of US Hwy 41 at the County Park, North of Hopson Rd, South of Ehren Cutoff                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Darby Community Church</location_name>
+      <line1>14745 Bellamy Brothers Blvd</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33525</zip>
+   </address>
+   <directions>West-side of Bellamy Bros Blvd (CR 581), North of Darby Rd, just South of St Joe Rd (CR 578)                                                                                                            </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>San Antonio City Hall</location_name>
+      <line1>32819 Pennsylvania Ave</line1>
+      <city>San Antonio</city>
+      <state>FL</state>
+      <zip>33576</zip>
+   </address>
+   <directions>North-side of Pennsylvania Ave, next to Fire Station, across from the Post Office                                                                                                                       </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Holy Trinity Lutheran Church</location_name>
+      <line1>20735 Leonard Rd</line1>
+      <city>Lutz</city>
+      <state>FL</state>
+      <zip>33558</zip>
+   </address>
+   <directions>North-side of Leonard Rd, West of Land O'Lakes Blvd (US Hwy 41), South of SR 54</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Wilderness Lake Church</location_name>
+      <line1>15511 US HWY 41</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34610</zip>
+   </address>
+   <directions>Direction from SR 52, take US Hwy 41 north 4.5 miles PCT 12 on west side of US 41.
+Direction from Pasco Hernando County line, take US Hwy 41 south 4 miles PCT 12 on west side of US Hwy 41
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Sea Ranch Civic Association</location_name>
+      <line1>13711 Veronica Dr</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34667</zip>
+   </address>
+   <directions>Corner of Veronica Dr. and Beverly Dr. West of US 19 off of Sea Ranch Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>Idlewild Church at Odessa</location_name>
+      <line1>1234 Gunn Hwy</line1>
+      <city>Odessa</city>
+      <state>FL</state>
+      <zip>33556</zip>
+   </address>
+   <directions>North of Byrd Dr, South of SR 54, East of Gunn Hwy</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Asbury United Methodist Church</location_name>
+      <line1>4204 Thys Rd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>East-side of Thys Rd; North of SR 54, South of Trouble Creek Rd                                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Crystal Springs Community Hall</location_name>
+      <line1>1655 Partridge Blvd</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33540</zip>
+   </address>
+   <directions>Corner of SR 39 and Bay Ave, North-side of Bay Ave, West of SR 39 &amp; Partridge Blvd                                                                                                                      </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Forest Lake Clubhouse</location_name>
+      <line1>6429 Forest Lake Dr</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33540</zip>
+   </address>
+   <directions>South-side of CR 54, East of Chancey Rd                                                                                                                                                                 </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Buena Vista Manor Civic Association</location_name>
+      <line1>5112 Rosada Ave</line1>
+      <city>Holiday</city>
+      <state>FL</state>
+      <zip>34690</zip>
+   </address>
+   <directions>West of Grand Blvd, South of Darlington Rd, East of US 19</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>Fairgrounds Agricultural Bldg</location_name>
+      <line1>36722 State Road 52</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33525</zip>
+   </address>
+   <directions>East-side of SR 52, just South of Pasco High School</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Land O'Lakes Community Building</location_name>
+      <line1>5401 Land O'Lakes Blvd</line1>
+      <city>Land O'Lakes</city>
+      <state>FL</state>
+      <zip>34639</zip>
+   </address>
+   <directions>South-side of US Hwy 41 at the County Park, North of Hopson Rd, South of Ehren Cutoff</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>First Baptist Church Lacoochee</location_name>
+      <line1>21012 Bower Rd</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33523</zip>
+   </address>
+   <directions>Corner of Bower Rd &amp; Coit Rd, South of Trilacoochee Rd (CR 575), North of Cummer Rd                                                                                                                     </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Valleydale Estates Civic Center</location_name>
+      <line1>37501 Martindale Ave</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33542</zip>
+   </address>
+   <directions>South-side of Martindale Ave, South &amp; East of Ft King Rd (CR 41), North of Eiland Blvd                                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Knights of Columbus Hall</location_name>
+      <line1>5850 K Of C Dr</line1>
+      <city>Port Richey</city>
+      <state>FL</state>
+      <zip>34668</zip>
+   </address>
+   <directions>East-side of US Hwy 19 at the end of K of C Dr, South of Ridge Rd, North of Grand Blvd                                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>Williamsburg Tanglewood Club</location_name>
+      <line1>28429 Williamsburg Dr</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33543</zip>
+   </address>
+   <directions>North-side of Williamsburg Dr; East of Bruce B Downs (SR 581)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>New Port Richey Recreation Center</location_name>
+      <line1>6630 Van Buren St</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>West-side of Van Buren St, South of Massachusetts Av, North of Main St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Sea Pines Civic Association</location_name>
+      <line1>7817 Gulf Way</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34667</zip>
+   </address>
+   <directions>North-side of Gulf Way; West of US Hwy 19, East of Old Dixie Hwy</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>Shady Hills Civic Association</location_name>
+      <line1>15840 Greenglen Ln</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34610</zip>
+   </address>
+   <directions>South-side of Greenglen Ln, South of Platinum Dr, West of Shady Hills Rd, North of Crews Lake Dr                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>Holiday Lake Ests Civic Center</location_name>
+      <line1>3624 Atlantis Dr</line1>
+      <city>Holiday</city>
+      <state>FL</state>
+      <zip>34691</zip>
+   </address>
+   <directions>South-side of Atlantis Dr, East of Normandy Blvd, North of Anclote Blvd &amp; Holiday Lake Dr, West of Alt 19</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Bonita Hall-Buena Vista Trailer Pk</location_name>
+      <line1>2039 Orange Dr</line1>
+      <city>Holiday</city>
+      <state>FL</state>
+      <zip>34691</zip>
+   </address>
+   <directions>West-side of Orange Dr, West of US Hwy 19, South of Darlington Rd &amp; Lange Rd, North of Bonita Rd,                                                                                                       </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>St Vincent DePaul Parish Center</location_name>
+      <line1>4843 Mile Stretch Dr</line1>
+      <city>Holiday</city>
+      <state>FL</state>
+      <zip>34690</zip>
+   </address>
+   <directions>North-side of Mile Stretch Dr; East of US Hwy 19, West of Grand Blvd, building directly North of the Church</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Jasmine Lakes Community Club</location_name>
+      <line1>7137 Jasmine Blvd</line1>
+      <city>Port Richey</city>
+      <state>FL</state>
+      <zip>34668</zip>
+   </address>
+   <directions>East-side of US Hwy 19, North-side of Jasmine Blvd, North of Regency Blvd, South of Coventry Dr                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>Beacon Square Civic Club</location_name>
+      <line1>3741 Bradford Dr</line1>
+      <city>Holiday</city>
+      <state>FL</state>
+      <zip>34691</zip>
+   </address>
+   <directions>West-side of Bradford Dr, West of US Hwy 19, North of Moog Rd, South of SR 54                                                                                                                           </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>Gulf Harbors Civic Assn</location_name>
+      <line1>4610 Floramar Terr</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34652</zip>
+   </address>
+   <directions>South-side of Floramar Terrace, South of Marine Parkway, North of Trouble Creek Rd, West of US Hwy 19                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>Trinity Baptist Church</location_name>
+      <line1>5725 Rowan Rd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>West-side of Rowan Rd, North of Plathe Rd, South of Massachusetts Ave                                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>Asbury United Methodist Church</location_name>
+      <line1>4204 Thys Rd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>East-side of Thys Rd; North of SR 54, South of Trouble Creek Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>Rasmussen College</location_name>
+      <line1>18600 Fernview St</line1>
+      <city>Land O Lakes</city>
+      <state>FL</state>
+      <zip>34638</zip>
+   </address>
+   <directions>West of Sunlake Hwy, North of SR 54</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>New Walk Church</location_name>
+      <line1>35008 State Road 54</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33541</zip>
+   </address>
+   <directions>From Zephyrhills go west on SR54 pass Dean Dairy / Coats Road Pct will be on the left. From Wesley Chapel go East on SR54 pass Morris Bridge / Eiland Blvd Pct will be on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>Country Walk Community</location_name>
+      <line1>30400 Country Point Blvd</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33543</zip>
+   </address>
+   <directions>South-side of SR 54, East of Curley Rd (CR577)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>Knights of Columbus Hall</location_name>
+      <line1>11549 Curley Rd</line1>
+      <city>San Antonio</city>
+      <state>FL</state>
+      <zip>33576</zip>
+   </address>
+   <directions>West of Curley Rd (CR 577), South of SR 52 &amp; Sunny Skies MHP, North of McCabe Rd </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>Country Club Civic Center</location_name>
+      <line1>12707 College Hill Dr</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34667</zip>
+   </address>
+   <directions>Corner of College Hill &amp; Country Club Dr, North-side of Country Club Dr, East of US Hwy 19, North of Beacon Woods Dr, South &amp; West of Fivay Rd                                                          </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>VFW Post 4412</location_name>
+      <line1>9734 Dick St</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34669</zip>
+   </address>
+   <directions>South-side of Dick St, West of Hicks Rd &amp; Litewood St, East of Little Rd, North of SR 52, South of Hudson Ave                                                                                           </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>J. Ben Harrill Recreation Center</location_name>
+      <line1>2830 Gulf Trace Blvd</line1>
+      <city>Holiday</city>
+      <state>FL</state>
+      <zip>34691</zip>
+   </address>
+   <directions>South-side of Gulf Trace Blvd, West-side of US 19, South-side Strauber Memorial                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>Crest Ridge Gdns Community Club</location_name>
+      <line1>4806 Phoenix Ave</line1>
+      <city>Holiday</city>
+      <state>FL</state>
+      <zip>34690</zip>
+   </address>
+   <directions>South-side of Phoenix Av, West of Excalibur St, East of US Hwy 19                                                                                                                                       </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="48">
+   <address>
+      <location_name>Senate Manor Mobile Park</location_name>
+      <line1>6905 Clemens Blvd</line1>
+      <city>Port Richey</city>
+      <state>FL</state>
+      <zip>34668</zip>
+   </address>
+   <directions>North-side of Clemens Blvd, West of US Hwy 19, South of SR 52                                                                                                                                           </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="49">
+   <address>
+      <location_name>Faith Baptist Church</location_name>
+      <line1>9230 Ridge Rd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34654</zip>
+   </address>
+   <directions>West-side of Sycamore Dr at Ridge Rd; South of Ridge Rd, East of Little Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="50">
+   <address>
+      <location_name>Emmanuel Baptist Church</location_name>
+      <line1>7831 Gulf Highlands Dr</line1>
+      <city>Port Richey</city>
+      <state>FL</state>
+      <zip>34668</zip>
+   </address>
+   <directions>North-side of Gulf Highlands Dr at the end of the road; East of Zimmerman Rd, South of SR 52, North of Ranch Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="51">
+   <address>
+      <location_name>Westminster Presbyterian Church</location_name>
+      <line1>4125 US Highway 19</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34652</zip>
+   </address>
+   <directions>South-side of Glissade on Church Dr, South of Canna Lily Dr, West of US Hwy 19                                                                                                                          </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="52">
+   <address>
+      <location_name>Calvary Baptist Church</location_name>
+      <line1>4724 Fox Ridge Blvd</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33543</zip>
+   </address>
+   <directions>Corner of SR 54 &amp; Fox Ridge Blvd; South of SR 54, East of Fox Ridge Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="53">
+   <address>
+      <location_name>River Ridge Golf Club</location_name>
+      <line1>11022 Tee Time Cir</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34654</zip>
+   </address>
+   <directions>West-side of Tee Time Circle; South of DeCubellis Rd, East of River Ridge Blvd, West of Town Center Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="54">
+   <address>
+      <location_name>Masonic Lodge F.&amp; A.M. #146</location_name>
+      <line1>6319 Louisiana Ave</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>North-side of Louisiana Ave, South of Main St, East of Madison St, West of Congress St                                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="55">
+   <address>
+      <location_name>BPOE Elks #2284</location_name>
+      <line1>7201 Congress St</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>North of Massachusetts Ave on Congress St, South of Ridge Rd &amp; Pine Hill Rd                                                                                                                             </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="56">
+   <address>
+      <location_name>Beacon Woods Civic Center</location_name>
+      <line1>12440 Clock Tower Pky</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34667</zip>
+   </address>
+   <directions>North-side of Clock Tower Pkwy, East of US Hwy 19 to Beacon Woods Dr, North of SR 52 to Majestic Blvd, East of Beacon Woods Dr, West of Majestic Blvd                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="57">
+   <address>
+      <location_name>Regency Park Civic Club</location_name>
+      <line1>10240 Regency Park Blvd</line1>
+      <city>Port Richey</city>
+      <state>FL</state>
+      <zip>34668</zip>
+   </address>
+   <directions>Just past Brier Way on the North-side of Regency Park Blvd;  East of US Hwy 19, North of Embassy Blvd, West of Little Rd, South of Jasmine Blvd                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="58">
+   <address>
+      <location_name>Salvation Army Fellowship Hall</location_name>
+      <line1>7745 Ridge Rd</line1>
+      <city>Port Richey</city>
+      <state>FL</state>
+      <zip>34668</zip>
+   </address>
+   <directions>North-side of Ridge Rd,  South of Embassy Dr, East of US Hwy 19, West of Regency Park Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="59">
+   <address>
+      <location_name>Crystal Lakes Clubhouse</location_name>
+      <line1>34749 State Road 54</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33541</zip>
+   </address>
+   <directions>East-side of Lake Crystal Blvd at the end of the road; North of SR 54, East of Morris Bridge Rd &amp; Eiland Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="60">
+   <address>
+      <location_name>Tropical Acres Clubhouse</location_name>
+      <line1>3221 Paradise Way</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33541</zip>
+   </address>
+   <directions>South-side of Paradise Way; West of US Hwy 301, South of Chancey Rd, North of Zephyrhills Correctional Institute</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="61">
+   <address>
+      <location_name>Cross Point Church</location_name>
+      <line1>5730 Elena Dr</line1>
+      <city>Holiday</city>
+      <state>FL</state>
+      <zip>34690</zip>
+   </address>
+   <directions>Corner of Elena Dr and Bahia Av, East of Grand Blvd, South of SR 54</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="62">
+   <address>
+      <location_name>Colony Cove Recreation Hall</location_name>
+      <line1>5203 Travelers Tree Dr</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>North-end of Travelers Tree Dr; North of Cecelia Dr, East of Madison St, West of Rowan Rd                                                                                                               </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="63">
+   <address>
+      <location_name>Timber Oaks - The Oaks Club</location_name>
+      <line1>8425 Ponderosa Ave</line1>
+      <city>Port Richey</city>
+      <state>FL</state>
+      <zip>34668</zip>
+   </address>
+   <directions>North-side of the South-end of Ponderosa Ave (Ponderosa makes a circle); North of Jasmine Blvd on Maricopa Ave, West of Little Rd on Ponderosa Ave, South of SR 52 on LaMadera Blvd                     </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="64">
+   <address>
+      <location_name>Finnish-American Club</location_name>
+      <line1>6016 Delaware Ave</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>South-side of Delaware Ave, East-side of Madison St, South of Main St, North of Louisana Ave                                                                                                            </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="65">
+   <address>
+      <location_name>Millpond Clubhouse</location_name>
+      <line1>7729 Morningdale Dr</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>West-side of Old Millpond Rd; North of SR 54, South of Trouble Creek Rd, East of Rowan Rd, West of Little Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="66">
+   <address>
+      <location_name>Quail Hollow - Red and Card Room</location_name>
+      <line1>6225 Old Pasco Rd</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33544</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="67">
+   <address>
+      <location_name>Country Aire Ests Clubhouse</location_name>
+      <line1>38130 McDonald St</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33525</zip>
+   </address>
+   <directions>South-side of McDonald St on Patrick St; East of US Hwy 301, South of Morningside Dr, North of Clinton Ave                                                                                              </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="68">
+   <address>
+      <location_name>Betmar Acres Clubhouse #3</location_name>
+      <line1>5512 Apache St</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33541</zip>
+   </address>
+   <directions>East-side of Apache St; East of Dean Dairy Rd on Strand Dr to Apache St, North of SR 54, South of Eiland Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="69">
+   <address>
+      <location_name>Chester McKay VFW Hall #7987</location_name>
+      <line1>7445 Chester McKay Dr</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>East-end of Chester McKay Dr off of Seven Springs Blvd; North of Perrine Ranch Rd, South of Mitchell Ranch Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="70">
+   <address>
+      <location_name>New Lakes of Regency Park Civic Asn</location_name>
+      <line1>8330 Civic Dr</line1>
+      <city>Port Richey</city>
+      <state>FL</state>
+      <zip>34668</zip>
+   </address>
+   <directions>West-side of Little Rd,  North of Embassy Blvd, South of Fox Hollow Dr </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="71">
+   <address>
+      <location_name>Holiday Free Methodist Church</location_name>
+      <line1>5330 Whippoorwill Dr</line1>
+      <city>Holiday</city>
+      <state>FL</state>
+      <zip>34690</zip>
+   </address>
+   <directions>North on Grand Blvd, left on Whippoorwill, polling place on the left or South on Grand Blvd, right on Whippoorwill, polling place on the right</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="72">
+   <address>
+      <location_name>Hudson Library Community Room</location_name>
+      <line1>8012 Library Rd</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34667</zip>
+   </address>
+   <directions>South-east side of Library Rd; North of Fivay Rd, South of Hudson Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="73">
+   <address>
+      <location_name>Emmanuel Lutheran Church</location_name>
+      <line1>6205 23rd St</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33542</zip>
+   </address>
+   <directions>West-side of 23rd St; South of SR 54                                                                                                                                                                    </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="74">
+   <address>
+      <location_name>The Groves Clubhouse</location_name>
+      <line1>7924 Melogold Cir</line1>
+      <city>Land O Lakes</city>
+      <state>FL</state>
+      <zip>34637</zip>
+   </address>
+   <directions>South-side of Melogold Circle; East of US Hwy 41                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="75">
+   <address>
+      <location_name>New Hope Missionary Baptist Church</location_name>
+      <line1>14236 County Line Rd</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34667</zip>
+   </address>
+   <directions>South-side of County Line Rd, East of East Rd, West of Shady Hills Rd                                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="76">
+   <address>
+      <location_name>First Presbyterian Church Pt Richey</location_name>
+      <line1>7540 Ridge Rd</line1>
+      <city>Port Richey</city>
+      <state>FL</state>
+      <zip>34668</zip>
+   </address>
+   <directions>South-side of Ridge Rd (West of Chasco School Complex); East of Regency Park Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="77">
+   <address>
+      <location_name>Lexington Oaks Community Center</location_name>
+      <line1>26304 Lexington Oaks Blvd</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33544</zip>
+   </address>
+   <directions>South-side of Lexington Oaks Blvd; West of SR 54</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="78">
+   <address>
+      <location_name>St. Leo Town Hall</location_name>
+      <line1>34544 State Road 52</line1>
+      <city>St Leo</city>
+      <state>FL</state>
+      <zip>33525</zip>
+   </address>
+   <directions>South-side of SR 52; West of Shakespeare Trail, East of St Leo Golf &amp; Country Club, across from Lake Jovita                                                                                             </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="79">
+   <address>
+      <location_name>Pasco County Facilities</location_name>
+      <line1>7220 Osteen Rd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34653</zip>
+   </address>
+   <directions>East on Massachusetts, Left on O'Steen, polling place on the right; West on Massachusetts, Right on O'Steen, polling place is on the right</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="80">
+   <address>
+      <location_name>Tampa Bay Golf &amp; Country Club</location_name>
+      <line1>11245 Old Tampa Bay Dr</line1>
+      <city>San Antonio</city>
+      <state>FL</state>
+      <zip>33576</zip>
+   </address>
+   <directions>Corner of Princeville &amp; Old Tampa Bay Dr, West-side of Old Tampa Bay Dr; South of SR 52, West of I-75</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="81">
+   <address>
+      <location_name>Veterans Memorial Park Gym</location_name>
+      <line1>14333 Hicks Rd</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34669</zip>
+   </address>
+   <directions>West-side of Hicks Rd; North of Hudson Ave, South of New York Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="82">
+   <address>
+      <location_name>Heritage Lake Clubhouse</location_name>
+      <line1>9151 Heritage Lake Blvd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>North-side of Heritage Lake Blvd; East of Little Rd, South of Rancho Del Rio Dr, North of SR 54                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="83">
+   <address>
+      <location_name>Sacred Heart Catholic Church</location_name>
+      <line1>32145 Saint Joe Rd</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33525</zip>
+   </address>
+   <directions>North-side of St. Joe Rd; West of Jessamine Rd, East of Lake Iola Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="84">
+   <address>
+      <location_name>Concourse Council</location_name>
+      <line1>15325 Alric Pottberg Rd</line1>
+      <city>Spring Hill</city>
+      <state>FL</state>
+      <zip>34610</zip>
+   </address>
+   <directions>North on Alric Pottberg Rd off of SR52, East of Hays Rd, West of the Suncoast Parkway</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="85">
+   <address>
+      <location_name>VFW Post 6180</location_name>
+      <line1>11551 Osceola Dr</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34654</zip>
+   </address>
+   <directions>West-side of Osceola Dr; South-east of Chicago Ave, South of SR 52, North of Minneola Ave, East of Little Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="86">
+   <address>
+      <location_name>Heritage Pines Country Club</location_name>
+      <line1>11524 Scenic Hills Blvd</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34667</zip>
+   </address>
+   <directions>South-side of Scenic Hills Blvd; east of Grand Club Dr, East of US Hwy 19, South of County Line Rd (CR 578) on Grand Club Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="87">
+   <address>
+      <location_name>Heritage Springs Clubhouse</location_name>
+      <line1>11345 Robert Trent Jones Pky</line1>
+      <city>Trinity</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>North-side of Robert Trent Jones Pkwy; East of Little Rd; South of SR 54 &amp; Mitchell Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="88">
+   <address>
+      <location_name>Timber Lake Ests Clubhouse</location_name>
+      <line1>34301 Countryside Dr</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33543</zip>
+   </address>
+   <directions>West-end of Countryside Dr; South of SR 54 &amp; Chancey Rd, West of Morris Bridge Rd (CR 579) on Countryside Dr                                                                                            </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="89">
+   <address>
+      <location_name>Meadow Pointe Clubhouse</location_name>
+      <line1>28245 County Line Rd</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33543</zip>
+   </address>
+   <directions>North-side of County Line Rd; East of Bruce B Downs Blvd (CR581), South of Meadow Point Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="90">
+   <address>
+      <location_name>Shady Oaks MHP Civic Club</location_name>
+      <line1>3651 Castle Dr</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33540</zip>
+   </address>
+   <directions>Intersection of Shady Oaks Dr &amp; Castle Dr; Southwest of SR 39, East of US Hwy 301                                                                                                                       </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="91">
+   <address>
+      <location_name>Spanish Trails Clubhouse</location_name>
+      <line1>7111 Gall Blvd</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33541</zip>
+   </address>
+   <directions>Spanish Trails Blvd across from Florida Hospital Zephyrhills; West of US Hwy 301 (Gall Blvd), North of Ft King Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="92">
+   <address>
+      <location_name>Travelers Rest Citrus Hall</location_name>
+      <line1>29129 Johnston Rd</line1>
+      <city>Dade City</city>
+      <state>FL</state>
+      <zip>33523</zip>
+   </address>
+   <directions>North-side of Johnston Rd; West of Lake Iola Rd, East of Bellamy Brothers Blvd                                                                                                                          </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="93">
+   <address>
+      <location_name>Lakewood Church of God</location_name>
+      <line1>12637 Pony Ln</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34669</zip>
+   </address>
+   <directions>North-side of SR52 at Lakewood Dr, East of Tami Trl, West of Lakewood Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="94">
+   <address>
+      <location_name>Meadow Pointe III Clubhouse</location_name>
+      <line1>1500 Meadow Pointe Blvd</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33543</zip>
+   </address>
+   <directions>South of SR 52, East of Curley, West of Foxwood Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="95">
+   <address>
+      <location_name>Hope United Methodist Church</location_name>
+      <line1>2200 Little Rd</line1>
+      <city>Trinity</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>East-side of Little Rd; South of SR 54, North of Mitchell Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="96">
+   <address>
+      <location_name>Beacon Woods East Rec Center</location_name>
+      <line1>8421 Clayton Blvd</line1>
+      <city>Bayonet Point</city>
+      <state>FL</state>
+      <zip>34667</zip>
+   </address>
+   <directions>West-side of Clayton Blvd; South of Hudson Av, North of Fivay Rd, East of US Hwy 19, West of Little Rd                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="97">
+   <address>
+      <location_name>Trinity Presbyterian Church</location_name>
+      <line1>4651 Little Rd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>South-side of Cypress Lakes Blvd; West of Little Rd, South of Plathe Rd, North of SR 54                                                                                                                 </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="98">
+   <address>
+      <location_name>Fairway Springs Clubhouse</location_name>
+      <line1>3331 Player Dr</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>West-side of Player Dr; North of SR 54 (Gunn Hwy), East of Little Rd                                                                                                                                    </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="99">
+   <address>
+      <location_name>Lake Heron Clubhouse</location_name>
+      <line1>21361 Lake Floyd Dr</line1>
+      <city>Lutz</city>
+      <state>FL</state>
+      <zip>33549</zip>
+   </address>
+   <directions>North-side of Lake Floyd Dr; East of US Hwy 41(Land O'Lakes Blvd), South of CR 54, West of Osprey Ln</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="100">
+   <address>
+      <location_name>Carpenter's Run Clubhouse</location_name>
+      <line1>1735 Carpenter's Run Blvd</line1>
+      <city>Lutz</city>
+      <state>FL</state>
+      <zip>33559</zip>
+   </address>
+   <directions>West-side of Carpenters Run Blvd; East of Oak Grove Blvd, West of Cypress Creek Run, South of SR 54</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="101">
+   <address>
+      <location_name>Faith United Methodist Church</location_name>
+      <line1>12128 Florida 52</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34669</zip>
+   </address>
+   <directions>South-side of SR 52; East of Shadow Ridge Rd, West of Sugarcreek Blvd, North of SR 52</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="102">
+   <address>
+      <location_name>Stagecoach Clubhouse</location_name>
+      <line1>3632 Mossy Oak Cir</line1>
+      <city>Land O'Lakes</city>
+      <state>FL</state>
+      <zip>34639</zip>
+   </address>
+   <directions>East end of Stagecoach; Center of Mossy Oak Cir; East of CR 54</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="103">
+   <address>
+      <location_name>Northwood Community Center</location_name>
+      <line1>27248 Big Sur Dr</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33544</zip>
+   </address>
+   <directions>North-side of County Line Rd; West of Bruce B Downs (CR 581); East of I-75</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="104">
+   <address>
+      <location_name>Trinity College of Florida</location_name>
+      <line1>2430 Welbilt Blvd</line1>
+      <city>Trinity</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>East side of Welbilt Blvd. West of  Little Rd, North of Mitchell Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="105">
+   <address>
+      <location_name>Meadow Pointe II Clubhouse</location_name>
+      <line1>30051 County Line Rd</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33543</zip>
+   </address>
+   <directions>North-side of County Line Rd; East of Bruce B Downs Blvd (CR 581), East of Meadow Point Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="106">
+   <address>
+      <location_name>Seven Springs Country Club</location_name>
+      <line1>3535 Trophy Blvd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>West-side of Trophy Blvd; North-side of Golfview Dr, East of Little Rd, North of SR 54                                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="107">
+   <address>
+      <location_name>River Ridge Golf Club</location_name>
+      <line1>11022 Tee Time Cir</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34654</zip>
+   </address>
+   <directions>West-side of Tee Time Circle; South of DeCubellis Rd, East of River Ridge Blvd, West of Town Center Rd                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="108">
+   <address>
+      <location_name>Tropical Mobile Home Park Clubhouse</location_name>
+      <line1>37407 Ray Dr</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33541</zip>
+   </address>
+   <directions>North-side of Ray Dr; West of Lane Rd, South of SR 54, East of Allen Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="109">
+   <address>
+      <location_name>Timber Greens Clubhouse</location_name>
+      <line1>6333 Timber Greens Blvd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>West-side of Timber Greens Blvd; North of River Crossing Blvd, West of Starkey Blvd, East of Little Rd                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="110">
+   <address>
+      <location_name>Country Place Village Clubhouse</location_name>
+      <line1>2535 Country Place Blvd</line1>
+      <city>New Port Richey</city>
+      <state>FL</state>
+      <zip>34655</zip>
+   </address>
+   <directions>West-side of Country Place Blvd; North of SR 54 on Country Place Blvd, East of Starkey Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="111">
+   <address>
+      <location_name>New River Branch Library</location_name>
+      <line1>34043 State Road 54</line1>
+      <city>Zephyrhills</city>
+      <state>FL</state>
+      <zip>33543</zip>
+   </address>
+   <directions>North side of SR 54, West of Eiland Blvd, East of New River Rd; between Westside Baptist Church and Point Cypress Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="112">
+   <address>
+      <location_name>Lakeside Clubhouse - Shadow Lakes</location_name>
+      <line1>12606 Shadow Ridge Blvd</line1>
+      <city>Hudson</city>
+      <state>FL</state>
+      <zip>34669</zip>
+   </address>
+   <directions>SR 52 to Sugar Creek Blvd., North on Sugar Creek Blvd. to Shadow Ridge Blvd., Left on Shadow Ridge Blvd., Polling place is on the left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="113">
+   <address>
+      <location_name>Myrtle Lake Baptist Church</location_name>
+      <line1>2017 Riegler Rd</line1>
+      <city>Land O'Lakes</city>
+      <state>FL</state>
+      <zip>34639</zip>
+   </address>
+   <directions>Northside of SR 54; East of Collier Pkwy, West of Reigler Rd                                                                                                                                            </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="114">
+   <address>
+      <location_name>Land O'Lakes Recreation Complex</location_name>
+      <line1>3032 Collier Pky</line1>
+      <city>Land O'Lakes</city>
+      <state>FL</state>
+      <zip>34639</zip>
+   </address>
+   <directions>East-side of Collier Pkwy; North of SR 54, East of US Hwy 41                                                                                                                                            </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="115">
+   <address>
+      <location_name>Seven Oaks Clubhouse</location_name>
+      <line1>2910 Sports Core Cir</line1>
+      <city>Wesley Chapel</city>
+      <state>FL</state>
+      <zip>33543</zip>
+   </address>
+   <directions>North on Ancient Oaks Blvd, polling place on the right; or South on Ancient Oaks Blvd, polling place on the left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

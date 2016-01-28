@@ -1,0 +1,500 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>St Johns County, FL</name>
+  <vip_id>12109</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>Julington Creek Annex</location_name>
+      <line1>725 Flora Branch Blvd</line1>
+      <city>St. Johns</city>
+      <state>FL</state>
+      <zip>32259</zip>
+   </address>
+   <directions>Located 1/8 mile north of Race Track Road on Flora Branch Blvd (across from the Publix Shopping Center). Annex is located behind Unity Church.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Creekside Christian Church</location_name>
+      <line1>92 Lifespring Way</line1>
+      <city>St. Johns</city>
+      <state>FL</state>
+      <zip>32259</zip>
+   </address>
+   <directions>.7 of a mile east of St. Johns Parkway on Racetrack Road. From US 1 and Racetrack Road, travel 1.8 miles west </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Switzerland Community Church</location_name>
+      <line1>2179 State Road 13 N</line1>
+      <city>St. Johns</city>
+      <state>FL</state>
+      <zip>32259</zip>
+   </address>
+   <directions>Located at the intersection of State Road 13 N and Worth Rd.  Church is on the northeast corner of this intersection.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Bartram Trail Library</location_name>
+      <line1>60 Davis Pond Blvd</line1>
+      <city>St. Johns</city>
+      <state>FL</state>
+      <zip>32259</zip>
+   </address>
+   <directions>Located at the intersection of State Road 13 and Davis Pond Blvd.  Library is on the southeast corner of this intersection.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Celebration Lutheran Church</location_name>
+      <line1>810 Roberts Rd</line1>
+      <city>St Johns</city>
+      <state>FL</state>
+      <zip>32259</zip>
+   </address>
+   <directions>Located at the intersection of Roberts Rd. and Lige Branch Ln.  Entrance to church is on Lige Branch Ln.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Faith Community Church</location_name>
+      <line1>3450 County Road 210 W</line1>
+      <city>St. Johns</city>
+      <state>FL</state>
+      <zip>32259</zip>
+   </address>
+   <directions>West on CR-210 to western end of Cimarron Golf Course. Church is on north side of CR-210, set off the road by a long entrance</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Bartram Trail High School</location_name>
+      <line1>7399 Longleaf Pine PKWY</line1>
+      <city>St Johns</city>
+      <state>FL</state>
+      <zip>32259</zip>
+   </address>
+   <directions>Located at the intersection of Greenbriar Rd. and Longleaf Pine Parkway.  School is located at the southeast corner of this intersection.  Voting location is in the school auditorium lobby.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Trout Creek Community Center</location_name>
+      <line1>6795 Collier Rd</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32092</zip>
+   </address>
+   <directions>2.4 miles north of 13/16 intersection on S.R. 13 in Trout Creek Park. Turn into park and then left on Collier Road. The park is located in Orangedale, Florida</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>St Johns Golf and Country Club</location_name>
+      <line1>205 St Johns Golf Dr</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32092</zip>
+   </address>
+   <directions>1.9 miles West from I-95 on C.R. 210 to left on Leo Maquire Prkwy to left on St. Johns Golf Drive. Polling location is next to pool area at the golf resort.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Heritage Landing Amenity Center</location_name>
+      <line1>370 Heritage Landing PKWY</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32092</zip>
+   </address>
+   <directions>Located in Heritage Landing subdivision, just east of County Road 13 and south of State Road 16.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Agricultural Center</location_name>
+      <line1>3125 Agricultural Center Dr</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32092</zip>
+   </address>
+   <directions>Located off of County Road 208, just west of State Road 16.  Turn south on Agricultural Center Drive.  Go to about 2 miles down and the Ag Center will be located on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>San Sebastian Catholic Church</location_name>
+      <line1>1112 State Road 16</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32084</zip>
+   </address>
+   <directions>Church is located on north side of State Road 16 about 3 miles east of I-95 or 4 miles west of the US 1.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Solomon Calhoun Community Ctr</location_name>
+      <line1>1300 Duval St</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32084</zip>
+   </address>
+   <directions>From west King Street, south on St. Johns Street to left on 15th Street then righ on Duval Street. From S.R. 207, turn north on Osceola Elementary Road, intersects with Solomon Calhoun Comm. Center</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>St. Ambrose Catholic Church</location_name>
+      <line1>6072 Church Rd</line1>
+      <city>Elkton</city>
+      <state>FL</state>
+      <zip>32033</zip>
+   </address>
+   <directions>From State Road 207, turn west on St Ambrose Church Road. Travel approximately 3 miles and turn left on Church Road. Church is on the left about 1 mile.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Hastings Town Hall</location_name>
+      <line1>6195 S Main St</line1>
+      <city>Hastings</city>
+      <state>FL</state>
+      <zip>32145</zip>
+   </address>
+   <directions>At the intersection of SR 207 and Main St., turn south.  The precinct is located in the back of the Hastings Town Hall.  Use the north parking lot entrance.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Good News Church</location_name>
+      <line1>1357 Wildwood Dr</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32086</zip>
+   </address>
+   <directions>Located on the south side of Wildwood Dr. between Treaty Park and Fort Peyton Dr.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>St. Augustine South Imp. Assn.</location_name>
+      <line1>709 Royal Rd</line1>
+      <city>St. Augustine</city>
+      <state>FL</state>
+      <zip>32086</zip>
+   </address>
+   <directions>Take St. Augustine South Dr to Royal Road and turn south.  Building is on left about 3 blocks.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Community Bible Church</location_name>
+      <line1>3150 US 1 S</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32086</zip>
+   </address>
+   <directions>Located on east side of US 1 approximately 1 1/2 miles south of Gate 4 of St Augustine South.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>Riverview Club</location_name>
+      <line1>790 Christina Dr</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32086</zip>
+   </address>
+   <directions>Take Shores Blvd. to Christina Dr.  Club will be on the northern side of Christina Dr., just east of Shores Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Coquina Crossing Comm. Ctr.</location_name>
+      <line1>4536 Coquina Crossing Dr</line1>
+      <city>Elkton</city>
+      <state>FL</state>
+      <zip>32033</zip>
+   </address>
+   <directions>Entrance to Coquina Crossing is about 2 miles west of I-95 on State Road 207.  Follow Coquina Crossing Dr to the Community Center.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>Southeast Branch Library</location_name>
+      <line1>6670 US 1 S</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32086</zip>
+   </address>
+   <directions>Located about 1/4 mile north of State Road 206 on the east side of US 1.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Anastasia Baptist Church</location_name>
+      <line1>1650 A1A S</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32080</zip>
+   </address>
+   <directions>East side of A1A approximately 1/2 mile north of the intersection of A1A and State Road 312.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>St. Anastasia Catholic Church</location_name>
+      <line1>5205 A1A S</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32080</zip>
+   </address>
+   <directions>Located at the intersection of Weff Rd and A1A S on the west side of A1A S.  Approximately 2 1/2 miles north of the intersection of A1A S and SR 206.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>Ponte Vedra Branch Library</location_name>
+      <line1>101 Library Blvd</line1>
+      <city>Ponte Vedra Beach</city>
+      <state>FL</state>
+      <zip>32082</zip>
+   </address>
+   <directions>Located just south of the light at the intersection of Solana Rd and A1A N on the west side of A1A N.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>Our Lady Star of the Sea Church</location_name>
+      <line1>545 A1A N</line1>
+      <city>Ponte Vedra Beach</city>
+      <state>FL</state>
+      <zip>32082</zip>
+   </address>
+   <directions>Located on the east side of A1A N about 1/2 mile north of Corona Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Ponte Vedra Presbyterian Church</location_name>
+      <line1>4510 Palm Valley Rd</line1>
+      <city>Ponte Vedra Beach</city>
+      <state>FL</state>
+      <zip>32082</zip>
+   </address>
+   <directions>Located on the west side of Palm Valley Road approximately 1 1/2 miles south of the Palm Valley Rd and A1A N intersection.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>Christ Episcopal Church</location_name>
+      <line1>400 San Juan Dr</line1>
+      <city>Ponte Vedra Beach</city>
+      <state>FL</state>
+      <zip>32082</zip>
+   </address>
+   <directions>Located at intersection of Solana Rd and San Juan Dr, east of A1A.  Use parking lot off of San Juan Dr.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>St. Francis in the Field</location_name>
+      <line1>895 Palm Valley Rd</line1>
+      <city>Ponte Vedra</city>
+      <state>FL</state>
+      <zip>32081</zip>
+   </address>
+   <directions>Turn east on Nocatee Parkway from US 1.  Proceed down Nocatee Parkway and turn on to Palm Valley Rd.  Church is located east of Walden Chase subdivision.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Ponte Vedra Community Center</location_name>
+      <line1>1050 A1A N</line1>
+      <city>Ponte Vedra Beach</city>
+      <state>FL</state>
+      <zip>32082</zip>
+   </address>
+   <directions>Located on the west side of A1A N just north of Mickler Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>The Palencia Club</location_name>
+      <line1>600 Palencia Club Dr</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32095</zip>
+   </address>
+   <directions>Located in the clubhouse of Palencia subdivision. Go 5.4 miles north of St. Augustine's NE Fl. Regional Airport to intersection of Palencia/9 mile Road, turn east into subdivision, 1.3 miles to end of road and clubhouse on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Fullerwood Center</location_name>
+      <line1>10 Hildreth Dr</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32084</zip>
+   </address>
+   <directions>Located one block north of the intersection of State Road 16 and San Marco Avenue.  Turn east on Hildreth Drive.  Center is located on north side of Hildreth Drive, between Bannan Avenue and Russell Boulevard.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>St. Johns Convention Center</location_name>
+      <line1>500 S Legacy TRL</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32092</zip>
+   </address>
+   <directions>Located at the World Golf Village.  Follow World Golf Village Blvd. until you get to the  Renaissance Hotel.  Center is located to the </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>Serenata Beach Club</location_name>
+      <line1>3175 S Ponte Vedra Blvd</line1>
+      <city>Ponte Vedra Beach</city>
+      <state>FL</state>
+      <zip>32082</zip>
+   </address>
+   <directions>From Vilano Beach, take A1A North approximately 4 miles.  Serenata Beach Club is located on the east side of A1A, in the area of the dog leg.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>Church of Christ</location_name>
+      <line1>2900 Lewis Speedway</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32084</zip>
+   </address>
+   <directions>Located N of State Road 16 on Lewis Speedway.  Church is on east side of road, across from Sebastian Middle School.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>Days Inn Historic Downtown</location_name>
+      <line1>1300 N Ponce De Leon Blvd</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32084</zip>
+   </address>
+   <directions>Located in conference room in the same building as Dennys Restaurant and just north of McDonalds Restaurant on Ponce De Leon Blvd. North of downtown St. Augustine</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>Willie Galimore Center</location_name>
+      <line1>399 Riberia St</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32084</zip>
+   </address>
+   <directions>Located at the intersection of Riberia St. and King St.  Go south on Riberia St.  Center is on the left just past Cerro St.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>Elks Lodge</location_name>
+      <line1>1420 A1A S</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32080</zip>
+   </address>
+   <directions>Located on the east side of A1A S approximately 1 1/4 south of Alligator Farm.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>St. Augustine Beach City Hall</location_name>
+      <line1>2200 A1A S</line1>
+      <city>St Augustine</city>
+      <state>FL</state>
+      <zip>32080</zip>
+   </address>
+   <directions>Located on east side of A1A approximately 1/2 mile south of the State Road 312.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>Elks Lodge</location_name>
+      <line1>1420 A1A S</line1>
+      <city>St. Augustine</city>
+      <state>FL</state>
+      <zip>32080</zip>
+   </address>
+   <directions>Located on the east side of A1A S approximately 1 1/4 south of Alligator Farm.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>St. Augustine Beach City Hall</location_name>
+      <line1>2200 A1A S</line1>
+      <city>St. Augustine</city>
+      <state>FL</state>
+      <zip>32080</zip>
+   </address>
+   <directions>Located on east side of A1A approximately 1/2 mile south of the State Road 312.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>Davidson Realty</location_name>
+      <line1>100 East Town Pl</line1>
+      <city>St. Augustine</city>
+      <state>FL</state>
+      <zip>32092</zip>
+   </address>
+   <directions>Just west of 1-95 on 9 Mile Road to the World Golf Village entrance. Turn right at at the traffic light. The Davidson Realty building is immediately on your right. The polling room is at the left side of the building.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

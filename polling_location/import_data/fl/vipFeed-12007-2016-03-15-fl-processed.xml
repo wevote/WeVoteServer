@@ -1,0 +1,284 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Bradford County, FL</name>
+  <vip_id>12007</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+<polling_location id="4">
+   <address>
+      <location_name>Grace United Methodist Church</location_name>
+      <line1>1822 Madison St</line1>
+      <city>Lawtey</city>
+      <state>FL</state>
+      <zip>320580000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Macedonia Freewill Bapt Church</location_name>
+      <line1>2496 Lake St</line1>
+      <city>Lawtey</city>
+      <state>FL</state>
+      <zip>320580000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Senior Center</location_name>
+      <line1>1805 N Temple Ave</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>32091</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>FAIRGROUNDS-BLDG # 1</location_name>
+      <line1>2302 N Temple Ave</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>320910000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Heilbronn Springs Baptist Church</location_name>
+      <line1>12354 NW State Road 16</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>32091</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Madison Street Baptist Church</location_name>
+      <line1>900 W Madison St</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>32091</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>FIRST METHODIST CHURCH</location_name>
+      <line1>200 N Walnut St</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>320910000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Bayless Highway Baptist Church</location_name>
+      <line1>11798 NW County Road 225</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>32091</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>HEILBRONN SPRINGS BAPT CHURCH</location_name>
+      <line1>21354 NW SR 16</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>320910000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Church of God by Faith</location_name>
+      <line1>730 Old Lawtey Rd</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>320910000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Starke Golf &amp; Country Club</location_name>
+      <line1>15501 NE 14th Ave</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>320910000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>SHANDS AT STARKE HOSP ATRIUM</location_name>
+      <line1>922 E Call St</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>320910000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Theressa Community Center</location_name>
+      <line1>1748 SE 81st Ave</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>32091</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>THERESSA COMMUNITY CTR</location_name>
+      <line1>1748 SE 81st Ave</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>320910000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>KEYSTONE METHODIST MULTI BLDG</location_name>
+      <line1>4004 SE SR 21</line1>
+      <city>Keystone Heights</city>
+      <state>FL</state>
+      <zip>356560000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Victory Baptist Church</location_name>
+      <line1>5340 Pine St</line1>
+      <city>Hampton</city>
+      <state>FL</state>
+      <zip>320440000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Keystone United Methodist Church</location_name>
+      <line1>4004 SE State Road 21</line1>
+      <city>Keystone Heights</city>
+      <state>FL</state>
+      <zip>32656</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Praise Christian Assembly</location_name>
+      <line1>10813 SW County Road 18</line1>
+      <city>Hampton</city>
+      <state>FL</state>
+      <zip>320440000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>Brooker City Hall</location_name>
+      <line1>17435 Tetstone Ave</line1>
+      <city>Brooker</city>
+      <state>FL</state>
+      <zip>32622</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>BROOKER CITY HALL/COMM CENTER</location_name>
+      <line1>17435 Tetstone Ave</line1>
+      <city>Brooker</city>
+      <state>FL</state>
+      <zip>326220000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>Hampton City Hall</location_name>
+      <line1>5784 Navarre Ave</line1>
+      <city>Hampton</city>
+      <state>FL</state>
+      <zip>32044</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Lawtey City Hall</location_name>
+      <line1>2793 Lake St</line1>
+      <city>Lawtey</city>
+      <state>FL</state>
+      <zip>32058</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Starke City Hall</location_name>
+      <line1>209 N Thompson St</line1>
+      <city>Starke</city>
+      <state>FL</state>
+      <zip>32091</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+</vip_object>

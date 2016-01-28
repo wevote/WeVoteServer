@@ -1,0 +1,368 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Sumter County, FL</name>
+  <vip_id>12119</vip_id>
+  <datetime>2015-12-02T02:45:01</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>SAVANNAH CTR</location_name>
+      <line1>1545 N Buena Vista Blvd</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32159</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466; Left on N Buena Vista Blvd., Building on right (corner of El Camino Real and Buena Vista Blvd.)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>HOPE LUTHERAN CHURCH</location_name>
+      <line1>250 Avenida Los Angelos</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32159</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466; Building on left after Morse Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>SADDLEBROOK REC CTR</location_name>
+      <line1>3010 Saddlebrook Ln</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466; Left on N Buena Vista Blvd; Right on Saddlebrook Lane.  Building straight ahead.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>PIMLICO REC CTR</location_name>
+      <line1>530 Belvedere Blvd</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466; Right on Belvedere; Steer Left; Building on Right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>COCONUT COVE REC CTR</location_name>
+      <line1>1398 Stillwater Trl</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301;  Right on E C-466; Right on Morse Blvd; Left on Stillwater Trail; Building on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>CANAL ST REC CTR</location_name>
+      <line1>1513 Canal St</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466; Right on Morse Blvd; Right on Stillwater Trail; Left on Canal Street; Building on left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>LAUREL MANOR REC CTR</location_name>
+      <line1>1985 Laurel Manor Dr</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466; Right on S Buena Vista Blvd; Left on Laurel Manor Dr; Building on Left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>ALLAMANDA VLG REC CTR</location_name>
+      <line1>1515 St Charles Pl</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466; Right on S Buena Vista Blvd; Right on St. Charles Place; Building on Right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>TRUMAN REC CTR</location_name>
+      <line1>2705 Canal St</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466A; Left on Canal Street; Building on Right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>STERLING HEIGHTS REC CTR</location_name>
+      <line1>2508 St Charles Pl</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466A; Left on S Buena Vista Blvd; Left on St. Charles Place; Bldg on Right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>CAPTIVA VILLAGE CTR</location_name>
+      <line1>658 Pinellas Pl</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32163</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466A; Right on Morse Blvd; Right at first circle onto Pinellas Place; Building on Left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>OXFORD COMMUNITY BUILDING</location_name>
+      <line1>4027 CR 106</line1>
+      <city>Oxford</city>
+      <state>FL</state>
+      <zip>34484</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on CR 106; Building on Right</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>ROYAL COMMUNITY BLDG</location_name>
+      <line1>9605 CR 235</line1>
+      <city>Wildwood</city>
+      <state>FL</state>
+      <zip>34785</zip>
+   </address>
+   <directions>S on Main St; Left on N 301 to Wildwood; Left on CR 462; Right on CR 235; Building on Right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>LAKE PANASOFFKEE REC CTR</location_name>
+      <line1>1582 CR 459</line1>
+      <city>Lake Panasoffkee</city>
+      <state>FL</state>
+      <zip>33538</zip>
+   </address>
+   <directions>N Main Street / 475; Left on 470; Left on CR 459; Building on Right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>WILDWOOD COMM BLDG</location_name>
+      <line1>6500 Powell Rd</line1>
+      <city>Wildwood</city>
+      <state>FL</state>
+      <zip>34785</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on Huey Street; Stay to the Right (CR 44a); Left on Powell Road; Building on Left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>CONTINENTAL COUNTRY CLUB</location_name>
+      <line1>50 Continental Blvd</line1>
+      <city>Wildwood</city>
+      <state>FL</state>
+      <zip>34785</zip>
+   </address>
+   <directions>S on Main St; Left on N 301 to Wildwood; Right on 44E; Right into Continental Country Club; Building on left on hill.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>COLEMAN COMMUNITY BUILDING</location_name>
+      <line1>1204 N Church St</line1>
+      <city>Coleman</city>
+      <state>FL</state>
+      <zip>33521</zip>
+   </address>
+   <directions>S on Main St; Left on N 301 to Coleman; Left on N Church Street; Building on Left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>FIRST UNITED METHODIST CHURCH</location_name>
+      <line1>221 W Noble Ave</line1>
+      <city>Bushnell</city>
+      <state>FL</state>
+      <zip>33513</zip>
+   </address>
+   <directions>S on Main Street; Right on Noble Avenue; Building on Left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>CENTER HILL COMMUNITY BUILDING</location_name>
+      <line1>74 S Virginia Ave</line1>
+      <city>Center Hill</city>
+      <state>FL</state>
+      <zip>33514</zip>
+   </address>
+   <directions>S on Main St; Left on E C-48 to Center Hill; Right on Virginia Avenue; Go one block; Building on Right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>BUSHNELL COMMUNITY BUILDING</location_name>
+      <line1>407 E Belt Ave</line1>
+      <city>Bushnell</city>
+      <state>FL</state>
+      <zip>33513</zip>
+   </address>
+   <directions>S on Main Street; Left on E Belt Avenue; Building on Right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>INDIAN HILL BAPTIST CHURCH</location_name>
+      <line1>7819 CR 633</line1>
+      <city>Bushnell</city>
+      <state>FL</state>
+      <zip>33513</zip>
+   </address>
+   <directions>S Main Street; Right on W 476; Go 7 miles; Right on CR 633; Fellowship Hall behind old church on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>CROOM COMMUNITY CLUB</location_name>
+      <line1>12632 CR 687</line1>
+      <city>Webster</city>
+      <state>FL</state>
+      <zip>33597</zip>
+   </address>
+   <directions>S Main Street / 301; Right on CR 656; Left on CR 684; Right on 687N; building on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>WEBSTER COMMUNITY BUILDING</location_name>
+      <line1>49 SE 1st St</line1>
+      <city>Webster</city>
+      <state>FL</state>
+      <zip>33597</zip>
+   </address>
+   <directions>S Main Street; Left on E C-48; Right on S 471; Left on SE 1st Avenue; Left on SE 1st Street; Building on Right (front of post office).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>LINDEN COMMUNITY BUILDING</location_name>
+      <line1>4735 CR 772</line1>
+      <city>Webster</city>
+      <state>FL</state>
+      <zip>33597</zip>
+   </address>
+   <directions>S Main Street; Left on W C-48; Right on SR 471 to Tarry Town; Right on CR 772 (stay left); Building on right next to cemetery.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>EL SANTIAGO REC CTR</location_name>
+      <line1>2373 Enrique Dr</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466; Left on N Buena Vista Blvd; Right on El Camino Real; Right on Enrique Dr; Bldg on left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>SAVANNAH CTR</location_name>
+      <line1>1545 Buena Vista Blvd</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466; Left on N Buena Vista Blvd.; Building on right (corner of El Camino Real and Buena Vista Blvd.)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>COLONY COTTAGE REC CTR</location_name>
+      <line1>510 Colony Blvd</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466A; Left on Morse Blvd; Right at first road; Building on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>SEABREEZE REC CTR</location_name>
+      <line1>2384 S Buena Vista Blvd</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32162</zip>
+   </address>
+   <directions>S on Main St; Left on N 301; Right on E C-466A; Left on S Buena Vista Blvd; Bldg on left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>EISENHOWER REC CTR</location_name>
+      <line1>3560 S Buena Vista Blvd</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32163</zip>
+   </address>
+   <directions>S on Main Street; Left on N 301; Right on SR 44; Left on S Buena Vista Blvd.; Bldg on left after SR 44A.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>ROHAN REC CTR</location_name>
+      <line1>850 Kristine Way</line1>
+      <city>The Villages</city>
+      <state>FL</state>
+      <zip>32163</zip>
+   </address>
+   <directions>S on Main Street; Left on N 301; Right on SR 44; Left on Morse Blvd.; Bldg on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

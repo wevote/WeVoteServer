@@ -1,0 +1,2396 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Duval County, FL</name>
+  <vip_id>12031</vip_id>
+  <datetime>2015-11-11T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>Charles Clark Community Center</location_name>
+      <line1>8793 Sibbald Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Woodlawn Presbyterian Church</location_name>
+      <line1>3026 Woodlawn Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Zion Hope Missionary Baptist Church</location_name>
+      <line1>2803 Edgewood Ave W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>St Paul AME Church</location_name>
+      <line1>6910 New Kings Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32219</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Legends Community Center</location_name>
+      <line1>5130 Soutel Dr</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Church of God  - N Lane Ave</location_name>
+      <line1>2956 Lane Ave N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32254</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Evangel Temple Assembly of God</location_name>
+      <line1>5755 Ramona Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32205</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Mary Lena Gibbs Center</location_name>
+      <line1>6974 Wilson Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Oak Hill Church of the Nazarene</location_name>
+      <line1>4151 Old Middleburg Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Saint Andrews Episcopal Church</location_name>
+      <line1>7801 Lone Star RD</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32211</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Twin Hills Civic Association</location_name>
+      <line1>6743 Watoma St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Country Inn &amp; Suites</location_name>
+      <line1>7035 Commonwealth Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32220</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Gregory West Apartments</location_name>
+      <line1>7844 Gregory Dr</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>Cedar Creek Baptist Church</location_name>
+      <line1>1372 Lane Ave S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32205</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>McGirts Creek Regional Park</location_name>
+      <line1>8535 118th St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Faith Temple Assembly of God</location_name>
+      <line1>6561 Firestone Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Argyle Church of Christ</location_name>
+      <line1>7310 Collins Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Arlington Masonic Lodge #309</location_name>
+      <line1>3421 University Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32277</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>St. Paul's Methodist Church</location_name>
+      <line1>8264 Lone Star Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32211</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Arlington Christian Church</location_name>
+      <line1>8075 Lone Star Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32211</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>Terry Parker Baptist Church</location_name>
+      <line1>7024 Merrill Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32277</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Blue Cypress Community Center</location_name>
+      <line1>4012 University Blvd N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32277</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Arlington Baptist Church</location_name>
+      <line1>6009 Arlington Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32211</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>The Central Church of the Nazarene</location_name>
+      <line1>2130 University Blvd N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32211</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>Arlington Congregational Church</location_name>
+      <line1>431 University Blvd N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32211</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Glynlea Grace United Methodist Church</location_name>
+      <line1>6429 Atlantic Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32211</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>Elm Croft of Timberlin Park</location_name>
+      <line1>7620 Timberlin Park Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>Glen Kernan Golf and Country Club</location_name>
+      <line1>4590 Glen Kernan Pkwy E</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32224</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Hampton Glen</location_name>
+      <line1>8515 Hampton Ridge Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>Christ's Church at Mandarin</location_name>
+      <line1>6045 Greenland Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32258</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Kernan Blvd Baptist Church</location_name>
+      <line1>4000 Kernan Blvd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32224</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>Holiday Inn</location_name>
+      <line1>11083 Nursery Fields Dr</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>Deercreek Country Club</location_name>
+      <line1>7816 McLaurin Rd N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>Landmark at Hampshire Place</location_name>
+      <line1>10023 Belle Rive Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>Deerwood Country Club</location_name>
+      <line1>10239 Golf Club Dr</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>Fort Caroline Presbyterian Church</location_name>
+      <line1>3754 Univ Club Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32277</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>Courtyard Marriott</location_name>
+      <line1>14402 Old St. Augustine Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32258</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>Shepherd of the Woods Lutheran Church</location_name>
+      <line1>7860 Southside Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>Southeast Regional Library</location_name>
+      <line1>10599 Deerwood Park Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>Ramada Inn Baymeadows</location_name>
+      <line1>9150 Baymeadows Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>The Salem Center</location_name>
+      <line1>7235 Bonneval Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32256</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>Mission Way Church</location_name>
+      <line1>14985 Old St. Augustine Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32258</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>Regency Square Regional Library</location_name>
+      <line1>9900 Regency Square Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="48">
+   <address>
+      <location_name>Fort Caroline Christian Church</location_name>
+      <line1>7535 Ft. Caroline Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32277</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="49">
+   <address>
+      <location_name>Destination Church of the  Assemblies of God</location_name>
+      <line1>88 Arlington Rd N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32211</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="50">
+   <address>
+      <location_name>Macedonia Baptist Church</location_name>
+      <line1>8081 Lenox Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32221</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="51">
+   <address>
+      <location_name>Woodstock Baptist Church</location_name>
+      <line1>9120 Crystal Springs Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32221</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="52">
+   <address>
+      <location_name>Leroy D. Clemons Senior Center</location_name>
+      <line1>55 Jackson Ave N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32220</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="53">
+   <address>
+      <location_name>Maxville Community Center</location_name>
+      <line1>18065 Pennsylvania Ave</line1>
+      <city>Maxville</city>
+      <state>FL</state>
+      <zip>32234</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="54">
+   <address>
+      <location_name>Midnight Cry Ministries</location_name>
+      <line1>1371 Hammond Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32221</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="55">
+   <address>
+      <location_name>Promise Land Baptist Church</location_name>
+      <line1>2197 Blair Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32221</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="56">
+   <address>
+      <location_name>Baldwin Town Hall</location_name>
+      <line1>10 U S Hwy 90 W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32234</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="57">
+   <address>
+      <location_name>Harvest Ministries</location_name>
+      <line1>2550 Fouraker Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="58">
+   <address>
+      <location_name>Whitehouse Baptist Church</location_name>
+      <line1>24 Celery Ave N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32220</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="59">
+   <address>
+      <location_name>Shindler Dr Baptist Church</location_name>
+      <line1>7100 Shindler Dr</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32222</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="60">
+   <address>
+      <location_name>Christian Family Fellowship</location_name>
+      <line1>7216 Old Middleburg Rd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32222</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="61">
+   <address>
+      <location_name>West Regional Library</location_name>
+      <line1>1425 Chaffee Rd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32221</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="62">
+   <address>
+      <location_name>New Hope Baptist Temple</location_name>
+      <line1>9900 103rd St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="63">
+   <address>
+      <location_name>Benni Furlong Senior Center</location_name>
+      <line1>281 19th Ave S</line1>
+      <city>Jacksonville Beach</city>
+      <state>FL</state>
+      <zip>32250</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="64">
+   <address>
+      <location_name>Bethlehem Lutheran Church</location_name>
+      <line1>1423 8th Ave N</line1>
+      <city>Jacksonville Beach</city>
+      <state>FL</state>
+      <zip>32250</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="65">
+   <address>
+      <location_name>American Legion Post 129</location_name>
+      <line1>1151 4th St S</line1>
+      <city>Jacksonville Beach</city>
+      <state>FL</state>
+      <zip>32250</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="66">
+   <address>
+      <location_name>Jacksonville Beach City Hall</location_name>
+      <line1>11 3rd St N</line1>
+      <city>Jacksonville Beach</city>
+      <state>FL</state>
+      <zip>32250</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="67">
+   <address>
+      <location_name>Beaches Regional Library</location_name>
+      <line1>600 3rd St</line1>
+      <city>Neptune Beach</city>
+      <state>FL</state>
+      <zip>32266</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="68">
+   <address>
+      <location_name>Atlantic Beach City Hall</location_name>
+      <line1>800 Seminole Rd</line1>
+      <city>Atlantic Beach</city>
+      <state>FL</state>
+      <zip>32233</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="69">
+   <address>
+      <location_name>Adele Grage Cultural Center</location_name>
+      <line1>716 Ocean Blvd</line1>
+      <city>Atlantic Beach</city>
+      <state>FL</state>
+      <zip>32233</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="70">
+   <address>
+      <location_name>Community Presbyterian Church</location_name>
+      <line1>150 Sherry Dr</line1>
+      <city>Atlantic Beach</city>
+      <state>FL</state>
+      <zip>32233</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="71">
+   <address>
+      <location_name>Neptune Beach Senior Activity Center</location_name>
+      <line1>2004 Forest Ave</line1>
+      <city>Neptune Beach</city>
+      <state>FL</state>
+      <zip>32266</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="72">
+   <address>
+      <location_name>First Christian Church of the Beaches</location_name>
+      <line1>2125 Ocean Front</line1>
+      <city>Neptune Beach</city>
+      <state>FL</state>
+      <zip>32266</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="73">
+   <address>
+      <location_name>Hampton Inn</location_name>
+      <line1>1220 Marsh Landing Pkwy</line1>
+      <city>Jacksonville Beach</city>
+      <state>FL</state>
+      <zip>32250</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="74">
+   <address>
+      <location_name>Oceanside Church of Christ</location_name>
+      <line1>1025 Snug Harbor Ct</line1>
+      <city>Atlantic Beach</city>
+      <state>FL</state>
+      <zip>32233</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="75">
+   <address>
+      <location_name>San Pablo Family Church</location_name>
+      <line1>3044 San Pablo Rd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32224</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="76">
+   <address>
+      <location_name>Mayport Community Center</location_name>
+      <line1>4870 Ocean St</line1>
+      <city>Atlantic Beach</city>
+      <state>FL</state>
+      <zip>32233</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="77">
+   <address>
+      <location_name>USO Center of Jacksonville</location_name>
+      <line1>2560 Mayport Rd</line1>
+      <city>Atlantic Beach</city>
+      <state>FL</state>
+      <zip>32233</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="78">
+   <address>
+      <location_name>Church at Argyle</location_name>
+      <line1>6823 Argyle Forest Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="79">
+   <address>
+      <location_name>Kirkwood Presbyterian Church</location_name>
+      <line1>8701 Argyle Forest Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="80">
+   <address>
+      <location_name>Argyle Branch Library</location_name>
+      <line1>7973 Old Middleburg Rd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="81">
+   <address>
+      <location_name>Grace Church of  Avondale</location_name>
+      <line1>1656 Edgewood Ave S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32205</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="82">
+   <address>
+      <location_name>Murray Hill Baptist Church</location_name>
+      <line1>4300 Post St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32205</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="83">
+   <address>
+      <location_name>Hillcrest Baptist</location_name>
+      <line1>7673 Collins Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="84">
+   <address>
+      <location_name>Jacksonville Association of Fire Fighters</location_name>
+      <line1>618 Stockton St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32204</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="85">
+   <address>
+      <location_name>St. John Presbyterian Church</location_name>
+      <line1>4275 Herschel St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="86">
+   <address>
+      <location_name>St. Peters Episcopal</location_name>
+      <line1>5042 Timuquana Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="87">
+   <address>
+      <location_name>Fleet Reserve</location_name>
+      <line1>5391 Collins Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="88">
+   <address>
+      <location_name>Ortega United Methodist Church</location_name>
+      <line1>4807 Roosevelt Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="89">
+   <address>
+      <location_name>Saint Catherine's Episcopal Church</location_name>
+      <line1>4758 Shelby Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="90">
+   <address>
+      <location_name>Trinity Lutheran Church - ELCA</location_name>
+      <line1>1415 McDuff Ave S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32205</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="91">
+   <address>
+      <location_name>Faith Lutheran Church</location_name>
+      <line1>5927 Old Timuquana Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="92">
+   <address>
+      <location_name>Riverside Presbyterian Apartments</location_name>
+      <line1>1045 Oak St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32204</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="93">
+   <address>
+      <location_name>Victory Celebration Church</location_name>
+      <line1>3220 New Berlin Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32226</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="94">
+   <address>
+      <location_name>Faith Bridge church</location_name>
+      <line1>13720 McCormick Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="95">
+   <address>
+      <location_name>Calvary Hill Baptist Church</location_name>
+      <line1>1211 Lee Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="96">
+   <address>
+      <location_name>Cedar Bay Baptist Church</location_name>
+      <line1>11553 Main St N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32218</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="97">
+   <address>
+      <location_name>Dunns Creek Baptist Church</location_name>
+      <line1>1425 Starratt Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32218</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="98">
+   <address>
+      <location_name>Resurrection Episcopal Church</location_name>
+      <line1>12355 Ft Caroline Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="99">
+   <address>
+      <location_name>Police Athletic League</location_name>
+      <line1>3450 Monument Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="100">
+   <address>
+      <location_name>Starratt Rd Christian Church</location_name>
+      <line1>2311 Starratt Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32226</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="101">
+   <address>
+      <location_name>Monument Pointe Fellowship</location_name>
+      <line1>13720 Mt Pleasant Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="102">
+   <address>
+      <location_name>Sisters Creek Marina</location_name>
+      <line1>8203 Heckscher Dr</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32226</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="103">
+   <address>
+      <location_name>Spirit of Life Lutheran Church</location_name>
+      <line1>2636 New Berlin Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32226</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="104">
+   <address>
+      <location_name>Black Hammock Island Community Center</location_name>
+      <line1>15770 Sawpit Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32226</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="105">
+   <address>
+      <location_name>Hidden Hills Country Club</location_name>
+      <line1>3901 Monument Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="106">
+   <address>
+      <location_name>Queen's Harbor Yacht &amp; Country Club</location_name>
+      <line1>238 Queen's Harbor Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="107">
+   <address>
+      <location_name>Fire Station #58</location_name>
+      <line1>251 Joeandy Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="108">
+   <address>
+      <location_name>Christ Church at San Pablo</location_name>
+      <line1>2002 San Pablo Rd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32224</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="109">
+   <address>
+      <location_name>Jacksonville Golf and Country Club</location_name>
+      <line1>3985 Hunt Club Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32224</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="110">
+   <address>
+      <location_name>Hodges Blvd Presbyterian Church</location_name>
+      <line1>4140 Hodges Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32224</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="111">
+   <address>
+      <location_name>East Pointe Baptist Church</location_name>
+      <line1>270 Kernan Blvd N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="112">
+   <address>
+      <location_name>Captains Club</location_name>
+      <line1>13363 Beach Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32246</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="113">
+   <address>
+      <location_name>The Woods Community Center</location_name>
+      <line1>2130 The Woods Dr E</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32246</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="114">
+   <address>
+      <location_name>Watson Reality Corporation</location_name>
+      <line1>13001 Atlantic Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="115">
+   <address>
+      <location_name>Fire Station #59</location_name>
+      <line1>14097 W M Davis Pkwy</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32224</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="116">
+   <address>
+      <location_name>Isle of Faith United Methodist Church</location_name>
+      <line1>1821 San Pablo Rd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32224</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="117">
+   <address>
+      <location_name>Pablo Creek Regional Library</location_name>
+      <line1>13295 Beach Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32246</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="118">
+   <address>
+      <location_name>Coastal Baptist Church</location_name>
+      <line1>750 Girvin Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="119">
+   <address>
+      <location_name>Lighthouse Church of the Nazarene</location_name>
+      <line1>1249 Girvin Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32225</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="120">
+   <address>
+      <location_name>Glendale Community Church</location_name>
+      <line1>6411 Beach Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32216</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="121">
+   <address>
+      <location_name>New Covenant Ministries</location_name>
+      <line1>2360 St Johns Bluff Rd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32246</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="122">
+   <address>
+      <location_name>Peace Presbyterian Church</location_name>
+      <line1>2300 Southside Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32216</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="123">
+   <address>
+      <location_name>Holiday Hill Baptist Church</location_name>
+      <line1>730 Mandalay Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32216</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="124">
+   <address>
+      <location_name>Southside Christian Church</location_name>
+      <line1>6755 Atlantic Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32211</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="125">
+   <address>
+      <location_name>Southpoint Baptist Church</location_name>
+      <line1>3335 Tiger Hole Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32216</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="126">
+   <address>
+      <location_name>Dean Road Church of Christ</location_name>
+      <line1>1968 Dean Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32216</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="127">
+   <address>
+      <location_name>Terry Road Baptist Church</location_name>
+      <line1>6625 Terry Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32216</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="128">
+   <address>
+      <location_name>Good News Baptist Church</location_name>
+      <line1>2600 St Johns Bluff Rd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32246</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="129">
+   <address>
+      <location_name>Windy Hill Community Center</location_name>
+      <line1>10540 Anders Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32246</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="130">
+   <address>
+      <location_name>Windy Hill Community Center</location_name>
+      <line1>10540 Anders Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32246</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="131">
+   <address>
+      <location_name>Balis Community Center</location_name>
+      <line1>1513 La Salle St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32207</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="132">
+   <address>
+      <location_name>Southside Assembly of God</location_name>
+      <line1>2118 Kings Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32207</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="133">
+   <address>
+      <location_name>Jacksonville Community Church</location_name>
+      <line1>8111 Old Kings Rd S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32217</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="134">
+   <address>
+      <location_name>Southside United Methodist Church</location_name>
+      <line1>3120 Hendricks Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32207</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="135">
+   <address>
+      <location_name>Saint Mark's Lutheran Church - ELCA</location_name>
+      <line1>3976 Hendricks Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32207</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="136">
+   <address>
+      <location_name>St. John the Divine Greek Orthodox Church</location_name>
+      <line1>3850 Atlantic Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32207</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="137">
+   <address>
+      <location_name>Hendricks Avenue Baptist Church</location_name>
+      <line1>4001 Hendricks Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32207</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="138">
+   <address>
+      <location_name>San Jose Church of Christ</location_name>
+      <line1>6233 San Jose Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32217</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="139">
+   <address>
+      <location_name>Christ the Messiah Church</location_name>
+      <line1>7576 San Jose blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32217</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="140">
+   <address>
+      <location_name>Wayman Chapel AME Church</location_name>
+      <line1>8855 Sanchez Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32217</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="141">
+   <address>
+      <location_name>Cuba Hunter Community Center</location_name>
+      <line1>3620 Bedford Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32207</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="142">
+   <address>
+      <location_name>Community Hospice of NE FL</location_name>
+      <line1>4266 Sunbeam Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32257</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="143">
+   <address>
+      <location_name>Calvin Presbyterian Church</location_name>
+      <line1>4050 Barnes Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32207</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="144">
+   <address>
+      <location_name>Italian American Club</location_name>
+      <line1>2838 Westberry Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32223</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="145">
+   <address>
+      <location_name>Mandarin Seventh Day Adventist Church</location_name>
+      <line1>10911 Old St Augustine Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32257</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="146">
+   <address>
+      <location_name>Mandarin Regional Library</location_name>
+      <line1>3330 Kori Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32257</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="147">
+   <address>
+      <location_name>Mandarin Presbyterian Church</location_name>
+      <line1>12001 Mandarin</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32223</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="148">
+   <address>
+      <location_name>Episcopal Church of Our Savior</location_name>
+      <line1>12236 Mandarin Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32223</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="149">
+   <address>
+      <location_name>South Mandarin Regional Library</location_name>
+      <line1>12125 San Jose Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32223</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="150">
+   <address>
+      <location_name>Augustine Landing</location_name>
+      <line1>10141 Old St Augustine Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32257</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="151">
+   <address>
+      <location_name>Freedom Christian Fellowship</location_name>
+      <line1>3423 Loretto Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32223</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="152">
+   <address>
+      <location_name>Burnett Park Recreation Center</location_name>
+      <line1>3740 Burnett Park Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32257</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="153">
+   <address>
+      <location_name>St Justin Martyr</location_name>
+      <line1>12460 Old St Augustine</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32258</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="154">
+   <address>
+      <location_name>Christ Church</location_name>
+      <line1>9791 Old St Augustine Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32257</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="155">
+   <address>
+      <location_name>Mandarin Church of Christ</location_name>
+      <line1>12791 Old St Augustine Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32258</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="156">
+   <address>
+      <location_name>Mandarin Moose Lodge #42</location_name>
+      <line1>4450 Losco Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32257</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="157">
+   <address>
+      <location_name>Cuban American Club</location_name>
+      <line1>5110 Lourcey Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32257</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="158">
+   <address>
+      <location_name>Charlie T. Joseph Senior Center</location_name>
+      <line1>6943 Buffalo Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="159">
+   <address>
+      <location_name>Unity Missionary Baptist Church</location_name>
+      <line1>281 44th St E</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="160">
+   <address>
+      <location_name>Oceanway Community Center</location_name>
+      <line1>12215 Sago Ave W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32218</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="161">
+   <address>
+      <location_name>Westside Church of Christ</location_name>
+      <line1>23 8th St W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32206</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="162">
+   <address>
+      <location_name>Garden City United Methodist Church</location_name>
+      <line1>3057 Dunn Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32218</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="163">
+   <address>
+      <location_name>Long Branch Senior Center</location_name>
+      <line1>4110 Franklin St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32206</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="164">
+   <address>
+      <location_name>Joseph Lee Community Center</location_name>
+      <line1>5120 Perry St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="165">
+   <address>
+      <location_name>Brown Eastside Branch Library</location_name>
+      <line1>1390 Harrison St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32206</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="166">
+   <address>
+      <location_name>First Timothy Baptist Church</location_name>
+      <line1>12103 Biscayne Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32218</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="167">
+   <address>
+      <location_name>Highlands Regional Library</location_name>
+      <line1>1826 Dunn Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32218</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="168">
+   <address>
+      <location_name>Eastside Community Center, PAL</location_name>
+      <line1>1050 Franklin St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32206</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="169">
+   <address>
+      <location_name>Mary Singleton Senior Citizen Center</location_name>
+      <line1>150 1st St E</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32206</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="170">
+   <address>
+      <location_name>Cathedral Terrace</location_name>
+      <line1>701 Ocean St N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32202</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="171">
+   <address>
+      <location_name>Grace Baptist Church</location_name>
+      <line1>1553 21st St E</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32206</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="172">
+   <address>
+      <location_name>Lake Forest Church of Christ</location_name>
+      <line1>950 Edgewood Ave W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="173">
+   <address>
+      <location_name>St Paul Missionary Baptist Church</location_name>
+      <line1>3738 Winton Dr</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="174">
+   <address>
+      <location_name>New Life Community Church</location_name>
+      <line1>11100 Wingate Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32218</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="175">
+   <address>
+      <location_name>N Main St Baptist Church</location_name>
+      <line1>7137 Main St N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="176">
+   <address>
+      <location_name>Riverview Senior Center</location_name>
+      <line1>9620 Water St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="177">
+   <address>
+      <location_name>Clanzel T. Brown Community Center</location_name>
+      <line1>4415 Moncrief Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="178">
+   <address>
+      <location_name>Bradham Brooks Regional Library</location_name>
+      <line1>1755 Edgewood Ave W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="179">
+   <address>
+      <location_name>Fairway Oaks</location_name>
+      <line1>5570 Golfbrook Dr</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="180">
+   <address>
+      <location_name>Simonds-Johnson Community Center</location_name>
+      <line1>3730 Moncrief Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="181">
+   <address>
+      <location_name>Temple Baptist Church</location_name>
+      <line1>485 Halsema Rd N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32220</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="182">
+   <address>
+      <location_name>Police Athletic League of Jacksonville, Inc</location_name>
+      <line1>2165 333rd St W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="183">
+   <address>
+      <location_name>Emmett Reed Center</location_name>
+      <line1>1093 6th St W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="184">
+   <address>
+      <location_name>Faith Baptist Church</location_name>
+      <line1>5330 Dunn Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32218</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="185">
+   <address>
+      <location_name>Cisco Garden Community Center</location_name>
+      <line1>4238 Jones Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32219</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="186">
+   <address>
+      <location_name>Graham Branch Library</location_name>
+      <line1>2304 Myrtle Ave N</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="187">
+   <address>
+      <location_name>Norwood Baptist Church</location_name>
+      <line1>6521 Norwood Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="188">
+   <address>
+      <location_name>Highlands Baptist Church</location_name>
+      <line1>2159 Broward Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32218</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="189">
+   <address>
+      <location_name>Greater Harvest Christian Fellowship</location_name>
+      <line1>9113 Ridge Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32208</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="190">
+   <address>
+      <location_name>CWA AFL-CIO Local #3106</location_name>
+      <line1>4076 Union Hall Pl</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32205</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="191">
+   <address>
+      <location_name>Schell-Sweet Resource Wellness Center</location_name>
+      <line1>1697 Kings Rd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="192">
+   <address>
+      <location_name>Hibernia Baptist Church- Hyde Park Campus</location_name>
+      <line1>2000 Lane Ave S</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="193">
+   <address>
+      <location_name>Johnnie W. Walker Community Center</location_name>
+      <line1>2500 20th St W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="194">
+   <address>
+      <location_name>Webb Wesconnett Regional Library</location_name>
+      <line1>6887 103rd St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="195">
+   <address>
+      <location_name>St Andrews Presbyterian Church</location_name>
+      <line1>6317 103rd St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="196">
+   <address>
+      <location_name>Wesconnett Church of Christ</location_name>
+      <line1>5223 Wesconnett Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32210</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="197">
+   <address>
+      <location_name>West Jacksonville Baptist Church</location_name>
+      <line1>5634 Normandy Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32205</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="198">
+   <address>
+      <location_name>Tru-Way Church of the Risen Christ</location_name>
+      <line1>2297 Edison Ave</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32204</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="199">
+   <address>
+      <location_name>Wallace Smalls Senior Citizen Center</location_name>
+      <line1>1083 Line St</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32209</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="200">
+   <address>
+      <location_name>Edith Brown Ford Center</location_name>
+      <line1>2839 Beaver St W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32254</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="201">
+   <address>
+      <location_name>Beaver St Enterprise Center</location_name>
+      <line1>1225 Beaver St W</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32204</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="202">
+   <address>
+      <location_name>Wesconnett Baptist Church</location_name>
+      <line1>5711 Wesconnett Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="203">
+   <address>
+      <location_name>Fleet Reserve Hall, Branch 126</location_name>
+      <line1>7673 Blanding Blvd</line1>
+      <city>Jacksonville</city>
+      <state>FL</state>
+      <zip>32244</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

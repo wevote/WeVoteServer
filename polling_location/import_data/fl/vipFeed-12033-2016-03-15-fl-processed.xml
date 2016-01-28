@@ -1,0 +1,966 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Escambia County, FL</name>
+  <vip_id>12033</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>PLEASANT GROVE BAPTIST CHURCH</location_name>
+      <line1>9301 Gulf Beach Hwy</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32507</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>MYRTLE GROVE UNITED METHODIST</location_name>
+      <line1>1030 N 57th Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32506</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>PINE FOREST UNITED METHODIST</location_name>
+      <line1>2800 Wilde Lake Blvd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32526</zip>
+   </address>
+   <directions>Wilde Lake Blvd is just south of the I-10 overpass on Pine Forest Rd.
+There is a Hardees on one corner and a BP Station on the other.
+The church is about 1 or 2 tenths of a mile down on the right   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>ST MONICA'S EPISCOPAL CHURCH</location_name>
+      <line1>699 S Highway 95A</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32533</zip>
+   </address>
+   <directions>On Old Palafox Hwy South of the Cantonment Post Office and North of Old Chemstrand Rd.                                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>PINEWOODS PRESBYTERIAN CHURCH</location_name>
+      <line1>2198 Highway 297A</line1>
+      <city>Cantonment</city>
+      <state>FL</state>
+      <zip>32533</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>WALNUT HILL COMMUNITY CENTER</location_name>
+      <line1>7850 Highway 97</line1>
+      <city>Walnut Hill</city>
+      <state>FL</state>
+      <zip>32568</zip>
+   </address>
+   <directions>In Walnut Hill on Highway 97 (Atmore Rd) - Voting in building behind Sheriff's substation</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>FRICKER COMMUNITY CENTER</location_name>
+      <line1>900 North F St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32501</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>COUNTY GOVERNMENT COMPLEX</location_name>
+      <line1>221 S Palafox Pl</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32502</zip>
+   </address>
+   <directions>Lobby of County Commission Building</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>MCDAVID VFD</location_name>
+      <line1>100 N Century Blvd</line1>
+      <city>McDavid</city>
+      <state>FL</state>
+      <zip>32568</zip>
+   </address>
+   <directions>Highway 29 across from Watson's Service Station                                                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>BARRINEAU PARK COMMUNITY CNTR</location_name>
+      <line1>6055 Barrineau Park School Rd</line1>
+      <city>MOLINO</city>
+      <state>FL</state>
+      <zip>32577</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>INTERNATIONAL PAPER</location_name>
+      <line1>375 Muscogee Rd</line1>
+      <city>Cantonment</city>
+      <state>FL</state>
+      <zip>32533</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>CENTURY CITY HALL</location_name>
+      <line1>7995 N Century Blvd</line1>
+      <city>Century</city>
+      <state>FL</state>
+      <zip>32535</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>BYRNEVILLE COMMUNITY CENTER</location_name>
+      <line1>1701 Highway 4A</line1>
+      <city>Century</city>
+      <state>FL</state>
+      <zip>32535</zip>
+   </address>
+   <directions>Corner of Highway 4 and Highway 4A                                                                                                                                                                      </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>WARRINGTON UNITED METHODIST</location_name>
+      <line1>301 E Winthrop Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32507-3669</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>AZALEA TRACE ADMIN/INFO BUILDING</location_name>
+      <line1>10100 Hillview Dr</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32514</zip>
+   </address>
+   <directions>University Pkwy; North off of 9 Mile Rd to Hillview Dr
+The last bldg on the RIGHT                                                                                                                      </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>ST ANNES CATH CHURCH FAM CNTR</location_name>
+      <line1>5200 Saufley Field Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32526</zip>
+   </address>
+   <directions>North side of Saufley Field Rd between Blue Angel Pkwy and Muldoon Rd                                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>DAMASCUS ROAD MISSIONARY BAPTIST</location_name>
+      <line1>8198 Untreiner Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32534</zip>
+   </address>
+   <directions>On Untreiner Ave South of Detroit Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>MT OLIVE MISSIONARY BAPTIST</location_name>
+      <line1>500 N Davis Hwy</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32501</zip>
+   </address>
+   <directions>On Davis Hwy South of Cervantes                                                                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>VICKREY COMMUNITY CENTER</location_name>
+      <line1>2130 Summit Blvd</line1>
+      <city>PENSACOLA</city>
+      <state>FL</state>
+      <zip>32504</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>CHRIST CHURCH PENSACOLA</location_name>
+      <line1>18 W Wright St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32501</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>SANDERS BEACH-CORINNE JONES CTR</location_name>
+      <line1>913 South I St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32502</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>FIRST BAPTIST CHURCH OF BRATT</location_name>
+      <line1>4570 W Highway 4</line1>
+      <city>Century</city>
+      <state>FL</state>
+      <zip>32535</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>MONTCLAIR ELEMENTARY SCHOOL</location_name>
+      <line1>820 W Massachusetts Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32505</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>EAST PENSACOLA HEIGHTS COMM CTR</location_name>
+      <line1>3208 E Gonzalez St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32501</zip>
+   </address>
+   <directions>On the corner of Gonzalez St
+and Van Kirk St                                                                                                                                                           </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>QUINTETTE COMMUNITY CENTER</location_name>
+      <line1>2490 Quintette Ln</line1>
+      <city>CANTONMENT</city>
+      <state>FL</state>
+      <zip>32533</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>GONZALEZ UNITED METHODIST</location_name>
+      <line1>2026 Pauline St</line1>
+      <city>Cantonment</city>
+      <state>FL</state>
+      <zip>32533</zip>
+   </address>
+   <directions>On Pauline St between
+Kingsfield Rd and Old Chemstrand Rd
+In the Community Life Center</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>BAYVIEW SENIOR RESOURCE CENTER</location_name>
+      <line1>2000 E Lloyd St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>North of Cervantes St at the corner of
+20th Ave and Lloyd St                                                                                                                                           </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>BAYVIEW SENIOR RESOURCE CENTER</location_name>
+      <line1>2000 E Lloyd St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>North of Cervantes St at the corner of
+20th Ave and Lloyd St                                                                                                                                           </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>COKESBURY CHURCH SUMMIT BLVD</location_name>
+      <line1>3300 Summit Blvd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503-4307</zip>
+   </address>
+   <directions>Just East of Spanish Trail                                                                                                                                                                              </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>BEULAH FREE WILL BAPTIST</location_name>
+      <line1>7561 Mobile Hwy</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32526</zip>
+   </address>
+   <directions>BETWEEN WOODSIDE RD &amp; BEULAH SCHOOL RD, 
+ACROSS FROM BRANDYWOOD                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>TRINITY PRESBYTERIAN CHURCH</location_name>
+      <line1>3400 Bayou Blvd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>FRIENDSHIP MISSIONARY BAPTIST CHURCH</location_name>
+      <line1>2601 W Strong St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32505</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>COUNTY CENTRAL OFFICE COMPLEX</location_name>
+      <line1>3363 West Park Pl</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32505</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>GRACE LUTHERAN CHURCH</location_name>
+      <line1>6601 N 9TH Ave</line1>
+      <city>PENSACOLA</city>
+      <state>FL</state>
+      <zip>32504</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>MALCOLM YONGE CENTER</location_name>
+      <line1>925 E Jackson St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32501</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>FERRY PASS MASONIC LODGE #348</location_name>
+      <line1>2320 E Johnson Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32514</zip>
+   </address>
+   <directions>EAST OF DAVIS HWY                                                                                                                                                                                       </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>ELKS LODGE BPOE #2108</location_name>
+      <line1>727 S 72nd Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32506</zip>
+   </address>
+   <directions>CORNER OF HIGHWAY 98 AND 72ND AVE                                                                                                                                                                       </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>BLUE ANGELS ELEMENTARY SCHOOL</location_name>
+      <line1>1551 Dog Track Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32506</zip>
+   </address>
+   <directions>6 TENTHS OF A  MILE NORTHWEST OF S BLUE ANGEL PKWY                                                                                                                                                      </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>LEGION FIELD RESOURCE CENTER</location_name>
+      <line1>1301 W Gregory St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32502</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>BRIT AHM MESSIANIC SYNAGOGUE</location_name>
+      <line1>6700 Spanish Trl</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32504</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>EBONWOOD COMMUNITY CENTER</location_name>
+      <line1>3511 W Scott St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32505</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>ELKS LODGE BPOE #2108</location_name>
+      <line1>727 S 72nd Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32506</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>CHARITY CHAPEL CHURCH</location_name>
+      <line1>5820 Montgomery Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32526</zip>
+   </address>
+   <directions>SOUTH OF MICHIGAN AVE                                                                                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="48">
+   <address>
+      <location_name>MARIE K. YOUNG WEDGEWOOD COMM CNTR</location_name>
+      <line1>6405 WAGNER RD</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32505</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="49">
+   <address>
+      <location_name>COKESBURY UNITED METHODIST</location_name>
+      <line1>5725 N 9th Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32504</zip>
+   </address>
+   <directions>Across from PJC; Asbury Place Building on College Blvd &amp; 9th Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="50">
+   <address>
+      <location_name>HOLY SPIRIT CATHOLIC CHURCH</location_name>
+      <line1>10650 Gulf Beach Hwy</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32507</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="51">
+   <address>
+      <location_name>PENS INTERSTATE FAIRGROUNDS</location_name>
+      <line1>6655 Mobile Hwy</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32526</zip>
+   </address>
+   <directions>AT MOBILE HWY &amp; PINE FOREST RD.                                                                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="52">
+   <address>
+      <location_name>FIRST BAPT CHURCH OF ENSLEY</location_name>
+      <line1>50 W Johnson Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32534</zip>
+   </address>
+   <directions>CORNER OF JOHNSON AVE AND VANCE AVE                                                                                                                                                                     </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="53">
+   <address>
+      <location_name>WOODHAM MIDDLE SCHOOL</location_name>
+      <line1>150 E Burgess Rd</line1>
+      <city>Pensacola,</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>Formerly Woodham High School</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="54">
+   <address>
+      <location_name>WARRINGTON PRESBYTERIAN</location_name>
+      <line1>406 S Navy Blvd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>CORNER OF SUNSET AVE AND SOUTH NAVY BLVD                                                                                                                                                                </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="55">
+   <address>
+      <location_name>ST CHRISTOPHER'S EPISCOPAL CHURCH</location_name>
+      <line1>3200 N 12th Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="56">
+   <address>
+      <location_name>LIBERTY CHURCH</location_name>
+      <line1>2221 S Blue Angel Pkwy</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32506</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="57">
+   <address>
+      <location_name>ESCAMBIA CO EXTENSION OFFICE</location_name>
+      <line1>3740 Stefani Rd</line1>
+      <city>Cantonment</city>
+      <state>FL</state>
+      <zip>32533</zip>
+   </address>
+   <directions>BETWEEN 9 1/2  &amp; 10 MILE RD                                                                                                                                                                             </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="58">
+   <address>
+      <location_name>PENSACOLA BAPTIST TEMPLE</location_name>
+      <line1>5000 Cerny Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32526</zip>
+   </address>
+   <directions>AT THE CORNER OF CERNY &amp; MULDOON RD.                                                                                                                                                                    </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="59">
+   <address>
+      <location_name>LEXINGTON TERRACE COMM CNTR</location_name>
+      <line1>700 S Old Corry Field Rd</line1>
+      <city>PENSACOLA</city>
+      <state>FL</state>
+      <zip>32507</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="60">
+   <address>
+      <location_name>MYRTLE GROVE BAPTIST CHURCH</location_name>
+      <line1>5920 Lillian Hwy</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32506</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="61">
+   <address>
+      <location_name>FRIENDSHIP MISSIONARY BAPTIST CHURCH</location_name>
+      <line1>2601 W Strong St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32505</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="62">
+   <address>
+      <location_name>WARRINGTON ASSEMBLY OF GOD</location_name>
+      <line1>901 Wayne Ave</line1>
+      <city>PENSACOLA</city>
+      <state>FL</state>
+      <zip>32507</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="63">
+   <address>
+      <location_name>PINE SUMMIT BAPTIST CHURCH</location_name>
+      <line1>2920 Bellview Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32526</zip>
+   </address>
+   <directions>NORTH OF MICHIGAN AVE &amp; EAST OF MOBILE HWY                                                                                                                                                              </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="64">
+   <address>
+      <location_name>UNIVERSITY PINES RETIREMENT</location_name>
+      <line1>8991 University Pkwy</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32514</zip>
+   </address>
+   <directions>BETWEEN JOHNSON AVE &amp; NINE MILE RD                                                                                                                                                                      </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="65">
+   <address>
+      <location_name>ST JOHN DIVINE BAPTIST CHURCH</location_name>
+      <line1>620 E Jordan St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>NORTH SIDE OF JORDAN BETWEEN 6TH &amp; 7TH AVE                                                                                                                                                              </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="66">
+   <address>
+      <location_name>OLIVE BAPTIST CHURCH</location_name>
+      <line1>1836 E Olive Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32514</zip>
+   </address>
+   <directions>CORNER OF OLIVE RD AND DAVIS HWY                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="67">
+   <address>
+      <location_name>PENSACOLA BEACH COMM CHURCH</location_name>
+      <line1>920 Panferio Dr</line1>
+      <city>PENSACOLA BEACH</city>
+      <state>FL</state>
+      <zip>32561</zip>
+   </address>
+   <directions>FELLOWSHIP HALL</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="68">
+   <address>
+      <location_name>PERDIDO BAY BAPTIST CHURCH</location_name>
+      <line1>12600 Sorrento Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32506</zip>
+   </address>
+   <directions>WEST OF BAUER &amp; MERLIN RD'S                                                                                                                                                                             </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="69">
+   <address>
+      <location_name>VICKREY COMMUNITY CENTER</location_name>
+      <line1>2130 Summit Blvd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32504</zip>
+   </address>
+   <directions>JUST EAST OF 12TH AVE                                                                                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="70">
+   <address>
+      <location_name>MACEDONIA BAPTIST CHURCH</location_name>
+      <line1>3802 N 9th Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>SOUTH OF FAIRFIELD DR                                                                                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="71">
+   <address>
+      <location_name>MYRTLE GROVE BAPTIST CHURCH</location_name>
+      <line1>5920 Lililian HWY</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32506</zip>
+   </address>
+   <directions>On North East corner of Lillian Hwy and 61st Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="72">
+   <address>
+      <location_name>PLAINVIEW BAPTIST CHURCH</location_name>
+      <line1>1101 W Nine Mile Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32534</zip>
+   </address>
+   <directions>BETWEEN HWY 29 &amp; PINE FOREST RD                                                                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="73">
+   <address>
+      <location_name>MARCUS POINTE BAPTIST CHURCH</location_name>
+      <line1>6205 N W ST</line1>
+      <city>PENSACOLA</city>
+      <state>FL</state>
+      <zip>32505</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="74">
+   <address>
+      <location_name>LAKEVIEW BAPTIST CHURCH</location_name>
+      <line1>1100 W Michigan Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32505</zip>
+   </address>
+   <directions>JUST EAST OF CRESCENT LAKE, TURN SOUTH ON MARSEILLE DR, 1st HOUSE ON THE RIGHT.                                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="75">
+   <address>
+      <location_name>MAYFAIR COMMUNITY CENTER</location_name>
+      <line1>701 S Madison Dr</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32505</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="76">
+   <address>
+      <location_name>PERDIDO BAY UNITED METHODIST</location_name>
+      <line1>13660 Innerarity Point Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32507</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="77">
+   <address>
+      <location_name>GRACE LUTHERAN CHURCH</location_name>
+      <line1>6601 N 9th Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32504</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="78">
+   <address>
+      <location_name>FAITH BAPTIST CHURCH</location_name>
+      <line1>3600 Creighton Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32504</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="79">
+   <address>
+      <location_name>HOLY CROSS EPISCOPAL CHURCH</location_name>
+      <line1>7979 N 9th Ave</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32514</zip>
+   </address>
+   <directions>BETWEEN OLIVE RD &amp; I-10                                                                                                                                                                                 </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="80">
+   <address>
+      <location_name>PCC MULLENIX CHAPEL/FELLOWSHIP HALL</location_name>
+      <line1>5406 Rawson Ln</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="81">
+   <address>
+      <location_name>ST LUKE UNITED METHODIST</location_name>
+      <line1>1394 E Nine Mile Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32514</zip>
+   </address>
+   <directions>AT FOXRUN RD                                                                                                                                                                                            </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="82">
+   <address>
+      <location_name>HILLCREST BAPTIST CHURCH</location_name>
+      <line1>800 E Nine Mile Rd</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32514</zip>
+   </address>
+   <directions>AT GUIDY LN                                                                                                                                                                                             </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="83">
+   <address>
+      <location_name>ESCAMBIA EDUCATION ASSOC</location_name>
+      <line1>6551 N Palafox St</line1>
+      <city>Pensacola</city>
+      <state>FL</state>
+      <zip>32503</zip>
+   </address>
+   <directions>BETWEEN OAKFIELD DR &amp; HANCOCK LN                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>
