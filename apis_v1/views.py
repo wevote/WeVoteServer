@@ -685,7 +685,7 @@ def voter_location_retrieve_from_ip_view(request):
 
 def voter_position_retrieve_view(request):
     """
-    Retrieve all of the details about a single position based on unique identifier
+    Retrieve all of the details about a single position based on unique identifier. voterPositionRetrieve
     :param request:
     :return:
     """

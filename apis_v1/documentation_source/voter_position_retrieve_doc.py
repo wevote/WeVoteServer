@@ -97,7 +97,7 @@ def voter_position_retrieve_doc_template_values(url_root):
                    '  "office_we_vote_id": string,\n' \
                    '  "candidate_we_vote_id": string,\n' \
                    '  "measure_we_vote_id": string,\n' \
-                   '  "stance": string (support/oppose/info only),\n' \
+                   '  "stance": string (SUPPORT, OPPOSE, INFO_ONLY, or NO_STANCE),\n' \
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \
                    '  "more_info_url": string,\n' \

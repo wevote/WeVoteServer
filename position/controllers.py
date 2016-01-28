@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PositionEntered, PositionEnteredManager, PositionListManager, ANY_STANCE
+from .models import PositionEntered, PositionEnteredManager, PositionListManager, ANY_STANCE, NO_STANCE
 from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
@@ -106,7 +106,7 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
     else:
         json_data = {
             'status':                   results['status'],
-            'success':                  False,
+            'success':                  results['success'],
             'position_id':              position_id,
             'position_we_vote_id':      we_vote_id,
             'ballot_item_display_name': '',
@@ -119,7 +119,7 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'office_we_vote_id':        '',
             'candidate_we_vote_id':     '',
             'measure_we_vote_id':       '',
-            'stance':                   '',
+            'stance':                   NO_STANCE,
             'statement_text':           '',
             'statement_html':           '',
             'more_info_url':            '',
