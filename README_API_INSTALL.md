@@ -196,6 +196,9 @@ If you need to retrieve fresh ballot data, you will need to sign up for a Google
   - Go here:  https://console.developers.google.com/projectselector/apis/credentials?pli=1
   - Create a new project
   - Click Credentials -> New credentials -> API Key -> Browser Key
+  - Check to make sure the "Google Civic Information API" is enabled here: https://console.developers.google.com/apis/enabled?project=atomic-router-681
+  - If you don't see it, go here and search for "Google Civic": https://console.developers.google.com/apis/library?project=atomic-router-681
+  - When you find it, click the "Enable API" button.
   - Copy your newly generated key and paste it into config/environment_variables.json as the value for GOOGLE_CIVIC_API_KEY
     
 [Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
