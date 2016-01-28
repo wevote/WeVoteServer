@@ -137,6 +137,11 @@ specify the level assigned to each message. You can change this to info items by
     $ make check
     $ make install
     $ cd ..
+    
+On OS X 10.10.5 I got an error (autoreconf: command not found), and had to do this first:
+    
+    $ brew install automake
+    $ brew install libtool
 
 ###  Run the command that downloads the GeoLite database from the WeVoteServer root folder (Where this README lives)
 
