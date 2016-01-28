@@ -1,0 +1,6029 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>State of NEW MEXICO</name>
+  <vip_id>35</vip_id>
+  <datetime>2014-04-10T09:03:23</datetime>
+  <organization_url>WWW.SOS.STATE.NM.US</organization_url>
+</source>
+<polling_location id="66602481">
+  <address>
+    <city>Tijeras</city>
+    <line1>12 Camino Municipal</line1>
+    <state>NM</state>
+    <location_name>Tijeras City Hall</location_name>
+    <zip>87059</zip>
+  </address>
+</polling_location>
+<polling_location id="66602483">
+  <address>
+    <city>Albuquerque</city>
+    <line1>620 Lomas Blvd NW</line1>
+    <state>NM</state>
+    <location_name>Clerk's Annex</location_name>
+    <zip>87102</zip>
+  </address>
+</polling_location>
+<polling_location id="66602490">
+  <address>
+    <city>Albuquerque</city>
+    <line1>3910 Isleta Blvd. SW</line1>
+    <state>NM</state>
+    <location_name>Rio Bravo Senior Meal Site</location_name>
+    <zip>87105</zip>
+  </address>
+</polling_location>
+<polling_location id="66602496">
+  <address>
+    <city>Albuquerque</city>
+    <line1>Student Union Building, Cochiti Lounge, 2nd Floor</line1>
+    <state>NM</state>
+    <location_name>University of New Mexico</location_name>
+    <zip>87106</zip>
+  </address>
+</polling_location>
+<polling_location id="66602505">
+  <address>
+    <city>Albuquerque</city>
+    <line1>8000 Paseo Del Norte NE, Suite A2</line1>
+    <state>NM</state>
+    <location_name>Paseo Crossing Shopping Center</location_name>
+    <zip>87109</zip>
+  </address>
+</polling_location>
+<polling_location id="66602506">
+  <address>
+    <city>Albuquerque</city>
+    <line1>5339 &amp; 5339A Menaul Blvd. NE</line1>
+    <state>NM</state>
+    <location_name>Daskalos Center</location_name>
+    <zip>87110</zip>
+  </address>
+</polling_location>
+<polling_location id="66602512">
+  <address>
+    <city>Albuquerque</city>
+    <line1>11816 Central Av. SE, Suite C</line1>
+    <state>NM</state>
+    <location_name>Central and Juan Tabo Plaza</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602525">
+  <address>
+    <city>Albuquerque</city>
+    <line1>9421 Coors Blvd. NW, Suites G &amp; H</line1>
+    <state>NM</state>
+    <location_name>Sun Country Plaza</location_name>
+    <zip>87114</zip>
+  </address>
+</polling_location>
+<polling_location id="66602552">
+  <address>
+    <city>Albuquerque</city>
+    <line1>12611 Montgomery NE, Ste. A-1-A-2</line1>
+    <state>NM</state>
+    <location_name>Gleenwood Village</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602554">
+  <address>
+    <city>Albuquerque</city>
+    <line1>6001 San Mateo Blvd.</line1>
+    <state>NM</state>
+    <location_name>Fiesta del Norte Shopping Center</location_name>
+    <zip>87109</zip>
+  </address>
+</polling_location>
+<polling_location id="66602555">
+  <address>
+    <city>Albuquerque</city>
+    <line1>2008 Larrazolo Rd. SW</line1>
+    <state>NM</state>
+    <location_name>South Valley Multi Gen Center</location_name>
+    <zip>87105</zip>
+  </address>
+</polling_location>
+<polling_location id="66602557">
+  <address>
+    <city>Albuquerque</city>
+    <line1>8201 Golf Courst, Suite C-1</line1>
+    <state>NM</state>
+    <location_name>Petroglyph Plaza</location_name>
+    <zip>87114</zip>
+  </address>
+</polling_location>
+<polling_location id="66602559">
+  <address>
+    <city>Albuquerque</city>
+    <line1>5201 Ouray NW Ste. D-2</line1>
+    <state>NM</state>
+    <location_name>Westbluff Center</location_name>
+    <zip>87120</zip>
+  </address>
+</polling_location>
+<polling_location id="66602561">
+  <address>
+    <city>Albuquerque</city>
+    <line1>6001 4th St NW, Ste L &amp; M</line1>
+    <state>NM</state>
+    <location_name>Los Rancho Villa</location_name>
+    <zip>87107</zip>
+  </address>
+</polling_location>
+<polling_location id="66602562">
+  <address>
+    <city>Albuquerque</city>
+    <line1>955 San Pedro SE</line1>
+    <state>NM</state>
+    <location_name>Willow Village</location_name>
+    <zip>87108</zip>
+  </address>
+</polling_location>
+<polling_location id="66602563">
+  <address>
+    <city>Albuquerque</city>
+    <line1>9421 Coors Blvd. NW Ste. G&amp;H</line1>
+    <state>NM</state>
+    <location_name>Sun Country Plaza</location_name>
+    <zip>87114</zip>
+  </address>
+</polling_location>
+<polling_location id="66602564">
+  <address>
+    <city>Albuquerque</city>
+    <line1>Roma Ave. NE</line1>
+    <state>NM</state>
+    <location_name>Student Union Building, 2nd Floor</location_name>
+    <zip>87106</zip>
+  </address>
+</polling_location>
+<polling_location id="66602566">
+  <address>
+    <city>Isleta</city>
+    <line1>Tribal Road 40</line1>
+    <state>NM</state>
+    <location_name>Isleta Recreation Center Building 60</location_name>
+    <zip>87022</zip>
+  </address>
+</polling_location>
+<polling_location id="66602570">
+  <address>
+    <city>Carlsbad</city>
+    <line1>325 S. Main St.</line1>
+    <state>NM</state>
+    <location_name>Eddy County Clerk's Office</location_name>
+    <zip>88220</zip>
+  </address>
+</polling_location>
+<polling_location id="66602614">
+  <address>
+    <city>Jal</city>
+    <line1>100 W. Idaho Ave.</line1>
+    <state>NM</state>
+    <location_name>Jal Chamber of Commerce</location_name>
+    <zip>88250</zip>
+  </address>
+</polling_location>
+<polling_location id="66602623">
+  <address>
+    <city>Las Cruces</city>
+    <line1>200 E Picacho Ave</line1>
+    <state>NM</state>
+    <location_name>Branigan Library</location_name>
+    <zip>88001</zip>
+  </address>
+</polling_location>
+<polling_location id="66602669">
+  <address>
+    <city>Bayard</city>
+    <line1>290 Hurley Ave.</line1>
+    <state>NM</state>
+    <location_name>Bayard Community Center</location_name>
+    <zip>88023</zip>
+  </address>
+</polling_location>
+<polling_location id="66602702">
+  <address>
+    <city>Zuni</city>
+    <line1>1203 State Hwy 53</line1>
+    <state>NM</state>
+    <location_name>Zuni Tribal Building</location_name>
+    <zip>87327</zip>
+  </address>
+</polling_location>
+<polling_location id="66602715">
+  <address>
+    <city>Belen</city>
+    <line1>333 Becker Ave.</line1>
+    <state>NM</state>
+    <location_name>Belen Public Library</location_name>
+    <zip>87002</zip>
+  </address>
+</polling_location>
+<polling_location id="66602716">
+  <address>
+    <city>Bosque Farms</city>
+    <line1>1455 W. Bosque Loop</line1>
+    <state>NM</state>
+    <location_name>Bosque Farms Public Library</location_name>
+    <zip>87068</zip>
+  </address>
+</polling_location>
+<polling_location id="66602822">
+  <address>
+    <city>Carrizozo</city>
+    <line1>300 Central Avenue</line1>
+    <state>NM</state>
+    <location_name>Lincoln County Courthouse</location_name>
+    <zip>88301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602832">
+  <address>
+    <city>Fort Sumner</city>
+    <line1>248 East Ave C</line1>
+    <state>NM</state>
+    <location_name>De Baca County Clerk</location_name>
+    <zip>88119</zip>
+  </address>
+</polling_location>
+<polling_location id="66602837">
+  <address>
+    <city>Zia Pueblo</city>
+    <line1>135 Capital Square Dr.</line1>
+    <state>NM</state>
+    <location_name>Zia Pueblo Community Center</location_name>
+    <zip>87053</zip>
+  </address>
+</polling_location>
+<polling_location id="66602853">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>3200 Civic Center Circle</line1>
+    <state>NM</state>
+    <location_name>Rio Rancho City Hall</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602869">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>1500 Idalia Rd NE, Bldg C</line1>
+    <state>NM</state>
+    <location_name>Sandoval County Transit Center</location_name>
+    <zip>87144</zip>
+  </address>
+</polling_location>
+<polling_location id="66602875">
+  <address>
+    <city>White Rock</city>
+    <line1>129 NM State Road 4</line1>
+    <state>NM</state>
+    <location_name>White Rock Fire Station #3</location_name>
+    <zip>87544</zip>
+  </address>
+</polling_location>
+<polling_location id="66602877">
+  <address>
+    <city>Los Alamos</city>
+    <line1>1000 Central Ave.</line1>
+    <state>NM</state>
+    <location_name>Los Alamos County Municipal Bldg.</location_name>
+    <zip>87544</zip>
+  </address>
+</polling_location>
+<polling_location id="66602001">
+  <address>
+    <city>Cimarron</city>
+    <line1>356 E. 9th Street, #B</line1>
+    <state>NM</state>
+    <location_name>Cimarron City Hall</location_name>
+    <zip>87714</zip>
+  </address>
+</polling_location>
+<polling_location id="66602003">
+  <address>
+    <city>Springer</city>
+    <line1>516 Maxwell Avenue</line1>
+    <state>NM</state>
+    <location_name>Luna Community Center</location_name>
+    <zip>87747</zip>
+  </address>
+</polling_location>
+<polling_location id="66602004">
+  <address>
+    <city>Springer</city>
+    <line1>1401 8th Street</line1>
+    <state>NM</state>
+    <location_name>High School</location_name>
+    <zip>87747</zip>
+  </address>
+</polling_location>
+<polling_location id="66602005">
+  <address>
+    <city>Maxwell</city>
+    <line1>4th Street &amp; Parque</line1>
+    <state>NM</state>
+    <location_name>School Auditorium</location_name>
+    <zip>87728</zip>
+  </address>
+</polling_location>
+<polling_location id="66602006">
+  <address>
+    <city>House</city>
+    <line1>110 South Apple Street, House</line1>
+    <state>NM</state>
+    <location_name>House Community/Senior Citizens Center</location_name>
+    <zip>88121</zip>
+  </address>
+</polling_location>
+<polling_location id="66602007">
+  <address>
+    <city>Forrest</city>
+    <line1>209 State Highway 210</line1>
+    <state>NM</state>
+    <location_name>Forrest Fire Department</location_name>
+    <zip>87571</zip>
+  </address>
+</polling_location>
+<polling_location id="66602008">
+  <address>
+    <city>San Jon</city>
+    <line1>2357 State Highway 469</line1>
+    <state>NM</state>
+    <location_name>San Jon City Community Center</location_name>
+    <zip>88434</zip>
+  </address>
+</polling_location>
+<polling_location id="66602009">
+  <address>
+    <city>Nara Vista</city>
+    <line1>950 Bell Street</line1>
+    <state>NM</state>
+    <location_name>Nara Visa Community Center</location_name>
+    <zip>88430</zip>
+  </address>
+</polling_location>
+<polling_location id="66602010">
+  <address>
+    <city>Logan</city>
+    <line1>100 North Second Street</line1>
+    <state>NM</state>
+    <location_name>Logan Civic Center</location_name>
+    <zip>88426</zip>
+  </address>
+</polling_location>
+<polling_location id="66602011">
+  <address>
+    <city>Santa Rosa</city>
+    <line1>244 S. 4th Street</line1>
+    <state>NM</state>
+    <location_name>City/County Complex</location_name>
+    <zip>88435</zip>
+  </address>
+</polling_location>
+<polling_location id="66602012">
+  <address>
+    <city>Santa Rosa</city>
+    <line1>1153 State Highway 91</line1>
+    <state>NM</state>
+    <location_name>KC Hall</location_name>
+    <zip>88435</zip>
+  </address>
+</polling_location>
+<polling_location id="66602013">
+  <address>
+    <city>Santa Rosa</city>
+    <line1>43 N. 4th Street</line1>
+    <state>NM</state>
+    <location_name>Santa Rosa Fire Station</location_name>
+    <zip>88435</zip>
+  </address>
+</polling_location>
+<polling_location id="66602014">
+  <address>
+    <city>Vaughn</city>
+    <line1>781 8th Street</line1>
+    <state>NM</state>
+    <location_name>Vaughn Community Center</location_name>
+    <zip>88353</zip>
+  </address>
+</polling_location>
+<polling_location id="66602016">
+  <address>
+    <city>Mosquero</city>
+    <line1>24 Main Street</line1>
+    <state>NM</state>
+    <location_name>Harding County Annex</location_name>
+    <zip>87733</zip>
+  </address>
+</polling_location>
+<polling_location id="66602017">
+  <address>
+    <city>Roy</city>
+    <line1>557 Wagon Mound Hwy</line1>
+    <state>NM</state>
+    <location_name>Harding County Community Building</location_name>
+    <zip>87743</zip>
+  </address>
+</polling_location>
+<polling_location id="66602018">
+  <address>
+    <city>Jamestown</city>
+    <line1>40 Whispering Cedars Rd.</line1>
+    <state>NM</state>
+    <location_name>Whispering Cedars Fire Station</location_name>
+    <zip>87347</zip>
+  </address>
+</polling_location>
+<polling_location id="66602019">
+  <address>
+    <city>Navajo</city>
+    <line1>Shepard Springs Rd.</line1>
+    <state>NM</state>
+    <location_name>Red Lake Chapter House</location_name>
+    <zip>87328</zip>
+  </address>
+</polling_location>
+<polling_location id="66602020">
+  <address>
+    <city>Tse Bonito</city>
+    <line1>02 Hilltop Rd.</line1>
+    <state>NM</state>
+    <location_name>Hilltop Christian School</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602021">
+  <address>
+    <city>Mexican Springs</city>
+    <line1>18 Miles N. 491; 3 Miles West on Navajo Route 30</line1>
+    <state>NM</state>
+    <location_name>Mexican Springs Chapter House</location_name>
+    <zip>87320</zip>
+  </address>
+</polling_location>
+<polling_location id="66602022">
+  <address>
+    <city>Tohatchi</city>
+    <line1>100 Chooshgai Road</line1>
+    <state>NM</state>
+    <location_name>Tohatchi Elementary School</location_name>
+    <zip>87325</zip>
+  </address>
+</polling_location>
+<polling_location id="66602023">
+  <address>
+    <city>Twin Lakes</city>
+    <line1>Mile Marker 13 N Hwy 491</line1>
+    <state>NM</state>
+    <location_name>Twin Lakes Elementary School</location_name>
+    <zip>87375</zip>
+  </address>
+</polling_location>
+<polling_location id="66602024">
+  <address>
+    <city>Brimhall</city>
+    <line1>Navajo Rt. 9; 10 Miles East of          Hwy 491</line1>
+    <state>NM</state>
+    <location_name>Coyote Canyon Chapter House</location_name>
+    <zip>87310</zip>
+  </address>
+</polling_location>
+<polling_location id="66602025">
+  <address>
+    <city>Crownpoint</city>
+    <line1>Mile Marker 24.5 Navajo Rt. 9; 17 Miles West of Crownpoint</line1>
+    <state>NM</state>
+    <location_name>Standing Rock Chapter House</location_name>
+    <zip>87313</zip>
+  </address>
+</polling_location>
+<polling_location id="66602026">
+  <address>
+    <city>Crownpoint</city>
+    <line1>1 Main Street</line1>
+    <state>NM</state>
+    <location_name>Crownpoint Elementary School</location_name>
+    <zip>87313</zip>
+  </address>
+</polling_location>
+<polling_location id="66602027">
+  <address>
+    <city>Crownpoint</city>
+    <line1>1 Eagle Drive</line1>
+    <state>NM</state>
+    <location_name>Crownpoint Middle School</location_name>
+    <zip>87313</zip>
+  </address>
+</polling_location>
+<polling_location id="66602028">
+  <address>
+    <city>Cuba</city>
+    <line1>HCR 79 Box 4069</line1>
+    <state>NM</state>
+    <location_name>Whitehorse Lake Chapter House</location_name>
+    <zip>87013</zip>
+  </address>
+</polling_location>
+<polling_location id="66602029">
+  <address>
+    <city>Ojo Encino</city>
+    <line1>HCR 79 Box 1500</line1>
+    <state>NM</state>
+    <location_name>Ojo Encino Chapter House</location_name>
+    <zip>87013</zip>
+  </address>
+</polling_location>
+<polling_location id="66602030">
+  <address>
+    <city>Prewitt</city>
+    <line1>1600 County Road 19</line1>
+    <state>NM</state>
+    <location_name>Borrego Pass Elementary School</location_name>
+    <zip>87313</zip>
+  </address>
+</polling_location>
+<polling_location id="66602031">
+  <address>
+    <city>Prewitt</city>
+    <line1>1669 State Hwy 122</line1>
+    <state>NM</state>
+    <location_name>Baca Chapter House</location_name>
+    <zip>87045</zip>
+  </address>
+</polling_location>
+<polling_location id="66602032">
+  <address>
+    <city>Smith Lake</city>
+    <line1>1299 Hwy 371</line1>
+    <state>NM</state>
+    <location_name>Smith Lake Chapter House</location_name>
+    <zip>87323</zip>
+  </address>
+</polling_location>
+<polling_location id="66602033">
+  <address>
+    <city>Thoreau</city>
+    <line1>8 Hawk Circle</line1>
+    <state>NM</state>
+    <location_name>Thoreau Middle School</location_name>
+    <zip>87323</zip>
+  </address>
+</polling_location>
+<polling_location id="66602034">
+  <address>
+    <city>Thoreau</city>
+    <line1>Building #6  4th Ave.</line1>
+    <state>NM</state>
+    <location_name>Thoreau Elementary School</location_name>
+    <zip>87323</zip>
+  </address>
+</polling_location>
+<polling_location id="66602035">
+  <address>
+    <city>Wingate</city>
+    <line1>290 McGaffey Lake Road Ft.</line1>
+    <state>NM</state>
+    <location_name>Ft. Wingate Fire Station</location_name>
+    <zip>87316</zip>
+  </address>
+</polling_location>
+<polling_location id="66602036">
+  <address>
+    <city>Churchrock</city>
+    <line1>43 Challenger Road</line1>
+    <state>NM</state>
+    <location_name>Churchrock Elementary School</location_name>
+    <zip>87311</zip>
+  </address>
+</polling_location>
+<polling_location id="66602037">
+  <address>
+    <city>Rock Springs</city>
+    <line1>191 A Rock Springs Rd.</line1>
+    <state>NM</state>
+    <location_name>Rock Springs Chapter House</location_name>
+    <zip>87375</zip>
+  </address>
+</polling_location>
+<polling_location id="66602038">
+  <address>
+    <city>Gamerco</city>
+    <line1>206 Ray Avenue</line1>
+    <state>NM</state>
+    <location_name>Gamerco Church of God</location_name>
+    <zip>87317</zip>
+  </address>
+</polling_location>
+<polling_location id="66602039">
+  <address>
+    <city>Manuelito</city>
+    <line1>HCR 57 Box 9069</line1>
+    <state>NM</state>
+    <location_name>Manuelito Chapter House</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602040">
+  <address>
+    <city>Churchrock</city>
+    <line1>523 Hwy N 11-49</line1>
+    <state>NM</state>
+    <location_name>Pinedale Chapter House</location_name>
+    <zip>87311</zip>
+  </address>
+</polling_location>
+<polling_location id="66602041">
+  <address>
+    <city>Vanderwagen</city>
+    <line1>190 Rodeo Rd.</line1>
+    <state>NM</state>
+    <location_name>Breadsprings Chapter House</location_name>
+    <zip>87326</zip>
+  </address>
+</polling_location>
+<polling_location id="66602042">
+  <address>
+    <city>Vanderwagen</city>
+    <line1>Route 45 Jones Ranch Road</line1>
+    <state>NM</state>
+    <location_name>David Skeet Elementary School</location_name>
+    <zip>87326</zip>
+  </address>
+</polling_location>
+<polling_location id="66602043">
+  <address>
+    <city>Ramah</city>
+    <line1>#4 Tietjen Ave.</line1>
+    <state>NM</state>
+    <location_name>Ramah Fire Station</location_name>
+    <zip>87321</zip>
+  </address>
+</polling_location>
+<polling_location id="66602044">
+  <address>
+    <city>Gallup</city>
+    <line1>R005-001 Refuge Rock Road</line1>
+    <state>NM</state>
+    <location_name>Red Rock Chapter House (North)</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602045">
+  <address>
+    <city>Chaparral</city>
+    <line1>827 Luna Street</line1>
+    <state>NM</state>
+    <location_name>FarSouth VFD &amp; EMS Fire Station</location_name>
+    <zip>88081</zip>
+  </address>
+</polling_location>
+<polling_location id="66602046">
+  <address>
+    <city>Mescalero</city>
+    <line1>106 Central</line1>
+    <state>NM</state>
+    <location_name>Mescalero Community Center</location_name>
+    <zip>88340</zip>
+  </address>
+</polling_location>
+<polling_location id="66602047">
+  <address>
+    <city>Orogrande</city>
+    <line1>1841 Woodson Ave.</line1>
+    <state>NM</state>
+    <location_name>Orogrande Fire Station</location_name>
+    <zip>88342</zip>
+  </address>
+</polling_location>
+<polling_location id="66602048">
+  <address>
+    <city>Boles Acres</city>
+    <line1>10 Sage Ave.</line1>
+    <state>NM</state>
+    <location_name>Boles Acres Fire Station</location_name>
+    <zip>88310</zip>
+  </address>
+</polling_location>
+<polling_location id="66602049">
+  <address>
+    <city>Bent</city>
+    <line1>24043 US Highway 70</line1>
+    <state>NM</state>
+    <location_name>Bent Fire Station</location_name>
+    <zip>88314</zip>
+  </address>
+</polling_location>
+<polling_location id="66602050">
+  <address>
+    <city>Pinon</city>
+    <line1>4538 Owen Prather Highway</line1>
+    <state>NM</state>
+    <location_name>Pinon Fire Station</location_name>
+    <zip>88344</zip>
+  </address>
+</polling_location>
+<polling_location id="66602051">
+  <address>
+    <city>Timberon</city>
+    <line1>1 Bobwhite Circle, Timberon, NM</line1>
+    <state>NM</state>
+    <location_name>Timberon Lodge</location_name>
+    <zip>88350</zip>
+  </address>
+</polling_location>
+<polling_location id="66602052">
+  <address>
+    <city>Weed</city>
+    <line1>32 Agua Chiquita</line1>
+    <state>NM</state>
+    <location_name>Weed Fire Station</location_name>
+    <zip>88354</zip>
+  </address>
+</polling_location>
+<polling_location id="66602053">
+  <address>
+    <city>Mayhill</city>
+    <line1>11 Civic Center Drive</line1>
+    <state>NM</state>
+    <location_name>Mayhill Fire Station</location_name>
+    <zip>88339</zip>
+  </address>
+</polling_location>
+<polling_location id="66602054">
+  <address>
+    <city>High Rolls</city>
+    <line1>39 Old Railroad Drive</line1>
+    <state>NM</state>
+    <location_name>High Rolls Fire Station</location_name>
+    <zip>88325</zip>
+  </address>
+</polling_location>
+<polling_location id="66602055">
+  <address>
+    <city>Cleveland</city>
+    <line1>Off SR 518 MM 31</line1>
+    <state>NM</state>
+    <location_name>Cleveland - CHET Fire Department</location_name>
+    <zip>87715</zip>
+  </address>
+</polling_location>
+<polling_location id="66602056">
+  <address>
+    <city>Gaudalupita</city>
+    <line1>Off SR 434 MM 16</line1>
+    <state>NM</state>
+    <location_name>Guadalupita Fire Department</location_name>
+    <zip>87722</zip>
+  </address>
+</polling_location>
+<polling_location id="66602057">
+  <address>
+    <city>Holman</city>
+    <line1>Off SR 518 MM 37</line1>
+    <state>NM</state>
+    <location_name>Holman Schools</location_name>
+    <zip>87723</zip>
+  </address>
+</polling_location>
+<polling_location id="66602058">
+  <address>
+    <city>Ledoux</city>
+    <line1>Off SR 94 MM 12</line1>
+    <state>NM</state>
+    <location_name>Ledoux Fire Department</location_name>
+    <zip>87732</zip>
+  </address>
+</polling_location>
+<polling_location id="66602059">
+  <address>
+    <city>Chacon</city>
+    <line1>Off SR 121 MM 6</line1>
+    <state>NM</state>
+    <location_name>Chacon Fire Department</location_name>
+    <zip>87713</zip>
+  </address>
+</polling_location>
+<polling_location id="66602060">
+  <address>
+    <city>Rainsville</city>
+    <line1>105 Rainsville Rd</line1>
+    <state>NM</state>
+    <location_name>Rainsville Fire Department</location_name>
+    <zip>87736</zip>
+  </address>
+</polling_location>
+<polling_location id="66602061">
+  <address>
+    <city>Buena Vista</city>
+    <line1>Sangre De Cristo Highway MM 23</line1>
+    <state>NM</state>
+    <location_name>Buena Vista Fire Department</location_name>
+    <zip>87712</zip>
+  </address>
+</polling_location>
+<polling_location id="66602062">
+  <address>
+    <city>Watrous</city>
+    <line1>Concord and 2nd Street</line1>
+    <state>NM</state>
+    <location_name>Watrous Fire Department</location_name>
+    <zip>87753</zip>
+  </address>
+</polling_location>
+<polling_location id="66602063">
+  <address>
+    <city>Ocate</city>
+    <line1>Off SR 120 MM 27</line1>
+    <state>NM</state>
+    <location_name>Ocate Community Center</location_name>
+    <zip>87734</zip>
+  </address>
+</polling_location>
+<polling_location id="66602064">
+  <address>
+    <city>Wagon Mound</city>
+    <line1>600 Catron Avenue</line1>
+    <state>NM</state>
+    <location_name>Wagon Mound City Hall</location_name>
+    <zip>87752</zip>
+  </address>
+</polling_location>
+<polling_location id="66602065">
+  <address>
+    <city>Mora</city>
+    <line1>One Courthouse Road</line1>
+    <state>NM</state>
+    <location_name>David Cargo Library</location_name>
+    <zip>87732</zip>
+  </address>
+</polling_location>
+<polling_location id="66602066">
+  <address>
+    <city>Lemitar</city>
+    <line1>13 Chambon Road</line1>
+    <state>NM</state>
+    <location_name>Lemitar Midway Fire Dept.</location_name>
+    <zip>87823</zip>
+  </address>
+</polling_location>
+<polling_location id="66602067">
+  <address>
+    <city>San Antonio</city>
+    <line1>38 U.S. 380</line1>
+    <state>NM</state>
+    <location_name>San Antonio Fire Dept.</location_name>
+    <zip>87832</zip>
+  </address>
+</polling_location>
+<polling_location id="66602069">
+  <address>
+    <city>Magdalena</city>
+    <line1>500 9th Street</line1>
+    <state>NM</state>
+    <location_name>Magdalena Senior Center</location_name>
+    <zip>87825</zip>
+  </address>
+</polling_location>
+<polling_location id="66602070">
+  <address>
+    <city>Magdalena</city>
+    <line1>500 9th Street</line1>
+    <state>NM</state>
+    <location_name>New Senior Citizens Center</location_name>
+    <zip>87825</zip>
+  </address>
+</polling_location>
+<polling_location id="66602071">
+  <address>
+    <city>Alamo</city>
+    <line1>Alamo</line1>
+    <state>NM</state>
+    <location_name>ANSB Wellness Center</location_name>
+    <zip>87825</zip>
+  </address>
+</polling_location>
+<polling_location id="66602072">
+  <address>
+    <city>Veguita</city>
+    <line1>894 Hwy 304 #15</line1>
+    <state>NM</state>
+    <location_name>Northern Socorro Senior Center</location_name>
+    <zip>87062</zip>
+  </address>
+</polling_location>
+<polling_location id="66602073">
+  <address>
+    <city>Roswell</city>
+    <line1>505 W. Pine Lodge</line1>
+    <state>NM</state>
+    <location_name>Berrendo Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602074">
+  <address>
+    <city>Roswell</city>
+    <line1>800 Marion Ridhards Rd.</line1>
+    <state>NM</state>
+    <location_name>Berrendo Middle School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602075">
+  <address>
+    <city>Dexter</city>
+    <line1>100 N. Lincoln</line1>
+    <state>NM</state>
+    <location_name>Central Office Dexter School</location_name>
+    <zip>88230</zip>
+  </address>
+</polling_location>
+<polling_location id="66602076">
+  <address>
+    <city>Hagerman</city>
+    <line1>209 E. Argyle</line1>
+    <state>NM</state>
+    <location_name>Hagerman Town Hall</location_name>
+    <zip>88232</zip>
+  </address>
+</polling_location>
+<polling_location id="66602077">
+  <address>
+    <city>Lake Arthur</city>
+    <line1>704 Maine</line1>
+    <state>NM</state>
+    <location_name>Community Center</location_name>
+    <zip>88253</zip>
+  </address>
+</polling_location>
+<polling_location id="66602078">
+  <address>
+    <city>Pinon</city>
+    <line1>496 Pinon Dunken Rd.</line1>
+    <state>NM</state>
+    <location_name>Dunken Fire Station</location_name>
+    <zip>88344</zip>
+  </address>
+</polling_location>
+<polling_location id="66602079">
+  <address>
+    <city>Roswell</city>
+    <line1>700 W. County Club</line1>
+    <state>NM</state>
+    <location_name>West Country Club Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602080">
+  <address>
+    <city>Roswell</city>
+    <line1>1405 N. Sycamore</line1>
+    <state>NM</state>
+    <location_name>Immanuel Lutheran Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602081">
+  <address>
+    <city>Roswell</city>
+    <line1>1822 N. Montana Ave.</line1>
+    <state>NM</state>
+    <location_name>Joy Senior Citizens Center</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602082">
+  <address>
+    <city>Roswell</city>
+    <line1>612 W. College</line1>
+    <state>NM</state>
+    <location_name>Salvation Army Chapel</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602083">
+  <address>
+    <city>Roswell</city>
+    <line1>200 N. Penn</line1>
+    <state>NM</state>
+    <location_name>First United Methodist Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602084">
+  <address>
+    <city>Roswell</city>
+    <line1>1900 N. Michigan</line1>
+    <state>NM</state>
+    <location_name>Military Heights Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602085">
+  <address>
+    <city>Roswell</city>
+    <line1>3607 N. Main Street</line1>
+    <state>NM</state>
+    <location_name>Hampton Inn &amp; Suites</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602086">
+  <address>
+    <city>Roswell</city>
+    <line1>2801 W. 4th</line1>
+    <state>NM</state>
+    <location_name>Westminister Presbyterian Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602087">
+  <address>
+    <city>Roswell</city>
+    <line1>408 N. Washington</line1>
+    <state>NM</state>
+    <location_name>Washington Ave. Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602088">
+  <address>
+    <city>Roswell</city>
+    <line1>1700 W. Alameda</line1>
+    <state>NM</state>
+    <location_name>Parkview Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602089">
+  <address>
+    <city>Roswell</city>
+    <line1>1009 W. Alameda</line1>
+    <state>NM</state>
+    <location_name>Calvary Baptist Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602090">
+  <address>
+    <city>Roswell</city>
+    <line1>200 S. Richardson</line1>
+    <state>NM</state>
+    <location_name>Central Fire Station</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602091">
+  <address>
+    <city>Roswell</city>
+    <line1>700 E. Berrendo Rd.</line1>
+    <state>NM</state>
+    <location_name>Roswell Baptist Temple</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602092">
+  <address>
+    <city>Roswell</city>
+    <line1>2807 W. Bland</line1>
+    <state>NM</state>
+    <location_name>El Capitan Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602093">
+  <address>
+    <city>Roswell</city>
+    <line1>2807 W. Bland</line1>
+    <state>NM</state>
+    <location_name>El Capitan Elementary School</location_name>
+    <zip>88203</zip>
+  </address>
+</polling_location>
+<polling_location id="66602094">
+  <address>
+    <city>Roswell</city>
+    <line1>500 S. Richardson Ave.</line1>
+    <state>NM</state>
+    <location_name>Yucca Recreation Center</location_name>
+    <zip>88203</zip>
+  </address>
+</polling_location>
+<polling_location id="66602095">
+  <address>
+    <city>Roswell</city>
+    <line1>700 W. Deming</line1>
+    <state>NM</state>
+    <location_name>Missouri Ave. Elementary School</location_name>
+    <zip>88203</zip>
+  </address>
+</polling_location>
+<polling_location id="66602096">
+  <address>
+    <city>Roswell</city>
+    <line1>500 S. Richardson</line1>
+    <state>NM</state>
+    <location_name>Yucca Recreation Center</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602097">
+  <address>
+    <city>Roswell</city>
+    <line1>500 S. Richardson Ave.</line1>
+    <state>NM</state>
+    <location_name>Yucca Recreation Cente</location_name>
+    <zip>88203</zip>
+  </address>
+</polling_location>
+<polling_location id="66602098">
+  <address>
+    <city>Roswell</city>
+    <line1>615 S. Sycamore</line1>
+    <state>NM</state>
+    <location_name>Sierra Middle School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602099">
+  <address>
+    <city>Roswell</city>
+    <line1>615 S. Sycamore Ave.</line1>
+    <state>NM</state>
+    <location_name>Sierra Middle School</location_name>
+    <zip>88203</zip>
+  </address>
+</polling_location>
+<polling_location id="66602102">
+  <address>
+    <city>Roswell</city>
+    <line1>701 E. Country Club Rd.</line1>
+    <state>NM</state>
+    <location_name>Goddard High School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602103">
+  <address>
+    <city>Roswell</city>
+    <line1>901 E. Country Club</line1>
+    <state>NM</state>
+    <location_name>Central Nazarene Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602104">
+  <address>
+    <city>Roswell</city>
+    <line1>303 N. Virginia</line1>
+    <state>NM</state>
+    <location_name>Sertoma Club Building</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602105">
+  <address>
+    <city>Roswell</city>
+    <line1>1307 E. College Blvd.</line1>
+    <state>NM</state>
+    <location_name>Girl Scout Program Center</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602106">
+  <address>
+    <city>Roswell</city>
+    <line1>2704 N. Garden</line1>
+    <state>NM</state>
+    <location_name>Del Norte Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602107">
+  <address>
+    <city>Roswell</city>
+    <line1>201 S. Garden</line1>
+    <state>NM</state>
+    <location_name>Roswell Boys &amp; Girls Club</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602108">
+  <address>
+    <city>Roswell</city>
+    <line1>201 South Garden</line1>
+    <state>NM</state>
+    <location_name>Roswell Boys and Girls Club</location_name>
+    <zip>88203</zip>
+  </address>
+</polling_location>
+<polling_location id="66602109">
+  <address>
+    <city>Roswell</city>
+    <line1>1208 E. Bland</line1>
+    <state>NM</state>
+    <location_name>Nancy Lopez Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602110">
+  <address>
+    <city>Roswell</city>
+    <line1>200 E. 19th St.</line1>
+    <state>NM</state>
+    <location_name>La Quinta Inn</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602111">
+  <address>
+    <city>Roswell</city>
+    <line1>111 E. Deming St.</line1>
+    <state>NM</state>
+    <location_name>St. Peter's School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602112">
+  <address>
+    <city>Roswell</city>
+    <line1>200 E. Chisum</line1>
+    <state>NM</state>
+    <location_name>Chaves County Extension Auditorium</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602113">
+  <address>
+    <city>Roswell</city>
+    <line1>600 E. Hobbs</line1>
+    <state>NM</state>
+    <location_name>Pecos Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602115">
+  <address>
+    <city>Roswell</city>
+    <line1>701 E. Country Club Rd.</line1>
+    <state>NM</state>
+    <location_name>Goddard High School</location_name>
+    <zip>88203</zip>
+  </address>
+</polling_location>
+<polling_location id="66602116">
+  <address>
+    <city>Roswell</city>
+    <line1>3773 East Grand Plains</line1>
+    <state>NM</state>
+    <location_name>East Grand Plains School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602117">
+  <address>
+    <city>Roswell</city>
+    <line1>48 University Blvd.</line1>
+    <state>NM</state>
+    <location_name>ENMU-R Cafeteria</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602119">
+  <address>
+    <city>Roswell</city>
+    <line1>1500 S. Main</line1>
+    <state>NM</state>
+    <location_name>Redeemer Christian Fellowship Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602120">
+  <address>
+    <city>Roswell</city>
+    <line1>1400 S. Washington</line1>
+    <state>NM</state>
+    <location_name>Valley View Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602122">
+  <address>
+    <city>Roswell</city>
+    <line1>400 W. Hobbs</line1>
+    <state>NM</state>
+    <location_name>Roswell High School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602124">
+  <address>
+    <city>Roswell</city>
+    <line1>935 W. Mescalero Rd.</line1>
+    <state>NM</state>
+    <location_name>Grace Community Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602125">
+  <address>
+    <city>Roswell</city>
+    <line1>900 W. Brasher Rd.</line1>
+    <state>NM</state>
+    <location_name>Church On The Move</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602126">
+  <address>
+    <city>Roswell</city>
+    <line1>119 W. Gayle</line1>
+    <state>NM</state>
+    <location_name>Fire Station #5</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602127">
+  <address>
+    <city>Roswell</city>
+    <line1>606 W. O'Connor</line1>
+    <state>NM</state>
+    <location_name>Sunset Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602128">
+  <address>
+    <city>Roswell</city>
+    <line1>606 W. O'Connor Rd.</line1>
+    <state>NM</state>
+    <location_name>Sunset Elementary School</location_name>
+    <zip>88203</zip>
+  </address>
+</polling_location>
+<polling_location id="66602129">
+  <address>
+    <city>Roswell</city>
+    <line1>910 W. Gayle</line1>
+    <state>NM</state>
+    <location_name>Monterrey Elementary School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602130">
+  <address>
+    <city>Roswell</city>
+    <line1>800 Marion Richards Rd.</line1>
+    <state>NM</state>
+    <location_name>Berrendo Middle School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602131">
+  <address>
+    <city>Reserve</city>
+    <line1>37 Mountaineer Road</line1>
+    <state>NM</state>
+    <location_name>Reserve Community Center</location_name>
+    <zip>87830</zip>
+  </address>
+</polling_location>
+<polling_location id="66602132">
+  <address>
+    <city>Glenwood</city>
+    <line1>21 Menges Lane</line1>
+    <state>NM</state>
+    <location_name>Glenwood Community Center</location_name>
+    <zip>88039</zip>
+  </address>
+</polling_location>
+<polling_location id="66602133">
+  <address>
+    <city>Aragon</city>
+    <line1>2596 Highway 12</line1>
+    <state>NM</state>
+    <location_name>Aragon Fire Station</location_name>
+    <zip>87820</zip>
+  </address>
+</polling_location>
+<polling_location id="66602134">
+  <address>
+    <city>Luna</city>
+    <line1>31 Luna Valley Dr.</line1>
+    <state>NM</state>
+    <location_name>Luna Community Center</location_name>
+    <zip>87824</zip>
+  </address>
+</polling_location>
+<polling_location id="66602135">
+  <address>
+    <city>Tres Piedras</city>
+    <line1>38391 Hwy 285</line1>
+    <state>NM</state>
+    <location_name>Tres Piedras Fire House</location_name>
+    <zip>87577</zip>
+  </address>
+</polling_location>
+<polling_location id="66602136">
+  <address>
+    <city>Costilla</city>
+    <line1># 14 Garcia Rd</line1>
+    <state>NM</state>
+    <location_name>Costilla Elementary School</location_name>
+    <zip>87524</zip>
+  </address>
+</polling_location>
+<polling_location id="66602137">
+  <address>
+    <city>Amalia</city>
+    <line1>Highway 196 through Amalia up towards Ventero</line1>
+    <state>NM</state>
+    <location_name>Amalia Senior Citizen Center</location_name>
+    <zip>87512</zip>
+  </address>
+</polling_location>
+<polling_location id="66602138">
+  <address>
+    <city>Cerro</city>
+    <line1>151 St. Rd.  Box 31</line1>
+    <state>NM</state>
+    <location_name>Cerro Community Center</location_name>
+    <zip>87519</zip>
+  </address>
+</polling_location>
+<polling_location id="66602139">
+  <address>
+    <city>Questa</city>
+    <line1>2 Mile Hwy 522 PO Box 829</line1>
+    <state>NM</state>
+    <location_name>Alta Vista Middle School</location_name>
+    <zip>87556</zip>
+  </address>
+</polling_location>
+<polling_location id="66602142">
+  <address>
+    <city>Red River</city>
+    <line1>101 W River St</line1>
+    <state>NM</state>
+    <location_name>Red River Conference Center</location_name>
+    <zip>87558</zip>
+  </address>
+</polling_location>
+<polling_location id="66602143">
+  <address>
+    <city>San Cristobal</city>
+    <line1>Camino del Medio Building #34</line1>
+    <state>NM</state>
+    <location_name>San Cristobal Community Center</location_name>
+    <zip>87564</zip>
+  </address>
+</polling_location>
+<polling_location id="66602144">
+  <address>
+    <city>Arroyo Hondo</city>
+    <line1>26 Lower Arroyo Hondo/489 Old Blueberry Hill Rd</line1>
+    <state>NM</state>
+    <location_name>Arroyo Hondo Community Center/ Old Armory</location_name>
+    <zip>87513</zip>
+  </address>
+</polling_location>
+<polling_location id="66602145">
+  <address>
+    <city>Valdez</city>
+    <line1>Hwy 230  General Delivery  Valdez</line1>
+    <state>NM</state>
+    <location_name>Valdez Old School</location_name>
+    <zip>87580</zip>
+  </address>
+</polling_location>
+<polling_location id="66602146">
+  <address>
+    <city>Arroyo Seco</city>
+    <line1>498 Hwy 150</line1>
+    <state>NM</state>
+    <location_name>Holy Trinity Parish Center</location_name>
+    <zip>87514</zip>
+  </address>
+</polling_location>
+<polling_location id="66602147">
+  <address>
+    <city>El Prado</city>
+    <line1>1032 Paseo del Pueblo Norte</line1>
+    <state>NM</state>
+    <location_name>LPA Building</location_name>
+    <zip>87529</zip>
+  </address>
+</polling_location>
+<polling_location id="66602149">
+  <address>
+    <city>Taos</city>
+    <line1>525 Rachitos Rd</line1>
+    <state>NM</state>
+    <location_name>Taos County Housing Authority Office</location_name>
+    <zip>87571</zip>
+  </address>
+</polling_location>
+<polling_location id="66602151">
+  <address>
+    <city>Taos</city>
+    <line1>134 Cervantes</line1>
+    <state>NM</state>
+    <location_name>Taos High School</location_name>
+    <zip>87571</zip>
+  </address>
+</polling_location>
+<polling_location id="66602152">
+  <address>
+    <city>El Prado</city>
+    <line1>60 Los Cordovas Rd/489 Blueberry Hill Rd</line1>
+    <state>NM</state>
+    <location_name>Los Cordovas Community Center/ Old Armory</location_name>
+    <zip>87529</zip>
+  </address>
+</polling_location>
+<polling_location id="66602153">
+  <address>
+    <city>Taos</city>
+    <line1>489 Blueberry Rd.</line1>
+    <state>NM</state>
+    <location_name>Old National Armory</location_name>
+    <zip>87571</zip>
+  </address>
+</polling_location>
+<polling_location id="66602154">
+  <address>
+    <city>Taos</city>
+    <line1>814 Witt Road/26566 Hwy 64 E</line1>
+    <state>NM</state>
+    <location_name>Christian Academy Gymnasium/ Rio Fernando Fire House</location_name>
+    <zip>87571</zip>
+  </address>
+</polling_location>
+<polling_location id="66602155">
+  <address>
+    <city>Ranchos de Taos</city>
+    <line1>200 Sanders Lane</line1>
+    <state>NM</state>
+    <location_name>Ranchos Elementary School</location_name>
+    <zip>87557</zip>
+  </address>
+</polling_location>
+<polling_location id="66602156">
+  <address>
+    <city>Ranchos de Taos</city>
+    <line1>St Rd 382 Hot Springs Rd</line1>
+    <state>NM</state>
+    <location_name>Llano Quemado Community Center</location_name>
+    <zip>87557</zip>
+  </address>
+</polling_location>
+<polling_location id="66602157">
+  <address>
+    <city>Ranchos de Taos</city>
+    <line1>#3 Archuleta Rd</line1>
+    <state>NM</state>
+    <location_name>Talpa Community Center</location_name>
+    <zip>87557</zip>
+  </address>
+</polling_location>
+<polling_location id="66602158">
+  <address>
+    <city>Ojo Caliente</city>
+    <line1>20 Los Banos</line1>
+    <state>NM</state>
+    <location_name>Ojo Caliente Fire House</location_name>
+    <zip>87549</zip>
+  </address>
+</polling_location>
+<polling_location id="66602159">
+  <address>
+    <city>Taos</city>
+    <line1>St Rd 570 Orilla Verde (Pilar)</line1>
+    <state>NM</state>
+    <location_name>BLM Rio Grande Gorge Visitor Center</location_name>
+    <zip>87571</zip>
+  </address>
+</polling_location>
+<polling_location id="66602160">
+  <address>
+    <city>Penasco</city>
+    <line1>1264 St Rd 75</line1>
+    <state>NM</state>
+    <location_name>Rio Lucio Community Center</location_name>
+    <zip>87553</zip>
+  </address>
+</polling_location>
+<polling_location id="66602161">
+  <address>
+    <city>Vadito</city>
+    <line1>5 Picuris Rd</line1>
+    <state>NM</state>
+    <location_name>Vadito Community Center</location_name>
+    <zip>87579</zip>
+  </address>
+</polling_location>
+<polling_location id="66602164">
+  <address>
+    <city>Chamisal</city>
+    <line1>Upper Chamisal Rd (Blue Bldg)</line1>
+    <state>NM</state>
+    <location_name>Sam Cordova Senior Citizen Center</location_name>
+    <zip>87521</zip>
+  </address>
+</polling_location>
+<polling_location id="66602165">
+  <address>
+    <city>Penasco</city>
+    <line1>14136 State Road 75</line1>
+    <state>NM</state>
+    <location_name>Penasco Community Center</location_name>
+    <zip>87553</zip>
+  </address>
+</polling_location>
+<polling_location id="66602167">
+  <address>
+    <city>Chamisal</city>
+    <line1>Upper Chamisal Rd (Blue Bldg)</line1>
+    <state>NM</state>
+    <location_name>Sam Cordova Senior Citizen Center</location_name>
+    <zip>87576</zip>
+  </address>
+</polling_location>
+<polling_location id="66602169">
+  <address>
+    <city>Llano</city>
+    <line1>15 Upper Llano Rd</line1>
+    <state>NM</state>
+    <location_name>Llano Community Center</location_name>
+    <zip>87543</zip>
+  </address>
+</polling_location>
+<polling_location id="66602170">
+  <address>
+    <city>Taos Ski Valley</city>
+    <line1>106 Sutton Place</line1>
+    <state>NM</state>
+    <location_name>TSV Resort Center</location_name>
+    <zip>87525</zip>
+  </address>
+</polling_location>
+<polling_location id="66602172">
+  <address>
+    <city>Taos</city>
+    <line1>213 Paseo del Canon</line1>
+    <state>NM</state>
+    <location_name>Taos Middle School</location_name>
+    <zip>87571</zip>
+  </address>
+</polling_location>
+<polling_location id="66602173">
+  <address>
+    <city>Lower Dixon</city>
+    <line1>220 SR 75</line1>
+    <state>NM</state>
+    <location_name>Dixon Elementary School</location_name>
+    <zip>87527</zip>
+  </address>
+</polling_location>
+<polling_location id="66602174">
+  <address>
+    <city>Alcalde</city>
+    <line1>26 CR 41A</line1>
+    <state>NM</state>
+    <location_name>Alcalde Community Center</location_name>
+    <zip>87511</zip>
+  </address>
+</polling_location>
+<polling_location id="66602175">
+  <address>
+    <city>Espanola</city>
+    <line1>1000 Zuni Lane</line1>
+    <state>NM</state>
+    <location_name>Fairview Elementary School</location_name>
+    <zip>87532</zip>
+  </address>
+</polling_location>
+<polling_location id="66602176">
+  <address>
+    <city>Santa Clara</city>
+    <line1>1 Kee St.</line1>
+    <state>NM</state>
+    <location_name>Santa Clara Senior Center</location_name>
+    <zip>87532</zip>
+  </address>
+</polling_location>
+<polling_location id="66602177">
+  <address>
+    <city>Admin. Building</city>
+    <line1>714 Calle Don Diego</line1>
+    <state>NM</state>
+    <location_name>Espanola Public Schools Admin. Building</location_name>
+    <zip>87532</zip>
+  </address>
+</polling_location>
+<polling_location id="66602178">
+  <address>
+    <city>Lucero Center</city>
+    <line1>313 N. Paseo De Onate</line1>
+    <state>NM</state>
+    <location_name>Lucero Center</location_name>
+    <zip>87532</zip>
+  </address>
+</polling_location>
+<polling_location id="66602179">
+  <address>
+    <city>Espanola</city>
+    <line1>410 Hunter Street</line1>
+    <state>NM</state>
+    <location_name>Espanola Senior Center</location_name>
+    <zip>87532</zip>
+  </address>
+</polling_location>
+<polling_location id="66602180">
+  <address>
+    <city>Lower Chimayo</city>
+    <line1>694 State Road 76</line1>
+    <state>NM</state>
+    <location_name>Arbolera Community Center</location_name>
+    <zip>87522</zip>
+  </address>
+</polling_location>
+<polling_location id="66602181">
+  <address>
+    <city>Cordova</city>
+    <line1>355 CR 80</line1>
+    <state>NM</state>
+    <location_name>Mountain View Elementary School</location_name>
+    <zip>87523</zip>
+  </address>
+</polling_location>
+<polling_location id="66602182">
+  <address>
+    <city>Truchas</city>
+    <line1>60 SR 75</line1>
+    <state>NM</state>
+    <location_name>Truchas Senior Citizens Center</location_name>
+    <zip>87578</zip>
+  </address>
+</polling_location>
+<polling_location id="66602183">
+  <address>
+    <city>Ojo Sarco</city>
+    <line1>State Road 76 House 2228</line1>
+    <state>NM</state>
+    <location_name>Ojo Sarco Fire Station</location_name>
+    <zip>87521</zip>
+  </address>
+</polling_location>
+<polling_location id="66602184">
+  <address>
+    <city>Tierra Amarilla</city>
+    <line1>1115 SR 162</line1>
+    <state>NM</state>
+    <location_name>Tierra Amarilla Senior Citizens Center</location_name>
+    <zip>87575</zip>
+  </address>
+</polling_location>
+<polling_location id="66602185">
+  <address>
+    <city>Los Ojos</city>
+    <line1>910 SR 514</line1>
+    <state>NM</state>
+    <location_name>Ganados</location_name>
+    <zip>87551</zip>
+  </address>
+</polling_location>
+<polling_location id="66602186">
+  <address>
+    <city>Chama</city>
+    <line1>229 W. 4th Street</line1>
+    <state>NM</state>
+    <location_name>Chama Village Council Chambers</location_name>
+    <zip>87520</zip>
+  </address>
+</polling_location>
+<polling_location id="66602187">
+  <address>
+    <city>Lumberton</city>
+    <line1>13 CR 354</line1>
+    <state>NM</state>
+    <location_name>St. Francis School Gym</location_name>
+    <zip>87528</zip>
+  </address>
+</polling_location>
+<polling_location id="66602188">
+  <address>
+    <city>Cebolla</city>
+    <line1>84-5a CR 310</line1>
+    <state>NM</state>
+    <location_name>Cebolla Community Center</location_name>
+    <zip>87518</zip>
+  </address>
+</polling_location>
+<polling_location id="66602189">
+  <address>
+    <city>Canjilon</city>
+    <line1>3115 SR 115</line1>
+    <state>NM</state>
+    <location_name>Canjilon Elementary School</location_name>
+    <zip>87515</zip>
+  </address>
+</polling_location>
+<polling_location id="66602191">
+  <address>
+    <city>Lindrith</city>
+    <line1>1380 SR 595</line1>
+    <state>NM</state>
+    <location_name>Lindrith Elementary School</location_name>
+    <zip>87029</zip>
+  </address>
+</polling_location>
+<polling_location id="66602192">
+  <address>
+    <city>Coyote</city>
+    <line1>SR 96 Jct Forest Road 309 House 70</line1>
+    <state>NM</state>
+    <location_name>Coyote Senior Center</location_name>
+    <zip>87012</zip>
+  </address>
+</polling_location>
+<polling_location id="66602193">
+  <address>
+    <city>Canones</city>
+    <line1>County Road 197 #00041</line1>
+    <state>NM</state>
+    <location_name>Early Childhood Center</location_name>
+    <zip>87516</zip>
+  </address>
+</polling_location>
+<polling_location id="66602196">
+  <address>
+    <city>Gallina</city>
+    <line1>1 PR 1650</line1>
+    <state>NM</state>
+    <location_name>Gallina School House</location_name>
+    <zip>87017</zip>
+  </address>
+</polling_location>
+<polling_location id="66602197">
+  <address>
+    <city>El Rito</city>
+    <line1>1115 SR 554</line1>
+    <state>NM</state>
+    <location_name>El Rito Community Center</location_name>
+    <zip>87530</zip>
+  </address>
+</polling_location>
+<polling_location id="66602198">
+  <address>
+    <city>Ojo Caliente</city>
+    <line1>64 SR 111</line1>
+    <state>NM</state>
+    <location_name>Ojo Caliente Elementary School Library</location_name>
+    <zip>87549</zip>
+  </address>
+</polling_location>
+<polling_location id="66602199">
+  <address>
+    <city>Vallecitos</city>
+    <line1>1540 CR 247</line1>
+    <state>NM</state>
+    <location_name>Vallecitos Fire Station</location_name>
+    <zip>87581</zip>
+  </address>
+</polling_location>
+<polling_location id="66602201">
+  <address>
+    <city>Abiquiu</city>
+    <line1>21342 SR 84</line1>
+    <state>NM</state>
+    <location_name>Abiquiu Elementary School</location_name>
+    <zip>87510</zip>
+  </address>
+</polling_location>
+<polling_location id="66602202">
+  <address>
+    <city>Hernandez</city>
+    <line1>US 84/285 House 19418</line1>
+    <state>NM</state>
+    <location_name>Agua Sana Fire Station</location_name>
+    <zip>87537</zip>
+  </address>
+</polling_location>
+<polling_location id="66602203">
+  <address>
+    <city>El Guique</city>
+    <line1>201 CR 58</line1>
+    <state>NM</state>
+    <location_name>Pedro Casados Place</location_name>
+    <zip>87566</zip>
+  </address>
+</polling_location>
+<polling_location id="66602204">
+  <address>
+    <city>Velarde</city>
+    <line1>14 CR 51</line1>
+    <state>NM</state>
+    <location_name>Velarde Elementary School</location_name>
+    <zip>87582</zip>
+  </address>
+</polling_location>
+<polling_location id="66602205">
+  <address>
+    <city>Medanales</city>
+    <line1>214 CR 142</line1>
+    <state>NM</state>
+    <location_name>Medanales Community Center</location_name>
+    <zip>87549</zip>
+  </address>
+</polling_location>
+<polling_location id="66602208">
+  <address>
+    <city>Fence Lake</city>
+    <line1>2125 Hwy 36</line1>
+    <state>NM</state>
+    <location_name>Fence Lake Community Center</location_name>
+    <zip>87315</zip>
+  </address>
+</polling_location>
+<polling_location id="66602209">
+  <address>
+    <city>Grants</city>
+    <line1>1150 Elm Dr.</line1>
+    <state>NM</state>
+    <location_name>Grants Senior Center/CAP Office</location_name>
+    <zip>87020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602210">
+  <address>
+    <city>Grants</city>
+    <line1>1100 Mt. Taylor Rd.</line1>
+    <state>NM</state>
+    <location_name>Los Alamitos Middle School</location_name>
+    <zip>87020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602211">
+  <address>
+    <city>Grants</city>
+    <line1>1005 Mesa Ave.</line1>
+    <state>NM</state>
+    <location_name>The Way, the Truth, and Life Ministries</location_name>
+    <zip>87020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602212">
+  <address>
+    <city>Grants</city>
+    <line1>600 W. Santa Fe</line1>
+    <state>NM</state>
+    <location_name>Grants City Hall</location_name>
+    <zip>87020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602213">
+  <address>
+    <city>Milan</city>
+    <line1>1611 Febco St.</line1>
+    <state>NM</state>
+    <location_name>Febco Fire Station</location_name>
+    <zip>87021</zip>
+  </address>
+</polling_location>
+<polling_location id="66602214">
+  <address>
+    <city>Milan</city>
+    <line1>407 Airport Rd.</line1>
+    <state>NM</state>
+    <location_name>Milan Parks &amp; Recreation</location_name>
+    <zip>87021</zip>
+  </address>
+</polling_location>
+<polling_location id="66602215">
+  <address>
+    <city>Grants</city>
+    <line1>1500 N. 3rd. St.</line1>
+    <state>NM</state>
+    <location_name>NMSU Grants Branch</location_name>
+    <zip>87020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602216">
+  <address>
+    <city>Acoma</city>
+    <line1>33A Pinsbaari Drive</line1>
+    <state>NM</state>
+    <location_name>Acoma Council Bldg</location_name>
+    <zip>87034</zip>
+  </address>
+</polling_location>
+<polling_location id="66602218">
+  <address>
+    <city>Seboyeta</city>
+    <line1>State Rd. 279</line1>
+    <state>NM</state>
+    <location_name>Seboyeta Elementary School</location_name>
+    <zip>87014</zip>
+  </address>
+</polling_location>
+<polling_location id="66602219">
+  <address>
+    <city>San Mateo</city>
+    <line1>110 San Mateo Main St.</line1>
+    <state>NM</state>
+    <location_name>San Mateo Fire Station</location_name>
+    <zip>87020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602220">
+  <address>
+    <city>Bluewater</city>
+    <line1>5 Pinon</line1>
+    <state>NM</state>
+    <location_name>Bluewater Senior Center</location_name>
+    <zip>87005</zip>
+  </address>
+</polling_location>
+<polling_location id="66602221">
+  <address>
+    <city>Ramah</city>
+    <line1>Route 2 (4 miles south of State Route 53 on BIA Route 125 Mt. View Community)</line1>
+    <state>NM</state>
+    <location_name>Ramah Chapter House</location_name>
+    <zip>87321</zip>
+  </address>
+</polling_location>
+<polling_location id="66602222">
+  <address>
+    <city>Thoreau</city>
+    <line1>9 Cod Dr.</line1>
+    <state>NM</state>
+    <location_name>Bluewater Acres Fire Station</location_name>
+    <zip>87323</zip>
+  </address>
+</polling_location>
+<polling_location id="66602223">
+  <address>
+    <city>San Rafael</city>
+    <line1>27 Mesa View Rd.</line1>
+    <state>NM</state>
+    <location_name>San Rafael Elementary School</location_name>
+    <zip>87051</zip>
+  </address>
+</polling_location>
+<polling_location id="66602224">
+  <address>
+    <city>Grants</city>
+    <line1>500 Mountain Road</line1>
+    <state>NM</state>
+    <location_name>Grants High School (South Campus Gym)</location_name>
+    <zip>87020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602225">
+  <address>
+    <city>Grants</city>
+    <line1>Corner of Del Norte &amp; Jemez</line1>
+    <state>NM</state>
+    <location_name>Mt. Taylor Elementary School</location_name>
+    <zip>87020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602226">
+  <address>
+    <city>Texico</city>
+    <line1>304 SR 77</line1>
+    <state>NM</state>
+    <location_name>Pleasant Hill Fire Department</location_name>
+    <zip>88135</zip>
+  </address>
+</polling_location>
+<polling_location id="66602227">
+  <address>
+    <city>Clovis</city>
+    <line1>1606 SR 311</line1>
+    <state>NM</state>
+    <location_name>Ranchvale Elementary School</location_name>
+    <zip>88101</zip>
+  </address>
+</polling_location>
+<polling_location id="66602228">
+  <address>
+    <city>Espanola</city>
+    <line1>22 E SOMBRILLO RD</line1>
+    <state>NM</state>
+    <location_name>SOMBRILLO ELEMENTARY</location_name>
+    <zip>87532</zip>
+  </address>
+</polling_location>
+<polling_location id="66602231">
+  <address>
+    <city>Chimayo</city>
+    <line1>354 A JUAN MEDINA RD</line1>
+    <state>NM</state>
+    <location_name>BENNY J CHAVEZ CENTER</location_name>
+    <zip>87522</zip>
+  </address>
+</polling_location>
+<polling_location id="66602232">
+  <address>
+    <city>Cundiyo</city>
+    <line1>RT 1 BOX 2</line1>
+    <state>NM</state>
+    <location_name>CUNDIYO FIRE STATION</location_name>
+    <zip>87522</zip>
+  </address>
+</polling_location>
+<polling_location id="66602233">
+  <address>
+    <city>Cundiyo</city>
+    <line1>5 jose Simon Dr.</line1>
+    <state>NM</state>
+    <location_name>Cundiyo Community Center</location_name>
+    <zip>87552</zip>
+  </address>
+</polling_location>
+<polling_location id="66602234">
+  <address>
+    <city>Santa Fe</city>
+    <line1>394 COUNTY RD 84</line1>
+    <state>NM</state>
+    <location_name>EL RANCHO COMMUNITY CENTER</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602235">
+  <address>
+    <city>Santa Fe</city>
+    <line1>TESUQUE PUEBLO</line1>
+    <state>NM</state>
+    <location_name>TESUQUE PUEBLO INTERGEN CENTER</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602236">
+  <address>
+    <city>Tesuque</city>
+    <line1>39 TP 84</line1>
+    <state>NM</state>
+    <location_name>Tesuque Pueblo Intergenerational Center</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602237">
+  <address>
+    <city>Santa Fe</city>
+    <line1>1 EL ALTO</line1>
+    <state>NM</state>
+    <location_name>RIO EN MEDIO COMMUNITY CENTER</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602238">
+  <address>
+    <city>Santa Fe</city>
+    <line1>1555 BISHOPS LODGE RD</line1>
+    <state>NM</state>
+    <location_name>TESUQUE ELEMENTARY</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602239">
+  <address>
+    <city>Santa Fe</city>
+    <line1>700 ACEQUIA MADRE</line1>
+    <state>NM</state>
+    <location_name>ACEQUIA MADRE ELEMENTARY</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602240">
+  <address>
+    <city>Santa Fe</city>
+    <line1>490 WASHINGTON AVE</line1>
+    <state>NM</state>
+    <location_name>FORT MARCY COMPLEX</location_name>
+    <zip>87501</zip>
+  </address>
+</polling_location>
+<polling_location id="66602241">
+  <address>
+    <city>Santa Fe</city>
+    <line1>490 Bishops Lodge Rd.</line1>
+    <state>NM</state>
+    <location_name>Fort Marcy</location_name>
+    <zip>87501</zip>
+  </address>
+</polling_location>
+<polling_location id="66602242">
+  <address>
+    <city>Santa Fe</city>
+    <line1>851 W. ALAMEDA STREET</line1>
+    <state>NM</state>
+    <location_name>GONZALES COMMUNITY SCHOOL</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602243">
+  <address>
+    <city>La Cienega</city>
+    <line1>136 Camino San Jose</line1>
+    <state>NM</state>
+    <location_name>LA CIENEGA COMMUNITY CENTER</location_name>
+    <zip>87507</zip>
+  </address>
+</polling_location>
+<polling_location id="66602244">
+  <address>
+    <city>Santa Fe</city>
+    <line1>645 OLD LAS VEGAS HWY</line1>
+    <state>NM</state>
+    <location_name>HONDO FIRE STATION #2</location_name>
+    <zip>87508</zip>
+  </address>
+</polling_location>
+<polling_location id="66602245">
+  <address>
+    <city>Santa Fe</city>
+    <line1>13 A SAN MARCOS LOOP</line1>
+    <state>NM</state>
+    <location_name>TURQUOISE TRAIL ELEMENTARY</location_name>
+    <zip>87508</zip>
+  </address>
+</polling_location>
+<polling_location id="66602246">
+  <address>
+    <city>Edgewood</city>
+    <line1>577 STATE RD 344</line1>
+    <state>NM</state>
+    <location_name>SOUTH MOUNTAIN ELEMENTARY</location_name>
+    <zip>87015</zip>
+  </address>
+</polling_location>
+<polling_location id="66602248">
+  <address>
+    <city>Lamy</city>
+    <line1>35 COUNTY RD 33-A</line1>
+    <state>NM</state>
+    <location_name>GALISTEO COMMUNITY CENTER</location_name>
+    <zip>87540</zip>
+  </address>
+</polling_location>
+<polling_location id="66602249">
+  <address>
+    <city>Galisteo</city>
+    <line1>35 Avenida Viejo</line1>
+    <state>NM</state>
+    <location_name>Galisteo Community Center</location_name>
+    <zip>87540</zip>
+  </address>
+</polling_location>
+<polling_location id="66602250">
+  <address>
+    <city>Edgewood</city>
+    <line1>17 VENUS RD</line1>
+    <state>NM</state>
+    <location_name>EDGEWOOD MIDDLE SCHOOL</location_name>
+    <zip>87015</zip>
+  </address>
+</polling_location>
+<polling_location id="66602251">
+  <address>
+    <city>Stanley</city>
+    <line1>13 W KINSELL AVE</line1>
+    <state>NM</state>
+    <location_name>STANLEY COMMUNITY CENTER</location_name>
+    <zip>87056</zip>
+  </address>
+</polling_location>
+<polling_location id="66602252">
+  <address>
+    <city>Santa Fe</city>
+    <line1>851 W. ALAMEDA STREET</line1>
+    <state>NM</state>
+    <location_name>GONZALES COMMUNITY  SCHOOL</location_name>
+    <zip>87501</zip>
+  </address>
+</polling_location>
+<polling_location id="66602253">
+  <address>
+    <city>Santa Fe</city>
+    <line1>180 A STATE RD 503</line1>
+    <state>NM</state>
+    <location_name>NAMBE COMMUNITY/SENIOR CENTER</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602254">
+  <address>
+    <city>Santa Fe</city>
+    <line1>1604 AGUA FRIA ST</line1>
+    <state>NM</state>
+    <location_name>ACADEMY AT LARRAGOITE SCHOOL</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602255">
+  <address>
+    <city>Santa Fe</city>
+    <line1>551 Alarid</line1>
+    <state>NM</state>
+    <location_name>Tierra Encantada Charter School</location_name>
+    <zip>87501</zip>
+  </address>
+</polling_location>
+<polling_location id="66602256">
+  <address>
+    <city>Santa Fe</city>
+    <line1>431 PASEO DE PERALTA</line1>
+    <state>NM</state>
+    <location_name>MONTEZUMA LODGE</location_name>
+    <zip>87501</zip>
+  </address>
+</polling_location>
+<polling_location id="66602259">
+  <address>
+    <city>Santa Fe</city>
+    <line1>1231 Apache Ave.</line1>
+    <state>NM</state>
+    <location_name>SALAZAR ELEMENTARY</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602261">
+  <address>
+    <city>Santa Fe</city>
+    <line1>450 LA MADERA ST</line1>
+    <state>NM</state>
+    <location_name>ASPEN COMMUNITY MAGNET SCHOOL</location_name>
+    <zip>87501</zip>
+  </address>
+</polling_location>
+<polling_location id="66602265">
+  <address>
+    <city>Santa Fe</city>
+    <line1>2655 SIRINGO RD</line1>
+    <state>NM</state>
+    <location_name>NAVA ELEMENTARY</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602266">
+  <address>
+    <city>Santa Fe</city>
+    <line1>2655 SIRINGO RD</line1>
+    <state>NM</state>
+    <location_name>NAVA ELEMENTARY 50</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602268">
+  <address>
+    <city>Santa Fe</city>
+    <line1>351 W ZIA RD</line1>
+    <state>NM</state>
+    <location_name>CAPSHAW MIDDLE SCHOOL</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602269">
+  <address>
+    <city>Santa Fe</city>
+    <line1>3221 Rodeo Rd.</line1>
+    <state>NM</state>
+    <location_name>Genoveva Chavez Community Center</location_name>
+    <zip>87507</zip>
+  </address>
+</polling_location>
+<polling_location id="66602271">
+  <address>
+    <city>Santa Fe</city>
+    <line1>2 TUNYO PO</line1>
+    <state>NM</state>
+    <location_name>SAN ILDEFONSO PUEBLO</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602272">
+  <address>
+    <city>Santa Fe</city>
+    <line1>720 LLANO ST</line1>
+    <state>NM</state>
+    <location_name>DE VARGAS MIDDLE SCHOOL</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602273">
+  <address>
+    <city>Santa Fe</city>
+    <line1>1720 Llano St.</line1>
+    <state>NM</state>
+    <location_name>De Vargas Middle School</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602274">
+  <address>
+    <city>Santa Fe</city>
+    <line1>610 ALTA VISTA ST</line1>
+    <state>NM</state>
+    <location_name>PUBLIC SCHOOL ADMINISTRATION BUILDING</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602276">
+  <address>
+    <city>Santa Fe</city>
+    <line1>141 E Booth St.</line1>
+    <state>NM</state>
+    <location_name>WOOD GORMLEY ELEMENTARY</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602277">
+  <address>
+    <city>Santa Fe</city>
+    <line1>107 W BARCELONA</line1>
+    <state>NM</state>
+    <location_name>UNITARIAN CHURCH</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602280">
+  <address>
+    <city>Santa Fe</city>
+    <line1>1200 Old Pecos Trail</line1>
+    <state>NM</state>
+    <location_name>St. John's Methodist Church</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602284">
+  <address>
+    <city>Santa Fe</city>
+    <line1>410 W SAN MATEO RD</line1>
+    <state>NM</state>
+    <location_name>E J MARTINEZ ELEMENTARY</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602285">
+  <address>
+    <city>Santa Fe</city>
+    <line1>664 ALTA VISTA ST</line1>
+    <state>NM</state>
+    <location_name>PASA TIEMPO SENIOR CENTER</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602286">
+  <address>
+    <city>Santa Fe</city>
+    <line1>664 Alto Vista St.</line1>
+    <state>NM</state>
+    <location_name>664 Alto Vista St.</location_name>
+    <zip>87501</zip>
+  </address>
+</polling_location>
+<polling_location id="66602290">
+  <address>
+    <city>Glorietta</city>
+    <line1>43 FIRE STATION RD</line1>
+    <state>NM</state>
+    <location_name>GLORIETA FIRE STATION</location_name>
+    <zip>87535</zip>
+  </address>
+</polling_location>
+<polling_location id="66602291">
+  <address>
+    <city>Santa Cruz</city>
+    <line1>155 A CAMINO DE QUINTANA</line1>
+    <state>NM</state>
+    <location_name>ABEDON LOPEZ COMMUNITY CENTER</location_name>
+    <zip>87532</zip>
+  </address>
+</polling_location>
+<polling_location id="66602292">
+  <address>
+    <city>Pojoaque</city>
+    <line1>1797 B STATE RD 502</line1>
+    <state>NM</state>
+    <location_name>POJOAQUE MIDDLE SCHOOL</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602295">
+  <address>
+    <city>Santa Fe</city>
+    <line1>136 Camino San Jose</line1>
+    <state>NM</state>
+    <location_name>LA CIENEGA COMMUNITY CENTER</location_name>
+    <zip>87507</zip>
+  </address>
+</polling_location>
+<polling_location id="66602296">
+  <address>
+    <city>Santa Fe</city>
+    <line1>2 AVENIDA TORREON</line1>
+    <state>NM</state>
+    <location_name>ELDORADO COMMUNITY SCHOOL</location_name>
+    <zip>87508</zip>
+  </address>
+</polling_location>
+<polling_location id="66602297">
+  <address>
+    <city>Santa Fe</city>
+    <line1>501 AIRPORT ROAD</line1>
+    <state>NM</state>
+    <location_name>SWEENEY ELEMENTARY</location_name>
+    <zip>87507</zip>
+  </address>
+</polling_location>
+<polling_location id="66602299">
+  <address>
+    <city>Santa Fe</city>
+    <line1>1 PRAIRIE DOG LOOP</line1>
+    <state>NM</state>
+    <location_name>AGUA FRIA COMMUNITY CENTER</location_name>
+    <zip>87507</zip>
+  </address>
+</polling_location>
+<polling_location id="66602300">
+  <address>
+    <city>Santa Fe</city>
+    <line1>3200 CALLE PO AE PI</line1>
+    <state>NM</state>
+    <location_name>RAMIREZ THOMAS ELEMENTARY</location_name>
+    <zip>87507</zip>
+  </address>
+</polling_location>
+<polling_location id="66602302">
+  <address>
+    <city>Santa Fe</city>
+    <line1>301 AVENIDA DEL SUR</line1>
+    <state>NM</state>
+    <location_name>AMY BIEHL COMMUNITY SCHOOL</location_name>
+    <zip>87508</zip>
+  </address>
+</polling_location>
+<polling_location id="66602305">
+  <address>
+    <city>Santa Fe</city>
+    <line1>2 Torreon</line1>
+    <state>NM</state>
+    <location_name>El Dorado Community School</location_name>
+    <zip>87508</zip>
+  </address>
+</polling_location>
+<polling_location id="66602306">
+  <address>
+    <city>Cerrillos</city>
+    <line1>7 FIRST ST</line1>
+    <state>NM</state>
+    <location_name>ST JOSEPHS PARISH HALL</location_name>
+    <zip>87010</zip>
+  </address>
+</polling_location>
+<polling_location id="66602307">
+  <address>
+    <city>Edgewood</city>
+    <line1>171 STATE RD 344</line1>
+    <state>NM</state>
+    <location_name>EDGEWOOD ELEMENTARY</location_name>
+    <zip>87015</zip>
+  </address>
+</polling_location>
+<polling_location id="66602310">
+  <address>
+    <city>Santa Fe</city>
+    <line1>501 Airport Rd.</line1>
+    <state>NM</state>
+    <location_name>Sweeney Elementary</location_name>
+    <zip>87507</zip>
+  </address>
+</polling_location>
+<polling_location id="66602311">
+  <address>
+    <city>Santa Fe</city>
+    <line1>2451 AVENIDA CHAPARRAL</line1>
+    <state>NM</state>
+    <location_name>CHAPARRAL ELEMENTARY</location_name>
+    <zip>87505</zip>
+  </address>
+</polling_location>
+<polling_location id="66602317">
+  <address>
+    <city>Santa Fe</city>
+    <line1>1 Prairie Dog Loop</line1>
+    <state>NM</state>
+    <location_name>Agua Fria Community Center</location_name>
+    <zip>87501</zip>
+  </address>
+</polling_location>
+<polling_location id="66602319">
+  <address>
+    <city>Santa Fe</city>
+    <line1>6 ARROYO CALABASAS RD</line1>
+    <state>NM</state>
+    <location_name>LAS TIERRAS FIRE STATION</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602320">
+  <address>
+    <city>Santa Fe</city>
+    <line1>1108 La Cuchara Rd</line1>
+    <state>NM</state>
+    <location_name>UNITY CHURCH OF SANTA FE</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602322">
+  <address>
+    <city>Edgewood</city>
+    <line1>17 W VENUS RD</line1>
+    <state>NM</state>
+    <location_name>EDGEWOOD MIDDLE SCHOOL</location_name>
+    <zip>87015</zip>
+  </address>
+</polling_location>
+<polling_location id="66602323">
+  <address>
+    <city>Santa Fe</city>
+    <line1>4164 S MEADOWS RD</line1>
+    <state>NM</state>
+    <location_name>ORTIZ MIDDLE SCHOOL</location_name>
+    <zip>87507</zip>
+  </address>
+</polling_location>
+<polling_location id="66602324">
+  <address>
+    <city>Estancia</city>
+    <line1>305 E. Highland</line1>
+    <state>NM</state>
+    <location_name>ESTANCIA SENIOR CENTER</location_name>
+    <zip>87016</zip>
+  </address>
+</polling_location>
+<polling_location id="66602325">
+  <address>
+    <city>Torreon</city>
+    <line1>18 Torreon Heights Rd.</line1>
+    <state>NM</state>
+    <location_name>TORREON COMMUNITY CENTER</location_name>
+    <zip>87061</zip>
+  </address>
+</polling_location>
+<polling_location id="66602326">
+  <address>
+    <city>Manzano</city>
+    <line1>4 Community Rd.</line1>
+    <state>NM</state>
+    <location_name>MANZANO CENTER</location_name>
+    <zip>87036</zip>
+  </address>
+</polling_location>
+<polling_location id="66602327">
+  <address>
+    <city>Moriarty</city>
+    <line1>2422 US Route 66</line1>
+    <state>NM</state>
+    <location_name>MOUNTAINVIEW ELEMENTARY SCHOOL</location_name>
+    <zip>87035</zip>
+  </address>
+</polling_location>
+<polling_location id="66602328">
+  <address>
+    <city>Moriarty</city>
+    <line1>205 Girard Ave.</line1>
+    <state>NM</state>
+    <location_name>MORIARTY CATHOLIC CENTER</location_name>
+    <zip>87035</zip>
+  </address>
+</polling_location>
+<polling_location id="66602329">
+  <address>
+    <city>McIntosh</city>
+    <line1>8 Clements Rd.</line1>
+    <state>NM</state>
+    <location_name>KXNM Radio Building</location_name>
+    <zip>87032</zip>
+  </address>
+</polling_location>
+<polling_location id="66602330">
+  <address>
+    <city>Willard</city>
+    <line1>520 N. Becker Ave</line1>
+    <state>NM</state>
+    <location_name>WILLARD COMMUNITY CENTER</location_name>
+    <zip>87063</zip>
+  </address>
+</polling_location>
+<polling_location id="66602331">
+  <address>
+    <city>Mountainair</city>
+    <line1>301 S. Roosevelt</line1>
+    <state>NM</state>
+    <location_name>MOUNTAINAIR  CATHOLIC CENTER</location_name>
+    <zip>87036</zip>
+  </address>
+</polling_location>
+<polling_location id="66602332">
+  <address>
+    <city>Mountainair</city>
+    <line1>900 W. 3RD STREET</line1>
+    <state>NM</state>
+    <location_name>MOUNTAINAIR  HIGH SCHOOL GYM</location_name>
+    <zip>87036</zip>
+  </address>
+</polling_location>
+<polling_location id="66602333">
+  <address>
+    <city>Encino</city>
+    <line1>527 A North Main St.</line1>
+    <state>NM</state>
+    <location_name>ENCINO COMMUNITY CENTER</location_name>
+    <zip>88321</zip>
+  </address>
+</polling_location>
+<polling_location id="66602334">
+  <address>
+    <city>Estancia</city>
+    <line1>19 Vidal St.</line1>
+    <state>NM</state>
+    <location_name>DURAN FIRE STATION</location_name>
+    <zip>87016</zip>
+  </address>
+</polling_location>
+<polling_location id="66602336">
+  <address>
+    <city>Estancia</city>
+    <line1>300 9TH STREET</line1>
+    <state>NM</state>
+    <location_name>ESTANCIA HIGH SCHOOL CAFETERIA</location_name>
+    <zip>87016</zip>
+  </address>
+</polling_location>
+<polling_location id="66602337">
+  <address>
+    <city>Cliff</city>
+    <line1>622 Highway 211</line1>
+    <state>NM</state>
+    <location_name>Cliff High School</location_name>
+    <zip>88028</zip>
+  </address>
+</polling_location>
+<polling_location id="66602338">
+  <address>
+    <city>MIMBRES</city>
+    <line1>860 HIGHWAY 35</line1>
+    <state>NM</state>
+    <location_name>SAPILLO CREEK VALLEY FIRE DEPT.</location_name>
+    <zip>88049</zip>
+  </address>
+</polling_location>
+<polling_location id="66602339">
+  <address>
+    <city>Mimbres</city>
+    <line1>860 Highway 35</line1>
+    <state>NM</state>
+    <location_name>Sapillo Creek Volunteer Fire Department</location_name>
+    <zip>88049</zip>
+  </address>
+</polling_location>
+<polling_location id="66602340">
+  <address>
+    <city>Red Rock</city>
+    <line1>25 Patton Rd.</line1>
+    <state>NM</state>
+    <location_name>Red Rock Church</location_name>
+    <zip>88055</zip>
+  </address>
+</polling_location>
+<polling_location id="66602341">
+  <address>
+    <city>SILVER CITY</city>
+    <line1>25 PATTON RD.</line1>
+    <state>NM</state>
+    <location_name>RED ROCK CHURCH</location_name>
+    <zip>88055</zip>
+  </address>
+</polling_location>
+<polling_location id="66602342">
+  <address>
+    <city>Pino Altos</city>
+    <line1>4759 Highway 15</line1>
+    <state>NM</state>
+    <location_name>Pino Altos Volunteer Fire Department</location_name>
+    <zip>88053</zip>
+  </address>
+</polling_location>
+<polling_location id="66602343">
+  <address>
+    <city>San Lorenzo</city>
+    <line1>3655 Highway 35</line1>
+    <state>NM</state>
+    <location_name>San Lorenzo Elementary School</location_name>
+    <zip>88041</zip>
+  </address>
+</polling_location>
+<polling_location id="66602344">
+  <address>
+    <city>Hachita</city>
+    <line1>44 A Ave.</line1>
+    <state>NM</state>
+    <location_name>Hachita Baptist Church</location_name>
+    <zip>88040</zip>
+  </address>
+</polling_location>
+<polling_location id="66602345">
+  <address>
+    <city>Mule Creek</city>
+    <line1>555 Highway 78</line1>
+    <state>NM</state>
+    <location_name>Mulecreek Community Center</location_name>
+    <zip>88051</zip>
+  </address>
+</polling_location>
+<polling_location id="66602346">
+  <address>
+    <city>Sedan</city>
+    <line1>501 Sedan Hwy Sedan</line1>
+    <state>NM</state>
+    <location_name>Sedan Fire Station</location_name>
+    <zip>88436</zip>
+  </address>
+</polling_location>
+<polling_location id="66602347">
+  <address>
+    <city>Amistad</city>
+    <line1>44 Amistad Hwy Amistad</line1>
+    <state>NM</state>
+    <location_name>Amistad Methodist Church</location_name>
+    <zip>88410</zip>
+  </address>
+</polling_location>
+<polling_location id="66602348">
+  <address>
+    <city>Des Moines</city>
+    <line1>415 Des Moines Ave.</line1>
+    <state>NM</state>
+    <location_name>Senior Citizen Center</location_name>
+    <zip>88415</zip>
+  </address>
+</polling_location>
+<polling_location id="66602349">
+  <address>
+    <city>Rociada</city>
+    <line1>278 NM Hwy 105</line1>
+    <state>NM</state>
+    <location_name>Rociada Fire Station</location_name>
+    <zip>87742</zip>
+  </address>
+</polling_location>
+<polling_location id="66602350">
+  <address>
+    <city>Sapello</city>
+    <line1>12 CR A-1</line1>
+    <state>NM</state>
+    <location_name>Robertson HS Mike Mateo Gymnasium</location_name>
+    <zip>87745</zip>
+  </address>
+</polling_location>
+<polling_location id="66602351">
+  <address>
+    <city>Serafina</city>
+    <line1>26 CR B28A</line1>
+    <state>NM</state>
+    <location_name>Bernal Community Center</location_name>
+    <zip>87569</zip>
+  </address>
+</polling_location>
+<polling_location id="66602352">
+  <address>
+    <city>Las Vegas</city>
+    <line1>91 CR B47A</line1>
+    <state>NM</state>
+    <location_name>Tecolote Community Center</location_name>
+    <zip>87701</zip>
+  </address>
+</polling_location>
+<polling_location id="66602353">
+  <address>
+    <city>Las Vegas</city>
+    <line1>42 CR C51A</line1>
+    <state>NM</state>
+    <location_name>Trujillo School House</location_name>
+    <zip>87701</zip>
+  </address>
+</polling_location>
+<polling_location id="66602354">
+  <address>
+    <city>Trementina</city>
+    <line1>9 NM Hwy 419</line1>
+    <state>NM</state>
+    <location_name>Trementina Fire Station</location_name>
+    <zip>88439</zip>
+  </address>
+</polling_location>
+<polling_location id="66602355">
+  <address>
+    <city>Conchas Dam</city>
+    <line1>101 Big Mesa Ave.</line1>
+    <state>NM</state>
+    <location_name>Conchas Dam Fire Station</location_name>
+    <zip>88416</zip>
+  </address>
+</polling_location>
+<polling_location id="66602356">
+  <address>
+    <city>Las Vegas</city>
+    <line1>3327 Ojitos Frios Rd.</line1>
+    <state>NM</state>
+    <location_name>Sheridan Fire Station</location_name>
+    <zip>87701</zip>
+  </address>
+</polling_location>
+<polling_location id="66602357">
+  <address>
+    <city>Anton Chico</city>
+    <line1>HC 67 Box 46</line1>
+    <state>NM</state>
+    <location_name>Home of Felipe Tenorio</location_name>
+    <zip>87711</zip>
+  </address>
+</polling_location>
+<polling_location id="66602358">
+  <address>
+    <city>San Juan</city>
+    <line1>121 CR B41A</line1>
+    <state>NM</state>
+    <location_name>San Juan Community Center</location_name>
+    <zip>87565</zip>
+  </address>
+</polling_location>
+<polling_location id="66602359">
+  <address>
+    <city>Ponderosa</city>
+    <line1>4252 Highway 290</line1>
+    <state>NM</state>
+    <location_name>Ponderosa Volunteer Fire Station</location_name>
+    <zip>87044</zip>
+  </address>
+</polling_location>
+<polling_location id="66602360">
+  <address>
+    <city>Jemez Pueblo</city>
+    <line1>8154 Hwy 4</line1>
+    <state>NM</state>
+    <location_name>Jemez Valley Community Center</location_name>
+    <zip>87024</zip>
+  </address>
+</polling_location>
+<polling_location id="66602361">
+  <address>
+    <city>Jemez Springs</city>
+    <line1>17570 Highway 4</line1>
+    <state>NM</state>
+    <location_name>Presbyterian Church</location_name>
+    <zip>87025</zip>
+  </address>
+</polling_location>
+<polling_location id="66602363">
+  <address>
+    <city>Santo Domingo Pueblo</city>
+    <line1>Tesuque St.</line1>
+    <state>NM</state>
+    <location_name>Santo Domingo Pueblo Community Center</location_name>
+    <zip>87052</zip>
+  </address>
+</polling_location>
+<polling_location id="66602364">
+  <address>
+    <city>Cuba</city>
+    <line1>46 Old Highway 126</line1>
+    <state>NM</state>
+    <location_name>Eichwald Center</location_name>
+    <zip>87013</zip>
+  </address>
+</polling_location>
+<polling_location id="66602366">
+  <address>
+    <city>Cuba</city>
+    <line1>108 County Rd. 496</line1>
+    <state>NM</state>
+    <location_name>La Jara Volunteer Fire Station</location_name>
+    <zip>87013</zip>
+  </address>
+</polling_location>
+<polling_location id="66602367">
+  <address>
+    <city>Counselors</city>
+    <line1>9828 Chapter House Rd. #14</line1>
+    <state>NM</state>
+    <location_name>Counselors Chapter House</location_name>
+    <zip>87018</zip>
+  </address>
+</polling_location>
+<polling_location id="66602368">
+  <address>
+    <city>Torreon</city>
+    <line1>Highway 197</line1>
+    <state>NM</state>
+    <location_name>Torreon Chapter House</location_name>
+    <zip>87013</zip>
+  </address>
+</polling_location>
+<polling_location id="66602370">
+  <address>
+    <city>San Ysidro</city>
+    <line1>398 Highway 4</line1>
+    <state>NM</state>
+    <location_name>San Ysidro Public Safety Training Room</location_name>
+    <zip>87053</zip>
+  </address>
+</polling_location>
+<polling_location id="66602371">
+  <address>
+    <city>Sandia Park</city>
+    <line1>672 Faith Dr.</line1>
+    <state>NM</state>
+    <location_name>La Madera Volunteer Fire Station</location_name>
+    <zip>87047</zip>
+  </address>
+</polling_location>
+<polling_location id="66602372">
+  <address>
+    <city>Bernalillo</city>
+    <line1>481 Sandia Lp.</line1>
+    <state>NM</state>
+    <location_name>Sandia Pueblo Community Center</location_name>
+    <zip>87004</zip>
+  </address>
+</polling_location>
+<polling_location id="66602373">
+  <address>
+    <city>Placitas</city>
+    <line1>463 Highway 165</line1>
+    <state>NM</state>
+    <location_name>Placitas Volunteer Fire Station</location_name>
+    <zip>87043</zip>
+  </address>
+</polling_location>
+<polling_location id="66602374">
+  <address>
+    <city>Placitas</city>
+    <line1>41 Camino del las Huertas</line1>
+    <state>NM</state>
+    <location_name>Placitas Senior Center</location_name>
+    <zip>87043</zip>
+  </address>
+</polling_location>
+<polling_location id="66602375">
+  <address>
+    <city>Bernalillo</city>
+    <line1>301 Calle del Esquela</line1>
+    <state>NM</state>
+    <location_name>Carroll Elementary School</location_name>
+    <zip>87004</zip>
+  </address>
+</polling_location>
+<polling_location id="66602376">
+  <address>
+    <city>Bernalillo</city>
+    <line1>485 Camino Don Tomas</line1>
+    <state>NM</state>
+    <location_name>Bernalillo Middle School</location_name>
+    <zip>87004</zip>
+  </address>
+</polling_location>
+<polling_location id="66602377">
+  <address>
+    <city>Bernalillo</city>
+    <line1>301 Camino Del Pueblo</line1>
+    <state>NM</state>
+    <location_name>Our Lady of Sorrows Social Center</location_name>
+    <zip>87004</zip>
+  </address>
+</polling_location>
+<polling_location id="66602379">
+  <address>
+    <city>Placitas</city>
+    <line1>5 Calle Del Carbon</line1>
+    <state>NM</state>
+    <location_name>Placitas Elementary School</location_name>
+    <zip>87043</zip>
+  </address>
+</polling_location>
+<polling_location id="66602380">
+  <address>
+    <city>Algodones</city>
+    <line1>395 Calle San Jose</line1>
+    <state>NM</state>
+    <location_name>Algodones Elementary School</location_name>
+    <zip>87001</zip>
+  </address>
+</polling_location>
+<polling_location id="66602381">
+  <address>
+    <city>Pena Blanca</city>
+    <line1>778 Highway 22</line1>
+    <state>NM</state>
+    <location_name>Pena Blanca Community Center</location_name>
+    <zip>87041</zip>
+  </address>
+</polling_location>
+<polling_location id="66602382">
+  <address>
+    <city>Cochiti Pueblo</city>
+    <line1>255 Cochiti St.</line1>
+    <state>NM</state>
+    <location_name>Cochiti Pueblo Community Center</location_name>
+    <zip>87041</zip>
+  </address>
+</polling_location>
+<polling_location id="66602384">
+  <address>
+    <city>San Felipe Pueblo</city>
+    <line1>5 Cedar Rd.</line1>
+    <state>NM</state>
+    <location_name>San Felipe Pueblo Senior Center</location_name>
+    <zip>87049</zip>
+  </address>
+</polling_location>
+<polling_location id="66602385">
+  <address>
+    <city>Cochiti Lake</city>
+    <line1>6515-C Hoochaneetsa Blvd.</line1>
+    <state>NM</state>
+    <location_name>Cochiti Lake Volunteer Fire/EMS</location_name>
+    <zip>87083</zip>
+  </address>
+</polling_location>
+<polling_location id="66602386">
+  <address>
+    <city>Jemez Pueblo</city>
+    <line1>5117 Highway 4</line1>
+    <state>NM</state>
+    <location_name>Jemez Pueblo Civic Center</location_name>
+    <zip>87024</zip>
+  </address>
+</polling_location>
+<polling_location id="66602387">
+  <address>
+    <city>Corrales</city>
+    <line1>500 Jones Rd.</line1>
+    <state>NM</state>
+    <location_name>Corrales Recreation Center</location_name>
+    <zip>87048</zip>
+  </address>
+</polling_location>
+<polling_location id="66602388">
+  <address>
+    <city>YahTaHey</city>
+    <line1>19 C Sunset Valley Rd.</line1>
+    <state>NM</state>
+    <location_name>Navajo Estates Fire Station</location_name>
+    <zip>87375</zip>
+  </address>
+</polling_location>
+<polling_location id="66602389">
+  <address>
+    <city>Wingate</city>
+    <line1>2111 A Suite 21A Iyanbito Rd, Ft.</line1>
+    <state>NM</state>
+    <location_name>Iyanbito Chapter House</location_name>
+    <zip>87316</zip>
+  </address>
+</polling_location>
+<polling_location id="66602390">
+  <address>
+    <city>Tajique</city>
+    <line1>8636 Hwy 55</line1>
+    <state>NM</state>
+    <location_name>TAJIQUE COMMUNITY CENTER</location_name>
+    <zip>87061</zip>
+  </address>
+</polling_location>
+<polling_location id="66602391">
+  <address>
+    <city>McIntosh</city>
+    <line1>14 E. Willow Lake Rd.</line1>
+    <state>NM</state>
+    <location_name>MCINTOSH SENIOR CENTER</location_name>
+    <zip>87032</zip>
+  </address>
+</polling_location>
+<polling_location id="66602392">
+  <address>
+    <city>Estancia</city>
+    <line1>2 W. Saline Pump Rd</line1>
+    <state>NM</state>
+    <location_name>CALVARY CHAPEL</location_name>
+    <zip>87016</zip>
+  </address>
+</polling_location>
+<polling_location id="66602394">
+  <address>
+    <city>Polvadera</city>
+    <line1>9 Midway Road</line1>
+    <state>NM</state>
+    <location_name>Midway School</location_name>
+    <zip>87828</zip>
+  </address>
+</polling_location>
+<polling_location id="66602396">
+  <address>
+    <city>Lemitar</city>
+    <line1>9 Midway</line1>
+    <state>NM</state>
+    <location_name>Midway School</location_name>
+  </address>
+</polling_location>
+<polling_location id="66602398">
+  <address>
+    <city>Abeytas</city>
+    <line1>387 Highway 116</line1>
+    <state>NM</state>
+    <location_name>Abeytas Fire Station (Bosque)</location_name>
+    <zip>87023</zip>
+  </address>
+</polling_location>
+<polling_location id="66602399">
+  <address>
+    <city>Veguita</city>
+    <line1>894 Hwy 304</line1>
+    <state>NM</state>
+    <location_name>Northern Senior Center</location_name>
+    <zip>87062</zip>
+  </address>
+</polling_location>
+<polling_location id="66602400">
+  <address>
+    <city>Bernalillo</city>
+    <line1>1500 Idalia Rd.</line1>
+    <state>NM</state>
+    <location_name>Sandoval County Admin Building D</location_name>
+    <zip>87004</zip>
+  </address>
+</polling_location>
+<polling_location id="66602402">
+  <address>
+    <city>Gallup</city>
+    <line1>R005-001 Refuge Rock Road</line1>
+    <state>NM</state>
+    <location_name>Red Rock Chapter House (South)</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602403">
+  <address>
+    <city>TseYaToh</city>
+    <line1>82 C West TseYaToh Rd.</line1>
+    <state>NM</state>
+    <location_name>Tsayatoh Multi-Complex Building</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602404">
+  <address>
+    <city>Tsayatoh</city>
+    <line1>PO Box 3068</line1>
+    <state>NM</state>
+    <location_name>Tsayatoh Multi Purpose Building</location_name>
+    <zip>87319</zip>
+  </address>
+</polling_location>
+<polling_location id="66602405">
+  <address>
+    <city>Gallup</city>
+    <line1>124 W.Historic Hwy 66</line1>
+    <state>NM</state>
+    <location_name>McKinley West Fire Station</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602406">
+  <address>
+    <city>Rehoboth</city>
+    <line1>37 Rehoboth Dr.</line1>
+    <state>NM</state>
+    <location_name>Rehoboth Mission</location_name>
+    <zip>87322</zip>
+  </address>
+</polling_location>
+<polling_location id="66602407">
+  <address>
+    <city>Cubero</city>
+    <line1>100 Main St.</line1>
+    <state>NM</state>
+    <location_name>Cubero Elementary School</location_name>
+    <zip>87014</zip>
+  </address>
+</polling_location>
+<polling_location id="66602408">
+  <address>
+    <city>Grants</city>
+    <line1>515 W. High St.</line1>
+    <state>NM</state>
+    <location_name>Cibola County Complex</location_name>
+    <zip>87020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602409">
+  <address>
+    <city>Laguna</city>
+    <line1>22 Capital Rd.</line1>
+    <state>NM</state>
+    <location_name>Laguna Tribal Building</location_name>
+    <zip>87026</zip>
+  </address>
+</polling_location>
+<polling_location id="66602410">
+  <address>
+    <city>Mesita</city>
+    <line1>Mesita Rd., BIA Rd. 520A</line1>
+    <state>NM</state>
+    <location_name>Mesita Recreation Hall</location_name>
+    <zip>87040</zip>
+  </address>
+</polling_location>
+<polling_location id="66602411">
+  <address>
+    <city>Paguate</city>
+    <line1>Stone Ridge Rd.</line1>
+    <state>NM</state>
+    <location_name>Paguate Bender Building</location_name>
+    <zip>87040</zip>
+  </address>
+</polling_location>
+<polling_location id="66602412">
+  <address>
+    <city>Encinal</city>
+    <line1>Flagstone BIA 46 Loop</line1>
+    <state>NM</state>
+    <location_name>Encinal Recreation Hall</location_name>
+    <zip>87038</zip>
+  </address>
+</polling_location>
+<polling_location id="66602413">
+  <address>
+    <city>Paraje</city>
+    <line1>Paraje Rd. , BIA Rd. 220</line1>
+    <state>NM</state>
+    <location_name>Paraje Recreation Building</location_name>
+    <zip>87007</zip>
+  </address>
+</polling_location>
+<polling_location id="66602414">
+  <address>
+    <city>Seama</city>
+    <line1>Sacred Shield BIA 240</line1>
+    <state>NM</state>
+    <location_name>Seama Recreation Hall</location_name>
+    <zip>87007</zip>
+  </address>
+</polling_location>
+<polling_location id="66602415">
+  <address>
+    <city>Penasco</city>
+    <line1>Off St Rd 75</line1>
+    <state>NM</state>
+    <location_name>Picuris Pueblo Administration Building</location_name>
+    <zip>87553</zip>
+  </address>
+</polling_location>
+<polling_location id="66602416">
+  <address>
+    <city>Santa Fe</city>
+    <line1>15 Bayay Poe</line1>
+    <state>NM</state>
+    <location_name>NAMBE PUEBLO TRIBAL ADMINISTRATIVE BUILDING</location_name>
+    <zip>87506</zip>
+  </address>
+</polling_location>
+<polling_location id="66602417">
+  <address>
+    <city>La Cueva</city>
+    <line1>122 Twisted Juniper</line1>
+    <state>NM</state>
+    <location_name>La Cueva Volunteer Fire Station</location_name>
+    <zip>87025</zip>
+  </address>
+</polling_location>
+<polling_location id="66602418">
+  <address>
+    <city>Sierra Los Pinos</city>
+    <line1>960 Forrest Rd. 10</line1>
+    <state>NM</state>
+    <location_name>Sierra Los Pinos Volunteer Fire Station</location_name>
+    <zip>87025</zip>
+  </address>
+</polling_location>
+<polling_location id="66602419">
+  <address>
+    <city>Placitas</city>
+    <line1>7 Paseo De San Antonio</line1>
+    <state>NM</state>
+    <location_name>Las Placitas Presbyterian Church</location_name>
+    <zip>87043</zip>
+  </address>
+</polling_location>
+<polling_location id="66602420">
+  <address>
+    <city>Santa Fe</city>
+    <line1>13A SAN MARCOS LOOP</line1>
+    <state>NM</state>
+    <location_name>TURQUOISE TRAIL ELEMENTARY SCHOOL</location_name>
+    <zip>87508</zip>
+  </address>
+</polling_location>
+<polling_location id="66602423">
+  <address>
+    <city>Hagerman</city>
+    <line1>209 E. Argyle</line1>
+    <state>NM</state>
+    <location_name>Hagerman Town Hall</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602424">
+  <address>
+    <city>Roswell</city>
+    <line1>25 West Martin</line1>
+    <state>NM</state>
+    <location_name>University High School</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="66602425">
+  <address>
+    <city>Roswell</city>
+    <line1>25 W. Martin</line1>
+    <state>NM</state>
+    <location_name>University High School</location_name>
+    <zip>88344</zip>
+  </address>
+</polling_location>
+<polling_location id="66602427">
+  <address>
+    <city>Chaparral</city>
+    <line1>827 Luna Street</line1>
+    <state>NM</state>
+    <location_name>Chaparral Far South Fire Station</location_name>
+    <zip>88081</zip>
+  </address>
+</polling_location>
+<polling_location id="66602429">
+  <address>
+    <city>Santa Fe</city>
+    <line1>6251 Jaguar Dr.</line1>
+    <state>NM</state>
+    <location_name>Cesar Chavez Elementary School</location_name>
+    <zip>87507</zip>
+  </address>
+</polling_location>
+<polling_location id="66602430">
+  <address>
+    <city>Jemez Pueblo</city>
+    <line1>129 Canal St.</line1>
+    <state>NM</state>
+    <location_name>Community Resource Center</location_name>
+    <zip>87024</zip>
+  </address>
+</polling_location>
+<polling_location id="66602431">
+  <address>
+    <city>Eagle Nest</city>
+    <line1>151 Willow Creek Drive</line1>
+    <state>NM</state>
+    <location_name>Eagle Nest Community Center</location_name>
+    <zip>87718</zip>
+  </address>
+</polling_location>
+<polling_location id="66602432">
+  <address>
+    <city>Angel Fire</city>
+    <line1>15 CS Ranch Road</line1>
+    <state>NM</state>
+    <location_name>Angel Fire Community Center</location_name>
+    <zip>87710</zip>
+  </address>
+</polling_location>
+<polling_location id="66602433">
+  <address>
+    <city>Crownpoint</city>
+    <line1>West Navajo Rt. 9; 1.8 Miles South on Dalton Pass Rd.</line1>
+    <state>NM</state>
+    <location_name>Dalton Pass (Nahodishgish) Chapter House</location_name>
+    <zip>87313</zip>
+  </address>
+</polling_location>
+<polling_location id="66602434">
+  <address>
+    <city>Pueblo Pintado</city>
+    <line1>118 Counselor Road</line1>
+    <state>NM</state>
+    <location_name>Tse Yi Gai High School (Pueblo Pintado)</location_name>
+    <zip>87013</zip>
+  </address>
+</polling_location>
+<polling_location id="66602435">
+  <address>
+    <city>Mariano Lake</city>
+    <line1>M003-001 Mariano Lake Loop Dr. Mariano Lake, NM</line1>
+    <state>NM</state>
+    <location_name>Mariano Lake Chapter House</location_name>
+    <zip>87323</zip>
+  </address>
+</polling_location>
+<polling_location id="66602436">
+  <address>
+    <city>Becenti</city>
+    <line1>Hwy 371, B003-001</line1>
+    <state>NM</state>
+    <location_name>Becenti Chapter House</location_name>
+    <zip>87313</zip>
+  </address>
+</polling_location>
+<polling_location id="66602437">
+  <address>
+    <city>La Luz</city>
+    <line1>99 Alamo Street</line1>
+    <state>NM</state>
+    <location_name>La Luz Elementary School</location_name>
+    <zip>88337</zip>
+  </address>
+</polling_location>
+<polling_location id="66602438">
+  <address>
+    <city>La Luz</city>
+    <line1>556 Laborcita Canyon Road</line1>
+    <state>NM</state>
+    <location_name>Burro Flats Fire Station</location_name>
+    <zip>88337</zip>
+  </address>
+</polling_location>
+<polling_location id="66602439">
+  <address>
+    <city>Cloudcroft</city>
+    <line1>201 Burro Ave.</line1>
+    <state>NM</state>
+    <location_name>Cloudcroft Council Chambers</location_name>
+    <zip>88317</zip>
+  </address>
+</polling_location>
+<polling_location id="66602440">
+  <address>
+    <city>Cloudcroft</city>
+    <line1>2346 US Hwy 82</line1>
+    <state>NM</state>
+    <location_name>James Canyon Fire Station</location_name>
+    <zip>88317</zip>
+  </address>
+</polling_location>
+<polling_location id="66602441">
+  <address>
+    <city>Cloudcroft</city>
+    <line1>Cox Canyon Hwy 130</line1>
+    <state>NM</state>
+    <location_name>Sivell's Baptist Camp</location_name>
+    <zip>88317</zip>
+  </address>
+</polling_location>
+<polling_location id="66602442">
+  <address>
+    <city>Lordsburg</city>
+    <line1>502 W. 2nd Street</line1>
+    <state>NM</state>
+    <location_name>Lordsburg Special Events Center</location_name>
+    <zip>88045</zip>
+  </address>
+</polling_location>
+<polling_location id="66602443">
+  <address>
+    <city>Lordsburg</city>
+    <line1>313 E. 4th Street</line1>
+    <state>NM</state>
+    <location_name>James H. Baxter Civic Center</location_name>
+    <zip>88045</zip>
+  </address>
+</polling_location>
+<polling_location id="66602444">
+  <address>
+    <city>Lordsburg</city>
+    <line1>720 E. 2nd Street</line1>
+    <state>NM</state>
+    <location_name>Hidalgo County Sherriff's Department</location_name>
+    <zip>88045</zip>
+  </address>
+</polling_location>
+<polling_location id="66602445">
+  <address>
+    <city>Virden</city>
+    <line1>110 Richmond Avenue</line1>
+    <state>NM</state>
+    <location_name>Virden Community Center</location_name>
+    <zip>85534</zip>
+  </address>
+</polling_location>
+<polling_location id="66602446">
+  <address>
+    <city>Rodeo</city>
+    <line1>16 Hickory Street</line1>
+    <state>NM</state>
+    <location_name>Rodeo Community Center</location_name>
+    <zip>88056</zip>
+  </address>
+</polling_location>
+<polling_location id="66602447">
+  <address>
+    <city>Animas</city>
+    <line1>21 Maverick Road</line1>
+    <state>NM</state>
+    <location_name>Animas Community Center</location_name>
+    <zip>88020</zip>
+  </address>
+</polling_location>
+<polling_location id="66602448">
+  <address>
+    <city>Anton Chico</city>
+    <line1>1809 State Hwy. 386</line1>
+    <state>NM</state>
+    <location_name>Anton Chico School</location_name>
+    <zip>87711</zip>
+  </address>
+</polling_location>
+<polling_location id="66602449">
+  <address>
+    <city>Anton Chico</city>
+    <line1>1050 La Loma Rd.</line1>
+    <state>NM</state>
+    <location_name>Anton Chico Fire Dept.</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602450">
+  <address>
+    <city>Anton Chico</city>
+    <line1>1012 San Jose Circle</line1>
+    <state>NM</state>
+    <location_name>Anton Chico Community Ctr.</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602451">
+  <address>
+    <city>Quemado</city>
+    <line1>27 Lopez Street</line1>
+    <state>NM</state>
+    <location_name>Quemado Community Center</location_name>
+    <zip>87829</zip>
+  </address>
+</polling_location>
+<polling_location id="66602452">
+  <address>
+    <city>Escudilla Bonita Acres</city>
+    <line1>13 Bonita Drive</line1>
+    <state>NM</state>
+    <location_name>Escudilla Bonita Coyote Creek Fire Station</location_name>
+    <zip>87829</zip>
+  </address>
+</polling_location>
+<polling_location id="66602453">
+  <address>
+    <city>Datil</city>
+    <line1>16 Old State Road 60</line1>
+    <state>NM</state>
+    <location_name>Datil Fire Station</location_name>
+    <zip>87821</zip>
+  </address>
+</polling_location>
+<polling_location id="66602454">
+  <address>
+    <city>Pie Town</city>
+    <line1>6 Beanery Road</line1>
+    <state>NM</state>
+    <location_name>Pie Town Community Center</location_name>
+    <zip>87827</zip>
+  </address>
+</polling_location>
+<polling_location id="66602455">
+  <address>
+    <city>Datil</city>
+    <line1>9 Frontier Trail Horse Mountain Subdivision</line1>
+    <state>NM</state>
+    <location_name>Horse Mountain Fire Station</location_name>
+    <zip>87821</zip>
+  </address>
+</polling_location>
+<polling_location id="66602464">
+  <address>
+    <city>Albuquerque</city>
+    <line1>Union Square/111 Union Square</line1>
+    <state>NM</state>
+    <location_name>Clerk's Annex</location_name>
+    <zip>87102</zip>
+  </address>
+</polling_location>
+<polling_location id="66602476">
+  <address>
+    <city>Albuquerque</city>
+    <line1>415 Thaxton Avenue, SE</line1>
+    <state>NM</state>
+    <location_name>East San Jose Elementary School</location_name>
+    <zip>78102</zip>
+  </address>
+</polling_location>
+<polling_location id="66602477">
+  <address>
+    <city>Isleta</city>
+    <line1>Bldg. 60 Tribal Road 40</line1>
+    <state>NM</state>
+    <location_name>Isleta Recreation Center</location_name>
+    <zip>87022</zip>
+  </address>
+</polling_location>
+<polling_location id="66602478">
+  <address>
+    <city>Sandia Park</city>
+    <line1>15 La Madera Road</line1>
+    <state>NM</state>
+    <location_name>Vista Grande Community Center</location_name>
+    <zip>87047</zip>
+  </address>
+</polling_location>
+<polling_location id="66602479">
+  <address>
+    <city>Tijeras</city>
+    <line1>24 Public School Road</line1>
+    <state>NM</state>
+    <location_name>A. Montoya Elementary School</location_name>
+    <zip>87059</zip>
+  </address>
+</polling_location>
+<polling_location id="66602480">
+  <address>
+    <city>Tijeras</city>
+    <line1>54 Hwy 217</line1>
+    <state>NM</state>
+    <location_name>Forest Meadow Baptist Church</location_name>
+    <zip>87059</zip>
+  </address>
+</polling_location>
+<polling_location id="66602482">
+  <address>
+    <city>Albuquerque</city>
+    <line1>800 Odelia Road, NE</line1>
+    <state>NM</state>
+    <location_name>Albuquerque High School</location_name>
+    <zip>87102</zip>
+  </address>
+</polling_location>
+<polling_location id="66602484">
+  <address>
+    <city>Albuquerque</city>
+    <line1>1101 Park Avenue, SW</line1>
+    <state>NM</state>
+    <location_name>Washington Middle School</location_name>
+    <zip>87102</zip>
+  </address>
+</polling_location>
+<polling_location id="66602485">
+  <address>
+    <city>Albuquerque</city>
+    <line1>2436 Zickert Road, NW</line1>
+    <state>NM</state>
+    <location_name>Duranes Elementary School</location_name>
+    <zip>87104</zip>
+  </address>
+</polling_location>
+<polling_location id="66602486">
+  <address>
+    <city>Albuquerque</city>
+    <line1>1724 Camino del Valle, SW</line1>
+    <state>NM</state>
+    <location_name>Adobe Acres Elementary School</location_name>
+    <zip>87105</zip>
+  </address>
+</polling_location>
+<polling_location id="66602487">
+  <address>
+    <city>Albuquerque</city>
+    <line1>5317 2nd Street, SW</line1>
+    <state>NM</state>
+    <location_name>Mountain View Elementary School</location_name>
+    <zip>87105</zip>
+  </address>
+</polling_location>
+<polling_location id="66602488">
+  <address>
+    <city>Albuquerque</city>
+    <line1>2701 Don Felipe, SW</line1>
+    <state>NM</state>
+    <location_name>Pajarito Elementary School</location_name>
+    <zip>87105</zip>
+  </address>
+</polling_location>
+<polling_location id="66602489">
+  <address>
+    <city>Albuquerque</city>
+    <line1>2220 Raymac Road, SW</line1>
+    <state>NM</state>
+    <location_name>Polk Middle School</location_name>
+    <zip>87105</zip>
+  </address>
+</polling_location>
+<polling_location id="66602491">
+  <address>
+    <city>Albuquerque</city>
+    <line1>2300 Arenal Road, SW</line1>
+    <state>NM</state>
+    <location_name>Rio Grande High School</location_name>
+    <zip>87105</zip>
+  </address>
+</polling_location>
+<polling_location id="66602492">
+  <address>
+    <city>Albuquerque</city>
+    <line1>1700 Mae Avenue, SW</line1>
+    <state>NM</state>
+    <location_name>Valle Vista Elementary School</location_name>
+    <zip>87105</zip>
+  </address>
+</polling_location>
+<polling_location id="66602493">
+  <address>
+    <city>Albuquerque</city>
+    <line1>3309 Pershing Avenue, SE</line1>
+    <state>NM</state>
+    <location_name>Bandelier Elementary School</location_name>
+    <zip>87106</zip>
+  </address>
+</polling_location>
+<polling_location id="66602494">
+  <address>
+    <city>Albuquerque</city>
+    <line1>712 Girard Blvd., NE</line1>
+    <state>NM</state>
+    <location_name>Jefferson Middle School</location_name>
+    <zip>87106</zip>
+  </address>
+</polling_location>
+<polling_location id="66602495">
+  <address>
+    <city>Albuquerque</city>
+    <line1>3100 Indian School Road, NE</line1>
+    <state>NM</state>
+    <location_name>Montezuma Elementary School</location_name>
+    <zip>87106</zip>
+  </address>
+</polling_location>
+<polling_location id="66602497">
+  <address>
+    <city>Albuquerque</city>
+    <line1>3501 6th Street, NW</line1>
+    <state>NM</state>
+    <location_name>Garfield Middle School</location_name>
+    <zip>87107</zip>
+  </address>
+</polling_location>
+<polling_location id="66602498">
+  <address>
+    <city>Albuquerque</city>
+    <line1>6125 4th Street NW, Suite 40</line1>
+    <state>NM</state>
+    <location_name>Guadalupe Plaza</location_name>
+    <zip>87107</zip>
+  </address>
+</polling_location>
+<polling_location id="66602499">
+  <address>
+    <city>Albuquerque</city>
+    <line1>1505 Candelaria Road, NW</line1>
+    <state>NM</state>
+    <location_name>Valley High School</location_name>
+    <zip>87107</zip>
+  </address>
+</polling_location>
+<polling_location id="66602500">
+  <address>
+    <city>Albuquerque</city>
+    <line1>310 San Pedro Drive NE</line1>
+    <state>NM</state>
+    <location_name>Alice Hoppes African American Pavilion-EXPO NM</location_name>
+    <zip>87108</zip>
+  </address>
+</polling_location>
+<polling_location id="66602501">
+  <address>
+    <city>Albuquerque</city>
+    <line1>4700 Coal Avenue, SE</line1>
+    <state>NM</state>
+    <location_name>Highland High School</location_name>
+    <zip>87108</zip>
+  </address>
+</polling_location>
+<polling_location id="66602502">
+  <address>
+    <city>Albuquerque</city>
+    <line1>700 Louisiana Blvd., SE</line1>
+    <state>NM</state>
+    <location_name>Van Buren Middle School</location_name>
+    <zip>87108</zip>
+  </address>
+</polling_location>
+<polling_location id="66602503">
+  <address>
+    <city>Albuquerque</city>
+    <line1>6504 Harper Drive, NE</line1>
+    <state>NM</state>
+    <location_name>Arroyo Del Oso Elementary School</location_name>
+    <zip>87109</zip>
+  </address>
+</polling_location>
+<polling_location id="66602504">
+  <address>
+    <city>Albuquerque</city>
+    <line1>5323 Montgomery Blvd., NE</line1>
+    <state>NM</state>
+    <location_name>Del Norte High School</location_name>
+    <zip>87109</zip>
+  </address>
+</polling_location>
+<polling_location id="66602507">
+  <address>
+    <city>Albuquerque</city>
+    <line1>1100 Texas Street, NE</line1>
+    <state>NM</state>
+    <location_name>Hayes Middle School</location_name>
+    <zip>87110</zip>
+  </address>
+</polling_location>
+<polling_location id="66602508">
+  <address>
+    <city>Albuquerque</city>
+    <line1>4500 Comanche Road, NE</line1>
+    <state>NM</state>
+    <location_name>McKinley Middle School</location_name>
+    <zip>87110</zip>
+  </address>
+</polling_location>
+<polling_location id="66602509">
+  <address>
+    <city>Albuquerque</city>
+    <line1>7801 Candelaria Road, NE</line1>
+    <state>NM</state>
+    <location_name>Sandia High School</location_name>
+    <zip>87110</zip>
+  </address>
+</polling_location>
+<polling_location id="66602510">
+  <address>
+    <city>Albuquerque</city>
+    <line1>6300 Claremont Avenue, NE</line1>
+    <state>NM</state>
+    <location_name>Zuni Elementary School</location_name>
+    <zip>87110</zip>
+  </address>
+</polling_location>
+<polling_location id="66602511">
+  <address>
+    <city>Albuquerque</city>
+    <line1>12500 Montgomery Blvd. NE, Ste. 101</line1>
+    <state>NM</state>
+    <location_name>Caracol Plaza Shopping Center</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602513">
+  <address>
+    <city>Albuquerque</city>
+    <line1>11001 Camero Road, NE</line1>
+    <state>NM</state>
+    <location_name>Eisenhower Middle School</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602514">
+  <address>
+    <city>Albuquerque</city>
+    <line1>11300 Montgomery Blvd., NE</line1>
+    <state>NM</state>
+    <location_name>Eldorado High School</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602515">
+  <address>
+    <city>Albuquerque</city>
+    <line1>12015 Tivoli Avenue, NE</line1>
+    <state>NM</state>
+    <location_name>Hoover Middle School</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602516">
+  <address>
+    <city>Albuquerque</city>
+    <line1>9801 Academy Hills Drive, NE</line1>
+    <state>NM</state>
+    <location_name>Hubert Humphrey Elementary School</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602517">
+  <address>
+    <city>Albuquerque</city>
+    <line1>3501 Moon Street, NE</line1>
+    <state>NM</state>
+    <location_name>Madison Middle School</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602519">
+  <address>
+    <city>Albuquerque</city>
+    <line1>8701 Princess Jeanne Avenue NE</line1>
+    <state>NM</state>
+    <location_name>Bellehaven Elementary School</location_name>
+    <zip>87112</zip>
+  </address>
+</polling_location>
+<polling_location id="66602520">
+  <address>
+    <city>Albuquerque</city>
+    <line1>10600 Indian School Road, NE</line1>
+    <state>NM</state>
+    <location_name>Jackson Middle School</location_name>
+    <zip>87112</zip>
+  </address>
+</polling_location>
+<polling_location id="66602521">
+  <address>
+    <city>Albuquerque</city>
+    <line1>12200 Lomas Blvd., NE</line1>
+    <state>NM</state>
+    <location_name>Manzano High School</location_name>
+    <zip>87112</zip>
+  </address>
+</polling_location>
+<polling_location id="66602522">
+  <address>
+    <city>Albuquerque</city>
+    <line1>12415 Brentwood Hills Blvd., NE</line1>
+    <state>NM</state>
+    <location_name>Onate Elementary School</location_name>
+    <zip>87112</zip>
+  </address>
+</polling_location>
+<polling_location id="66602523">
+  <address>
+    <city>Albuquerque</city>
+    <line1>1510 Ellison Drive, NW</line1>
+    <state>NM</state>
+    <location_name>Cibola High School</location_name>
+    <zip>87114</zip>
+  </address>
+</polling_location>
+<polling_location id="66602524">
+  <address>
+    <city>Albuquerque</city>
+    <line1>9800 4th Street, NW</line1>
+    <state>NM</state>
+    <location_name>Raymond G. Sanchez Community Center</location_name>
+    <zip>87114</zip>
+  </address>
+</polling_location>
+<polling_location id="66602526">
+  <address>
+    <city>Albuquerque</city>
+    <line1>8200 Guadalupe Trail, NW</line1>
+    <state>NM</state>
+    <location_name>Taylor Middle School</location_name>
+    <zip>87114</zip>
+  </address>
+</polling_location>
+<polling_location id="66602527">
+  <address>
+    <city>Albuquerque</city>
+    <line1>6801 Ventana Village Road, NW</line1>
+    <state>NM</state>
+    <location_name>Ventana Ranch Elementary School</location_name>
+    <zip>87114</zip>
+  </address>
+</polling_location>
+<polling_location id="66602528">
+  <address>
+    <city>Albuquerque</city>
+    <line1>8100 Rainbow Blvd., NW</line1>
+    <state>NM</state>
+    <location_name>Volcano Vista High School</location_name>
+    <zip>87114</zip>
+  </address>
+</polling_location>
+<polling_location id="66602529">
+  <address>
+    <city>Albuquerque</city>
+    <line1>6325 Milne Road, NW</line1>
+    <state>NM</state>
+    <location_name>Chaparral Elementary School</location_name>
+    <zip>87120</zip>
+  </address>
+</polling_location>
+<polling_location id="66602530">
+  <address>
+    <city>Albuquerque</city>
+    <line1>6811 Taylor Ranch Road, NW</line1>
+    <state>NM</state>
+    <location_name>LBJ Middle School</location_name>
+    <zip>87120</zip>
+  </address>
+</polling_location>
+<polling_location id="66602531">
+  <address>
+    <city>Albuquerque</city>
+    <line1>120 98th St. NW</line1>
+    <state>NM</state>
+    <location_name>98th and Central Shopping Center</location_name>
+    <zip>87121</zip>
+  </address>
+</polling_location>
+<polling_location id="66602532">
+  <address>
+    <city>Albuquerque</city>
+    <line1>9400 Benavides Road, SW</line1>
+    <state>NM</state>
+    <location_name>Truman Middle School</location_name>
+    <zip>87121</zip>
+  </address>
+</polling_location>
+<polling_location id="66602533">
+  <address>
+    <city>Albuquerque</city>
+    <line1>6701 Fortuna Road, NW</line1>
+    <state>NM</state>
+    <location_name>West Mesa High School</location_name>
+    <zip>87121</zip>
+  </address>
+</polling_location>
+<polling_location id="66602534">
+  <address>
+    <city>Albuquerque</city>
+    <line1>8901 Lowell Drive NE</line1>
+    <state>NM</state>
+    <location_name>Double Eagle Elementary School</location_name>
+    <zip>87122</zip>
+  </address>
+</polling_location>
+<polling_location id="66602535">
+  <address>
+    <city>Albuquerque</city>
+    <line1>7801 Wilshire Avenue, NE</line1>
+    <state>NM</state>
+    <location_name>La Cueva High School</location_name>
+    <zip>87122</zip>
+  </address>
+</polling_location>
+<polling_location id="66602536">
+  <address>
+    <city>Albuquerque</city>
+    <line1>721 Tomasita Street, NE</line1>
+    <state>NM</state>
+    <location_name>Kennedy Middle School</location_name>
+    <zip>87123</zip>
+  </address>
+</polling_location>
+<polling_location id="66602537">
+  <address>
+    <city>Albuquerque</city>
+    <line1>801 Elizabeth Street, SE</line1>
+    <state>NM</state>
+    <location_name>Manzano Mesa Elementary School</location_name>
+    <zip>87123</zip>
+  </address>
+</polling_location>
+<polling_location id="66602539">
+  <address>
+    <city>Tijeras</city>
+    <line1>24 Public School Rd.</line1>
+    <state>NM</state>
+    <location_name>A. Montoya Elementary School</location_name>
+    <zip>87059</zip>
+  </address>
+</polling_location>
+<polling_location id="66602540">
+  <address>
+    <city>Albuquerque</city>
+    <line1>2800 Vermejo Park Dr. SW</line1>
+    <state>NM</state>
+    <location_name>Rudolfo Anaya Elementary School</location_name>
+    <zip>87121</zip>
+  </address>
+</polling_location>
+<polling_location id="66602541">
+  <address>
+    <city>Albuquerque</city>
+    <line1>3501 Moon St. NE</line1>
+    <state>NM</state>
+    <location_name>Madison Middle School</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602547">
+  <address>
+    <city>Albuquerque</city>
+    <line1>8510 Montgomery Blvd. NE Ste. A6</line1>
+    <state>NM</state>
+    <location_name>Montgomery Crossing Shopping Center</location_name>
+    <zip>87111</zip>
+  </address>
+</polling_location>
+<polling_location id="66602567">
+  <address>
+    <city>Albuquerque</city>
+    <line1>W. Albuquerque Exit 131, 8 miles N to DC Complex</line1>
+    <state>NM</state>
+    <location_name>Desiderio Community Center DC Complex</location_name>
+    <zip>87022</zip>
+  </address>
+</polling_location>
+<polling_location id="66602568">
+  <address>
+    <city>Albuquerque</city>
+    <line1>1724 camino del Valle SW</line1>
+    <state>NM</state>
+    <location_name>Adobe Acres Elementary School</location_name>
+    <zip>87108</zip>
+  </address>
+</polling_location>
+<polling_location id="66602571">
+  <address>
+    <city>Artesia</city>
+    <line1>401 S. 20th Street</line1>
+    <state>NM</state>
+    <location_name>Faith Baptist Church</location_name>
+    <zip>88210</zip>
+  </address>
+</polling_location>
+<polling_location id="66602572">
+  <address>
+    <city>Carlsbad</city>
+    <line1>1302 W. Pierce St.</line1>
+    <state>NM</state>
+    <location_name>St. Peter Lutheran Church</location_name>
+    <zip>88220</zip>
+  </address>
+</polling_location>
+<polling_location id="66602573">
+  <address>
+    <city>Carlsbad</city>
+    <line1>1400 Commerce Dr.</line1>
+    <state>NM</state>
+    <location_name>Permian Basin Training Center</location_name>
+    <zip>88220</zip>
+  </address>
+</polling_location>
+<polling_location id="66602575">
+  <address>
+    <city>Artesia</city>
+    <line1>602 S. 1st St.</line1>
+    <state>NM</state>
+    <location_name>County Sub-Office</location_name>
+    <zip>88210</zip>
+  </address>
+</polling_location>
+<polling_location id="66602577">
+  <address>
+    <city>Carlsbad</city>
+    <line1>1302 Mission Ave.</line1>
+    <state>NM</state>
+    <location_name>Leo Sweet Center</location_name>
+    <zip>88220</zip>
+  </address>
+</polling_location>
+<polling_location id="66602578">
+  <address>
+    <city>Carlsbad</city>
+    <line1>181 W. Lea St.</line1>
+    <state>NM</state>
+    <location_name>Early Childhood Education Center</location_name>
+    <zip>88220</zip>
+  </address>
+</polling_location>
+<polling_location id="66602579">
+  <address>
+    <city>Carlsbad</city>
+    <line1>2810 San Jose Blvd.</line1>
+    <state>NM</state>
+    <location_name>San Jose Senior Citizen</location_name>
+    <zip>88220</zip>
+  </address>
+</polling_location>
+<polling_location id="66602580">
+  <address>
+    <city>Loving</city>
+    <line1>309 S. 6th St.</line1>
+    <state>NM</state>
+    <location_name>Old Loving Middle School</location_name>
+    <zip>88256</zip>
+  </address>
+</polling_location>
+<polling_location id="66602581">
+  <address>
+    <city>Artesia</city>
+    <line1>202 W. Chisum Ave.</line1>
+    <state>NM</state>
+    <location_name>Artesia Senior Citizens Center</location_name>
+    <zip>88210</zip>
+  </address>
+</polling_location>
+<polling_location id="66602588">
+  <address>
+    <city>Clovis</city>
+    <line1>316 W. 2nd St.</line1>
+    <state>NM</state>
+    <location_name>Roy Walker Center</location_name>
+    <zip>88101</zip>
+  </address>
+</polling_location>
+<polling_location id="66602589">
+  <address>
+    <city>Clovis</city>
+    <line1>1504 E. 7th St.</line1>
+    <state>NM</state>
+    <location_name>Youth Recreation Building</location_name>
+    <zip>88101</zip>
+  </address>
+</polling_location>
+<polling_location id="66602590">
+  <address>
+    <city>Clovis</city>
+    <line1>1320 W. 21st St.</line1>
+    <state>NM</state>
+    <location_name>Trinity United Methodest Church</location_name>
+    <zip>88101</zip>
+  </address>
+</polling_location>
+<polling_location id="66602591">
+  <address>
+    <city>Clovis</city>
+    <line1>1300 Colonial Parkway</line1>
+    <state>NM</state>
+    <location_name>Colonial Clubhouse</location_name>
+    <zip>88101</zip>
+  </address>
+</polling_location>
+<polling_location id="66602592">
+  <address>
+    <city>Clovis</city>
+    <line1>105 E. Avenue B</line1>
+    <state>NM</state>
+    <location_name>Melrose City Hall</location_name>
+    <zip>88124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602593">
+  <address>
+    <city>Texico</city>
+    <line1>215 N. Griffin</line1>
+    <state>NM</state>
+    <location_name>Texico Community Building</location_name>
+    <zip>88135</zip>
+  </address>
+</polling_location>
+<polling_location id="66602594">
+  <address>
+    <city>Grady</city>
+    <line1>104 W. Main St.</line1>
+    <state>NM</state>
+    <location_name>Grady Senior Citizens Center</location_name>
+    <zip>88120</zip>
+  </address>
+</polling_location>
+<polling_location id="66602597">
+  <address>
+    <city>Eunice</city>
+    <line1>1115 Avenue I</line1>
+    <state>NM</state>
+    <location_name>Eunice Community Center</location_name>
+    <zip>88231</zip>
+  </address>
+</polling_location>
+<polling_location id="66602598">
+  <address>
+    <city>Hobbs</city>
+    <line1>2110 East Sanger</line1>
+    <state>NM</state>
+    <location_name>Hobbs Municipal School Training Facility</location_name>
+    <zip>88240</zip>
+  </address>
+</polling_location>
+<polling_location id="66602599">
+  <address>
+    <city>Hobbs</city>
+    <line1>620 West Alto</line1>
+    <state>NM</state>
+    <location_name>Hobbs Teen Center</location_name>
+    <zip>88240</zip>
+  </address>
+</polling_location>
+<polling_location id="66602600">
+  <address>
+    <city>Hobbs</city>
+    <line1>2101 North Lovington</line1>
+    <state>NM</state>
+    <location_name>Lea County Event Center</location_name>
+    <zip>88240</zip>
+  </address>
+</polling_location>
+<polling_location id="66602601">
+  <address>
+    <city>Hobbs</city>
+    <line1>5915 Lovington Highway</line1>
+    <state>NM</state>
+    <location_name>Lea County Road Department</location_name>
+    <zip>88242</zip>
+  </address>
+</polling_location>
+<polling_location id="66602602">
+  <address>
+    <city>Tatum</city>
+    <line1>Third and Highway 18</line1>
+    <state>NM</state>
+    <location_name>Tatum Schools Auditorium</location_name>
+    <zip>88267</zip>
+  </address>
+</polling_location>
+<polling_location id="66602603">
+  <address>
+    <city>Lovington</city>
+    <line1>Commercial and Central</line1>
+    <state>NM</state>
+    <location_name>Yucca Building, Fairgrounds</location_name>
+    <zip>88267</zip>
+  </address>
+</polling_location>
+<polling_location id="66602604">
+  <address>
+    <city>Caprock</city>
+    <line1>99 Moore Road</line1>
+    <state>NM</state>
+    <location_name>Caprock Community Hall</location_name>
+    <zip>88213</zip>
+  </address>
+</polling_location>
+<polling_location id="66602605">
+  <address>
+    <city>Maljamar</city>
+    <line1>36 Maljamar Rd</line1>
+    <state>NM</state>
+    <location_name>Maljamar Community Hall</location_name>
+    <zip>88265</zip>
+  </address>
+</polling_location>
+<polling_location id="66602606">
+  <address>
+    <city>Monument</city>
+    <line1>10620 W. NM Hwy 322</line1>
+    <state>NM</state>
+    <location_name>Monument Community Center</location_name>
+    <zip>88264</zip>
+  </address>
+</polling_location>
+<polling_location id="66602607">
+  <address>
+    <city>Jal</city>
+    <line1>100 W. Idaho Ave.</line1>
+    <state>NM</state>
+    <location_name>Jal Chamber of Commerce</location_name>
+    <zip>88252</zip>
+  </address>
+</polling_location>
+<polling_location id="66602608">
+  <address>
+    <city>Lovington</city>
+    <line1>18 W. Central Ave.</line1>
+    <state>NM</state>
+    <location_name>Lovington Schools Central Office</location_name>
+    <zip>88260</zip>
+  </address>
+</polling_location>
+<polling_location id="66602615">
+  <address>
+    <city>Hobbs</city>
+    <line1>200 E. Broadway</line1>
+    <state>NM</state>
+    <location_name>Hobbs City Hall</location_name>
+    <zip>88240</zip>
+  </address>
+</polling_location>
+<polling_location id="66602621">
+  <address>
+    <city>Anthony</city>
+    <line1>600 N Fourth St</line1>
+    <state>NM</state>
+    <location_name>Anthony Elementary School</location_name>
+    <zip>88021</zip>
+  </address>
+</polling_location>
+<polling_location id="66602622">
+  <address>
+    <city>Berino</city>
+    <line1>92 Shrode Rd</line1>
+    <state>NM</state>
+    <location_name>Berino Elementary School</location_name>
+    <zip>88021</zip>
+  </address>
+</polling_location>
+<polling_location id="66602624">
+  <address>
+    <city>Las Cruces</city>
+    <line1>200 E. Picacho Ave.</line1>
+    <state>NM</state>
+    <location_name>Branigan Library</location_name>
+    <zip>88001</zip>
+  </address>
+</polling_location>
+<polling_location id="66602625">
+  <address>
+    <city>Las Cruces</city>
+    <line1>2961 Roadrunner Pkwy</line1>
+    <state>NM</state>
+    <location_name>Camino Real Middle School</location_name>
+    <zip>88011</zip>
+  </address>
+</polling_location>
+<polling_location id="66602626">
+  <address>
+    <city>Chaparral</city>
+    <line1>290 Lisa Dr</line1>
+    <state>NM</state>
+    <location_name>Chaparral Middle School</location_name>
+    <zip>88081</zip>
+  </address>
+</polling_location>
+<polling_location id="66602627">
+  <address>
+    <city>Las Cruces</city>
+    <line1>NMSU 2nd Floor Art Gallery</line1>
+    <state>NM</state>
+    <location_name>Corbett Center</location_name>
+    <zip>88003</zip>
+  </address>
+</polling_location>
+<polling_location id="66602628">
+  <address>
+    <city>Mesquite</city>
+    <line1>180 La Fe Ave</line1>
+    <state>NM</state>
+    <location_name>Del Cerro Community Center</location_name>
+    <zip>88048</zip>
+  </address>
+</polling_location>
+<polling_location id="66602629">
+  <address>
+    <city>Las Cruces</city>
+    <line1>280 Roadrunner Pkwy</line1>
+    <state>NM</state>
+    <location_name>Desert Hills Elementary School</location_name>
+    <zip>88011</zip>
+  </address>
+</polling_location>
+<polling_location id="66602630">
+  <address>
+    <city>Sunland Park</city>
+    <line1>1105 Valle Vista</line1>
+    <state>NM</state>
+    <location_name>Desert View Elementary School</location_name>
+    <zip>88063</zip>
+  </address>
+</polling_location>
+<polling_location id="66602631">
+  <address>
+    <city>Dona Ana</city>
+    <line1>5745 Ledesma Dr</line1>
+    <state>NM</state>
+    <location_name>Dona Ana Community Center</location_name>
+    <zip>88007</zip>
+  </address>
+</polling_location>
+<polling_location id="66602632">
+  <address>
+    <city>Las Cruces</city>
+    <line1>845 North Motel Blvd.</line1>
+    <state>NM</state>
+    <location_name>Dona Ana County Government Center</location_name>
+    <zip>88003</zip>
+  </address>
+</polling_location>
+<polling_location id="66602633">
+  <address>
+    <city>Las Cruces</city>
+    <line1>5745 Ledesma Dr</line1>
+    <state>NM</state>
+    <location_name>Dona Ana Government Center</location_name>
+    <zip>88007</zip>
+  </address>
+</polling_location>
+<polling_location id="66602634">
+  <address>
+    <city>Las Cruces</city>
+    <line1>4450 N Valley Dr.</line1>
+    <state>NM</state>
+    <location_name>East Picacho Elementary School</location_name>
+    <zip>88007</zip>
+  </address>
+</polling_location>
+<polling_location id="66602635">
+  <address>
+    <city>Las Cruces</city>
+    <line1>4501 W Picacho Ave</line1>
+    <state>NM</state>
+    <location_name>Fairacres Elementary School</location_name>
+    <zip>88007</zip>
+  </address>
+</polling_location>
+<polling_location id="66602636">
+  <address>
+    <city>Mesilla Park</city>
+    <line1>304 Bell Ave.</line1>
+    <state>NM</state>
+    <location_name>Frank O'Brien Papen Center</location_name>
+    <zip>88005</zip>
+  </address>
+</polling_location>
+<polling_location id="66602637">
+  <address>
+    <city>Garfield</city>
+    <line1>8820 Highway 187</line1>
+    <state>NM</state>
+    <location_name>Garfield Elementary School</location_name>
+    <zip>87936</zip>
+  </address>
+</polling_location>
+<polling_location id="66602638">
+  <address>
+    <city>Las Cruces</city>
+    <line1>3011 Buena Vida Cir</line1>
+    <state>NM</state>
+    <location_name>Good Samaritan Social Center</location_name>
+    <zip>88011</zip>
+  </address>
+</polling_location>
+<polling_location id="66602639">
+  <address>
+    <city>Hatch</city>
+    <line1>170 E Herrera</line1>
+    <state>NM</state>
+    <location_name>Hatch High School</location_name>
+    <zip>87937</zip>
+  </address>
+</polling_location>
+<polling_location id="66602640">
+  <address>
+    <city>Las Cruces</city>
+    <line1>3400 Elks Dr</line1>
+    <state>NM</state>
+    <location_name>Jornada Elementary School</location_name>
+    <zip>88005</zip>
+  </address>
+</polling_location>
+<polling_location id="66602641">
+  <address>
+    <city>Anthony</city>
+    <line1>875 Mercantile Ave</line1>
+    <state>NM</state>
+    <location_name>La Union Elementary School</location_name>
+    <zip>88021</zip>
+  </address>
+</polling_location>
+<polling_location id="66602642">
+  <address>
+    <city>Las Cruces</city>
+    <line1>4145 Cholla Dr</line1>
+    <state>NM</state>
+    <location_name>Las Alturas Fire Station</location_name>
+    <zip>88011</zip>
+  </address>
+</polling_location>
+<polling_location id="66602643">
+  <address>
+    <city>Las Cruces</city>
+    <line1>1755 El Paseo Rd</line1>
+    <state>NM</state>
+    <location_name>Las Cruces High School</location_name>
+    <zip>88001</zip>
+  </address>
+</polling_location>
+<polling_location id="66602644">
+  <address>
+    <city>Las Cruces</city>
+    <line1>950 S Walnut St</line1>
+    <state>NM</state>
+    <location_name>Lynn Middle School</location_name>
+    <zip>88001</zip>
+  </address>
+</polling_location>
+<polling_location id="66602645">
+  <address>
+    <city>Las Cruces</city>
+    <line1>1955 N Valley Dr</line1>
+    <state>NM</state>
+    <location_name>Mayfield High School</location_name>
+    <zip>88007</zip>
+  </address>
+</polling_location>
+<polling_location id="66602646">
+  <address>
+    <city>Las Cruces</city>
+    <line1>2363 Calle Del Sur</line1>
+    <state>NM</state>
+    <location_name>Mesilla Elementary School</location_name>
+    <zip>88005</zip>
+  </address>
+</polling_location>
+<polling_location id="66602647">
+  <address>
+    <city>Las Cruces</city>
+    <line1>4100 Dripping Springs Rd</line1>
+    <state>NM</state>
+    <location_name>NM Farm And Ranch Heritage Museum</location_name>
+    <zip>88011</zip>
+  </address>
+</polling_location>
+<polling_location id="66602648">
+  <address>
+    <city>San Miguel</city>
+    <line1>300 Cascade Ave</line1>
+    <state>NM</state>
+    <location_name>North Valley Elementary School</location_name>
+    <zip>88058</zip>
+  </address>
+</polling_location>
+<polling_location id="66602649">
+  <address>
+    <city>Las Cruces</city>
+    <line1>5700 Mesa Grade Dr</line1>
+    <state>NM</state>
+    <location_name>Onate High School</location_name>
+    <zip>88011</zip>
+  </address>
+</polling_location>
+<polling_location id="66602650">
+  <address>
+    <city>Organ</city>
+    <line1>5816 3rd St.</line1>
+    <state>NM</state>
+    <location_name>Organ Fire Station</location_name>
+    <zip>88012</zip>
+  </address>
+</polling_location>
+<polling_location id="66602651">
+  <address>
+    <city>Las Cruces</city>
+    <line1>12060 L.B. Lindbeck Rd</line1>
+    <state>NM</state>
+    <location_name>Radium Springs Community Center</location_name>
+    <zip>88007</zip>
+  </address>
+</polling_location>
+<polling_location id="66602652">
+  <address>
+    <city>Rincon</city>
+    <line1>255 Harlin St</line1>
+    <state>NM</state>
+    <location_name>Rincon Fire Station</location_name>
+    <zip>87940</zip>
+  </address>
+</polling_location>
+<polling_location id="66602653">
+  <address>
+    <city>Santa Teresa</city>
+    <line1>4800 McNutt Rd</line1>
+    <state>NM</state>
+    <location_name>Santa Teresa Middle School</location_name>
+    <zip>88008</zip>
+  </address>
+</polling_location>
+<polling_location id="66602654">
+  <address>
+    <city>Las Cruces</city>
+    <line1>1700 Spruce</line1>
+    <state>NM</state>
+    <location_name>Sierra Middle School</location_name>
+    <zip>88001</zip>
+  </address>
+</polling_location>
+<polling_location id="66602656">
+  <address>
+    <city>Las Cruces</city>
+    <line1>4201 Northrise Dr</line1>
+    <state>NM</state>
+    <location_name>Sonoma Elementary School</location_name>
+    <zip>88011</zip>
+  </address>
+</polling_location>
+<polling_location id="66602657">
+  <address>
+    <city>Las Cruces</city>
+    <line1>5300 Holman Rd</line1>
+    <state>NM</state>
+    <location_name>Sunrise Elementary School</location_name>
+    <zip>88012</zip>
+  </address>
+</polling_location>
+<polling_location id="66602659">
+  <address>
+    <city>Las Cruces</city>
+    <line1>226 Carver Rd.</line1>
+    <state>NM</state>
+    <location_name>Tombaugh Elementary School</location_name>
+    <zip>88005</zip>
+  </address>
+</polling_location>
+<polling_location id="66602660">
+  <address>
+    <city>Las Cruces</city>
+    <line1>2005 S Locust</line1>
+    <state>NM</state>
+    <location_name>University Hills Elementary School</location_name>
+    <zip>88001</zip>
+  </address>
+</polling_location>
+<polling_location id="66602661">
+  <address>
+    <city>Las Cruces</city>
+    <line1>4465 Elks Drive</line1>
+    <state>NM</state>
+    <location_name>Vista Middle School</location_name>
+    <zip>88021</zip>
+  </address>
+</polling_location>
+<polling_location id="66602665">
+  <address>
+    <city>Hurley</city>
+    <line1>312 Carrasco Ave.</line1>
+    <state>NM</state>
+    <location_name>Hurley Community Center</location_name>
+    <zip>88043</zip>
+  </address>
+</polling_location>
+<polling_location id="66602666">
+  <address>
+    <city>Silver City</city>
+    <line1>3031 Highway 180 East</line1>
+    <state>NM</state>
+    <location_name>GC Business &amp; Conference Center</location_name>
+    <zip>88061</zip>
+  </address>
+</polling_location>
+<polling_location id="66602667">
+  <address>
+    <city>Silver City</city>
+    <line1>1990 US Highway 180</line1>
+    <state>NM</state>
+    <location_name>National Guard Armory</location_name>
+    <zip>88061</zip>
+  </address>
+</polling_location>
+<polling_location id="66602668">
+  <address>
+    <city>Silver City</city>
+    <line1>1715 Silver Heights Blvd.</line1>
+    <state>NM</state>
+    <location_name>Silver City Women's Club</location_name>
+    <zip>88061</zip>
+  </address>
+</polling_location>
+<polling_location id="66602673">
+  <address>
+    <city>Tyrone</city>
+    <line1>50 Malachite Ave.</line1>
+    <state>NM</state>
+    <location_name>Tyrone Community Center</location_name>
+    <zip>88065</zip>
+  </address>
+</polling_location>
+<polling_location id="66602674">
+  <address>
+    <city>SILVER CITY</city>
+    <line1>1715 SILVER HEIGHTS BLVD.</line1>
+    <state>NM</state>
+    <location_name>SILVER CITY WOMENS CLUB</location_name>
+    <zip>88061</zip>
+  </address>
+</polling_location>
+<polling_location id="66602675">
+  <address>
+    <city>SILVER CITY</city>
+    <line1>3031 HIGHWAY 180 E.</line1>
+    <state>NM</state>
+    <location_name>GC BUSINESS &amp; CONFERENCE CENTER</location_name>
+    <zip>88061</zip>
+  </address>
+</polling_location>
+<polling_location id="66602678">
+  <address>
+    <city>Raton</city>
+    <line1>901 S. 3rd Street</line1>
+    <state>NM</state>
+    <location_name>Raton Convention Center</location_name>
+    <zip>87740</zip>
+  </address>
+</polling_location>
+<polling_location id="66602679">
+  <address>
+    <city>Raton</city>
+    <line1>104 Buena Vista</line1>
+    <state>NM</state>
+    <location_name>St. Patrick/St. Joseph's Parish Hall</location_name>
+    <zip>87740</zip>
+  </address>
+</polling_location>
+<polling_location id="66602681">
+  <address>
+    <city>Tucumcari</city>
+    <line1>1500 Historic U.S. 66</line1>
+    <state>NM</state>
+    <location_name>Tucumcari Convention Center</location_name>
+    <zip>88401</zip>
+  </address>
+</polling_location>
+<polling_location id="66602683">
+  <address>
+    <city>Portales</city>
+    <line1>200 E. 7th Street</line1>
+    <state>NM</state>
+    <location_name>Memorial Building</location_name>
+    <zip>88130</zip>
+  </address>
+</polling_location>
+<polling_location id="66602684">
+  <address>
+    <city>Portales</city>
+    <line1>705 East Lime Street</line1>
+    <state>NM</state>
+    <location_name>Jake Lopez Community Center</location_name>
+    <zip>88130</zip>
+  </address>
+</polling_location>
+<polling_location id="66602686">
+  <address>
+    <city>Dora</city>
+    <line1>401 Avenue B</line1>
+    <state>NM</state>
+    <location_name>Dora School</location_name>
+    <zip>88115</zip>
+  </address>
+</polling_location>
+<polling_location id="66602687">
+  <address>
+    <city>Elida</city>
+    <line1>704 State Street</line1>
+    <state>NM</state>
+    <location_name>Elida Community Center</location_name>
+    <zip>88116</zip>
+  </address>
+</polling_location>
+<polling_location id="66602688">
+  <address>
+    <city>Floyd</city>
+    <line1>1572 New Mexico Hwy 267</line1>
+    <state>NM</state>
+    <location_name>Floyd Community Center</location_name>
+    <zip>88118</zip>
+  </address>
+</polling_location>
+<polling_location id="66602692">
+  <address>
+    <city>Las Vegas</city>
+    <line1>1240 5th Street</line1>
+    <state>NM</state>
+    <location_name>Robertson HS, Mike Marr Gymnasium</location_name>
+    <zip>87701</zip>
+  </address>
+</polling_location>
+<polling_location id="66602693">
+  <address>
+    <city>Las Vegas</city>
+    <line1>179 Bridge Street</line1>
+    <state>NM</state>
+    <location_name>Valley Jr. High School Gymnasium</location_name>
+    <zip>87701</zip>
+  </address>
+</polling_location>
+<polling_location id="66602694">
+  <address>
+    <city>Las Vegas</city>
+    <line1>157 Moreno St.</line1>
+    <state>NM</state>
+    <location_name>West Las Vegas HS Gillie Lopez Gymnasium</location_name>
+    <zip>87701</zip>
+  </address>
+</polling_location>
+<polling_location id="66602695">
+  <address>
+    <city>Ribera</city>
+    <line1>24 Panther Parkway</line1>
+    <state>NM</state>
+    <location_name>Pecos High School Gymnasium</location_name>
+    <zip>87552</zip>
+  </address>
+</polling_location>
+<polling_location id="66602696">
+  <address>
+    <city>Gallup</city>
+    <line1>207 West Hill St.</line1>
+    <state>NM</state>
+    <location_name>McKinley County Courthouse - Clerk's Office</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602701">
+  <address>
+    <city>Zuni</city>
+    <line1>#4 3rd St.</line1>
+    <state>NM</state>
+    <location_name>Zuni Fire Station</location_name>
+    <zip>87327</zip>
+  </address>
+</polling_location>
+<polling_location id="66602703">
+  <address>
+    <city>Gallup</city>
+    <line1>1800 S. Second St.</line1>
+    <state>NM</state>
+    <location_name>Southside Fire Station</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602704">
+  <address>
+    <city>Gallup</city>
+    <line1>200 College Dr.</line1>
+    <state>NM</state>
+    <location_name>U.N.M. Gallup Campus</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602705">
+  <address>
+    <city>Gallup</city>
+    <line1>3700 Churchrock St.</line1>
+    <state>NM</state>
+    <location_name>Eastside Fire Station</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602706">
+  <address>
+    <city>Gallup</city>
+    <line1>1300 W. I-40 Frontage Rd.</line1>
+    <state>NM</state>
+    <location_name>Rio West Mall</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602708">
+  <address>
+    <city>Gallup</city>
+    <line1>700 Joseph M Montoya Blvd</line1>
+    <state>NM</state>
+    <location_name>Larry Brian Mitchell Recreation Center</location_name>
+    <zip>87301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602713">
+  <address>
+    <city>Los Lunas</city>
+    <line1>112 Meadow Lake Rd</line1>
+    <state>NM</state>
+    <location_name>Ann Parish Elementary School</location_name>
+    <zip>87031</zip>
+  </address>
+</polling_location>
+<polling_location id="66602714">
+  <address>
+    <city>Belen</city>
+    <line1>305 Eagle Ln.</line1>
+    <state>NM</state>
+    <location_name>Belen Community Center</location_name>
+    <zip>87002</zip>
+  </address>
+</polling_location>
+<polling_location id="66602717">
+  <address>
+    <city>Los Lunas</city>
+    <line1>32 Sun Valley Rd</line1>
+    <state>NM</state>
+    <location_name>Daniel Fernandez Elementary</location_name>
+    <zip>87031</zip>
+  </address>
+</polling_location>
+<polling_location id="66602718">
+  <address>
+    <city>Belen</city>
+    <line1>351 Rio Communities Blvd</line1>
+    <state>NM</state>
+    <location_name>Del Rio Senior Center</location_name>
+    <zip>87002</zip>
+  </address>
+</polling_location>
+<polling_location id="66602719">
+  <address>
+    <city>Los Lunas</city>
+    <line1>307 El Cerro Misson Rd</line1>
+    <state>NM</state>
+    <location_name>El Cerro Mission Community Center</location_name>
+    <zip>87031</zip>
+  </address>
+</polling_location>
+<polling_location id="66602720">
+  <address>
+    <city>Los Lunas</city>
+    <line1>49 Camino la Canada</line1>
+    <state>NM</state>
+    <location_name>Desert View Elementary School</location_name>
+    <zip>87031</zip>
+  </address>
+</polling_location>
+<polling_location id="66602721">
+  <address>
+    <city>Los Lunas</city>
+    <line1>197 Don Pasqual Rd</line1>
+    <state>NM</state>
+    <location_name>Fred Luna Senior Center</location_name>
+    <zip>87031</zip>
+  </address>
+</polling_location>
+<polling_location id="66602722">
+  <address>
+    <city>Belen</city>
+    <line1>2 Bombero Cir</line1>
+    <state>NM</state>
+    <location_name>Los Chavez Fire Station</location_name>
+    <zip>87002</zip>
+  </address>
+</polling_location>
+<polling_location id="66602723">
+  <address>
+    <city>Los Lunas</city>
+    <line1>119 Luna Ave</line1>
+    <state>NM</state>
+    <location_name>Los Lunas Schools Administration</location_name>
+    <zip>87031</zip>
+  </address>
+</polling_location>
+<polling_location id="66602724">
+  <address>
+    <city>Bosque Farms</city>
+    <line1>191 Tribal Rd 2</line1>
+    <state>NM</state>
+    <location_name>Old Isleta Headstart</location_name>
+    <zip>87068</zip>
+  </address>
+</polling_location>
+<polling_location id="66602725">
+  <address>
+    <city>Los Lunas</city>
+    <line1>2933 Hwy 47</line1>
+    <state>NM</state>
+    <location_name>Tome Dominguez de Mendoza Comm. Ctr.</location_name>
+    <zip>87031</zip>
+  </address>
+</polling_location>
+<polling_location id="66602726">
+  <address>
+    <city>Jarales</city>
+    <line1>376 Hwy 109</line1>
+    <state>NM</state>
+    <location_name>Gill Sanchez Elementary School</location_name>
+    <zip>87023</zip>
+  </address>
+</polling_location>
+<polling_location id="66602861">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>301 Loma Colorado NE</line1>
+    <state>NM</state>
+    <location_name>Rio Rancho High School</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602732">
+  <address>
+    <city>Alamogordo</city>
+    <line1>401 Fairgrounds Road</line1>
+    <state>NM</state>
+    <location_name>Otero County Fairgrounds - Extension Office Meet Rm</location_name>
+    <zip>88310</zip>
+  </address>
+</polling_location>
+<polling_location id="66602733">
+  <address>
+    <city>Alamogordo</city>
+    <line1>800 East 1st Street, Alamogordo, NM</line1>
+    <state>NM</state>
+    <location_name>Sgt. Willie Estrada Memorial Civic Center</location_name>
+    <zip>88310</zip>
+  </address>
+</polling_location>
+<polling_location id="66602734">
+  <address>
+    <city>Alamogordo</city>
+    <line1>2235 N. Scenic</line1>
+    <state>NM</state>
+    <location_name>Tays Special Event Center</location_name>
+    <zip>88310</zip>
+  </address>
+</polling_location>
+<polling_location id="66602735">
+  <address>
+    <city>Tularosa</city>
+    <line1>609 St. Francis Drive</line1>
+    <state>NM</state>
+    <location_name>Tularosa Public Safety Facility - Court Room</location_name>
+    <zip>88352</zip>
+  </address>
+</polling_location>
+<polling_location id="66602739">
+  <address>
+    <city>Aztec</city>
+    <line1>1020 NE Aztec Blvd.</line1>
+    <state>NM</state>
+    <location_name>Aztec Masonic Lodge</location_name>
+    <zip>87410</zip>
+  </address>
+</polling_location>
+<polling_location id="66602740">
+  <address>
+    <city>Beclabito</city>
+    <line1>U.S. Hwy 64 - 4 miles E of AZ border</line1>
+    <state>NM</state>
+    <location_name>Beclabito Chapter Facilities</location_name>
+    <zip>86514</zip>
+  </address>
+</polling_location>
+<polling_location id="66602741">
+  <address>
+    <city>Blanco</city>
+    <line1>7372 U.S. Highway 64</line1>
+    <state>NM</state>
+    <location_name>Blanco Fire Station</location_name>
+    <zip>87412</zip>
+  </address>
+</polling_location>
+<polling_location id="66602742">
+  <address>
+    <city>Bloomfield</city>
+    <line1>915 N. First St.</line1>
+    <state>NM</state>
+    <location_name>Bloomfield City Hall</location_name>
+    <zip>87413</zip>
+  </address>
+</polling_location>
+<polling_location id="66602744">
+  <address>
+    <city>Bloomfield</city>
+    <line1>333 S. First St.</line1>
+    <state>NM</state>
+    <location_name>Bloomfield Cultural Center</location_name>
+    <zip>87413</zip>
+  </address>
+</polling_location>
+<polling_location id="66602745">
+  <address>
+    <city>Aztec</city>
+    <line1>#4 CR 2343 Cedar Hill</line1>
+    <state>NM</state>
+    <location_name>Cedar Hill Fire Station</location_name>
+    <zip>87410</zip>
+  </address>
+</polling_location>
+<polling_location id="66602746">
+  <address>
+    <city>Crouch Mesa</city>
+    <line1>10 RD 3323</line1>
+    <state>NM</state>
+    <location_name>Crouch Mesa Baptist Church</location_name>
+    <zip>87410</zip>
+  </address>
+</polling_location>
+<polling_location id="66602747">
+  <address>
+    <city>Crystal</city>
+    <line1>Route 134 BIA RD</line1>
+    <state>NM</state>
+    <location_name>Crystal Chapter Facilities</location_name>
+    <zip>87328</zip>
+  </address>
+</polling_location>
+<polling_location id="66602748">
+  <address>
+    <city>Farmington</city>
+    <line1>800 Municipal Drive</line1>
+    <state>NM</state>
+    <location_name>Farmington City Hall</location_name>
+    <zip>87401</zip>
+  </address>
+</polling_location>
+<polling_location id="66602749">
+  <address>
+    <city>Farmington</city>
+    <line1>200 W. Arrington</line1>
+    <state>NM</state>
+    <location_name>Farmington Civic Center</location_name>
+    <zip>87401</zip>
+  </address>
+</polling_location>
+<polling_location id="66602751">
+  <address>
+    <city>Farmington</city>
+    <line1>2101 Farmington Ave.</line1>
+    <state>NM</state>
+    <location_name>Farmington Public Library</location_name>
+    <zip>87401</zip>
+  </address>
+</polling_location>
+<polling_location id="66602752">
+  <address>
+    <city>Gadiiahi</city>
+    <line1>11 miles NW of Shiprock, S of San Juan River</line1>
+    <state>NM</state>
+    <location_name>Gadii'ahi Chapter Facilities</location_name>
+    <zip>87420</zip>
+  </address>
+</polling_location>
+<polling_location id="66602753">
+  <address>
+    <city>Farmington</city>
+    <line1>3041 E. Main St.</line1>
+    <state>NM</state>
+    <location_name>Gateway Museum</location_name>
+    <zip>87401</zip>
+  </address>
+</polling_location>
+<polling_location id="66602755">
+  <address>
+    <city>Huerfano</city>
+    <line1>#536 CR 7150</line1>
+    <state>NM</state>
+    <location_name>Huerfano Chapter Facilities</location_name>
+    <zip>87413</zip>
+  </address>
+</polling_location>
+<polling_location id="66602756">
+  <address>
+    <city>La Plata</city>
+    <line1>1438 NM Highway 170</line1>
+    <state>NM</state>
+    <location_name>La Plata Community Center</location_name>
+    <zip>87418</zip>
+  </address>
+</polling_location>
+<polling_location id="66602757">
+  <address>
+    <city>Lake Valley</city>
+    <line1>NM Highway 371 &amp; CR 7750</line1>
+    <state>NM</state>
+    <location_name>Lake Valley School</location_name>
+    <zip>87313</zip>
+  </address>
+</polling_location>
+<polling_location id="66602758">
+  <address>
+    <city>McGee Park</city>
+    <line1>41 Road 5568</line1>
+    <state>NM</state>
+    <location_name>McGee Park</location_name>
+    <zip>87401</zip>
+  </address>
+</polling_location>
+<polling_location id="66602759">
+  <address>
+    <city>Nageezi</city>
+    <line1>11553 NM Highway 550</line1>
+    <state>NM</state>
+    <location_name>Nageezi Chapter Facilities</location_name>
+    <zip>87037</zip>
+  </address>
+</polling_location>
+<polling_location id="66602760">
+  <address>
+    <city>Naschitti</city>
+    <line1>U.S. Highway 491 Mile marker 42</line1>
+    <state>NM</state>
+    <location_name>Naschitti Chapter Facilities</location_name>
+    <zip>87364</zip>
+  </address>
+</polling_location>
+<polling_location id="66602761">
+  <address>
+    <city>Nenahnezad</city>
+    <line1>Between CR 6675 &amp; N36</line1>
+    <state>NM</state>
+    <location_name>Nenahnezad Chapter Facilities</location_name>
+    <zip>87416</zip>
+  </address>
+</polling_location>
+<polling_location id="66602763">
+  <address>
+    <city>Newcomb</city>
+    <line1>NM # 56.5 U.S. Highway 491</line1>
+    <state>NM</state>
+    <location_name>Newcomb Fire Station</location_name>
+    <zip>87455</zip>
+  </address>
+</polling_location>
+<polling_location id="66602764">
+  <address>
+    <city>Shiprock</city>
+    <line1>U.S. Hwy 64 / W of Shiprock High School</line1>
+    <state>NM</state>
+    <location_name>Phil Thomas Performance Hall</location_name>
+    <zip>87420</zip>
+  </address>
+</polling_location>
+<polling_location id="66602765">
+  <address>
+    <city>Farmington</city>
+    <line1>5001 Foothills Dr.</line1>
+    <state>NM</state>
+    <location_name>Pinon Hills Seventh Day Adventist Church</location_name>
+    <zip>87402</zip>
+  </address>
+</polling_location>
+<polling_location id="66602766">
+  <address>
+    <city>Kirtland</city>
+    <line1>#5 CR 6575</line1>
+    <state>NM</state>
+    <location_name>Ruth N. Bond Elementary School</location_name>
+    <zip>87417</zip>
+  </address>
+</polling_location>
+<polling_location id="66602767">
+  <address>
+    <city>Shiprock</city>
+    <line1>S. of US Hwy 64-Old Shiprock High Gym</line1>
+    <state>NM</state>
+    <location_name>CCSD Business Office</location_name>
+    <zip>87420</zip>
+  </address>
+</polling_location>
+<polling_location id="66602769">
+  <address>
+    <city>Farmington</city>
+    <line1>7450 E. Main St.</line1>
+    <state>NM</state>
+    <location_name>San Juan County Multi Agency Building</location_name>
+    <zip>87401</zip>
+  </address>
+</polling_location>
+<polling_location id="66602770">
+  <address>
+    <city>Sanostee</city>
+    <line1>9 miles W of U.S. Hwy 491 on Indian Svc Rt 34</line1>
+    <state>NM</state>
+    <location_name>Sanostee Chapter</location_name>
+    <zip>87461</zip>
+  </address>
+</polling_location>
+<polling_location id="66602771">
+  <address>
+    <city>Sheep Springs</city>
+    <line1>1/4 mile West of Sheep Springs Store</line1>
+    <state>NM</state>
+    <location_name>Sheep Springs Chapter Facilities</location_name>
+    <zip>87364</zip>
+  </address>
+</polling_location>
+<polling_location id="66602772">
+  <address>
+    <city>Shiprock</city>
+    <line1>S of U.S. Hwy 64 - Old Shiprock High A-GYM</line1>
+    <state>NM</state>
+    <location_name>Shiprock Central - CCSD Business Office</location_name>
+    <zip>87420</zip>
+  </address>
+</polling_location>
+<polling_location id="66602774">
+  <address>
+    <city>Aztec</city>
+    <line1>209 S. Oliver Drive</line1>
+    <state>NM</state>
+    <location_name>SJC Fire Operations Center</location_name>
+    <zip>87410</zip>
+  </address>
+</polling_location>
+<polling_location id="66602775">
+  <address>
+    <city>Farmington</city>
+    <line1>1051 Sycamore St.</line1>
+    <state>NM</state>
+    <location_name>Sycamore Park Community Center</location_name>
+    <zip>87401</zip>
+  </address>
+</polling_location>
+<polling_location id="66602776">
+  <address>
+    <city>Burnham</city>
+    <line1>12 Miles E. of US Hwy 491, Navajo Rt. 5 &amp; .5 Mile S. on Navajoh Rt. 508</line1>
+    <state>NM</state>
+    <location_name>Tiis Tsoh Sikaad Chapter Facilities</location_name>
+    <zip>87325</zip>
+  </address>
+</polling_location>
+<polling_location id="66602777">
+  <address>
+    <city>Two Grey Hills</city>
+    <line1>Junction of N-19 and N-5000</line1>
+    <state>NM</state>
+    <location_name>Two Grey Hills Chapter Facilities</location_name>
+    <zip>87455</zip>
+  </address>
+</polling_location>
+<polling_location id="66602779">
+  <address>
+    <city>La Madera</city>
+    <line1>491 NM 111</line1>
+    <state>NM</state>
+    <location_name>Apache Drums</location_name>
+    <zip>87539</zip>
+  </address>
+</polling_location>
+<polling_location id="66602783">
+  <address>
+    <city>Chamita</city>
+    <line1>42 CR 56A</line1>
+    <state>NM</state>
+    <location_name>Chamita Community Center</location_name>
+    <zip>87566</zip>
+  </address>
+</polling_location>
+<polling_location id="66602784">
+  <address>
+    <city>Upper Dixon</city>
+    <line1>220 SR 75</line1>
+    <state>NM</state>
+    <location_name>Dixon Elementary School</location_name>
+    <zip>87527</zip>
+  </address>
+</polling_location>
+<polling_location id="66602785">
+  <address>
+    <city>Upper Chimayo</city>
+    <line1>694 State Road 76</line1>
+    <state>NM</state>
+    <location_name>Arbolera Community Center</location_name>
+    <zip>87522</zip>
+  </address>
+</polling_location>
+<polling_location id="66602789">
+  <address>
+    <city>Espanola</city>
+    <line1>313 N. Paseo de Onate</line1>
+    <state>NM</state>
+    <location_name>Lucero Center Gym</location_name>
+    <zip>87532</zip>
+  </address>
+</polling_location>
+<polling_location id="66602790">
+  <address>
+    <city>Espanola</city>
+    <line1>30 CR 8</line1>
+    <state>NM</state>
+    <location_name>San Pedro Community Center</location_name>
+    <zip>87532</zip>
+  </address>
+</polling_location>
+<polling_location id="66602792">
+  <address>
+    <city>Clayton</city>
+    <line1>124 N. Front St Clayton</line1>
+    <state>NM</state>
+    <location_name>Clayton Civic Center</location_name>
+    <zip>88415</zip>
+  </address>
+</polling_location>
+<polling_location id="66602793">
+  <address>
+    <city>Deming</city>
+    <line1>615 South Copper</line1>
+    <state>NM</state>
+    <location_name>Holy Family Parish Hall</location_name>
+    <zip>88030</zip>
+  </address>
+</polling_location>
+<polling_location id="66602794">
+  <address>
+    <city>Columbus</city>
+    <line1>112 W. Broadway</line1>
+    <state>NM</state>
+    <location_name>Columbus Village Library</location_name>
+    <zip>88029</zip>
+  </address>
+</polling_location>
+<polling_location id="66602795">
+  <address>
+    <city>Deming</city>
+    <line1>2300 E. Pine</line1>
+    <state>NM</state>
+    <location_name>Mimbres Valley Learning Center</location_name>
+    <zip>88030</zip>
+  </address>
+</polling_location>
+<polling_location id="66602804">
+  <address>
+    <city>T or C</city>
+    <line1>400 W. 4th Street</line1>
+    <state>NM</state>
+    <location_name>Civic Center</location_name>
+    <zip>87901</zip>
+  </address>
+</polling_location>
+<polling_location id="66602805">
+  <address>
+    <city>T or C</city>
+    <line1>2953 South Broadway</line1>
+    <state>NM</state>
+    <location_name>Albert J. Lyons Events</location_name>
+    <zip>87901</zip>
+  </address>
+</polling_location>
+<polling_location id="66602806">
+  <address>
+    <city>Hillsboro</city>
+    <line1>Elenora Street (BLK 6 Lots 3, 8, 11 &amp;12)</line1>
+    <state>NM</state>
+    <location_name>Hillsboro Community Center</location_name>
+    <zip>88042</zip>
+  </address>
+</polling_location>
+<polling_location id="66602807">
+  <address>
+    <city>T or C</city>
+    <line1>Hwy 187</line1>
+    <state>NM</state>
+    <location_name>Ken James Senior Center</location_name>
+    <zip>87901</zip>
+  </address>
+</polling_location>
+<polling_location id="66602808">
+  <address>
+    <city>Elephant Butte</city>
+    <line1>103 Rio Grand Street</line1>
+    <state>NM</state>
+    <location_name>Elephant Butte Community Center</location_name>
+    <zip>87935</zip>
+  </address>
+</polling_location>
+<polling_location id="66602809">
+  <address>
+    <city>Winston</city>
+    <line1>10 Hwy 52</line1>
+    <state>NM</state>
+    <location_name>Winston Fire Station</location_name>
+    <zip>87943</zip>
+  </address>
+</polling_location>
+<polling_location id="66602810">
+  <address>
+    <city>Monticello</city>
+    <line1>State Hwy 142</line1>
+    <state>NM</state>
+    <location_name>Monticello Fire Station</location_name>
+    <zip>87939</zip>
+  </address>
+</polling_location>
+<polling_location id="66602811">
+  <address>
+    <city>T or C</city>
+    <line1>100 N. Date St.</line1>
+    <state>NM</state>
+    <location_name>Civic Center</location_name>
+    <zip>87901</zip>
+  </address>
+</polling_location>
+<polling_location id="66602812">
+  <address>
+    <city>Caballo</city>
+    <line1>Hwy 187</line1>
+    <state>NM</state>
+    <location_name>Caballo Fire Station</location_name>
+    <zip>87931</zip>
+  </address>
+</polling_location>
+<polling_location id="66602818">
+  <address>
+    <city>Socorro</city>
+    <line1>198 Neel Avenue</line1>
+    <state>NM</state>
+    <location_name>County Annex</location_name>
+    <zip>87801</zip>
+  </address>
+</polling_location>
+<polling_location id="66602820">
+  <address>
+    <city>Socorro</city>
+    <line1>1002 Ake Ave.</line1>
+    <state>NM</state>
+    <location_name>Socorro Youth Center</location_name>
+    <zip>87801</zip>
+  </address>
+</polling_location>
+<polling_location id="66602823">
+  <address>
+    <city>Capitan</city>
+    <line1>150 Forrest Street</line1>
+    <state>NM</state>
+    <location_name>Capitan High School</location_name>
+    <zip>88316</zip>
+  </address>
+</polling_location>
+<polling_location id="66602824">
+  <address>
+    <city>Corona</city>
+    <line1>461 Main Street</line1>
+    <state>NM</state>
+    <location_name>Corona Village Hall</location_name>
+    <zip>88318</zip>
+  </address>
+</polling_location>
+<polling_location id="66602825">
+  <address>
+    <city>Ruidoso</city>
+    <line1>111 Sierra Blanca</line1>
+    <state>NM</state>
+    <location_name>Ruidoso Convention Center</location_name>
+    <zip>88345</zip>
+  </address>
+</polling_location>
+<polling_location id="66602826">
+  <address>
+    <city>Ruidoso Downs</city>
+    <line1>393 E. Highway 70</line1>
+    <state>NM</state>
+    <location_name>Ruidoso Downs Zia Center</location_name>
+    <zip>88346</zip>
+  </address>
+</polling_location>
+<polling_location id="66602827">
+  <address>
+    <city>Hondo</city>
+    <line1>111 Don Pablo Lane</line1>
+    <state>NM</state>
+    <location_name>Hondo High School</location_name>
+    <zip>88336</zip>
+  </address>
+</polling_location>
+<polling_location id="66602830">
+  <address>
+    <city>Ruidoso</city>
+    <line1>111 Sierra Blanca Dr</line1>
+    <state>NM</state>
+    <location_name>Ruicoso Convention Center</location_name>
+    <zip>88301</zip>
+  </address>
+</polling_location>
+<polling_location id="66602850">
+  <address>
+    <city>Corrales</city>
+    <line1>24 Academy Ln.</line1>
+    <state>NM</state>
+    <location_name>Sandia View Elementary School</location_name>
+    <zip>87048</zip>
+  </address>
+</polling_location>
+<polling_location id="66602851">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>4101 Montreal Loop</line1>
+    <state>NM</state>
+    <location_name>Mountain View Middle School</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602852">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>450 Southern Boulevard</line1>
+    <state>NM</state>
+    <location_name>Puesta Del Sol Elementary School</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602854">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>1600 Loma Colorado Blvd NE</line1>
+    <state>NM</state>
+    <location_name>Rio Rancho Middle School</location_name>
+    <zip>87144</zip>
+  </address>
+</polling_location>
+<polling_location id="66602857">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>4300 Meadowlark Ln SE</line1>
+    <state>NM</state>
+    <location_name>Meadowlark Senior Center</location_name>
+    <zip>87144</zip>
+  </address>
+</polling_location>
+<polling_location id="66602858">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>3001 Civic Center Cir NE</line1>
+    <state>NM</state>
+    <location_name>Santa Ana Star Center</location_name>
+    <zip>87144</zip>
+  </address>
+</polling_location>
+<polling_location id="66602859">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>1500 Veranda SE</line1>
+    <state>NM</state>
+    <location_name>Maggie Cordova Elementary School</location_name>
+    <zip>87144</zip>
+  </address>
+</polling_location>
+<polling_location id="66602860">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>1700 Grande Ct. SE</line1>
+    <state>NM</state>
+    <location_name>Highlands University in Rio Rancho</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602862">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>800 Fruta Rd NE</line1>
+    <state>NM</state>
+    <location_name>Eagle Ridge Middle School</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602863">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>5620 Laredo Rd NE</line1>
+    <state>NM</state>
+    <location_name>Celebration Baptist Church</location_name>
+    <zip>87144</zip>
+  </address>
+</polling_location>
+<polling_location id="66602864">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>2003 Southern Blvd SE</line1>
+    <state>NM</state>
+    <location_name>Soul Rio Church</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602865">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>7001 Chayote Rd NE</line1>
+    <state>NM</state>
+    <location_name>Vista Grande Elementary School</location_name>
+    <zip>87144</zip>
+  </address>
+</polling_location>
+<polling_location id="66602866">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>1652 Abrazo Rd NE</line1>
+    <state>NM</state>
+    <location_name>Rio Rancho United Methodist Church</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602867">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>1550 34th Cir SE, Rio Rancho</line1>
+    <state>NM</state>
+    <location_name>Cielo Azul Elementary School</location_name>
+    <zip>87144</zip>
+  </address>
+</polling_location>
+<polling_location id="66602870">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>4401 Northern Blvd</line1>
+    <state>NM</state>
+    <location_name>Catalyst Church</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="66602879">
+  <address>
+    <city>Los Alamos</city>
+    <line1>1000 Central Ave. Room 110</line1>
+    <state>NM</state>
+    <location_name>Los Alamos County Clerk's Office</location_name>
+    <zip>87544</zip>
+  </address>
+</polling_location>
+<polling_location id="66602880">
+  <address>
+    <city>Los Alamos</city>
+    <line1>1300 Diamond Dr</line1>
+    <state>NM</state>
+    <location_name>Duane W. Smith Auditorium</location_name>
+    <zip>87544</zip>
+  </address>
+</polling_location>
+<polling_location id="666894321">
+  <address>
+    <city>Moriarty</city>
+    <line1>202 S. Broadway St.</line1>
+    <state>NM</state>
+    <location_name>MORIARTY CIVIC CENTER</location_name>
+    <zip>87035</zip>
+  </address>
+</polling_location>
+<polling_location id="6664444">
+  <address>
+    <city>Roswell</city>
+    <line1>915 W. 19th</line1>
+    <state>NM</state>
+    <location_name>Aldersgate Methodist Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="6665555">
+  <address>
+    <city>Roswell</city>
+    <line1>202 S. Sunset</line1>
+    <state>NM</state>
+    <location_name>Waymaker Church</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="6666666">
+  <address>
+    <city>Roswell</city>
+    <line1>2807 W. Alameda</line1>
+    <state>NM</state>
+    <location_name>West Alameda Church of Christ</location_name>
+    <zip>88201</zip>
+  </address>
+</polling_location>
+<polling_location id="6667777">
+  <address>
+    <city>Roswell</city>
+    <line1>1512 S. Main</line1>
+    <state>NM</state>
+    <location_name>South Main Church of Christ</location_name>
+    <zip>88203</zip>
+  </address>
+</polling_location>
+<polling_location id="6669999">
+  <address>
+    <city>Dulce</city>
+    <line1>25 Hawk Street</line1>
+    <state>NM</state>
+    <location_name>Jicarilla Apache Nation Tribal Bldg Pct 24</location_name>
+    <zip>87528</zip>
+  </address>
+</polling_location>
+<polling_location id="6663333">
+  <address>
+    <city>Ohkay Owingeh</city>
+    <line1>217 N Cross Place</line1>
+    <state>NM</state>
+    <location_name>Ohkay Owingeh Senior Center Pct 41</location_name>
+    <zip>87566</zip>
+  </address>
+</polling_location>
+<polling_location id="6668888">
+  <address>
+    <city>Rio Rancho</city>
+    <line1>138 Frontage Rd.</line1>
+    <state>NM</state>
+    <location_name>Calvary Chapel of Rio Rancho</location_name>
+    <zip>87124</zip>
+  </address>
+</polling_location>
+<polling_location id="666191919">
+  <address>
+    <city>Santa Ana Pueblo</city>
+    <line1>2 Dove Rd.</line1>
+    <state>NM</state>
+    <location_name>Santa Ana Pueblo Community Center</location_name>
+    <zip>87004</zip>
+  </address>
+</polling_location>
+</vip_object>
