@@ -1,0 +1,2531 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <vip_id>50</vip_id>
+  <datetime>2014-10-04T17:16:51</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+  <organization_url>http://votinginfoproject.org</organization_url>
+</source>
+<polling_location id="7770001">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Addison</city>
+    <line1>65 VT Rte 17 West</line1>
+    <state>VT</state>
+    <location_name>Town Clerk's Office</location_name>
+    <zip>05491</zip>
+  </address>
+</polling_location>
+<polling_location id="7770002">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Albany</city>
+    <line1>827 Main Street</line1>
+    <state>VT</state>
+    <location_name>Town Clerk's Office</location_name>
+    <zip>05820</zip>
+  </address>
+</polling_location>
+<polling_location id="7770003">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Alburgh</city>
+    <line1>4 Firehouse Rd</line1>
+    <state>VT</state>
+    <location_name>Fire Station Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770004">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Andover</city>
+    <line1>953 Weston-Andover Road</line1>
+    <state>VT</state>
+    <location_name>Andover Town Hall</location_name>
+    <zip>05143</zip>
+  </address>
+</polling_location>
+<polling_location id="7770005">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Arlington</city>
+    <line1>529 E Arlington Rd</line1>
+    <state>VT</state>
+    <location_name>Arlington Memorial High School</location_name>
+    <zip>05250</zip>
+  </address>
+</polling_location>
+<polling_location id="7770006">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Athens</city>
+    <line1>25 Brookline Road</line1>
+    <state>VT</state>
+    <location_name>Athens Town Office</location_name>
+    <zip>05143</zip>
+  </address>
+</polling_location>
+<polling_location id="7770007">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bakersfield</city>
+    <line1>40 East Bakersfield RD</line1>
+    <state>VT</state>
+    <location_name>Bakersfield Town Hall</location_name>
+    <zip>05441</zip>
+  </address>
+</polling_location>
+<polling_location id="7770008">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Baltimore</city>
+    <line1>1902 Baltimore Road</line1>
+    <state>VT</state>
+    <location_name>Baltimore Town Office</location_name>
+    <zip>05143</zip>
+  </address>
+</polling_location>
+<polling_location id="7770009">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Barnet</city>
+    <line1>151 Bimson Drive</line1>
+    <state>VT</state>
+    <location_name>Fire Station</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770012">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Barton</city>
+    <line1>317 Lake Region Rd</line1>
+    <state>VT</state>
+    <location_name>Lake Region Union High School</location_name>
+    <zip>05860</zip>
+  </address>
+</polling_location>
+<polling_location id="7770013">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Belvidere</city>
+    <line1>3996 VT RT 109</line1>
+    <state>VT</state>
+    <location_name>Belvidere Town Clerk's office</location_name>
+    <zip>05442</zip>
+  </address>
+</polling_location>
+<polling_location id="7770016">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Benson</city>
+    <line1>2724 Stage Rd</line1>
+    <state>VT</state>
+    <location_name>Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770017">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Berkshire</city>
+    <line1>4454 Watertower Rd</line1>
+    <state>VT</state>
+    <location_name>Berkshire Town Clerk's Office</location_name>
+    <zip>05450</zip>
+  </address>
+</polling_location>
+<polling_location id="7770018">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Berlin</city>
+    <line1>108 Shed Rd</line1>
+    <state>VT</state>
+    <location_name>Berlin Municipal Office Building</location_name>
+    <zip>05602</zip>
+  </address>
+</polling_location>
+<polling_location id="7770019">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bethel</city>
+    <line1>273 Pleasant Street.</line1>
+    <state>VT</state>
+    <location_name>Whitcomb High School</location_name>
+    <zip>05032</zip>
+  </address>
+</polling_location>
+<polling_location id="7770020">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bloomfield</city>
+    <line1>27 Schoolhouse Rd</line1>
+    <state>VT</state>
+    <location_name>The Old Bloomfield School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770021">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bolton</city>
+    <line1>2712 Theodore Roosevelt Highway</line1>
+    <state>VT</state>
+    <location_name>Smilie Memorial School</location_name>
+    <zip>05676</zip>
+  </address>
+</polling_location>
+<polling_location id="7770022">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bradford</city>
+    <line1>172 North Main Street</line1>
+    <state>VT</state>
+    <location_name>Bradford Academy</location_name>
+    <zip>05033</zip>
+  </address>
+</polling_location>
+<polling_location id="7770023">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Braintree</city>
+    <line1>5379 VT Rte 12A</line1>
+    <state>VT</state>
+    <location_name>Braintree Town Hall</location_name>
+    <zip>05060</zip>
+  </address>
+</polling_location>
+<polling_location id="7770024">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Brandon</city>
+    <line1>17 Neshobe Circle</line1>
+    <state>VT</state>
+    <location_name>Neshobe Elementary School</location_name>
+    <zip>05733</zip>
+  </address>
+</polling_location>
+<polling_location id="7770025">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Brattleboro</city>
+    <line1>230 Main Street</line1>
+    <state>VT</state>
+    <location_name>Brattleboro Municipal Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770026">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bridgewater</city>
+    <line1>7335 US RT 4</line1>
+    <state>VT</state>
+    <location_name>Town Office</location_name>
+    <zip>05034</zip>
+  </address>
+</polling_location>
+<polling_location id="7770027">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bridport</city>
+    <line1>52 Middle Road</line1>
+    <state>VT</state>
+    <location_name>Community/Masonic Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770028">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Island Pond</city>
+    <line1>49 Mill Street</line1>
+    <state>VT</state>
+    <location_name>Brighton Town Hall Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770029">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bristol</city>
+    <line1>1 South Street</line1>
+    <state>VT</state>
+    <location_name>Holley Hall</location_name>
+    <zip>05443</zip>
+  </address>
+</polling_location>
+<polling_location id="7770030">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Brookfield</city>
+    <line1>1728 Ridge Road</line1>
+    <state>VT</state>
+    <location_name>Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770031">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Brookline</city>
+    <line1>734 Grassy Brook Road</line1>
+    <state>VT</state>
+    <location_name>Town Office</location_name>
+    <zip>05345</zip>
+  </address>
+</polling_location>
+<polling_location id="7770032">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Brownington</city>
+    <line1>622 Schoolhouse Road</line1>
+    <state>VT</state>
+    <location_name>Brownington Town Clerk's Office</location_name>
+    <zip>05860</zip>
+  </address>
+</polling_location>
+<polling_location id="7770033">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Brunswick</city>
+    <line1>Community Office Bldg.</line1>
+    <state>VT</state>
+  </address>
+</polling_location>
+<polling_location id="7770034">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>West Burke</city>
+    <line1>212 School St.</line1>
+    <state>VT</state>
+    <location_name>Town Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770042">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Cabot</city>
+    <line1>25 Common Road</line1>
+    <state>VT</state>
+    <location_name>Cabot School Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770043">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>East Calais</city>
+    <line1>3120 Pekin Brook Road</line1>
+    <state>VT</state>
+    <location_name>Calais Town Hall</location_name>
+    <zip>05650</zip>
+  </address>
+</polling_location>
+<polling_location id="7770044">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Jeffersonville</city>
+    <line1>186 School Street</line1>
+    <state>VT</state>
+    <location_name>Cambridge Memorial Gymnasium</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770045">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Canaan</city>
+    <line1>318 Christian Hill</line1>
+    <state>VT</state>
+    <location_name>Canaan Community Office Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770046">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Castleton</city>
+    <line1>378 Route 4a West</line1>
+    <state>VT</state>
+    <location_name>American Legion Post #50</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770047">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Proctorsville</city>
+    <line1>573 Main Street</line1>
+    <state>VT</state>
+    <location_name>Cavendish Town Elementary School</location_name>
+    <zip>05153</zip>
+  </address>
+</polling_location>
+<polling_location id="7770048">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>W Charleston</city>
+    <line1>5063 VT RTE 105</line1>
+    <state>VT</state>
+    <location_name>Charleston Town Office</location_name>
+    <zip>05872</zip>
+  </address>
+</polling_location>
+<polling_location id="7770049">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Charlotte</city>
+    <line1>408 Hinesburg Rd</line1>
+    <state>VT</state>
+    <location_name>Central School Multi-Purpose Room</location_name>
+    <zip>05445</zip>
+  </address>
+</polling_location>
+<polling_location id="7770050">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Chelsea</city>
+    <line1>296 VT RT 110</line1>
+    <state>VT</state>
+    <location_name>Orange/Chelsea Town Hall</location_name>
+    <zip>05038</zip>
+  </address>
+</polling_location>
+<polling_location id="7770051">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Chester</city>
+    <line1>556 Elm Street</line1>
+    <state>VT</state>
+    <location_name>Chester Town Hall, Second Floor</location_name>
+    <zip>05143</zip>
+  </address>
+</polling_location>
+<polling_location id="7770052">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Chittenden</city>
+    <line1>260 Chittenden Road</line1>
+    <state>VT</state>
+    <location_name>Chittenden Municipal Offices</location_name>
+    <zip>05737</zip>
+  </address>
+</polling_location>
+<polling_location id="7770053">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Clarendon</city>
+    <line1>279 Middle Rd</line1>
+    <state>VT</state>
+    <location_name>Clarendon Town Hall</location_name>
+    <zip>05759</zip>
+  </address>
+</polling_location>
+<polling_location id="7770056">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Concord</city>
+    <line1>456 Main Street</line1>
+    <state>VT</state>
+    <location_name>Concord Town Hall</location_name>
+    <zip>05824</zip>
+  </address>
+</polling_location>
+<polling_location id="7770057">
+  <polling_hours>8:30 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Corinth</city>
+    <line1>1387 Cookeville Rd</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05039</zip>
+  </address>
+</polling_location>
+<polling_location id="7770058">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Cornwall</city>
+    <line1>2629 Route 30</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05753</zip>
+  </address>
+</polling_location>
+<polling_location id="7770059">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Coventry</city>
+    <line1>168 Main Street</line1>
+    <state>VT</state>
+    <location_name>Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770060">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Danby</city>
+    <line1>130 Brook Road</line1>
+    <state>VT</state>
+    <location_name>Municipal Office</location_name>
+    <zip>05739</zip>
+  </address>
+</polling_location>
+<polling_location id="7770061">
+  <address>
+    <city>Danville</city>
+    <line1>36 Route 2 W</line1>
+    <state>VT</state>
+    <location_name>Danville Town Hall</location_name>
+    <zip>05828-00183</zip>
+  </address>
+</polling_location>
+<polling_location id="7770062">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Derby</city>
+    <line1>124 Main St</line1>
+    <state>VT</state>
+    <location_name>Derby Municipal Building</location_name>
+    <zip>05829</zip>
+  </address>
+</polling_location>
+<polling_location id="7770063">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Dorset</city>
+    <line1>120 School Drive</line1>
+    <state>VT</state>
+    <location_name>The Dorset School</location_name>
+    <zip>05251</zip>
+  </address>
+</polling_location>
+<polling_location id="7770064">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Dummerston</city>
+    <line1>1535 Middle Rd</line1>
+    <state>VT</state>
+    <location_name>Dummerston Center Congregational Church</location_name>
+    <zip>05301</zip>
+  </address>
+</polling_location>
+<polling_location id="7770065">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Duxbury</city>
+    <line1>5672 Vermont 100</line1>
+    <state>VT</state>
+    <location_name>Crossett Brook Middle School</location_name>
+    <zip>05676</zip>
+  </address>
+</polling_location>
+<polling_location id="7770066">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>East Haven</city>
+    <line1>64 Community Building Road</line1>
+    <state>VT</state>
+    <location_name>Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770067">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>East Montpelier</city>
+    <line1>665 Vincent Flats Road</line1>
+    <state>VT</state>
+    <location_name>Elementary School</location_name>
+    <zip>05651</zip>
+  </address>
+</polling_location>
+<polling_location id="7770068">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Eden Mills</city>
+    <line1>71 Old Schoolhouse Road</line1>
+    <state>VT</state>
+    <location_name>Town Clerk's Office</location_name>
+    <zip>05653</zip>
+  </address>
+</polling_location>
+<polling_location id="7770069">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Elmore</city>
+    <line1>1175 VT Rte. 12</line1>
+    <state>VT</state>
+    <location_name>Town Clerk's Office</location_name>
+    <zip>05657</zip>
+  </address>
+</polling_location>
+<polling_location id="7770070">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Enosburg</city>
+    <line1>83 Sampsonville Rd</line1>
+    <state>VT</state>
+    <location_name>Fire Station</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770073">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Fair Haven</city>
+    <line1>72 S Main St</line1>
+    <state>VT</state>
+    <location_name>American Legion Post #49</location_name>
+    <zip>05743</zip>
+  </address>
+</polling_location>
+<polling_location id="7770074">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Fairfax</city>
+    <line1>12 Buck Hollow Rd</line1>
+    <state>VT</state>
+    <location_name>Fairfax Town Office</location_name>
+    <zip>05454</zip>
+  </address>
+</polling_location>
+<polling_location id="7770075">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Fairfield</city>
+    <line1>25 North Rd</line1>
+    <state>VT</state>
+    <location_name>Municipal Bldg</location_name>
+    <zip>05455</zip>
+  </address>
+</polling_location>
+<polling_location id="7770076">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Fairlee</city>
+    <line1>75 Town Common Rd</line1>
+    <state>VT</state>
+    <location_name>Fairlee Town Hall</location_name>
+    <zip>05045</zip>
+  </address>
+</polling_location>
+<polling_location id="7770077">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Fayston</city>
+    <line1>866 North Fayston Road</line1>
+    <state>VT</state>
+    <location_name>Fayston Municipal Offices</location_name>
+    <zip>05660</zip>
+  </address>
+</polling_location>
+<polling_location id="7770078">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Ferrisburgh</city>
+    <line1>3279 Route 7</line1>
+    <state>VT</state>
+    <location_name>Ferrisburgh Town Hall</location_name>
+    <zip>05456</zip>
+  </address>
+</polling_location>
+<polling_location id="7770079">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Fletcher</city>
+    <line1>215 Cambridge Rd</line1>
+    <state>VT</state>
+    <location_name>Fletcher Town Office</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770080">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Franklin</city>
+    <line1>5167 Main St</line1>
+    <state>VT</state>
+    <location_name>Franklin Town Hall</location_name>
+    <zip>05457</zip>
+  </address>
+</polling_location>
+<polling_location id="7770081">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Georgia</city>
+    <line1>4416 Ethan Allen Highway</line1>
+    <state>VT</state>
+    <location_name>Georgia Elementary &amp; Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770082">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Glover</city>
+    <line1>51 Bean Hill</line1>
+    <state>VT</state>
+    <location_name>Glover Town Clerk's Office</location_name>
+    <zip>05839</zip>
+  </address>
+</polling_location>
+<polling_location id="7770083">
+  <polling_hours>7:30 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Goshen</city>
+    <line1>50 Carlisle Hill Rd.</line1>
+    <state>VT</state>
+    <location_name>Goshen Town Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770084">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Grafton</city>
+    <line1>117 Main Street</line1>
+    <state>VT</state>
+    <location_name>Grafton Town Hall</location_name>
+    <zip>05146</zip>
+  </address>
+</polling_location>
+<polling_location id="7770085">
+  <polling_hours>6:30 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Granby</city>
+    <line1>9005 Granby Road</line1>
+    <state>VT</state>
+    <location_name>Granby Town Hall</location_name>
+    <zip>05840</zip>
+  </address>
+</polling_location>
+<polling_location id="7770086">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Grand Isle</city>
+    <line1>9 Hyde Road</line1>
+    <state>VT</state>
+    <location_name>Grand Isle Town Office</location_name>
+    <zip>05458</zip>
+  </address>
+</polling_location>
+<polling_location id="7770087">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Granville</city>
+    <line1>4157 Vermont Route 100</line1>
+    <state>VT</state>
+    <location_name>Granville Town Halll</location_name>
+    <zip>05747</zip>
+  </address>
+</polling_location>
+<polling_location id="7770088">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Greensboro</city>
+    <line1>81 Lauredon Ave</line1>
+    <state>VT</state>
+    <location_name>Greensboro Town Clerks Office</location_name>
+    <zip>05841</zip>
+  </address>
+</polling_location>
+<polling_location id="7770089">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Groton</city>
+    <line1>1476 Scott Hwy</line1>
+    <state>VT</state>
+    <location_name>Groton Community Building Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770090">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Guildhall</city>
+    <line1>13 Courthouse Dr.</line1>
+    <state>VT</state>
+    <location_name>The Guild Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770091">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Guilford</city>
+    <line1>3940 Guilford Center RD</line1>
+    <state>VT</state>
+    <location_name>Broad Brook Grange</location_name>
+    <zip>05301</zip>
+  </address>
+</polling_location>
+<polling_location id="7770092">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>West Halifax</city>
+    <line1>246 Branch Road</line1>
+    <state>VT</state>
+    <location_name>Multipurpose Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770093">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Hancock</city>
+    <line1>1097 VT Route 100</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05748</zip>
+  </address>
+</polling_location>
+<polling_location id="7770094">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Hardwick</city>
+    <line1>135 South Main Street</line1>
+    <state>VT</state>
+    <location_name>Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770095">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>White River Jct.</city>
+    <line1>37 Highland Ave.</line1>
+    <state>VT</state>
+    <location_name>Hartford High School Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770096">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Hartland</city>
+    <line1>1 Quechee Road</line1>
+    <state>VT</state>
+    <location_name>Damon Hall</location_name>
+    <zip>05048</zip>
+  </address>
+</polling_location>
+<polling_location id="7770097">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Highgate Center</city>
+    <line1>219 Gore Rd</line1>
+    <state>VT</state>
+    <location_name>Highgate Elementary School</location_name>
+    <zip>05459</zip>
+  </address>
+</polling_location>
+<polling_location id="7770098">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Hinesburg</city>
+    <line1>10632 Route 116</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05461</zip>
+  </address>
+</polling_location>
+<polling_location id="7770099">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Holland</city>
+    <line1>120 School Road</line1>
+    <state>VT</state>
+    <location_name>Holland Town Office</location_name>
+    <zip>05830</zip>
+  </address>
+</polling_location>
+<polling_location id="7770100">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Hubbardton</city>
+    <line1>1831 Monument Hill Rd.</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05735</zip>
+  </address>
+</polling_location>
+<polling_location id="7770101">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Huntington Center</city>
+    <line1>120 School Street</line1>
+    <state>VT</state>
+    <location_name>Brewster-Pierce School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770102">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <line2>Lower Level</line2>
+    <city>Hyde Park</city>
+    <line1>344 VT 15 W</line1>
+    <state>VT</state>
+    <location_name>Town Offices</location_name>
+    <zip>05655</zip>
+  </address>
+</polling_location>
+<polling_location id="7770103">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Ira</city>
+    <line1>1800 VT Route 133</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05777</zip>
+  </address>
+</polling_location>
+<polling_location id="7770104">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Irasburg</city>
+    <line1>161 RT 58 East</line1>
+    <state>VT</state>
+    <location_name>Irasburg Town Hall</location_name>
+    <zip>05845</zip>
+  </address>
+</polling_location>
+<polling_location id="7770105">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Isle La Motte</city>
+    <line1>2272 Main St.</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05463</zip>
+  </address>
+</polling_location>
+<polling_location id="7770106">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Jamaica</city>
+    <line1>28 Town Office Road</line1>
+    <state>VT</state>
+    <location_name>Town Office</location_name>
+    <zip>05343</zip>
+  </address>
+</polling_location>
+<polling_location id="7770107">
+  <polling_hours>0.375 - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Jay</city>
+    <line1>1036 VT RTE 242</line1>
+    <state>VT</state>
+    <location_name>Town Clerk's Office</location_name>
+    <zip>05859</zip>
+  </address>
+</polling_location>
+<polling_location id="7770108">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Jericho</city>
+    <line1>90 Vermont Route 15</line1>
+    <state>VT</state>
+    <location_name>Jericho Elementary School</location_name>
+    <zip>05465</zip>
+  </address>
+</polling_location>
+<polling_location id="7770109">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Johnson</city>
+    <line1>293 Lower Main West</line1>
+    <state>VT</state>
+    <location_name>Johnson Municipal Building</location_name>
+    <zip>05656</zip>
+  </address>
+</polling_location>
+<polling_location id="7770110">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Killington</city>
+    <line1>2706 River Road</line1>
+    <state>VT</state>
+    <location_name>Killington Town Office</location_name>
+    <zip>05751</zip>
+  </address>
+</polling_location>
+<polling_location id="7770111">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Kirby</city>
+    <line1>346 Town Hall Road</line1>
+    <state>VT</state>
+    <location_name>Kirby Town Hall</location_name>
+    <zip>05851</zip>
+  </address>
+</polling_location>
+<polling_location id="7770112">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Landgrove</city>
+    <line1>88 Landgrove Road</line1>
+    <state>VT</state>
+    <location_name>Landgrove Town Hall</location_name>
+    <zip>05148</zip>
+  </address>
+</polling_location>
+<polling_location id="7770113">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Leicester</city>
+    <line1>44 Schoolhouse Road</line1>
+    <state>VT</state>
+    <location_name>Town Office</location_name>
+    <zip>05733</zip>
+  </address>
+</polling_location>
+<polling_location id="7770114">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <line2>Vt 102</line2>
+    <city>Lemington</city>
+    <line1>2549 River Rd</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05903</zip>
+  </address>
+</polling_location>
+<polling_location id="7770115">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bristol</city>
+    <line1>52 E River Rd</line1>
+    <state>VT</state>
+    <location_name>Burnham Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770116">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>So. Londonderry</city>
+    <line1>100 Old School St.</line1>
+    <state>VT</state>
+    <location_name>Town Office (Twitchell Building)</location_name>
+    <zip>05155</zip>
+  </address>
+</polling_location>
+<polling_location id="7770117">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Lowell</city>
+    <line1>2170 VT Rte 100</line1>
+    <state>VT</state>
+    <location_name>Town Office Building</location_name>
+    <zip>05847</zip>
+  </address>
+</polling_location>
+<polling_location id="7770118">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Gilman</city>
+    <line1>2720 River Rd</line1>
+    <state>VT</state>
+    <location_name>Gilman Middle School</location_name>
+    <zip>05904</zip>
+  </address>
+</polling_location>
+<polling_location id="7770119">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Lyndonville</city>
+    <line1>119 Park Avenue</line1>
+    <state>VT</state>
+    <location_name>Town of Lyndon Municipal Office Building</location_name>
+    <zip>05851</zip>
+  </address>
+</polling_location>
+<polling_location id="7770120">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Maidstone</city>
+    <line1>508 Vermont Route 102</line1>
+    <state>VT</state>
+    <location_name>Maidstone Town Hall</location_name>
+    <zip>05905</zip>
+  </address>
+</polling_location>
+<polling_location id="7770121">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Manchester Center</city>
+    <line1>6039 Main Street</line1>
+    <state>VT</state>
+    <location_name>Manchester Town Hall</location_name>
+    <zip>05255</zip>
+  </address>
+</polling_location>
+<polling_location id="7770122">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Marlboro</city>
+    <line1>510 South Road</line1>
+    <state>VT</state>
+    <location_name>Marlboro Town Office</location_name>
+    <zip>05344</zip>
+  </address>
+</polling_location>
+<polling_location id="7770123">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Marshfield</city>
+    <line1>122 School Street</line1>
+    <state>VT</state>
+    <location_name>Old Schoolhouse Common</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770124">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Mendon</city>
+    <line1>2282 U.S. Rte 4</line1>
+    <state>VT</state>
+    <location_name>Mendon Town Hall</location_name>
+    <zip>05701</zip>
+  </address>
+</polling_location>
+<polling_location id="7770125">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Middlebury</city>
+    <line1>94 Main Street</line1>
+    <state>VT</state>
+    <location_name>Municipal Gymnasium</location_name>
+    <zip>05753</zip>
+  </address>
+</polling_location>
+<polling_location id="7770126">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Middlesex</city>
+    <line1>5 Church Street</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05602</zip>
+  </address>
+</polling_location>
+<polling_location id="7770127">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Middletown Springs</city>
+    <line1>8 Firehouse Lane</line1>
+    <state>VT</state>
+    <location_name>FireHouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770130">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Monkton</city>
+    <line1>3747 States Prison Hollow Rd</line1>
+    <state>VT</state>
+    <location_name>Monkton Volunteer Fire Department</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770131">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Montgomery Center</city>
+    <line1>57 Main Street</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05471</zip>
+  </address>
+</polling_location>
+<polling_location id="7770132">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Montpelier</city>
+    <line1>39 Main Street</line1>
+    <state>VT</state>
+    <location_name>Montpelier City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770133">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Moretown</city>
+    <line1>940 Route 100B</line1>
+    <state>VT</state>
+    <location_name>Moretown Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770134">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Morrisville</city>
+    <line1>43 Portland Street</line1>
+    <state>VT</state>
+    <location_name>Municipal Building</location_name>
+    <zip>05661</zip>
+  </address>
+</polling_location>
+<polling_location id="7770135">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Mount Holly</city>
+    <line1>50 School St</line1>
+    <state>VT</state>
+    <location_name>Mount Holly Town Office</location_name>
+    <zip>05758</zip>
+  </address>
+</polling_location>
+<polling_location id="7770136">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Mount Tabor</city>
+    <line1>522 Brooklyn Road</line1>
+    <state>VT</state>
+    <location_name>Town Office</location_name>
+    <zip>05739</zip>
+  </address>
+</polling_location>
+<polling_location id="7770137">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>New Haven</city>
+    <line1>70 North St.</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05472</zip>
+  </address>
+</polling_location>
+<polling_location id="7770138">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Newark</city>
+    <line1>1336 Newark St.</line1>
+    <state>VT</state>
+    <location_name>Newark Town Clerk's Office</location_name>
+    <zip>05871</zip>
+  </address>
+</polling_location>
+<polling_location id="7770142">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Newfane</city>
+    <line1>698 VT Route 30</line1>
+    <state>VT</state>
+    <location_name>NewBrook Fire Department</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770145">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>North Hero</city>
+    <line1>6441 US RT 2</line1>
+    <state>VT</state>
+    <location_name>Town Office Meeting Room</location_name>
+    <zip>05474</zip>
+  </address>
+</polling_location>
+<polling_location id="7770146">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Northfield</city>
+    <line1>21 Vine St.</line1>
+    <state>VT</state>
+    <location_name>Northifeld High School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770147">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Norton</city>
+    <line1>12 VT Route 114E</line1>
+    <state>VT</state>
+    <location_name>Norton Town Hall</location_name>
+    <zip>05907</zip>
+  </address>
+</polling_location>
+<polling_location id="7770148">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Norwich</city>
+    <line1>300 Main Street</line1>
+    <state>VT</state>
+    <location_name>Tracy Hall Gym</location_name>
+    <zip>05055</zip>
+  </address>
+</polling_location>
+<polling_location id="7770149">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Orange</city>
+    <line1>392 U.S. Route 302</line1>
+    <state>VT</state>
+    <location_name>Orange Town Hall</location_name>
+    <zip>05649</zip>
+  </address>
+</polling_location>
+<polling_location id="7770150">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Orwell</city>
+    <line1>436 Main Street</line1>
+    <state>VT</state>
+    <location_name>Orwell Town Hall</location_name>
+    <zip>05760</zip>
+  </address>
+</polling_location>
+<polling_location id="7770151">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Panton</city>
+    <line1>3176 Jersey St.</line1>
+    <state>VT</state>
+    <location_name>Panton Town Hall</location_name>
+    <zip>05491</zip>
+  </address>
+</polling_location>
+<polling_location id="7770152">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Pawlet</city>
+    <line1>122 School St.</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05761</zip>
+  </address>
+</polling_location>
+<polling_location id="7770153">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Peacham</city>
+    <line1>79 Church St</line1>
+    <state>VT</state>
+    <location_name>Town Hall Gym</location_name>
+    <zip>05862</zip>
+  </address>
+</polling_location>
+<polling_location id="7770154">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Peru</city>
+    <line1>402 Main St</line1>
+    <state>VT</state>
+    <location_name>Peru Town Center</location_name>
+    <zip>05152</zip>
+  </address>
+</polling_location>
+<polling_location id="7770155">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Pittsfield</city>
+    <line1>40 Village Green</line1>
+    <state>VT</state>
+    <location_name>Town Office Building</location_name>
+    <zip>05762-00556</zip>
+  </address>
+</polling_location>
+<polling_location id="7770156">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Pittsford</city>
+    <line1>426 Plains Road</line1>
+    <state>VT</state>
+    <location_name>Municipal Office Conference Room</location_name>
+    <zip>05763</zip>
+  </address>
+</polling_location>
+<polling_location id="7770157">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Plainfield</city>
+    <line1>149 Main Street</line1>
+    <state>VT</state>
+    <location_name>Plainfield Town Hall</location_name>
+    <zip>05667</zip>
+  </address>
+</polling_location>
+<polling_location id="7770158">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Plymouth</city>
+    <line1>68 Town Office Rd</line1>
+    <state>VT</state>
+    <location_name>Municipal Building</location_name>
+    <zip>05056</zip>
+  </address>
+</polling_location>
+<polling_location id="7770159">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>North Pomfret</city>
+    <line1>5218 Pomfret Road</line1>
+    <state>VT</state>
+    <location_name>Pomfret Town Offices</location_name>
+    <zip>05053</zip>
+  </address>
+</polling_location>
+<polling_location id="7770160">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Poultney</city>
+    <line1>263 Beaman St</line1>
+    <state>VT</state>
+    <location_name>Poultney Fire House</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770161">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Pownal</city>
+    <line1>Center Firehouse</line1>
+    <state>VT</state>
+  </address>
+</polling_location>
+<polling_location id="7770162">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Proctor</city>
+    <line1>12 Park Street</line1>
+    <state>VT</state>
+    <location_name>Proctor Jr.-Sr. High School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770163">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Putney</city>
+    <line1>182 Westminster Rd</line1>
+    <state>VT</state>
+    <location_name>Putney Central School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770164">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Randolph</city>
+    <line1>7 Summer Street</line1>
+    <state>VT</state>
+    <location_name>Randolph Town Hall</location_name>
+    <zip>05060</zip>
+  </address>
+</polling_location>
+<polling_location id="7770165">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Reading</city>
+    <line1>Robinson Hall</line1>
+    <state>VT</state>
+  </address>
+</polling_location>
+<polling_location id="7770166">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Readsboro</city>
+    <line1>301 Phelps Lane</line1>
+    <state>VT</state>
+    <location_name>Readsboro Central School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770167">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Richford</city>
+    <line1>94 Main Street</line1>
+    <state>VT</state>
+    <location_name>Richford Town Hall</location_name>
+    <zip>05476</zip>
+  </address>
+</polling_location>
+<polling_location id="7770168">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Richmond</city>
+    <line1>173 School St</line1>
+    <state>VT</state>
+    <location_name>Camels Hump Middle School</location_name>
+    <zip>05477</zip>
+  </address>
+</polling_location>
+<polling_location id="7770169">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Ripton</city>
+    <line1>1283 Vt. Route 125</line1>
+    <state>VT</state>
+    <location_name>Community House</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770170">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Rochester</city>
+    <line1>67 School St</line1>
+    <state>VT</state>
+    <location_name>Town Office</location_name>
+    <zip>05767</zip>
+  </address>
+</polling_location>
+<polling_location id="7770171">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bellows Falls</city>
+    <line1>61 Westminster St.</line1>
+    <state>VT</state>
+    <location_name>Masonic Temple</location_name>
+    <zip>05101</zip>
+  </address>
+</polling_location>
+<polling_location id="7770172">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Roxbury</city>
+    <line1>1664 Roxbury Road</line1>
+    <state>VT</state>
+    <location_name>Roxbury Town Clerk's Office</location_name>
+    <zip>05669</zip>
+  </address>
+</polling_location>
+<polling_location id="7770173">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Royalton</city>
+    <line1>223 S Windsor St</line1>
+    <state>VT</state>
+    <location_name>South Royalton School Gymnasium</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770174">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>West Rupert</city>
+    <line1>187 East Street</line1>
+    <state>VT</state>
+    <location_name>Rupert Town Office</location_name>
+    <zip>05776</zip>
+  </address>
+</polling_location>
+<polling_location id="7770181">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Ryegate</city>
+    <line1>134 Witherspoon Road</line1>
+    <state>VT</state>
+    <location_name>Ryegate Town Hall</location_name>
+    <zip>05042</zip>
+  </address>
+</polling_location>
+<polling_location id="7770184">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>St George</city>
+    <line1>One Barber Road</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05495</zip>
+  </address>
+</polling_location>
+<polling_location id="7770185">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>St. Johnsbury</city>
+    <line1>506 Summer Street</line1>
+    <state>VT</state>
+    <location_name>Father Lively Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770186">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Salisbury</city>
+    <line1>25 Schoolhouse Rd.</line1>
+    <state>VT</state>
+    <location_name>Salisbury Town Office</location_name>
+    <zip>05769</zip>
+  </address>
+</polling_location>
+<polling_location id="7770187">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Sandgate</city>
+    <line1>3266 Sandgate Road</line1>
+    <state>VT</state>
+    <location_name>Sandgate Town Hall</location_name>
+    <zip>05250</zip>
+  </address>
+</polling_location>
+<polling_location id="7770188">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Searsburg</city>
+    <line1>18 Town Garage Road</line1>
+    <state>VT</state>
+    <location_name>Searsburg Town Hall</location_name>
+    <zip>05363</zip>
+  </address>
+</polling_location>
+<polling_location id="7770189">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Shaftsbury</city>
+    <line1>166 Buck Hill Rd</line1>
+    <state>VT</state>
+    <location_name>Buck Hill Road Firehouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770190">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Sharon</city>
+    <line1>75 Vermont Route 132</line1>
+    <state>VT</state>
+    <location_name>Sharon Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770191">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Sheffield</city>
+    <line1>37 Dane Toad</line1>
+    <state>VT</state>
+    <location_name>Municipal Building</location_name>
+    <zip>05866</zip>
+  </address>
+</polling_location>
+<polling_location id="7770192">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Shelburne</city>
+    <line1>5420 Shelburne Rd.</line1>
+    <state>VT</state>
+    <location_name>Town Center Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770193">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Sheldon</city>
+    <line1>1640 Main Street</line1>
+    <state>VT</state>
+    <location_name>Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770194">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Shoreham</city>
+    <line1>297 Main Street</line1>
+    <state>VT</state>
+    <location_name>Shoreham Town Office</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770195">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Shrewsbury</city>
+    <line1>88 Lottery Rd</line1>
+    <state>VT</state>
+    <location_name>Shrewsbury Community Meeting House</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770200">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>South Hero</city>
+    <line1>333 Route 2</line1>
+    <state>VT</state>
+    <location_name>So Hero Town Office</location_name>
+    <zip>05486-00175</zip>
+  </address>
+</polling_location>
+<polling_location id="7770203">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Stamford</city>
+    <line1>School Hall</line1>
+    <state>VT</state>
+  </address>
+</polling_location>
+<polling_location id="7770204">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Stannard</city>
+    <line1>615 Stannard Mountain Road</line1>
+    <state>VT</state>
+    <location_name>Stannard Town Hall</location_name>
+    <zip>05836</zip>
+  </address>
+</polling_location>
+<polling_location id="7770205">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Starksboro</city>
+    <line1>41 Parsonage Rd.</line1>
+    <state>VT</state>
+    <location_name>Robinson Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770206">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Stockbridge</city>
+    <line1>41 Parsonage Rd.</line1>
+    <state>VT</state>
+    <location_name>Stockbridge Town Office</location_name>
+    <zip>05772</zip>
+  </address>
+</polling_location>
+<polling_location id="7770207">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Stowe</city>
+    <line1>67 Main St</line1>
+    <state>VT</state>
+    <location_name>Akeley Memorial Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770208">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Strafford</city>
+    <line1>227 Justin Morrill Highway</line1>
+    <state>VT</state>
+    <location_name>Town House</location_name>
+    <zip>05072</zip>
+  </address>
+</polling_location>
+<polling_location id="7770209">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Stratton</city>
+    <line1>9 West Jamaica Rd</line1>
+    <state>VT</state>
+    <location_name>Stratton Town Office</location_name>
+    <zip>05360</zip>
+  </address>
+</polling_location>
+<polling_location id="7770210">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Sudbury</city>
+    <line1>36 Blacksmith Lane</line1>
+    <state>VT</state>
+    <location_name>Sudbury Town Hall</location_name>
+    <zip>05733</zip>
+  </address>
+</polling_location>
+<polling_location id="7770211">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Sunderland</city>
+    <line1>98 Bear Ridge Road</line1>
+    <state>VT</state>
+    <location_name>Sunderland Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770212">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Sutton</city>
+    <line1>167 Underpass Rd</line1>
+    <state>VT</state>
+    <location_name>Sutton School Multi-Purpose Room</location_name>
+    <zip>05867</zip>
+  </address>
+</polling_location>
+<polling_location id="7770213">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Swanton</city>
+    <line1>120 First Street</line1>
+    <state>VT</state>
+    <location_name>Swanton Village Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770214">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Thetford Ctr</city>
+    <line1>3910 VT Route 113</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05075</zip>
+  </address>
+</polling_location>
+<polling_location id="7770215">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Tinmouth</city>
+    <line1>573 Route 140 Tinmouth</line1>
+    <state>VT</state>
+    <location_name>Tinmouth Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770216">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Topsham</city>
+    <line1>6 Harts Road</line1>
+    <state>VT</state>
+    <location_name>Topsham Town Hall</location_name>
+    <zip>05076</zip>
+  </address>
+</polling_location>
+<polling_location id="7770217">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Townshend</city>
+    <line1>2006 VT Route 30</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05353</zip>
+  </address>
+</polling_location>
+<polling_location id="7770218">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>North Troy</city>
+    <line1>126 MAIN STREET</line1>
+    <state>VT</state>
+    <location_name>Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770219">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Tunbridge</city>
+    <line1>277 VT RT 110</line1>
+    <state>VT</state>
+    <location_name>Tunbridge Town Hall</location_name>
+    <zip>05077</zip>
+  </address>
+</polling_location>
+<polling_location id="7770220">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Underhill</city>
+    <line1>12 Pleasant Valley Rd</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05489</zip>
+  </address>
+</polling_location>
+<polling_location id="7770221">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Vergennes</city>
+    <line1>50 Green Street</line1>
+    <state>VT</state>
+    <location_name>Fire Station</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770222">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Vernon</city>
+    <line1>567 Governor Hunt Rd</line1>
+    <state>VT</state>
+    <location_name>Town Office Building - Downstairs</location_name>
+    <zip>05354</zip>
+  </address>
+</polling_location>
+<polling_location id="7770223">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Vershire</city>
+    <line1>6894 VT RT 113</line1>
+    <state>VT</state>
+    <location_name>Town Center Building</location_name>
+    <zip>05079</zip>
+  </address>
+</polling_location>
+<polling_location id="7770224">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Victory</city>
+    <line1>102 Radar Road</line1>
+    <state>VT</state>
+    <location_name>Victory Town Hall</location_name>
+    <zip>05858</zip>
+  </address>
+</polling_location>
+<polling_location id="7770225">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Waitsfied</city>
+    <line1>3951 Main St</line1>
+    <state>VT</state>
+    <location_name>Waitsfield Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770226">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Walden</city>
+    <line1>12 VT RTE 215</line1>
+    <state>VT</state>
+    <location_name>Emergency Services Building</location_name>
+    <zip>05873</zip>
+  </address>
+</polling_location>
+<polling_location id="7770227">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Wallingford</city>
+    <line1>75 School Street</line1>
+    <state>VT</state>
+    <location_name>Wallingford Town Hall</location_name>
+    <zip>05773</zip>
+  </address>
+</polling_location>
+<polling_location id="7770228">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Waltham</city>
+    <line1>2053 Maple Street</line1>
+    <state>VT</state>
+    <location_name>Waltham Town Hall</location_name>
+    <zip>05491</zip>
+  </address>
+</polling_location>
+<polling_location id="7770229">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Wardsboro</city>
+    <line1>71 Main Street</line1>
+    <state>VT</state>
+    <location_name>Town Office</location_name>
+    <zip>05355</zip>
+  </address>
+</polling_location>
+<polling_location id="7770230">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Warren</city>
+    <line1>296 School Rd</line1>
+    <state>VT</state>
+    <location_name>Warren Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770231">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Washington</city>
+    <line1>2895 VT Route 110</line1>
+    <state>VT</state>
+    <location_name>Washington Town Hall</location_name>
+    <zip>05675</zip>
+  </address>
+</polling_location>
+<polling_location id="7770232">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Waterbury</city>
+    <line1>47 Stowe Street</line1>
+    <state>VT</state>
+    <location_name>Thatcher Brook Primary School</location_name>
+    <zip>05676</zip>
+  </address>
+</polling_location>
+<polling_location id="7770233">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Waterford</city>
+    <line1>276 Duck Pond Rd</line1>
+    <state>VT</state>
+    <location_name>Waterford Elementary School</location_name>
+    <zip>05819</zip>
+  </address>
+</polling_location>
+<polling_location id="7770234">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Waterville</city>
+    <line1>544 VT Route 109</line1>
+    <state>VT</state>
+    <location_name>Waterville Town Hall</location_name>
+    <zip>05492</zip>
+  </address>
+</polling_location>
+<polling_location id="7770235">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Ascutney</city>
+    <line1>5259 Route 5</line1>
+    <state>VT</state>
+    <location_name>Martin Memorial Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770236">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Wells</city>
+    <line1>108 VT Rt 30</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05774</zip>
+  </address>
+</polling_location>
+<polling_location id="7770237">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>West Fairlee</city>
+    <line1>894 VT RTE 113</line1>
+    <state>VT</state>
+    <location_name>Community Building (lower level)</location_name>
+    <zip>05083</zip>
+  </address>
+</polling_location>
+<polling_location id="7770238">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>West Haven</city>
+    <line1>2919 Main Road</line1>
+    <state>VT</state>
+    <location_name>Community Hall</location_name>
+    <zip>05743</zip>
+  </address>
+</polling_location>
+<polling_location id="7770239">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>West Rutland</city>
+    <line1>35 Marble Street</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05777</zip>
+  </address>
+</polling_location>
+<polling_location id="7770240">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>West Windsor</city>
+    <line1>22 Brownsville-Hartland Rd</line1>
+    <state>VT</state>
+    <location_name>Story Memorial Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770241">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Westfield</city>
+    <line1>59 North Hill Road</line1>
+    <state>VT</state>
+    <location_name>Westfield Community Center</location_name>
+    <zip>05874</zip>
+  </address>
+</polling_location>
+<polling_location id="7770242">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Westford</city>
+    <line1>146 Brookside Road</line1>
+    <state>VT</state>
+    <location_name>Westford School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770243">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Westminster</city>
+    <line1>3581 US Rte 5</line1>
+    <state>VT</state>
+    <location_name>Westminster Institute</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770244">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Westmore</city>
+    <line1>54 Hinton Hill RD</line1>
+    <state>VT</state>
+    <location_name>Municipal Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770245">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Weston</city>
+    <line1>12 Lawrence Hill Rd</line1>
+    <state>VT</state>
+    <location_name>Weston Town Office</location_name>
+    <zip>05161</zip>
+  </address>
+</polling_location>
+<polling_location id="7770246">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Weybridge</city>
+    <line1>1727 Quaker Village Road</line1>
+    <state>VT</state>
+    <location_name>Town Clerk's Office</location_name>
+    <zip>05753</zip>
+  </address>
+</polling_location>
+<polling_location id="7770247">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Wheelock</city>
+    <line1>1192 Route 122</line1>
+    <state>VT</state>
+    <location_name>Wheelock Town Hall</location_name>
+    <zip>05851</zip>
+  </address>
+</polling_location>
+<polling_location id="7770248">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Whiting</city>
+    <line1>29 South Main Street</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05778</zip>
+  </address>
+</polling_location>
+<polling_location id="7770249">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Jacksonville</city>
+    <line1>2948 Vermont Route 100</line1>
+    <state>VT</state>
+    <location_name>Whitingham Municipal Center</location_name>
+    <zip>05342</zip>
+  </address>
+</polling_location>
+<polling_location id="7770250">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Williamstown</city>
+    <line1>120 Hebert Road</line1>
+    <state>VT</state>
+    <location_name>Williamstown Middle High School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770251">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Williston</city>
+    <line1>7800 Williston Road</line1>
+    <state>VT</state>
+    <location_name>Armory</location_name>
+    <zip>05495</zip>
+  </address>
+</polling_location>
+<polling_location id="7770252">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Wilmington</city>
+    <line1>1 School Street</line1>
+    <state>VT</state>
+    <location_name>Twin Valley High School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770253">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Windham</city>
+    <line1>5976 Windham Hill Road</line1>
+    <state>VT</state>
+    <location_name>Windham Town Office</location_name>
+    <zip>05359</zip>
+  </address>
+</polling_location>
+<polling_location id="7770254">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Windsor</city>
+    <line1>29 Union Street</line1>
+    <state>VT</state>
+    <location_name>Municipal Bldg, Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770255">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bondville</city>
+    <line1>115 Vermont Route 30</line1>
+    <state>VT</state>
+    <location_name>Winhall Town Hall</location_name>
+    <zip>05340</zip>
+  </address>
+</polling_location>
+<polling_location id="7770256">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Winooski</city>
+    <line1>123 Barlow St</line1>
+    <state>VT</state>
+    <location_name>Winooski Senior Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770257">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Wolcott</city>
+    <line1>28 Railroad Street</line1>
+    <state>VT</state>
+    <location_name>Town Office</location_name>
+    <zip>05680</zip>
+  </address>
+</polling_location>
+<polling_location id="7770259">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Woodbury</city>
+    <line1>1672 Route 14</line1>
+    <state>VT</state>
+    <location_name>Woodbury Town Hall</location_name>
+    <zip>05681</zip>
+  </address>
+</polling_location>
+<polling_location id="7770258">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Woodford</city>
+    <line1>1391 VT RTE 9</line1>
+    <state>VT</state>
+    <location_name>Town Offices</location_name>
+    <zip>05201</zip>
+  </address>
+</polling_location>
+<polling_location id="7770260">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Woodstock</city>
+    <line1>31 The Green</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05091</zip>
+  </address>
+</polling_location>
+<polling_location id="7770261">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Worcester</city>
+    <line1>20 Worcester Village Road</line1>
+    <state>VT</state>
+    <location_name>Town Hall</location_name>
+    <zip>05682</zip>
+  </address>
+</polling_location>
+<polling_location id="7770010">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Barre</city>
+    <line1>15 Auditorium Hill</line1>
+    <state>VT</state>
+    <location_name>Barre Civic Center Auditorium</location_name>
+    <zip>05641</zip>
+  </address>
+</polling_location>
+<polling_location id="7770011">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Barre</city>
+    <line1>70 Websterville Road</line1>
+    <state>VT</state>
+    <location_name>Barre Town Elementary &amp; Middle School</location_name>
+    <zip>05641</zip>
+  </address>
+</polling_location>
+<polling_location id="7770014">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Bennington</city>
+    <line1>130 River Street</line1>
+    <state>VT</state>
+    <location_name>Bennington Fire House</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770015">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>North Bennington</city>
+    <line1>Main St. &amp; Depot St.</line1>
+    <state>VT</state>
+    <location_name>North Bennington Trustee Office</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770035">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Burlington</city>
+    <line1>100 Mansfield Ave</line1>
+    <state>VT</state>
+    <location_name>Mater Christi School</location_name>
+    <zip>05401</zip>
+  </address>
+</polling_location>
+<polling_location id="7770036">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Burlington</city>
+    <line1>6 Archibald Street</line1>
+    <state>VT</state>
+    <location_name>H.O. Wheeler School</location_name>
+    <zip>05401</zip>
+  </address>
+</polling_location>
+<polling_location id="7770037">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Burlington</city>
+    <line1>123 North Street</line1>
+    <state>VT</state>
+    <location_name>Lawrence Barnes School</location_name>
+    <zip>05401</zip>
+  </address>
+</polling_location>
+<polling_location id="7770038">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Burlington</city>
+    <line1>1271 North Avenue</line1>
+    <state>VT</state>
+    <location_name>St. Mark's Youth Center</location_name>
+    <zip>05408</zip>
+  </address>
+</polling_location>
+<polling_location id="7770039">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Burlington</city>
+    <line1>585 Pine Street</line1>
+    <state>VT</state>
+    <location_name>Burlington Electric Department</location_name>
+    <zip>05401</zip>
+  </address>
+</polling_location>
+<polling_location id="7770040">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Burlington</city>
+    <line1>275 Main Street</line1>
+    <state>VT</state>
+    <location_name>Edmunds Middle School</location_name>
+    <zip>05401</zip>
+  </address>
+</polling_location>
+<polling_location id="7770041">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Burlington</city>
+    <line1>130 Gosse Court</line1>
+    <state>VT</state>
+    <location_name>Robert Miller Rec Center</location_name>
+    <zip>05408</zip>
+  </address>
+</polling_location>
+<polling_location id="7770055">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Colchester</city>
+    <line1>131 Laker Ln</line1>
+    <state>VT</state>
+    <location_name>Colchester High School</location_name>
+    <zip>05446</zip>
+  </address>
+</polling_location>
+<polling_location id="7770054">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Colchester</city>
+    <line1>830 Main St</line1>
+    <state>VT</state>
+    <location_name>Colchester Meeting House</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770071">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Essex</city>
+    <line1>60 Founders Road</line1>
+    <state>VT</state>
+    <location_name>Essex Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770072">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Essex Junction</city>
+    <line1>2 Educational Drive</line1>
+    <state>VT</state>
+    <location_name>Essex High School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770128">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Milton</city>
+    <line1>43 Bombardier Rd</line1>
+    <state>VT</state>
+    <location_name>Municipal Building &amp; Fire Station</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770129">
+  <polling_hours>9:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Milton</city>
+    <line1>43 Bombardier Rd</line1>
+    <state>VT</state>
+    <location_name>Municipal Buliding, Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770141">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Newberry</city>
+    <line1>4504 Scotch Hollow RD</line1>
+    <state>VT</state>
+    <location_name>Newbury Center Town House</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770139">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Newberry Village</city>
+    <line1>4982 Main Street South</line1>
+    <state>VT</state>
+    <location_name>Newbury Town Offices</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770140">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Wells River Village</city>
+    <line1>15 Creamery Street</line1>
+    <state>VT</state>
+    <location_name>Wells River Village Office</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770143">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Newport</city>
+    <line1>222 Main St.</line1>
+    <state>VT</state>
+    <location_name>Newport Municipal Building</location_name>
+    <zip>05855</zip>
+  </address>
+</polling_location>
+<polling_location id="7770144">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Newport Center</city>
+    <line1>102 Vance Hill Road</line1>
+    <state>VT</state>
+    <location_name>Town of Newport Clerk's Office</location_name>
+    <zip>05857</zip>
+  </address>
+</polling_location>
+<polling_location id="7770175">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Rutland</city>
+    <line1>1 Deer St</line1>
+    <state>VT</state>
+    <location_name>Godnick Adult Center</location_name>
+    <zip>05701</zip>
+  </address>
+</polling_location>
+<polling_location id="7770176">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Rutland</city>
+    <line1>60 South Main St.</line1>
+    <state>VT</state>
+    <location_name>Christ the King School</location_name>
+    <zip>05701</zip>
+  </address>
+</polling_location>
+<polling_location id="7770177">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Rutland</city>
+    <line1>33 Washington Street</line1>
+    <state>VT</state>
+    <location_name>American Legion</location_name>
+    <zip>05701</zip>
+  </address>
+</polling_location>
+<polling_location id="7770178">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Rutland</city>
+    <line1>2 Meadow Ln</line1>
+    <state>VT</state>
+    <location_name>Calvary Bible Church</location_name>
+    <zip>05701</zip>
+  </address>
+</polling_location>
+<polling_location id="7770179">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Rutland</city>
+    <line1>1612 Post Rd</line1>
+    <state>VT</state>
+    <location_name>Town School East</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770180">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Center Rutland</city>
+    <line1>181 Business Route 4</line1>
+    <state>VT</state>
+    <location_name>Town Hall - West</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770182">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>St. Albans</city>
+    <line1>100 North Main Street</line1>
+    <state>VT</state>
+    <location_name>St. Albans City Hall</location_name>
+    <zip>05478</zip>
+  </address>
+</polling_location>
+<polling_location id="7770183">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>St. Albans</city>
+    <line1>890 Fairfax Road</line1>
+    <state>VT</state>
+    <location_name>Collins Perley Sports Center</location_name>
+    <zip>05478</zip>
+  </address>
+</polling_location>
+<polling_location id="7770196">
+  <polling_hours>7:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>South Burlington</city>
+    <line1>2 Baldwin Ave</line1>
+    <state>VT</state>
+    <location_name>Orchard School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770197">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>South Burlington</city>
+    <line1>500 Dorset St</line1>
+    <state>VT</state>
+    <location_name>FHT Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770198">
+  <polling_hours>8:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>South Burlington</city>
+    <line1>500 Dorset St</line1>
+    <state>VT</state>
+    <location_name>FHT Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770199">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>South Burlington</city>
+    <line1>262 White St</line1>
+    <state>VT</state>
+    <location_name>Chamberlin School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770201">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Springfield</city>
+    <line1>13 Fairground Rd</line1>
+    <state>VT</state>
+    <location_name>Riverside Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="7770202">
+  <polling_hours>10:00 A.M. - 7:00 P.M.</polling_hours>
+  <address>
+    <city>Springfield</city>
+    <line1>13 Fairground Rd</line1>
+    <state>VT</state>
+    <location_name>Riverside Middle School</location_name>
+  </address>
+</polling_location>
+</vip_object>

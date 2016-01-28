@@ -1,0 +1,5965 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>South Dakota Secretary of State's Office</name>
+  <datetime>2014-10-14T17:16:51</datetime>
+  <organization_url>https://sdsos.gov/default.aspx</organization_url>
+</source>
+<polling_location id="999000100001">
+  <directions>Use Front Door</directions>
+  <address>
+    <city>Stickney</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>Stickney Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000100002">
+  <directions>Use Front Door</directions>
+  <address>
+    <city>Stickney</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>Stickney Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000100003">
+  <directions>Handicap Accessible In Back</directions>
+  <address>
+    <city>White Lake</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>White Lake City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000100005">
+  <directions>Use West Door</directions>
+  <address>
+    <city>Plankinton</city>
+    <line1>Fairgrounds</line1>
+    <state>SD</state>
+    <location_name>Aurora County Ag Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000100007">
+  <directions>Use Front Door</directions>
+  <address>
+    <city>Plankinton</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>Plankinton Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040012">
+  <address>
+    <city>Wolsey</city>
+    <line1>305 Commercial Ave SW</line1>
+    <state>SD</state>
+    <location_name>Wolsey Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040015">
+  <address>
+    <city>Huron</city>
+    <line1>40546 S Shore Road</line1>
+    <state>SD</state>
+    <location_name>Byron Bible Camp</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040017">
+  <address>
+    <city>Cavour</city>
+    <line1>250 Victor St</line1>
+    <state>SD</state>
+    <location_name>Cavour Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040021">
+  <address>
+    <city>Huron</city>
+    <line1>150 5th St SW</line1>
+    <state>SD</state>
+    <location_name>Huron Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040022">
+  <address>
+    <city>Huron</city>
+    <line1>150 5th St SW</line1>
+    <state>SD</state>
+    <location_name>Huron Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040023">
+  <address>
+    <city>Huron</city>
+    <line1>150 5th St SW</line1>
+    <state>SD</state>
+    <location_name>Huron Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040031">
+  <address>
+    <city>Huron</city>
+    <line1>150 5th St SW</line1>
+    <state>SD</state>
+    <location_name>Huron Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040032">
+  <address>
+    <city>Huron</city>
+    <line1>150 5th St SW</line1>
+    <state>SD</state>
+    <location_name>Huron Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040041">
+  <address>
+    <city>Huron</city>
+    <line1>150 5th St SW</line1>
+    <state>SD</state>
+    <location_name>Huron Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000040042">
+  <address>
+    <city>Huron</city>
+    <line1>150 5th St SW</line1>
+    <state>SD</state>
+    <location_name>Huron Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000110001">
+  <directions>Voting in the gym</directions>
+  <address>
+    <city>Allen</city>
+    <line1>28451 Allen Rd</line1>
+    <state>SD</state>
+    <location_name>American Horse School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000110002">
+  <directions>Martin City will vote here. Note change of place</directions>
+  <address>
+    <city>Martin</city>
+    <line1>101 First Ave</line1>
+    <state>SD</state>
+    <location_name>Martin Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000110027">
+  <directions>Use west entrance. Martin Rural 26 and Martin Rural 27 are combined to vote here.</directions>
+  <address>
+    <city>Martin</city>
+    <line1>121 N. Harold St</line1>
+    <state>SD</state>
+    <location_name>Lacreek Electric Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000110003">
+  <directions>New Fire Hall. Previously Riverside School. Tuthill/Vetal are combined to vote here.</directions>
+  <address>
+    <city>Vetal</city>
+    <line1>23688 US Hwy 18</line1>
+    <state>SD</state>
+    <location_name>Vetal Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000120001">
+  <address>
+    <city>Scotland</city>
+    <line1>410 Main Street</line1>
+    <state>SD</state>
+    <location_name>Scotland Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000120002">
+  <address>
+    <city>Avon</city>
+    <line1>E 1st Avenue</line1>
+    <state>SD</state>
+    <location_name>Avon Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000120003">
+  <address>
+    <city>Tyndall</city>
+    <line1>1609 Laurel St</line1>
+    <state>SD</state>
+    <location_name>Tyndall Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000120004">
+  <address>
+    <city>Tabor</city>
+    <line1>138 N Lidice St</line1>
+    <state>SD</state>
+    <location_name>Tabor Senior Citizens Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000120005">
+  <address>
+    <city>Springfield</city>
+    <line1>807 8th Street</line1>
+    <state>SD</state>
+    <location_name>Springfield Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000001">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Elkton</city>
+    <line1>109 Elk St. S.</line1>
+    <state>SD</state>
+    <location_name>1-5 Elkton Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000002">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Sinai</city>
+    <line1>Main Ave.</line1>
+    <state>SD</state>
+    <location_name>1-9 Sinai American Legion</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000003">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Volga</city>
+    <line1>109 Samara Ave.</line1>
+    <state>SD</state>
+    <location_name>1-10 Volga Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000004">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Aurora</city>
+    <line1>Nicollett St.</line1>
+    <state>SD</state>
+    <location_name>1-4 Aurora Little Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000005">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Bruce</city>
+    <line1>507 Jay St.</line1>
+    <state>SD</state>
+    <location_name>1-7 Bruce City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000006">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Arlington</city>
+    <line1>321 S. Main</line1>
+    <state>SD</state>
+    <location_name>1-8 Trinity Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000007">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>White</city>
+    <line1>228 W. Main St.</line1>
+    <state>SD</state>
+    <location_name>1-6 McKnight Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000008">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Brookings</city>
+    <line1>320 5th Ave.</line1>
+    <state>SD</state>
+    <location_name>1-1 Brookings Activity Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000009">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Brookings</city>
+    <line1>714 17th Ave. S.</line1>
+    <state>SD</state>
+    <location_name>1-2 Bethel Baptist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000010">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Brookings</city>
+    <line1>824 32nd Ave</line1>
+    <state>SD</state>
+    <location_name>1-3 Swiftel Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999060001000011">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Brookings</city>
+    <line1>241 Mustang Pass</line1>
+    <state>SD</state>
+    <location_name>1-11 Holy Life Tabernacle</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000012">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Aberdeen</city>
+    <line1>1400 8th Ave NW</line1>
+    <state>SD</state>
+    <location_name>Best Western Ramkota Hotel and Convention Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000013">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Frederick</city>
+    <line1>2nd Ave.</line1>
+    <state>SD</state>
+    <location_name>Frederick Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000014">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Aberdeen</city>
+    <line1>2727 6th Ave SE</line1>
+    <state>SD</state>
+    <location_name>Ramada Convention Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000015">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Columbia</city>
+    <line1>102 N Broadway</line1>
+    <state>SD</state>
+    <location_name>Columbia American Legion</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000016">
+  <directions>You may vote at any of the vote centers shown. enter in the west doors</directions>
+  <address>
+    <city>Aberdeen</city>
+    <line1>25 Market St.</line1>
+    <state>SD</state>
+    <location_name>Courthouse Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000017">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Claremont</city>
+    <line1>505 6th St.</line1>
+    <state>SD</state>
+    <location_name>Claremont Fire Station</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000018">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Warner</city>
+    <line1>Main St.</line1>
+    <state>SD</state>
+    <location_name>Warner Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000019">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Stratford</city>
+    <line1>293 E Rondell Ave.</line1>
+    <state>SD</state>
+    <location_name>Stratford Communty Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000020">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Groton</city>
+    <line1>109 N 3rd St</line1>
+    <state>SD</state>
+    <location_name>Groton Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000021">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Westport</city>
+    <line1>13 W Main St.</line1>
+    <state>SD</state>
+    <location_name>Westport Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999030001000022">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Hecla</city>
+    <line1>206 Main St.</line1>
+    <state>SD</state>
+    <location_name>Hecla Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000130001">
+  <directions>2nd Floor - Community Room</directions>
+  <address>
+    <city>Chamberlain</city>
+    <line1>300 S Courtland</line1>
+    <state>SD</state>
+    <location_name>Brule County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000130002">
+  <address>
+    <city>Kimball</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Kimball Legion Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000130003">
+  <address>
+    <city>Pukwana</city>
+    <line1>200 County Rd 122</line1>
+    <state>SD</state>
+    <location_name>Brule County Ag Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000130004">
+  <address>
+    <city>Platte</city>
+    <line1>26886 SD Hwy 50</line1>
+    <state>SD</state>
+    <location_name>Academy Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000130005">
+  <directions>Located 20 miles s of Chamberlain in town of Ola</directions>
+  <address>
+    <city>Chamberlain</city>
+    <line1>26096 349 Ave</line1>
+    <state>SD</state>
+    <location_name>Ola Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000140001">
+  <directions>Hwy 34 - 8 miles west of Jct 34/45 OR 9 miles east of Jct 34/50 at Lee's Corner</directions>
+  <address>
+    <city>Gann Valley</city>
+    <line1>35190 SD HWY 34</line1>
+    <state>SD</state>
+    <location_name>Elm Creek Election Bldg.</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000140002">
+  <directions>Crow Creek Housing District on 348 Avenue</directions>
+  <address>
+    <city>CCST Reservation</city>
+    <line1>210 A Avenue</line1>
+    <state>SD</state>
+    <location_name>Crow Creek Housing Dist Recr. Bldg.</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000140003">
+  <directions>Catholic Church Hall, Fort Thompson</directions>
+  <address>
+    <city>Fort Thompson</city>
+    <line1>817 HWY 47</line1>
+    <state>SD</state>
+    <location_name>St. Joseph Catholic Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150006">
+  <address>
+    <city>Newell</city>
+    <line1>16108 Old Hwy 79</line1>
+    <state>SD</state>
+    <location_name>Castle Rock - Moreau River Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150008">
+  <address>
+    <city>Newell</city>
+    <line1>108 3rd Street</line1>
+    <state>SD</state>
+    <location_name>Newell Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150011">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150012">
+  <address>
+    <city>Nisland</city>
+    <line1>505 2nd Street</line1>
+    <state>SD</state>
+    <location_name>American Legion Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150013">
+  <address>
+    <city>Newell</city>
+    <line1>108 3rd Street</line1>
+    <state>SD</state>
+    <location_name>Newell Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150014">
+  <address>
+    <city>Newell</city>
+    <line1>108 3rd Street</line1>
+    <state>SD</state>
+    <location_name>Newell Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150016">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150017">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150018">
+  <address>
+    <city>Nisland</city>
+    <line1>505 2nd Street</line1>
+    <state>SD</state>
+    <location_name>American Legion Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150020">
+  <address>
+    <city>Newell</city>
+    <line1>108 3rd Street</line1>
+    <state>SD</state>
+    <location_name>Newell Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150021">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150022">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150023">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150024">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150025">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150026">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150027">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000150028">
+  <address>
+    <city>Belle Fourche</city>
+    <line1>508 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Belle Fourche Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000160001">
+  <address>
+    <city>Herreid</city>
+    <line1>202 Main St N</line1>
+    <state>SD</state>
+    <location_name>Herreid Senior Citizens Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000160002">
+  <address>
+    <city>Pollock</city>
+    <line1>119 Main St</line1>
+    <state>SD</state>
+    <location_name>Pollock Visitors Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000160003">
+  <address>
+    <city>Herreid</city>
+    <line1>202 Main St N</line1>
+    <state>SD</state>
+    <location_name>Herreid Senior Citizens Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000160004">
+  <address>
+    <city>Mound City</city>
+    <line1>349 Campbell St NW</line1>
+    <state>SD</state>
+    <location_name>Mound City Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000160005">
+  <address>
+    <city>Mound City</city>
+    <line1>111 2nd St NE</line1>
+    <state>SD</state>
+    <location_name>Campbell County Courthouse/Court Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170001">
+  <address>
+    <city>Wagner</city>
+    <line1>610 E SD Hwy 46</line1>
+    <state>SD</state>
+    <location_name>Wagner Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170002">
+  <address>
+    <city>Dante</city>
+    <line1>103 Church Dr</line1>
+    <state>SD</state>
+    <location_name>Dante Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170003">
+  <address>
+    <city>Wagner</city>
+    <line1>610 E SD Hwy 46</line1>
+    <state>SD</state>
+    <location_name>Wagner Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170004">
+  <address>
+    <city>Marty</city>
+    <line1>200 S Main</line1>
+    <state>SD</state>
+    <location_name>Ihanktonwan Community College</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170005">
+  <address>
+    <city>Lake Andes</city>
+    <line1>100 School St</line1>
+    <state>SD</state>
+    <location_name>Lake Andes 4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170006">
+  <address>
+    <city>Lake Andes</city>
+    <line1>100 School St</line1>
+    <state>SD</state>
+    <location_name>Lake Andes 4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170007">
+  <address>
+    <city>Pickstown</city>
+    <line1>310 White Swan Dr</line1>
+    <state>SD</state>
+    <location_name>Pickstown Rainbow Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170008">
+  <address>
+    <city>Geddes</city>
+    <line1>401 Wisconsin Ave</line1>
+    <state>SD</state>
+    <location_name>Geddes Community Bldg</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170009">
+  <address>
+    <city>Platte</city>
+    <line1>310 S Main St</line1>
+    <state>SD</state>
+    <location_name>Platte Community Bldg</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170010">
+  <address>
+    <city>Academy</city>
+    <line1>SD Hwy 44</line1>
+    <state>SD</state>
+    <location_name>Academy Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170011">
+  <address>
+    <city>Platte</city>
+    <line1>310 S Main St</line1>
+    <state>SD</state>
+    <location_name>Platte Community Bldg</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170012">
+  <address>
+    <city>Geddes</city>
+    <line1>401 Wisconsin Ave</line1>
+    <state>SD</state>
+    <location_name>Geddes Community Bldg</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000170013">
+  <address>
+    <city>Ravinia</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>Ravinia Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180001">
+  <address>
+    <city>Bradley</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Bradley Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180002">
+  <address>
+    <city>Clark</city>
+    <line1>200 N. Commercial</line1>
+    <state>SD</state>
+    <location_name>Clark County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180003">
+  <address>
+    <city>Raymond</city>
+    <line1>201 Flower Street</line1>
+    <state>SD</state>
+    <location_name>Raymond Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180004">
+  <address>
+    <city>Garden City</city>
+    <line1>110 1st St NE</line1>
+    <state>SD</state>
+    <location_name>Prairie Ridge Lodge</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180005">
+  <address>
+    <city>Clark</city>
+    <line1>200 N. Commercial</line1>
+    <state>SD</state>
+    <location_name>Clark County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180006">
+  <address>
+    <city>Clark</city>
+    <line1>200 N. Commercial</line1>
+    <state>SD</state>
+    <location_name>Clark County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180007">
+  <address>
+    <city>Willow Lake</city>
+    <line1>610 3rd Street</line1>
+    <state>SD</state>
+    <location_name>Willow Lake Grace Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180008">
+  <address>
+    <city>Willow Lake</city>
+    <line1>213 Garfield Ave</line1>
+    <state>SD</state>
+    <location_name>Willow Lake Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180009">
+  <address>
+    <city>Vienna</city>
+    <line1>228 Main Street</line1>
+    <state>SD</state>
+    <location_name>Vienna Town Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180010">
+  <address>
+    <city>Carpenter</city>
+    <line1>524 415th Ave</line1>
+    <state>SD</state>
+    <location_name>Carpenter Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180011">
+  <address>
+    <city>Clark</city>
+    <line1>100 N. Commercial</line1>
+    <state>SD</state>
+    <location_name>Clark Senior Citizens - Ullyot Bldg</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180012">
+  <address>
+    <city>Clark</city>
+    <line1>100 N. Commercial</line1>
+    <state>SD</state>
+    <location_name>Clark Senior Citizens - Ullyot Bldg</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000180013">
+  <address>
+    <city>Clark</city>
+    <line1>100 N. Commercial</line1>
+    <state>SD</state>
+    <location_name>Clark Senior Citizens - Ullyot Bldg</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190001">
+  <address>
+    <city>Beresford</city>
+    <line1>29974 University Rd</line1>
+    <state>SD</state>
+    <location_name>SESD Experimental Farm</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190002">
+  <address>
+    <city>Wakonda</city>
+    <line1>119 Ohio St</line1>
+    <state>SD</state>
+    <location_name>Wakonda Senior Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190003">
+  <address>
+    <city>Vermillion</city>
+    <line1>515 High St</line1>
+    <state>SD</state>
+    <location_name>Vermillion 4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190011">
+  <address>
+    <city>Vermillion</city>
+    <line1>603 Princeton St</line1>
+    <state>SD</state>
+    <location_name>National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190012">
+  <address>
+    <city>Vermillion</city>
+    <line1>603 Princeton St</line1>
+    <state>SD</state>
+    <location_name>National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190021">
+  <address>
+    <city>Vermillion</city>
+    <line1>603 Princeton St</line1>
+    <state>SD</state>
+    <location_name>National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190022">
+  <address>
+    <city>Vermillion</city>
+    <line1>603 Princeton St</line1>
+    <state>SD</state>
+    <location_name>National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190031">
+  <address>
+    <city>Vermillion</city>
+    <line1>603 Princeton St</line1>
+    <state>SD</state>
+    <location_name>National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190032">
+  <address>
+    <city>Vermillion</city>
+    <line1>603 Princeton St</line1>
+    <state>SD</state>
+    <location_name>National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190041">
+  <address>
+    <city>Vermillion</city>
+    <line1>603 Princeton St</line1>
+    <state>SD</state>
+    <location_name>National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000190042">
+  <address>
+    <city>Vermillion</city>
+    <line1>603 Princeton St</line1>
+    <state>SD</state>
+    <location_name>National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050001">
+  <address>
+    <city>Florence</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Florence Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050002">
+  <address>
+    <city>Florence</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Florence Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050003">
+  <address>
+    <city>Watertown</city>
+    <line1>1100 13 St NE</line1>
+    <state>SD</state>
+    <location_name>Lincoln School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050004">
+  <address>
+    <city>Florence</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Florence Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050005">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050006">
+  <address>
+    <city>Henry</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Henry Town Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050008">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050009">
+  <address>
+    <city>Kranzburg</city>
+    <line1>Minnesota Ave</line1>
+    <state>SD</state>
+    <location_name>Holy Rosary School Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050010">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050011">
+  <address>
+    <city>South Shore</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>South Shore Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050012">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050014">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050015">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050016">
+  <address>
+    <city>Watertown</city>
+    <line1>2900 9 Ave SE</line1>
+    <state>SD</state>
+    <location_name>Days Inn of Watertown</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050017">
+  <address>
+    <city>Waverly</city>
+    <line1>319 Mary Place</line1>
+    <state>SD</state>
+    <location_name>Waverly School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050021">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050022">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050023">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050024">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050031">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050032">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050033">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050034">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050041">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050042">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050043">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050044">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050051">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050052">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050053">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050054">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050061">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050062">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050063">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050064">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000050065">
+  <directions>Use South Expo Entrances</directions>
+  <address>
+    <city>Watertown</city>
+    <line1>1910 W Kemp Ave</line1>
+    <state>SD</state>
+    <location_name>County Extension Complex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200001">
+  <address>
+    <city>Bullhead</city>
+    <line1>Bullhead Community Center</line1>
+    <state>SD</state>
+    <location_name>Bullhead Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200002">
+  <directions>Break Room</directions>
+  <address>
+    <city>McIntosh</city>
+    <line1>108 First Street East</line1>
+    <state>SD</state>
+    <location_name>Corson County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200003">
+  <address>
+    <city>McLaughlin</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>McLaughlin City Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200004">
+  <address>
+    <city>Keldron</city>
+    <line1>21152 114th St</line1>
+    <state>SD</state>
+    <location_name>Grand River Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200005">
+  <address>
+    <city>Kenel</city>
+    <line1>Kenel Community Hall</line1>
+    <state>SD</state>
+    <location_name>Kenel Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200006">
+  <directions>Broken Heart Ranch</directions>
+  <address>
+    <city>Timber Lake</city>
+    <line1>BIA Road #4</line1>
+    <state>SD</state>
+    <location_name>Gary Pederson Residence</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200007">
+  <address>
+    <city>McLaughlin</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>McLaughlin City Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200008">
+  <directions>Old Nutrition Site</directions>
+  <address>
+    <city>Little Eagle</city>
+    <line1>Little Eagle District Office</line1>
+    <state>SD</state>
+    <location_name>Little Eagle District Office</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200009">
+  <address>
+    <city>McLaughlin</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>McLaughlin City Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200010">
+  <address>
+    <city>McLaughlin</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>McLaughlin City Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200011">
+  <directions>Break Room</directions>
+  <address>
+    <city>McIntosh</city>
+    <line1>108 First Street East</line1>
+    <state>SD</state>
+    <location_name>Corson County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200012">
+  <address>
+    <city>Wakpala</city>
+    <line1>Wakpala Community Center</line1>
+    <state>SD</state>
+    <location_name>Wakpala Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200013">
+  <address>
+    <city>Morristown</city>
+    <line1>100 2nd St E</line1>
+    <state>SD</state>
+    <location_name>Morristown Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000200014">
+  <address>
+    <city>Trail City</city>
+    <line1>Hwy 20</line1>
+    <state>SD</state>
+    <location_name>Trail City Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210001">
+  <address>
+    <city>Hermosa</city>
+    <line1>102 2nd St N</line1>
+    <state>SD</state>
+    <location_name>Hermosa United Church of Christ</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210002">
+  <directions>Old School Bldg</directions>
+  <address>
+    <city>Fairburn</city>
+    <line1>710 2nd St</line1>
+    <state>SD</state>
+    <location_name>Fairburn Community &amp; Historical Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210003">
+  <directions>1 block west of Old Bank Bldg</directions>
+  <address>
+    <city>Buffalo Gap</city>
+    <line1>209 Main St</line1>
+    <state>SD</state>
+    <location_name>Buffalo Gap Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210004">
+  <address>
+    <city>Pringle</city>
+    <line1>436 Railway</line1>
+    <state>SD</state>
+    <location_name>Pringle Fire Auxillary Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210005">
+  <address>
+    <city>Custer</city>
+    <line1>447 Crook St</line1>
+    <state>SD</state>
+    <location_name>Custer County Courthouse Annex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210006">
+  <address>
+    <city>Custer</city>
+    <line1>447 Crook St</line1>
+    <state>SD</state>
+    <location_name>Custer County Courthouse Annex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210007">
+  <address>
+    <city>Custer</city>
+    <line1>447 Crook St</line1>
+    <state>SD</state>
+    <location_name>Custer County Courthouse Annex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210008">
+  <address>
+    <city>Custer</city>
+    <line1>447 Crook St</line1>
+    <state>SD</state>
+    <location_name>Custer County Courthouse Annex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210009">
+  <directions>3 mi S Hwy 385</directions>
+  <address>
+    <city>Custer</city>
+    <line1>25365 US Hwy 385</line1>
+    <state>SD</state>
+    <location_name>Custer County Highway Dept Bldg</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000210010">
+  <directions>3 mi S of US 16 on Dewey Rd; E on</directions>
+  <address>
+    <city>Rural</city>
+    <line1>10222 Valley Rd</line1>
+    <state>SD</state>
+    <location_name>Elk Mountain School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080001">
+  <address>
+    <city>Ethan</city>
+    <line1>201 West Main</line1>
+    <state>SD</state>
+    <location_name>Ethan Town Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080002">
+  <address>
+    <city>Mt. Vernon</city>
+    <line1>NULL</line1>
+    <state>SD</state>
+    <location_name>Mt. Vernon Senior Citizens Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080003">
+  <address>
+    <city>Mitchell</city>
+    <line1>3200 W Havens</line1>
+    <state>SD</state>
+    <location_name>Davison County Fairgrounds</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080004">
+  <address>
+    <city>Mitchell</city>
+    <line1>3200 W Havens</line1>
+    <state>SD</state>
+    <location_name>Davison County Fairgrounds</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080005">
+  <address>
+    <city>Mitchell</city>
+    <line1>3200 W Havens</line1>
+    <state>SD</state>
+    <location_name>Davison County Fairgrounds</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080006">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080007">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080008">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080009">
+  <address>
+    <city>Mitchell</city>
+    <line1>612 N. Main St.</line1>
+    <state>SD</state>
+    <location_name>Corn Palace</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080010">
+  <address>
+    <city>Mitchell</city>
+    <line1>612 N. Main St.</line1>
+    <state>SD</state>
+    <location_name>Corn Palace</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080011">
+  <address>
+    <city>Mitchell</city>
+    <line1>612 N. Main St.</line1>
+    <state>SD</state>
+    <location_name>Corn Palace</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080012">
+  <address>
+    <city>Mitchell</city>
+    <line1>612 N. Main St.</line1>
+    <state>SD</state>
+    <location_name>Corn Palace</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080013">
+  <address>
+    <city>Mitchell</city>
+    <line1>612 N. Main St.</line1>
+    <state>SD</state>
+    <location_name>Corn Palace</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080014">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080015">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080016">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080017">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080018">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080019">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000080020">
+  <address>
+    <city>Mitchell</city>
+    <line1>821 N. Capital</line1>
+    <state>SD</state>
+    <location_name>MCTEA Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220001">
+  <directions>Community Room</directions>
+  <address>
+    <city>Webster</city>
+    <line1>711 W. 1st St</line1>
+    <state>SD</state>
+    <location_name>Day County Courthouse Rm#101</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220002">
+  <directions>Community Room</directions>
+  <address>
+    <city>Webster</city>
+    <line1>711 W. 1st St</line1>
+    <state>SD</state>
+    <location_name>Day County Courthouse Rm#101</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220003">
+  <directions>Community Room</directions>
+  <address>
+    <city>Webster</city>
+    <line1>711 W. 1st St</line1>
+    <state>SD</state>
+    <location_name>Day County Courthouse Rm#101</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220004">
+  <directions>Community Room</directions>
+  <address>
+    <city>Webster</city>
+    <line1>711 W. 1st St</line1>
+    <state>SD</state>
+    <location_name>Day County Courthouse Rm#101</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220005">
+  <directions>Community Room</directions>
+  <address>
+    <city>Webster</city>
+    <line1>711 W. 1st St</line1>
+    <state>SD</state>
+    <location_name>Day County Courthouse Rm#101</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220006">
+  <directions>Use Side Door</directions>
+  <address>
+    <city>Waubay</city>
+    <line1>20 E. 2nd Ave</line1>
+    <state>SD</state>
+    <location_name>Waubay Legion</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220007">
+  <directions>Commissioner Room</directions>
+  <address>
+    <city>Webster</city>
+    <line1>711 W. 1st St</line1>
+    <state>SD</state>
+    <location_name>Day County Courthouse Rm#205</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220008">
+  <address>
+    <city>Bristol</city>
+    <line1>86 S Main St</line1>
+    <state>SD</state>
+    <location_name>Bristol Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220009">
+  <directions>Room by Extension Office</directions>
+  <address>
+    <city>Webster</city>
+    <line1>711 W. 1st St</line1>
+    <state>SD</state>
+    <location_name>Day County Courthouse Rm#104</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220010">
+  <address>
+    <city>Andover</city>
+    <line1>100 S Main St</line1>
+    <state>SD</state>
+    <location_name>Andover Senior Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220011">
+  <address>
+    <city>Roslyn</city>
+    <line1>600 Main St</line1>
+    <state>SD</state>
+    <location_name>Roslyn City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220012">
+  <directions>Use Side Door</directions>
+  <address>
+    <city>Pierpont</city>
+    <line1>101 W Main St</line1>
+    <state>SD</state>
+    <location_name>Pierpont Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220013">
+  <address>
+    <city>Grenville</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>St. Joseph's Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000220014">
+  <address>
+    <city>Bristol</city>
+    <line1>86 S Main St</line1>
+    <state>SD</state>
+    <location_name>Bristol Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230001">
+  <directions>new polling place location</directions>
+  <address>
+    <city>Clear Lake</city>
+    <line1>47743 172nd St</line1>
+    <state>SD</state>
+    <location_name>Dakota Ridge Lodge</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230003">
+  <address>
+    <city>Brandt</city>
+    <line1>102 Main St</line1>
+    <state>SD</state>
+    <location_name>Brandt Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230004">
+  <address>
+    <city>Clear Lake</city>
+    <line1>218 3rd Ave. S.</line1>
+    <state>SD</state>
+    <location_name>Clear Lake Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230005">
+  <address>
+    <city>Clear Lake</city>
+    <line1>218 3rd Ave. S.</line1>
+    <state>SD</state>
+    <location_name>Clear Lake Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230006">
+  <address>
+    <city>Clear Lake</city>
+    <line1>218 3rd Ave. S.</line1>
+    <state>SD</state>
+    <location_name>Clear Lake Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230007">
+  <address>
+    <city>Goodwin</city>
+    <line1>125 N Bowdoin St.</line1>
+    <state>SD</state>
+    <location_name>Goodwin Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230008">
+  <address>
+    <city>Gary</city>
+    <line1>114 1st Ave.</line1>
+    <state>SD</state>
+    <location_name>Gary Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230009">
+  <address>
+    <city>Clear Lake</city>
+    <line1>218 3rd Ave. S.</line1>
+    <state>SD</state>
+    <location_name>Clear Lake Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230010">
+  <address>
+    <city>Astoria</city>
+    <line1>341 Main Street</line1>
+    <state>SD</state>
+    <location_name>Astoria Legion Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000230011">
+  <address>
+    <city>Toronto</city>
+    <line1>460 Main Ave</line1>
+    <state>SD</state>
+    <location_name>Toronto Community Rm. (FireHall)</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240002">
+  <directions>#2</directions>
+  <address>
+    <city>Trail City</city>
+    <line1>N Hwy 20</line1>
+    <state>SD</state>
+    <location_name>Trail City Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240003">
+  <directions># 3</directions>
+  <address>
+    <city>Timber Lake</city>
+    <line1>700 Main Street</line1>
+    <state>SD</state>
+    <location_name>Timber Lake Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240004">
+  <directions># 4</directions>
+  <address>
+    <city>Timber Lake</city>
+    <line1>700 Main Street</line1>
+    <state>SD</state>
+    <location_name>Timber Lake Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240005">
+  <directions># 5</directions>
+  <address>
+    <city>Timber Lake</city>
+    <line1>710 C St</line1>
+    <state>SD</state>
+    <location_name>Dewey Co. Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240006">
+  <directions># 6</directions>
+  <address>
+    <city>Isabel</city>
+    <line1>412 N  Main</line1>
+    <state>SD</state>
+    <location_name>Isabel Senior Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240007">
+  <directions># 7</directions>
+  <address>
+    <city>Eagle Butte</city>
+    <line1>East Knott's Landing Rd</line1>
+    <state>SD</state>
+    <location_name>CRST Senior Nutrition Site</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240008">
+  <directions># 8</directions>
+  <address>
+    <city>White Horse</city>
+    <line1>West Main Avenue</line1>
+    <state>SD</state>
+    <location_name>White Horse Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240009">
+  <directions># 9</directions>
+  <address>
+    <city>Promise</city>
+    <line1>S 1806 and N of Promise townsite</line1>
+    <state>SD</state>
+    <location_name>St. Catherine Hall/Promise</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240010">
+  <directions>#10</directions>
+  <address>
+    <city>Gettysburg</city>
+    <line1>N of Smith's Bay</line1>
+    <state>SD</state>
+    <location_name>Ducheneaux Chapel</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240011">
+  <directions># 11</directions>
+  <address>
+    <city>LaPlant</city>
+    <line1>Virgin Creek Road</line1>
+    <state>SD</state>
+    <location_name>UCC Church Hall/LaPlante</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240012">
+  <directions># 13</directions>
+  <address>
+    <city>Eagle Butte</city>
+    <line1>N of Hwy 212</line1>
+    <state>SD</state>
+    <location_name>Lakota Wesleyan Chapel</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240013">
+  <directions>#12</directions>
+  <address>
+    <city>Eagle Butte</city>
+    <line1>N of Hwy 212</line1>
+    <state>SD</state>
+    <location_name>Lakota Wesleyan Chapel</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240014">
+  <directions># 14</directions>
+  <address>
+    <city>Eagle Butte</city>
+    <line1>south end of Main St east side of street</line1>
+    <state>SD</state>
+    <location_name>Landmark Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000240015">
+  <directions># 15</directions>
+  <address>
+    <city>Eagle Butte</city>
+    <line1>Willow St</line1>
+    <state>SD</state>
+    <location_name>Eagle Butte Volunteer Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000250001">
+  <address>
+    <city>Harrison</city>
+    <line1>380 Main Ave.</line1>
+    <state>SD</state>
+    <location_name>Holland Township Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000250002">
+  <address>
+    <city>Corsica</city>
+    <line1>335 East Main St.</line1>
+    <state>SD</state>
+    <location_name>Community Building- Corsica</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000250003">
+  <address>
+    <city>Delmont</city>
+    <line1>105 West Main St.</line1>
+    <state>SD</state>
+    <location_name>Community Center-Delmont</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000250004">
+  <address>
+    <city>Armour</city>
+    <line1>618 Main Street</line1>
+    <state>SD</state>
+    <location_name>City Council Chambers</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000250005">
+  <address>
+    <city>Armour</city>
+    <line1>39182 280th St.</line1>
+    <state>SD</state>
+    <location_name>4-H Center- Armour</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000260001">
+  <address>
+    <city>Mina</city>
+    <line1>103 South Sunset Dr</line1>
+    <state>SD</state>
+    <location_name>Wakeside Lower Level</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000260002">
+  <address>
+    <city>Ipswich</city>
+    <line1>515 7th St</line1>
+    <state>SD</state>
+    <location_name>4-H Building Ipswich</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000260003">
+  <address>
+    <city>Ipswich</city>
+    <line1>515 7th St</line1>
+    <state>SD</state>
+    <location_name>Ipswich 4-H Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000260004">
+  <address>
+    <city>Roscoe</city>
+    <line1>208 N Mitchell St</line1>
+    <state>SD</state>
+    <location_name>Roscoe Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000260005">
+  <address>
+    <city>Bowdle</city>
+    <line1>8001 W 5th St</line1>
+    <state>SD</state>
+    <location_name>Bowdle Multi-Purpose Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000260006">
+  <address>
+    <city>Hosmer</city>
+    <line1>315 S Chapman Ave</line1>
+    <state>SD</state>
+    <location_name>Hosmer Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000270001">
+  <address>
+    <city>Oral</city>
+    <line1>27600 W Oral Rd</line1>
+    <state>SD</state>
+    <location_name>Oral School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000270002">
+  <address>
+    <city>Hot Springs</city>
+    <line1>27974 Cascade Rd</line1>
+    <state>SD</state>
+    <location_name>Cascade Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000270003">
+  <address>
+    <city>Edgemont</city>
+    <line1>306 3rd Ave</line1>
+    <state>SD</state>
+    <location_name>St. James Parish Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000270004">
+  <address>
+    <city>Hot Springs</city>
+    <line1>801 S 6th</line1>
+    <state>SD</state>
+    <location_name>Mueller Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000270011">
+  <address>
+    <city>Hot Springs</city>
+    <line1>801 S 6th</line1>
+    <state>SD</state>
+    <location_name>Mueller Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000270010">
+  <address>
+    <city>Hot Springs</city>
+    <line1>801 S 6th</line1>
+    <state>SD</state>
+    <location_name>Mueller Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000270005">
+  <address>
+    <city>Hot Springs</city>
+    <line1>801 S 6th</line1>
+    <state>SD</state>
+    <location_name>Mueller Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000270007">
+  <address>
+    <city>Oelrichs</city>
+    <line1>108 E 6th St</line1>
+    <state>SD</state>
+    <location_name>Oelrichs Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000280001">
+  <address>
+    <city>Cresbard</city>
+    <line1>204 Main St</line1>
+    <state>SD</state>
+    <location_name>Cresbard Community Ctr</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000280002">
+  <address>
+    <city>Wecota</city>
+    <line1>Wecota Ave</line1>
+    <state>SD</state>
+    <location_name>Freedom Farmers Union Local 974</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000280003">
+  <address>
+    <city>Seneca</city>
+    <line1>Pine St</line1>
+    <state>SD</state>
+    <location_name>Seneca Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000280004">
+  <address>
+    <city>Orient</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>Orient Community Ctr.</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000280005">
+  <address>
+    <city>Rockham</city>
+    <line1>116 S Broadway</line1>
+    <state>SD</state>
+    <location_name>Rockham Community Ctr</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000280006">
+  <address>
+    <city>Faulkton</city>
+    <line1>NULL</line1>
+    <state>SD</state>
+    <location_name>Faulkton Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000280007">
+  <address>
+    <city>Faulkton</city>
+    <line1>NULL</line1>
+    <state>SD</state>
+    <location_name>Faulkton Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290011">
+  <address>
+    <city>Milbank</city>
+    <line1>1001 E 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Milbank City Office Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290012">
+  <address>
+    <city>Milbank</city>
+    <line1>1001 E 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Milbank City Office Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290021">
+  <address>
+    <city>Milbank</city>
+    <line1>1001 E 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Milbank City Office Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290022">
+  <address>
+    <city>Milbank</city>
+    <line1>1001 E 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Milbank City Office Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290031">
+  <address>
+    <city>Milbank</city>
+    <line1>1001 E 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Milbank City Office Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290032">
+  <address>
+    <city>Milbank</city>
+    <line1>1001 E 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Milbank City Office Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290033">
+  <address>
+    <city>Milbank</city>
+    <line1>1001 E 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Milbank City Office Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290041">
+  <address>
+    <city>Revillo</city>
+    <line1>308 N 2nd Ave</line1>
+    <state>SD</state>
+    <location_name>Revillo Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290042">
+  <address>
+    <city>Milbank</city>
+    <line1>14871 482nd Ave</line1>
+    <state>SD</state>
+    <location_name>Milbank Airport</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290043">
+  <address>
+    <city>Big Stone City</city>
+    <line1>400 Washington St</line1>
+    <state>SD</state>
+    <location_name>Big Stone City Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290044">
+  <address>
+    <city>Summit</city>
+    <line1>15050 455th Ave</line1>
+    <state>SD</state>
+    <location_name>New Township Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290045">
+  <address>
+    <city>LaBolt</city>
+    <line1>140 Main St</line1>
+    <state>SD</state>
+    <location_name>LaBolt Mini Mall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290046">
+  <address>
+    <city>Milbank</city>
+    <line1>1101 E 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Whetstone Valley Electric Meeting Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290047">
+  <address>
+    <city>Milbank</city>
+    <line1>404 S 2nd St</line1>
+    <state>SD</state>
+    <location_name>Otter Tail Power Co Meeting Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290049">
+  <address>
+    <city>Marvin</city>
+    <line1>204 S Church St</line1>
+    <state>SD</state>
+    <location_name>Marvin Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290052">
+  <address>
+    <city>Stockholm</city>
+    <line1>400 E Johnson Ave</line1>
+    <state>SD</state>
+    <location_name>Stockholm Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290053">
+  <address>
+    <city>Strandburg</city>
+    <line1>118 Main St.</line1>
+    <state>SD</state>
+    <location_name>Stranburg Branch Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000290054">
+  <address>
+    <city>Twin Brooks</city>
+    <line1>502 Lasell St</line1>
+    <state>SD</state>
+    <location_name>Twin Brooks Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000300001">
+  <address>
+    <city>Gregory</city>
+    <line1>222 Main St</line1>
+    <state>SD</state>
+    <location_name>Gregory Memorial Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000300002">
+  <address>
+    <city>Burke</city>
+    <line1>822 Main St</line1>
+    <state>SD</state>
+    <location_name>Burke Civic Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000300003">
+  <address>
+    <city>Bonesteel</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>Bonesteel Comunity Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000310001">
+  <address>
+    <city>Midland</city>
+    <line1>19990 Deep Creek Rd</line1>
+    <state>SD</state>
+    <location_name>Deep Creek Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000310004">
+  <address>
+    <city>Milesville</city>
+    <line1>22101 King School Rd</line1>
+    <state>SD</state>
+    <location_name>Milesville Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000310016">
+  <address>
+    <city>Philip</city>
+    <line1>140 South Howard Ave</line1>
+    <state>SD</state>
+    <location_name>Courthouse Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000310017">
+  <address>
+    <city>Philip</city>
+    <line1>115 S Center Ave</line1>
+    <state>SD</state>
+    <location_name>Bad River Senior Citizens Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000310019">
+  <address>
+    <city>Philip</city>
+    <line1>140 South Howard Ave</line1>
+    <state>SD</state>
+    <location_name>Courthouse Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000310020">
+  <address>
+    <city>Midland</city>
+    <line1>509 Main St</line1>
+    <state>SD</state>
+    <location_name>Midland Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000320002">
+  <address>
+    <city>Thomas</city>
+    <line1>18097 450 Ave</line1>
+    <state>SD</state>
+    <location_name>Oxford Township Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000320021">
+  <address>
+    <city>Castlewood</city>
+    <line1>204 E Main St</line1>
+    <state>SD</state>
+    <location_name>Castlewood Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000320022">
+  <address>
+    <city>Hazel</city>
+    <line1>19 W William</line1>
+    <state>SD</state>
+    <location_name>Hazel Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000320023">
+  <address>
+    <city>Bryant</city>
+    <line1>115 E Main St</line1>
+    <state>SD</state>
+    <location_name>Bryant City Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000320024">
+  <address>
+    <city>Lake Norden</city>
+    <line1>600 Main Ave</line1>
+    <state>SD</state>
+    <location_name>Lake Norden Firehall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000320025">
+  <address>
+    <city>Estelline</city>
+    <line1>219 Main St N</line1>
+    <state>SD</state>
+    <location_name>Estelline Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000320026">
+  <address>
+    <city>Hayti</city>
+    <line1>214 Main Ave</line1>
+    <state>SD</state>
+    <location_name>Hayti Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330001">
+  <address>
+    <city>Orient</city>
+    <line1>17989 Polo Drive</line1>
+    <state>SD</state>
+    <location_name>Polo School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330002">
+  <address>
+    <city>Zell</city>
+    <line1>37295 US Hwy 212</line1>
+    <state>SD</state>
+    <location_name>St. Mary's Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330003">
+  <address>
+    <city>Orient</city>
+    <line1>17989 Polo Drive</line1>
+    <state>SD</state>
+    <location_name>Polo School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330004">
+  <address>
+    <city>St. Lawrence</city>
+    <line1>36606 187 St</line1>
+    <state>SD</state>
+    <location_name>Holden Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330005">
+  <address>
+    <city>Ree Heights</city>
+    <line1>116 S. Dakota Avenue</line1>
+    <state>SD</state>
+    <location_name>Ree Heights American Legion</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330006">
+  <address>
+    <city>St. Lawrence</city>
+    <line1>106 N. Commercial Drive</line1>
+    <state>SD</state>
+    <location_name>St. Lawrence Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330007">
+  <address>
+    <city>Wessington</city>
+    <line1>20211 374th Ave</line1>
+    <state>SD</state>
+    <location_name>Vern's Manufacturing</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330008">
+  <address>
+    <city>Ree Heights</city>
+    <line1>116 S. Dakota Avenue</line1>
+    <state>SD</state>
+    <location_name>Ree Heights American Legion</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330009">
+  <address>
+    <city>Miller</city>
+    <line1>400 Sunshine Dr</line1>
+    <state>SD</state>
+    <location_name>Sunshine Bible Academy</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330010">
+  <address>
+    <city>Miller</city>
+    <line1>400 Sunshine Dr</line1>
+    <state>SD</state>
+    <location_name>Sunshine Bible Academy</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330011">
+  <address>
+    <city>Miller</city>
+    <line1>610 E. 4th Avenue</line1>
+    <state>SD</state>
+    <location_name>Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000330012">
+  <address>
+    <city>Miller</city>
+    <line1>415 W. 1st Avenue</line1>
+    <state>SD</state>
+    <location_name>Hand County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000340001">
+  <address>
+    <city>Emery</city>
+    <line1>130 N 4th St.</line1>
+    <state>SD</state>
+    <location_name>Emery Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000340002">
+  <address>
+    <city>Alexandria</city>
+    <line1>421 Main St.</line1>
+    <state>SD</state>
+    <location_name>Alexandria City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000340003">
+  <address>
+    <city>Fulton</city>
+    <line1>217 N Main</line1>
+    <state>SD</state>
+    <location_name>Fulton Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000340004">
+  <address>
+    <city>Fulton</city>
+    <line1>217 N Main</line1>
+    <state>SD</state>
+    <location_name>Fulton Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000340005">
+  <address>
+    <city>Alexandria</city>
+    <line1>720 5th St.</line1>
+    <state>SD</state>
+    <location_name>Hanson County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000350001">
+  <address>
+    <city>Buffalo</city>
+    <line1>204 Hodge Street</line1>
+    <state>SD</state>
+    <location_name>Harding County Memorial REC</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000350002">
+  <address>
+    <city>Camp Crook</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Camp Crook Area Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000350003">
+  <directions>voting upstairs - handicap access on east side of building</directions>
+  <address>
+    <city>Ralph</city>
+    <line1>11126 Ralph Road</line1>
+    <state>SD</state>
+    <location_name>Ralph Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000350005">
+  <address>
+    <city>Buffalo</city>
+    <line1>204 Hodge Street</line1>
+    <state>SD</state>
+    <location_name>Harding County Memorial REC</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000350006">
+  <directions>voting in the basement</directions>
+  <address>
+    <city>Buffalo</city>
+    <line1>11460 Ladner Road</line1>
+    <state>SD</state>
+    <location_name>Ladner Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000350007">
+  <address>
+    <city>Ludlow</city>
+    <line1>10796 US Hwy 85</line1>
+    <state>SD</state>
+    <location_name>Ludlow Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000350008">
+  <address>
+    <city>Buffalo</city>
+    <line1>204 Hodge Street</line1>
+    <state>SD</state>
+    <location_name>Harding County Memorial REC</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000350009">
+  <directions>handicap access on southeast side of building</directions>
+  <address>
+    <city>Reva</city>
+    <line1>14753 SD Hwy 20</line1>
+    <state>SD</state>
+    <location_name>Reva Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999360005000023">
+  <directions>You may vote at any of the vote centers shown. Vote Center 1</directions>
+  <address>
+    <city>Pierre</city>
+    <line1>714 N. Grand</line1>
+    <state>SD</state>
+    <location_name>Faith Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999360005000024">
+  <directions>You may vote at any of the vote centers shown. Vote Center 5</directions>
+  <address>
+    <city>Blunt</city>
+    <line1>208 N. Main</line1>
+    <state>SD</state>
+    <location_name>Blunt City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999360005000025">
+  <directions>You may vote at any of the vote centers shown. Vote Center 6</directions>
+  <address>
+    <city>Harrold</city>
+    <line1>206 S. Nixon</line1>
+    <state>SD</state>
+    <location_name>Harrold City Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999360005000026">
+  <directions>You may vote at any of the vote centers shown. Vote Center 7</directions>
+  <address>
+    <city>Pierre</city>
+    <line1>31815 E. SD Hwy 34</line1>
+    <state>SD</state>
+    <location_name>Hyde Residence</location_name>
+  </address>
+</polling_location>
+<polling_location id="999360005000027">
+  <directions>You may vote at any of the vote centers shown. Vote Center 2</directions>
+  <address>
+    <city>Pierre</city>
+    <line1>1120 N. Harrison</line1>
+    <state>SD</state>
+    <location_name>New Life Assembly of God Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999360005000028">
+  <directions>You may vote at any of the vote centers shown. Vote Center 3 - East Park Street Entrance</directions>
+  <address>
+    <city>Pierre</city>
+    <line1>3001 E. Sully</line1>
+    <state>SD</state>
+    <location_name>PILC Rec Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999360005000029">
+  <directions>You may vote at any of the vote centers shown. Vote Center 4</directions>
+  <address>
+    <city>Pierre</city>
+    <line1>320 E Prospect Ave</line1>
+    <state>SD</state>
+    <location_name>Lutheran Memorial Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000370001">
+  <address>
+    <city>Menno</city>
+    <line1>302 S 5th St</line1>
+    <state>SD</state>
+    <location_name>Menno Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000370002">
+  <directions>City Council Room</directions>
+  <address>
+    <city>Freeman</city>
+    <line1>185 E Third St</line1>
+    <state>SD</state>
+    <location_name>City Council Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000370003">
+  <address>
+    <city>Clayton</city>
+    <line1>27213 427th Ave</line1>
+    <state>SD</state>
+    <location_name>Clayton Township Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000370004">
+  <address>
+    <city>Dimock</city>
+    <line1>146 W 1st</line1>
+    <state>SD</state>
+    <location_name>St. Peter &amp; Paul Parrish Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000370005">
+  <address>
+    <city>Parkston</city>
+    <line1>221 W Main St</line1>
+    <state>SD</state>
+    <location_name>Parkston American Legion Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000370006">
+  <address>
+    <city>Tripp</city>
+    <line1>306 S Main Street</line1>
+    <state>SD</state>
+    <location_name>Tripp Area Emergency Service Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000370007">
+  <address>
+    <city>Olivet</city>
+    <line1>140 Euclid</line1>
+    <state>SD</state>
+    <location_name>Courthouse Conference Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999380001000030">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Highmore</city>
+    <line1>125 2nd ST SW</line1>
+    <state>SD</state>
+    <location_name>Hyde County Memorial Auditorium - Main Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000390001">
+  <address>
+    <city>Phillip</city>
+    <line1>23720 Fairview Rd</line1>
+    <state>SD</state>
+    <location_name>Cottonwood Range Field Station</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000390002">
+  <address>
+    <city>Interior</city>
+    <line1>117 6th Avenue</line1>
+    <state>SD</state>
+    <location_name>Interior Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000390003">
+  <address>
+    <city>Kadoka</city>
+    <line1>700 Main St</line1>
+    <state>SD</state>
+    <location_name>Jackson County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000390004">
+  <address>
+    <city>Kadoka</city>
+    <line1>700 Main St</line1>
+    <state>SD</state>
+    <location_name>Jackson County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000390005">
+  <address>
+    <city>Belvidere</city>
+    <line1>807 1st St</line1>
+    <state>SD</state>
+    <location_name>Belvidere Fellowship Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000390006">
+  <address>
+    <city>Long Valley</city>
+    <line1>26840 SD Hwy 73</line1>
+    <state>SD</state>
+    <location_name>Long Valley School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000390007">
+  <address>
+    <city>Wanblee</city>
+    <line1>245 Crazy Horse Dr</line1>
+    <state>SD</state>
+    <location_name>Crazy Horse School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000390008">
+  <address>
+    <city>Interior</city>
+    <line1>20545 May Rd</line1>
+    <state>SD</state>
+    <location_name>Green Valley Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000400001">
+  <address>
+    <city>Wessington Springs</city>
+    <line1>604 2nd Street NE</line1>
+    <state>SD</state>
+    <location_name>Jerauld County 4-H Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000400002">
+  <address>
+    <city>Wessington Springs</city>
+    <line1>604 2nd Street NE</line1>
+    <state>SD</state>
+    <location_name>Jerauld County 4-H Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000400003">
+  <address>
+    <city>Alpena</city>
+    <line1>307 Main Street</line1>
+    <state>SD</state>
+    <location_name>Alpena Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000400004">
+  <address>
+    <city>Lane</city>
+    <line1>220 W. 3rd St</line1>
+    <state>SD</state>
+    <location_name>Ed and Donna Gray Garage</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000400005">
+  <address>
+    <city>Wessington Springs</city>
+    <line1>22721 374th Ave</line1>
+    <state>SD</state>
+    <location_name>Larry Powell's Shop</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000410001">
+  <address>
+    <city>Murdo</city>
+    <line1>307 Kennedy Avenue</line1>
+    <state>SD</state>
+    <location_name>Murdo Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000410003">
+  <address>
+    <city>Murdo</city>
+    <line1>307 Kennedy Avenue</line1>
+    <state>SD</state>
+    <location_name>Murdo Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000410005">
+  <address>
+    <city>Draper</city>
+    <line1>193 N Main Street</line1>
+    <state>SD</state>
+    <location_name>Draper Town Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000420021">
+  <address>
+    <city>Arlington</city>
+    <line1>202 W Elm St</line1>
+    <state>SD</state>
+    <location_name>Arlington City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000420004">
+  <address>
+    <city>Badger</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Badger American Legion Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000420024">
+  <address>
+    <city>De Smet</city>
+    <line1>107 Lyle Ave NE</line1>
+    <state>SD</state>
+    <location_name>Kingsbury County 4-H Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000420001">
+  <address>
+    <city>Iroquois</city>
+    <line1>120 Ottowa St. S</line1>
+    <state>SD</state>
+    <location_name>Iroquois Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000420005">
+  <address>
+    <city>Lake Preston</city>
+    <line1>215 N Main</line1>
+    <state>SD</state>
+    <location_name>Lake Preston Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000420006">
+  <address>
+    <city>Oldham</city>
+    <line1>112 S Epton Avenue</line1>
+    <state>SD</state>
+    <location_name>Oldham School Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430001">
+  <address>
+    <city>Chester</city>
+    <line1>407 2nd St</line1>
+    <state>SD</state>
+    <location_name>Chester Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430004">
+  <address>
+    <city>Ramona</city>
+    <line1>120 W 3rd St</line1>
+    <state>SD</state>
+    <location_name>Ramona Parish Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430012">
+  <address>
+    <city>Madison</city>
+    <line1>1205 N Washington Ave</line1>
+    <state>SD</state>
+    <location_name>Dakota Prairie Playhouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430005">
+  <address>
+    <city>Madison</city>
+    <line1>1205 N Washington Ave</line1>
+    <state>SD</state>
+    <location_name>Dakota Prairie Playhouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430006">
+  <address>
+    <city>Madison</city>
+    <line1>1205 N Washington Ave</line1>
+    <state>SD</state>
+    <location_name>Dakota Prairie Playhouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430003">
+  <address>
+    <city>Nunda</city>
+    <line1>410 Main St</line1>
+    <state>SD</state>
+    <location_name>Nunda Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430008">
+  <address>
+    <city>Madison</city>
+    <line1>1205 N Washington Ave</line1>
+    <state>SD</state>
+    <location_name>Dakota Prairie Playhouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430010">
+  <address>
+    <city>Madison</city>
+    <line1>1205 N Washington Ave</line1>
+    <state>SD</state>
+    <location_name>Dakota Prairie Playhouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430011">
+  <address>
+    <city>Madison</city>
+    <line1>1205 N Washington Ave</line1>
+    <state>SD</state>
+    <location_name>Dakota Prairie Playhouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000430002">
+  <address>
+    <city>Wentworth</city>
+    <line1>425 S Main St</line1>
+    <state>SD</state>
+    <location_name>Wentworth Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090001">
+  <address>
+    <city>Spearfish</city>
+    <line1>1306 N 10th Street</line1>
+    <state>SD</state>
+    <location_name>Spearfish Senior Citizen's Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090002">
+  <address>
+    <city>Spearfish</city>
+    <line1>1306 N 10th Street</line1>
+    <state>SD</state>
+    <location_name>Spearfish Senior Citizen's Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090003">
+  <address>
+    <city>Spearfish</city>
+    <line1>1306 N 10th Street</line1>
+    <state>SD</state>
+    <location_name>Spearfish Senior Citizen's Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090004">
+  <address>
+    <city>Lead</city>
+    <line1>900 Miners Avenue</line1>
+    <state>SD</state>
+    <location_name>Days Inn</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090005">
+  <address>
+    <city>Deadwood</city>
+    <line1>90 Sherman Street</line1>
+    <state>SD</state>
+    <location_name>Lawrence County Administrative Annex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090006">
+  <address>
+    <city>Nemo</city>
+    <line1>12755 Nemo Road</line1>
+    <state>SD</state>
+    <location_name>Nemo Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090007">
+  <address>
+    <city>Deadwood</city>
+    <line1>90 Sherman Street</line1>
+    <state>SD</state>
+    <location_name>Lawrence County Administrative Annex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090008">
+  <address>
+    <city>St Onge</city>
+    <line1>234 1st Street</line1>
+    <state>SD</state>
+    <location_name>St Onge Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090009">
+  <address>
+    <city>Whitewood</city>
+    <line1>1025 Meade Street</line1>
+    <state>SD</state>
+    <location_name>Whitewood City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000090010">
+  <address>
+    <city>Spearfish</city>
+    <line1>115 S Canyon Street</line1>
+    <state>SD</state>
+    <location_name>Spearfish Park Pavilion</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440002">
+  <address>
+    <city>Hudson</city>
+    <line1>47998 292nd St.</line1>
+    <state>SD</state>
+    <location_name>Lands Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440006">
+  <address>
+    <city>Canton</city>
+    <line1>621 E. 4th St.</line1>
+    <state>SD</state>
+    <location_name>Canton Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440008">
+  <address>
+    <city>Lennox</city>
+    <line1>46587 US Hwy 18</line1>
+    <state>SD</state>
+    <location_name>Delaware Reformed Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440011">
+  <address>
+    <city>Lennox</city>
+    <line1>46788 282nd St.</line1>
+    <state>SD</state>
+    <location_name>West Prairie Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440012">
+  <address>
+    <city>Harrisburg</city>
+    <line1>1000 Maple St.</line1>
+    <state>SD</state>
+    <location_name>Shalom Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440013">
+  <address>
+    <city>Harrisburg</city>
+    <line1>1000 Maple St.</line1>
+    <state>SD</state>
+    <location_name>Shalom Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440014">
+  <address>
+    <city>Lennox</city>
+    <line1>123 S. Main St.</line1>
+    <state>SD</state>
+    <location_name>Lennox Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440015">
+  <address>
+    <city>Harrisburg</city>
+    <line1>1000 Maple St.</line1>
+    <state>SD</state>
+    <location_name>Shalom Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440016">
+  <address>
+    <city>Tea</city>
+    <line1>600 E. 1st St.</line1>
+    <state>SD</state>
+    <location_name>Tea City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440020">
+  <address>
+    <city>Canton</city>
+    <line1>621 E. 4th St.</line1>
+    <state>SD</state>
+    <location_name>Canton Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440021">
+  <address>
+    <city>Hudson</city>
+    <line1>310 4th St.</line1>
+    <state>SD</state>
+    <location_name>Hudson Town Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440023">
+  <address>
+    <city>Worthing</city>
+    <line1>121 S Main St.</line1>
+    <state>SD</state>
+    <location_name>Worthing Civic Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440024">
+  <address>
+    <city>Tea</city>
+    <line1>600 E. 1st St.</line1>
+    <state>SD</state>
+    <location_name>Tea City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440025">
+  <address>
+    <city>Lennox</city>
+    <line1>123 S. Main St.</line1>
+    <state>SD</state>
+    <location_name>Lennox Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440026">
+  <address>
+    <city>Beresford</city>
+    <line1>115 S. 3rd St.</line1>
+    <state>SD</state>
+    <location_name>Beresford Public Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440027">
+  <address>
+    <city>Harrisburg</city>
+    <line1>204 Grand Ave.</line1>
+    <state>SD</state>
+    <location_name>United Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440085">
+  <address>
+    <city>Harrisburg</city>
+    <line1>204 Grand Ave.</line1>
+    <state>SD</state>
+    <location_name>United Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440030">
+  <address>
+    <city>Canton</city>
+    <line1>621 E. 4th St.</line1>
+    <state>SD</state>
+    <location_name>Canton Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440041">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2601 W. 69th St.</line1>
+    <state>SD</state>
+    <location_name>First Evangelical Free Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440051">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>6101 S Mogen Ave</line1>
+    <state>SD</state>
+    <location_name>Crosswalk Community Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440061">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3100 W. Ralph Rogers Rd.</line1>
+    <state>SD</state>
+    <location_name>Central Baptist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440081">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3100 W. Ralph Rogers Rd.</line1>
+    <state>SD</state>
+    <location_name>Central Baptist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440084">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2601 W. 69th St.</line1>
+    <state>SD</state>
+    <location_name>First Evangelical Free Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440071">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3100 W. Ralph Rogers Rd.</line1>
+    <state>SD</state>
+    <location_name>Central Baptist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440083">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2208 W Laquinta St</line1>
+    <state>SD</state>
+    <location_name>Spirit of Joy Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440042">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>601 W. 57th St.</line1>
+    <state>SD</state>
+    <location_name>Faith Baptist Fellowship Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440052">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>601 W. 57th St.</line1>
+    <state>SD</state>
+    <location_name>Faith Baptist Fellowship Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440062">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1101 E. 57th St.</line1>
+    <state>SD</state>
+    <location_name>Linwood Wesleyan Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440072">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1101 E. 57th St.</line1>
+    <state>SD</state>
+    <location_name>Linwood Wesleyan Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000440082">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>601 W. 57th St.</line1>
+    <state>SD</state>
+    <location_name>Faith Baptist Fellowship Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000450001">
+  <address>
+    <city>IONA</city>
+    <line1>26511 266TH ST</line1>
+    <state>SD</state>
+    <location_name>#01 IONA COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000450004">
+  <address>
+    <city>OACOMA</city>
+    <line1>100 E 3RD ST</line1>
+    <state>SD</state>
+    <location_name>#04 OACOMA COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000450006">
+  <address>
+    <city>RELIANCE</city>
+    <line1>120 N MAIN AVE</line1>
+    <state>SD</state>
+    <location_name>#06 RELIANCE METHODIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000450007">
+  <address>
+    <city>LOWER BRULE</city>
+    <line1>307 CRAZY HORSE ST</line1>
+    <state>SD</state>
+    <location_name>#07 GOLDEN BUFFALO CONVENTION CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000450009">
+  <directions>COMMISSIONER ROOM</directions>
+  <address>
+    <city>KENNEBEC</city>
+    <line1>300 S MAIN ST</line1>
+    <state>SD</state>
+    <location_name>#09 LYMAN COUNTY COURTHOUSE</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000450012">
+  <directions>SOCIAL ROOM</directions>
+  <address>
+    <city>PRESHO</city>
+    <line1>100 W WILLOW AVE</line1>
+    <state>SD</state>
+    <location_name>#12 PRESHO METHODIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000450013">
+  <address>
+    <city>VIVIAN</city>
+    <line1>738 MAIN AVE</line1>
+    <state>SD</state>
+    <location_name>#13 VIVIAN FIRE HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000480001">
+  <address>
+    <city>Britton</city>
+    <line1>615 Main St</line1>
+    <state>SD</state>
+    <location_name>Fun After Fifty</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000480002">
+  <address>
+    <city>Britton</city>
+    <line1>909 S Main St</line1>
+    <state>SD</state>
+    <location_name>County Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000480003">
+  <address>
+    <city>Britton</city>
+    <line1>909 S Main St</line1>
+    <state>SD</state>
+    <location_name>County Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000480004">
+  <address>
+    <city>Langford</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>Langford City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000480005">
+  <address>
+    <city>Veblen</city>
+    <line1>102 N Main St</line1>
+    <state>SD</state>
+    <location_name>Veblen City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000480006">
+  <directions>1 block west of Main St</directions>
+  <address>
+    <city>Lake City</city>
+    <line1>106 W Roy Lake Ave</line1>
+    <state>SD</state>
+    <location_name>St. Joseph's Catholic Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000480007">
+  <address>
+    <city>Eden</city>
+    <line1>302 Broadway Center</line1>
+    <state>SD</state>
+    <location_name>Eden Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000480008">
+  <address>
+    <city>Britton</city>
+    <line1>N Main St</line1>
+    <state>SD</state>
+    <location_name>Britton-Hecla School Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000480009">
+  <address>
+    <city>Britton</city>
+    <line1>N Main St</line1>
+    <state>SD</state>
+    <location_name>Britton-Hecla School Auditorium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000460001">
+  <address>
+    <city>Montrose</city>
+    <line1>100 W Main St</line1>
+    <state>SD</state>
+    <location_name>Montrose Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000460002">
+  <address>
+    <city>Spencer</city>
+    <line1>320 Main St</line1>
+    <state>SD</state>
+    <location_name>Spencer Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000460003">
+  <address>
+    <city>Canistota</city>
+    <line1>West Main St</line1>
+    <state>SD</state>
+    <location_name>Canistota Legion Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000460004">
+  <address>
+    <city>Bridgewater</city>
+    <line1>North Main St</line1>
+    <state>SD</state>
+    <location_name>Bridgewater Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000460005">
+  <address>
+    <city>Salem</city>
+    <line1>740 N Peck St</line1>
+    <state>SD</state>
+    <location_name>Salem Nat'l Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000460006">
+  <address>
+    <city>Salem</city>
+    <line1>740 N Peck St</line1>
+    <state>SD</state>
+    <location_name>Salem Nat'l Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000470001">
+  <address>
+    <city>Leola</city>
+    <line1>706 Main Street</line1>
+    <state>SD</state>
+    <location_name>McPherson County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000470002">
+  <address>
+    <city>Leola</city>
+    <line1>706 Main Street</line1>
+    <state>SD</state>
+    <location_name>McPherson County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000470003">
+  <address>
+    <city>Long Lake</city>
+    <line1>101 Bacon Ave.</line1>
+    <state>SD</state>
+    <location_name>Long Lake Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000470004">
+  <address>
+    <city>Eureka</city>
+    <line1>518 F Ave.</line1>
+    <state>SD</state>
+    <location_name>Eureka Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000470005">
+  <address>
+    <city>Eureka</city>
+    <line1>518 F Ave.</line1>
+    <state>SD</state>
+    <location_name>Eureka Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000470006">
+  <address>
+    <city>Eureka</city>
+    <line1>518 F Ave.</line1>
+    <state>SD</state>
+    <location_name>Eureka Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490056">
+  <address>
+    <city>Sturgis</city>
+    <line1>13921 Alkali Rd.</line1>
+    <state>SD</state>
+    <location_name>Alkali Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490023">
+  <address>
+    <city>Ellsworth AFB</city>
+    <line1>600 N. Ellsworth Rd.</line1>
+    <state>SD</state>
+    <location_name>Vandenberg School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490009">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490014">
+  <address>
+    <city>Black Hawk</city>
+    <line1>6010 Peaceful Pines Rd.</line1>
+    <state>SD</state>
+    <location_name>Black Hawk Fire Department</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490019">
+  <address>
+    <city>Black Hawk</city>
+    <line1>6010 Peaceful Pines Rd.</line1>
+    <state>SD</state>
+    <location_name>Black Hawk Fire Department</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490003">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490027">
+  <address>
+    <city>Union Center</city>
+    <line1>19617 Ball Field Rd.</line1>
+    <state>SD</state>
+    <location_name>Central Meade Co. Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490012">
+  <address>
+    <city>Piedmont</city>
+    <line1>16159 Second St.</line1>
+    <state>SD</state>
+    <location_name>Piedmont Community Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490001">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490021">
+  <address>
+    <city>Ellsworth AFB</city>
+    <line1>600 N. Ellsworth Rd.</line1>
+    <state>SD</state>
+    <location_name>Vandenberg School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490022">
+  <address>
+    <city>Ellsworth AFB</city>
+    <line1>600 N. Ellsworth Rd.</line1>
+    <state>SD</state>
+    <location_name>Vandenberg School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490018">
+  <address>
+    <city>Elm Springs</city>
+    <line1>17674 Dalzell Rd.</line1>
+    <state>SD</state>
+    <location_name>Elm Springs Fire Department</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490029">
+  <address>
+    <city>Union Center</city>
+    <line1>19617 Ball Field Rd.</line1>
+    <state>SD</state>
+    <location_name>Central Meade Co. Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490031">
+  <address>
+    <city>Faith</city>
+    <line1>204 N. Main St.</line1>
+    <state>SD</state>
+    <location_name>Faith Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490008">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490020">
+  <address>
+    <city>Hereford</city>
+    <line1>15911 Cross S Rd.</line1>
+    <state>SD</state>
+    <location_name>Hereford Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490041">
+  <address>
+    <city>Marcus</city>
+    <line1>18949 Old Marcus Rd.</line1>
+    <state>SD</state>
+    <location_name>Marcus Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490051">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490005">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490011">
+  <address>
+    <city>Piedmont</city>
+    <line1>16159 Second St.</line1>
+    <state>SD</state>
+    <location_name>Piedmont Community Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490033">
+  <address>
+    <city>Opal</city>
+    <line1>18010 Opal Rd.</line1>
+    <state>SD</state>
+    <location_name>Opal School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490030">
+  <address>
+    <city>Red Owl</city>
+    <line1>18649 Red Owl Rd.</line1>
+    <state>SD</state>
+    <location_name>RNA Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490015">
+  <address>
+    <city>Black Hawk</city>
+    <line1>6010 Peaceful Pines Rd.</line1>
+    <state>SD</state>
+    <location_name>Black Hawk Fire Department</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490007">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490052">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490013">
+  <address>
+    <city>Piedmont</city>
+    <line1>16159 Second St.</line1>
+    <state>SD</state>
+    <location_name>Piedmont Community Gym</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490002">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490054">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490055">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490035">
+  <address>
+    <city>Mud Butte</city>
+    <line1>15902 Hwy 212</line1>
+    <state>SD</state>
+    <location_name>Mud Butte Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490010">
+  <address>
+    <city>Summerset</city>
+    <line1>12150 Siouxland Rd.</line1>
+    <state>SD</state>
+    <location_name>Summerset City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490006">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490040">
+  <address>
+    <city>Plainview</city>
+    <line1>US Highway 34</line1>
+    <state>SD</state>
+    <location_name>Plainview Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490017">
+  <address>
+    <city>New Underwood</city>
+    <line1>500 S. "A" Avenue</line1>
+    <state>SD</state>
+    <location_name>New Underwood Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490016">
+  <address>
+    <city>Black Hawk</city>
+    <line1>6010 Peaceful Pines Rd.</line1>
+    <state>SD</state>
+    <location_name>Black Hawk Fire Department</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490024">
+  <address>
+    <city>Ellsworth AFB</city>
+    <line1>600 N. Ellsworth Rd.</line1>
+    <state>SD</state>
+    <location_name>Vandenberg School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490004">
+  <address>
+    <city>Sturgis</city>
+    <line1>1401 Lazelle St.</line1>
+    <state>SD</state>
+    <location_name>Sturgis Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000490025">
+  <address>
+    <city>White Owl</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>White Owl Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000500002">
+  <address>
+    <city>White River</city>
+    <line1>415 North Roosevelt</line1>
+    <state>SD</state>
+    <location_name>Emergency Services Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000500003">
+  <address>
+    <city>Wood</city>
+    <line1>130 South Dakota Street</line1>
+    <state>SD</state>
+    <location_name>Wood Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000500005">
+  <address>
+    <city>White River</city>
+    <line1>415 North Roosevelt</line1>
+    <state>SD</state>
+    <location_name>Emergency Services Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000500006">
+  <address>
+    <city>Norris</city>
+    <line1>27160 SD HWY 63</line1>
+    <state>SD</state>
+    <location_name>Norris Township Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000510001">
+  <address>
+    <city>Howard</city>
+    <line1>210 Pleasant Street</line1>
+    <state>SD</state>
+    <location_name>Howard City Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000510002">
+  <address>
+    <city>Howard</city>
+    <line1>210 Pleasant Street</line1>
+    <state>SD</state>
+    <location_name>Howard City Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000510003">
+  <address>
+    <city>Howard</city>
+    <line1>210 Pleasant Street</line1>
+    <state>SD</state>
+    <location_name>Howard City Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000510004">
+  <directions>Enter on the West side</directions>
+  <address>
+    <city>Canova</city>
+    <line1>E 242nd Street</line1>
+    <state>SD</state>
+    <location_name>Canova C.A.R.E. Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000510005">
+  <address>
+    <city>Fedora</city>
+    <line1>23302 421st Avenue</line1>
+    <state>SD</state>
+    <location_name>Fedora Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000510006">
+  <address>
+    <city>Howard</city>
+    <line1>210 Pleasant Street</line1>
+    <state>SD</state>
+    <location_name>Howard City Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000510007">
+  <address>
+    <city>Howard</city>
+    <line1>210 Pleasant Street</line1>
+    <state>SD</state>
+    <location_name>Howard City Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000510008">
+  <address>
+    <city>Carthage</city>
+    <line1>107 Buell Street</line1>
+    <state>SD</state>
+    <location_name>Carthage Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010102">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2001 S Elmwood Ave</line1>
+    <state>SD</state>
+    <location_name>St Mark's Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010103">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3201 S Kiwanis Ave</line1>
+    <state>SD</state>
+    <location_name>O'Gorman High School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010104">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2300 W 46th St</line1>
+    <state>SD</state>
+    <location_name>Center for Active Generations</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010105">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2300 W 46th St</line1>
+    <state>SD</state>
+    <location_name>Center for Active Generations</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010106">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>4801 W 41st St</line1>
+    <state>SD</state>
+    <location_name>Sunnycrest United Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010108">
+  <directions>in Oscar Howe Elementary</directions>
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2801 S Valley View Rd</line1>
+    <state>SD</state>
+    <location_name>Kuehn Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010109">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>5509 W 41st St</line1>
+    <state>SD</state>
+    <location_name>Peace Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010110">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>4501 S Holbrook Ave</line1>
+    <state>SD</state>
+    <location_name>JFK School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010117">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>4501 S Holbrook Ave</line1>
+    <state>SD</state>
+    <location_name>JFK School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010201">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3601 S Minnesota Ave</line1>
+    <state>SD</state>
+    <location_name>VFW Club</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010202">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3100 E 49th St</line1>
+    <state>SD</state>
+    <location_name>Ronning Branch Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010203">
+  <directions>in Harvey Dunn Elementary</directions>
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2400 S Bahnson Ave</line1>
+    <state>SD</state>
+    <location_name>Morningside Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010204">
+  <directions>accessible entrance on south side</directions>
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1415 S Bahnson Ave</line1>
+    <state>SD</state>
+    <location_name>Church of the Holy Apostles</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010206">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3801 E 26th St</line1>
+    <state>SD</state>
+    <location_name>Westminster Presbyterian</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010207">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2600 S Sycamore Ave</line1>
+    <state>SD</state>
+    <location_name>Lord of Life Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010208">
+  <directions>take 52nd to Prince of Peace Pl, go north to Oakwood Apts entrance</directions>
+  <address>
+    <city>Sioux Falls</city>
+    <line1>4500 S Prince of Peace Pl</line1>
+    <state>SD</state>
+    <location_name>Avera Prince of Peace Retirement Community</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010209">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2101 E 57th St</line1>
+    <state>SD</state>
+    <location_name>Calvary Assembly of God</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010214">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3501 E 49th St</line1>
+    <state>SD</state>
+    <location_name>John Harris School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010305">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1201 N. West Ave.</line1>
+    <state>SD</state>
+    <location_name>Sioux Falls Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010306">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>201 N West Ave</line1>
+    <state>SD</state>
+    <location_name>Axtell Park Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010307">
+  <directions>in Garfield Elementary</directions>
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2421 W 15th St</line1>
+    <state>SD</state>
+    <location_name>Oyate Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010308">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2400 W 18th St</line1>
+    <state>SD</state>
+    <location_name>Trinity Baptist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010309">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1101 S Marion Rd</line1>
+    <state>SD</state>
+    <location_name>Girl Scouts Dakota Horizons</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010310">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1401 S Sertoma Ave</line1>
+    <state>SD</state>
+    <location_name>Memorial Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010311">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>6820 W 26th St</line1>
+    <state>SD</state>
+    <location_name>Church at the Gate</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010312">
+  <directions>in Hayward Elementary</directions>
+  <address>
+    <city>Sioux Falls</city>
+    <line1>400 N Valley View Rd</line1>
+    <state>SD</state>
+    <location_name>MariCar Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010314">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>4700 W Career Cir</line1>
+    <state>SD</state>
+    <location_name>Career Technical Education</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010315">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1600 S Marion Rd</line1>
+    <state>SD</state>
+    <location_name>St Michael's Catholic Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010316">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1401 S Sertoma Ave</line1>
+    <state>SD</state>
+    <location_name>Memorial Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010317">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>7630 W 26th St</line1>
+    <state>SD</state>
+    <location_name>Prairie West Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010401">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>200 N Dakota Ave</line1>
+    <state>SD</state>
+    <location_name>Sioux Falls Main Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010402">
+  <directions>north of Eugene Field School</directions>
+  <address>
+    <city>Sioux Falls</city>
+    <line1>405 S Mable Ave</line1>
+    <state>SD</state>
+    <location_name>Emmanuel Baptist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010403">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1721 E Austin St</line1>
+    <state>SD</state>
+    <location_name>Terry Redlin School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010404">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1700 E 6th St</line1>
+    <state>SD</state>
+    <location_name>Wesley United Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010405">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1100 E. Benson Rd.</line1>
+    <state>SD</state>
+    <location_name>Fire Station # 7</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010406">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1600 N Wayland Ave</line1>
+    <state>SD</state>
+    <location_name>Laura B Anderson School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010407">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3701 E 3rd St</line1>
+    <state>SD</state>
+    <location_name>Kenny Anderson Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010408">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3701 E 3rd St</line1>
+    <state>SD</state>
+    <location_name>Kenny Anderson Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010409">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>3300 E 18th St</line1>
+    <state>SD</state>
+    <location_name>Grace Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010410">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1000 S Bahnson Ave</line1>
+    <state>SD</state>
+    <location_name>St Lambert's Catholic Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010411">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>4800 E 6th St</line1>
+    <state>SD</state>
+    <location_name>Wild Flower Presbyterian Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010412">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1312 S Bahnson Ave</line1>
+    <state>SD</state>
+    <location_name>Hilltop United Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010501">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>327 S Dakota Ave</line1>
+    <state>SD</state>
+    <location_name>First Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010502">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>327 S Dakota Ave</line1>
+    <state>SD</state>
+    <location_name>First Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010503">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1400 S Duluth Ave</line1>
+    <state>SD</state>
+    <location_name>Zion Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010504">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1116 S 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Longfellow School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010506">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1700 S Cliff Ave</line1>
+    <state>SD</state>
+    <location_name>Hope Lutheran</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010507">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2200 S 5th Ave</line1>
+    <state>SD</state>
+    <location_name>Patrick Henry Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010508">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>201 E 38th St</line1>
+    <state>SD</state>
+    <location_name>Instructional Planning Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010509">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>909 W 33rd St</line1>
+    <state>SD</state>
+    <location_name>Our Savior's Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010510">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>30th and Lake Ave.</line1>
+    <state>SD</state>
+    <location_name>First Presbyterian Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010511">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1309 W. 51st St.</line1>
+    <state>SD</state>
+    <location_name>Volunteers of America</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010512">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>201 E 38th St</line1>
+    <state>SD</state>
+    <location_name>Instructional Planning Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010513">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>201 E 38th St</line1>
+    <state>SD</state>
+    <location_name>Instructional Planning Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010514">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>1610 S Lake Ave</line1>
+    <state>SD</state>
+    <location_name>Jefferson School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010515">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>200 N Dakota Ave</line1>
+    <state>SD</state>
+    <location_name>Sioux Falls Main Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010517">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>2425 S Western Ave</line1>
+    <state>SD</state>
+    <location_name>Asbury United Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010518">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>601 N Spring Ave</line1>
+    <state>SD</state>
+    <location_name>Hawthorne School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010011">
+  <address>
+    <city>Valley Springs</city>
+    <line1>301 Valley Dr</line1>
+    <state>SD</state>
+    <location_name>Valley Springs Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010012">
+  <address>
+    <city>Sioux Falls</city>
+    <line1>7201 E Hwy 42</line1>
+    <state>SD</state>
+    <location_name>Split Rock Fire Station</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010013">
+  <address>
+    <city>Brandon</city>
+    <line1>2100 E Aspen Blvd</line1>
+    <state>SD</state>
+    <location_name>Brandon Municipal Golf Course</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010014">
+  <address>
+    <city>Renner</city>
+    <line1>47419 258th St</line1>
+    <state>SD</state>
+    <location_name>Mapleton Township Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010015">
+  <address>
+    <city>Brandon</city>
+    <line1>308 S Main Ave</line1>
+    <state>SD</state>
+    <location_name>Brandon City Hall - Council Chambers</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010016">
+  <directions>in Hayward Elementary</directions>
+  <address>
+    <city>Sioux Falls</city>
+    <line1>400 N Valley View Rd</line1>
+    <state>SD</state>
+    <location_name>MariCar Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010017">
+  <address>
+    <city>Hartford</city>
+    <line1>125 N Main Ave</line1>
+    <state>SD</state>
+    <location_name>Hartford City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010018">
+  <address>
+    <city>Humboldt</city>
+    <line1>118 S. Main St</line1>
+    <state>SD</state>
+    <location_name>Humboldt Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010019">
+  <address>
+    <city>Baltic</city>
+    <line1>500 3rd St</line1>
+    <state>SD</state>
+    <location_name>Baltic Elementary Gymnasium</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010020">
+  <address>
+    <city>Garretson</city>
+    <line1>528 Main Ave</line1>
+    <state>SD</state>
+    <location_name>Garretson Senior Citizens Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010021">
+  <address>
+    <city>Dell Rapids</city>
+    <line1>701 Orleans Ave</line1>
+    <state>SD</state>
+    <location_name>Lutheran Church of Dell Rapids</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010022">
+  <address>
+    <city>Dell Rapids</city>
+    <line1>24883 481st Ave</line1>
+    <state>SD</state>
+    <location_name>Heesch Farm</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010023">
+  <address>
+    <city>Colton</city>
+    <line1>102 E 3rd St</line1>
+    <state>SD</state>
+    <location_name>Taopi Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010025">
+  <address>
+    <city>Brandon</city>
+    <line1>401 Sioux Blvd</line1>
+    <state>SD</state>
+    <location_name>Brandon Fire Station</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010026">
+  <address>
+    <city>Crooks</city>
+    <line1>701 S West Ave</line1>
+    <state>SD</state>
+    <location_name>Crooks Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010027">
+  <address>
+    <city>Hartford</city>
+    <line1>26452 463rd Ave</line1>
+    <state>SD</state>
+    <location_name>Wall Lake Township Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000010031">
+  <address>
+    <city>Dell Rapids</city>
+    <line1>701 Orleans Ave</line1>
+    <state>SD</state>
+    <location_name>Lutheran Church of Dell Rapids</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000520001">
+  <address>
+    <city>Flandreau</city>
+    <line1>500 W 1st Ave</line1>
+    <state>SD</state>
+    <location_name>Flandreau Extension Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000520002">
+  <directions>Handicap Access is at South Door</directions>
+  <address>
+    <city>Flandreau</city>
+    <line1>101 E Pipestone Ave</line1>
+    <state>SD</state>
+    <location_name>Moody County Courthouse-1st Floor</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000520003">
+  <address>
+    <city>Trent</city>
+    <line1>101 E 3rd St</line1>
+    <state>SD</state>
+    <location_name>Trent Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000520034">
+  <address>
+    <city>Flandreau</city>
+    <line1>500 W 1st Ave</line1>
+    <state>SD</state>
+    <location_name>Flandreau Extension Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000520004">
+  <address>
+    <city>Egan</city>
+    <line1>200 W 3rd St</line1>
+    <state>SD</state>
+    <location_name>Egan Senior Citizens Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000520005">
+  <address>
+    <city>Colman</city>
+    <line1>126 N Main</line1>
+    <state>SD</state>
+    <location_name>Colman Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020011">
+  <directions>1/1</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>4905 S Hwy 16</line1>
+    <state>SD</state>
+    <location_name>First Assembly Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020012">
+  <directions>1/2</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>835 E Fairmont Blvd</line1>
+    <state>SD</state>
+    <location_name>St Paul's Ev Lutheran School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020013">
+  <directions>1/3</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>3301 Grandview Dr</line1>
+    <state>SD</state>
+    <location_name>Grandview School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020014">
+  <directions>1/4</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>3250 E Highway 44</line1>
+    <state>SD</state>
+    <location_name>West River Elec Assn</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020021">
+  <directions>2-1/2-5</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>610 Quincy St</line1>
+    <state>SD</state>
+    <location_name>Rapid City Public Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020022">
+  <directions>2-2/4-2</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>1202 N Maple Ave</line1>
+    <state>SD</state>
+    <location_name>Bethel Assembly (Atrium)</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020023">
+  <directions>2/3</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>601 E Centre St</line1>
+    <state>SD</state>
+    <location_name>Walter Taylor 4H Bldg (Fairgrounds)</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020024">
+  <directions>2/4</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>2 Indiana St</line1>
+    <state>SD</state>
+    <location_name>South Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020025">
+  <directions>2-1/2-5</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>610 Quincy St</line1>
+    <state>SD</state>
+    <location_name>Rapid City Public Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020031">
+  <directions>3/1</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>1805 W Fulton</line1>
+    <state>SD</state>
+    <location_name>Jackson Heights Highrise</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020032">
+  <directions>3/2</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>5311 Sheridan Lake Rd</line1>
+    <state>SD</state>
+    <location_name>Calvary Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020033">
+  <directions>3/3</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>4501 Park Dr</line1>
+    <state>SD</state>
+    <location_name>Southwest Middle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020034">
+  <directions>3/4</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>3125 W Flormann</line1>
+    <state>SD</state>
+    <location_name>Meadowbrook School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020041">
+  <directions>4-1/5-1</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>902 Anamosa St</line1>
+    <state>SD</state>
+    <location_name>Horace Mann School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020042">
+  <directions>2-2/4-2</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>1202 N Maple Ave</line1>
+    <state>SD</state>
+    <location_name>Bethel Assembly (Atrium)</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020043">
+  <directions>4/3</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>2430 Gnugnuska Dr</line1>
+    <state>SD</state>
+    <location_name>Lakota Homes-Oyate Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020044">
+  <directions>4/4</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>10 E Van Buren St</line1>
+    <state>SD</state>
+    <location_name>General Beadle School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020045">
+  <directions>4/5</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>602 Auburn Dr</line1>
+    <state>SD</state>
+    <location_name>Atonement Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020051">
+  <directions>4-1/5-1</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>902 Anamosa St</line1>
+    <state>SD</state>
+    <location_name>Horace Mann School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020052">
+  <directions>5-2/CL</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>2900 Canyon Lake Dr</line1>
+    <state>SD</state>
+    <location_name>Canyon Lake Senior Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020053">
+  <directions>5-3/5-5</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>4901 W Chicago</line1>
+    <state>SD</state>
+    <location_name>Pinedale School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020054">
+  <directions>5/4</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>1018 11th St</line1>
+    <state>SD</state>
+    <location_name>West Park Apartments</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020055">
+  <directions>5-3/5-5</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>4901 W Chicago</line1>
+    <state>SD</state>
+    <location_name>Pinedale School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020060">
+  <directions>BE/EL/NH/AW</directions>
+  <address>
+    <city>Box Elder</city>
+    <line1>420 Villa Dr</line1>
+    <state>SD</state>
+    <location_name>Box Elder Event Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020061">
+  <directions>BE/EL/NH/AW</directions>
+  <address>
+    <city>Box Elder</city>
+    <line1>420 Villa Dr</line1>
+    <state>SD</state>
+    <location_name>Box Elder Event Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020062">
+  <directions>CA</directions>
+  <address>
+    <city>Caputa</city>
+    <line1>23501 Main St</line1>
+    <state>SD</state>
+    <location_name>Caputa Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020063">
+  <directions>5-2/CL</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>2900 Canyon Lake Dr</line1>
+    <state>SD</state>
+    <location_name>Canyon Lake Senior Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020064">
+  <directions>CR</directions>
+  <address>
+    <city>Creighton</city>
+    <line1>21939 Creighton Rd</line1>
+    <state>SD</state>
+    <location_name>Creighton Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020065">
+  <directions>DT</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>8770 Nemo Rd</line1>
+    <state>SD</state>
+    <location_name>Doty Fire District</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020066">
+  <directions>BE/EL/NH/AW</directions>
+  <address>
+    <city>Box Elder</city>
+    <line1>420 Villa Dr</line1>
+    <state>SD</state>
+    <location_name>Box Elder Event Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020067">
+  <directions>HC</directions>
+  <address>
+    <city>Hill City</city>
+    <line1>227 Walnut Ave</line1>
+    <state>SD</state>
+    <location_name>Hill City Senior Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020068">
+  <directions>HR</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>23757 Arena Dr</line1>
+    <state>SD</state>
+    <location_name>Rapid City Christian School at Hart Ranch</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020069">
+  <directions>JS</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>12200 W Highway 44</line1>
+    <state>SD</state>
+    <location_name>Rimrock Church at Johnson Siding</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020070">
+  <directions>KY</directions>
+  <address>
+    <city>Keystone</city>
+    <line1>1101 Madill St</line1>
+    <state>SD</state>
+    <location_name>Keystone Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020071">
+  <directions>BE/EL/NH/AW</directions>
+  <address>
+    <city>Box Elder</city>
+    <line1>420 Villa Dr</line1>
+    <state>SD</state>
+    <location_name>Box Elder Event Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020072">
+  <directions>NU</directions>
+  <address>
+    <city>New Underwood</city>
+    <line1>500 S A Ave</line1>
+    <state>SD</state>
+    <location_name>New Underwood Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020073">
+  <directions>QU</directions>
+  <address>
+    <city>Quinn</city>
+    <line1>37 Main St</line1>
+    <state>SD</state>
+    <location_name>Quinn Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020274">
+  <directions>RH</directions>
+  <address>
+    <city>Rochford</city>
+    <line1>11701 Rochford Rd</line1>
+    <state>SD</state>
+    <location_name>Rochford Fire District</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020275">
+  <directions>RK</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>13720 S Highway 16</line1>
+    <state>SD</state>
+    <location_name>Rockerville Fire District</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020276">
+  <directions>RV</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>2601 Covington St</line1>
+    <state>SD</state>
+    <location_name>Rapid Valley School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020277">
+  <directions>SC</directions>
+  <address>
+    <city>Scenic</city>
+    <line1>28 E 2nd Ave</line1>
+    <state>SD</state>
+    <location_name>Scenic Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020278">
+  <directions>VF</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>5500 E Highway 44</line1>
+    <state>SD</state>
+    <location_name>Rapid Valley Fire District</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020279">
+  <directions>VS</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>4611 Teak Dr</line1>
+    <state>SD</state>
+    <location_name>Rapid Valley Sanitary District</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020280">
+  <directions>VV</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>4840 Homestead St</line1>
+    <state>SD</state>
+    <location_name>Valley View School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020281">
+  <directions>WL</directions>
+  <address>
+    <city>Wall</city>
+    <line1>501 Main St</line1>
+    <state>SD</state>
+    <location_name>Wall Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020282">
+  <directions>WP</directions>
+  <address>
+    <city>Rapid City</city>
+    <line1>7980 Clarkson Rd</line1>
+    <state>SD</state>
+    <location_name>Whispering Pines Fire District</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000020283">
+  <directions>WS</directions>
+  <address>
+    <city>Wasta</city>
+    <line1>38 A Street</line1>
+    <state>SD</state>
+    <location_name>Wasta Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530001">
+  <address>
+    <city>Lemmon</city>
+    <line1>203 Main Ave</line1>
+    <state>SD</state>
+    <location_name>Beeler Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530002">
+  <address>
+    <city>Lodgepole</city>
+    <line1>11006 SD Hwy 75</line1>
+    <state>SD</state>
+    <location_name>Lodgepole Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530003">
+  <address>
+    <city>Lemmon</city>
+    <line1>203 Main Ave</line1>
+    <state>SD</state>
+    <location_name>Beeler Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530004">
+  <address>
+    <city>Lemmon</city>
+    <line1>203 Main Ave</line1>
+    <state>SD</state>
+    <location_name>Beeler Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530005">
+  <address>
+    <city>Lemmon</city>
+    <line1>203 Main Ave</line1>
+    <state>SD</state>
+    <location_name>Beeler Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530006">
+  <address>
+    <city>Meadow</city>
+    <line1>13506 SD Hwy 73</line1>
+    <state>SD</state>
+    <location_name>Indian Creek Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530007">
+  <address>
+    <city>Prairie City</city>
+    <line1>303 1st St E</line1>
+    <state>SD</state>
+    <location_name>Beckman Memorial Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530008">
+  <directions>Use West Entrance</directions>
+  <address>
+    <city>Faith</city>
+    <line1>204 N Main St</line1>
+    <state>SD</state>
+    <location_name>Faith Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530009">
+  <address>
+    <city>Reva</city>
+    <line1>15263 Zeona Rd</line1>
+    <state>SD</state>
+    <location_name>Zeona Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000530012">
+  <address>
+    <city>Bison</city>
+    <line1>400 West Carr Street</line1>
+    <state>SD</state>
+    <location_name>Bentley Memorial Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999540023000031">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Hoven</city>
+    <line1>102 Main St</line1>
+    <state>SD</state>
+    <location_name>Hoven American Legion</location_name>
+  </address>
+</polling_location>
+<polling_location id="999540023000032">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Gettysburg</city>
+    <line1>112 S Exene</line1>
+    <state>SD</state>
+    <location_name>Gettysburg Legion Annex</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550001">
+  <address>
+    <city>Claire City</city>
+    <line1>255 Feeney Ave</line1>
+    <state>SD</state>
+    <location_name>Claire City Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550002">
+  <address>
+    <city>Corona</city>
+    <line1>104 Main St</line1>
+    <state>SD</state>
+    <location_name>Corona Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550003">
+  <address>
+    <city>New Effington</city>
+    <line1>303 Main St</line1>
+    <state>SD</state>
+    <location_name>New Effington Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550004">
+  <address>
+    <city>Ortley</city>
+    <line1>106 N Main St</line1>
+    <state>SD</state>
+    <location_name>Ortley Senior Citizens Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550005">
+  <address>
+    <city>Peever</city>
+    <line1>113 3rd St</line1>
+    <state>SD</state>
+    <location_name>Peever Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550006">
+  <address>
+    <city>Rosholt</city>
+    <line1>19 East Main St</line1>
+    <state>SD</state>
+    <location_name>Rosholt Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550007">
+  <address>
+    <city>Rosholt</city>
+    <line1>19 East Main St</line1>
+    <state>SD</state>
+    <location_name>Rosholt Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550008">
+  <address>
+    <city>Summit</city>
+    <line1>Main St</line1>
+    <state>SD</state>
+    <location_name>Summit Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550009">
+  <address>
+    <city>Wilmot</city>
+    <line1>516 Main St</line1>
+    <state>SD</state>
+    <location_name>Wilmot Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550010">
+  <address>
+    <city>Sisseton</city>
+    <line1>11905 BIA Hwy 700</line1>
+    <state>SD</state>
+    <location_name>Roberts County 4-H Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550011">
+  <address>
+    <city>Sisseton</city>
+    <line1>525 E Chestnut St</line1>
+    <state>SD</state>
+    <location_name>St. Peters Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550012">
+  <address>
+    <city>Sisseton</city>
+    <line1>525 E Chestnut St</line1>
+    <state>SD</state>
+    <location_name>St. Peters Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550013">
+  <address>
+    <city>Sisseton</city>
+    <line1>525 E Chestnut St</line1>
+    <state>SD</state>
+    <location_name>St. Peters Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000550014">
+  <address>
+    <city>Sisseton</city>
+    <line1>525 E Chestnut St</line1>
+    <state>SD</state>
+    <location_name>St. Peters Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000560001">
+  <directions>Old Artesian School</directions>
+  <address>
+    <city>Artesian</city>
+    <line1>209 S 2nd St</line1>
+    <state>SD</state>
+    <location_name>Artesian Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000560002">
+  <directions>Main Street</directions>
+  <address>
+    <city>Letcher</city>
+    <line1>104 E Main St</line1>
+    <state>SD</state>
+    <location_name>Letcher Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000560004">
+  <directions>Main Street</directions>
+  <address>
+    <city>Woonsocket</city>
+    <line1>102 S Dumont</line1>
+    <state>SD</state>
+    <location_name>Woonsocket Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000560005">
+  <directions>Main Street</directions>
+  <address>
+    <city>Woonsocket</city>
+    <line1>102 S Dumont</line1>
+    <state>SD</state>
+    <location_name>Woonsocket Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000570001">
+  <address>
+    <city>Doland</city>
+    <line1>215 Humphrey Dr N</line1>
+    <state>SD</state>
+    <location_name>Doland Senior Citizen Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000570003">
+  <address>
+    <city>Tulare</city>
+    <line1>112 Main St</line1>
+    <state>SD</state>
+    <location_name>Tulare Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000570004">
+  <address>
+    <city>Redfield</city>
+    <line1>309 W 3rd St</line1>
+    <state>SD</state>
+    <location_name>Redfield National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000570005">
+  <address>
+    <city>Frankfort</city>
+    <line1>602 Jefferson Ave</line1>
+    <state>SD</state>
+    <location_name>Frankfort Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000570006">
+  <address>
+    <city>Ashton</city>
+    <line1>102 E Main St</line1>
+    <state>SD</state>
+    <location_name>Ashton Community Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000570007">
+  <address>
+    <city>Mellette</city>
+    <line1>232 4th Ave</line1>
+    <state>SD</state>
+    <location_name>Northwestern United Methodist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000570008">
+  <address>
+    <city>Conde</city>
+    <line1>125 Broadway St SW</line1>
+    <state>SD</state>
+    <location_name>Conde Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000570009">
+  <address>
+    <city>Redfield</city>
+    <line1>309 W 3rd St</line1>
+    <state>SD</state>
+    <location_name>Redfield National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000570010">
+  <address>
+    <city>Redfield</city>
+    <line1>309 W 3rd St</line1>
+    <state>SD</state>
+    <location_name>Redfield National Guard Armory</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000580001">
+  <address>
+    <city>Ft Pierre</city>
+    <line1>19 E Main Ave</line1>
+    <state>SD</state>
+    <location_name>Community Youth Involved Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000580002">
+  <address>
+    <city>Ft Pierre</city>
+    <line1>28082 SD HWY 1806</line1>
+    <state>SD</state>
+    <location_name>McQuistion Farmstead</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000580003">
+  <address>
+    <city>Hayes</city>
+    <line1>25426 US Hwy 14/34</line1>
+    <state>SD</state>
+    <location_name>Hayes Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999590001000033">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Pierre</city>
+    <line1>28342 188th St</line1>
+    <state>SD</state>
+    <location_name>Bill Floyd Shop</location_name>
+  </address>
+</polling_location>
+<polling_location id="999590001000034">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Onida</city>
+    <line1>117 S Main Street</line1>
+    <state>SD</state>
+    <location_name>Phoenix Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999590001000035">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Agar</city>
+    <line1>120 Ash St</line1>
+    <state>SD</state>
+    <location_name>Agar Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000670004">
+  <directions>in the gymnasium</directions>
+  <address>
+    <city>Spring Creek</city>
+    <line1>233 Yellow Cloud Rd</line1>
+    <state>SD</state>
+    <location_name>Spring Creek School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000670002">
+  <directions>in the gymnasium</directions>
+  <address>
+    <city>Valentine</city>
+    <line1>28406 301st St.</line1>
+    <state>NE</state>
+    <location_name>Littleburg School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000670001">
+  <directions>in the gymnasium</directions>
+  <address>
+    <city>Crookston</city>
+    <line1>26886 269th Ave</line1>
+    <state>NE</state>
+    <location_name>Lakeview School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000670003">
+  <address>
+    <city>Mission</city>
+    <line1>151 North Jefferson</line1>
+    <state>SD</state>
+    <location_name>St. Thomas Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000670005">
+  <directions>in the gymnasium</directions>
+  <address>
+    <city>O'Kreek</city>
+    <line1>231 School St.</line1>
+    <state>SD</state>
+    <location_name>O'Kreek School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000670007">
+  <directions>in the gymnasium</directions>
+  <address>
+    <city>Rosebud</city>
+    <line1>2314 E. 1st St.</line1>
+    <state>SD</state>
+    <location_name>Clark Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000670008">
+  <address>
+    <city>Mission</city>
+    <line1>151 North Jefferson</line1>
+    <state>SD</state>
+    <location_name>St. Thomas Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600001">
+  <address>
+    <city>Winner</city>
+    <line1>29201 307th Ave</line1>
+    <state>SD</state>
+    <location_name>Clearfield Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600002">
+  <address>
+    <city>Colome</city>
+    <line1>312 Main St.</line1>
+    <state>SD</state>
+    <location_name>Skatetown</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600003">
+  <address>
+    <city>Hamill</city>
+    <line1>32402 B St</line1>
+    <state>SD</state>
+    <location_name>Hamill Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600004">
+  <address>
+    <city>Ideal</city>
+    <line1>31204 266th St</line1>
+    <state>SD</state>
+    <location_name>First Presbyterian Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600005">
+  <address>
+    <city>Colome</city>
+    <line1>312 Main St.</line1>
+    <state>SD</state>
+    <location_name>Skatetown</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600006">
+  <address>
+    <city>Winner</city>
+    <line1>815 West 12th St.</line1>
+    <state>SD</state>
+    <location_name>4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600007">
+  <address>
+    <city>Winner</city>
+    <line1>815 West 12th St.</line1>
+    <state>SD</state>
+    <location_name>4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600009">
+  <address>
+    <city>Winner</city>
+    <line1>815 West 12th St.</line1>
+    <state>SD</state>
+    <location_name>4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600010">
+  <address>
+    <city>Winner</city>
+    <line1>815 West 12th St.</line1>
+    <state>SD</state>
+    <location_name>4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600012">
+  <address>
+    <city>Winner</city>
+    <line1>815 West 12th St.</line1>
+    <state>SD</state>
+    <location_name>4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600011">
+  <address>
+    <city>Winner</city>
+    <line1>815 West 12th St.</line1>
+    <state>SD</state>
+    <location_name>4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600013">
+  <address>
+    <city>Winner</city>
+    <line1>815 West 12th St.</line1>
+    <state>SD</state>
+    <location_name>4-H Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000600008">
+  <address>
+    <city>Witten</city>
+    <line1>117 East 1st St</line1>
+    <state>SD</state>
+    <location_name>Witten Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000610001">
+  <address>
+    <city>Marion</city>
+    <line1>212 N Broadway</line1>
+    <state>SD</state>
+    <location_name>Marion Legion Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000610002">
+  <address>
+    <city>Parker</city>
+    <line1>400 S Main</line1>
+    <state>SD</state>
+    <location_name>Turner County Courthouse Community Room</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000610003">
+  <address>
+    <city>Chancellor</city>
+    <line1>240 S 2 Ave</line1>
+    <state>SD</state>
+    <location_name>Chancellor City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000610004">
+  <address>
+    <city>Viborg</city>
+    <line1>44707 289th St</line1>
+    <state>SD</state>
+    <location_name>Spring Valley Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000610005">
+  <address>
+    <city>Hurley</city>
+    <line1>507 Center Ave</line1>
+    <state>SD</state>
+    <location_name>Hurley Senior Citizen Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000610006">
+  <address>
+    <city>Viborg</city>
+    <line1>110 N Main</line1>
+    <state>SD</state>
+    <location_name>Viborg City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000610007">
+  <address>
+    <city>Irene</city>
+    <line1>120 S Clark</line1>
+    <state>SD</state>
+    <location_name>Irene Town Community Building</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000610008">
+  <address>
+    <city>Centerville</city>
+    <line1>411 Wisconsin</line1>
+    <state>SD</state>
+    <location_name>Good Shepherd Pascale Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620001">
+  <address>
+    <city>Alcester</city>
+    <line1>106 W. 2nd St.</line1>
+    <state>SD</state>
+    <location_name>Alcester City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620002">
+  <address>
+    <city>Alcester</city>
+    <line1>106 W. 2nd St.</line1>
+    <state>SD</state>
+    <location_name>Alcester City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620003">
+  <address>
+    <city>Elk Point</city>
+    <line1>209 East Main</line1>
+    <state>SD</state>
+    <location_name>Union County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620004">
+  <address>
+    <city>Alcester</city>
+    <line1>30705 480th Ave.</line1>
+    <state>SD</state>
+    <location_name>Big Springs Baptist Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620005">
+  <address>
+    <city>Beresford</city>
+    <line1>115 S. 3rd St.</line1>
+    <state>SD</state>
+    <location_name>Beresford Public Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620006">
+  <address>
+    <city>Beresford</city>
+    <line1>115 S. 3rd St.</line1>
+    <state>SD</state>
+    <location_name>Beresford Public Library</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620007">
+  <address>
+    <city>Jefferson</city>
+    <line1>400 Main</line1>
+    <state>SD</state>
+    <location_name>St. Peter's Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620008">
+  <address>
+    <city>Elk Point</city>
+    <line1>209 East Main</line1>
+    <state>SD</state>
+    <location_name>Union County Courthouse</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620009">
+  <address>
+    <city>Jefferson</city>
+    <line1>400 Main</line1>
+    <state>SD</state>
+    <location_name>St. Peter's Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620010">
+  <address>
+    <city>North Sioux City</city>
+    <line1>200 Sodrac Dr.</line1>
+    <state>SD</state>
+    <location_name>North Sioux City Community Center-Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620011">
+  <address>
+    <city>North Sioux City</city>
+    <line1>200 Sodrac Dr.</line1>
+    <state>SD</state>
+    <location_name>North Sioux City Community Center-Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620012">
+  <address>
+    <city>Dakota Dunes</city>
+    <line1>995 Sioux Point Road</line1>
+    <state>SD</state>
+    <location_name>Blessed Teresa Catholic Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000620013">
+  <address>
+    <city>Dakota Dunes</city>
+    <line1>149 Bison Trail</line1>
+    <state>SD</state>
+    <location_name>Holy Cross Lutheran Church</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630001">
+  <address>
+    <city>Akaska</city>
+    <line1>109 Main Street</line1>
+    <state>SD</state>
+    <location_name>Akaska Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630002">
+  <address>
+    <city>Java</city>
+    <line1>4116 Main Street</line1>
+    <state>SD</state>
+    <location_name>Java Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630003">
+  <address>
+    <city>Selby</city>
+    <line1>3419 Main Street</line1>
+    <state>SD</state>
+    <location_name>Selby Senior Citizens Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630004">
+  <address>
+    <city>Mobridge</city>
+    <line1>212 Main Street</line1>
+    <state>SD</state>
+    <location_name>Scherr Howe Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630005">
+  <address>
+    <city>Mobridge</city>
+    <line1>212 Main Street</line1>
+    <state>SD</state>
+    <location_name>Scherr Howe Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630006">
+  <address>
+    <city>Mobridge</city>
+    <line1>212 Main Street</line1>
+    <state>SD</state>
+    <location_name>Scherr Howe Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630007">
+  <address>
+    <city>Mobridge</city>
+    <line1>212 Main Street</line1>
+    <state>SD</state>
+    <location_name>Scherr Howe Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630011">
+  <address>
+    <city>Hoven</city>
+    <line1>14727 319th Avenue</line1>
+    <state>SD</state>
+    <location_name>Hoven Airport</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630010">
+  <address>
+    <city>Glenham</city>
+    <line1>121 Main Street</line1>
+    <state>SD</state>
+    <location_name>Glenham Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000630008">
+  <address>
+    <city>Mobridge</city>
+    <line1>212 Main Street</line1>
+    <state>SD</state>
+    <location_name>Scherr Howe Arena</location_name>
+  </address>
+</polling_location>
+<polling_location id="999070001000036">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Yankton</city>
+    <line1>2809 Broadway Avenue</line1>
+    <state>SD</state>
+    <location_name>JoDean's Steakhouse and Lounge</location_name>
+  </address>
+</polling_location>
+<polling_location id="999070001000037">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Yankton</city>
+    <line1>416 Walnut Street</line1>
+    <state>SD</state>
+    <location_name>Yankton City Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999070001000038">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Gayville</city>
+    <line1>502 Washington St.</line1>
+    <state>SD</state>
+    <location_name>Gayville Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999070001000039">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Lesterville</city>
+    <line1>212 Main Ave</line1>
+    <state>SD</state>
+    <location_name>Lesterville Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999070001000040">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Yankton</city>
+    <line1>800 Archery Lane</line1>
+    <state>SD</state>
+    <location_name>National Field Archery Assoc.</location_name>
+  </address>
+</polling_location>
+<polling_location id="999070001000041">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Yankton</city>
+    <line1>43349 SD Hwy 52</line1>
+    <state>SD</state>
+    <location_name>Lewis &amp; Clark Rec Area</location_name>
+  </address>
+</polling_location>
+<polling_location id="999070001000042">
+  <directions>You may vote at any of the vote centers shown.</directions>
+  <address>
+    <city>Irene</city>
+    <line1>44398 SD Hwy 46</line1>
+    <state>SD</state>
+    <location_name>Mayfield Store</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000640001">
+  <address>
+    <city>Bridger</city>
+    <line1>Bridger Community</line1>
+    <state>SD</state>
+    <location_name>Bridger Community Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000640002">
+  <address>
+    <city>Cherry  Creek</city>
+    <line1>Cherry Creek Community</line1>
+    <state>SD</state>
+    <location_name>Cherry Creek Nutrition Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000640003">
+  <address>
+    <city>Eagle Butte</city>
+    <line1>South Main</line1>
+    <state>SD</state>
+    <location_name>Eagle Butte Upper Elementary School</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000640004">
+  <address>
+    <city>Glad Valley</city>
+    <line1>Hwy. 20</line1>
+    <state>SD</state>
+    <location_name>Glad Valley Fire Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000640005">
+  <address>
+    <city>Dupree</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Harry's Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000640006">
+  <address>
+    <city>Dupree</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Harry's Hall</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000640007">
+  <address>
+    <city>Red Scaffold</city>
+    <line1>Red Scaffold Community</line1>
+    <state>SD</state>
+    <location_name>Red Scaffold Nutrition Center</location_name>
+  </address>
+</polling_location>
+<polling_location id="999000640008">
+  <address>
+    <city>Dupree</city>
+    <line1>Main Street</line1>
+    <state>SD</state>
+    <location_name>Harry's Hall</location_name>
+  </address>
+</polling_location>
+</vip_object>

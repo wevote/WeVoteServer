@@ -1,0 +1,1809 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Lt. Governor's Office</name>
+  <vip_id>49</vip_id>
+  <datetime>2015-07-07T10:28:59</datetime>
+  <description>Lt. Governor's Office of the State of Utah</description>
+  <organization_url>http://elections.utah.gov</organization_url>
+  <feed_contact_id>3087</feed_contact_id>
+</source>
+<polling_location id="150133591407">
+  <address>
+    <city>Amalga</city>
+    <line1>6590 N 2400 W</line1>
+    <state>UT</state>
+    <location_name>Amalga Town Hall</location_name>
+    <zip>84335</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591409">
+  <address>
+    <city>Clarkston</city>
+    <line1>50 S Main</line1>
+    <state>UT</state>
+    <location_name>Clarkston Town Hall</location_name>
+    <zip>84305</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591411">
+  <address>
+    <city>Richmond</city>
+    <line1>6 West Main St</line1>
+    <state>UT</state>
+    <location_name>Richmond Community Bldg</location_name>
+    <zip>84333</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591413">
+  <address>
+    <city>Hyde Park</city>
+    <line1>113 E Center</line1>
+    <state>UT</state>
+    <location_name>Hyde Park City Office</location_name>
+    <zip>84318</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591414">
+  <address>
+    <city>Hyrum</city>
+    <line1>83 W Main</line1>
+    <state>UT</state>
+    <location_name>Hyrum City Office</location_name>
+    <zip>84319</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591416">
+  <address>
+    <city>Lewiston</city>
+    <line1>29 S Main St.</line1>
+    <state>UT</state>
+    <location_name>Lewiston City Office</location_name>
+    <zip>84320</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591430">
+  <address>
+    <city>Mendon</city>
+    <line1>95 North Main St</line1>
+    <state>UT</state>
+    <location_name>Historic Mendon Station</location_name>
+    <zip>84325</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591437">
+  <address>
+    <city>Paradise</city>
+    <line1>9035 S 100 W</line1>
+    <state>UT</state>
+    <location_name>Paradise Town Hall</location_name>
+    <zip>84328</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591440">
+  <address>
+    <city>River Heights</city>
+    <line1>520 S 500 E</line1>
+    <state>UT</state>
+    <location_name>River Heights City Office</location_name>
+    <zip>84321</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591486">
+  <address>
+    <city>Centerville</city>
+    <line1>1155 North Main Street</line1>
+    <state>UT</state>
+    <location_name>Stewart Elementary</location_name>
+    <zip>84014</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591504">
+  <address>
+    <line2>P. O. Box 160</line2>
+    <city>Farmington</city>
+    <line1>120 S. Main Street</line1>
+    <state>UT</state>
+    <location_name>Farmington City Community Center</location_name>
+    <zip>84025</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591516">
+  <address>
+    <city>Kaysville</city>
+    <line1>181 North Flint Street</line1>
+    <state>UT</state>
+    <location_name>Kaysville Bible Church</location_name>
+    <zip>84037</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591522">
+  <address>
+    <city>Layton</city>
+    <line1>2430 North 400 West</line1>
+    <state>UT</state>
+    <location_name>Northridge High</location_name>
+    <zip>84040</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591535">
+  <address>
+    <city>Layton</city>
+    <line1>440 Lancer Lane</line1>
+    <state>UT</state>
+    <location_name>Layton High</location_name>
+    <zip>84041</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591538">
+  <address>
+    <city>Layton</city>
+    <line1>1354 West Weaver Lane</line1>
+    <state>UT</state>
+    <location_name>Heritage Elementary</location_name>
+    <zip>84041</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591545">
+  <address>
+    <city>Sunset</city>
+    <line1>200 West 1300 North</line1>
+    <state>UT</state>
+    <location_name>Sunset City Hall</location_name>
+    <zip>84015</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591551">
+  <address>
+    <city>West Bountiful</city>
+    <line1>550 North 800 West</line1>
+    <state>UT</state>
+    <location_name>West Bountiful City Hall</location_name>
+    <zip>84087</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591554">
+  <address>
+    <city>West Point</city>
+    <line1>3200 West 300 North</line1>
+    <state>UT</state>
+    <location_name>West Point City Hall</location_name>
+    <zip>84015</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591575">
+  <address>
+    <city>Huntington</city>
+    <line1>20 South Main St</line1>
+    <state>UT</state>
+    <location_name>Huntington City Hall</location_name>
+    <zip>84528</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591585">
+  <address>
+    <city>Moab</city>
+    <line1>125 East Center</line1>
+    <state>UT</state>
+    <location_name>Grand County Courthouse (Court Lobby)</location_name>
+    <zip>84532</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591587">
+  <address>
+    <city>Moab</city>
+    <line1>182 N. 500 W.</line1>
+    <state>UT</state>
+    <location_name>Grand Center 3</location_name>
+    <zip>84532</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591588">
+  <address>
+    <city>Moab</city>
+    <line1>420 Mi Vida Drive</line1>
+    <state>UT</state>
+    <location_name>First Baptist Church</location_name>
+    <zip>84532</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591596">
+  <address>
+    <city>Cedar City</city>
+    <line1>499 W 400 South</line1>
+    <state>UT</state>
+    <location_name>South Elementary</location_name>
+    <zip>84720</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591598">
+  <address>
+    <city>Cedar City</city>
+    <line1>703 W. 600 South</line1>
+    <state>UT</state>
+    <location_name>Cedar High School</location_name>
+    <zip>84720</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591601">
+  <address>
+    <city>Cedar City</city>
+    <line1>2215 W Royal Hunte Dr.</line1>
+    <state>UT</state>
+    <location_name>Cedar Middle School</location_name>
+    <zip>84720</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591603">
+  <address>
+    <city>Cedar City</city>
+    <line1>166 W 1925 North</line1>
+    <state>UT</state>
+    <location_name>Canyon View High School</location_name>
+    <zip>84721</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591605">
+  <address>
+    <city>Cedar City</city>
+    <line1>250 E. Center St.</line1>
+    <state>UT</state>
+    <location_name>East Elementary</location_name>
+    <zip>84720</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591613">
+  <address>
+    <city>Parowan</city>
+    <line1>128 W 100 N</line1>
+    <state>UT</state>
+    <location_name>Parowan Elementary</location_name>
+    <zip>86761</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591638">
+  <address>
+    <city>Fillmore</city>
+    <line1>75 WEST CENTER</line1>
+    <state>UT</state>
+    <location_name>Fillmore City Building</location_name>
+    <zip>84631</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591644">
+  <address>
+    <city>Leamington</city>
+    <line1>20 W Center</line1>
+    <state>UT</state>
+    <location_name>Leamington Fire House</location_name>
+    <zip>84638</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591646">
+  <address>
+    <city>Meadow</city>
+    <line1>100 N 160 E</line1>
+    <state>UT</state>
+    <location_name>Meadow Firehouse</location_name>
+    <zip>84644</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591648">
+  <address>
+    <city>Scipio</city>
+    <line1>160 N Main</line1>
+    <state>UT</state>
+    <location_name>Scipio Town Hall - Firehouse</location_name>
+    <zip>84656</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591662">
+  <address>
+    <city>Laketown</city>
+    <line1>200 E. Center Street</line1>
+    <state>UT</state>
+    <location_name>Laketown</location_name>
+    <zip>84038</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591663">
+  <address>
+    <city>Garden City</city>
+    <line1>69 North Paradise Pkwy Bldg. A</line1>
+    <state>UT</state>
+    <location_name>Garden City</location_name>
+    <zip>84028</zip>
+  </address>
+</polling_location>
+<polling_location id="150142257962">
+  <address>
+    <city>St George</city>
+    <line1>245 N 200 W</line1>
+    <state>UT</state>
+    <location_name>Community Center (Rear Bldg.)</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591897">
+  <address>
+    <line2>117 S. Main</line2>
+    <city>Monticello</city>
+    <line1>San Juan County Clerk's Office</line1>
+    <state>UT</state>
+    <location_name>By Mail Precinct</location_name>
+    <zip>84535</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591928">
+  <address>
+    <city>Coalville</city>
+    <line1>40 N Main</line1>
+    <state>UT</state>
+    <location_name>Coalville LDS Church</location_name>
+    <zip>84017</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591929">
+  <address>
+    <city>Park City</city>
+    <line1>445 Marsac Ave</line1>
+    <state>UT</state>
+    <location_name>Park City Municipal Building</location_name>
+    <zip>84060</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591930">
+  <address>
+    <city>Henefer</city>
+    <line1>310 South Henefer Rd</line1>
+    <state>UT</state>
+    <location_name>Henefer Fire Station</location_name>
+    <zip>84033</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591934">
+  <address>
+    <city>Park City</city>
+    <line1>3010 Saddleback Road</line1>
+    <state>UT</state>
+    <location_name>Jeremy Ranch LDS Church</location_name>
+    <zip>84098</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591936">
+  <address>
+    <city>Oakley</city>
+    <line1>960 West Center</line1>
+    <state>UT</state>
+    <location_name>Oakley Town Hall</location_name>
+    <zip>84055</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591939">
+  <address>
+    <city>Park City</city>
+    <line1>2465 W. Kilby Road</line1>
+    <state>UT</state>
+    <location_name>Ecker Hill Middle School</location_name>
+    <zip>84098</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591942">
+  <address>
+    <city>Park City</city>
+    <line1>4595 North Silver Springs Dr.</line1>
+    <state>UT</state>
+    <location_name>St Luke's Episcopal Church</location_name>
+    <zip>84098</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591945">
+  <address>
+    <city>Wanship</city>
+    <line1>2000 South Hoytsville Road</line1>
+    <state>UT</state>
+    <location_name>Wanship Fire Station</location_name>
+    <zip>84017</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591978">
+  <address>
+    <state>UT</state>
+    <location_name>Stockton - By Mail Precinct</location_name>
+  </address>
+</polling_location>
+<polling_location id="150133592058">
+  <address>
+    <city>Payson</city>
+    <line1>1025 S Hwy 91</line1>
+    <state>UT</state>
+    <location_name>Payson Jr High School</location_name>
+    <zip>84651</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592059">
+  <address>
+    <city>Payson</city>
+    <line1>851 W 450 S</line1>
+    <state>UT</state>
+    <location_name>Mount Nebo Jr High</location_name>
+    <zip>84651</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592067">
+  <address>
+    <city>Pleasant Grove</city>
+    <line1>547 S Locust Ave</line1>
+    <state>UT</state>
+    <location_name>Pleasant Grove Community Center</location_name>
+    <zip>84062</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592068">
+  <address>
+    <city>Pleasant Grove</city>
+    <line1>810 N 100 E</line1>
+    <state>UT</state>
+    <location_name>Pleasant Grove Jr High</location_name>
+    <zip>84062</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592070">
+  <address>
+    <city>Provo</city>
+    <line1>629 S 1000 E</line1>
+    <state>UT</state>
+    <location_name>Provost Elementary</location_name>
+    <zip>84606</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592072">
+  <address>
+    <city>Provo</city>
+    <line1>1740 S Nevada Ave</line1>
+    <state>UT</state>
+    <location_name>Spring Creek Elementary</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592074">
+  <address>
+    <city>Provo</city>
+    <line1>665 E Center St</line1>
+    <state>UT</state>
+    <location_name>Provo Peaks Elementary (Farrer)</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592075">
+  <address>
+    <city>Provo</city>
+    <line1>550 N University Ave</line1>
+    <state>UT</state>
+    <location_name>Provo City Library - RM 201</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592081">
+  <address>
+    <city>Provo</city>
+    <line1>2585 W 200 S</line1>
+    <state>UT</state>
+    <location_name>Amelia Earhart Elementary</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592083">
+  <address>
+    <city>Provo</city>
+    <line1>305 E 2320 N</line1>
+    <state>UT</state>
+    <location_name>Centennial Middle School</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592085">
+  <address>
+    <city>Provo</city>
+    <line1>566 E 3650 N</line1>
+    <state>UT</state>
+    <location_name>Edgemont Elementary</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592090">
+  <address>
+    <city>Provo</city>
+    <line1>3570 N 650 E</line1>
+    <state>UT</state>
+    <location_name>Timpview High School</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592100">
+  <address>
+    <city>Payson</city>
+    <line1>1750 S 500 W</line1>
+    <state>UT</state>
+    <location_name>Spring Lake Elementary</location_name>
+    <zip>84651</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592108">
+  <address>
+    <city>Santaquin</city>
+    <line1>25 S 400 W</line1>
+    <state>UT</state>
+    <location_name>Santaquin Elementary</location_name>
+    <zip>84655</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592128">
+  <address>
+    <city>LaVerkin</city>
+    <line1>111 S Main St</line1>
+    <state>UT</state>
+    <location_name>LaVerkin City Council Chambers</location_name>
+    <zip>84745</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592012">
+  <address>
+    <city>Highland</city>
+    <line1>6250 W 11800 N</line1>
+    <state>UT</state>
+    <location_name>Ridgeline Elementary</location_name>
+    <zip>84003</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592016">
+  <address>
+    <city>Eagle Mountain</city>
+    <line1>3985 E Smith Ranch Rd</line1>
+    <state>UT</state>
+    <location_name>Pony Express Elementary</location_name>
+    <zip>84005</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592017">
+  <address>
+    <city>Elk Ridge</city>
+    <line1>80 E Park Dr</line1>
+    <state>UT</state>
+    <location_name>Elk Ridge City Hall</location_name>
+    <zip>84651</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592019">
+  <address>
+    <city>Highland</city>
+    <line1>10326 N 6800 W</line1>
+    <state>UT</state>
+    <location_name>Freedom Elementary</location_name>
+    <zip>84003</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592021">
+  <address>
+    <city>Highland</city>
+    <line1>5525 W 10400 N</line1>
+    <state>UT</state>
+    <location_name>Mountain Ridge Jr High</location_name>
+    <zip>84003</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592029">
+  <address>
+    <city>Provo</city>
+    <line1>100 E Center, Rm 3100</line1>
+    <state>UT</state>
+    <location_name>Non-Voting Precincts</location_name>
+    <zip>84660</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592034">
+  <address>
+    <city>Provo</city>
+    <line1>636 N Independence Ave</line1>
+    <state>UT</state>
+    <location_name>Independence High School</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591444">
+  <address>
+    <city>Wellsville</city>
+    <line1>49 West 200 South</line1>
+    <state>UT</state>
+    <location_name>Wellsville 4th &amp; 8th Ward Church</location_name>
+    <zip>84339</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592198">
+  <address>
+    <city>Ogden</city>
+    <line1>2501 Wall Ave</line1>
+    <state>UT</state>
+    <location_name>Union Station - North Entrance</location_name>
+    <zip>84401</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592250">
+  <address>
+    <city>West Haven</city>
+    <line1>4150 S 3900 W</line1>
+    <state>UT</state>
+    <location_name>West Haven City Hall</location_name>
+    <zip>84401</zip>
+  </address>
+</polling_location>
+<polling_location id="150133824706">
+  <address>
+    <city>Provo</city>
+    <line1>1080 N 900 E</line1>
+    <state>UT</state>
+    <location_name>Wasatch Elementary</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592131">
+  <address>
+    <city>Santa Clara</city>
+    <line1>2603 Santa Clara Dr</line1>
+    <state>UT</state>
+    <location_name>Santa Clara City Office</location_name>
+    <zip>84765</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592136">
+  <address>
+    <city>St George</city>
+    <line1>245 N 200 W</line1>
+    <state>UT</state>
+    <location_name>Senior Citizen's Center</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592137">
+  <address>
+    <city>St George</city>
+    <line1>326 S 600 E</line1>
+    <state>UT</state>
+    <location_name>1st Southern Baptist Church</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592139">
+  <address>
+    <city>St George</city>
+    <line1>1099 Lava Flow Dr</line1>
+    <state>UT</state>
+    <location_name>Santa Clara Branch Library</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592146">
+  <address>
+    <city>St George</city>
+    <line1>936 E Desert Hills Dr</line1>
+    <state>UT</state>
+    <location_name>Desert Hills Middle School</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592147">
+  <address>
+    <city>St George</city>
+    <line1>919 E Brigham Rd</line1>
+    <state>UT</state>
+    <location_name>Bloomington Hills Elementary School</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150143414473">
+  <address>
+    <city>Midvale</city>
+    <line1>7505 S Holden St (700 W)</line1>
+    <state>UT</state>
+    <location_name>Midvale City Hall</location_name>
+    <zip>84047</zip>
+  </address>
+</polling_location>
+<polling_location id="150143414619">
+  <address>
+    <city>South Jordan</city>
+    <line1>10673 S Redwood Rd (1700 W)</line1>
+    <state>UT</state>
+    <location_name>South Jordan Library</location_name>
+    <zip>84095</zip>
+  </address>
+</polling_location>
+<polling_location id="150143414649">
+  <address>
+    <city>Salt Lake City</city>
+    <line1>855 W California Ave(1300 S)</line1>
+    <state>UT</state>
+    <location_name>Sorenson Multicultural Ctr</location_name>
+    <zip>84104</zip>
+  </address>
+</polling_location>
+<polling_location id="150143414402">
+  <address>
+    <city>Holladay</city>
+    <line1>4580 S 2300 E</line1>
+    <state>UT</state>
+    <location_name>Holladay City Hall</location_name>
+    <zip>84117</zip>
+  </address>
+</polling_location>
+<polling_location id="150143414334">
+  <address>
+    <city>Salt Lake City</city>
+    <line1>2150 S Foothill Dr (2755 E)</line1>
+    <state>UT</state>
+    <location_name>First Congregational Church</location_name>
+    <zip>84109</zip>
+  </address>
+</polling_location>
+<polling_location id="150143485733">
+  <address>
+    <city>Provo</city>
+    <line1>51 S University Ave</line1>
+    <state>UT</state>
+    <location_name>UC Historic Courthouse (Rotunda)</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150143414761">
+  <address>
+    <city>West Jordan</city>
+    <line1>1825 W 8030 S</line1>
+    <state>UT</state>
+    <location_name>West Jordan Library</location_name>
+    <zip>84088</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592157">
+  <address>
+    <city>Washington</city>
+    <line1>2500 S Harvest Ln</line1>
+    <state>UT</state>
+    <location_name>Riverside Elementary School</location_name>
+    <zip>84780</zip>
+  </address>
+</polling_location>
+<polling_location id="150144230887">
+  <address>
+    <city>Syracuse</city>
+    <line1>1912 West 1900 South</line1>
+    <state>UT</state>
+    <location_name>Syracuse Community Center</location_name>
+    <zip>84075</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591485">
+  <address>
+    <city>Centerville</city>
+    <line1>350 North 100 East</line1>
+    <state>UT</state>
+    <location_name>Centerville Elementary</location_name>
+    <zip>84014</zip>
+  </address>
+</polling_location>
+<polling_location id="150143414755">
+  <address>
+    <city>West Valley City</city>
+    <line1>1355 W 3100 S</line1>
+    <state>UT</state>
+    <location_name>Utah Cultural Celebration Ctr</location_name>
+    <zip>84119</zip>
+  </address>
+</polling_location>
+<polling_location id="150184079251">
+  <address>
+    <city>Herriman</city>
+    <line1>5380 W Herriman Main St (12720 S)</line1>
+    <state>UT</state>
+    <location_name>Herriman Library</location_name>
+    <zip>84096</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591610">
+  <address>
+    <line1>WILL BE ABSENTEE BALLOTS</line1>
+    <state>UT</state>
+    <location_name>All Mail</location_name>
+  </address>
+</polling_location>
+<polling_location id="150133592141">
+  <address>
+    <city>St George</city>
+    <line1>2040 W 2000 N</line1>
+    <state>UT</state>
+    <location_name>Coral Cliffs Elementary School</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592118">
+  <address>
+    <city>St George</city>
+    <line1>1411 W Diamond Valley Dr</line1>
+    <state>UT</state>
+    <location_name>Diamond Valley Elementary School</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150173636422">
+  <address>
+    <city>Layton</city>
+    <line1>2501 East Gentile</line1>
+    <state>UT</state>
+    <location_name>Valley View Golf Course</location_name>
+    <zip>84040</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592144">
+  <address>
+    <city>St George</city>
+    <line1>425 Man O War Rd</line1>
+    <state>UT</state>
+    <location_name>Bloomington Elementary School</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592145">
+  <address>
+    <city>St George</city>
+    <line1>3521 Manzanita</line1>
+    <state>UT</state>
+    <location_name>Bloomington Fire Station #4</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592143">
+  <address>
+    <city>St George</city>
+    <line1>1835 Convention Center Dr</line1>
+    <state>UT</state>
+    <location_name>Dixie Convention Center</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592140">
+  <address>
+    <city>St George</city>
+    <line1>1795 W 1230 N</line1>
+    <state>UT</state>
+    <location_name>Dixie Sun Elementary School</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592119">
+  <address>
+    <city>Enterprise</city>
+    <line1>375 S 200 E</line1>
+    <state>UT</state>
+    <location_name>Enterprise City Office</location_name>
+    <zip>84725</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592121">
+  <address>
+    <city>Hurricane</city>
+    <line1>63 S 100 W</line1>
+    <state>UT</state>
+    <location_name>Hurricane City Community Center</location_name>
+    <zip>84737</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592130">
+  <address>
+    <city>New Harmony</city>
+    <line1>34 S 2900 E</line1>
+    <state>UT</state>
+    <location_name>New Harmony Library</location_name>
+    <zip>84757</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592127">
+  <address>
+    <city>Ivins</city>
+    <line1>263 E 200 S</line1>
+    <state>UT</state>
+    <location_name>Red Mountain Elementary School</location_name>
+    <zip>84738</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591643">
+  <address>
+    <city>Kanosh</city>
+    <line1>55 N Main</line1>
+    <state>UT</state>
+    <location_name>Kanosh Town Hall</location_name>
+    <zip>84637</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591645">
+  <address>
+    <city>Lynndyl</city>
+    <line1>96 E Center St.</line1>
+    <state>UT</state>
+    <location_name>Lynndyl Town Hall</location_name>
+    <zip>84640</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591647">
+  <address>
+    <city>Oak City</city>
+    <line1>30 W Center</line1>
+    <state>UT</state>
+    <location_name>Oak City Town Hall</location_name>
+    <zip>84649</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591660">
+  <address>
+    <city>Woodruff</city>
+    <line1>195 S Main</line1>
+    <state>UT</state>
+    <location_name>Woodruff</location_name>
+    <zip>84086</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591661">
+  <address>
+    <city>Randolph</city>
+    <line1>20 N. Main Street</line1>
+    <state>UT</state>
+    <location_name>Randolph South</location_name>
+    <zip>84064</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591410">
+  <address>
+    <city>Cornish</city>
+    <line1>14300 N 4800 W</line1>
+    <state>UT</state>
+    <location_name>Cornish Town Hall</location_name>
+    <zip>84308</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591432">
+  <address>
+    <city>Newton</city>
+    <line1>51 S Center</line1>
+    <state>UT</state>
+    <location_name>Newton Town Hall</location_name>
+    <zip>84327</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591443">
+  <address>
+    <city>Trenton</city>
+    <line1>17 E Main Street</line1>
+    <state>UT</state>
+    <location_name>Trenton Town Hall</location_name>
+    <zip>84338</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591450">
+  <address>
+    <line1>451 Denver Ave</line1>
+    <state>UT</state>
+    <location_name>Senior Citizens Center - East Carbon</location_name>
+  </address>
+</polling_location>
+<polling_location id="150133592211">
+  <address>
+    <city>Ogden</city>
+    <line1>4450 Harrison Blvd</line1>
+    <state>UT</state>
+    <location_name>Dee Events Center - SW Parking Lot Level Entrance</location_name>
+    <zip>84408</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592218">
+  <address>
+    <city>Riverdale</city>
+    <line1>4600 S Weber River Dr</line1>
+    <state>UT</state>
+    <location_name>Riverdale Civic Center</location_name>
+    <zip>84405</zip>
+  </address>
+</polling_location>
+<polling_location id="150133824694">
+  <address>
+    <city>Pleasant Grove</city>
+    <line1>941 E Orchard Dr</line1>
+    <state>UT</state>
+    <location_name>Valley View Elementary</location_name>
+    <zip>84062</zip>
+  </address>
+</polling_location>
+<polling_location id="150142793443">
+  <address>
+    <city>Saratoga Springs</city>
+    <line1>2105 N Providence Dr</line1>
+    <state>UT</state>
+    <location_name>Harvest Elementary</location_name>
+    <zip>84045</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592015">
+  <address>
+    <city>Eagle Mountain</city>
+    <line1>1650 E Stagecoach Run</line1>
+    <state>UT</state>
+    <location_name>Eagle Mountain Town Hall</location_name>
+    <zip>84005</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592020">
+  <address>
+    <city>Highland</city>
+    <line1>10189 N 4800 W</line1>
+    <state>UT</state>
+    <location_name>Lone Peak High</location_name>
+    <zip>84003</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592028">
+  <address>
+    <city>Lehi</city>
+    <line1>176 S 500 W</line1>
+    <state>UT</state>
+    <location_name>Meadow Elementary</location_name>
+    <zip>84043</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592055">
+  <address>
+    <city>Vineyard</city>
+    <line1>620 E Holdaway Rd</line1>
+    <state>UT</state>
+    <location_name>Vineyard Elementary - LD59</location_name>
+    <zip>84058</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592060">
+  <address>
+    <city>Payson</city>
+    <line1>456 N 300 E</line1>
+    <state>UT</state>
+    <location_name>Barnett Elementary</location_name>
+    <zip>84651</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592062">
+  <address>
+    <city>Payson</city>
+    <line1>439 W Utah Ave</line1>
+    <state>UT</state>
+    <location_name>Payson City Center</location_name>
+    <zip>84651</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592064">
+  <address>
+    <city>Pleasant Grove</city>
+    <line1>1726 N 600 W</line1>
+    <state>UT</state>
+    <location_name>Manila Elementary</location_name>
+    <zip>84062</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592066">
+  <address>
+    <city>Pleasant Grove</city>
+    <line1>600 E Center St</line1>
+    <state>UT</state>
+    <location_name>Sportsman Lions Center</location_name>
+    <zip>84062</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592069">
+  <address>
+    <city>Pleasant Grove</city>
+    <line1>200 E 1100 N</line1>
+    <state>UT</state>
+    <location_name>Grovecrest Elementary</location_name>
+    <zip>84062</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592158">
+  <address>
+    <city>Washington</city>
+    <line1>3435 E Canyon Crest Ave</line1>
+    <state>UT</state>
+    <location_name>Coral Canyon Elementary</location_name>
+    <zip>84780</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592073">
+  <address>
+    <city>Provo</city>
+    <line1>151 S University Ave</line1>
+    <state>UT</state>
+    <location_name>Utah County Health &amp; Justice Bldg</location_name>
+    <zip>84606</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592076">
+  <address>
+    <city>Provo</city>
+    <line1>320 W 500 N</line1>
+    <state>UT</state>
+    <location_name>Provo City Rec Center</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592082">
+  <address>
+    <city>Provo</city>
+    <line1>750 W 200 N</line1>
+    <state>UT</state>
+    <location_name>Dixon Middle School</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592084">
+  <address>
+    <city>Provo</city>
+    <line1>1825 N University Pkwy</line1>
+    <state>UT</state>
+    <location_name>Larry H. Miller Dodge</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592086">
+  <address>
+    <city>Provo</city>
+    <line1>1720 W 1460 N</line1>
+    <state>UT</state>
+    <location_name>Westridge Elementary</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592088">
+  <address>
+    <city>Provo</city>
+    <line1>770 E University Pkwy</line1>
+    <state>UT</state>
+    <location_name>BYU Conference Center</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592091">
+  <address>
+    <city>Provo</city>
+    <line1>4664 N Canyon Rd</line1>
+    <state>UT</state>
+    <location_name>Canyon Crest Elementary</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592110">
+  <address>
+    <city>Saratoga Springs</city>
+    <line1>1415 S Parkside Dr</line1>
+    <state>UT</state>
+    <location_name>Saratoga Shores Elementary</location_name>
+    <zip>84045</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592182">
+  <address>
+    <city>Ogden</city>
+    <line1>200 N Washington Blvd</line1>
+    <state>UT</state>
+    <location_name>Ogden-Weber Applied Tech College-Health Tech Bldg</location_name>
+    <zip>84404</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591523">
+  <address>
+    <city>Layton</city>
+    <line1>2025 East 3100 North</line1>
+    <state>UT</state>
+    <location_name>Mountain View Elementary</location_name>
+    <zip>84040</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591546">
+  <address>
+    <city>South Weber</city>
+    <line1>1181 East Lester Street</line1>
+    <state>UT</state>
+    <location_name>South Weber Family Activity Center</location_name>
+    <zip>84405</zip>
+  </address>
+</polling_location>
+<polling_location id="150158930938">
+  <address>
+    <city>Park City</city>
+    <line1>1388 West Center Drive</line1>
+    <state>UT</state>
+    <location_name>Basin Recreation Field House At Newpark</location_name>
+    <zip>84098</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591599">
+  <address>
+    <city>Cedar City</city>
+    <line1>550 W 200 N</line1>
+    <state>UT</state>
+    <location_name>North Elementary</location_name>
+    <zip>84721</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591600">
+  <address>
+    <city>Cedar City</city>
+    <line1>1575 W 200 North</line1>
+    <state>UT</state>
+    <location_name>Crystal Inn</location_name>
+    <zip>84720</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591602">
+  <address>
+    <city>Cedar City</city>
+    <line1>475 E. 1935 North</line1>
+    <state>UT</state>
+    <location_name>Fiddler's Canyon Elementary</location_name>
+    <zip>84721</zip>
+  </address>
+</polling_location>
+<polling_location id="150153941811">
+  <address>
+    <city>Delta</city>
+    <line1>76 N 200 W</line1>
+    <state>UT</state>
+    <location_name>Delta City Library Building</location_name>
+    <zip>84624</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591636">
+  <address>
+    <city>Delta</city>
+    <line1>76 N 200 W</line1>
+    <state>UT</state>
+    <location_name>Delta City Building</location_name>
+    <zip>84624</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591931">
+  <address>
+    <city>Francis</city>
+    <line1>2317 S. Spring Hollow Rd.</line1>
+    <state>UT</state>
+    <location_name>Francis Town Hall</location_name>
+    <zip>84036</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591932">
+  <address>
+    <city>Park City</city>
+    <line1>5715 Trailside Drive</line1>
+    <state>UT</state>
+    <location_name>Trailside Park Admin Buildings</location_name>
+    <zip>84098</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591935">
+  <address>
+    <city>Kamas</city>
+    <line1>170 North Main</line1>
+    <state>UT</state>
+    <location_name>Kamas City Hall</location_name>
+    <zip>84036</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591938">
+  <address>
+    <city>Park City</city>
+    <line1>6505 North Landmark Drive</line1>
+    <state>UT</state>
+    <location_name>Sheldon D. Richins Building</location_name>
+    <zip>84098</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591629">
+  <address>
+    <city>Kanab</city>
+    <line1>76  N Main</line1>
+    <state>UT</state>
+    <location_name>Kanab City Office</location_name>
+    <zip>84741</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591637">
+  <address>
+    <city>Hinckley</city>
+    <line1>270 W Center</line1>
+    <state>UT</state>
+    <location_name>Hinckley's Lions Club Building</location_name>
+    <zip>84635</zip>
+  </address>
+</polling_location>
+<polling_location id="150133591642">
+  <address>
+    <city>Holden</city>
+    <line1>185 S Main</line1>
+    <state>UT</state>
+    <location_name>Holden Town Hall</location_name>
+    <zip>84636</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592149">
+  <address>
+    <city>St George</city>
+    <line1>4275 S Country Club Dr</line1>
+    <state>UT</state>
+    <location_name>Sun River Community Center</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592142">
+  <address>
+    <city>St George</city>
+    <line1>495 N Westridge Dr</line1>
+    <state>UT</state>
+    <location_name>Sunset Elementary School</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592152">
+  <address>
+    <city>Toquerville</city>
+    <line1>212 N Toquerville Blvd</line1>
+    <state>UT</state>
+    <location_name>Toquerville City Office</location_name>
+    <zip>84774</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592154">
+  <address>
+    <city>Washington</city>
+    <line1>111 N 100 E</line1>
+    <state>UT</state>
+    <location_name>Washington City Office</location_name>
+    <zip>84780</zip>
+  </address>
+</polling_location>
+<polling_location id="150133592135">
+  <address>
+    <city>St George</city>
+    <line1>197 E Tabernacle St</line1>
+    <state>UT</state>
+    <location_name>Washington County Administration Bldg</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150155999146">
+  <address>
+    <city>Cedar City</city>
+    <line1>235 N 4050 W</line1>
+    <state>UT</state>
+    <location_name>Iron Springs Elementary</location_name>
+    <zip>84720</zip>
+  </address>
+</polling_location>
+<polling_location id="150156114629">
+  <address>
+    <city>Layton</city>
+    <line1>800 North Cold Creek Way</line1>
+    <state>UT</state>
+    <location_name>Ellison Park Elementary</location_name>
+    <zip>84041</zip>
+  </address>
+</polling_location>
+<polling_location id="150157918861">
+  <address>
+    <city>Provo</city>
+    <line1>1190 W 900 N</line1>
+    <state>UT</state>
+    <location_name>Freedom Academy</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150157919061">
+  <address>
+    <city>Santaquin</city>
+    <line1>364 N State Road 198</line1>
+    <state>UT</state>
+    <location_name>C.S. Lewis Academy</location_name>
+    <zip>84655</zip>
+  </address>
+</polling_location>
+<polling_location id="150158214142">
+  <address>
+    <city>Salt Lake City</city>
+    <line1>1300 W 300 N</line1>
+    <state>UT</state>
+    <location_name>Rivers Bend NW Senior Ctr</location_name>
+    <zip>84116</zip>
+  </address>
+</polling_location>
+<polling_location id="150158635117">
+  <address>
+    <city>Grantsville</city>
+    <line1>26 N. Center St.</line1>
+    <state>UT</state>
+    <location_name>Grantsville Fire Station</location_name>
+    <zip>84029</zip>
+  </address>
+</polling_location>
+<polling_location id="150158134457">
+  <address>
+    <city>Randolph</city>
+    <line1>20 N. Main Street</line1>
+    <state>UT</state>
+    <location_name>Randolph North</location_name>
+    <zip>84064</zip>
+  </address>
+</polling_location>
+<polling_location id="150157912434">
+  <address>
+    <city>Eagle Mountain</city>
+    <line1>7789 E Tawny Owl Circle</line1>
+    <state>UT</state>
+    <location_name>Ranches Academy</location_name>
+    <zip>84043</zip>
+  </address>
+</polling_location>
+<polling_location id="150165585215">
+  <address>
+    <city>Provo</city>
+    <line1>2899 W 1390 N</line1>
+    <state>UT</state>
+    <location_name>Lakeview Elementary</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150166841038">
+  <address>
+    <city>Washington</city>
+    <line1>220 N 300 E</line1>
+    <state>UT</state>
+    <location_name>Washington City Library</location_name>
+    <zip>84780</zip>
+  </address>
+</polling_location>
+<polling_location id="150167301571">
+  <address>
+    <city>Park City</city>
+    <line1>1750 Kearns Blvd</line1>
+    <state>UT</state>
+    <location_name>Eccles Center - Park City High School</location_name>
+    <zip>84060</zip>
+  </address>
+</polling_location>
+<polling_location id="150166871842">
+  <address>
+    <state>UT</state>
+    <location_name>By Mail</location_name>
+  </address>
+</polling_location>
+<polling_location id="150169763872">
+  <address>
+    <city>Provo</city>
+    <line1>351 W Center St</line1>
+    <state>UT</state>
+    <location_name>Provo City Center</location_name>
+    <zip>84604</zip>
+  </address>
+</polling_location>
+<polling_location id="150170333541">
+  <address>
+    <city>Moab</city>
+    <line1>217 East Center Street</line1>
+    <state>UT</state>
+    <location_name>Moab City Center</location_name>
+    <zip>84532</zip>
+  </address>
+</polling_location>
+<polling_location id="150170248155">
+  <address>
+    <city>Nibley</city>
+    <line1>455 W. 3200 S.</line1>
+    <state>UT</state>
+    <location_name>Nibley City Office</location_name>
+    <zip>84321</zip>
+  </address>
+</polling_location>
+<polling_location id="150170248170">
+  <address>
+    <city>Millville</city>
+    <line1>490 E. 300 S.</line1>
+    <state>UT</state>
+    <location_name>Millville City Office</location_name>
+    <zip>84326</zip>
+  </address>
+</polling_location>
+<polling_location id="150167208015">
+  <address>
+    <city>South Salt Lake</city>
+    <line1>220 E Morris Ave (2430 S)</line1>
+    <state>UT</state>
+    <location_name>South Salt Lake City Hall</location_name>
+    <zip>84115</zip>
+  </address>
+</polling_location>
+<polling_location id="150167311296">
+  <address>
+    <city>North Logan</city>
+    <line1>2076 North 1200 East</line1>
+    <state>UT</state>
+    <location_name>North Logan City Office</location_name>
+    <zip>84341</zip>
+  </address>
+</polling_location>
+<polling_location id="150234900379">
+  <address>
+    <line1>No Early Voting ... All By Mail</line1>
+    <state>UT</state>
+    <location_name>Vote By Mail</location_name>
+  </address>
+</polling_location>
+<polling_location id="150176774834">
+  <address>
+    <state>UT</state>
+    <location_name>By Mail</location_name>
+  </address>
+</polling_location>
+<polling_location id="150197544636">
+  <address>
+    <city>Kaysville</city>
+    <line1>23 East Center St.</line1>
+    <state>UT</state>
+    <location_name>Kaysville City Hall</location_name>
+    <zip>84037</zip>
+  </address>
+</polling_location>
+<polling_location id="150206457814">
+  <address>
+    <city>Ivins</city>
+    <line1>55 N Main St</line1>
+    <state>UT</state>
+    <location_name>Ivins City Hall</location_name>
+    <zip>84738</zip>
+  </address>
+</polling_location>
+<polling_location id="150213234624">
+  <address>
+    <city>Smithfield</city>
+    <line1>50 East 100 North</line1>
+    <state>UT</state>
+    <location_name>Smithfield Civic Center</location_name>
+    <zip>84335</zip>
+  </address>
+</polling_location>
+<polling_location id="150197553260">
+  <address>
+    <state>UT</state>
+    <location_name>This Election Is By-Mail, No Early Voting For Your Area</location_name>
+  </address>
+</polling_location>
+<polling_location id="150201861294">
+  <address>
+    <state>UT</state>
+    <location_name>By Mail</location_name>
+  </address>
+</polling_location>
+<polling_location id="150204020821">
+  <address>
+    <city>Perry</city>
+    <line1>2625 S 1050 W</line1>
+    <state>UT</state>
+    <location_name>Perry Elementary School</location_name>
+    <zip>84302</zip>
+  </address>
+</polling_location>
+<polling_location id="150208395827">
+  <address>
+    <city>St George</city>
+    <line1>3167 S 2350 E</line1>
+    <state>UT</state>
+    <location_name>Sunrise Ridge Intermediate School</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150209579883">
+  <address>
+    <city>St George</city>
+    <line1>390 N 3050 E</line1>
+    <state>UT</state>
+    <location_name>St George Parks Bldg</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150197827358">
+  <address>
+    <city>Salt Lake City</city>
+    <line1>600 S 700 E</line1>
+    <state>UT</state>
+    <location_name>Trolley Square</location_name>
+    <zip>84102</zip>
+  </address>
+</polling_location>
+<polling_location id="150217752899">
+  <address>
+    <city>Saratoga Springs</city>
+    <line1>484 Pony Express Parkway</line1>
+    <state>UT</state>
+    <location_name>Vista Heights Middle School</location_name>
+    <zip>84045</zip>
+  </address>
+</polling_location>
+<polling_location id="150215575946">
+  <address>
+    <city>Apple Valley</city>
+    <line1>1777 N Meadowlark Dr</line1>
+    <state>UT</state>
+    <location_name>Apple Valley Town Hall</location_name>
+    <zip>84737</zip>
+  </address>
+</polling_location>
+<polling_location id="150224778138">
+  <address>
+    <city>Tremonton</city>
+    <line1>102 South Tremont</line1>
+    <state>UT</state>
+    <location_name>Tremonton City Offices</location_name>
+    <zip>84337</zip>
+  </address>
+</polling_location>
+<polling_location id="150225933386">
+  <address>
+    <city>Virgin</city>
+    <line1>114 S Mill St</line1>
+    <state>UT</state>
+    <location_name>Virgin Town Hall</location_name>
+    <zip>UT</zip>
+  </address>
+</polling_location>
+<polling_location id="150226326331">
+  <address>
+    <city>Enoch</city>
+    <line1>900 E Midvalley Rd</line1>
+    <state>UT</state>
+    <location_name>Enoch City Offices</location_name>
+    <zip>84721</zip>
+  </address>
+</polling_location>
+<polling_location id="150228319771">
+  <address>
+    <city>Vernal</city>
+    <state>UT</state>
+    <location_name>By Mail Only</location_name>
+    <zip>84078</zip>
+  </address>
+</polling_location>
+<polling_location id="150226039778">
+  <address>
+    <city>Ivins</city>
+    <line1>160 N 200 E</line1>
+    <state>UT</state>
+    <location_name>Southern Utah Veterans Home</location_name>
+    <zip>84738</zip>
+  </address>
+</polling_location>
+<polling_location id="150228771425">
+  <address>
+    <city>St George</city>
+    <line1>1210 W Curly Hollow</line1>
+    <state>UT</state>
+    <location_name>Tonaquint Intermediate School</location_name>
+    <zip>84770</zip>
+  </address>
+</polling_location>
+<polling_location id="150229762794">
+  <address>
+    <city>St George</city>
+    <line1>2277 S 3000 E</line1>
+    <state>UT</state>
+    <location_name>George Washington Academy</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150228771684">
+  <address>
+    <city>St George</city>
+    <line1>1096  Bluegrass Way</line1>
+    <state>UT</state>
+    <location_name>Sun River Fire Station # 8</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150230326913">
+  <address>
+    <city>Saratoga Springs</city>
+    <line1>264 N 750 W</line1>
+    <state>UT</state>
+    <location_name>Thunder Ridge Elementary</location_name>
+    <zip>84045</zip>
+  </address>
+</polling_location>
+<polling_location id="150229766532">
+  <address>
+    <city>St George</city>
+    <line1>2410 E Riverside Dr</line1>
+    <state>UT</state>
+    <location_name>Millcreek High School</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150229364328">
+  <address>
+    <city>St George</city>
+    <line1>2835 E 2000 S</line1>
+    <state>UT</state>
+    <location_name>Crimson View Elementary</location_name>
+    <zip>84790</zip>
+  </address>
+</polling_location>
+<polling_location id="150229364338">
+  <address>
+    <city>Washington</city>
+    <line1>1305 E Washington Dam Rd</line1>
+    <state>UT</state>
+    <location_name>Washington City Public Works Bldg</location_name>
+    <zip>84780</zip>
+  </address>
+</polling_location>
+<polling_location id="150233971853">
+  <address>
+    <city>Vineyard</city>
+    <line1>620 E Holdaway Rd</line1>
+    <state>UT</state>
+    <location_name>Vineyard Elementary - LD60</location_name>
+    <zip>84058</zip>
+  </address>
+</polling_location>
+<polling_location id="150230929130">
+  <address>
+    <city>Provo</city>
+    <line1>351 W Center</line1>
+    <state>UT</state>
+    <location_name>Provo City Center (Franklin Elementary)</location_name>
+    <zip>84601</zip>
+  </address>
+</polling_location>
+<polling_location id="150230929163">
+  <address>
+    <city>Pleasant Grove</city>
+    <line1>618 N 1300 W</line1>
+    <state>UT</state>
+    <location_name>Mount Mahogany Elementary</location_name>
+    <zip>84062</zip>
+  </address>
+</polling_location>
+<polling_location id="150246909472">
+  <address>
+    <state>UT</state>
+    <location_name>No Primary Election</location_name>
+  </address>
+</polling_location>
+<polling_location id="150246909587">
+  <address>
+    <state>UT</state>
+    <location_name>Unincorporated - No Municipal Election</location_name>
+  </address>
+</polling_location>
+<polling_location id="150246909678">
+  <address>
+    <state>UT</state>
+    <location_name>Vote By Mail - Municipal</location_name>
+  </address>
+</polling_location>
+<polling_location id="150246247194">
+  <address>
+    <city>Brigham City</city>
+    <line1>24 North 300 West</line1>
+    <state>UT</state>
+    <location_name>Brigham City Senior Center</location_name>
+    <zip>84302</zip>
+  </address>
+</polling_location>
+</vip_object>
