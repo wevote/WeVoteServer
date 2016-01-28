@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>District of Columbia</name>
+  <vip_id>11</vip_id>
+  <datetime>2015-03-26T18:11:31</datetime>
+  <description>The Board of Elections election information in Washington, DC. This feed provides information on election dates, districts, and precinct boundaries</description>
+  <organization_url>http://www.dcboee.org</organization_url>
+  <feed_contact_id>511</feed_contact_id>
+  <tou_url>http://www.dcboee.org</tou_url>
+</source>
+<polling_location id="115000267">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <directions>Multi-purpose Room</directions>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>2498 ALABAMA AVENUE SE</line1>
+    <state>DC</state>
+    <location_name>ALLEN AME CHURCH</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000223">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1800 GOOD HOPE RD SE</line1>
+    <state>DC</state>
+    <location_name>ANACOSTIA PUBLIC LIBRARY</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000277">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1601 16TH STREET SE</line1>
+    <state>DC</state>
+    <location_name>ANACOSTIA SR. HIGH SCHOOL</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000243">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>3401 4TH ST SE</line1>
+    <state>DC</state>
+    <location_name>BALLOU SENIOR HIGH SCHOOL</location_name>
+    <zip>20032</zip>
+  </address>
+</polling_location>
+<polling_location id="115000109">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>430 DECATUR STREET NW</line1>
+    <state>DC</state>
+    <location_name>BARNARD ELEMENTARY SCHOOL</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000105">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1300 NICHOLSON ST NW</line1>
+    <state>DC</state>
+    <location_name>BRIGHTWOOD ELEMENTARY SCHOOL</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000117">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>6315 5TH ST NW</line1>
+    <state>DC</state>
+    <location_name>COOLIDGE SR. HIGH SCHOOL</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000247">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>3845 SOUTH CAPITOL ST SW</line1>
+    <state>DC</state>
+    <location_name>COVENANT BAPTIST UNITED CHURCH OF CHRIST</location_name>
+    <zip>20032</zip>
+  </address>
+</polling_location>
+<polling_location id="115000091">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>4501 KANSAS AVENUE NW</line1>
+    <state>DC</state>
+    <location_name>E.L. HAYNES PUBLIC CHARTER SCHOOL</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000241">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>3999 8TH STREET SE</line1>
+    <state>DC</state>
+    <location_name>FEREBEE-HOPE RECREATION CTR</location_name>
+    <zip>20032</zip>
+  </address>
+</polling_location>
+<polling_location id="115000121">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1327 VAN BUREN STREET NW</line1>
+    <state>DC</state>
+    <location_name>FORT STEVENS RECREATION CENTER</location_name>
+    <zip>20012</zip>
+  </address>
+</polling_location>
+<polling_location id="115000115">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>6001 GEORGIA AVENUE NW</line1>
+    <state>DC</state>
+    <location_name>FOURTH DISTRICT POLICE STATION</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000113">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>324 KENNEDY ST NW</line1>
+    <state>DC</state>
+    <location_name>HATTIE HOLMES WELLNESS CENTER</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000249">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>425 CHESAPEAKE STREET SE</line1>
+    <state>DC</state>
+    <location_name>HENDLEY SCHOOL</location_name>
+    <zip>20032</zip>
+  </address>
+</polling_location>
+<polling_location id="115000129">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>501 RIGGS ROAD NE</line1>
+    <state>DC</state>
+    <location_name>LA SALLE ELEMENTARY SCHOOL</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000101">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>5701 BROAD BRANCH RD NW</line1>
+    <state>DC</state>
+    <location_name>LAFAYETTE SCHOOL</location_name>
+    <zip>20015</zip>
+  </address>
+</polling_location>
+<polling_location id="115000127">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>20 TUCKERMAN STREET NE</line1>
+    <state>DC</state>
+    <location_name>LAMOND RECREATION CENTER</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000239">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1351 ALABAMA AVE SE</line1>
+    <state>DC</state>
+    <location_name>MALCOLM X ELEMENTARY SCHOOL</location_name>
+    <zip>20032</zip>
+  </address>
+</polling_location>
+<polling_location id="115000245">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>600 ALABAMA AVENUE S.E.</line1>
+    <state>DC</state>
+    <location_name>MARTIN LUTHER KING ELEMENTARY SCHOOL</location_name>
+    <zip>20032</zip>
+  </address>
+</polling_location>
+<polling_location id="115000237">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>2616 M. L. KING AVENUE SE</line1>
+    <state>DC</state>
+    <location_name>MATTHEWS MEMORIAL BAPTIST CHURCH</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000235">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1565 MORRIS ROAD SE</line1>
+    <state>DC</state>
+    <location_name>MOTEN ELEMENTARY SCHOOL</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000089">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>801 SHEPHERD ST NW</line1>
+    <state>DC</state>
+    <location_name>MPD - REGIONAL OPERATION COMM (NORTH)</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000119">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>6000 GEORGIA AVENUE NW</line1>
+    <state>DC</state>
+    <location_name>NATIVITY YOUTH CENTER</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000265">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>2200 MINNESOTA AVE SE</line1>
+    <state>DC</state>
+    <location_name>ORR SCHOOL</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000093">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1350 UPSHUR ST NW</line1>
+    <state>DC</state>
+    <location_name>POWELL SCHOOL</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000097">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>3725 10TH STREET NW</line1>
+    <state>DC</state>
+    <location_name>RAYMOND RECREATION CENTER</location_name>
+    <zip>20010</zip>
+  </address>
+</polling_location>
+<polling_location id="115000229">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>2455 ALABAMA AVENUE SE</line1>
+    <state>DC</state>
+    <location_name>SEVENTH DISTRICT POLICE STATION</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000095">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>4300 13TH STREET NW</line1>
+    <state>DC</state>
+    <location_name>SHARPE HEALTH SCHOOL</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000123">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>7800 14TH STREET NW</line1>
+    <state>DC</state>
+    <location_name>SHEPHERD ELEMENTARY SCHOOL</location_name>
+    <zip>20012</zip>
+  </address>
+</polling_location>
+<polling_location id="115000103">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>2607 MILITARY ROAD NW</line1>
+    <state>DC</state>
+    <location_name>ST. JOHN'S COLLEGE HIGH SCHOOL</location_name>
+    <zip>20015</zip>
+  </address>
+</polling_location>
+<polling_location id="115000125">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>7010 PINEY BRANCH RD NW</line1>
+    <state>DC</state>
+    <location_name>TAKOMA EDUCATION CAMPUS</location_name>
+    <zip>20012</zip>
+  </address>
+</polling_location>
+<polling_location id="115000231">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1901 MISSISSIPPI AVENUE SE</line1>
+    <state>DC</state>
+    <location_name>THE ARC</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000111">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>800 INGRAHAM STREET NW</line1>
+    <state>DC</state>
+    <location_name>TRUESDELL ELEMENTARY SCHOOL</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+<polling_location id="115000233">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>3264 STANTON ROAD SE</line1>
+    <state>DC</state>
+    <location_name>TURNER ELEMENTARY SCHOOL</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000227">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1225 W ST SE</line1>
+    <state>DC</state>
+    <location_name>UNION TEMPLE BAPTIST CHURCH</location_name>
+    <zip>20020</zip>
+  </address>
+</polling_location>
+<polling_location id="115000251">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>4399 SOUTH CAPITOL TERR SW</line1>
+    <state>DC</state>
+    <location_name>W B PATTERSON ELEMENTARY SCHOOL</location_name>
+    <zip>20032</zip>
+  </address>
+</polling_location>
+<polling_location id="115000107">
+  <polling_hours>7 AM - 8 PM EST</polling_hours>
+  <address>
+    <city>WASHINGTON</city>
+    <line1>1338 FARRAGUT STREET NW</line1>
+    <state>DC</state>
+    <location_name>WEST ELEMENTARY SCHOOL</location_name>
+    <zip>20011</zip>
+  </address>
+</polling_location>
+</vip_object>

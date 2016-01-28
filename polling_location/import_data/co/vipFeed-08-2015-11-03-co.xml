@@ -1,0 +1,1426 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Colorado Secretary of State</name>
+  <vip_id>8</vip_id>
+  <datetime>2015-09-25T11:09:28</datetime>
+  <description>The Secretary of State's office is the source for state election information in Colorado. This feed provides information on election dates, districts,and precinct boundaries</description>
+  <organization_url>http://www.elections.colorado.gov</organization_url>
+</source>
+<polling_location id="180600001529">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GOLDEN</city>
+    <line1>3500 ILLINOIS ST  STE 1100</line1>
+    <state>CO</state>
+    <location_name>000 - MAIN OFFICE</location_name>
+    <zip>80401</zip>
+  </address>
+</polling_location>
+<polling_location id="1803345">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LITTLETON</city>
+    <line1>7706 W BOWLES AVE</line1>
+    <state>CO</state>
+    <location_name>006 - COLUMBINE LIBRARY</location_name>
+    <zip>80123</zip>
+  </address>
+</polling_location>
+<polling_location id="1803398">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>EVERGREEN</city>
+    <line1>32003 ELLINGWOOD TRL</line1>
+    <state>CO</state>
+    <location_name>026 - BUCHANAN PARK AND REC CTR</location_name>
+    <zip>80439</zip>
+  </address>
+</polling_location>
+<polling_location id="1803501">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>SAGUACHE</city>
+    <line1>501 FOURTH ST</line1>
+    <state>CO</state>
+    <location_name>1-SAGUACHE COUNTY COURTHOUSE</location_name>
+    <zip>81149</zip>
+  </address>
+</polling_location>
+<polling_location id="1803314">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>ARVADA</city>
+    <line1>8485 KIPLING ST</line1>
+    <state>CO</state>
+    <location_name>103 - STANDLEY LAKE LIBRARY</location_name>
+    <zip>80005</zip>
+  </address>
+</polling_location>
+<polling_location id="1803181">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LAKEWOOD</city>
+    <line1>3101 S KIPLING ST</line1>
+    <state>CO</state>
+    <location_name>148 - BEAR CREEK PRES CH</location_name>
+    <zip>80227</zip>
+  </address>
+</polling_location>
+<polling_location id="1803234">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LAKEWOOD</city>
+    <line1>480 S ALLISON PKWY</line1>
+    <state>CO</state>
+    <location_name>172 - LAKEWOOD MUNICIPAL CTR</location_name>
+    <zip>80226</zip>
+  </address>
+</polling_location>
+<polling_location id="1805336">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>SILVERTHORNE</city>
+    <line1>400 BLUE RIVER PARKWAY</line1>
+    <state>CO</state>
+    <location_name>25-SILVERTHORNE PAVILION</location_name>
+    <zip>80498</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000621">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>ARVADA</city>
+    <line1>6510 WADSWORTH BLVD #320</line1>
+    <state>CO</state>
+    <location_name>501 - ARVADA MV</location_name>
+    <zip>80003</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000622">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LITTLETON</city>
+    <line1>11139 BRADFORD RD</line1>
+    <state>CO</state>
+    <location_name>503 - SOUTH SERVICE CENTER</location_name>
+    <zip>80127</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000641">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>EVERGREEN</city>
+    <line1>4990 COUNTY HWY 73</line1>
+    <state>CO</state>
+    <location_name>504 - EVERGREEN MV</location_name>
+    <zip>80439</zip>
+  </address>
+</polling_location>
+<polling_location id="180600005707">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LAKEWOOD</city>
+    <line1>645 PARFET ST STE 2</line1>
+    <state>CO</state>
+    <location_name>508-JEFFERSON COUNTY PUBLIC HEALTH</location_name>
+    <zip>80215</zip>
+  </address>
+</polling_location>
+<polling_location id="180600006067">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <line1>NOT PROVIDED</line1>
+    <state>CO</state>
+    <location_name>510-LAKEWOOD CHURCH OF THE NAZARENE</location_name>
+    <zip>NOT PROVIDED</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000160">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LAS ANIMAS</city>
+    <line1>725 BENT AVE</line1>
+    <state>CO</state>
+    <location_name>6 - BENT COUNTY COURTHOUSE</location_name>
+    <zip>81054</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000040">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>ALAMOSA</city>
+    <line1>8999 INDEPENDENCE WAY</line1>
+    <state>CO</state>
+    <location_name>ALAMOSA COUNTY CLERK'S OFFICE</location_name>
+    <zip>81101</zip>
+  </address>
+</polling_location>
+<polling_location id="1801081">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>AURORA</city>
+    <line1>14980 E ALAMEDA DR</line1>
+    <state>CO</state>
+    <location_name>ARAPAHOE CENTREPOINT PLAZA</location_name>
+    <zip>80012</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004447">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>PAGOSA SPRINGS</city>
+    <line1>449 SAN JUAN ST</line1>
+    <state>CO</state>
+    <location_name>ARCHULETA COUNTY ELECTION'S OFFICE</location_name>
+    <zip>81147</zip>
+  </address>
+</polling_location>
+<polling_location id="180600006087">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>ASPEN</city>
+    <line1>435 WEST MAIN STREET</line1>
+    <state>CO</state>
+    <location_name>ASPEN JEWISH COMMUNITY CENTER</location_name>
+    <zip>81611</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000462">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>AVON</city>
+    <line1>100 W BEAVER CREEK BLVD</line1>
+    <state>CO</state>
+    <location_name>AVON OFFICE</location_name>
+    <zip>81620</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004867">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>SPRINGFIELD</city>
+    <line1>741 MAIN ST STE #3</line1>
+    <state>CO</state>
+    <location_name>BACA COUNTY COURTHOUSE</location_name>
+    <zip>81073</zip>
+  </address>
+</polling_location>
+<polling_location id="1803470">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CANON CITY</city>
+    <line1>575 ASH STREET</line1>
+    <state>CO</state>
+    <location_name>BACKUP CANON CITY PARK AND REC DISTRICT</location_name>
+    <zip>81212</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000480">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BAILEY</city>
+    <line1>59865 HWY 285</line1>
+    <state>CO</state>
+    <location_name>BAILEY VSPC</location_name>
+    <zip>80421</zip>
+  </address>
+</polling_location>
+<polling_location id="1803946">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BAYFIELD</city>
+    <line1>1199 BAYFIELD PARKWAY</line1>
+    <state>CO</state>
+    <location_name>BAYFIELD TOWN HALL</location_name>
+    <zip>81122</zip>
+  </address>
+</polling_location>
+<polling_location id="180600005607">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BENNETT</city>
+    <line1>1100 W COLFAX AVE</line1>
+    <state>CO</state>
+    <location_name>BENNETT COMMUNITY CENTER</location_name>
+    <zip>80102</zip>
+  </address>
+</polling_location>
+<polling_location id="180200001580">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GUNNISON</city>
+    <line1>221 NORTH WISCONSIN STREET SUITE C</line1>
+    <state>CO</state>
+    <location_name>BLACKSTOCK GOVERNMENT CENTER</location_name>
+    <zip>81230</zip>
+  </address>
+</polling_location>
+<polling_location id="1803933">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DURANGO</city>
+    <line1>98 EVERETT ST STE C</line1>
+    <state>CO</state>
+    <location_name>BODO OFFICE</location_name>
+    <zip>81303</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004894">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BUENA VISTA</city>
+    <line1>112 LINDERMAN AVENUE</line1>
+    <state>CO</state>
+    <location_name>BUENA VISTA VSPC</location_name>
+    <zip>81211</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000021">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BYERS</city>
+    <line1>GUARANTY BANK &amp; TRUST BUILDING 538 N HIGHWAY 36</line1>
+    <state>CO</state>
+    <location_name>BYERS BRANCH OFFICE</location_name>
+    <zip>80103</zip>
+  </address>
+</polling_location>
+<polling_location id="1804143">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CARBONDALE</city>
+    <line1>511 COLORADO AVE</line1>
+    <state>CO</state>
+    <location_name>CARBONDALE TOWN HALL</location_name>
+    <zip>81623</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000001">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CENTENNIAL</city>
+    <line1>6954 S LIMA ST</line1>
+    <state>CO</state>
+    <location_name>CENTENNIAL BRANCH OFFICE</location_name>
+    <zip>80112</zip>
+  </address>
+</polling_location>
+<polling_location id="1803484">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CRIPPLE CREEK</city>
+    <line1>112 NORTH A STREET</line1>
+    <state>CO</state>
+    <location_name>CENTENNIAL BUILDING</location_name>
+    <zip>80813</zip>
+  </address>
+</polling_location>
+<polling_location id="1802166">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CHEYENNE WELLS</city>
+    <line1>51 S 1</line1>
+    <state>CO</state>
+    <location_name>CHEYENNE COUNTY COURTHOUSE</location_name>
+    <zip>80810</zip>
+  </address>
+</polling_location>
+<polling_location id="180200001140">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DENVER</city>
+    <line1>GYM  8085 HAMPDEN AVE</line1>
+    <state>CO</state>
+    <location_name>CHRIST COMMUNITY CHURCH</location_name>
+    <zip>80231</zip>
+  </address>
+</polling_location>
+<polling_location id="180549">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>MANITOU SPRINGS</city>
+    <line1>606 MANITOU AVE</line1>
+    <state>CO</state>
+    <location_name>CITY OF MANITOU SPRINGS - CITY HALL</location_name>
+    <zip>80829</zip>
+  </address>
+</polling_location>
+<polling_location id="1804083">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>405 ARGENTINE ST</line1>
+    <state>CO</state>
+    <location_name>CLEAR CREEK COUNTY COURTHOUSE</location_name>
+    <zip>80444</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000321">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LEADVILLE</city>
+    <line1>505 HARRISON AVE P O BOX 917</line1>
+    <state>CO</state>
+    <location_name>CLERK &amp; RECORDERS OFFICE</location_name>
+    <zip>80461</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004987">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>ASPEN</city>
+    <line1>530 E MAIN ST #101</line1>
+    <state>CO</state>
+    <location_name>CLERK AND RECORDER'S OFFICE - MAIN</location_name>
+    <zip>81611</zip>
+  </address>
+</polling_location>
+<polling_location id="180600001571">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>SAN LUIS</city>
+    <line1>400 GASPER ST  STE 101</line1>
+    <state>CO</state>
+    <location_name>CLERK'S OFFICE</location_name>
+    <zip>81152</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000022">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>SALIDA</city>
+    <line1>104 CRESTONE AVE</line1>
+    <state>CO</state>
+    <location_name>CLERK'S OFFICE - SALIDA</location_name>
+    <zip>81201</zip>
+  </address>
+</polling_location>
+<polling_location id="180200001520">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>TRINIDAD</city>
+    <line1>200 E FIRST ST #205</line1>
+    <state>CO</state>
+    <location_name>CLERKS OFFICE</location_name>
+    <zip>81082</zip>
+  </address>
+</polling_location>
+<polling_location id="180600006028">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <line1>NOT PROVIDED</line1>
+    <state>CO</state>
+    <location_name>CLIFTON MV</location_name>
+    <zip>NOT PROVIDED</zip>
+  </address>
+</polling_location>
+<polling_location id="180681">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CONEJOS</city>
+    <line1>6683 COUNTY RD 13</line1>
+    <state>CO</state>
+    <location_name>CONEJOS COUNTY COURTHOUSE</location_name>
+    <zip>81129</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000942">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LAMAR</city>
+    <line1>301 S MAIN  SUITE 210</line1>
+    <state>CO</state>
+    <location_name>COUNTY CLERK</location_name>
+    <zip>81052</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000220">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CRIPPLE CREEK</city>
+    <line1>101 W BENNETT AVE</line1>
+    <state>CO</state>
+    <location_name>COUNTY CLERK &amp; RECORDER</location_name>
+    <zip>80813</zip>
+  </address>
+</polling_location>
+<polling_location id="1805531">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BOULDER</city>
+    <line1>1750 33RD ST</line1>
+    <state>CO</state>
+    <location_name>COUNTY CLERK'S MAIN OFFICE</location_name>
+    <zip>80301</zip>
+  </address>
+</polling_location>
+<polling_location id="1802907">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>ORDWAY</city>
+    <line1>631 MAIN ST STE 102</line1>
+    <state>CO</state>
+    <location_name>COUNTY CLERK'S OFFICE</location_name>
+    <zip>81063</zip>
+  </address>
+</polling_location>
+<polling_location id="1803811">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>WALSENBURG</city>
+    <line1>401 MAIN STE 204</line1>
+    <state>CO</state>
+    <location_name>COUNTY CLERK'S OFFICE</location_name>
+    <zip>81089</zip>
+  </address>
+</polling_location>
+<polling_location id="180200001581">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>FRISCO</city>
+    <line1>37 PEAK ONE DRIVE</line1>
+    <state>CO</state>
+    <location_name>COUNTY COMMONS</location_name>
+    <zip>80443</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000420">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GLENWOOD SPRINGS</city>
+    <line1>109 8TH STREET SUITE 200</line1>
+    <state>CO</state>
+    <location_name>COURT HOUSE</location_name>
+    <zip>81601</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000460">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CRAIG</city>
+    <line1>221 W VICTORY WAY</line1>
+    <state>CO</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>81625</zip>
+  </address>
+</polling_location>
+<polling_location id="1803822">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LAKE CITY</city>
+    <line1>317 N HENSON ST</line1>
+    <state>CO</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>81235</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000301">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>OURAY</city>
+    <line1>541 FOURTH ST</line1>
+    <state>CO</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>81427</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000040">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>KIOWA</city>
+    <line1>215 COMANCHE STREET PO BOX 990</line1>
+    <state>CO</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>80117</zip>
+  </address>
+</polling_location>
+<polling_location id="180200001280">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>WALDEN</city>
+    <line1>396 LAFEVER STREET</line1>
+    <state>CO</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>80480</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000660">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>AKRON</city>
+    <line1>150 ASH</line1>
+    <state>CO</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>80720</zip>
+  </address>
+</polling_location>
+<polling_location id="180600001755">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>JULESBURG</city>
+    <line1>315 CEDAR ST</line1>
+    <state>CO</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>80737</zip>
+  </address>
+</polling_location>
+<polling_location id="1803891">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DEL NORTE</city>
+    <line1>965 SIXTH STREET</line1>
+    <state>CO</state>
+    <location_name>COURTHOUSE ANNEX BUILDING</location_name>
+    <zip>81132</zip>
+  </address>
+</polling_location>
+<polling_location id="1801150">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>FORT COLLINS</city>
+    <line1>200 W OAK ST 1ST FL</line1>
+    <state>CO</state>
+    <location_name>COURTHOUSE-CARTER BOYD</location_name>
+    <zip>80521</zip>
+  </address>
+</polling_location>
+<polling_location id="18048">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BAILEY</city>
+    <line1>153 DELLWOOD DR</line1>
+    <state>CO</state>
+    <location_name>CROWHILL FIRE VSPC</location_name>
+    <zip>80421</zip>
+  </address>
+</polling_location>
+<polling_location id="1803561">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>WESTCLIFFE</city>
+    <line1>205 S 6TH ST</line1>
+    <state>CO</state>
+    <location_name>CUSTER COUNTY COURTHOUSE-3054414001</location_name>
+    <zip>81252</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000120">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DELTA</city>
+    <line1>501 PALMER ST STE 211</line1>
+    <state>CO</state>
+    <location_name>DELTA COUNTY COURTHOUSE</location_name>
+    <zip>81416</zip>
+  </address>
+</polling_location>
+<polling_location id="1802581">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DENVER</city>
+    <line1>MEETING ROOM  1625 S UNIVERSITY BLVD</line1>
+    <state>CO</state>
+    <location_name>DENVER POLICE DEPARTMENT DISTRICT 3</location_name>
+    <zip>80210</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000340">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DOVE CREEK</city>
+    <line1>409 N MAIN ST</line1>
+    <state>CO</state>
+    <location_name>DOLORES COUNTY CLERK</location_name>
+    <zip>81324</zip>
+  </address>
+</polling_location>
+<polling_location id="180474">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>COLORADO SPRINGS</city>
+    <line1>200 S CASCADE AVE</line1>
+    <state>CO</state>
+    <location_name>DOWNTOWN BRANCH (EPC CLERK'S OFFICE)</location_name>
+    <zip>80903</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000461">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>EAGLE</city>
+    <line1>500 BROADWAY</line1>
+    <state>CO</state>
+    <location_name>EAGLE OFFICE</location_name>
+    <zip>81631</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000481">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>EL JEBEL</city>
+    <line1>0020 EAGLE COUNTY DRIVE</line1>
+    <state>CO</state>
+    <location_name>EL JEBEL OFFICE</location_name>
+    <zip>81623</zip>
+  </address>
+</polling_location>
+<polling_location id="180600002537">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>WRAY</city>
+    <line1>130 E 3RD ST</line1>
+    <state>CO</state>
+    <location_name>ELECTION CENTER</location_name>
+    <zip>80758</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000441">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>STEAMBOAT SPRINGS</city>
+    <line1>522 LINCOLN AVE</line1>
+    <state>CO</state>
+    <location_name>ELECTION OFFICE</location_name>
+    <zip>80487</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000060">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DENVER</city>
+    <line1>200 W 14TH AVE SUITE 100</line1>
+    <state>CO</state>
+    <location_name>ELECTIONS DIVISION - MAIN OFFICE</location_name>
+    <zip>80204</zip>
+  </address>
+</polling_location>
+<polling_location id="180600005713">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DENVER</city>
+    <line1>LOBBY 200 W 14TH AVE SUITE 100</line1>
+    <state>CO</state>
+    <location_name>ELECTIONS DIVISION VSPC</location_name>
+    <zip>80204</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004948">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>TRINIDAD</city>
+    <line1>200 E FIRST ST #206</line1>
+    <state>CO</state>
+    <location_name>ELECTIONS OFFICE</location_name>
+    <zip>81082</zip>
+  </address>
+</polling_location>
+<polling_location id="180600003187">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GRAND JUNCTION</city>
+    <line1>200 S SPRUCE STREET</line1>
+    <state>CO</state>
+    <location_name>ELECTIONS OFFICE</location_name>
+    <zip>81501</zip>
+  </address>
+</polling_location>
+<polling_location id="1801184">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>ESTES PARK</city>
+    <line1>170 MACGREGOR AVE</line1>
+    <state>CO</state>
+    <location_name>ESTES PARK MUNICIPAL BUILDING</location_name>
+    <zip>80517</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000421">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>ASPEN</city>
+    <line1>530 E MAIN STREET SUITE 101</line1>
+    <state>CO</state>
+    <location_name>EV - CLERK &amp; RECORDERS OFFICE</location_name>
+    <zip>81611</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004627">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DURANGO</city>
+    <line1>2500 MAIN AVE</line1>
+    <state>CO</state>
+    <location_name>FAIRGROUNDS</location_name>
+    <zip>81301</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000001">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>FAIRPLAY</city>
+    <line1>501 MAIN ST</line1>
+    <state>CO</state>
+    <location_name>FAIRPLAY COUNTY OFFICE</location_name>
+    <zip>80440</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004949">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>FOUNTAIN</city>
+    <line1>222 N SANTA FE AVE</line1>
+    <state>CO</state>
+    <location_name>FOUNTAIN POLICE DEPARTMENT - COMMUNITY ROOM</location_name>
+    <zip>80817</zip>
+  </address>
+</polling_location>
+<polling_location id="180200001923">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GUNNISON</city>
+    <line1>275 S SPRUCE STREET</line1>
+    <state>CO</state>
+    <location_name>FRED FIELD WESTERN HERITAGE CENTER</location_name>
+    <zip>81230</zip>
+  </address>
+</polling_location>
+<polling_location id="1803461">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CANON CITY</city>
+    <line1>615 MACON AVE RM 102</line1>
+    <state>CO</state>
+    <location_name>FREMONT COUNTY ADMN BLDG</location_name>
+    <zip>81212</zip>
+  </address>
+</polling_location>
+<polling_location id="180600005427">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BROOMFIELD</city>
+    <line1>1 DESCOMBES DR</line1>
+    <state>CO</state>
+    <location_name>GEORGE DICIERO BUILDING</location_name>
+    <zip>80020</zip>
+  </address>
+</polling_location>
+<polling_location id="1801">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CENTRAL CITY</city>
+    <line1>203 EUREKA ST</line1>
+    <state>CO</state>
+    <location_name>GILPIN COUNTY COURTHOUSE</location_name>
+    <zip>80427</zip>
+  </address>
+</polling_location>
+<polling_location id="1804147">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GLENWOOD SPGS</city>
+    <line1>100 WULFSOHN RD</line1>
+    <state>CO</state>
+    <location_name>GLENWOOD COMMUNITY CENTER</location_name>
+    <zip>81601</zip>
+  </address>
+</polling_location>
+<polling_location id="180600002391">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GRAND JUNCTION</city>
+    <line1>630 24 1/2 ROAD</line1>
+    <state>CO</state>
+    <location_name>GOODWILL</location_name>
+    <zip>81501</zip>
+  </address>
+</polling_location>
+<polling_location id="180600001448">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>HOT SULPHUR SPRINGS</city>
+    <line1>308 BYERS AVE</line1>
+    <state>CO</state>
+    <location_name>GRAND COUNTY CLERK</location_name>
+    <zip>80451</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004507">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DENVER</city>
+    <line1>200 W 14TH AVE SUITE 100</line1>
+    <state>CO</state>
+    <location_name>GROUP RESIDENTIAL FACILITY</location_name>
+    <zip>80204</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000901">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DENVER</city>
+    <line1>MULTIPURPOSE ROOM 2121 S TENNYSON ST</line1>
+    <state>CO</state>
+    <location_name>HARVEY PARK RECREATION CENTER</location_name>
+    <zip>80219</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000921">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DENVER</city>
+    <line1>MULTIPURPOSE ROOM 3334 N HOLLY ST</line1>
+    <state>CO</state>
+    <location_name>HIAWATHA DAVIS JR. RECREATION CENTER</location_name>
+    <zip>80207</zip>
+  </address>
+</polling_location>
+<polling_location id="1802562">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DENVER</city>
+    <line1>MULTIPURPOSE ROOM 2880 OSCEOLA ST</line1>
+    <state>CO</state>
+    <location_name>HIGHLAND RECREATION CENTER</location_name>
+    <zip>80212</zip>
+  </address>
+</polling_location>
+<polling_location id="1805704">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BOULDER</city>
+    <line1>1750 33RD ST</line1>
+    <state>CO</state>
+    <location_name>HOUSTON ROOM</location_name>
+    <zip>80301</zip>
+  </address>
+</polling_location>
+<polling_location id="1802925">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>EADS</city>
+    <line1>1305 GOFF ST</line1>
+    <state>CO</state>
+    <location_name>KIOWA COUNTY CLERK'S OFFICE</location_name>
+    <zip>81036</zip>
+  </address>
+</polling_location>
+<polling_location id="1803044">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BURLINGTON</city>
+    <line1>251 16TH ST</line1>
+    <state>CO</state>
+    <location_name>KIT CARSON COUNTY COURTHOUSE</location_name>
+    <zip>80807</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004787">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LAFAYETTE</city>
+    <line1>1376 MINERS DRIVE</line1>
+    <state>CO</state>
+    <location_name>LAFAYETTE CLERK &amp; RECORDER</location_name>
+    <zip>80026</zip>
+  </address>
+</polling_location>
+<polling_location id="1803601">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>HUGO</city>
+    <line1>103 3RD AVENUE</line1>
+    <state>CO</state>
+    <location_name>LINCOLN COUNTY COURTHOUSE</location_name>
+    <zip>80821</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000000">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LITTLETON</city>
+    <line1>5334 S PRINCE ST</line1>
+    <state>CO</state>
+    <location_name>LITTLETON BRANCH OFFICE</location_name>
+    <zip>80120</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000201">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>STERLING</city>
+    <line1>315 MAIN STREET SUITE 3</line1>
+    <state>CO</state>
+    <location_name>LOGAN COUNTY COURTHOUSE</location_name>
+    <zip>80751</zip>
+  </address>
+</polling_location>
+<polling_location id="1805694">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LONGMONT</city>
+    <line1>529 COFFMAN STREET</line1>
+    <state>CO</state>
+    <location_name>LONGMONT CLERK &amp; RECORDER</location_name>
+    <zip>80501</zip>
+  </address>
+</polling_location>
+<polling_location id="1801151">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LOVELAND</city>
+    <line1>810 E 10TH ST</line1>
+    <state>CO</state>
+    <location_name>LOVELAND POLICE &amp; COURTS BUILDING</location_name>
+    <zip>80537</zip>
+  </address>
+</polling_location>
+<polling_location id="180200003281">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>COLORADO SPRINGS</city>
+    <line1>1675 W GARDEN OF THE GODS RD SUITE 2202</line1>
+    <state>CO</state>
+    <location_name>MAIN OFFICE AT CITIZENS SERVICE CENTER (EPC CLERK'S OFFICE)</location_name>
+    <zip>80907</zip>
+  </address>
+</polling_location>
+<polling_location id="180600005207">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GRAND JUNCTION</city>
+    <line1>200 S SPRUCE STREET</line1>
+    <state>CO</state>
+    <location_name>MCCS - VSPC</location_name>
+    <zip>81501</zip>
+  </address>
+</polling_location>
+<polling_location id="1804027">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>MEEKER</city>
+    <line1>555 MAIN ST-VSPC/COUNTY CLERK'S OFFICE</line1>
+    <state>CO</state>
+    <location_name>MEEKER OFFICE</location_name>
+    <zip>81641</zip>
+  </address>
+</polling_location>
+<polling_location id="1803861">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CREEDE</city>
+    <line1>1201 N MAIN ST</line1>
+    <state>CO</state>
+    <location_name>MINERAL COUNTY COURTHOUSE</location_name>
+    <zip>81130</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000922">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>DENVER</city>
+    <line1>MULTIPURPOSE ROOM 15555 E 53RD AVE</line1>
+    <state>CO</state>
+    <location_name>MONTBELLO RECREATION CENTER</location_name>
+    <zip>80239</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000320">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CORTEZ</city>
+    <line1>140 W MAIN STREET SUITE 1</line1>
+    <state>CO</state>
+    <location_name>MONTEZUMA COUNTY</location_name>
+    <zip>81321</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000780">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>MONTROSE</city>
+    <line1>320 S 1ST ST</line1>
+    <state>CO</state>
+    <location_name>MONTROSE COUNTY COURTHOUSE</location_name>
+    <zip>81401</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000640">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>FORT MORGAN</city>
+    <line1>231 ENSIGN ST</line1>
+    <state>CO</state>
+    <location_name>MORGAN COUNTY ADMINISTRATION  FLOOR #1</location_name>
+    <zip>80701</zip>
+  </address>
+</polling_location>
+<polling_location id="180600002701">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>NATURITA</city>
+    <line1>230 W MAIN</line1>
+    <state>CO</state>
+    <location_name>NATURITA CHAMBER OF COMMERCE</location_name>
+    <zip>81422</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004927">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>402 W MAIN ST</line1>
+    <state>CO</state>
+    <location_name>NEW CASTLE LIBRARY</location_name>
+    <zip>81647</zip>
+  </address>
+</polling_location>
+<polling_location id="180600002106">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>COLORADO SPRINGS</city>
+    <line1>8830 N UNION BLVD</line1>
+    <state>CO</state>
+    <location_name>NORTH BRANCH (EPC CLERK'S OFFICE)</location_name>
+    <zip>80920</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000140">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>HOTCHKISS</city>
+    <line1>196 W HOTCHKISS AVE</line1>
+    <state>CO</state>
+    <location_name>NORTH FORK ANNEX</location_name>
+    <zip>81419</zip>
+  </address>
+</polling_location>
+<polling_location id="180600001161">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>NUCLA</city>
+    <line1>300 MAIN ST</line1>
+    <state>CO</state>
+    <location_name>NUCLA COURTHOUSE ANNEX</location_name>
+    <zip>81424</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000723">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BRECKENRIDGE</city>
+    <line1>208 E LINCOLN</line1>
+    <state>CO</state>
+    <location_name>OLD COURTHOUSE</location_name>
+    <zip>80424</zip>
+  </address>
+</polling_location>
+<polling_location id="1802990">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LA JUNTA</city>
+    <line1>13 WEST 3RD STREET</line1>
+    <state>CO</state>
+    <location_name>OTERO COUNTY CLERKS OFFICE</location_name>
+    <zip>81050</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004947">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>PARACHUTE</city>
+    <line1>244 GRAND VALLEY WAY</line1>
+    <state>CO</state>
+    <location_name>PARACHUTE LIBRARY</location_name>
+    <zip>81635</zip>
+  </address>
+</polling_location>
+<polling_location id="180600003787">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CRESTED BUTTE</city>
+    <line1>401 SOPRIS AVENUE</line1>
+    <state>CO</state>
+    <location_name>PARISH HALL - QUEEN OF ALL SAINTS</location_name>
+    <zip>81224</zip>
+  </address>
+</polling_location>
+<polling_location id="180600005667">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BROOMFIELD</city>
+    <line1>13201 LOWELL BLVD</line1>
+    <state>CO</state>
+    <location_name>PAUL DERDA RECREATION CENTER</location_name>
+    <zip>80020</zip>
+  </address>
+</polling_location>
+<polling_location id="1802210">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>HOLYOKE</city>
+    <line1>221 S INTEROCEAN</line1>
+    <state>CO</state>
+    <location_name>PHILLIPS COUNTY CLERKS OFFICE</location_name>
+    <zip>80734</zip>
+  </address>
+</polling_location>
+<polling_location id="180200000621">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>PUEBLO</city>
+    <line1>720 N MAIN ST STE 200</line1>
+    <state>CO</state>
+    <location_name>PUEBLO COUNTY ELECTIONS</location_name>
+    <zip>81003</zip>
+  </address>
+</polling_location>
+<polling_location id="1804024">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>RANGELY</city>
+    <line1>17497 HWY 64 VSPC/RANGELY OFFICE</line1>
+    <state>CO</state>
+    <location_name>RANGELY OFFICE</location_name>
+    <zip>81648</zip>
+  </address>
+</polling_location>
+<polling_location id="180200001080">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>RIFLE</city>
+    <line1>144 E 3RD ST</line1>
+    <state>CO</state>
+    <location_name>RIFLE BRANCH</location_name>
+    <zip>81650</zip>
+  </address>
+</polling_location>
+<polling_location id="1803825">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>SILVERTON</city>
+    <line1>1557 GREENE ST</line1>
+    <state>CO</state>
+    <location_name>SAN JUAN COUNTY COURTHOUSE-3065956001</location_name>
+    <zip>81433</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004087">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>WESTMINSTER</city>
+    <line1>12200 N PECOS ST CONFERENCE ROOM</line1>
+    <state>CO</state>
+    <location_name>SC-ADAMS COUNTY ECO DEVPMNT</location_name>
+    <zip>80234</zip>
+  </address>
+</polling_location>
+<polling_location id="180600002474">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BRIGHTON</city>
+    <line1>4430 S ADAMS COUNTY PKWY</line1>
+    <state>CO</state>
+    <location_name>SC-ADAMS COUNTY GOVERNMENT CENTER</location_name>
+    <zip>80601</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004089">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>COMMERCE CITY</city>
+    <line1>7190 COLORADO BLVD</line1>
+    <state>CO</state>
+    <location_name>SC-ADCO HUMAN SVCS</location_name>
+    <zip>80022</zip>
+  </address>
+</polling_location>
+<polling_location id="180600002415">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>AURORA</city>
+    <line1>3155 N CHAMBERS ROAD UNIT C</line1>
+    <state>CO</state>
+    <location_name>SC-AURORA WORKFORCE CENTER</location_name>
+    <zip>80011</zip>
+  </address>
+</polling_location>
+<polling_location id="180600002416">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>WESTMINSTER</city>
+    <line1>8452 FEDERAL BLVD</line1>
+    <state>CO</state>
+    <location_name>SC-WESTMINSTER MOTOR VEHICLE</location_name>
+    <zip>80031</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004928">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>SILT</city>
+    <line1>680 HOME AVE</line1>
+    <state>CO</state>
+    <location_name>SILT LIBRARY</location_name>
+    <zip>81652</zip>
+  </address>
+</polling_location>
+<polling_location id="180600000161">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>COLORADO SPRINGS</city>
+    <line1>5650 INDUSTRIAL PLACE</line1>
+    <state>CO</state>
+    <location_name>SOUTHEAST BRANCH (EPC CLERK'S OFFICE)</location_name>
+    <zip>80916</zip>
+  </address>
+</polling_location>
+<polling_location id="180559">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>MONUMENT</city>
+    <line1>645 BEACON LITE RD</line1>
+    <state>CO</state>
+    <location_name>TOWN OF MONUMENT - TOWN HALL</location_name>
+    <zip>80132</zip>
+  </address>
+</polling_location>
+<polling_location id="180200002365">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>BOULDER</city>
+    <line1>CU BOULDER - UMC STUDENT RECREATION CENTER 1669 EUCLID AVE</line1>
+    <state>CO</state>
+    <location_name>UNIVERSITY OF COLORADO - UMC</location_name>
+    <zip>80309</zip>
+  </address>
+</polling_location>
+<polling_location id="180600002721">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CANON CITY</city>
+    <line1>615 MACON AVE ROOM 102</line1>
+    <state>CO</state>
+    <location_name>VENDOR ABS LOCATION</location_name>
+    <zip>81212</zip>
+  </address>
+</polling_location>
+<polling_location id="180200002709">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>405 ARGENTINE ST PO BOX 2000</line1>
+    <state>CO</state>
+    <location_name>VENDOR FILE</location_name>
+    <zip>80444</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004891">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>CASTLE ROCK</city>
+    <line1>125 STEPHANIE PLACE</line1>
+    <state>CO</state>
+    <location_name>VSPC - ELECTION OFFICE HEADQUARTERS</location_name>
+    <zip>80109</zip>
+  </address>
+</polling_location>
+<polling_location id="180600003367">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>HIGHLANDS RANCH</city>
+    <line1>9250 ZOTOS DR</line1>
+    <state>CO</state>
+    <location_name>VSPC - HIGHLANDS RANCH SHERIFF SUBSTATION</location_name>
+    <zip>80134</zip>
+  </address>
+</polling_location>
+<polling_location id="180600003348">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>LONE TREE</city>
+    <line1>9350 HERITAGE HILLS CIR</line1>
+    <state>CO</state>
+    <location_name>VSPC - LONE TREE MOTOR VEHICLE OFFICE</location_name>
+    <zip>80124</zip>
+  </address>
+</polling_location>
+<polling_location id="180600003347">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>PARKER</city>
+    <line1>20120 E MAINSTREET - CONFERENCE ROOM</line1>
+    <state>CO</state>
+    <location_name>VSPC - PARKER TOWN HALL - CONF ROOM</location_name>
+    <zip>80138</zip>
+  </address>
+</polling_location>
+<polling_location id="1804066">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>NORWOOD</city>
+    <line1>1670 NATURITA ST</line1>
+    <state>CO</state>
+    <location_name>VSPC NORWOOD COMMUNITY CENTER</location_name>
+    <zip>81423</zip>
+  </address>
+</polling_location>
+<polling_location id="1804068">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>MTN VILLAGE</city>
+    <line1>455 MOUNTAIN VILLAGE BLVD SUITE A</line1>
+    <state>CO</state>
+    <location_name>VSPC TOWN OF MOUNTAIN VILLAGE - TOWN HALL</location_name>
+    <zip>81435</zip>
+  </address>
+</polling_location>
+<polling_location id="180600002643">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>TELLURIDE</city>
+    <line1>335 W COLORADO</line1>
+    <state>CO</state>
+    <location_name>VSPC WEST WING - COUNTY ANNEX</location_name>
+    <zip>81435</zip>
+  </address>
+</polling_location>
+<polling_location id="180600005887">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <line1>NOT PROVIDED</line1>
+    <state>CO</state>
+    <location_name>VSPC-LARKSPUR FIRE DEPT</location_name>
+    <zip>NOT PROVIDED</zip>
+  </address>
+</polling_location>
+<polling_location id="180600005888">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <line1>NOT PROVIDED</line1>
+    <state>CO</state>
+    <location_name>VSPC-PARKER REC CEN</location_name>
+    <zip>NOT PROVIDED</zip>
+  </address>
+</polling_location>
+<polling_location id="180600004647">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>YUMA</city>
+    <line1>910 S MAIN ST SUITE 101</line1>
+    <state>CO</state>
+    <location_name>YUMA CITY HALL MV</location_name>
+    <zip>80759</zip>
+  </address>
+</polling_location>
+<polling_location id="180200001560">
+  <polling_hours>Check with your county clerk</polling_hours>
+  <address>
+    <city>WRAY</city>
+    <line1>310 ASH ST SUITE F</line1>
+    <state>CO</state>
+    <location_name>YUMA COUNTY COURTHOUSE</location_name>
+    <zip>80758</zip>
+  </address>
+</polling_location>
+</vip_object>

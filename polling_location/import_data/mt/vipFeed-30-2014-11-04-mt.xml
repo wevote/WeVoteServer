@@ -1,0 +1,5410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Montana Secretary of State</name>
+  <vip_id>30</vip_id>
+  <datetime>2014-09-18T09:05:21</datetime>
+  <description>Montana Secretary of State Office. This feed provides Montana statewide election information, including counties, districts, precincts, splits, and polling locations.</description>
+  <organization_url>http://MyVoterPage.mt.gov</organization_url>
+</source>
+<polling_location id="5500095">
+  <address>
+    <city>MISSOULA</city>
+    <line1>3216 RUSSELL</line1>
+    <state>MT</state>
+    <location_name>RUSSELL SCHOOL</location_name>
+    <zip>59801</zip>
+  </address>
+</polling_location>
+<polling_location id="55000200">
+  <address>
+    <city>CHINOOK</city>
+    <line1>528 OHIO ST</line1>
+    <state>MT</state>
+    <location_name>CHINOOK HIGH SCHOOL #10</location_name>
+    <zip>59523</zip>
+  </address>
+</polling_location>
+<polling_location id="550001000">
+  <address>
+    <city>MARION</city>
+    <line1>180 GOPHER LN</line1>
+    <state>MT</state>
+    <location_name>MARION FIRE HALL</location_name>
+    <zip>59925</zip>
+  </address>
+</polling_location>
+<polling_location id="550001100">
+  <address>
+    <city>DUTTON</city>
+    <line1>201 MAIN STREET EAST</line1>
+    <state>MT</state>
+    <location_name>DUTTON AMERICAN LEGION</location_name>
+    <zip>59433</zip>
+  </address>
+</polling_location>
+<polling_location id="550001200">
+  <address>
+    <city>FROID</city>
+    <line1>103 2ND STREET NORTH</line1>
+    <state>MT</state>
+    <location_name>FROID COMMUNITY CENTER</location_name>
+    <zip>59226</zip>
+  </address>
+</polling_location>
+<polling_location id="550001300">
+  <address>
+    <city>LAME DEER</city>
+    <line1>100 CHEYENNE AVENUE</line1>
+    <state>MT</state>
+    <location_name>NORTHERN CHEYENNE TRIBAL BUILDING</location_name>
+    <zip>59043</zip>
+  </address>
+</polling_location>
+<polling_location id="550001400">
+  <address>
+    <city>WHITE SULPHUR SPRINGS</city>
+    <line1>PO BOX 442</line1>
+    <state>MT</state>
+    <location_name>CITY HALL-B</location_name>
+    <zip>59645</zip>
+  </address>
+</polling_location>
+<polling_location id="55000197">
+  <address>
+    <city>TURNER</city>
+    <line1>190 1ST ST E</line1>
+    <state>MT</state>
+    <location_name>TURNER SCHOOL #1</location_name>
+    <zip>59542</zip>
+  </address>
+</polling_location>
+<polling_location id="55000198">
+  <address>
+    <city>HARLEM</city>
+    <line1>210 CHIPPEWA AVE FORT BELKNAP AGENCY</line1>
+    <state>MT</state>
+    <location_name>SACRED HEART CATHOLIC CHURCH #3</location_name>
+    <zip>59526</zip>
+  </address>
+</polling_location>
+<polling_location id="55000199">
+  <address>
+    <city>HARLEM</city>
+    <line1>610 1ST AVE SE</line1>
+    <state>MT</state>
+    <location_name>HARLEM HIGH SCHOOL #8</location_name>
+    <zip>59526</zip>
+  </address>
+</polling_location>
+<polling_location id="55000201">
+  <address>
+    <city>CHINOOK</city>
+    <line1>528 OHIO ST</line1>
+    <state>MT</state>
+    <location_name>CHINOOK HIGH SCHOOL #11</location_name>
+    <zip>59523</zip>
+  </address>
+</polling_location>
+<polling_location id="55000203">
+  <address>
+    <city>HAYS</city>
+    <line1>129 JOHN CAPTURE ROAD</line1>
+    <state>MT</state>
+    <location_name>JOHN CAPTURE CENTER #15</location_name>
+    <zip>59527</zip>
+  </address>
+</polling_location>
+<polling_location id="55000206">
+  <address>
+    <city>CHINOOK</city>
+    <line1>528 OHIO ST</line1>
+    <state>MT</state>
+    <location_name>CHINOOK HIGH SCHOOL #13</location_name>
+    <zip>59523</zip>
+  </address>
+</polling_location>
+<polling_location id="55000207">
+  <address>
+    <city>HARLEM</city>
+    <line1>210 CHIPPEWA AVE FORT BELKNAP AGENCY</line1>
+    <state>MT</state>
+    <location_name>SACRED HEART CATHOLIC CHURCH #9</location_name>
+    <zip>59526</zip>
+  </address>
+</polling_location>
+<polling_location id="55000208">
+  <address>
+    <city>CLANCY</city>
+    <line1>4 N. MAIN / BEHIND MUSEUM</line1>
+    <state>MT</state>
+    <location_name>CLANCY SCHOOL OLD GYM</location_name>
+    <zip>59634</zip>
+  </address>
+</polling_location>
+<polling_location id="55000209">
+  <address>
+    <city>JEFFERSON CITY</city>
+    <line1>21 SPRING ST</line1>
+    <state>MT</state>
+    <location_name>JEFFERSON CITY FIRE HALL</location_name>
+    <zip>59638</zip>
+  </address>
+</polling_location>
+<polling_location id="55000210">
+  <address>
+    <city>BOULDER</city>
+    <line1>27 N. WHITETAIL RD JEFFERSON COUNTY FAIRGROUNDS</line1>
+    <state>MT</state>
+    <location_name>VOLUNTEER HALL -FAIRGROUNDS-BOULDER</location_name>
+    <zip>59632</zip>
+  </address>
+</polling_location>
+<polling_location id="55000211">
+  <address>
+    <city>WHITEHALL</city>
+    <line1>9 N. DIVISION ST.</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY HALL</location_name>
+    <zip>59759</zip>
+  </address>
+</polling_location>
+<polling_location id="55000212">
+  <address>
+    <city>WHITEHALL</city>
+    <line1>9 N DIVISION ST</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY HALL-PREC5</location_name>
+    <zip>59759</zip>
+  </address>
+</polling_location>
+<polling_location id="55000213">
+  <address>
+    <city>BOULDER</city>
+    <line1>27 N. WHITETAIL RD JEFFERSON COUNTY FAIRGROUNDS</line1>
+    <state>MT</state>
+    <location_name>VOLUNTEER HALL-FAIRGROUNDS-BOULDER</location_name>
+    <zip>59632</zip>
+  </address>
+</polling_location>
+<polling_location id="55000214">
+  <address>
+    <city>WHITEHALL</city>
+    <line1>9 N. DIVISION</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY HALL-WHITEHALL</location_name>
+    <zip>59759</zip>
+  </address>
+</polling_location>
+<polling_location id="55000215">
+  <address>
+    <city>BASIN</city>
+    <line1>30 N. QUARTZ ST.</line1>
+    <state>MT</state>
+    <location_name>BASIN SCHOOL</location_name>
+    <zip>59631</zip>
+  </address>
+</polling_location>
+<polling_location id="55000216">
+  <address>
+    <city>ELK PARK</city>
+    <line1>309 EAST ELK PARK RD</line1>
+    <state>MT</state>
+    <location_name>ELK PARK FIRE HALL</location_name>
+    <zip>59701</zip>
+  </address>
+</polling_location>
+<polling_location id="55000217">
+  <address>
+    <city>CLANCY</city>
+    <line1>4 N. MAIN / BEHIND THE MUESUM</line1>
+    <state>MT</state>
+    <location_name>CLANCY SCHOOL GYM 20</location_name>
+    <zip>59634</zip>
+  </address>
+</polling_location>
+<polling_location id="55000218">
+  <address>
+    <city>MONTANA CITY</city>
+    <line1>11 MCCLELLAN CREEK RD</line1>
+    <state>MT</state>
+    <location_name>MONTANA CITY SCHOOL 27</location_name>
+    <zip>59634</zip>
+  </address>
+</polling_location>
+<polling_location id="55000219">
+  <address>
+    <city>WHITEHALL</city>
+    <line1>9 N. DIVISION</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY HALL-WTHL</location_name>
+    <zip>59759</zip>
+  </address>
+</polling_location>
+<polling_location id="55000220">
+  <address>
+    <city>WILLOW CREEK</city>
+    <line1>WILLOW CREEK</line1>
+    <state>MT</state>
+    <location_name>WILLOW CREEK</location_name>
+    <zip>59760</zip>
+  </address>
+</polling_location>
+<polling_location id="55000223">
+  <address>
+    <city>CLANCY</city>
+    <line1>CLANCY</line1>
+    <state>MT</state>
+    <location_name>CLANCY SCHOOL</location_name>
+    <zip>59634</zip>
+  </address>
+</polling_location>
+<polling_location id="55000224">
+  <address>
+    <city>BOULDER</city>
+    <line1>27 N. WHITETAIL RD.</line1>
+    <state>MT</state>
+    <location_name>VOLUNTEER HALL-BLDER</location_name>
+    <zip>59632</zip>
+  </address>
+</polling_location>
+<polling_location id="55000225">
+  <address>
+    <city>WHITEHALL</city>
+    <line1>9 N. DIVISION</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY HALL-WHT</location_name>
+    <zip>59759</zip>
+  </address>
+</polling_location>
+<polling_location id="55000377">
+  <address>
+    <city>WEST YELLOWSTONE</city>
+    <line1>10 GEYSER ST</line1>
+    <state>MT</state>
+    <location_name>POVAH CENTER</location_name>
+    <zip>59758</zip>
+  </address>
+</polling_location>
+<polling_location id="55000378">
+  <address>
+    <city>BIG SKY</city>
+    <line1>561 LITTLE COYOTE RD</line1>
+    <state>MT</state>
+    <location_name>BIG SKY WATER/SEWER OFFICE</location_name>
+    <zip>59716</zip>
+  </address>
+</polling_location>
+<polling_location id="55000379">
+  <address>
+    <city>GALLATIN GATEWAY</city>
+    <line1>145 MILL ST</line1>
+    <state>MT</state>
+    <location_name>GALLATIN GATEWAY COMM CTR</location_name>
+    <zip>59730</zip>
+  </address>
+</polling_location>
+<polling_location id="55000381">
+  <address>
+    <city>BOZEMAN</city>
+    <line1>2152 W GRAF</line1>
+    <state>MT</state>
+    <location_name>HOPE LUTHERAN FIRESIDE RM</location_name>
+    <zip>59718</zip>
+  </address>
+</polling_location>
+<polling_location id="55000384">
+  <address>
+    <city>THREE FORKS</city>
+    <line1>212 E NEAL ST</line1>
+    <state>MT</state>
+    <location_name>THREE FORKS HIGH SCHOOL</location_name>
+    <zip>59752</zip>
+  </address>
+</polling_location>
+<polling_location id="55000385">
+  <address>
+    <city>MANHATTAN</city>
+    <line1>8000 CHURCHILL RD</line1>
+    <state>MT</state>
+    <location_name>MANHATTAN CHRISTIAN SCHOOL</location_name>
+    <zip>59741</zip>
+  </address>
+</polling_location>
+<polling_location id="55000386">
+  <address>
+    <city>MANHATTAN</city>
+    <line1>200 W FULTON AVE</line1>
+    <state>MT</state>
+    <location_name>MANHATTAN HIGH SCHL</location_name>
+    <zip>59741</zip>
+  </address>
+</polling_location>
+<polling_location id="55000387">
+  <address>
+    <city>BELGRADE</city>
+    <line1>101 RIVER ROCK RD</line1>
+    <state>MT</state>
+    <location_name>RIVER ROCK COMM CTR</location_name>
+    <zip>59714</zip>
+  </address>
+</polling_location>
+<polling_location id="55000393">
+  <address>
+    <city>BOZEMAN</city>
+    <line1>8081 BRIDGER CANYON RD</line1>
+    <state>MT</state>
+    <location_name>BRIDGER CANYON FIRE STATION</location_name>
+    <zip>59715</zip>
+  </address>
+</polling_location>
+<polling_location id="55000398">
+  <address>
+    <city>BOZEMAN</city>
+    <line1>2152 W. GRAF</line1>
+    <state>MT</state>
+    <location_name>HOPE LUTHERAN GYM</location_name>
+    <zip>59718</zip>
+  </address>
+</polling_location>
+<polling_location id="55000402">
+  <address>
+    <city>BELGRADE</city>
+    <line1>220 SPOONER RD</line1>
+    <state>MT</state>
+    <location_name>BELGRADE SPECL EVENTS CNTR</location_name>
+    <zip>59714</zip>
+  </address>
+</polling_location>
+<polling_location id="55000415">
+  <address>
+    <city>BOZEMAN</city>
+    <line1>TAMARACK &amp; BLACK</line1>
+    <state>MT</state>
+    <location_name>FAIRGROUNDS BLDG 3</location_name>
+    <zip>59715</zip>
+  </address>
+</polling_location>
+<polling_location id="55000420">
+  <address>
+    <city>BOZEMAN</city>
+    <line1>2152 W. GRAF</line1>
+    <state>MT</state>
+    <location_name>HOPE LUTHERAN CLASSRM 123</location_name>
+    <zip>59718</zip>
+  </address>
+</polling_location>
+<polling_location id="55000437">
+  <address>
+    <city>BRADY</city>
+    <line1>303 Central Avenue</line1>
+    <state>MT</state>
+    <location_name>BRADY COMMUNITY CENTER</location_name>
+    <zip>59416</zip>
+  </address>
+</polling_location>
+<polling_location id="55000438">
+  <address>
+    <city>HEART BUTTE</city>
+    <line1>Heart Butte School Road</line1>
+    <state>MT</state>
+    <location_name>HEART BUTTE HIGH SCHOOL</location_name>
+    <zip>59448</zip>
+  </address>
+</polling_location>
+<polling_location id="55000439">
+  <address>
+    <city>DUPUYER</city>
+    <line1>201 Gillette Ave E</line1>
+    <state>MT</state>
+    <location_name>DUPUYER COMMUNITY CENTER</location_name>
+    <zip>59432</zip>
+  </address>
+</polling_location>
+<polling_location id="55000440">
+  <address>
+    <city>CONRAD</city>
+    <line1>400 N VIRGINIA ST</line1>
+    <state>MT</state>
+    <location_name>PONDERA CENTER 24</location_name>
+    <zip>59425</zip>
+  </address>
+</polling_location>
+<polling_location id="55000441">
+  <address>
+    <city>CONRAD</city>
+    <line1>400 N VIRGINIA ST</line1>
+    <state>MT</state>
+    <location_name>PONDERA CENTER 27</location_name>
+    <zip>59425</zip>
+  </address>
+</polling_location>
+<polling_location id="55000442">
+  <address>
+    <city>CONRAD</city>
+    <line1>400 N VIRGINIA ST</line1>
+    <state>MT</state>
+    <location_name>PONDERA CENTER 29</location_name>
+    <zip>59425</zip>
+  </address>
+</polling_location>
+<polling_location id="55000443">
+  <address>
+    <city>VALIER</city>
+    <line1>514 Montana St</line1>
+    <state>MT</state>
+    <location_name>VALIER CIVIC CENTER</location_name>
+    <zip>59486</zip>
+  </address>
+</polling_location>
+<polling_location id="55000453">
+  <address>
+    <city>HELENA</city>
+    <line1>715 N FEE</line1>
+    <state>MT</state>
+    <location_name>EAGLES MANOR</location_name>
+    <zip>59601</zip>
+  </address>
+</polling_location>
+<polling_location id="55000458">
+  <address>
+    <city>HELENA</city>
+    <line1>1497 SIERRA RD E</line1>
+    <state>MT</state>
+    <location_name>ROSSITER SCHOOL</location_name>
+    <zip>59602</zip>
+  </address>
+</polling_location>
+<polling_location id="55000461">
+  <address>
+    <city>CANYON CREEK</city>
+    <line1>7435 DUFFY LANE</line1>
+    <state>MT</state>
+    <location_name>CANYON CREEK SCHOOL</location_name>
+    <zip>59633</zip>
+  </address>
+</polling_location>
+<polling_location id="55000462">
+  <address>
+    <city>LINCOLN</city>
+    <line1>404 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>LINCOLN COMMUNITY HALL</location_name>
+    <zip>59639</zip>
+  </address>
+</polling_location>
+<polling_location id="55000464">
+  <address>
+    <city>WOLF CREEK</city>
+    <line1>5400 HWY 434</line1>
+    <state>MT</state>
+    <location_name>DEARBORN COMMUNITY CNTR</location_name>
+    <zip>59648</zip>
+  </address>
+</polling_location>
+<polling_location id="55000466">
+  <address>
+    <city>WOLF CREEK</city>
+    <line1>150 WALSH STREET</line1>
+    <state>MT</state>
+    <location_name>WOLF CREEK SCHOOL</location_name>
+    <zip>59648</zip>
+  </address>
+</polling_location>
+<polling_location id="55000469">
+  <address>
+    <city>HELENA</city>
+    <line1>6040 NELSON ROAD</line1>
+    <state>MT</state>
+    <location_name>YORK COMMUNITY CENTER</location_name>
+    <zip>59601</zip>
+  </address>
+</polling_location>
+<polling_location id="55000474">
+  <address>
+    <city>HELENA</city>
+    <line1>2701 PROSPECT AVE</line1>
+    <state>MT</state>
+    <location_name>MT DEPT OF TRANSPORTATION</location_name>
+    <zip>59601</zip>
+  </address>
+</polling_location>
+<polling_location id="55000476">
+  <address>
+    <city>HELENA</city>
+    <line1>1165 FORESTVALE RD</line1>
+    <state>MT</state>
+    <location_name>WEST VALLEY FIRE HALL</location_name>
+    <zip>59602</zip>
+  </address>
+</polling_location>
+<polling_location id="55000482">
+  <address>
+    <city>HELENA</city>
+    <line1>340 NEILL</line1>
+    <state>MT</state>
+    <location_name>CIVIC CENTER BALLROOM</location_name>
+    <zip>59601</zip>
+  </address>
+</polling_location>
+<polling_location id="55000484">
+  <address>
+    <city>HELENA</city>
+    <line1>120 S LAST CHANCE GULCH</line1>
+    <state>MT</state>
+    <location_name>LEWIS AND CLARK LIBRARY</location_name>
+    <zip>59601</zip>
+  </address>
+</polling_location>
+<polling_location id="55000485">
+  <address>
+    <city>HELENA</city>
+    <line1>98 WEST CUSTER AVE</line1>
+    <state>MT</state>
+    <location_name>EXHIBIT BLDG-ENTRY HALL-FAIRGROUNDS</location_name>
+    <zip>59601</zip>
+  </address>
+</polling_location>
+<polling_location id="55000487">
+  <address>
+    <city>HELENA</city>
+    <line1>2801 COLONIAL DR</line1>
+    <state>MT</state>
+    <location_name>HUNTERS POINTE</location_name>
+    <zip>59601</zip>
+  </address>
+</polling_location>
+<polling_location id="55000527">
+  <address>
+    <city>HELENA</city>
+    <line1>915 SADDLE DRIVE</line1>
+    <state>MT</state>
+    <location_name>TOUCHMARK</location_name>
+    <zip>59601</zip>
+  </address>
+</polling_location>
+<polling_location id="55000541">
+  <address>
+    <city>HELENA</city>
+    <line1>900 LINCOLN RD W</line1>
+    <state>MT</state>
+    <location_name>JIM DARCY SCHOOL</location_name>
+    <zip>59602</zip>
+  </address>
+</polling_location>
+<polling_location id="55000606">
+  <address>
+    <city>LODGE GRASS</city>
+    <line1>HARDING AVE &amp; WOLF LAYS DOWN</line1>
+    <state>MT</state>
+    <location_name>LG SENIOR CENTER</location_name>
+    <zip>59050</zip>
+  </address>
+</polling_location>
+<polling_location id="55000610">
+  <address>
+    <city>HARDIN</city>
+    <line1>317 N CUSTER AVE</line1>
+    <state>MT</state>
+    <location_name>PERITSA- SR CENTER</location_name>
+    <zip>59034</zip>
+  </address>
+</polling_location>
+<polling_location id="55000611">
+  <address>
+    <city>FORT SMITH</city>
+    <line1>5 AVE B</line1>
+    <state>MT</state>
+    <location_name>NAT'L PARK SERV BLDG - FORT</location_name>
+    <zip>59035</zip>
+  </address>
+</polling_location>
+<polling_location id="55000612">
+  <address>
+    <city>HARDIN</city>
+    <line1>317 N CUSTER AVE</line1>
+    <state>MT</state>
+    <location_name>FOSTER -3 SR CENTER</location_name>
+    <zip>59034</zip>
+  </address>
+</polling_location>
+<polling_location id="55000613">
+  <address>
+    <city>HARDIN</city>
+    <line1>317 N CUSTER AVE</line1>
+    <state>MT</state>
+    <location_name>WHITMAN - SR CENTER</location_name>
+    <zip>59034</zip>
+  </address>
+</polling_location>
+<polling_location id="55000614">
+  <address>
+    <city>CROW AGENCY</city>
+    <line1>8470 S CHILD STREET</line1>
+    <state>MT</state>
+    <location_name>CROW SCHOOL -  RENO</location_name>
+    <zip>59022</zip>
+  </address>
+</polling_location>
+<polling_location id="55000615">
+  <address>
+    <city>BIG HORN</city>
+    <line1>22997 E SARPY ROAD</line1>
+    <state>MT</state>
+    <location_name>SPRING CRK SCHL -  SARPY</location_name>
+    <zip>59010</zip>
+  </address>
+</polling_location>
+<polling_location id="55000616">
+  <address>
+    <city>CROW AGENCY</city>
+    <line1>8470 S. CHILD STREET</line1>
+    <state>MT</state>
+    <location_name>CROW SCHL -  CROW AGNCY</location_name>
+    <zip>59022</zip>
+  </address>
+</polling_location>
+<polling_location id="55000617">
+  <address>
+    <city>SAINT XAVIER</city>
+    <line1>18348 S MISSION ROAD</line1>
+    <state>MT</state>
+    <location_name>PRETTY EAGLE SCHL -  ST X</location_name>
+    <zip>59075</zip>
+  </address>
+</polling_location>
+<polling_location id="55000618">
+  <address>
+    <city>DECKER</city>
+    <line1>38966 E. TONGUE LANE</line1>
+    <state>MT</state>
+    <location_name>DECKER SCHOOL -  DECKER</location_name>
+    <zip>59025</zip>
+  </address>
+</polling_location>
+<polling_location id="55000619">
+  <address>
+    <city>WYOLA</city>
+    <line1>41220 S. MONDEL AVE.</line1>
+    <state>MT</state>
+    <location_name>WYOLA SCHOOL - WYOLA</location_name>
+    <zip>59089</zip>
+  </address>
+</polling_location>
+<polling_location id="55000620">
+  <address>
+    <city>PRYOR</city>
+    <line1>45089 W. SCHOOL YARD STREET</line1>
+    <state>MT</state>
+    <location_name>PRYOR ELEM SCH - PRYOR</location_name>
+    <zip>59066</zip>
+  </address>
+</polling_location>
+<polling_location id="55000621">
+  <address>
+    <city>HARDIN</city>
+    <line1>611 WEST 5TH</line1>
+    <state>MT</state>
+    <location_name>AUDITORIUM - HARDIN</location_name>
+    <zip>59034</zip>
+  </address>
+</polling_location>
+<polling_location id="55000623">
+  <address>
+    <city>BUSBY</city>
+    <line1>13152 S. B STREET</line1>
+    <state>MT</state>
+    <location_name>BUSBY SCHOOL -  BUSBY</location_name>
+    <zip>59016</zip>
+  </address>
+</polling_location>
+<polling_location id="55000628">
+  <address>
+    <city>LODGE GRASS</city>
+    <line1>11448 E. LODGE GRASS SCHOOL ROAD</line1>
+    <state>MT</state>
+    <location_name>LG HIGH SCHOOL</location_name>
+    <zip>59050</zip>
+  </address>
+</polling_location>
+<polling_location id="55000630">
+  <address>
+    <city>CROW AGENCY</city>
+    <line1>8470 S. CHILD STREET</line1>
+    <state>MT</state>
+    <location_name>CROW AGENCY SCHL - Z1-A</location_name>
+    <zip>59022</zip>
+  </address>
+</polling_location>
+<polling_location id="55000632">
+  <address>
+    <city>BUSBY</city>
+    <line1>13152 S. B STREET</line1>
+    <state>MT</state>
+    <location_name>BUSBY SCHL LIBRARY - Z2-A</location_name>
+    <zip>59016</zip>
+  </address>
+</polling_location>
+<polling_location id="55000643">
+  <address>
+    <city>BUSBY</city>
+    <line1>13152 S. B STREET</line1>
+    <state>MT</state>
+    <location_name>BUSBY SCHOOL  - 17H6</location_name>
+    <zip>59016</zip>
+  </address>
+</polling_location>
+<polling_location id="55000644">
+  <address>
+    <city>HARDIN</city>
+    <line1>317 N CUSTER AVE</line1>
+    <state>MT</state>
+    <location_name>NORTH WHITMAN- 4N SR CENTER</location_name>
+    <zip>59034</zip>
+  </address>
+</polling_location>
+<polling_location id="55000645">
+  <address>
+    <city>HARDIN</city>
+    <line1>317 N CUSTER AVE</line1>
+    <state>MT</state>
+    <location_name>EAST WHITMAN - 4E SR CENTER</location_name>
+    <zip>59304</zip>
+  </address>
+</polling_location>
+<polling_location id="55000649">
+  <address>
+    <city>CARTER</city>
+    <line1>175 2ND AVENUE</line1>
+    <state>MT</state>
+    <location_name>CARTER COMMUNITY HALL</location_name>
+    <zip>59420</zip>
+  </address>
+</polling_location>
+<polling_location id="55000651">
+  <address>
+    <city>HIGHWOOD</city>
+    <line1>152 MAIN STREET SOUTH</line1>
+    <state>MT</state>
+    <location_name>HIGHWOOD COMMUNITY HALL</location_name>
+    <zip>59450</zip>
+  </address>
+</polling_location>
+<polling_location id="55000652">
+  <address>
+    <city>LOMA</city>
+    <line1>207 3RD AVENUE</line1>
+    <state>MT</state>
+    <location_name>LOMA COMMUNITY HALL</location_name>
+    <zip>59460</zip>
+  </address>
+</polling_location>
+<polling_location id="55000653">
+  <address>
+    <city>BIG SANDY</city>
+    <line1>115 JOHANNES AVENUE</line1>
+    <state>MT</state>
+    <location_name>BIG SANDY TOWN HALL</location_name>
+    <zip>59520</zip>
+  </address>
+</polling_location>
+<polling_location id="55000655">
+  <address>
+    <city>GERALDINE</city>
+    <line1>420 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>GERALDINE SENIOR CITIZEN</location_name>
+    <zip>59446</zip>
+  </address>
+</polling_location>
+<polling_location id="55000657">
+  <address>
+    <city>BOX ELDER</city>
+    <line1>8294 UPPER BOX ELDER ROAD ROCKY BOY RESERVATION</line1>
+    <state>MT</state>
+    <location_name>NEW STONE CHILD COLLEGE</location_name>
+    <zip>59521</zip>
+  </address>
+</polling_location>
+<polling_location id="55000664">
+  <address>
+    <city>WORDEN</city>
+    <line1>1477 ASH STREET</line1>
+    <state>MT</state>
+    <location_name>HUNTLEY PROJECT ELEM. GYM</location_name>
+    <zip>59088</zip>
+  </address>
+</polling_location>
+<polling_location id="55000669">
+  <address>
+    <city>BROADVIEW</city>
+    <line1>13725 5TH</line1>
+    <state>MT</state>
+    <location_name>BROADVIEW COMMUNITY CENTER</location_name>
+    <zip>59015</zip>
+  </address>
+</polling_location>
+<polling_location id="55000675">
+  <address>
+    <city>BILLINGS</city>
+    <line1>3652 BLUE CREEK ROAD</line1>
+    <state>MT</state>
+    <location_name>BLUE CREEK SCHOOL</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000678">
+  <address>
+    <city>BILLINGS</city>
+    <line1>3139 DUCK CREEK ROAD</line1>
+    <state>MT</state>
+    <location_name>CANYON CREEK SCHOOL</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000679">
+  <address>
+    <city>BILLINGS</city>
+    <line1>32ND ST W &amp; CENTRAL AVE</line1>
+    <state>MT</state>
+    <location_name>FAITH EVANGELICAL CHURCH</location_name>
+    <zip>59102</zip>
+  </address>
+</polling_location>
+<polling_location id="55000682">
+  <address>
+    <city>BILLINGS</city>
+    <line1>360 NORTH 23RD STREET</line1>
+    <state>MT</state>
+    <location_name>BILLINGS COMMUNITY CENTER</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000683">
+  <address>
+    <city>CUSTER</city>
+    <line1>210 2ND AVENUE</line1>
+    <state>MT</state>
+    <location_name>CUSTER SCHOOL GYM</location_name>
+    <zip>59024</zip>
+  </address>
+</polling_location>
+<polling_location id="55000684">
+  <address>
+    <city>BILLINGS</city>
+    <line1>1532 S 64TH ST WEST</line1>
+    <state>MT</state>
+    <location_name>ELDER GROVE SCHOOL</location_name>
+    <zip>59106</zip>
+  </address>
+</polling_location>
+<polling_location id="55000685">
+  <address>
+    <city>BILLINGS</city>
+    <line1>6416 ELYSIAN ROAD</line1>
+    <state>MT</state>
+    <location_name>ELYSIAN SCHOOL</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000690">
+  <address>
+    <city>HUNTLEY</city>
+    <line1>150 COOPERATIVE WAY</line1>
+    <state>MT</state>
+    <location_name>YELLOWSTONE VALLEY ELEC. CO-OP 43A</location_name>
+    <zip>59037</zip>
+  </address>
+</polling_location>
+<polling_location id="55000691">
+  <address>
+    <city>BILLINGS</city>
+    <line1>2907 ROUNDUP ROAD</line1>
+    <state>MT</state>
+    <location_name>INDEPENDENT SCHOOL</location_name>
+    <zip>59105</zip>
+  </address>
+</polling_location>
+<polling_location id="55000693">
+  <address>
+    <city>BILLINGS</city>
+    <line1>1932 US HWY 87</line1>
+    <state>MT</state>
+    <location_name>LOCKWOOD SCHOOL 42A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000694">
+  <address>
+    <city>LAUREL</city>
+    <line1>203 E 8TH</line1>
+    <state>MT</state>
+    <location_name>LAUREL H.S. 57C</location_name>
+    <zip>59044</zip>
+  </address>
+</polling_location>
+<polling_location id="55000698">
+  <address>
+    <city>BILLINGS</city>
+    <line1>8824 PRYOR ROAD</line1>
+    <state>MT</state>
+    <location_name>MORIN SCHOOL</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000701">
+  <address>
+    <city>BILLINGS</city>
+    <line1>1937 DOVER ROAD</line1>
+    <state>MT</state>
+    <location_name>PIONEER SCHOOL</location_name>
+    <zip>59105</zip>
+  </address>
+</polling_location>
+<polling_location id="55000702">
+  <address>
+    <city>BILLINGS</city>
+    <line1>1603 GRAND AVENUE</line1>
+    <state>MT</state>
+    <location_name>WEST PARK PLAZA</location_name>
+    <zip>59102</zip>
+  </address>
+</polling_location>
+<polling_location id="55000706">
+  <address>
+    <city>BILLINGS</city>
+    <line1>3700 MADISON AVENUE</line1>
+    <state>MT</state>
+    <location_name>RIVERSIDE JR. HIGH SCH</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000712">
+  <address>
+    <city>SHEPHERD</city>
+    <line1>7842 SHEPHERD ROAD</line1>
+    <state>MT</state>
+    <location_name>SHEPHERD H.S.</location_name>
+    <zip>59079</zip>
+  </address>
+</polling_location>
+<polling_location id="55000718">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #10</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000719">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #11</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000720">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #13</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000721">
+  <address>
+    <city>MOORE</city>
+    <line1>302 FERGUS AVE</line1>
+    <state>MT</state>
+    <location_name>MOORE FIRE HALL #14</location_name>
+    <zip>59464</zip>
+  </address>
+</polling_location>
+<polling_location id="55000723">
+  <address>
+    <city>WINIFRED</city>
+    <line1>200 MAIN ST</line1>
+    <state>MT</state>
+    <location_name>WINIFRED COMMUNITY CENTER #16</location_name>
+    <zip>59489</zip>
+  </address>
+</polling_location>
+<polling_location id="55000724">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #17</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000725">
+  <address>
+    <city>ROY</city>
+    <line1>500 DAVIS ST</line1>
+    <state>MT</state>
+    <location_name>ROY SCHOOL #18</location_name>
+    <zip>59471</zip>
+  </address>
+</polling_location>
+<polling_location id="55000727">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #03</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000728">
+  <address>
+    <city>DENTON</city>
+    <line1>515 BROADWAY ST</line1>
+    <state>MT</state>
+    <location_name>DENTON TOWN HALL #4</location_name>
+    <zip>59430</zip>
+  </address>
+</polling_location>
+<polling_location id="55000729">
+  <address>
+    <city>GRASS RANGE</city>
+    <line1>310 E 2ND ST</line1>
+    <state>MT</state>
+    <location_name>GRASS RANGE SCHOOL #5</location_name>
+    <zip>59032</zip>
+  </address>
+</polling_location>
+<polling_location id="55000730">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #06</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000731">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #07</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000739">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>19A4 EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000740">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>19E EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000744">
+  <address>
+    <city>FORT SHAW</city>
+    <line1>13319 MT HWY 200</line1>
+    <state>MT</state>
+    <location_name>19A2 SUN RIVER SENIOR CENTER</location_name>
+    <zip>59443</zip>
+  </address>
+</polling_location>
+<polling_location id="55000745">
+  <address>
+    <city>BELT</city>
+    <line1>19 CASTNER ST</line1>
+    <state>MT</state>
+    <location_name>19D BELT SENIOR CENTER</location_name>
+    <zip>59412</zip>
+  </address>
+</polling_location>
+<polling_location id="55000746">
+  <address>
+    <city>BELT</city>
+    <line1>19 CASTNER ST</line1>
+    <state>MT</state>
+    <location_name>30 BELT SENIOR CENTER</location_name>
+    <zip>59412</zip>
+  </address>
+</polling_location>
+<polling_location id="55000747">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>19C CENTERVILLE PUBLIC SCHOOL</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000749">
+  <address>
+    <city>SAND COULEE</city>
+    <line1>693 STOCKETT RD</line1>
+    <state>MT</state>
+    <location_name>19B1 CENTERVILLE PUBLIC SCHOOL</location_name>
+    <zip>59472</zip>
+  </address>
+</polling_location>
+<polling_location id="55000750">
+  <address>
+    <city>CASCADE</city>
+    <line1>13 FRONT ST</line1>
+    <state>MT</state>
+    <location_name>19B2 CASCADE - WEDSWORTH HALL</location_name>
+    <zip>59421</zip>
+  </address>
+</polling_location>
+<polling_location id="55000751">
+  <address>
+    <city>ULM</city>
+    <line1>6 WEST ULM RD</line1>
+    <state>MT</state>
+    <location_name>19A3 ULM PUBLIC SCHOOL</location_name>
+    <zip>59485</zip>
+  </address>
+</polling_location>
+<polling_location id="55000752">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>20A EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000753">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>20B EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000755">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>21A EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000756">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>21B EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000758">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>22A EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000759">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>22B EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000760">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>22C EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000761">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>23 EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000764">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>24 EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000767">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>25 EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000771">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>26A EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000772">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>26B EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000774">
+  <address>
+    <city>VAUGHN</city>
+    <line1>14 4TH ST</line1>
+    <state>MT</state>
+    <location_name>19A1 VAUGHN FIRE STATION</location_name>
+    <zip>59487</zip>
+  </address>
+</polling_location>
+<polling_location id="55000775">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>400 3RD ST NW</line1>
+    <state>MT</state>
+    <location_name>27 EXHIBITION HALL/EXPO PARK</location_name>
+    <zip>59404</zip>
+  </address>
+</polling_location>
+<polling_location id="55000776">
+  <address>
+    <city>COLUMBUS</city>
+    <line1>328 E 5TH AVE N</line1>
+    <state>MT</state>
+    <location_name>STILLWATER PAVILLION</location_name>
+    <zip>59019</zip>
+  </address>
+</polling_location>
+<polling_location id="55000777">
+  <address>
+    <city>PARK CITY</city>
+    <line1>19 2ND AVE. SW</line1>
+    <state>MT</state>
+    <location_name>PARK CITY CIVIC CENTER</location_name>
+    <zip>59063</zip>
+  </address>
+</polling_location>
+<polling_location id="55000778">
+  <address>
+    <city>REED POINT</city>
+    <line1>308 CENTRAL AVENUE SW</line1>
+    <state>MT</state>
+    <location_name>REED POINT HIGH SCHOOL LIBRARY</location_name>
+    <zip>59069</zip>
+  </address>
+</polling_location>
+<polling_location id="55000779">
+  <address>
+    <city>MOLT</city>
+    <line1>214 LAKE AVE.</line1>
+    <state>MT</state>
+    <location_name>MOLT SCHOOL</location_name>
+    <zip>59057</zip>
+  </address>
+</polling_location>
+<polling_location id="55000780">
+  <address>
+    <city>RAPELJE</city>
+    <line1>714 MAIN</line1>
+    <state>MT</state>
+    <location_name>RAPELJE HIGH SCHOOL</location_name>
+    <zip>59067</zip>
+  </address>
+</polling_location>
+<polling_location id="55000781">
+  <address>
+    <city>NYE</city>
+    <line1>2033 NYE ROAD</line1>
+    <state>MT</state>
+    <location_name>NYE FIRE HALL</location_name>
+    <zip>59061</zip>
+  </address>
+</polling_location>
+<polling_location id="55000782">
+  <address>
+    <city>FISHTAIL</city>
+    <line1>21 WEST MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>FISHTAIL COMMUNITY CENTER</location_name>
+    <zip>59028</zip>
+  </address>
+</polling_location>
+<polling_location id="55000783">
+  <address>
+    <city>ABSAROKEE</city>
+    <line1>327 S. WOODARD AVE.</line1>
+    <state>MT</state>
+    <location_name>ABSAROKEE ELEM SCHOOL GYM</location_name>
+    <zip>59001</zip>
+  </address>
+</polling_location>
+<polling_location id="55000784">
+  <address>
+    <city>JOLIET</city>
+    <line1>209 FRONT ST</line1>
+    <state>MT</state>
+    <location_name>JOLIET COMMUNITY CENTER</location_name>
+    <zip>59041</zip>
+  </address>
+</polling_location>
+<polling_location id="55000785">
+  <address>
+    <city>JOLIET</city>
+    <line1>209 E. FRONT</line1>
+    <state>MT</state>
+    <location_name>P2 JOLIET COMMUNITY CENTER</location_name>
+    <zip>59041</zip>
+  </address>
+</polling_location>
+<polling_location id="55000786">
+  <address>
+    <city>JOLIET</city>
+    <line1>209 E FRONT</line1>
+    <state>MT</state>
+    <location_name>P3 JOLIET COMMUNITY CENTER</location_name>
+    <zip>59041</zip>
+  </address>
+</polling_location>
+<polling_location id="55000788">
+  <address>
+    <city>BRIDGER</city>
+    <line1>427 W PARK</line1>
+    <state>MT</state>
+    <location_name>P5 BRIDGER HIGH SCHOOL</location_name>
+    <zip>59014</zip>
+  </address>
+</polling_location>
+<polling_location id="55000789">
+  <address>
+    <city>BELFRY</city>
+    <line1>26 WISCONSIN</line1>
+    <state>MT</state>
+    <location_name>BELFRY ELEMENTARY SCHOOL</location_name>
+    <zip>59008</zip>
+  </address>
+</polling_location>
+<polling_location id="55000792">
+  <address>
+    <city>RED LODGE</city>
+    <line1>214 W 14TH</line1>
+    <state>MT</state>
+    <location_name>RED LODGE CIVIC CENTER9</location_name>
+    <zip>59068</zip>
+  </address>
+</polling_location>
+<polling_location id="55000793">
+  <address>
+    <city>RED LODGE</city>
+    <line1>214 W 14TH</line1>
+    <state>MT</state>
+    <location_name>RED LODGE CIVIC CENTER10</location_name>
+    <zip>59068</zip>
+  </address>
+</polling_location>
+<polling_location id="55000794">
+  <address>
+    <city>RED LODGE</city>
+    <line1>214 W 14TH</line1>
+    <state>MT</state>
+    <location_name>RED LODGE CIVIC CENTER11</location_name>
+    <zip>59068</zip>
+  </address>
+</polling_location>
+<polling_location id="55000797">
+  <address>
+    <city>BOYD</city>
+    <line1>13 MONTANA AVE</line1>
+    <state>MT</state>
+    <location_name>BOYD SCHOOL</location_name>
+    <zip>59013</zip>
+  </address>
+</polling_location>
+<polling_location id="55000798">
+  <address>
+    <city>FROMBERG</city>
+    <line1>319 SCHOOL</line1>
+    <state>MT</state>
+    <location_name>FROMBERG SCHOOL</location_name>
+    <zip>59029</zip>
+  </address>
+</polling_location>
+<polling_location id="55000799">
+  <address>
+    <city>LUTHER</city>
+    <line1>4 LUTHER/ROSCOE RD</line1>
+    <state>MT</state>
+    <location_name>LUTHER SCHOOL</location_name>
+    <zip>59068</zip>
+  </address>
+</polling_location>
+<polling_location id="55000803">
+  <address>
+    <city>BRIDGER</city>
+    <line1>427 W PARK</line1>
+    <state>MT</state>
+    <location_name>P4 BRIDGER HIGH SCHOOL</location_name>
+    <zip>59014</zip>
+  </address>
+</polling_location>
+<polling_location id="55000806">
+  <address>
+    <city>ROBERTS</city>
+    <line1>5 SOUTH FIRST ST</line1>
+    <state>MT</state>
+    <location_name>ROBERTS FIRE HALL</location_name>
+    <zip>59013</zip>
+  </address>
+</polling_location>
+<polling_location id="55000807">
+  <address>
+    <city>RED LODGE</city>
+    <line1>214 W 14TH</line1>
+    <state>MT</state>
+    <location_name>RED LODGE CIVIC CENTER8</location_name>
+    <zip>59068</zip>
+  </address>
+</polling_location>
+<polling_location id="55000816">
+  <address>
+    <city>WINNETT</city>
+    <line1>302 EAST MAIN</line1>
+    <state>MT</state>
+    <location_name>PETROLEUM COUNTY COURTHOUSE</location_name>
+    <zip>59087</zip>
+  </address>
+</polling_location>
+<polling_location id="55000817">
+  <address>
+    <city>ROUNDUP</city>
+    <line1>700 THIRD STREET WEST</line1>
+    <state>MT</state>
+    <location_name>ROUNDUP COMMUNITY CENTER</location_name>
+    <zip>59072</zip>
+  </address>
+</polling_location>
+<polling_location id="55000818">
+  <address>
+    <city>MELSTONE</city>
+    <line1>500 FERGUS</line1>
+    <state>MT</state>
+    <location_name>MELSTONE COMMUNITY CENTER</location_name>
+    <zip>59054</zip>
+  </address>
+</polling_location>
+<polling_location id="55000819">
+  <address>
+    <city>ROUNDUP</city>
+    <line1>525 6TH AVENUE WEST</line1>
+    <state>MT</state>
+    <location_name>ROUNDUP SCHOOL</location_name>
+    <zip>59072</zip>
+  </address>
+</polling_location>
+<polling_location id="55000820">
+  <address>
+    <city>MUSSELSHELL</city>
+    <line1>100 SOUTH MUSSELSHELL ROAD</line1>
+    <state>MT</state>
+    <location_name>MUSSELSHELL SCHOOL</location_name>
+    <zip>59059</zip>
+  </address>
+</polling_location>
+<polling_location id="55000821">
+  <address>
+    <city>BROADVIEW</city>
+    <line1>13935 1ST STREET</line1>
+    <state>MT</state>
+    <location_name>BROADVIEW SCHOOL</location_name>
+    <zip>59015</zip>
+  </address>
+</polling_location>
+<polling_location id="55000822">
+  <address>
+    <city>MELSTONE</city>
+    <line1>5 6TH AVEUNE NORTH</line1>
+    <state>MT</state>
+    <location_name>MELSTONE SCHOOL</location_name>
+    <zip>59054</zip>
+  </address>
+</polling_location>
+<polling_location id="55000838">
+  <address>
+    <city>GOLD CREEK</city>
+    <line1>653 GOLD CREEK ROAD</line1>
+    <state>MT</state>
+    <location_name>GOLD CREEK COMMUNITY CENTER</location_name>
+    <zip>59733</zip>
+  </address>
+</polling_location>
+<polling_location id="55000839">
+  <address>
+    <city>DEER LODGE</city>
+    <line1>416 COTTONWOOD</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY CENTER-3</location_name>
+    <zip>59722</zip>
+  </address>
+</polling_location>
+<polling_location id="55000840">
+  <address>
+    <city>DEER LODGE</city>
+    <line1>416 COTTONWOOD</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY CENTER-4</location_name>
+    <zip>59722</zip>
+  </address>
+</polling_location>
+<polling_location id="55000841">
+  <address>
+    <city>DEER LODGE</city>
+    <line1>416 COTTONWOOD</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY CENTER-6</location_name>
+    <zip>59722</zip>
+  </address>
+</polling_location>
+<polling_location id="55000842">
+  <address>
+    <city>DEER LODGE</city>
+    <line1>416 COTTONWOOD</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY CENTER-7</location_name>
+    <zip>59722</zip>
+  </address>
+</polling_location>
+<polling_location id="55000843">
+  <address>
+    <city>AVON</city>
+    <line1>208 MAIN ST</line1>
+    <state>MT</state>
+    <location_name>AVON COMMUNITY CENTER</location_name>
+    <zip>59713</zip>
+  </address>
+</polling_location>
+<polling_location id="55000844">
+  <address>
+    <city>DEER LODGE</city>
+    <line1>416 COTTONWOOD</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY CENTER-5</location_name>
+    <zip>59722</zip>
+  </address>
+</polling_location>
+<polling_location id="55000845">
+  <address>
+    <city>ELLISTON</city>
+    <line1>205 WEST MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>ELLISTON SCHOOL GYM</location_name>
+    <zip>59728</zip>
+  </address>
+</polling_location>
+<polling_location id="55000846">
+  <address>
+    <city>GARRISON</city>
+    <line1>33 SCHOOL HOUSE RD</line1>
+    <state>MT</state>
+    <location_name>GARRISON SCHOOL</location_name>
+    <zip>59731</zip>
+  </address>
+</polling_location>
+<polling_location id="55000847">
+  <address>
+    <city>HELMVILLE</city>
+    <line1>105 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>HELMVILLE COMMUNITY CENTER</location_name>
+    <zip>59843</zip>
+  </address>
+</polling_location>
+<polling_location id="55000848">
+  <address>
+    <city>OVANDO</city>
+    <line1>108 BIRCH STREET</line1>
+    <state>MT</state>
+    <location_name>OVANDO COMMUNITY CENTER</location_name>
+    <zip>59854</zip>
+  </address>
+</polling_location>
+<polling_location id="55000849">
+  <address>
+    <city>DEER LODGE</city>
+    <line1>6887 S FRONTAGE RD</line1>
+    <state>MT</state>
+    <location_name>RACETRACK COMMUNITY HALL</location_name>
+    <zip>59722</zip>
+  </address>
+</polling_location>
+<polling_location id="55000850">
+  <address>
+    <city>VIRGINIA CITY</city>
+    <line1>IDAHO STREET</line1>
+    <state>MT</state>
+    <location_name>HERITAGE COMMISSION REHEARSAL HALL</location_name>
+    <zip>59755</zip>
+  </address>
+</polling_location>
+<polling_location id="55000851">
+  <address>
+    <city>SHERIDAN</city>
+    <line1>109 E HAMILTON</line1>
+    <state>MT</state>
+    <location_name>SHERIDAN LIBRARY</location_name>
+    <zip>59749</zip>
+  </address>
+</polling_location>
+<polling_location id="55000852">
+  <address>
+    <city>TWIN BRIDGES</city>
+    <line1>216 W 6TH AVE</line1>
+    <state>MT</state>
+    <location_name>TWIN BRIDGES SCHOOL</location_name>
+    <zip>59754</zip>
+  </address>
+</polling_location>
+<polling_location id="55000853">
+  <address>
+    <city>HARRISON</city>
+    <line1>120 HARRISON ST</line1>
+    <state>MT</state>
+    <location_name>HARRISON SCHOOL</location_name>
+    <zip>59735</zip>
+  </address>
+</polling_location>
+<polling_location id="55000854">
+  <address>
+    <city>ENNIS</city>
+    <line1>5037 US HIGHWAY 287 N</line1>
+    <state>MT</state>
+    <location_name>ENNIS RURAL FIRE HALL</location_name>
+    <zip>59729</zip>
+  </address>
+</polling_location>
+<polling_location id="55000855">
+  <address>
+    <city>ENNIS</city>
+    <line1>328 E MAIN ST</line1>
+    <state>MT</state>
+    <location_name>ENNIS TOWN HALL</location_name>
+    <zip>59729</zip>
+  </address>
+</polling_location>
+<polling_location id="55000856">
+  <address>
+    <city>ALDER</city>
+    <line1>ALDER</line1>
+    <state>MT</state>
+    <location_name>ALDER COMMUNITY CENTER</location_name>
+    <zip>59710</zip>
+  </address>
+</polling_location>
+<polling_location id="55000857">
+  <address>
+    <city>CARDWELL</city>
+    <line1>80 MT HIGHWAY 359</line1>
+    <state>MT</state>
+    <location_name>CARDWELL SCHOOL</location_name>
+    <zip>59721</zip>
+  </address>
+</polling_location>
+<polling_location id="55000859">
+  <address>
+    <city>PHILIPSBURG</city>
+    <line1>135 SOUTH SANSOME</line1>
+    <state>MT</state>
+    <location_name>GRANITE MUSEUM</location_name>
+    <zip>59858</zip>
+  </address>
+</polling_location>
+<polling_location id="55000860">
+  <address>
+    <city>HALL</city>
+    <line1>8 FARM TO MARKET ROAD</line1>
+    <state>MT</state>
+    <location_name>HALL SCHOOL</location_name>
+    <zip>59837</zip>
+  </address>
+</polling_location>
+<polling_location id="55000861">
+  <address>
+    <city>DRUMMOND</city>
+    <line1>54 EAST BROAD STREET</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY HALL</location_name>
+    <zip>59832</zip>
+  </address>
+</polling_location>
+<polling_location id="55000862">
+  <address>
+    <city>PHILIPSBURG</city>
+    <line1>507 SCHNEPEL ST</line1>
+    <state>MT</state>
+    <location_name>GRANITE HIGH SCHOOL</location_name>
+    <zip>59858</zip>
+  </address>
+</polling_location>
+<polling_location id="55000863">
+  <address>
+    <city>DRUMMOND</city>
+    <line1>108 W EDWARDS ST</line1>
+    <state>MT</state>
+    <location_name>DRUMMOND HIGH SCHOOL</location_name>
+    <zip>59832</zip>
+  </address>
+</polling_location>
+<polling_location id="55000890">
+  <address>
+    <city>GLEN</city>
+    <line1>6715 SCHOOLHOUSE RD</line1>
+    <state>MT</state>
+    <location_name>REICHLE SCHOOL 1</location_name>
+    <zip>59732</zip>
+  </address>
+</polling_location>
+<polling_location id="55000892">
+  <address>
+    <city>POLARIS</city>
+    <line1>4210 PIONEER MOUNTAINS BYWAY</line1>
+    <state>MT</state>
+    <location_name>POLARIS SCHOOL</location_name>
+    <zip>59746</zip>
+  </address>
+</polling_location>
+<polling_location id="55000894">
+  <address>
+    <city>JACKSON</city>
+    <line1>415 JARDINE</line1>
+    <state>MT</state>
+    <location_name>JACKSON SCHOOL</location_name>
+    <zip>59736</zip>
+  </address>
+</polling_location>
+<polling_location id="55000895">
+  <address>
+    <city>WISDOM</city>
+    <line1>411 COUNTY ROAD</line1>
+    <state>MT</state>
+    <location_name>WISDOM COMMUNITY HALL</location_name>
+    <zip>59761</zip>
+  </address>
+</polling_location>
+<polling_location id="55000896">
+  <address>
+    <city>WISE RIVER</city>
+    <line1>64845 HIGHWAY</line1>
+    <state>MT</state>
+    <location_name>WISE RIVER FIRE HALL</location_name>
+    <zip>59762</zip>
+  </address>
+</polling_location>
+<polling_location id="55000898">
+  <address>
+    <city>LIMA</city>
+    <line1>5 WEST SECTION CORNER ST</line1>
+    <state>MT</state>
+    <location_name>LIMA FIRE HALL</location_name>
+    <zip>59739</zip>
+  </address>
+</polling_location>
+<polling_location id="55000899">
+  <address>
+    <city>LIMA</city>
+    <line1>5 W SEC CORNER ST</line1>
+    <state>MT</state>
+    <location_name>LIMA COMM FIRE HALL</location_name>
+    <zip>59739</zip>
+  </address>
+</polling_location>
+<polling_location id="55000902">
+  <address>
+    <city>DILLON</city>
+    <line1>1240 HIGHWAY 324</line1>
+    <state>MT</state>
+    <location_name>GRANT SCHOOL</location_name>
+    <zip>59725</zip>
+  </address>
+</polling_location>
+<polling_location id="55000904">
+  <address>
+    <city>ANACONDA</city>
+    <line1>1410 W PARK AVE</line1>
+    <state>MT</state>
+    <location_name>AHS TECHNOLOGY CENTER</location_name>
+    <zip>59711</zip>
+  </address>
+</polling_location>
+<polling_location id="55000907">
+  <address>
+    <city>ANACONDA</city>
+    <line1>219 EAST THIRD</line1>
+    <state>MT</state>
+    <location_name>FRED MOODRY MIDDLE SCHOOL 4</location_name>
+    <zip>59711</zip>
+  </address>
+</polling_location>
+<polling_location id="55000911">
+  <address>
+    <city>OPPORTUNITY</city>
+    <line1>STEWART &amp; HAUSER</line1>
+    <state>MT</state>
+    <location_name>OPPORTUNITY COMMUNITY CLUB</location_name>
+    <zip>59711</zip>
+  </address>
+</polling_location>
+<polling_location id="55000913">
+  <address>
+    <city>WISE RIVER</city>
+    <line1>54200 HWY 43</line1>
+    <state>MT</state>
+    <location_name>RALSTON RANCH</location_name>
+    <zip>59762</zip>
+  </address>
+</polling_location>
+<polling_location id="55000937">
+  <address>
+    <city>DARBY</city>
+    <line1>209 SCHOOL DRIVE</line1>
+    <state>MT</state>
+    <location_name>DARBY SCHOOL GYM</location_name>
+    <zip>59829</zip>
+  </address>
+</polling_location>
+<polling_location id="55000942">
+  <address>
+    <city>HAMILTON</city>
+    <line1>327 FAIRGROUNDS ROAD</line1>
+    <state>MT</state>
+    <location_name>HAMILTON HIGH SCHOOL GYM</location_name>
+    <zip>59840</zip>
+  </address>
+</polling_location>
+<polling_location id="55000946">
+  <address>
+    <city>CORVALLIS</city>
+    <line1>1045 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>CORVALLIS HIGH SCHOOL GYM</location_name>
+    <zip>59828</zip>
+  </address>
+</polling_location>
+<polling_location id="55000949">
+  <address>
+    <city>PINESDALE</city>
+    <line1>DOWNTOWN PINESDALE</line1>
+    <state>MT</state>
+    <location_name>PINESDALE TOWN HALL</location_name>
+    <zip>59841</zip>
+  </address>
+</polling_location>
+<polling_location id="55000950">
+  <address>
+    <city>VICTOR</city>
+    <line1>424 4TH AVENUE</line1>
+    <state>MT</state>
+    <location_name>VICTOR SCHOOL GYM</location_name>
+    <zip>59875</zip>
+  </address>
+</polling_location>
+<polling_location id="55000952">
+  <address>
+    <city>STEVENSVILLE</city>
+    <line1>333 CHARLOS ST</line1>
+    <state>MT</state>
+    <location_name>STEVENSVILLE ELEMENTARY SCHOOL GYM</location_name>
+    <zip>59833</zip>
+  </address>
+</polling_location>
+<polling_location id="55000955">
+  <address>
+    <city>STEVENSVILLE</city>
+    <line1>1112 THREE MILE ROAD</line1>
+    <state>MT</state>
+    <location_name>LONE ROCK SCHOOL</location_name>
+    <zip>59870</zip>
+  </address>
+</polling_location>
+<polling_location id="55000957">
+  <address>
+    <city>FLORENCE</city>
+    <line1>5602 OLD HIGHWAY 93</line1>
+    <state>MT</state>
+    <location_name>FLORENCE CARLTON SCHOOL GYM</location_name>
+    <zip>59833</zip>
+  </address>
+</polling_location>
+<polling_location id="55000959">
+  <address>
+    <city>ALBERTON</city>
+    <line1>133 RAILROAD AVE</line1>
+    <state>MT</state>
+    <location_name>ALBERTON_22</location_name>
+    <zip>59820</zip>
+  </address>
+</polling_location>
+<polling_location id="55000960">
+  <address>
+    <city>SUPERIOR</city>
+    <line1>301 2ND AVE E</line1>
+    <state>MT</state>
+    <location_name>SUPERIOR_24</location_name>
+    <zip>59872</zip>
+  </address>
+</polling_location>
+<polling_location id="55000961">
+  <address>
+    <city>SUPERIOR</city>
+    <line1>201 RIVER STREET</line1>
+    <state>MT</state>
+    <location_name>SUPERIOR_25</location_name>
+    <zip>59872</zip>
+  </address>
+</polling_location>
+<polling_location id="55000962">
+  <address>
+    <city>ST REGIS</city>
+    <line1>230 LOBO LOOP</line1>
+    <state>MT</state>
+    <location_name>ST. REGIS_26</location_name>
+    <zip>59866</zip>
+  </address>
+</polling_location>
+<polling_location id="55000963">
+  <address>
+    <city>DEBORGIA</city>
+    <line1>218 THOMPSON DEBORGIA RD</line1>
+    <state>MT</state>
+    <location_name>DEBORGIA_27</location_name>
+    <zip>59830</zip>
+  </address>
+</polling_location>
+<polling_location id="55000964">
+  <address>
+    <city>SUPERIOR</city>
+    <line1>410 ARIZONA AVE</line1>
+    <state>MT</state>
+    <location_name>SUPERIOR_30</location_name>
+    <zip>59872</zip>
+  </address>
+</polling_location>
+<polling_location id="55000965">
+  <address>
+    <city>HERON</city>
+    <line1>6 UPPER RIVER ROAD</line1>
+    <state>MT</state>
+    <location_name>HERON COMMUNITY CENTER</location_name>
+    <zip>59844</zip>
+  </address>
+</polling_location>
+<polling_location id="55000966">
+  <address>
+    <city>NOXON</city>
+    <line1>311 NOXON AVE</line1>
+    <state>MT</state>
+    <location_name>NOXON EMERGENCY SERVICES BLDG</location_name>
+    <zip>59853</zip>
+  </address>
+</polling_location>
+<polling_location id="55000967">
+  <address>
+    <city>TROUT CREEK</city>
+    <line1>4 SCHOOL LANE</line1>
+    <state>MT</state>
+    <location_name>TROUT CREEK SCHOOL</location_name>
+    <zip>59874</zip>
+  </address>
+</polling_location>
+<polling_location id="55000969">
+  <address>
+    <city>THOMPSON FALLS</city>
+    <line1>410 GOLF ST</line1>
+    <state>MT</state>
+    <location_name>THOMPSON FALLS COMM. CENTER</location_name>
+    <zip>59873</zip>
+  </address>
+</polling_location>
+<polling_location id="55000970">
+  <address>
+    <city>PLAINS</city>
+    <line1>412 RITTENOUR ST</line1>
+    <state>MT</state>
+    <location_name>PLAINS HIGH SCHOOL</location_name>
+    <zip>59859</zip>
+  </address>
+</polling_location>
+<polling_location id="55000971">
+  <address>
+    <city>HOT SPRINGS</city>
+    <line1>101 MAIN ST</line1>
+    <state>MT</state>
+    <location_name>HOT SPRINGS SENIOR CITZENS</location_name>
+    <zip>59845</zip>
+  </address>
+</polling_location>
+<polling_location id="55000974">
+  <address>
+    <city>DIXON</city>
+    <line1>35 3RD ST</line1>
+    <state>MT</state>
+    <location_name>DIXON SENIOR CITIZENS CENTER</location_name>
+    <zip>59831</zip>
+  </address>
+</polling_location>
+<polling_location id="55000975">
+  <address>
+    <city>KALISPELL</city>
+    <line1>265 N MERIDIAN</line1>
+    <state>MT</state>
+    <location_name>FC TRADE CENTER - FAIRGROUNDS</location_name>
+    <zip>59901</zip>
+  </address>
+</polling_location>
+<polling_location id="55000978">
+  <address>
+    <city>KALISPELL</city>
+    <line1>897 LAKE BLAINE RD</line1>
+    <state>MT</state>
+    <location_name>CAYUSE PRAIRIE SCHOOL</location_name>
+    <zip>59901</zip>
+  </address>
+</polling_location>
+<polling_location id="55000981">
+  <address>
+    <city>KALISPELL</city>
+    <line1>2898 US HWY 93 N</line1>
+    <state>MT</state>
+    <location_name>US ARMED FORCES RESERVE CENTER</location_name>
+    <zip>59901</zip>
+  </address>
+</polling_location>
+<polling_location id="55000982">
+  <address>
+    <city>COLUMBIA FALLS</city>
+    <line1>2105 MIDDLE RD</line1>
+    <state>MT</state>
+    <location_name>DEER PARK SCHOOL</location_name>
+    <zip>59912</zip>
+  </address>
+</polling_location>
+<polling_location id="55000987">
+  <address>
+    <city>LAKESIDE</city>
+    <line1>255 ADAMS ST</line1>
+    <state>MT</state>
+    <location_name>LAKESIDE SCHOOL GYM</location_name>
+    <zip>59922</zip>
+  </address>
+</polling_location>
+<polling_location id="55000988">
+  <address>
+    <city>MARTIN CITY</city>
+    <line1>320 CENTRAL AVE</line1>
+    <state>MT</state>
+    <location_name>MARTIN CITY FIRE-LIETZ HALL</location_name>
+    <zip>59926</zip>
+  </address>
+</polling_location>
+<polling_location id="55000990">
+  <address>
+    <city>COLUMBIA FALLS</city>
+    <line1>130 6TH ST W ROOM A</line1>
+    <state>MT</state>
+    <location_name>COUNCIL CHAMBERS, CF CITY HALL</location_name>
+    <zip>59912</zip>
+  </address>
+</polling_location>
+<polling_location id="55000991">
+  <address>
+    <city>WEST GLACIER</city>
+    <line1>160 OLD RIVER BRIDGE RD</line1>
+    <state>MT</state>
+    <location_name>WEST GLACIER SCHOOL</location_name>
+    <zip>59936</zip>
+  </address>
+</polling_location>
+<polling_location id="55000993">
+  <address>
+    <city>KALISPELL</city>
+    <line1>436 BIRCH GROVE</line1>
+    <state>MT</state>
+    <location_name>NEW COVENANT FELLOWSHIP</location_name>
+    <zip>59901</zip>
+  </address>
+</polling_location>
+<polling_location id="55000994">
+  <address>
+    <city>WHITEFISH</city>
+    <line1>305 ARMORY RD</line1>
+    <state>MT</state>
+    <location_name>WF ARMORY</location_name>
+    <zip>59937</zip>
+  </address>
+</polling_location>
+<polling_location id="55000995">
+  <address>
+    <city>COLUMBIA FALLS</city>
+    <line1>610 13TH ST W</line1>
+    <state>MT</state>
+    <location_name>CF HIGH SCHOOL FOYER</location_name>
+    <zip>59912</zip>
+  </address>
+</polling_location>
+<polling_location id="55000998">
+  <address>
+    <city>KILA</city>
+    <line1>KILA - 190 COTTAGE LN</line1>
+    <state>MT</state>
+    <location_name>KILA COUNTRY CHURCH</location_name>
+    <zip>59920</zip>
+  </address>
+</polling_location>
+<polling_location id="550001003">
+  <address>
+    <city>SOMERS</city>
+    <line1>315 SCHOOL ADDITION RD</line1>
+    <state>MT</state>
+    <location_name>SOMERS SCHOOL GYM</location_name>
+    <zip>59932</zip>
+  </address>
+</polling_location>
+<polling_location id="550001007">
+  <address>
+    <city>KALISPELL</city>
+    <line1>902 1ST AVE E</line1>
+    <state>MT</state>
+    <location_name>CENTRAL BIBLE CHURCH, KALISPELL</location_name>
+    <zip>59901</zip>
+  </address>
+</polling_location>
+<polling_location id="550001010">
+  <address>
+    <city>KALISPELL</city>
+    <line1>2290 FARM TO MARKET RD</line1>
+    <state>MT</state>
+    <location_name>WEST VALLEY SCHOOL</location_name>
+    <zip>59901</zip>
+  </address>
+</polling_location>
+<polling_location id="550001012">
+  <address>
+    <city>BIGFORK</city>
+    <line1>8559 MT HWY 35</line1>
+    <state>MT</state>
+    <location_name>BETHANY LUTHERAN CHURCH</location_name>
+    <zip>59911</zip>
+  </address>
+</polling_location>
+<polling_location id="550001013">
+  <address>
+    <city>OLNEY</city>
+    <line1>11 OLNEY LOOP RD</line1>
+    <state>MT</state>
+    <location_name>OLNEY FIRE HALL</location_name>
+    <zip>59927</zip>
+  </address>
+</polling_location>
+<polling_location id="550001016">
+  <address>
+    <city>BIGFORK</city>
+    <line1>1205 SWAN HWY</line1>
+    <state>MT</state>
+    <location_name>SWAN RIVER SCHOOL</location_name>
+    <zip>59911</zip>
+  </address>
+</polling_location>
+<polling_location id="550001017">
+  <address>
+    <city>KALISPELL</city>
+    <line1>797 FAIRMONT RD</line1>
+    <state>MT</state>
+    <location_name>FAIR-MONT-EGAN SCHOOL</location_name>
+    <zip>59901</zip>
+  </address>
+</polling_location>
+<polling_location id="550001018">
+  <address>
+    <city>WHITEFISH</city>
+    <line1>6232 US HIGHWAY 93 S</line1>
+    <state>MT</state>
+    <location_name>FIRST BAPTIST CHURCH, WHITEFISH</location_name>
+    <zip>59937</zip>
+  </address>
+</polling_location>
+<polling_location id="550001019">
+  <address>
+    <city>WHITEFISH</city>
+    <line1>230 W 10TH ST</line1>
+    <state>MT</state>
+    <location_name>MOOSE HOME, WHITEFISH</location_name>
+    <zip>59937</zip>
+  </address>
+</polling_location>
+<polling_location id="550001023">
+  <address>
+    <city>WHITEFISH</city>
+    <line1>1150 WISCONSIN AVE</line1>
+    <state>MT</state>
+    <location_name>UNITED METHODIST CHURCH</location_name>
+    <zip>59937</zip>
+  </address>
+</polling_location>
+<polling_location id="550001039">
+  <address>
+    <city>TROY</city>
+    <line1>1564 OLD HIGHWAY 2 NORTH</line1>
+    <state>MT</state>
+    <location_name>MC CORMICK SCHOOL</location_name>
+    <zip>59935</zip>
+  </address>
+</polling_location>
+<polling_location id="550001040">
+  <address>
+    <city>TROY</city>
+    <line1>306 3RD STREET</line1>
+    <state>MT</state>
+    <location_name>KOOTENAI SENIOR CITIZEN'S CNTR_7</location_name>
+    <zip>59935</zip>
+  </address>
+</polling_location>
+<polling_location id="550001041">
+  <address>
+    <city>TROY</city>
+    <line1>306 3RD STREET</line1>
+    <state>MT</state>
+    <location_name>KOOTENAI SR CITIZEN'S CENTER_8</location_name>
+    <zip>59935</zip>
+  </address>
+</polling_location>
+<polling_location id="550001044">
+  <address>
+    <city>LIBBY</city>
+    <line1>108 WEST 2ND STREET</line1>
+    <state>MT</state>
+    <location_name>VFW BUILDING_11</location_name>
+    <zip>59923</zip>
+  </address>
+</polling_location>
+<polling_location id="550001046">
+  <address>
+    <city>LIBBY</city>
+    <line1>108 WEST 2ND STREET</line1>
+    <state>MT</state>
+    <location_name>VFW BUILDING_13</location_name>
+    <zip>59923</zip>
+  </address>
+</polling_location>
+<polling_location id="550001059">
+  <address>
+    <city>DAYTON</city>
+    <line1>43578 B ST</line1>
+    <state>MT</state>
+    <location_name>DAYTON CHURCH</location_name>
+    <zip>59914</zip>
+  </address>
+</polling_location>
+<polling_location id="550001060">
+  <address>
+    <city>POLSON</city>
+    <line1>411 2ND ST E</line1>
+    <state>MT</state>
+    <location_name>POLSON LINDERMAN GYMNAS</location_name>
+    <zip>59860</zip>
+  </address>
+</polling_location>
+<polling_location id="550001068">
+  <address>
+    <city>CHARLO</city>
+    <line1>53159 1ST AVE W</line1>
+    <state>MT</state>
+    <location_name>CHARLO SCHOOL GYM</location_name>
+    <zip>59824</zip>
+  </address>
+</polling_location>
+<polling_location id="550001069">
+  <address>
+    <city>ST IGNATIUS</city>
+    <line1>76 3RD AVE</line1>
+    <state>MT</state>
+    <location_name>ST IGNATIUS SCHOOL GYM</location_name>
+    <zip>59865</zip>
+  </address>
+</polling_location>
+<polling_location id="550001071">
+  <address>
+    <city>BIGFORK</city>
+    <line1>31857 S FERNDALE DR</line1>
+    <state>MT</state>
+    <location_name>FERNDALE CLUB HOUSE</location_name>
+    <zip>59911</zip>
+  </address>
+</polling_location>
+<polling_location id="550001073">
+  <address>
+    <city>SWAN LAKE</city>
+    <line1>34925 MT HWY 83</line1>
+    <state>MT</state>
+    <location_name>SWAN RIVER ST FOREST H</location_name>
+    <zip>59911</zip>
+  </address>
+</polling_location>
+<polling_location id="550001080">
+  <address>
+    <city>ARLEE</city>
+    <line1>34532 WESSINGER ST</line1>
+    <state>MT</state>
+    <location_name>ARLEE SENIOR CENTER</location_name>
+    <zip>59821</zip>
+  </address>
+</polling_location>
+<polling_location id="550001099">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>603 CENTRAL</line1>
+    <state>MT</state>
+    <location_name>FAIRFIELD TOWN HALL</location_name>
+    <zip>59436</zip>
+  </address>
+</polling_location>
+<polling_location id="550001101">
+  <address>
+    <city>CHOTEAU</city>
+    <line1>114 7TH AVE NW</line1>
+    <state>MT</state>
+    <location_name>CHOTEAU ELEMENTARY SCHOOL</location_name>
+    <zip>59422</zip>
+  </address>
+</polling_location>
+<polling_location id="550001102">
+  <address>
+    <city>PENDROY</city>
+    <line1>119 MAIN AVE</line1>
+    <state>MT</state>
+    <location_name>PENDROY FIRE DEPARTMENT</location_name>
+    <zip>59467</zip>
+  </address>
+</polling_location>
+<polling_location id="550001103">
+  <address>
+    <city>POWER</city>
+    <line1>402 TETON</line1>
+    <state>MT</state>
+    <location_name>POWER PUBLIC SCHOOL</location_name>
+    <zip>59468</zip>
+  </address>
+</polling_location>
+<polling_location id="550001104">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>11 7TH STREET NORTH</line1>
+    <state>MT</state>
+    <location_name>FAIRFIELD SCHOOL</location_name>
+    <zip>59436</zip>
+  </address>
+</polling_location>
+<polling_location id="550001123">
+  <address>
+    <city>WIBAUX</city>
+    <line1>203 WIBAUX ST S</line1>
+    <state>MT</state>
+    <location_name>COURTROOM 1</location_name>
+    <zip>59353</zip>
+  </address>
+</polling_location>
+<polling_location id="550001128">
+  <address>
+    <city>HAVRE</city>
+    <line1>900 18TH ST</line1>
+    <state>MT</state>
+    <location_name>HAVRE HIGH SCHOOL GYM - 01</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001129">
+  <address>
+    <city>HAVRE</city>
+    <line1>440 7TH AVE</line1>
+    <state>MT</state>
+    <location_name>ST JUDE'S PARISH CENTER - 02</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001130">
+  <address>
+    <city>HAVRE</city>
+    <line1>1441 11TH ST W</line1>
+    <state>MT</state>
+    <location_name>HAVRE MIDDLE SCHOOL GYM-03</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001131">
+  <address>
+    <city>HAVRE</city>
+    <line1>1441 11TH ST W</line1>
+    <state>MT</state>
+    <location_name>HAVRE MIDDLE SCHOOL GYM -04</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001132">
+  <address>
+    <city>HAVRE</city>
+    <line1>801 4TH ST</line1>
+    <state>MT</state>
+    <location_name>LINCOLN-MCKINLEY SCHOOL GYM - 05</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001133">
+  <address>
+    <city>HAVRE</city>
+    <line1>900 18TH ST</line1>
+    <state>MT</state>
+    <location_name>HAVRE HIGH SCHOOL GYM - 07</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001134">
+  <address>
+    <city>HAVRE</city>
+    <line1>900 18TH ST</line1>
+    <state>MT</state>
+    <location_name>HAVRE HIGH SCHOOL GYM - 08</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001135">
+  <address>
+    <city>HAVRE</city>
+    <line1>440 7TH AVE</line1>
+    <state>MT</state>
+    <location_name>ST JUDE'S PARISH CENTER - 10</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001136">
+  <address>
+    <city>HAVRE</city>
+    <line1>1441 11TH ST W</line1>
+    <state>MT</state>
+    <location_name>HAVRE MIDDLE SCHOOL GYM - 13</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001137">
+  <address>
+    <city>HAVRE</city>
+    <line1>2229 5TH AVE</line1>
+    <state>MT</state>
+    <location_name>H.R.D.C.-HUMAN RES DEV COUNCIL -14</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001138">
+  <address>
+    <city>HAVRE</city>
+    <line1>1441 11TH STREET WEST</line1>
+    <state>MT</state>
+    <location_name>HAVRE MIDDLE SCHOOL - 15</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001139">
+  <address>
+    <city>HAVRE</city>
+    <line1>1441 11TH STREET WEST</line1>
+    <state>MT</state>
+    <location_name>HAVRE MIDDLE SCHOOL -16</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001140">
+  <address>
+    <city>BOX ELDER</city>
+    <line1>205 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>BOX ELDER SCHOOL REAR ENT - 18</location_name>
+    <zip>59521</zip>
+  </address>
+</polling_location>
+<polling_location id="550001141">
+  <address>
+    <city>HINGHAM</city>
+    <line1>HI LINE COMM CENTER</line1>
+    <state>MT</state>
+    <location_name>HI-LINE COMM CNT - 19</location_name>
+    <zip>59528</zip>
+  </address>
+</polling_location>
+<polling_location id="550001142">
+  <address>
+    <city>HINGHAM</city>
+    <line1>502 5TH STREET</line1>
+    <state>MT</state>
+    <location_name>HI-LINE COMM CNT -20</location_name>
+    <zip>59528</zip>
+  </address>
+</polling_location>
+<polling_location id="550001143">
+  <address>
+    <city>HINGHAM</city>
+    <line1>502 5TH STREET</line1>
+    <state>MT</state>
+    <location_name>HI-LINE COMM CNT- 21</location_name>
+    <zip>59528</zip>
+  </address>
+</polling_location>
+<polling_location id="550001144">
+  <address>
+    <city>HINGHAM</city>
+    <line1>502 5TH STREET</line1>
+    <state>MT</state>
+    <location_name>HI-LINE COMM CNT- 22</location_name>
+    <zip>59528</zip>
+  </address>
+</polling_location>
+<polling_location id="550001145">
+  <address>
+    <city>HINGHAM</city>
+    <line1>HI-LINE COMM CENTER</line1>
+    <state>MT</state>
+    <location_name>HI-LINE COMM CNT - 23</location_name>
+    <zip>59528</zip>
+  </address>
+</polling_location>
+<polling_location id="550001146">
+  <address>
+    <city>HAVRE</city>
+    <line1>440 7TH AVE</line1>
+    <state>MT</state>
+    <location_name>ST JUDE'S PARISH CENTER - 25</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001147">
+  <address>
+    <city>ROCKY BOY</city>
+    <line1>646 CLINIC ROAD EAST</line1>
+    <state>MT</state>
+    <location_name>CHIPPEWA CREE WELLNESS CENTER-28</location_name>
+    <zip>59521</zip>
+  </address>
+</polling_location>
+<polling_location id="550001148">
+  <address>
+    <city>HAVRE</city>
+    <line1>24570 RD 415 N</line1>
+    <state>MT</state>
+    <location_name>COTTONWOOD SCHOOL</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001149">
+  <address>
+    <city>ROCKY BOY</city>
+    <line1>ROCKY BOY SCHOOL</line1>
+    <state>MT</state>
+    <location_name>ROCKY BOY SCHOOL</location_name>
+    <zip>59521</zip>
+  </address>
+</polling_location>
+<polling_location id="550001150">
+  <address>
+    <city>GILDFORD</city>
+    <line1>GILDFORD COLONY</line1>
+    <state>MT</state>
+    <location_name>GILDFORD COLONY</location_name>
+    <zip>59525</zip>
+  </address>
+</polling_location>
+<polling_location id="550001151">
+  <address>
+    <city>DAVEY</city>
+    <line1>DAVEY SCHOOL</line1>
+    <state>MT</state>
+    <location_name>DAVEY SCHOOL</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001152">
+  <address>
+    <city>HAVRE</city>
+    <line1>900 18TH ST</line1>
+    <state>MT</state>
+    <location_name>HAVRE HIGH SCHOOL GYM - 09</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="550001154">
+  <address>
+    <city>SHELBY</city>
+    <line1>669 PARK AVE</line1>
+    <state>MT</state>
+    <location_name>CIVIC CNT</location_name>
+    <zip>59474</zip>
+  </address>
+</polling_location>
+<polling_location id="550001156">
+  <address>
+    <city>SUNBURST</city>
+    <line1>220 1ST STREET SOUTH</line1>
+    <state>MT</state>
+    <location_name>ELEM SCH</location_name>
+    <zip>59482</zip>
+  </address>
+</polling_location>
+<polling_location id="550001157">
+  <address>
+    <city>GALATA</city>
+    <line1>4 DIVISION STREET</line1>
+    <state>MT</state>
+    <location_name>GAL HALL</location_name>
+    <zip>59444</zip>
+  </address>
+</polling_location>
+<polling_location id="550001158">
+  <address>
+    <city>KEVIN</city>
+    <line1>4 NORTH 1ST STREET</line1>
+    <state>MT</state>
+    <location_name>K DEPOT</location_name>
+    <zip>59454</zip>
+  </address>
+</polling_location>
+<polling_location id="550001165">
+  <address>
+    <city>WESTBY</city>
+    <line1>208 MAIN ST</line1>
+    <state>MT</state>
+    <location_name>WESTBY COMMUNITY HALL</location_name>
+    <zip>59275</zip>
+  </address>
+</polling_location>
+<polling_location id="550001166">
+  <address>
+    <city>PLENTYWOOD</city>
+    <line1>4262 C HWY 16 S</line1>
+    <state>MT</state>
+    <location_name>CIVIC CENTER</location_name>
+    <zip>59254</zip>
+  </address>
+</polling_location>
+<polling_location id="550001170">
+  <address>
+    <city>MEDICINE LAKE</city>
+    <line1>106 MAIN ST</line1>
+    <state>MT</state>
+    <location_name>MEDICINE LAKE FIRE STATION</location_name>
+    <zip>59247</zip>
+  </address>
+</polling_location>
+<polling_location id="550001181">
+  <address>
+    <city>VIDA</city>
+    <line1>200 SHELL STREET</line1>
+    <state>MT</state>
+    <location_name>VIDA SCHOOL</location_name>
+    <zip>59274</zip>
+  </address>
+</polling_location>
+<polling_location id="550001185">
+  <address>
+    <city>CIRCLE</city>
+    <line1>CIRCLE</line1>
+    <state>MT</state>
+    <location_name>BO-PEEP SCHOOL</location_name>
+    <zip>59215</zip>
+  </address>
+</polling_location>
+<polling_location id="550001186">
+  <address>
+    <city>CIRCLE</city>
+    <line1>212 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>COMM./SR.CENTER</location_name>
+    <zip>59215</zip>
+  </address>
+</polling_location>
+<polling_location id="550001187">
+  <address>
+    <city>CIRCLE</city>
+    <line1>101 TENTH STREET</line1>
+    <state>MT</state>
+    <location_name>COUNTRY MARKET BANQUET ROOM</location_name>
+    <zip>59215</zip>
+  </address>
+</polling_location>
+<polling_location id="550001199">
+  <address>
+    <city>BAINVILLE</city>
+    <line1>409 TUBMAN</line1>
+    <state>MT</state>
+    <location_name>BAINVILLE SCHOOL 2</location_name>
+    <zip>59212</zip>
+  </address>
+</polling_location>
+<polling_location id="550001201">
+  <address>
+    <city>CULBERTSON</city>
+    <line1>423 1ST AVE W</line1>
+    <state>MT</state>
+    <location_name>CULBERTSON SCHOOL 12</location_name>
+    <zip>59218</zip>
+  </address>
+</polling_location>
+<polling_location id="550001202">
+  <address>
+    <city>BROCKTON</city>
+    <line1>529 5TH ST</line1>
+    <state>MT</state>
+    <location_name>BROCKTON SCHOOL DISTRICT OFFICE 15</location_name>
+    <zip>59213</zip>
+  </address>
+</polling_location>
+<polling_location id="550001203">
+  <address>
+    <city>POPLAR</city>
+    <line1>408 D ST WEST</line1>
+    <state>MT</state>
+    <location_name>POPLAR MIDDLE SCHOOL 18</location_name>
+    <zip>59255</zip>
+  </address>
+</polling_location>
+<polling_location id="550001205">
+  <address>
+    <city>WOLF POINT</city>
+    <line1>124 CUSTER ST</line1>
+    <state>MT</state>
+    <location_name>COUNTY SERVICES BLDG SR CENTER 24</location_name>
+    <zip>59201</zip>
+  </address>
+</polling_location>
+<polling_location id="550001206">
+  <address>
+    <city>WOLF POINT</city>
+    <line1>124 CUSTER ST</line1>
+    <state>MT</state>
+    <location_name>COUNTY SERVICES BLDG SR CENTER 26</location_name>
+    <zip>59201</zip>
+  </address>
+</polling_location>
+<polling_location id="550001207">
+  <address>
+    <city>WOLF POINT</city>
+    <line1>124 CUSTER ST</line1>
+    <state>MT</state>
+    <location_name>COUNTY SERVICES BLDG SR CENTER 27</location_name>
+    <zip>59201</zip>
+  </address>
+</polling_location>
+<polling_location id="550001208">
+  <address>
+    <city>WOLF POINT</city>
+    <line1>124 CUSTER ST</line1>
+    <state>MT</state>
+    <location_name>COUNTY SERVICES BLDG SR CENTER 28</location_name>
+    <zip>59201</zip>
+  </address>
+</polling_location>
+<polling_location id="550001209">
+  <address>
+    <city>POPLAR</city>
+    <line1>408 D ST WEST</line1>
+    <state>MT</state>
+    <location_name>POPLAR MIDDLE SCHOOL 16</location_name>
+    <zip>59255</zip>
+  </address>
+</polling_location>
+<polling_location id="550001210">
+  <address>
+    <city>BROCKTON</city>
+    <line1>4703 HIGHWAY 344 W</line1>
+    <state>MT</state>
+    <location_name>FAITH LUTHERAN CHURCH 17</location_name>
+    <zip>59213</zip>
+  </address>
+</polling_location>
+<polling_location id="550001211">
+  <address>
+    <city>WOLF POINT</city>
+    <line1>124 CUSTER ST</line1>
+    <state>MT</state>
+    <location_name>COUNTY SERVICES BLDG CONFERENCE ROOM 22</location_name>
+    <zip>59201</zip>
+  </address>
+</polling_location>
+<polling_location id="550001213">
+  <address>
+    <city>FLAXVILLE</city>
+    <line1>201 1ST AVE W</line1>
+    <state>MT</state>
+    <location_name>FLAXVILLE SCHOOL</location_name>
+    <zip>59222</zip>
+  </address>
+</polling_location>
+<polling_location id="550001214">
+  <address>
+    <city>SCOBEY</city>
+    <line1>205 2ND AVE E</line1>
+    <state>MT</state>
+    <location_name>SCOBEY HIGH SCHOOL</location_name>
+    <zip>59263</zip>
+  </address>
+</polling_location>
+<polling_location id="550001216">
+  <address>
+    <city>SCOBEY</city>
+    <line1>201 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>SENIOR CITIZENS CENTER</location_name>
+    <zip>59263</zip>
+  </address>
+</polling_location>
+<polling_location id="550001217">
+  <address>
+    <city>SCOBEY</city>
+    <line1>203 TIMMONS ST.</line1>
+    <state>MT</state>
+    <location_name>COUNTY LIBRARY</location_name>
+    <zip>59263</zip>
+  </address>
+</polling_location>
+<polling_location id="550001218">
+  <address>
+    <city>FLAXVILLE</city>
+    <line1>201 1ST AVE W</line1>
+    <state>MT</state>
+    <location_name>FLAXVILLE SCHOOL HOUSE</location_name>
+    <zip>59222</zip>
+  </address>
+</polling_location>
+<polling_location id="550001219">
+  <address>
+    <city>SIDNEY</city>
+    <line1>414 EAST MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>ASSEMBLY OF GOD MULTIPURPOSE ROOM</location_name>
+    <zip>59270</zip>
+  </address>
+</polling_location>
+<polling_location id="550001223">
+  <address>
+    <city>SAVAGE</city>
+    <line1>164 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>SAVAGE SENIOR CENTER</location_name>
+    <zip>59262</zip>
+  </address>
+</polling_location>
+<polling_location id="550001224">
+  <address>
+    <city>LAMBERT</city>
+    <line1>121 3RD AVENUE NORTH</line1>
+    <state>MT</state>
+    <location_name>LAMBERT SCHOOL OLD GYM</location_name>
+    <zip>59243</zip>
+  </address>
+</polling_location>
+<polling_location id="550001228">
+  <address>
+    <city>SIDNEY</city>
+    <line1>13610 COUNTY ROAD 338</line1>
+    <state>MT</state>
+    <location_name>GIRARD HALL</location_name>
+    <zip>59270</zip>
+  </address>
+</polling_location>
+<polling_location id="550001229">
+  <address>
+    <city>BROCKTON</city>
+    <line1>32108 COUNTY 139</line1>
+    <state>MT</state>
+    <location_name>ELMDALE HALL</location_name>
+    <zip>59213</zip>
+  </address>
+</polling_location>
+<polling_location id="550001241">
+  <address>
+    <city>EKALAKA</city>
+    <line1>209 W. SPEELMON</line1>
+    <state>MT</state>
+    <location_name>CARTER COUNTY EVENT CENTER</location_name>
+    <zip>59324</zip>
+  </address>
+</polling_location>
+<polling_location id="550001242">
+  <address>
+    <city>ALZADA</city>
+    <line1>142 OFALLON STREET</line1>
+    <state>MT</state>
+    <location_name>ALZADA COMMUNITY HALL</location_name>
+    <zip>59311</zip>
+  </address>
+</polling_location>
+<polling_location id="550001259">
+  <address>
+    <city>HYSHAM</city>
+    <line1>306 RAPELJE</line1>
+    <state>MT</state>
+    <location_name>T.C. COMMUNITY CENTER (PCT 6)</location_name>
+    <zip>59038</zip>
+  </address>
+</polling_location>
+<polling_location id="550001261">
+  <address>
+    <city>HYSHAM</city>
+    <line1>307 RAPELJE</line1>
+    <state>MT</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>59038</zip>
+  </address>
+</polling_location>
+<polling_location id="550001262">
+  <address>
+    <city>BAKER</city>
+    <line1>3440 HIGHWAY 7</line1>
+    <state>MT</state>
+    <location_name>PCT'S 1, 2, 3 &amp; 7 AT EXHIBIT HALL</location_name>
+    <zip>59313</zip>
+  </address>
+</polling_location>
+<polling_location id="550001263">
+  <address>
+    <city>PLEVNA</city>
+    <line1>105 CALLIN AVENUE WEST</line1>
+    <state>MT</state>
+    <location_name>PREC 4 PLEVNA FIRE HALL</location_name>
+    <zip>59344</zip>
+  </address>
+</polling_location>
+<polling_location id="550001265">
+  <address>
+    <city>BAKER</city>
+    <line1>1279 WEBSTER ROAD</line1>
+    <state>MT</state>
+    <location_name>PREC 8 CHIMNEY CREEK SCHOOL</location_name>
+    <zip>59313</zip>
+  </address>
+</polling_location>
+<polling_location id="550001266">
+  <address>
+    <city>BAKER</city>
+    <line1>4 1ST STREET SW</line1>
+    <state>MT</state>
+    <location_name>BAKER FIRE HALL</location_name>
+    <zip>59313</zip>
+  </address>
+</polling_location>
+<polling_location id="550001267">
+  <address>
+    <city>BAKER</city>
+    <line1>115 LINCOLN AVE W</line1>
+    <state>MT</state>
+    <location_name>LONGFELLOW SCHOOL</location_name>
+    <zip>59313</zip>
+  </address>
+</polling_location>
+<polling_location id="550001268">
+  <address>
+    <city>PLEVNA</city>
+    <line1>105 CALLIN AVE W</line1>
+    <state>MT</state>
+    <location_name>PLEVNA FIRE HALL-SCHOOL</location_name>
+    <zip>59344</zip>
+  </address>
+</polling_location>
+<polling_location id="550001269">
+  <address>
+    <city>PLEVNA</city>
+    <line1>105 CALLIN AVE W</line1>
+    <state>MT</state>
+    <location_name>PLEVNA FIRE HALL-SPECIAL</location_name>
+    <zip>59344</zip>
+  </address>
+</polling_location>
+<polling_location id="550001270">
+  <address>
+    <city>BAKER</city>
+    <line1>4 1ST STREET W</line1>
+    <state>MT</state>
+    <location_name>BAKER FIRE HALL-#1</location_name>
+    <zip>59313</zip>
+  </address>
+</polling_location>
+<polling_location id="550001271">
+  <address>
+    <city>BAKER</city>
+    <line1>4 1ST STREET W</line1>
+    <state>MT</state>
+    <location_name>BAKER FIRE HALL-#2</location_name>
+    <zip>59313</zip>
+  </address>
+</polling_location>
+<polling_location id="550001272">
+  <address>
+    <city>BAKER</city>
+    <line1>115 LINCOLN AVE W</line1>
+    <state>MT</state>
+    <location_name>LONGFELLOW SCHOOL-FIRE/SPECIAL</location_name>
+    <zip>59313</zip>
+  </address>
+</polling_location>
+<polling_location id="550001273">
+  <address>
+    <city>TERRY</city>
+    <line1>215 W PARK</line1>
+    <state>MT</state>
+    <location_name>TERRY HIGH SCHOOL</location_name>
+    <zip>59349</zip>
+  </address>
+</polling_location>
+<polling_location id="550001274">
+  <address>
+    <city>FALLON</city>
+    <line1>518 N RAILWAY AVE</line1>
+    <state>MT</state>
+    <location_name>FALLON COFFEE SHOP</location_name>
+    <zip>59326</zip>
+  </address>
+</polling_location>
+<polling_location id="550001275">
+  <address>
+    <city>TERRY</city>
+    <line1>203 S LOGAN</line1>
+    <state>MT</state>
+    <location_name>TERRY TOWN HALL</location_name>
+    <zip>59349</zip>
+  </address>
+</polling_location>
+<polling_location id="550001276">
+  <address>
+    <city>POWDERVILLE</city>
+    <line1>362 W. POWDERVILLE ROAD</line1>
+    <state>MT</state>
+    <location_name>POWDERVILLE HALL</location_name>
+    <zip>59345</zip>
+  </address>
+</polling_location>
+<polling_location id="550001277">
+  <address>
+    <city>VOLBORG</city>
+    <line1>10 RILEY ROAD</line1>
+    <state>MT</state>
+    <location_name>COALWOOD SCHOOL</location_name>
+    <zip>59351</zip>
+  </address>
+</polling_location>
+<polling_location id="550001278">
+  <address>
+    <city>VOLBORG</city>
+    <line1>5 LISCOMB ROAD</line1>
+    <state>MT</state>
+    <location_name>STACEY MEMORIAL HALL</location_name>
+    <zip>59351</zip>
+  </address>
+</polling_location>
+<polling_location id="550001279">
+  <address>
+    <city>ASHLAND</city>
+    <line1>2435 HIGHWAY 212</line1>
+    <state>MT</state>
+    <location_name>TRECO BUILDING</location_name>
+    <zip>59003</zip>
+  </address>
+</polling_location>
+<polling_location id="550001281">
+  <address>
+    <city>OTTER</city>
+    <line1>905 SAYLE ROAD</line1>
+    <state>MT</state>
+    <location_name>BILLUP SCHOOL</location_name>
+    <zip>59062</zip>
+  </address>
+</polling_location>
+<polling_location id="550001282">
+  <address>
+    <city>BIDDLE</city>
+    <line1>212 S. STATE HIGHWAY 59</line1>
+    <state>MT</state>
+    <location_name>BIDDLE HERITAGE CENTER</location_name>
+    <zip>59314</zip>
+  </address>
+</polling_location>
+<polling_location id="550001283">
+  <address>
+    <city>BROADUS</city>
+    <line1>1 COURTHOUSE SQUARE</line1>
+    <state>MT</state>
+    <location_name>COURTHOUSE LOBBY</location_name>
+    <zip>59317</zip>
+  </address>
+</polling_location>
+<polling_location id="550001284">
+  <address>
+    <city>BROADUS</city>
+    <line1>1 COURTHOUSE SQUARE</line1>
+    <state>MT</state>
+    <location_name>COURTHOUSE ELECTION ROOM</location_name>
+    <zip>59317</zip>
+  </address>
+</polling_location>
+<polling_location id="550001299">
+  <address>
+    <city>ROSEBUD</city>
+    <line1>601 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>ROSEBUD SCHOOL</location_name>
+    <zip>59347</zip>
+  </address>
+</polling_location>
+<polling_location id="550001301">
+  <address>
+    <city>ASHLAND</city>
+    <line1>8 OLD MISSION ROAD</line1>
+    <state>MT</state>
+    <location_name>ASHLAND PUBLIC SCHOOL</location_name>
+    <zip>59003</zip>
+  </address>
+</polling_location>
+<polling_location id="550001304">
+  <address>
+    <city>INGOMAR</city>
+    <line1>400 1ST AVE</line1>
+    <state>MT</state>
+    <location_name>INGOMAR SCHOOL</location_name>
+    <zip>59039</zip>
+  </address>
+</polling_location>
+<polling_location id="550001306">
+  <address>
+    <city>COLSTRIP</city>
+    <line1>520 POPLAR DRIVE</line1>
+    <state>MT</state>
+    <location_name>ISABELLE BILLS LEARNING CENTER</location_name>
+    <zip>59323</zip>
+  </address>
+</polling_location>
+<polling_location id="550001308">
+  <address>
+    <city>BIRNEY</city>
+    <line1>201 COMMERCIAL STREET</line1>
+    <state>MT</state>
+    <location_name>BIRNEY SCHOOL</location_name>
+    <zip>59012</zip>
+  </address>
+</polling_location>
+<polling_location id="550001310">
+  <address>
+    <city>MILES CITY</city>
+    <line1>210 N 9TH</line1>
+    <state>MT</state>
+    <location_name>WASHINGTON GYM-A</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="550001311">
+  <address>
+    <city>MILES CITY</city>
+    <line1>20 S CENTER</line1>
+    <state>MT</state>
+    <location_name>CCDHS GYM LOBBY</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="550001312">
+  <address>
+    <city>MILES CITY</city>
+    <line1>716 S CALE</line1>
+    <state>MT</state>
+    <location_name>HIGHLAND PARK SCHOOL GYM</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="550001313">
+  <address>
+    <city>MILES CITY</city>
+    <line1>106 N STREVELL</line1>
+    <state>MT</state>
+    <location_name>JEFFERSON SCHOOL GYM</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="550001315">
+  <address>
+    <city>MILES CITY</city>
+    <line1>1734 ROAD 506</line1>
+    <state>MT</state>
+    <location_name>RIVERVIEW SCHOOL</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="550001316">
+  <address>
+    <city>ISMAY</city>
+    <line1>ISMAY</line1>
+    <state>MT</state>
+    <location_name>ISMAY COMMUNITY CHURCH</location_name>
+    <zip>59336</zip>
+  </address>
+</polling_location>
+<polling_location id="550001317">
+  <address>
+    <city>ISMAY</city>
+    <line1>1533 HORSE CREEK ROAD 403</line1>
+    <state>MT</state>
+    <location_name>KNOWLTON  SCHOOL</location_name>
+    <zip>59336</zip>
+  </address>
+</polling_location>
+<polling_location id="550001322">
+  <address>
+    <city>MILES CITY</city>
+    <line1>6281 MOON CREEK ROAD</line1>
+    <state>MT</state>
+    <location_name>S-H SCHOOL</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="550001323">
+  <address>
+    <city>MILES CITY</city>
+    <line1>2500 MAIN ST</line1>
+    <state>MT</state>
+    <location_name>NATIONAL GUARD ARMORY</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="550001339">
+  <address>
+    <city>MALTA</city>
+    <line1>31283 REGINA RD</line1>
+    <state>MT</state>
+    <location_name>FIRST CREEK HALL</location_name>
+    <zip>59538</zip>
+  </address>
+</polling_location>
+<polling_location id="550001342">
+  <address>
+    <city>WHITEWATER</city>
+    <line1>117 1ST AVE W</line1>
+    <state>MT</state>
+    <location_name>WHITEWATER SCHOOL</location_name>
+    <zip>59544</zip>
+  </address>
+</polling_location>
+<polling_location id="550001343">
+  <address>
+    <city>ZORTMAN</city>
+    <line1>319 RUBY ST</line1>
+    <state>MT</state>
+    <location_name>MISSIONARY NETWORK BLDG</location_name>
+    <zip>59546</zip>
+  </address>
+</polling_location>
+<polling_location id="550001344">
+  <address>
+    <city>LANDUSKY</city>
+    <line1>245 ORE ST</line1>
+    <state>MT</state>
+    <location_name>LANDUSKY SCHOOL</location_name>
+    <zip>59534</zip>
+  </address>
+</polling_location>
+<polling_location id="550001345">
+  <address>
+    <city>LORING</city>
+    <line1>92 1ST ST E</line1>
+    <state>MT</state>
+    <location_name>LORING HALL</location_name>
+    <zip>59537</zip>
+  </address>
+</polling_location>
+<polling_location id="550001346">
+  <address>
+    <city>DODSON</city>
+    <line1>2ND ST W</line1>
+    <state>MT</state>
+    <location_name>DODSON SCHOOL</location_name>
+    <zip>59524</zip>
+  </address>
+</polling_location>
+<polling_location id="550001347">
+  <address>
+    <city>SACO</city>
+    <line1>321 US HIGHWAY 243</line1>
+    <state>MT</state>
+    <location_name>SACO SCHOOL</location_name>
+    <zip>59261</zip>
+  </address>
+</polling_location>
+<polling_location id="550001348">
+  <address>
+    <city>MALTA</city>
+    <line1>39 S 2ND ST E</line1>
+    <state>MT</state>
+    <location_name>CITY HALL/9-1 LEFT</location_name>
+    <zip>59538</zip>
+  </address>
+</polling_location>
+<polling_location id="550001349">
+  <address>
+    <city>MALTA</city>
+    <line1>39 S 2ND ST E</line1>
+    <state>MT</state>
+    <location_name>CITY HALL/9-2 RIGHT</location_name>
+    <zip>59538</zip>
+  </address>
+</polling_location>
+<polling_location id="550001352">
+  <address>
+    <city>GLASGOW</city>
+    <line1>319 3RD ST S</line1>
+    <state>MT</state>
+    <location_name>GLASGOW CIVIC CENTER 1</location_name>
+    <zip>59230</zip>
+  </address>
+</polling_location>
+<polling_location id="550001353">
+  <address>
+    <city>GLASGOW</city>
+    <line1>319 3RD ST S</line1>
+    <state>MT</state>
+    <location_name>GLASGOW CIVIC CENTER 2</location_name>
+    <zip>59230</zip>
+  </address>
+</polling_location>
+<polling_location id="550001354">
+  <address>
+    <city>GLASGOW</city>
+    <line1>319 3RD ST S</line1>
+    <state>MT</state>
+    <location_name>GLASGOW CIVIC CENTER 3</location_name>
+    <zip>59230</zip>
+  </address>
+</polling_location>
+<polling_location id="550001356">
+  <address>
+    <city>FORT PECK</city>
+    <line1>125 MISSOURI AVE</line1>
+    <state>MT</state>
+    <location_name>FORT PECK REC HALL</location_name>
+    <zip>59223</zip>
+  </address>
+</polling_location>
+<polling_location id="550001358">
+  <address>
+    <city>GLASGOW</city>
+    <line1>501 3RD AVE S</line1>
+    <state>MT</state>
+    <location_name>COURTHOUSE 2</location_name>
+    <zip>59230</zip>
+  </address>
+</polling_location>
+<polling_location id="550001359">
+  <address>
+    <city>HINSDALE</city>
+    <line1>124 MONTANA ST</line1>
+    <state>MT</state>
+    <location_name>HINSDALE LEGION HALL</location_name>
+    <zip>59241</zip>
+  </address>
+</polling_location>
+<polling_location id="550001360">
+  <address>
+    <city>OPHEIM</city>
+    <line1>75 MAIN ST</line1>
+    <state>MT</state>
+    <location_name>OPHEIM NORVAL ELECTRIC BUILDING</location_name>
+    <zip>59250</zip>
+  </address>
+</polling_location>
+<polling_location id="550001361">
+  <address>
+    <city>FRAZER</city>
+    <line1>282 LUSTRE RD</line1>
+    <state>MT</state>
+    <location_name>LUSTRE GRADE SCHOOL</location_name>
+    <zip>59225</zip>
+  </address>
+</polling_location>
+<polling_location id="550001362">
+  <address>
+    <city>FRAZER</city>
+    <line1>400 MOCCASIN AVE</line1>
+    <state>MT</state>
+    <location_name>FRAZER NEW COMMUNITY HALL</location_name>
+    <zip>59225</zip>
+  </address>
+</polling_location>
+<polling_location id="550001363">
+  <address>
+    <city>RAYNESFORD</city>
+    <line1>104 2ND AVENUE EAST</line1>
+    <state>MT</state>
+    <location_name>RAYNESFORD SCHOOL</location_name>
+    <zip>59469</zip>
+  </address>
+</polling_location>
+<polling_location id="550001365">
+  <address>
+    <city>GEYSER</city>
+    <line1>105 EAST RAILROAD AVENUE</line1>
+    <state>MT</state>
+    <location_name>GEYSER SR. CITIZENS</location_name>
+    <zip>59447</zip>
+  </address>
+</polling_location>
+<polling_location id="550001366">
+  <address>
+    <city>STANFORD</city>
+    <line1>102 CENTRAL AVENUE</line1>
+    <state>MT</state>
+    <location_name>STANFORD CITY HALL</location_name>
+    <zip>59479</zip>
+  </address>
+</polling_location>
+<polling_location id="550001367">
+  <address>
+    <city>HOBSON</city>
+    <line1>102 2ND STREET WEST</line1>
+    <state>MT</state>
+    <location_name>HOBSON SR. CITIZENS</location_name>
+    <zip>59452</zip>
+  </address>
+</polling_location>
+<polling_location id="550001371">
+  <address>
+    <city>CUT BANK</city>
+    <line1>913 E. RAILROAD</line1>
+    <state>MT</state>
+    <location_name>CB VOTING CENTER 01</location_name>
+    <zip>59427</zip>
+  </address>
+</polling_location>
+<polling_location id="550001372">
+  <address>
+    <city>CUT BANK</city>
+    <line1>913 E. RAILROAD</line1>
+    <state>MT</state>
+    <location_name>CB VOTING CENTER 02</location_name>
+    <zip>59427</zip>
+  </address>
+</polling_location>
+<polling_location id="550001373">
+  <address>
+    <city>CUT BANK</city>
+    <line1>913 E. RAILROAD</line1>
+    <state>MT</state>
+    <location_name>CB VOTING CENTER 03</location_name>
+    <zip>59427</zip>
+  </address>
+</polling_location>
+<polling_location id="550001374">
+  <address>
+    <city>CUT BANK</city>
+    <line1>913 E. RAILROAD</line1>
+    <state>MT</state>
+    <location_name>CB VOTING CENTER 04</location_name>
+    <zip>59427</zip>
+  </address>
+</polling_location>
+<polling_location id="550001375">
+  <address>
+    <city>CUT BANK</city>
+    <line1>48 SANTA RITA HIGHWAY</line1>
+    <state>MT</state>
+    <location_name>GEWAREHOUSE 05</location_name>
+    <zip>59427</zip>
+  </address>
+</polling_location>
+<polling_location id="550001376">
+  <address>
+    <city>CUT BANK</city>
+    <line1>512 E. MAIN</line1>
+    <state>MT</state>
+    <location_name>GCCOURTHSE 06</location_name>
+    <zip>59427</zip>
+  </address>
+</polling_location>
+<polling_location id="550001378">
+  <address>
+    <city>BROWNING</city>
+    <line1>DE LASALLE SCHOOL</line1>
+    <state>MT</state>
+    <location_name>CCD CENTER 08</location_name>
+    <zip>59417</zip>
+  </address>
+</polling_location>
+<polling_location id="550001379">
+  <address>
+    <city>BROWNING</city>
+    <line1>DE LASALLE SCHOOL</line1>
+    <state>MT</state>
+    <location_name>CCD CENTER 09</location_name>
+    <zip>59417</zip>
+  </address>
+</polling_location>
+<polling_location id="550001380">
+  <address>
+    <city>EAST GLACIER</city>
+    <line1>EAST GLACIER</line1>
+    <state>MT</state>
+    <location_name>EGP WOMENS CLUB 10</location_name>
+    <zip>59434</zip>
+  </address>
+</polling_location>
+<polling_location id="550001381">
+  <address>
+    <city>BLACKFOOT</city>
+    <line1>BLACKFOOT</line1>
+    <state>MT</state>
+    <location_name>DOLORES SALOIS RESIDENCE 11</location_name>
+    <zip>59417</zip>
+  </address>
+</polling_location>
+<polling_location id="550001382">
+  <address>
+    <city>BROWNING</city>
+    <line1>DE LASALLE SCHOOL</line1>
+    <state>MT</state>
+    <location_name>CCD CENTER 12</location_name>
+    <zip>59417</zip>
+  </address>
+</polling_location>
+<polling_location id="550001383">
+  <address>
+    <city>BROWNING</city>
+    <line1>DE LASALLE SCHOOL</line1>
+    <state>MT</state>
+    <location_name>CCD CENTER 13</location_name>
+    <zip>59417</zip>
+  </address>
+</polling_location>
+<polling_location id="550001385">
+  <address>
+    <city>BABB</city>
+    <line1>BABB</line1>
+    <state>MT</state>
+    <location_name>BABB SCHOOL 15</location_name>
+    <zip>59411</zip>
+  </address>
+</polling_location>
+<polling_location id="550001386">
+  <address>
+    <city>BROWNING</city>
+    <line1>DE LASALLE SCHOOL</line1>
+    <state>MT</state>
+    <location_name>CCD CENTER 19</location_name>
+    <zip>59417</zip>
+  </address>
+</polling_location>
+<polling_location id="550001387">
+  <address>
+    <city>BROWNING</city>
+    <line1>DE LASALLE SCHOOL</line1>
+    <state>MT</state>
+    <location_name>CCD CENTER 21</location_name>
+    <zip>59417</zip>
+  </address>
+</polling_location>
+<polling_location id="550001399">
+  <address>
+    <city>LENNEP</city>
+    <line1>LENNEP</line1>
+    <state>MT</state>
+    <location_name>LENNEP SCHOOL-D</location_name>
+    <zip>59053</zip>
+  </address>
+</polling_location>
+<polling_location id="550001401">
+  <address>
+    <city>WHITE SULPHUR SPRINGS</city>
+    <line1>209 CENTRAL AVENUE</line1>
+    <state>MT</state>
+    <location_name>GRADE SCHOOL-A</location_name>
+    <zip>59645</zip>
+  </address>
+</polling_location>
+<polling_location id="550001402">
+  <address>
+    <city>RINGLING</city>
+    <line1>PO BOX 157</line1>
+    <state>MT</state>
+    <location_name>RINGLING SCHOOL-C</location_name>
+    <zip>59642</zip>
+  </address>
+</polling_location>
+<polling_location id="550001403">
+  <address>
+    <city>MARTINSDALE</city>
+    <line1>MARTINSDALE</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY HALL-E</location_name>
+    <zip>59053</zip>
+  </address>
+</polling_location>
+<polling_location id="550001404">
+  <address>
+    <city>WHITE SULPHUR SPRINGS</city>
+    <line1>PO BOX 73</line1>
+    <state>MT</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>59645</zip>
+  </address>
+</polling_location>
+<polling_location id="550001407">
+  <address>
+    <city>WINSTON</city>
+    <line1>6467 HWY 287</line1>
+    <state>MT</state>
+    <location_name>WINSTON FIRE HALL</location_name>
+    <zip>59647</zip>
+  </address>
+</polling_location>
+<polling_location id="550001408">
+  <address>
+    <city>TOSTON</city>
+    <line1>8852 HWY 287</line1>
+    <state>MT</state>
+    <location_name>TOSTON FIRE HALL</location_name>
+    <zip>59643</zip>
+  </address>
+</polling_location>
+<polling_location id="550001409">
+  <address>
+    <city>TOWNSEND</city>
+    <line1>201 N SPRUCE</line1>
+    <state>MT</state>
+    <location_name>LIBRARY COMMUNITY ROOM</location_name>
+    <zip>59644</zip>
+  </address>
+</polling_location>
+<polling_location id="550001411">
+  <address>
+    <city>TOWNSEND</city>
+    <line1>515 BROADWAY</line1>
+    <state>MT</state>
+    <location_name>COURT HOUSE</location_name>
+    <zip>59644</zip>
+  </address>
+</polling_location>
+<polling_location id="550001412">
+  <address>
+    <city>BIG TIMBER</city>
+    <line1>301 HOOPER ST</line1>
+    <state>MT</state>
+    <location_name>CIVIC CENTER</location_name>
+    <zip>59011</zip>
+  </address>
+</polling_location>
+<polling_location id="550001420">
+  <address>
+    <city>EMIGRANT</city>
+    <line1>101 STORY ROAD</line1>
+    <state>MT</state>
+    <location_name>EMIGRANT HALL</location_name>
+    <zip>59027</zip>
+  </address>
+</polling_location>
+<polling_location id="550001421">
+  <address>
+    <city>GARDINER</city>
+    <line1>510 STONE STREET</line1>
+    <state>MT</state>
+    <location_name>GARDINER SCHOOL</location_name>
+    <zip>59030</zip>
+  </address>
+</polling_location>
+<polling_location id="550001427">
+  <address>
+    <city>CLYDE PARK</city>
+    <line1>409 MILES AVE.</line1>
+    <state>MT</state>
+    <location_name>SHIELDS VALLEY COMMUNITY CENTER</location_name>
+    <zip>59018</zip>
+  </address>
+</polling_location>
+<polling_location id="550001437">
+  <address>
+    <city>LIVINGSTON</city>
+    <line1>46 VIEW VISTA DR</line1>
+    <state>MT</state>
+    <location_name>LIVINGSTON FAIRGROUNDS</location_name>
+    <zip>59047</zip>
+  </address>
+</polling_location>
+<polling_location id="550002336">
+  <address>
+    <city>JORDON</city>
+    <line1>352 LEAVITT AVE</line1>
+    <state>MT</state>
+    <location_name>COURT HOUSE</location_name>
+    <zip>59337</zip>
+  </address>
+</polling_location>
+<polling_location id="550002337">
+  <address>
+    <city>SAND SPRINGS</city>
+    <line1>3194 HIGHWAY 200 W</line1>
+    <state>MT</state>
+    <location_name>SANDSPRINGS SCHOOL</location_name>
+    <zip>59077</zip>
+  </address>
+</polling_location>
+<polling_location id="550002338">
+  <address>
+    <city>BRUSETT</city>
+    <line1>2071 EDWARDS ROAD</line1>
+    <state>MT</state>
+    <location_name>BRUSETT - COMMUNITY HALL</location_name>
+    <zip>59318</zip>
+  </address>
+</polling_location>
+<polling_location id="550002339">
+  <address>
+    <city>COHAGEN</city>
+    <line1>19 3RD STREET E</line1>
+    <state>MT</state>
+    <location_name>COHAGEN - COMMUNITY HALL</location_name>
+    <zip>59322</zip>
+  </address>
+</polling_location>
+<polling_location id="550002340">
+  <address>
+    <city>MOSBY</city>
+    <line1>5 ROWTON ROAD</line1>
+    <state>MT</state>
+    <location_name>MOSBY</location_name>
+    <zip>59058</zip>
+  </address>
+</polling_location>
+<polling_location id="550002341">
+  <address>
+    <city>JORDON</city>
+    <line1>379 VAN NORMAN ROAD</line1>
+    <state>MT</state>
+    <location_name>VAN NORMAN - COMMUNITY HALL</location_name>
+    <zip>59337</zip>
+  </address>
+</polling_location>
+<polling_location id="550002342">
+  <address>
+    <city>ANGELA</city>
+    <line1>14 U ALL ROAD</line1>
+    <state>MT</state>
+    <location_name>TREE COULEE</location_name>
+    <zip>59312</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000100">
+  <address>
+    <city>HAVRE</city>
+    <line1>900 18TH ST</line1>
+    <state>MT</state>
+    <location_name>HAVRE HIGH SCHOOL GYM -06</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000025">
+  <address>
+    <city>MISSOULA</city>
+    <line1>200 W BROADWAY</line1>
+    <state>MT</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>59802</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000027">
+  <address>
+    <city>MISSOULA</city>
+    <line1>6355 PADRE LANE</line1>
+    <state>MT</state>
+    <location_name>DESMET SCHOOL</location_name>
+    <zip>59808</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000028">
+  <address>
+    <city>MISSOULA</city>
+    <line1>5600 LONGVIEW</line1>
+    <state>MT</state>
+    <location_name>CHIEF CHARLO SCHOOL</location_name>
+    <zip>59803</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000029">
+  <address>
+    <city>CLINTON</city>
+    <line1>19075 E MULLAN RD</line1>
+    <state>MT</state>
+    <location_name>CLINTON SCHOOL</location_name>
+    <zip>59825</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000031">
+  <address>
+    <city>MISSOULA</city>
+    <line1>2625 BRIGGS</line1>
+    <state>MT</state>
+    <location_name>COLD SPRINGS SCHOOL</location_name>
+    <zip>59803</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000033">
+  <address>
+    <city>MISSOULA</city>
+    <line1>2510 CENTRAL AVE</line1>
+    <state>MT</state>
+    <location_name>C S PORTER SCHOOL</location_name>
+    <zip>59804</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000034">
+  <address>
+    <city>MISSOULA</city>
+    <line1>310 S CURTIS</line1>
+    <state>MT</state>
+    <location_name>EMMA DICKENSON SCHOOL</location_name>
+    <zip>59801</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000035">
+  <address>
+    <city>MISSOULA</city>
+    <line1>6900 GROOMS RD</line1>
+    <state>MT</state>
+    <location_name>EVARO FIRE STATION</location_name>
+    <zip>59808</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000036">
+  <address>
+    <city>MISSOULA</city>
+    <line1>1901 S 10TH ST W</line1>
+    <state>MT</state>
+    <location_name>FRANKLIN SCHOOL</location_name>
+    <zip>59801</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000037">
+  <address>
+    <city>FRENCHTOWN</city>
+    <line1>16875 MARION</line1>
+    <state>MT</state>
+    <location_name>FRENCHTOWN FIRE STATION</location_name>
+    <zip>59834</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000038">
+  <address>
+    <city>MISSOULA</city>
+    <line1>2835 S 3RD ST W</line1>
+    <state>MT</state>
+    <location_name>HAWTHORNE SCHOOL</location_name>
+    <zip>59804</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000039">
+  <address>
+    <city>MISSOULA</city>
+    <line1>2385 FLYNN LANE</line1>
+    <state>MT</state>
+    <location_name>HELLGATE ELEMENTARY SCHOOL</location_name>
+    <zip>59808</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000040">
+  <address>
+    <city>MISSOULA</city>
+    <line1>1700 SOUTH AVE W</line1>
+    <state>MT</state>
+    <location_name>JEFFERSON SCHOOL</location_name>
+    <zip>59801</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000041">
+  <address>
+    <city>MISSOULA</city>
+    <line1>2901 PARK</line1>
+    <state>MT</state>
+    <location_name>LEWIS &amp; CLARK SCHOOL</location_name>
+    <zip>59801</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000042">
+  <address>
+    <city>LOLO</city>
+    <line1>11395 HIWAY 93 SOUTH</line1>
+    <state>MT</state>
+    <location_name>LOLO ELEMENTARY SCHOOL</location_name>
+    <zip>59847</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000043">
+  <address>
+    <city>MISSOULA</city>
+    <line1>1200 SHERWOOD</line1>
+    <state>MT</state>
+    <location_name>LOWELL SCHOOL</location_name>
+    <zip>59802</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000044">
+  <address>
+    <city>MISSOULA</city>
+    <line1>4210 S RESERVE ST</line1>
+    <state>MT</state>
+    <location_name>MEADOW HILL SCHOOL</location_name>
+    <zip>59803</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000045">
+  <address>
+    <city>MISSOULA</city>
+    <line1>735 MICHIGAN</line1>
+    <state>MT</state>
+    <location_name>MOUNT JUMBO SCHOOL</location_name>
+    <zip>59802</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000046">
+  <address>
+    <city>HUSON</city>
+    <line1>32095 PINEY MEADOWS</line1>
+    <state>MT</state>
+    <location_name>NINE MILE FIRE STATION</location_name>
+    <zip>59846</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000047">
+  <address>
+    <city>MISSOULA</city>
+    <line1>101 EVANS</line1>
+    <state>MT</state>
+    <location_name>PAXSON SCHOOL</location_name>
+    <zip>59801</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000048">
+  <address>
+    <city>ALBERTON</city>
+    <line1>995 TERRACE VIEW DR</line1>
+    <state>MT</state>
+    <location_name>PETTY CREEK FIRE STATION</location_name>
+    <zip>59820</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000049">
+  <address>
+    <city>BONNER</city>
+    <line1>27950 POTOMAC RD</line1>
+    <state>MT</state>
+    <location_name>GREENOUGH POTOMAC COMMUNITY CENTER</location_name>
+    <zip>59823</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000050">
+  <address>
+    <city>MISSOULA</city>
+    <line1>1100 HARRISON</line1>
+    <state>MT</state>
+    <location_name>PRESCOTT SCHOOL</location_name>
+    <zip>59802</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000051">
+  <address>
+    <city>MISSOULA</city>
+    <line1>1220 PINEVIEW DR</line1>
+    <state>MT</state>
+    <location_name>RATTLESNAKE SCHOOL</location_name>
+    <zip>59802</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000053">
+  <address>
+    <city>SEELEY LAKE</city>
+    <line1>200 SCHOOL LANE</line1>
+    <state>MT</state>
+    <location_name>SEELEY LAKE ELEMENTARY SCHOOL</location_name>
+    <zip>59868</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000054">
+  <address>
+    <city>MISSOULA</city>
+    <line1>705 S HIGGINS</line1>
+    <state>MT</state>
+    <location_name>SENIOR CITIZENS CENTER</location_name>
+    <zip>59801</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000055">
+  <address>
+    <city>MISSOULA</city>
+    <line1>9350 LADYSLIPPER</line1>
+    <state>MT</state>
+    <location_name>SPRING MEADOWS FIRE STATION</location_name>
+    <zip>59808</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000056">
+  <address>
+    <city>MISSOULA</city>
+    <line1>503 EDITH</line1>
+    <state>MT</state>
+    <location_name>ST JOSEPH SCHOOL</location_name>
+    <zip>59801</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000057">
+  <address>
+    <city>GREENOUGH</city>
+    <line1>5024 SUNSET HILL RD</line1>
+    <state>MT</state>
+    <location_name>SUNSET SCHOOL</location_name>
+    <zip>59836</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000058">
+  <address>
+    <city>CONDON</city>
+    <line1>6423 HIWAY 83 N</line1>
+    <state>MT</state>
+    <location_name>SWAN VALLEY SCHOOL</location_name>
+    <zip>59826</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000059">
+  <address>
+    <city>MISSOULA</city>
+    <line1>4095 SOUTH AVE WEST</line1>
+    <state>MT</state>
+    <location_name>TARGET RANGE SCHOOL</location_name>
+    <zip>59804</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000060">
+  <address>
+    <city>MISSOULA</city>
+    <line1>1000 E. BECKWITH AVENUE</line1>
+    <state>MT</state>
+    <location_name>U C CENTER</location_name>
+    <zip>59812</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000061">
+  <address>
+    <city>MISSOULA</city>
+    <line1>645 W CENTRAL</line1>
+    <state>MT</state>
+    <location_name>WASHINGTON SCHOOL</location_name>
+    <zip>59801</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000062">
+  <address>
+    <city>LOLO</city>
+    <line1>18470 HIWAY 93 S</line1>
+    <state>MT</state>
+    <location_name>WOODMAN SCHOOL</location_name>
+    <zip>59847</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000063">
+  <address>
+    <city>MISSOULA</city>
+    <line1>200 W BROADWAY RM 201</line1>
+    <state>MT</state>
+    <location_name>COUNTING CENTER</location_name>
+    <zip>59802</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000066">
+  <address>
+    <city>BONNER</city>
+    <line1>9045 HIWAY 200 E</line1>
+    <state>MT</state>
+    <location_name>BONNER SCHOOL</location_name>
+    <zip>59823</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000069">
+  <address>
+    <city>GREAT FALLS</city>
+    <line1>325 2ND AVE N</line1>
+    <state>MT</state>
+    <location_name>CASCADE COUNTY ANNEX</location_name>
+    <zip>59401</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000075">
+  <address>
+    <city>KALISPELL</city>
+    <line1>3496 US HIGHWAY 2 W</line1>
+    <state>MT</state>
+    <location_name>SMITH VALLEY FIRE HALL</location_name>
+    <zip>59901</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000077">
+  <address>
+    <city>CHESTER</city>
+    <line1>511 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>CJI ELE GYM</location_name>
+    <zip>59522</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000079">
+  <address>
+    <city>GLENDIVE</city>
+    <line1>200 S KENDRICK</line1>
+    <state>MT</state>
+    <location_name>LIBRARY - 1</location_name>
+    <zip>59330</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000080">
+  <address>
+    <city>GLENDIVE</city>
+    <line1>604 E GRANT</line1>
+    <state>MT</state>
+    <location_name>SENIOR CITIZEN CENTER - 2</location_name>
+    <zip>59330</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000081">
+  <address>
+    <city>GLENDIVE</city>
+    <line1>900 N MERRILL AVE</line1>
+    <state>MT</state>
+    <location_name>DAWSON COUNTY HIGH SCHOOL - 3</location_name>
+    <zip>59330</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000082">
+  <address>
+    <city>GLENDIVE</city>
+    <line1>604 E GRANT</line1>
+    <state>MT</state>
+    <location_name>SENIOR CITIZENS CENTER - 4</location_name>
+    <zip>59330</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000083">
+  <address>
+    <city>RICHEY</city>
+    <line1>223 S MAIN ST</line1>
+    <state>MT</state>
+    <location_name>RICHEY SENIOR CITIZEN CENTER - 5</location_name>
+    <zip>59259</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000084">
+  <address>
+    <city>LINDSAY</city>
+    <line1>30 FAS 470</line1>
+    <state>MT</state>
+    <location_name>LINDSAY HALL - 6</location_name>
+    <zip>59339</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000085">
+  <address>
+    <city>BLOOMFIELD</city>
+    <line1>2285 FAS 470</line1>
+    <state>MT</state>
+    <location_name>BLOOMFIELD SCHOOL - 7</location_name>
+    <zip>59315</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000086">
+  <address>
+    <city>GLENDIVE</city>
+    <line1>800 JEFFERSON SCHOOL RD</line1>
+    <state>MT</state>
+    <location_name>JEFFERSON SCHOOL - 8</location_name>
+    <zip>59330</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000087">
+  <address>
+    <city>GLENDIVE</city>
+    <line1>1714 CRISAFULLI DR</line1>
+    <state>MT</state>
+    <location_name>WEST GLENDIVE FIRE HALL - 9</location_name>
+    <zip>59330</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000088">
+  <address>
+    <city>GLENDIVE</city>
+    <line1>207 W BELL ST</line1>
+    <state>MT</state>
+    <location_name>COURTHOUSE - 10</location_name>
+    <zip>59330</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000089">
+  <address>
+    <city>PLENTYWOOD</city>
+    <line1>4262 C HWY 16 S</line1>
+    <state>MT</state>
+    <location_name>PCT 3 CIVIC CENTER</location_name>
+    <zip>59254</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000090">
+  <address>
+    <city>DILLON</city>
+    <line1>715 E BANNACK</line1>
+    <state>MT</state>
+    <location_name>LUTHERAN CHURCH</location_name>
+    <zip>59725</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000092">
+  <address>
+    <city>BUTTE</city>
+    <line1>1340 HARRISON AVE</line1>
+    <state>MT</state>
+    <location_name>CIVIC CENTER</location_name>
+    <zip>59701</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000093">
+  <address>
+    <city>BUTTE</city>
+    <line1>1110 GRIZZLY TRAIL</line1>
+    <state>MT</state>
+    <location_name>ROCKER FIRE HALL</location_name>
+    <zip>59701</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000094">
+  <address>
+    <city>RAMSAY</city>
+    <line1>3 RUSSELL</line1>
+    <state>MT</state>
+    <location_name>RAMSAY SCHOOL</location_name>
+    <zip>59748</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000095">
+  <address>
+    <city>DIVIDE</city>
+    <line1>105 SCHOOLHOUSE RD</line1>
+    <state>MT</state>
+    <location_name>DIVIDE GRANGE HALL</location_name>
+    <zip>59727</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000096">
+  <address>
+    <city>MELROSE</city>
+    <line1>377 HECLA STREET</line1>
+    <state>MT</state>
+    <location_name>MELROSE SCHOOL</location_name>
+    <zip>59743</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000097">
+  <address>
+    <city>AUGUSTA</city>
+    <line1>132 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>AUGUSTA YOUTH/SENIOR CENTER</location_name>
+    <zip>59410</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000098">
+  <address>
+    <city>EAST HELENA</city>
+    <line1>306 EAST MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>EAST HELENA CITY HALL</location_name>
+    <zip>59635</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000103">
+  <address>
+    <city>MALTA</city>
+    <line1>314 S 2ND AVE W</line1>
+    <state>MT</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>59538</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000104">
+  <address>
+    <city>FORT BENTON</city>
+    <line1>1406 FRANKLIN STREET</line1>
+    <state>MT</state>
+    <location_name>FORT BENTON ELEMENTARY</location_name>
+    <zip>59442</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000105">
+  <address>
+    <city>FAIRVIEW</city>
+    <line1>317 WEST 7TH ST</line1>
+    <state>MT</state>
+    <location_name>ST CATHERINES CHURCH</location_name>
+    <zip>59221</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000112">
+  <address>
+    <city>RYEGATE</city>
+    <line1>107 KEMP</line1>
+    <state>MT</state>
+    <location_name>RYEGATE COURT HOUSE</location_name>
+    <zip>59074</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000113">
+  <address>
+    <city>LAVINA</city>
+    <line1>117 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>LAVINA SENIOR CENTER</location_name>
+    <zip>59046</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000114">
+  <address>
+    <city>WHITEFISH</city>
+    <line1>121 E 2ND ST</line1>
+    <state>MT</state>
+    <location_name>WF SENIOR CITIZENS CNTR</location_name>
+    <zip>59937</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000115">
+  <address>
+    <city>WHITEHALL</city>
+    <line1>9 N. DIVISION</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY HALL - WHITEHALL</location_name>
+    <zip>59759</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000116">
+  <address>
+    <city>MT CITY</city>
+    <line1>11 MCCLELLAN CREEK RD</line1>
+    <state>MT</state>
+    <location_name>MONTANA CITY SCHOOL</location_name>
+    <zip>59634</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000121">
+  <address>
+    <city>BOZEMAN</city>
+    <line1>TAMARACK &amp; BLACK</line1>
+    <state>MT</state>
+    <location_name>FAIRGROUNDS BLDG 1</location_name>
+    <zip>59715</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000122">
+  <address>
+    <city>BOZEMAN</city>
+    <line1>TAMARACK &amp; BLACK</line1>
+    <state>MT</state>
+    <location_name>FAIRGROUNDS BLDG 2</location_name>
+    <zip>59718</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000126">
+  <address>
+    <city>BOZEMAN</city>
+    <line1>TAMARACK &amp; BLACK</line1>
+    <state>MT</state>
+    <location_name>FAIRGROUNDS BLDG 4</location_name>
+    <zip>59715</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000134">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #02</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000137">
+  <address>
+    <city>TWO DOT</city>
+    <line1>TWO DOT HIGHWAY</line1>
+    <state>MT</state>
+    <location_name>PREC 1 COMMUNITY CLUB</location_name>
+    <zip>59085</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000138">
+  <address>
+    <city>HARLOWTON</city>
+    <line1>304 E. DIVISION</line1>
+    <state>MT</state>
+    <location_name>PREC 2 HARLOWTON HIGH SCHOOL</location_name>
+    <zip>59036</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000139">
+  <address>
+    <city>SHAWMUT</city>
+    <line1>1 EAST 3RD AVE</line1>
+    <state>MT</state>
+    <location_name>PREC 3 SHAWMUT SCHOOL</location_name>
+    <zip>59078</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000140">
+  <address>
+    <city>JUDITH GAP</city>
+    <line1>601 MEAGHER ST</line1>
+    <state>MT</state>
+    <location_name>PREC 4 CITY COMPLEX</location_name>
+    <zip>59453</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000141">
+  <address>
+    <city>HARLOWTON</city>
+    <line1>304 E. DIVISION</line1>
+    <state>MT</state>
+    <location_name>PREC 9 HARLOWTON HIGH SCHOOL</location_name>
+    <zip>59306</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000142">
+  <address>
+    <city>HELENA</city>
+    <line1>316 N. PARK AVE</line1>
+    <state>MT</state>
+    <location_name>CITY/COUNTY BLDG</location_name>
+    <zip>59601</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000143">
+  <address>
+    <city>CHESTER</city>
+    <line1>111 1ST STREET EAST</line1>
+    <state>MT</state>
+    <location_name>LIBERTY CO COURTHOUSE</location_name>
+    <zip>59522</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000144">
+  <address>
+    <city>HYSHAM</city>
+    <line1>306 RAPELJE</line1>
+    <state>MT</state>
+    <location_name>T.C. COMMUNITY CENTER (PCT.3)</location_name>
+    <zip>59038</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000145">
+  <address>
+    <city>HELENA</city>
+    <line1>3553 TIZER DR</line1>
+    <state>MT</state>
+    <location_name>HELENA VALLEY COMMUNITY CENTER</location_name>
+    <zip>59602</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000147">
+  <address>
+    <city>STANFOR</city>
+    <line1>91 3RD STREET NORTH COURTHOUSE</line1>
+    <state>MT</state>
+    <location_name>ELECTION OFFICE</location_name>
+    <zip>59479</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000148">
+  <address>
+    <city>MISSOULA</city>
+    <line1>301 E MAIN</line1>
+    <state>MT</state>
+    <location_name>LIBRARY</location_name>
+    <zip>59802</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000149">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVENUE NORTH</line1>
+    <state>MT</state>
+    <location_name>METRA PARK</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000150">
+  <address>
+    <city>BILLINGS</city>
+    <line1>517 SHILOH RD.</line1>
+    <state>MT</state>
+    <location_name>FAITH CHAPEL</location_name>
+    <zip>59102</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000153">
+  <address>
+    <city>MALTA</city>
+    <line1>39 S 2ND ST E</line1>
+    <state>MT</state>
+    <location_name>MALTA CITY HALL - 12N</location_name>
+    <zip>59538</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000154">
+  <address>
+    <city>MALTA</city>
+    <line1>39 S 2ND ST E</line1>
+    <state>MT</state>
+    <location_name>MALTA CITY HALL - 12S</location_name>
+    <zip>59538</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000155">
+  <address>
+    <city>EDGAR</city>
+    <line1>222 E. RAILWAY</line1>
+    <state>MT</state>
+    <location_name>EDGAR FIRE HALL</location_name>
+    <zip>59026</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000156">
+  <address>
+    <city>BILLINGS</city>
+    <line1>1932 US HWY 87</line1>
+    <state>MT</state>
+    <location_name>LOCKWOOD SCHL</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000157">
+  <address>
+    <city>HUNTLEY</city>
+    <line1>150 COOPERATIVE WAY</line1>
+    <state>MT</state>
+    <location_name>YELLOWSTONE VALLEY ELEC. CO-OP</location_name>
+    <zip>59037</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000158">
+  <address>
+    <city>SHEPHERD</city>
+    <line1>7842 SHEPHERD RD</line1>
+    <state>MT</state>
+    <location_name>SHEPHERD H.S. 46A</location_name>
+    <zip>59079</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000159">
+  <address>
+    <city>BILLINGS</city>
+    <line1>517 SHILOH RD</line1>
+    <state>MT</state>
+    <location_name>FAITH CHAPEL 46F</location_name>
+    <zip>59102</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000160">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE NORTH</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 46H</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000161">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE NORTH</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 46I</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000162">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 47A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000163">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 47B</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000164">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 48A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000165">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 48B</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000166">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 49A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000167">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 49B</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000168">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 50A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000169">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 50B</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000170">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 51A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000171">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 51B</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000172">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 52A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000173">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 52B</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000175">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 53A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000182">
+  <address>
+    <city>BILLINGS</city>
+    <line1>1532 S 64TH ST W</line1>
+    <state>MT</state>
+    <location_name>ELDER GROVE SCHOOL 57B</location_name>
+    <zip>59106</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000183">
+  <address>
+    <city>BILLINGS</city>
+    <line1>3652 BLUE CREEK RD</line1>
+    <state>MT</state>
+    <location_name>BLUE CREEK SCHOOL 57E</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000184">
+  <address>
+    <city>LAUREL</city>
+    <line1>203 E 8TH</line1>
+    <state>MT</state>
+    <location_name>LAUREL H.S.</location_name>
+    <zip>59044</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000185">
+  <address>
+    <city>LAUREL</city>
+    <line1>203 E 8TH</line1>
+    <state>MT</state>
+    <location_name>LAUREL H.S. 58B</location_name>
+    <zip>59044</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000186">
+  <address>
+    <city>LAUREL</city>
+    <line1>203 E 8TH</line1>
+    <state>MT</state>
+    <location_name>LAUREL H.S. 58C</location_name>
+    <zip>59044</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000187">
+  <address>
+    <city>LAUREL</city>
+    <line1>203 E 8TH</line1>
+    <state>MT</state>
+    <location_name>LAUREL H.S. 58D</location_name>
+    <zip>59044</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000188">
+  <address>
+    <city>LAUREL</city>
+    <line1>203 E 8TH</line1>
+    <state>MT</state>
+    <location_name>LAUREL H.S. 58E</location_name>
+    <zip>59044</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000191">
+  <address>
+    <city>CLANCY</city>
+    <line1>9 NORTH MAIN ST</line1>
+    <state>MT</state>
+    <location_name>CLANCY MUSEUM</location_name>
+    <zip>59634</zip>
+  </address>
+</polling_location>
+<polling_location id="55000100000192">
+  <address>
+    <city>CLANCY</city>
+    <line1>9 NORTH MAIN ST</line1>
+    <state>MT</state>
+    <location_name>MUSEUM - CLANCY</location_name>
+    <zip>59634</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000002">
+  <address>
+    <city>WHITEHALL</city>
+    <line1>9 N DIVISION ST</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY HALL-PREC 6</location_name>
+    <zip>59759</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000029">
+  <address>
+    <city>MISSOULA</city>
+    <line1>326 MONTANA AVE</line1>
+    <state>MT</state>
+    <location_name>EAST MISSOULA COMMUNITY CENTER</location_name>
+    <zip>59802</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000030">
+  <address>
+    <city>MILES CITY</city>
+    <line1>1 ASH CREEK ROAD 664</line1>
+    <state>MT</state>
+    <location_name>S-Y SCH</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000031">
+  <address>
+    <city>MILES CITY</city>
+    <line1>1401 CROW ROCK ROAD 109</line1>
+    <state>MT</state>
+    <location_name>TWIN BUTTES SCH</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000032">
+  <address>
+    <city>KINSEY</city>
+    <line1>7 MASTIN ROAD</line1>
+    <state>MT</state>
+    <location_name>KINSEY SCH</location_name>
+    <zip>59338</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000033">
+  <address>
+    <city>ISMAY</city>
+    <line1>1533 HORSE CREEK ROAD</line1>
+    <state>MT</state>
+    <location_name>KNOWLTON SCH</location_name>
+    <zip>59336</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000034">
+  <address>
+    <city>MILES CITY</city>
+    <line1>331 KIRCHER CREEK ROAD</line1>
+    <state>MT</state>
+    <location_name>KIRCHER CREEK SCH</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000035">
+  <address>
+    <city>MILES CITY</city>
+    <line1>12 KRUTZFELDT ROAD</line1>
+    <state>MT</state>
+    <location_name>SPRING CRK SCH</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000036">
+  <address>
+    <city>MILES CITY</city>
+    <line1>1734 RD 506</line1>
+    <state>MT</state>
+    <location_name>RIVERVW SCH</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000037">
+  <address>
+    <city>MILES CITY</city>
+    <line1>20 S. CENTER</line1>
+    <state>MT</state>
+    <location_name>CCDHS</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000038">
+  <address>
+    <city>MILES CITY</city>
+    <line1>6281 MOON CREEK ROAD</line1>
+    <state>MT</state>
+    <location_name>S-H SCH</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000043">
+  <address>
+    <city>HAVRE</city>
+    <line1>315 4TH ST</line1>
+    <state>MT</state>
+    <location_name>-----COURTHOUSE--</location_name>
+    <zip>59501</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000044">
+  <address>
+    <city>HINGHAM</city>
+    <line1>CONNIE GEORGE P.O. BOX 235</line1>
+    <state>MT</state>
+    <location_name>----COMM CENT HINGHAM --</location_name>
+    <zip>59528</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000045">
+  <address>
+    <city>THOMPSON FALLS</city>
+    <line1>1111 MAIN STREET</line1>
+    <state>MT</state>
+    <location_name>COURTHOUSE</location_name>
+    <zip>59873</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000046">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #08</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000047">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #09</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000048">
+  <address>
+    <city>JOPLIN</city>
+    <line1>105 2ND STREET EAST</line1>
+    <state>MT</state>
+    <location_name>JOPLIN COMMUNITY HALL</location_name>
+    <zip>59531</zip>
+  </address>
+</polling_location>
+<polling_location id="55000400000050">
+  <address>
+    <city>BOYES</city>
+    <line1>10460 HWY212</line1>
+    <state>MT</state>
+    <location_name>BOYES COMMUNITY HALL</location_name>
+    <zip>59316</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000001">
+  <address>
+    <city>PLENTYWOOD</city>
+    <line1>4262 C HWY 16 S</line1>
+    <state>MT</state>
+    <location_name>PCT 4 CIVIC CENTER</location_name>
+    <zip>59254</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000002">
+  <address>
+    <city>PLENTYWOOD</city>
+    <line1>4262 C HWY 16 S</line1>
+    <state>MT</state>
+    <location_name>PCT 6 CIVIC CENTER</location_name>
+    <zip>59254</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000003">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 46E</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000005">
+  <address>
+    <city>LIBBY</city>
+    <line1>108 WEST 2ND STREET</line1>
+    <state>MT</state>
+    <location_name>VFW BUILDING_10</location_name>
+    <zip>59923</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000006">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE NORTH</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 46F</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000007">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 51C</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000008">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 52C</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000009">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 53B</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000010">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 53C</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000011">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 54A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000012">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 54C</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000013">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 55A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000014">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 55B</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000015">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK A56</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000016">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK B56</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000017">
+  <address>
+    <city>BILLINGS</city>
+    <line1>308 6TH AVE N</line1>
+    <state>MT</state>
+    <location_name>METRA PARK 57A</location_name>
+    <zip>59101</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000022">
+  <address>
+    <city>JEFFERSON CITY</city>
+    <line1>21 SPRING ST</line1>
+    <state>MT</state>
+    <location_name>JEFFERSON CITY COMMUNITY HALL</location_name>
+    <zip>59638</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000023">
+  <address>
+    <city>GLENDIVE</city>
+    <line1>313 S MERRILL AVE</line1>
+    <state>MT</state>
+    <location_name>11-EPEC CENTER</location_name>
+    <zip>59330</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000025">
+  <address>
+    <city>POWDERVILLE</city>
+    <line1>12 KRUTZFELDT ROAD 561</line1>
+    <state>MT</state>
+    <location_name>SPRING CREEK SCHOOL</location_name>
+    <zip>59345</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000028">
+  <address>
+    <city>TROY</city>
+    <line1>306 3RD STREET</line1>
+    <state>MT</state>
+    <location_name>KOOTENAI SENIOR CITIZENS CNTR 14</location_name>
+    <zip>59935</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000030">
+  <address>
+    <city>DEER LODGE</city>
+    <line1>416 COTTONWOOD AVE</line1>
+    <state>MT</state>
+    <location_name>COMMUNITY CENTER 2</location_name>
+    <zip>59722</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000037">
+  <address>
+    <city>BROWNING</city>
+    <line1>DE LASSALE SCHOOL</line1>
+    <state>MT</state>
+    <location_name>CCD CENTER 07</location_name>
+    <zip>59417</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000038">
+  <address>
+    <city>RONAN</city>
+    <line1>300 3RD AVE NW</line1>
+    <state>MT</state>
+    <location_name>RONAN COMMUNITY CENTER</location_name>
+    <zip>59864</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000039">
+  <address>
+    <city>BIGFORK</city>
+    <line1>19269 MT HWY 35</line1>
+    <state>MT</state>
+    <location_name>BEAR DANCE CLUB HOUSE</location_name>
+    <zip>59911</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000040">
+  <address>
+    <city>EAST HELENA</city>
+    <line1>3200 SPOKANE CREEK RD</line1>
+    <state>MT</state>
+    <location_name>TRI-LAKES FIRE HALL STATION#3</location_name>
+    <zip>59635</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000041">
+  <address>
+    <city>COLUMBIA FALLS</city>
+    <line1>23 COLUMBIA PINES CT</line1>
+    <state>MT</state>
+    <location_name>BAD ROCK FIRE HALL</location_name>
+    <zip>59912</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000042">
+  <address>
+    <city>LEWISTOWN</city>
+    <line1>100 FAIRGROUNDS RD</line1>
+    <state>MT</state>
+    <location_name>TRADE CENTER #12</location_name>
+    <zip>59457</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000043">
+  <address>
+    <city>COLUMBIA FALLS</city>
+    <line1>130 6TH ST W</line1>
+    <state>MT</state>
+    <location_name>FIRE DEPT. RM C FALLS FIRE HALL</location_name>
+    <zip>59912</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000053">
+  <address>
+    <city>RED LODGE</city>
+    <line1>207 SOUTH VILLARD</line1>
+    <state>MT</state>
+    <location_name>RED LODGE SENIOR CENTER11</location_name>
+    <zip>59068</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000054">
+  <address>
+    <city>LUTHER</city>
+    <line1>4 LUTHER/ROSCOE ROAD</line1>
+    <state>MT</state>
+    <location_name>LUTHER SCHOOL13</location_name>
+    <zip>59068</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000055">
+  <address>
+    <city>FORTINE</city>
+    <line1>11889 HIGHWAY 93 S</line1>
+    <state>MT</state>
+    <location_name>TREGO-FORTINE-STRYKER VOLUNTEER FIRE DEPARTMENT</location_name>
+    <zip>59918</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000057">
+  <address>
+    <city>EUREKA</city>
+    <line1>1295 2ND AVENUE EAST</line1>
+    <state>MT</state>
+    <location_name>EUREKA FIRST CHURCH OF GOD - HIGH ROAD YOUTH CENTER</location_name>
+    <zip>59917</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000058">
+  <address>
+    <city>EUREKA</city>
+    <line1>1295 2ND AVENUE EAST</line1>
+    <state>MT</state>
+    <location_name>EUREKA FIRST CHURCH OF GOD-HIGH ROAD YOUTH CENTER</location_name>
+    <zip>59917</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000060">
+  <address>
+    <city>LIBBY</city>
+    <line1>952 E SPRUCE ST</line1>
+    <state>MT</state>
+    <location_name>LIBBY CITY HALL</location_name>
+    <zip>59923</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000061">
+  <address>
+    <city>LIBBY</city>
+    <line1>952 E SPRUCE ST</line1>
+    <state>MT</state>
+    <location_name>CITY OF LIBBY PONDEROSA ROOM</location_name>
+    <zip>59923</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000064">
+  <address>
+    <city>FORSYTH</city>
+    <line1>483 EAST ROSEBUD STREET</line1>
+    <state>MT</state>
+    <location_name>HAUGO CENTER</location_name>
+    <zip>59327</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000065">
+  <address>
+    <city>TROY</city>
+    <line1>74 SHOOTING RANGE DRIVE</line1>
+    <state>MT</state>
+    <location_name>UPPER YAAK FIRE SERVICE BUILDING</location_name>
+    <zip>59935</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000068">
+  <address>
+    <city>MILES CITY</city>
+    <line1>1 ASH CREEK ROAD 665</line1>
+    <state>MT</state>
+    <location_name>SY SCHOOL</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000069">
+  <address>
+    <city>MILES CITY</city>
+    <line1>331 KIRCHER CREEK RD</line1>
+    <state>MT</state>
+    <location_name>KIRCHER CREEK SCHOOL</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000070">
+  <address>
+    <city>KINSEY</city>
+    <line1>7 MASTIN ROAD</line1>
+    <state>MT</state>
+    <location_name>KINSEY</location_name>
+    <zip>59338</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000072">
+  <address>
+    <city>MILES CITY</city>
+    <line1>210 N 9TH STREET</line1>
+    <state>MT</state>
+    <location_name>WASHINGTON SCHOOL GYM B</location_name>
+    <zip>59301</zip>
+  </address>
+</polling_location>
+<polling_location id="55000450000074">
+  <address>
+    <city>FORTINE</city>
+    <line1>11889 HIGHWAY 93 SOUTH</line1>
+    <state>MT</state>
+    <location_name>TREGO-FORTINE-STRYKER VOLUNTEER FIRE DEPARTMENTT</location_name>
+    <zip>59918</zip>
+  </address>
+</polling_location>
+</vip_object>

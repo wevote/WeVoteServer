@@ -1,0 +1,3903 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Delaware State Election Commission</name>
+  <vip_id>10</vip_id>
+  <datetime>2014-10-03T00:00:00</datetime>
+</source>
+<polling_location id="9950101">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>701 W 34TH ST</line1>
+    <state>DE</state>
+    <location_name>P S DUPONT MIDDLE SCHOOL</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950102">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>3601 N JEFFERSON ST</line1>
+    <state>DE</state>
+    <location_name>HARLAN ELEMENTARY SCHOOL</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950103">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>701 W 34TH ST</line1>
+    <state>DE</state>
+    <location_name>P S DUPONT MIDDLE SCHOOL</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950104">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>100 W 18TH ST</line1>
+    <state>DE</state>
+    <location_name>SHORTLIDGE ACADEMY</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950105">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1800 N BROOM ST</line1>
+    <state>DE</state>
+    <location_name>THE PARK VIEW</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950106">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>309 W 18TH ST</line1>
+    <state>DE</state>
+    <location_name>BAYNARD APARTMENTS</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950107">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1901 N MARKET ST</line1>
+    <state>DE</state>
+    <location_name>WILMINGTON SENIOR CENTER</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950108">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>4425 N MARKET ST</line1>
+    <state>DE</state>
+    <location_name>DEPARTMENT OF LABOR</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950109">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>4101 N WASHINGTON ST</line1>
+    <state>DE</state>
+    <location_name>MUSIC SCHOOL OF DELAWARE</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950110">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2700 N MARKET ST</line1>
+    <state>DE</state>
+    <location_name>CRESTVIEW APARTMENTS</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950111">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>701 W 34TH ST</line1>
+    <state>DE</state>
+    <location_name>P S DUPONT MIDDLE SCHOOL</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950112">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>3707 N MARKET ST</line1>
+    <state>DE</state>
+    <location_name>PAL OF WILMINGTON</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950113">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>4425 N MARKET ST</line1>
+    <state>DE</state>
+    <location_name>DEPARTMENT OF LABOR</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950114">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>5201 N WASHINGTON ST EXT</line1>
+    <state>DE</state>
+    <location_name>MT PLEASANT HIGH SCHOOL</location_name>
+    <zip>19809</zip>
+  </address>
+</polling_location>
+<polling_location id="9950115">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>700 N LOMBARD ST</line1>
+    <state>DE</state>
+    <location_name>BANCROFT ELEMENTARY SCHOOL</location_name>
+    <zip>19801</zip>
+  </address>
+</polling_location>
+<polling_location id="9950116">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>3000 N CLAYMONT ST</line1>
+    <state>DE</state>
+    <location_name>EAST SIDE CHARTER SCHOOL</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950117">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1100 N PINE ST</line1>
+    <state>DE</state>
+    <location_name>STUBBS ELEMENTARY SCHOOL</location_name>
+    <zip>19801</zip>
+  </address>
+</polling_location>
+<polling_location id="9950118">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1201 N HARRISON ST</line1>
+    <state>DE</state>
+    <location_name>LUTHER TOWERS - I</location_name>
+    <zip>19806</zip>
+  </address>
+</polling_location>
+<polling_location id="9950119">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1019 BROWN ST</line1>
+    <state>DE</state>
+    <location_name>GIRLS INC - DENNISON BRANCH</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950120">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>820 N FRENCH ST</line1>
+    <state>DE</state>
+    <location_name>CARVEL STATE OFFICE BUILDING</location_name>
+    <zip>19801</zip>
+  </address>
+</polling_location>
+<polling_location id="9950121">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>16 IDELLA AVE</line1>
+    <state>DE</state>
+    <location_name>RICHARDSON PARK ELEM SCHOOL</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950122">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1100 N PINE ST</line1>
+    <state>DE</state>
+    <location_name>STUBBS ELEMENTARY SCHOOL</location_name>
+    <zip>19801</zip>
+  </address>
+</polling_location>
+<polling_location id="9950123">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>16 IDELLA AVE</line1>
+    <state>DE</state>
+    <location_name>RICHARDSON PARK ELEM SCHOOL</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950124">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>500 W 8TH ST</line1>
+    <state>DE</state>
+    <location_name>CONNECTIONS</location_name>
+    <zip>19801</zip>
+  </address>
+</polling_location>
+<polling_location id="9950125">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2200 N LOCUST ST</line1>
+    <state>DE</state>
+    <location_name>THOMAS EDISON CHARTER SCHOOL</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950126">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2300 BOWERS ST</line1>
+    <state>DE</state>
+    <location_name>KINGSWOOD COMMUNITY CENTER</location_name>
+    <zip>19802</zip>
+  </address>
+</polling_location>
+<polling_location id="9950127">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1019 BROWN ST</line1>
+    <state>DE</state>
+    <location_name>(GIRLS INC - DENNISON BRANCH)</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950128">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>820 N FRENCH ST</line1>
+    <state>DE</state>
+    <location_name>CARVEL STATE OFFICE BLDG (FED)</location_name>
+    <zip>19801</zip>
+  </address>
+</polling_location>
+<polling_location id="9950129">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1018 W 6TH ST</line1>
+    <state>DE</state>
+    <location_name>HILLTOP LUTHERAN NEIGHBORHOOD</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950130">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2101 LANCASTER AVE</line1>
+    <state>DE</state>
+    <location_name>ZION LUTHERAN CHURCH</location_name>
+    <zip>198053731</zip>
+  </address>
+</polling_location>
+<polling_location id="9950131">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>100 N DUPONT RD</line1>
+    <state>DE</state>
+    <location_name>CAB CALLOWAY SCHOOL OF ARTS</location_name>
+    <zip>19807</zip>
+  </address>
+</polling_location>
+<polling_location id="9950132">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>200 N WASHINGTON ST</line1>
+    <state>DE</state>
+    <location_name>QUAKER HILL PLACE APARTMENTS</location_name>
+    <zip>19801</zip>
+  </address>
+</polling_location>
+<polling_location id="9950133">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>500 W 8TH ST</line1>
+    <state>DE</state>
+    <location_name>CONNECTIONS</location_name>
+    <zip>19801</zip>
+  </address>
+</polling_location>
+<polling_location id="9950134">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1018 W 6TH ST</line1>
+    <state>DE</state>
+    <location_name>HILLTOP LUTHERAN NEIGHBORHOOD</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950135">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>504 S CLAYTON ST</line1>
+    <state>DE</state>
+    <location_name>CLAYMORE SENIOR CENTER</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950136">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>200 S DUPONT ST</line1>
+    <state>DE</state>
+    <location_name>BAYARD MIDDLE SCHOOL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950137">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>200 S DUPONT ST</line1>
+    <state>DE</state>
+    <location_name>BAYARD MIDDLE SCHOOL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950138">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>100 N DUPONT RD</line1>
+    <state>DE</state>
+    <location_name>CAB CALLOWAY SCHOOL OF ARTS</location_name>
+    <zip>19807</zip>
+  </address>
+</polling_location>
+<polling_location id="9950139">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2100 GILPIN AVE</line1>
+    <state>DE</state>
+    <location_name>HIGHLANDS ELEMENTARY SCHOOL</location_name>
+    <zip>19806</zip>
+  </address>
+</polling_location>
+<polling_location id="9950140">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2301 KENTMERE PKWY</line1>
+    <state>DE</state>
+    <location_name>DELAWARE ART MUSEUM</location_name>
+    <zip>19806</zip>
+  </address>
+</polling_location>
+<polling_location id="9950141">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2400 W 17TH ST</line1>
+    <state>DE</state>
+    <location_name>IMMANUEL CHURCH HIGHLANDS</location_name>
+    <zip>19806</zip>
+  </address>
+</polling_location>
+<polling_location id="9950142">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1201 N HARRISON ST</line1>
+    <state>DE</state>
+    <location_name>LUTHER TOWERS - I</location_name>
+    <zip>19806</zip>
+  </address>
+</polling_location>
+<polling_location id="9950143">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>100 N DUPONT RD</line1>
+    <state>DE</state>
+    <location_name>CAB CALLOWAY SCHOOL OF ARTS</location_name>
+    <zip>19807</zip>
+  </address>
+</polling_location>
+<polling_location id="9950144">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1800 N DUPONT ST</line1>
+    <state>DE</state>
+    <location_name>LINCOLN TOWERS</location_name>
+    <zip>19806</zip>
+  </address>
+</polling_location>
+<polling_location id="9950145">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1502 W 13TH ST</line1>
+    <state>DE</state>
+    <location_name>WESTMINSTER PRESBY CHURCH</location_name>
+    <zip>19806</zip>
+  </address>
+</polling_location>
+<polling_location id="9950146">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2501 CENTERVILLE RD</line1>
+    <state>DE</state>
+    <location_name>ST CATHERINE OF SIENA CHURCH</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950147">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>808 N BROOM ST</line1>
+    <state>DE</state>
+    <location_name>HOLY TRINITY GREEK ORTHODOX CH</location_name>
+    <zip>19806</zip>
+  </address>
+</polling_location>
+<polling_location id="9950148">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2020 W 9TH ST</line1>
+    <state>DE</state>
+    <location_name>WOODLAWN LIBRARY</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950149">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>100 N DUPONT RD</line1>
+    <state>DE</state>
+    <location_name>CAB CALLOWAY SCHOOL OF ARTS</location_name>
+    <zip>19807</zip>
+  </address>
+</polling_location>
+<polling_location id="9950150">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>301 MCKENNANS CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>MCKEAN HIGH SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950151">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>808 N BROOM ST</line1>
+    <state>DE</state>
+    <location_name>HOLY TRINITY GREEK ORTHODOX CH</location_name>
+    <zip>19806</zip>
+  </address>
+</polling_location>
+<polling_location id="9950152">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2020 W 9TH ST</line1>
+    <state>DE</state>
+    <location_name>WOODLAWN LIBRARY</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950153">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1501 BARLEY MILL RD</line1>
+    <state>DE</state>
+    <location_name>TATNALL SCHOOL</location_name>
+    <zip>19807</zip>
+  </address>
+</polling_location>
+<polling_location id="9950154">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2020 W 9TH ST</line1>
+    <state>DE</state>
+    <location_name>WOODLAWN LIBRARY</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950155">
+  <address>
+    <city>BEAR</city>
+    <line1>1545 CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>RED LION UNITED METH CHURCH</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950156">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>16 PLEASANT PL</line1>
+    <state>DE</state>
+    <location_name>PLEASANTVILLE ELEM SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950157">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>16 PLEASANT PL</line1>
+    <state>DE</state>
+    <location_name>PLEASANTVILLE ELEM SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950158">
+  <address>
+    <city>BEAR</city>
+    <line1>101 GOVERNORS PL</line1>
+    <state>DE</state>
+    <location_name>BEAR LIBRARY</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950159">
+  <address>
+    <city>BEAR</city>
+    <line1>101 GOVERNORS PL</line1>
+    <state>DE</state>
+    <location_name>BEAR LIBRARY</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950160">
+  <address>
+    <city>NEWARK</city>
+    <line1>1015 CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>LEASURE ELEMENTARY SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950161">
+  <address>
+    <city>BEAR</city>
+    <line1>925 BEAR CORBITT RD</line1>
+    <state>DE</state>
+    <location_name>EDEN SUPPORT SERVICES</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950162">
+  <address>
+    <city>BEAR</city>
+    <line1>1545 CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>RED LION UNITED METH CHURCH</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950163">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>100 WILTON BLVD</line1>
+    <state>DE</state>
+    <location_name>VICTORY CHRISTIAN FELLOWSHIP</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950164">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>100 WILTON BLVD</line1>
+    <state>DE</state>
+    <location_name>VICTORY CHRISTIAN FELLOWSHIP</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950165">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>500 DUNCAN RD</line1>
+    <state>DE</state>
+    <location_name>MT PLEASANT ELEMENTARY SCHOOL</location_name>
+    <zip>19809</zip>
+  </address>
+</polling_location>
+<polling_location id="9950166">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>412 FOULK RD</line1>
+    <state>DE</state>
+    <location_name>LOMBARDY ELEMENTARY SCHOOL</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950167">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>412 FOULK RD</line1>
+    <state>DE</state>
+    <location_name>LOMBARDY ELEMENTARY SCHOOL</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950168">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>400 HILLCREST AVE</line1>
+    <state>DE</state>
+    <location_name>HILLCREST-BELLEFONTE METH CH</location_name>
+    <zip>19809</zip>
+  </address>
+</polling_location>
+<polling_location id="9950169">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1006 BRANDYWINE BLVD</line1>
+    <state>DE</state>
+    <location_name>BRANDYWINE HUNDRED FIRE CO #1</location_name>
+    <zip>19809</zip>
+  </address>
+</polling_location>
+<polling_location id="9950170">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1006 BRANDYWINE BLVD</line1>
+    <state>DE</state>
+    <location_name>BRANDYWINE HUNDRED FIRE CO #1</location_name>
+    <zip>19809</zip>
+  </address>
+</polling_location>
+<polling_location id="9950171">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>4641 WELDIN RD</line1>
+    <state>DE</state>
+    <location_name>MARY CAMPBELL CENTER</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950172">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>500 DUNCAN RD</line1>
+    <state>DE</state>
+    <location_name>MT PLEASANT ELEMENTARY SCHOOL</location_name>
+    <zip>19809</zip>
+  </address>
+</polling_location>
+<polling_location id="9950173">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>503 CREST RD</line1>
+    <state>DE</state>
+    <location_name>CARRCROFT ELEMENTARY SCHOOL</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950174">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1400 FOULK RD</line1>
+    <state>DE</state>
+    <location_name>BRANDYWINE HIGH SCHOOL</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950175">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1530 FOULK RD</line1>
+    <state>DE</state>
+    <location_name>LUTHERAN CHURCH/GOOD SHEPHERD</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950176">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1006 WILSON RD</line1>
+    <state>DE</state>
+    <location_name>EMMANUEL PRESBYTERIAN CHURCH</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950177">
+  <address>
+    <city>CLAYMONT</city>
+    <line1>100 MAPLE LN</line1>
+    <state>DE</state>
+    <location_name>MAPLE LANE ELEMENTARY SCHOOL</location_name>
+    <zip>19703</zip>
+  </address>
+</polling_location>
+<polling_location id="9950178">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1900 WESTMINSTER DR</line1>
+    <state>DE</state>
+    <location_name>FORWOOD ELEMENTARY SCHOOL</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950179">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1900 WESTMINSTER DR</line1>
+    <state>DE</state>
+    <location_name>FORWOOD ELEMENTARY SCHOOL</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950180">
+  <address>
+    <city>CLAYMONT</city>
+    <line1>3401 GREEN ST</line1>
+    <state>DE</state>
+    <location_name>CLAYMONT ELEMENTARY SCHOOL</location_name>
+    <zip>19703</zip>
+  </address>
+</polling_location>
+<polling_location id="9950181">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2126 THE HIGHWAY</line1>
+    <state>DE</state>
+    <location_name>GILD HALL - ARDEN CLUB</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950182">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1120 DARLEY RD</line1>
+    <state>DE</state>
+    <location_name>TRINITY PRESBYTERIAN CHURCH</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950183">
+  <address>
+    <city>CLAYMONT</city>
+    <line1>500 DARLEY RD</line1>
+    <state>DE</state>
+    <location_name>CLAYMONT BOYS &amp; GIRLS CLUB</location_name>
+    <zip>19703</zip>
+  </address>
+</polling_location>
+<polling_location id="9950184">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2000 NAAMANS RD</line1>
+    <state>DE</state>
+    <location_name>LANCASHIRE ELEMENTARY SCHOOL</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950185">
+  <address>
+    <city>CLAYMONT</city>
+    <line1>100 MAPLE LN</line1>
+    <state>DE</state>
+    <location_name>MAPLE LANE ELEMENTARY SCHOOL</location_name>
+    <zip>19703</zip>
+  </address>
+</polling_location>
+<polling_location id="9950186">
+  <address>
+    <city>CLAYMONT</city>
+    <line1>7807 GOVERNOR PRINTZ BLVD</line1>
+    <state>DE</state>
+    <location_name>RIVER CLUB APARTMENTS</location_name>
+    <zip>19703</zip>
+  </address>
+</polling_location>
+<polling_location id="9950187">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>1070 BUNKER HILL RD</line1>
+    <state>DE</state>
+    <location_name>BUNKER HILL ELEMENTARY SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950188">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>1080 BUNKER HILL RD</line1>
+    <state>DE</state>
+    <location_name>APPOQUINIMINK HIGH SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950189">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>651 N BROAD ST</line1>
+    <state>DE</state>
+    <location_name>APPOQUINIMINK LIBRARY</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950190">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>201 NEW ST</line1>
+    <state>DE</state>
+    <location_name>REDDING MIDDLE SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950191">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>120 SILVER LAKE RD</line1>
+    <state>DE</state>
+    <location_name>MIDDLETOWN HIGH SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950192">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>504 S BROAD ST</line1>
+    <state>DE</state>
+    <location_name>MEREDITH MIDDLE SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950193">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>1235 CEDAR LANE RD</line1>
+    <state>DE</state>
+    <location_name>WATERS MIDDLE SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950194">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>1070 BUNKER HILL RD</line1>
+    <state>DE</state>
+    <location_name>BUNKER HILL ELEMENTARY SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950195">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>1235 CEDAR LANE RD</line1>
+    <state>DE</state>
+    <location_name>WATERS MIDDLE SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950196">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>200 E COCHRAN ST</line1>
+    <state>DE</state>
+    <location_name>SILVER LAKE ELEMENTARY SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950197">
+  <address>
+    <city>PORT PENN</city>
+    <line1>26 W MARKET ST</line1>
+    <state>DE</state>
+    <location_name>PORT PENN FIRE COMPANY</location_name>
+    <zip>19731</zip>
+  </address>
+</polling_location>
+<polling_location id="9950198">
+  <address>
+    <city>TOWNSEND</city>
+    <line1>580 TONY MARCHIO DR</line1>
+    <state>DE</state>
+    <location_name>OLD STATE ELEMENTARY SCHOOL</location_name>
+    <zip>19734</zip>
+  </address>
+</polling_location>
+<polling_location id="9950199">
+  <address>
+    <city>TOWNSEND</city>
+    <line1>611 CAMPUS DR</line1>
+    <state>DE</state>
+    <location_name>SPRING MEADOW EARLY CHILD CTR</location_name>
+    <zip>19734</zip>
+  </address>
+</polling_location>
+<polling_location id="9950200">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>378 BRICK MILL RD</line1>
+    <state>DE</state>
+    <location_name>BRICK MILL ELEMENTARY SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950201">
+  <address>
+    <city>ODESSA</city>
+    <line1>118 S SIXTH ST</line1>
+    <state>DE</state>
+    <location_name>MARION PROFFITT TRAINING CTR</location_name>
+    <zip>19730</zip>
+  </address>
+</polling_location>
+<polling_location id="9950202">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>1259 CEDAR LANE RD</line1>
+    <state>DE</state>
+    <location_name>CEDAR LANE ELEMENTARY SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950203">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>1259 CEDAR LANE RD</line1>
+    <state>DE</state>
+    <location_name>CEDAR LANE ELEMENTARY SCHOOL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950204">
+  <address>
+    <city>MIDDLETOWN</city>
+    <line1>555 HYETTS CORNER RD</line1>
+    <state>DE</state>
+    <location_name>ST GEORGES TECHNICAL HIGH SCHL</location_name>
+    <zip>19709</zip>
+  </address>
+</polling_location>
+<polling_location id="9950205">
+  <address>
+    <city>TOWNSEND</city>
+    <line1>4519 S DUPONT HWY</line1>
+    <state>DE</state>
+    <location_name>FREEWILL BAPTIST CHURCH</location_name>
+    <zip>19734</zip>
+  </address>
+</polling_location>
+<polling_location id="9950206">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2501 EBRIGHT RD</line1>
+    <state>DE</state>
+    <location_name>CONCORD HIGH SCHOOL</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950207">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2220 SHIPLEY RD</line1>
+    <state>DE</state>
+    <location_name>SPRINGER MIDDLE SCHOOL</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950208">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2501 EBRIGHT RD</line1>
+    <state>DE</state>
+    <location_name>CONCORD HIGH SCHOOL</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950209">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1110 CYPRESS RD</line1>
+    <state>DE</state>
+    <location_name>TALLEY MIDDLE SCHOOL</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950210">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2523 BERWYN RD</line1>
+    <state>DE</state>
+    <location_name>HANBY ELEMENTARY SCHOOL</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950211">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2523 BERWYN RD</line1>
+    <state>DE</state>
+    <location_name>HANBY ELEMENTARY SCHOOL</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950212">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2723 SHIPLEY RD</line1>
+    <state>DE</state>
+    <location_name>SHIPLEY MANOR</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950213">
+  <address>
+    <city>CLAYMONT</city>
+    <line1>500 DARLEY RD</line1>
+    <state>DE</state>
+    <location_name>CLAYMONT BOYS &amp; GIRLS CLUB</location_name>
+    <zip>19703</zip>
+  </address>
+</polling_location>
+<polling_location id="9950214">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2510 MARSH RD</line1>
+    <state>DE</state>
+    <location_name>CONCORD CHRISTIAN ACADEMY</location_name>
+    <zip>19810</zip>
+  </address>
+</polling_location>
+<polling_location id="9950215">
+  <address>
+    <city>CLAYMONT</city>
+    <line1>8000 SOCIETY DR</line1>
+    <state>DE</state>
+    <location_name>B'NAI B'RITH HOUSE</location_name>
+    <zip>19703</zip>
+  </address>
+</polling_location>
+<polling_location id="9950216">
+  <address>
+    <city>TOWNSEND</city>
+    <line1>107 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>TOWNSEND FIRE HALL</location_name>
+    <zip>19734</zip>
+  </address>
+</polling_location>
+<polling_location id="9950217">
+  <address>
+    <city>TOWNSEND</city>
+    <line1>209 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>IMMANUEL UNITED METH CHURCH</location_name>
+    <zip>19734</zip>
+  </address>
+</polling_location>
+<polling_location id="9950218">
+  <address>
+    <city>TOWNSEND</city>
+    <line1>10 BROOK RAMBLE LN</line1>
+    <state>DE</state>
+    <location_name>TOWNSEND EARLY CHILDHOOD CNTR</location_name>
+    <zip>19734</zip>
+  </address>
+</polling_location>
+<polling_location id="9950219">
+  <address>
+    <city>TOWNSEND</city>
+    <line1>120 BLACKBIRD FOREST RD</line1>
+    <state>DE</state>
+    <location_name>BLACKBIRD COMMUNITY CENTER</location_name>
+    <zip>19734</zip>
+  </address>
+</polling_location>
+<polling_location id="9950220">
+  <address>
+    <city>KENTON</city>
+    <line1>265 MAIN STREET</line1>
+    <state>DE</state>
+    <location_name>KENTON SCHOOL</location_name>
+    <zip>19955</zip>
+  </address>
+</polling_location>
+<polling_location id="9950221">
+  <address>
+    <city>HARTLY</city>
+    <line1>2898 ARTHURSVILLE RD</line1>
+    <state>DE</state>
+    <location_name>HARTLY FIRE HALL</location_name>
+    <zip>19953</zip>
+  </address>
+</polling_location>
+<polling_location id="9950222">
+  <address>
+    <city>KENTON</city>
+    <line1>249 S MAIN ST</line1>
+    <state>DE</state>
+    <location_name>KENTON RURITAN CLUB</location_name>
+    <zip>19955</zip>
+  </address>
+</polling_location>
+<polling_location id="9950223">
+  <address>
+    <city>HARTLY</city>
+    <line1>2898 ARTHURSVILLE ROAD</line1>
+    <state>DE</state>
+    <location_name>HARTLY FIRE HALL</location_name>
+    <zip>19953</zip>
+  </address>
+</polling_location>
+<polling_location id="9950224">
+  <address>
+    <city>MARYDEL</city>
+    <line1>110 FIREHOUSE LN</line1>
+    <state>DE</state>
+    <location_name>MARYDEL FIRE HALL</location_name>
+    <zip>19964</zip>
+  </address>
+</polling_location>
+<polling_location id="9950225">
+  <address>
+    <city>CAMDEN-WYOMING</city>
+    <line1>109 E CAM-WYO AVE</line1>
+    <state>DE</state>
+    <location_name>FRED FIFER MIDDLE SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950226">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1800 FAIRFAX BLVD</line1>
+    <state>DE</state>
+    <location_name>CONCORD PRESBYTERIAN CHURCH</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950227">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2313 CONCORD PIKE</line1>
+    <state>DE</state>
+    <location_name>ALDERSGATE METHODIST CHURCH</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950228">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2313 CONCORD PIKE</line1>
+    <state>DE</state>
+    <location_name>ALDERSGATE METHODIST CHURCH</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950229">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>50 HILLSIDE RD</line1>
+    <state>DE</state>
+    <location_name>A I DUPONT HIGH SCHOOL</location_name>
+    <zip>19807</zip>
+  </address>
+</polling_location>
+<polling_location id="9950230">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>730 HALSTEAD RD</line1>
+    <state>DE</state>
+    <location_name>FIRST UNITARIAN CHURCH</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950231">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>101 OLD KENNETT RD</line1>
+    <state>DE</state>
+    <location_name>LOWER BRANDYWINE PRESBY CHURCH</location_name>
+    <zip>19807</zip>
+  </address>
+</polling_location>
+<polling_location id="9950232">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>1023 VALLEY RD</line1>
+    <state>DE</state>
+    <location_name>HOCKESSIN LIBRARY</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950233">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>735 MEETING HOUSE RD</line1>
+    <state>DE</state>
+    <location_name>HENRY B DUPONT MIDDLE SCHOOL</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950234">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>7259 LANCASTER PIKE</line1>
+    <state>DE</state>
+    <location_name>ACTIVITY CTR AT HOCKESSIN PAL</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950235">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>735 MEETING HOUSE RD</line1>
+    <state>DE</state>
+    <location_name>HENRY B DUPONT MIDDLE SCHOOL</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950236">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>4830 KENNETT PIKE</line1>
+    <state>DE</state>
+    <location_name>METHODIST COUNTRY HOUSE</location_name>
+    <zip>19807</zip>
+  </address>
+</polling_location>
+<polling_location id="9950237">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>7259 LANCASTER PIKE</line1>
+    <state>DE</state>
+    <location_name>ACTIVITY CTR AT HOCKESSIN PAL</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950238">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>726 LOVEVILLE RD</line1>
+    <state>DE</state>
+    <location_name>COKESBURY VILLAGE</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950239">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>850 MT LEBANON RD</line1>
+    <state>DE</state>
+    <location_name>MT LEBANON METHODIST CHURCH</location_name>
+    <zip>19803</zip>
+  </address>
+</polling_location>
+<polling_location id="9950240">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1500 SPRUCE AVE</line1>
+    <state>DE</state>
+    <location_name>BALTZ ELEMENTARY SCHOOL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950241">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2101 CENTERVILLE RD</line1>
+    <state>DE</state>
+    <location_name>MARBROOK ELEMENTARY SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950242">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1800 PROSPECT RD</line1>
+    <state>DE</state>
+    <location_name>DOUGLASS SCHOOL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950243">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>201 JACKSON AVE</line1>
+    <state>DE</state>
+    <location_name>CONRAD SCHOOLS OF SCIENCE</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950244">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>11 N MARYLAND AVE</line1>
+    <state>DE</state>
+    <location_name>RICHARDSON PARK METHODIST CH</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950245">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>201 JACKSON AVE</line1>
+    <state>DE</state>
+    <location_name>CONRAD SCHOOLS OF SCIENCE</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950246">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1500 SPRUCE AVE</line1>
+    <state>DE</state>
+    <location_name>BALTZ ELEMENTARY SCHOOL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950247">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1107 NEW RD</line1>
+    <state>DE</state>
+    <location_name>ELSMERE FIRE HALL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950248">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>11 POPLAR AVE</line1>
+    <state>DE</state>
+    <location_name>ELSMERE TOWN HALL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950249">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>30 SPRUCE AVE</line1>
+    <state>DE</state>
+    <location_name>ELSMERE PUBLIC LIBRARY</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950250">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1300 CEDAR ST</line1>
+    <state>DE</state>
+    <location_name>PULASKI ELEMENTARY SCHOOL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950251">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1800 PROSPECT RD</line1>
+    <state>DE</state>
+    <location_name>DOUGLASS SCHOOL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950252">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1300 CEDAR ST</line1>
+    <state>DE</state>
+    <location_name>PULASKI ELEMENTARY SCHOOL</location_name>
+    <zip>19805</zip>
+  </address>
+</polling_location>
+<polling_location id="9950253">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>201 JACKSON AVE</line1>
+    <state>DE</state>
+    <location_name>CONRAD SCHOOLS OF SCIENCE</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950254">
+  <address>
+    <city>LEWES</city>
+    <line1>347 SAVANNAH RD</line1>
+    <state>DE</state>
+    <location_name>LEWES FIRE HALL</location_name>
+    <zip>19958</zip>
+  </address>
+</polling_location>
+<polling_location id="9950255">
+  <address>
+    <city>LEWES</city>
+    <line1>1250 KINGS HWY</line1>
+    <state>DE</state>
+    <location_name>CAPE HENLOPEN HIGH SCHOOL</location_name>
+    <zip>19958</zip>
+  </address>
+</polling_location>
+<polling_location id="9950256">
+  <address>
+    <city>REHOBOTH</city>
+    <line1>219 REHOBOTH AVE</line1>
+    <state>DE</state>
+    <location_name>REHOBOTH FIRE HALL</location_name>
+    <zip>19971</zip>
+  </address>
+</polling_location>
+<polling_location id="9950257">
+  <address>
+    <city>LEWES</city>
+    <line1>19483 JOHN J. WILLIAMS HWY</line1>
+    <state>DE</state>
+    <location_name>BEACON MIDDLE SCHOOL</location_name>
+    <zip>19958</zip>
+  </address>
+</polling_location>
+<polling_location id="9950258">
+  <address>
+    <city>LEWES</city>
+    <line1>21194 JOHN J. WILLIAMS HWY</line1>
+    <state>DE</state>
+    <location_name>LEWES-REHOBOTH - STA. #3</location_name>
+    <zip>19958</zip>
+  </address>
+</polling_location>
+<polling_location id="9950259">
+  <address>
+    <city>REHOBOTH</city>
+    <line1>36027  AIRPORT RD</line1>
+    <state>DE</state>
+    <location_name>REHOBOTH FIRE CO - STA. #2</location_name>
+    <zip>19971</zip>
+  </address>
+</polling_location>
+<polling_location id="9950260">
+  <address>
+    <city>REHOBOTH</city>
+    <line1>500 STOCKLEY ST</line1>
+    <state>DE</state>
+    <location_name>REHOBOTH ELEMENTARY SCHOOL</location_name>
+    <zip>19971</zip>
+  </address>
+</polling_location>
+<polling_location id="9950261">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>795 COX NECK RD</line1>
+    <state>DE</state>
+    <location_name>SOUTHERN ELEMENTARY SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950262">
+  <address>
+    <city>BEAR</city>
+    <line1>1714 PORTER RD</line1>
+    <state>DE</state>
+    <location_name>CHRISTIANA FIRE COMPANY #6</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950263">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>795 COX NECK RD</line1>
+    <state>DE</state>
+    <location_name>SOUTHERN ELEMENTARY SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950264">
+  <address>
+    <city>NEWARK</city>
+    <line1>1015 CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>LEASURE ELEMENTARY SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950265">
+  <address>
+    <city>BEAR</city>
+    <line1>500 CALEDONIA WAY</line1>
+    <state>DE</state>
+    <location_name>OBERLE ELEMENTARY SCHOOL</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950266">
+  <address>
+    <city>BEAR</city>
+    <line1>500 CALEDONIA WAY</line1>
+    <state>DE</state>
+    <location_name>OBERLE ELEMENTARY SCHOOL</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950267">
+  <address>
+    <city>BEAR</city>
+    <line1>4050 WRANGLE HILL RD</line1>
+    <state>DE</state>
+    <location_name>WILBUR ELEMENTARY SCHOOL</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950268">
+  <address>
+    <city>NEWARK</city>
+    <line1>1015 CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>LEASURE ELEMENTARY SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950269">
+  <address>
+    <city>BEAR</city>
+    <line1>4050 WRANGLE HILL RD</line1>
+    <state>DE</state>
+    <location_name>WILBUR ELEMENTARY SCHOOL</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950270">
+  <address>
+    <city>NEWARK</city>
+    <line1>1015 CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>LEASURE ELEMENTARY SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950271">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>12 LANDERS LN</line1>
+    <state>DE</state>
+    <location_name>COLWYCK ELEMENTARY SCHOOL</location_name>
+    <zip>197202095</zip>
+  </address>
+</polling_location>
+<polling_location id="9950272">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>19 LAMBSON LN</line1>
+    <state>DE</state>
+    <location_name>ROSE HILL COMMUNITY CENTER</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950273">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>500 ROGERS RD</line1>
+    <state>DE</state>
+    <location_name>DE LA WARR COMMUNITY CENTER</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950274">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>129 E HAZELDELL AVE</line1>
+    <state>DE</state>
+    <location_name>MINQUADALE FIRE COMPANY</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950275">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>20 CHASE AVE</line1>
+    <state>DE</state>
+    <location_name>MCCULLOUGH MIDDLE SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950276">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1218 B ST</line1>
+    <state>DE</state>
+    <location_name>NEIGHBORHOOD HOUSE</location_name>
+    <zip>19801</zip>
+  </address>
+</polling_location>
+<polling_location id="9950277">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>502 MOORES LN</line1>
+    <state>DE</state>
+    <location_name>CASTLE HILLS ELEMENTARY SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950278">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>502 MOORES LN</line1>
+    <state>DE</state>
+    <location_name>CASTLE HILLS ELEMENTARY SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950279">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>400 SOUTH ST</line1>
+    <state>DE</state>
+    <location_name>NEW CASTLE SENIOR CENTER</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950280">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>400 SOUTH ST</line1>
+    <state>DE</state>
+    <location_name>NEW CASTLE SENIOR CENTER</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950281">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>27 LANDERS LN</line1>
+    <state>DE</state>
+    <location_name>EISENBERG ELEMENTARY SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950282">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>198 S DUPONT HWY</line1>
+    <state>DE</state>
+    <location_name>NUR SHRINERS (NUR TEMPLE)</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950283">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>198 S DUPONT HWY</line1>
+    <state>DE</state>
+    <location_name>NUR SHRINERS (NUR TEMPLE)</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950284">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>510 DELAWARE ST</line1>
+    <state>DE</state>
+    <location_name>NEW CASTLE UNITED METH CHURCH</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950285">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>314 E BASIN RD</line1>
+    <state>DE</state>
+    <location_name>READ MIDDLE SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950286">
+  <address>
+    <city>NEWARK</city>
+    <line1>400 STANTON CHRISTIANA RD</line1>
+    <state>DE</state>
+    <location_name>DE TECH &amp; COMM COLLEGE-STANTON</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950287">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>1 BASSETT AVE</line1>
+    <state>DE</state>
+    <location_name>HOWARD WESTON SENIOR CENTER</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950288">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>713 E BASIN RD</line1>
+    <state>DE</state>
+    <location_name>WILLIAM PENN HIGH SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950289">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>200 E ROOSEVELT AVE</line1>
+    <state>DE</state>
+    <location_name>WILMINGTON MANOR ELEM SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950290">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>1 BASSETT AVE</line1>
+    <state>DE</state>
+    <location_name>HOWARD WESTON SENIOR CENTER</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950291">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>187A OLD CHURCHMANS RD</line1>
+    <state>DE</state>
+    <location_name>CONNER BUILDING</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950292">
+  <address>
+    <city>NEWARK</city>
+    <line1>800 N BROWNLEAF RD</line1>
+    <state>DE</state>
+    <location_name>GALLAHER ELEMENTARY SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950293">
+  <address>
+    <city>NEWARK</city>
+    <line1>400 STANTON CHRISTIANA RD</line1>
+    <state>DE</state>
+    <location_name>DE TECH &amp; COMM COLLEGE-STANTON</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950294">
+  <address>
+    <city>BEAR</city>
+    <line1>925 BEAR CORBITT RD</line1>
+    <state>DE</state>
+    <location_name>EDEN SUPPORT SERVICES</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950295">
+  <address>
+    <city>BEAR</city>
+    <line1>345 SCHOOL BELL RD</line1>
+    <state>DE</state>
+    <location_name>UNION UNITED METHODIST CHURCH</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950296">
+  <address>
+    <city>NEW CASTLE</city>
+    <line1>16 PLEASANT PL</line1>
+    <state>DE</state>
+    <location_name>PLEASANTVILLE ELEM SCHOOL</location_name>
+    <zip>19720</zip>
+  </address>
+</polling_location>
+<polling_location id="9950297">
+  <address>
+    <city>BEAR</city>
+    <line1>250 BEAR CHRISTIANA RD</line1>
+    <state>DE</state>
+    <location_name>DELDOT CANAL DISTRICT</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950298">
+  <address>
+    <city>NEWARK</city>
+    <line1>800 N BROWNLEAF RD</line1>
+    <state>DE</state>
+    <location_name>GALLAHER ELEMENTARY SCHOOL</location_name>
+    <zip>197133300</zip>
+  </address>
+</polling_location>
+<polling_location id="9950299">
+  <address>
+    <city>BEAR</city>
+    <line1>345 BEAR CHRISTIANA RD</line1>
+    <state>DE</state>
+    <location_name>ST ELIZABETH ANN SETON CHURCH</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950300">
+  <address>
+    <city>BEAR</city>
+    <line1>345 SCHOOL BELL RD</line1>
+    <state>DE</state>
+    <location_name>UNION UNITED METHODIST CHURCH</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950301">
+  <address>
+    <city>BEAR</city>
+    <line1>345 BEAR CHRISTIANA RD</line1>
+    <state>DE</state>
+    <location_name>ST ELIZABETH ANN SETON CHURCH</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950302">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1417 NEWPORT RD</line1>
+    <state>DE</state>
+    <location_name>DELCASTLE TECHNICAL HIGH SCH</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950303">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>115 E MARKET ST</line1>
+    <state>DE</state>
+    <location_name>PENIEL UNITED METHODIST CHURCH</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950304">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2916 DUNCAN RD</line1>
+    <state>DE</state>
+    <location_name>BRANDYWINE SPRINGS SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950305">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>3900 KIRKWOOD HWY</line1>
+    <state>DE</state>
+    <location_name>MILL CREEK FIRE COMPANY</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950306">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2106 ST JAMES CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>ST JAMES CHURCH PARISH HOUSE</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950307">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1700 LIMESTONE RD</line1>
+    <state>DE</state>
+    <location_name>ST MARKS UNITED METHODIST CH</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950308">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1800 LIMESTONE RD</line1>
+    <state>DE</state>
+    <location_name>STANTON MIDDLE SCHOOL</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950309">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1800 LIMESTONE RD</line1>
+    <state>DE</state>
+    <location_name>STANTON MIDDLE SCHOOL</location_name>
+    <zip>198044196</zip>
+  </address>
+</polling_location>
+<polling_location id="9950310">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2101 CENTERVILLE RD</line1>
+    <state>DE</state>
+    <location_name>MARBROOK ELEMENTARY SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950311">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>4501 KIRKWOOD HWY</line1>
+    <state>DE</state>
+    <location_name>ST PHILIP'S LUTHERAN CHURCH</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950312">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>105 E HIGHLAND AVE</line1>
+    <state>DE</state>
+    <location_name>RICHEY ELEMENTARY SCHOOL</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950313">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1417 NEWPORT RD</line1>
+    <state>DE</state>
+    <location_name>DELCASTLE TECHNICAL HIGH SCH</location_name>
+    <zip>19804</zip>
+  </address>
+</polling_location>
+<polling_location id="9950314">
+  <address>
+    <city>MILTON</city>
+    <line1>512 FEDERAL ST</line1>
+    <state>DE</state>
+    <location_name>MILTON ELEMENTARY SCHOOL</location_name>
+    <zip>19968</zip>
+  </address>
+</polling_location>
+<polling_location id="9950315">
+  <address>
+    <city>MILTON</city>
+    <line1>16391 HARBESON RD</line1>
+    <state>DE</state>
+    <location_name>MARINER MIDDLE SCHOOL</location_name>
+    <zip>19968</zip>
+  </address>
+</polling_location>
+<polling_location id="9950316">
+  <address>
+    <city>MILTON</city>
+    <line1>400 MULBERRY ST</line1>
+    <state>DE</state>
+    <location_name>H. O. BRITTINGHAM SCHOOL</location_name>
+    <zip>19968</zip>
+  </address>
+</polling_location>
+<polling_location id="9950317">
+  <address>
+    <city>LEWES</city>
+    <line1>28842 LOG CABIN RD</line1>
+    <state>DE</state>
+    <location_name>COOL SPRING PRES CHURCH HALL</location_name>
+    <zip>19958</zip>
+  </address>
+</polling_location>
+<polling_location id="9950318">
+  <address>
+    <city>LEWES</city>
+    <line1>910 SHIELDS AVE</line1>
+    <state>DE</state>
+    <location_name>SHIELDS ELEMENTARY SCHOOL</location_name>
+    <zip>19958</zip>
+  </address>
+</polling_location>
+<polling_location id="9950319">
+  <address>
+    <city>LEWES</city>
+    <line1>1250 KINGS HWY</line1>
+    <state>DE</state>
+    <location_name>CAPE HENLOPEN HIGH SCHOOL</location_name>
+    <zip>19958</zip>
+  </address>
+</polling_location>
+<polling_location id="9950320">
+  <address>
+    <city>LEWES</city>
+    <line1>820 SAVANNAH RD</line1>
+    <state>DE</state>
+    <location_name>LEWES SCHOOL</location_name>
+    <zip>19958</zip>
+  </address>
+</polling_location>
+<polling_location id="9950321">
+  <address>
+    <city>HARBESON</city>
+    <line1>18636 HARBESON RD</line1>
+    <state>DE</state>
+    <location_name>HARBESON CHURCH HALL</location_name>
+    <zip>19951</zip>
+  </address>
+</polling_location>
+<polling_location id="9950322">
+  <address>
+    <city>MILTON</city>
+    <line1>116 FRONT ST</line1>
+    <state>DE</state>
+    <location_name>MILTON FIRE HALL</location_name>
+    <zip>19968</zip>
+  </address>
+</polling_location>
+<polling_location id="9950323">
+  <address>
+    <city>LEWES</city>
+    <line1>19483 JOHN J. WILLIAMS HWY</line1>
+    <state>DE</state>
+    <location_name>BEACON MIDDLE SCHOOL</location_name>
+    <zip>19958</zip>
+  </address>
+</polling_location>
+<polling_location id="9950324">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1801 MILLTOWN RD</line1>
+    <state>DE</state>
+    <location_name>DICKINSON HIGH SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950325">
+  <address>
+    <city>NEWARK</city>
+    <line1>55 S MEADOWOOD DR</line1>
+    <state>DE</state>
+    <location_name>FOREST OAK ELEMENTARY SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950326">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1801 MILLTOWN RD</line1>
+    <state>DE</state>
+    <location_name>DICKINSON HIGH SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950327">
+  <address>
+    <city>NEWARK</city>
+    <line1>14 FORGE RD</line1>
+    <state>DE</state>
+    <location_name>WILSON ELEMENTARY SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950328">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2900 SKYLINE DR</line1>
+    <state>DE</state>
+    <location_name>SKYLINE MIDDLE SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950329">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>2900 SKYLINE DR</line1>
+    <state>DE</state>
+    <location_name>SKYLINE MIDDLE SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950330">
+  <address>
+    <city>NEWARK</city>
+    <line1>308 POSSUM PARK RD</line1>
+    <state>DE</state>
+    <location_name>EVANGELICAL PRESBYTERIAN CH</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950331">
+  <address>
+    <city>NEWARK</city>
+    <line1>55 S MEADOWOOD DR</line1>
+    <state>DE</state>
+    <location_name>FOREST OAK ELEMENTARY SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950332">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>1801 MILLTOWN RD</line1>
+    <state>DE</state>
+    <location_name>DICKINSON HIGH SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950333">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>3201 LIMESTONE RD</line1>
+    <state>DE</state>
+    <location_name>LIMESTONE PRESBYTERIAN CHURCH</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950334">
+  <address>
+    <city>NEWARK</city>
+    <line1>1500 CAPITOL TRL</line1>
+    <state>DE</state>
+    <location_name>SHUE-MEDILL MIDDLE SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950335">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>1340 LITTLE BALTIMORE RD</line1>
+    <state>DE</state>
+    <location_name>NORTH STAR ELEMENTARY SCHOOL</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950336">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>1225 OLD LANCASTER PIKE</line1>
+    <state>DE</state>
+    <location_name>HOCKESSIN FIRE COMPANY</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950337">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>1340 LITTLE BALTIMORE RD</line1>
+    <state>DE</state>
+    <location_name>NORTH STAR ELEMENTARY SCHOOL</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950338">
+  <address>
+    <city>NEWARK</city>
+    <line1>579 POLLY DRUMMOND HILL RD</line1>
+    <state>DE</state>
+    <location_name>UNITARIAN UNIVERSLST/MILLCREEK</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950339">
+  <address>
+    <city>HOCKESSIN</city>
+    <line1>1340 LITTLE BALTIMORE RD</line1>
+    <state>DE</state>
+    <location_name>NORTH STAR ELEMENTARY SCHOOL</location_name>
+    <zip>19707</zip>
+  </address>
+</polling_location>
+<polling_location id="9950340">
+  <address>
+    <city>NEWARK</city>
+    <line1>525 POLLY DRUMMOND HILL RD</line1>
+    <state>DE</state>
+    <location_name>EBENEZER METHODIST CHURCH</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950341">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>3415 SKYLINE DR</line1>
+    <state>DE</state>
+    <location_name>LINDEN HILL ELEMENTARY SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950342">
+  <address>
+    <city>NEWARK</city>
+    <line1>14 FORGE RD</line1>
+    <state>DE</state>
+    <location_name>WILSON ELEMENTARY SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950343">
+  <address>
+    <city>NEWARK</city>
+    <line1>525 POLLY DRUMMOND HILL RD</line1>
+    <state>DE</state>
+    <location_name>EBENEZER METHODIST CHURCH</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950344">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>301 MCKENNANS CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>MCKEAN HIGH SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950345">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>3415 SKYLINE DR</line1>
+    <state>DE</state>
+    <location_name>LINDEN HILL ELEMENTARY SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950346">
+  <address>
+    <city>WILMINGTON</city>
+    <line1>301 MCKENNANS CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>MCKEAN HIGH SCHOOL</location_name>
+    <zip>19808</zip>
+  </address>
+</polling_location>
+<polling_location id="9950347">
+  <address>
+    <city>NEWARK</city>
+    <line1>330 E MAIN ST</line1>
+    <state>DE</state>
+    <location_name>MAIN TOWERS</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950348">
+  <address>
+    <city>NEWARK</city>
+    <line1>292 W MAIN ST</line1>
+    <state>DE</state>
+    <location_name>FIRST PRESBYTERIAN CHURCH</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950349">
+  <address>
+    <city>NEWARK</city>
+    <line1>220 CASHO MILL RD</line1>
+    <state>DE</state>
+    <location_name>DOWNES ELEMENTARY SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950350">
+  <address>
+    <city>NEWARK</city>
+    <line1>220 CASHO MILL RD</line1>
+    <state>DE</state>
+    <location_name>DOWNES ELEMENTARY SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950351">
+  <address>
+    <city>NEWARK</city>
+    <line1>7 THORN LN</line1>
+    <state>DE</state>
+    <location_name>AETNA FIRE STATION #7</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950352">
+  <address>
+    <city>NEWARK</city>
+    <line1>300 ST REGIS DR</line1>
+    <state>DE</state>
+    <location_name>MACLARY ELEMENTARY SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950353">
+  <address>
+    <city>NEWARK</city>
+    <line1>357 PAPER MILL RD</line1>
+    <state>DE</state>
+    <location_name>FIRST CHURCH OF THE NAZARENE</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950354">
+  <address>
+    <city>NEWARK</city>
+    <line1>303 NEW LONDON RD</line1>
+    <state>DE</state>
+    <location_name>GEORGE WILSON COMMUNITY CENTER</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950355">
+  <address>
+    <city>NEWARK</city>
+    <line1>579 POLLY DRUMMOND HILL RD</line1>
+    <state>DE</state>
+    <location_name>UNITARIAN UNIVERSLST/MILLCREEK</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950356">
+  <address>
+    <city>NEWARK</city>
+    <line1>50 GENDER RD</line1>
+    <state>DE</state>
+    <location_name>GAUGER-COBBS MIDDLE SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950357">
+  <address>
+    <city>NEWARK</city>
+    <line1>50 GENDER RD</line1>
+    <state>DE</state>
+    <location_name>GAUGER-COBBS MIDDLE SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950358">
+  <address>
+    <city>NEWARK</city>
+    <line1>190 SALEM CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>CHRISTIANA HIGH SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950359">
+  <address>
+    <city>NEWARK</city>
+    <line1>190 SALEM CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>CHRISTIANA HIGH SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950360">
+  <address>
+    <city>NEWARK</city>
+    <line1>1500 CAPITOL TRL</line1>
+    <state>DE</state>
+    <location_name>SHUE-MEDILL MIDDLE SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950361">
+  <address>
+    <city>NEWARK</city>
+    <line1>750 E DELAWARE AVE</line1>
+    <state>DE</state>
+    <location_name>NEWARK HIGH SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950362">
+  <address>
+    <city>NEWARK</city>
+    <line1>142 BRENNEN DR</line1>
+    <state>DE</state>
+    <location_name>JENNIE SMITH ELEMENTARY SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950363">
+  <address>
+    <city>NEWARK</city>
+    <line1>140 BRENNEN DR</line1>
+    <state>DE</state>
+    <location_name>KIRK MIDDLE SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950364">
+  <address>
+    <city>NEWARK</city>
+    <line1>800 MARROWS RD</line1>
+    <state>DE</state>
+    <location_name>BROOKSIDE ELEMENTARY SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950365">
+  <address>
+    <city>NEWARK</city>
+    <line1>800 MARROWS RD</line1>
+    <state>DE</state>
+    <location_name>BROOKSIDE ELEMENTARY SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950366">
+  <address>
+    <city>NEWARK</city>
+    <line1>750 LIBRARY AVE</line1>
+    <state>DE</state>
+    <location_name>NEWARK LIBRARY</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950367">
+  <address>
+    <city>NEWARK</city>
+    <line1>908 JANICE DR</line1>
+    <state>DE</state>
+    <location_name>MCVEY ELEMENTARY SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950368">
+  <address>
+    <city>NEWARK</city>
+    <line1>193 WEST PARK PL</line1>
+    <state>DE</state>
+    <location_name>WEST PARK PLACE ELEM SCHOOL</location_name>
+    <zip>19711</zip>
+  </address>
+</polling_location>
+<polling_location id="9950369">
+  <address>
+    <city>NEWARK</city>
+    <line1>908 JANICE DR</line1>
+    <state>DE</state>
+    <location_name>MCVEY ELEMENTARY SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950370">
+  <address>
+    <city>NEWARK</city>
+    <line1>1842 OTTS CHAPEL RD</line1>
+    <state>DE</state>
+    <location_name>LIGHTHOUSE BAPTIST CHURCH</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950371">
+  <address>
+    <city>NEWARK</city>
+    <line1>1842 OTTS CHAPEL RD</line1>
+    <state>DE</state>
+    <location_name>LIGHTHOUSE BAPTIST CHURCH</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950372">
+  <address>
+    <city>NEWARK</city>
+    <line1>908 JANICE DR</line1>
+    <state>DE</state>
+    <location_name>MCVEY ELEMENTARY SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950373">
+  <address>
+    <city>NEWARK</city>
+    <line1>1901 S COLLEGE AVE</line1>
+    <state>DE</state>
+    <location_name>GLASGOW HIGH SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950374">
+  <address>
+    <city>NEWARK</city>
+    <line1>1901 S COLLEGE AVE</line1>
+    <state>DE</state>
+    <location_name>GLASGOW HIGH SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950375">
+  <address>
+    <city>NEWARK</city>
+    <line1>1901 S COLLEGE AVE</line1>
+    <state>DE</state>
+    <location_name>GLASGOW HIGH SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950376">
+  <address>
+    <city>NEWARK</city>
+    <line1>35 W MAIN ST</line1>
+    <state>DE</state>
+    <location_name>JONES ELEMENTARY SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950377">
+  <address>
+    <city>NEWARK</city>
+    <line1>190 SALEM CHURCH RD</line1>
+    <state>DE</state>
+    <location_name>CHRISTIANA HIGH SCHOOL</location_name>
+    <zip>19713</zip>
+  </address>
+</polling_location>
+<polling_location id="9950378">
+  <address>
+    <city>NEWARK</city>
+    <line1>101 BARRETT RUN RD</line1>
+    <state>DE</state>
+    <location_name>THURGOOD MARSHALL ELEM SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950379">
+  <address>
+    <city>NEWARK</city>
+    <line1>101 BARRETT RUN RD</line1>
+    <state>DE</state>
+    <location_name>THURGOOD MARSHALL ELEM SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950380">
+  <address>
+    <city>NEWARK</city>
+    <line1>101 BARRETT RUN RD</line1>
+    <state>DE</state>
+    <location_name>THURGOOD MARSHALL ELEM SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950381">
+  <address>
+    <city>NEWARK</city>
+    <line1>35 W MAIN ST</line1>
+    <state>DE</state>
+    <location_name>JONES ELEMENTARY SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950382">
+  <address>
+    <city>NEWARK</city>
+    <line1>109 GLASGOW DR</line1>
+    <state>DE</state>
+    <location_name>GREATER NWK BOYS &amp; GIRLS CLUB</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950383">
+  <address>
+    <city>BEAR</city>
+    <line1>200 BRENNAN BLVD</line1>
+    <state>DE</state>
+    <location_name>LOSS ELEMENTARY SCHOOL</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950384">
+  <address>
+    <city>NEWARK</city>
+    <line1>350 FOUR SEASONS PKY</line1>
+    <state>DE</state>
+    <location_name>BRADER ELEMENTARY SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950385">
+  <address>
+    <city>NEWARK</city>
+    <line1>2575 GLASGOW AVE</line1>
+    <state>DE</state>
+    <location_name>HODGSON VO-TECH HIGH SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950386">
+  <address>
+    <city>NEWARK</city>
+    <line1>2575 GLASGOW AVE</line1>
+    <state>DE</state>
+    <location_name>HODGSON VO-TECH HIGH SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950387">
+  <address>
+    <city>NEWARK</city>
+    <line1>200 LAGRANGE AVE</line1>
+    <state>DE</state>
+    <location_name>KEENE ELEMENTARY SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950388">
+  <address>
+    <city>NEWARK</city>
+    <line1>200 LAGRANGE AVE</line1>
+    <state>DE</state>
+    <location_name>KEENE ELEMENTARY SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950389">
+  <address>
+    <city>BEAR</city>
+    <line1>2274 PORTER RD</line1>
+    <state>DE</state>
+    <location_name>GOOD SHEPHERD BAPTIST CHURCH</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950390">
+  <address>
+    <city>NEWARK</city>
+    <line1>2575 GLASGOW AVE</line1>
+    <state>DE</state>
+    <location_name>HODGSON VO-TECH HIGH SCHOOL</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950391">
+  <address>
+    <city>BEAR</city>
+    <line1>200 BRENNAN BLVD</line1>
+    <state>DE</state>
+    <location_name>LOSS ELEMENTARY SCHOOL</location_name>
+    <zip>19701</zip>
+  </address>
+</polling_location>
+<polling_location id="9950392">
+  <address>
+    <city>NEWARK</city>
+    <line1>2430 OLD COUNTY RD</line1>
+    <state>DE</state>
+    <location_name>NEW CASTLE CONSERVATION CENTER</location_name>
+    <zip>19702</zip>
+  </address>
+</polling_location>
+<polling_location id="9950393">
+  <address>
+    <city>SMYRNA</city>
+    <line1>700  DUCK CREEK PARKWAY</line1>
+    <state>DE</state>
+    <location_name>SMYRNA MIDDLE SCHOOL</location_name>
+    <zip>19977</zip>
+  </address>
+</polling_location>
+<polling_location id="9950394">
+  <address>
+    <city>SMYRNA</city>
+    <line1>27 N MAIN ST</line1>
+    <state>DE</state>
+    <location_name>LEVIN CENTER</location_name>
+    <zip>19977</zip>
+  </address>
+</polling_location>
+<polling_location id="9950395">
+  <address>
+    <city>SMYRNA</city>
+    <line1>103 W COMMERCE ST</line1>
+    <state>DE</state>
+    <location_name>CITIZENS HOSE COMPANY NO 1</location_name>
+    <zip>19977</zip>
+  </address>
+</polling_location>
+<polling_location id="9950396">
+  <address>
+    <city>SMYRNA</city>
+    <line1>123 RABBIT CHASE LN</line1>
+    <state>DE</state>
+    <location_name>SUNNYSIDE ELEMENTARY SCHOOL</location_name>
+    <zip>19977</zip>
+  </address>
+</polling_location>
+<polling_location id="9950397">
+  <address>
+    <city>SMYRNA</city>
+    <line1>123 RABBIT CHASE LN</line1>
+    <state>DE</state>
+    <location_name>SUNNYSIDE ELEMENTARY SCHOOL</location_name>
+    <zip>19977</zip>
+  </address>
+</polling_location>
+<polling_location id="9950398">
+  <address>
+    <city>SMYRNA</city>
+    <line1>103 W COMMERCE ST</line1>
+    <state>DE</state>
+    <location_name>CITIZENS HOSE COMPANY NO 1</location_name>
+    <zip>19977</zip>
+  </address>
+</polling_location>
+<polling_location id="9950399">
+  <address>
+    <city>LEIPSIC</city>
+    <line1>318 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>LEIPSIC FIRE HALL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950400">
+  <address>
+    <city>LEIPSIC</city>
+    <line1>318 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>LEIPSIC FIRE HALL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950401">
+  <address>
+    <city>DOVER</city>
+    <line1>400 CAMPUS DR</line1>
+    <state>DE</state>
+    <location_name>DEL TECH CORP TRAINING CENTER</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950402">
+  <address>
+    <city>DOVER</city>
+    <line1>629 BUCKSON DR</line1>
+    <state>DE</state>
+    <location_name>TOWNE POINT ELEMENTARY SCHOOL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950403">
+  <address>
+    <city>LITTLE CREEK</city>
+    <line1>311 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>LITTLE CREEK FIRE HALL</location_name>
+    <zip>19961</zip>
+  </address>
+</polling_location>
+<polling_location id="9950404">
+  <address>
+    <city>SMYRNA</city>
+    <line1>123 RABBIT CHASE LN</line1>
+    <state>DE</state>
+    <location_name>SUNNYSIDE ELEMENTARY SCHOOL</location_name>
+    <zip>19977</zip>
+  </address>
+</polling_location>
+<polling_location id="9950405">
+  <address>
+    <city>LEIPSIC</city>
+    <line1>318 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>LEIPSIC FIRE HALL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950406">
+  <address>
+    <city>LEIPSIC</city>
+    <line1>318 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>LEIPSIC FIRE HALL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950407">
+  <address>
+    <city>CLAYTON</city>
+    <line1>214 RAILROAD AVE</line1>
+    <state>DE</state>
+    <location_name>CLAYTON FIRE HOUSE</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950408">
+  <address>
+    <city>CLAYTON</city>
+    <line1>214 RAILROAD AVE</line1>
+    <state>DE</state>
+    <location_name>CLAYTON FIRE HOUSE</location_name>
+    <zip>19938</zip>
+  </address>
+</polling_location>
+<polling_location id="9950409">
+  <address>
+    <city>CHESWOLD</city>
+    <line1>371 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>CHESWOLD FIRE HALL</location_name>
+    <zip>19936</zip>
+  </address>
+</polling_location>
+<polling_location id="9950410">
+  <address>
+    <city>CHESWOLD</city>
+    <line1>371 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>CHESWOLD FIRE HALL</location_name>
+    <zip>19936</zip>
+  </address>
+</polling_location>
+<polling_location id="9950411">
+  <address>
+    <city>CHESWOLD</city>
+    <line1>371 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>CHESWOLD FIRE HALL</location_name>
+    <zip>19936</zip>
+  </address>
+</polling_location>
+<polling_location id="9950412">
+  <address>
+    <city>CHESWOLD</city>
+    <line1>371 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>CHESWOLD FIRE HALL</location_name>
+    <zip>19936</zip>
+  </address>
+</polling_location>
+<polling_location id="9950413">
+  <address>
+    <city>DOVER</city>
+    <line1>400 CAMPUS DR</line1>
+    <state>DE</state>
+    <location_name>DEL TECH CORP TRAINING CENTER</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950414">
+  <address>
+    <city>DOVER</city>
+    <line1>1461 CHESTNUT GROVE RD</line1>
+    <state>DE</state>
+    <location_name>STATE FIRE SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950415">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>109 E CAM-WYO AVE</line1>
+    <state>DE</state>
+    <location_name>FRED FIFER MIDDLE SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950416">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>109 E CAM-WYO AVE</line1>
+    <state>DE</state>
+    <location_name>FRED FIFER MIDDLE SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950417">
+  <address>
+    <city>DOVER</city>
+    <line1>1461 CHESTNUT GROVE RD</line1>
+    <state>DE</state>
+    <location_name>STATE FIRE SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950418">
+  <address>
+    <city>DOVER</city>
+    <line1>1461 CHESTNUT GROVE RD</line1>
+    <state>DE</state>
+    <location_name>STATE FIRE SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950419">
+  <address>
+    <city>DOVER</city>
+    <line1>3874 UPPERKING RD</line1>
+    <state>DE</state>
+    <location_name>NELLIE STOKES ELEM SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950420">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>56 HONEYSUCKLE RD</line1>
+    <state>DE</state>
+    <location_name>WILLOW GROVE CHURCH OF GOD</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950421">
+  <address>
+    <city>VIOLA</city>
+    <line1>29 RURITAN LN</line1>
+    <state>DE</state>
+    <location_name>RURITAN CLUB VIOLA</location_name>
+    <zip>19979</zip>
+  </address>
+</polling_location>
+<polling_location id="9950422">
+  <address>
+    <city>FELTON</city>
+    <line1>9 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>FELTON FIRE HALL</location_name>
+    <zip>19943</zip>
+  </address>
+</polling_location>
+<polling_location id="9950423">
+  <address>
+    <city>FELTON</city>
+    <line1>9 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>FELTON FIRE HALL</location_name>
+    <zip>19943</zip>
+  </address>
+</polling_location>
+<polling_location id="9950424">
+  <address>
+    <city>FELTON</city>
+    <line1>5407 KILLENS POND RD</line1>
+    <state>DE</state>
+    <location_name>LAKE FOREST HIGH SCHOOL</location_name>
+    <zip>19943</zip>
+  </address>
+</polling_location>
+<polling_location id="9950425">
+  <address>
+    <city>FELTON</city>
+    <line1>5407 KILLENS POND RD</line1>
+    <state>DE</state>
+    <location_name>LAKE FOREST HIGH SCHOOL</location_name>
+    <zip>19943</zip>
+  </address>
+</polling_location>
+<polling_location id="9950426">
+  <address>
+    <city>HARRINGTON</city>
+    <line1>20 CLARK ST</line1>
+    <state>DE</state>
+    <location_name>HARRINGTON FIRE HALL</location_name>
+    <zip>19952</zip>
+  </address>
+</polling_location>
+<polling_location id="9950427">
+  <address>
+    <city>HARRINGTON</city>
+    <line1>20 CLARK ST</line1>
+    <state>DE</state>
+    <location_name>HARRINGTON FIRE HALL</location_name>
+    <zip>19952</zip>
+  </address>
+</polling_location>
+<polling_location id="9950428">
+  <address>
+    <city>HARRINGTON</city>
+    <line1>20 CLARK ST</line1>
+    <state>DE</state>
+    <location_name>HARRINGTON FIRE HALL</location_name>
+    <zip>19952</zip>
+  </address>
+</polling_location>
+<polling_location id="9950429">
+  <address>
+    <city>HOUSTON</city>
+    <line1>143 BROAD ST</line1>
+    <state>DE</state>
+    <location_name>HOUSTON FIRE HALL</location_name>
+    <zip>19954</zip>
+  </address>
+</polling_location>
+<polling_location id="9950430">
+  <address>
+    <city>FARMINGTON</city>
+    <line1>20920 S DUPONT HWY</line1>
+    <state>DE</state>
+    <location_name>FARMINGTON FIRE HALL</location_name>
+    <zip>19950</zip>
+  </address>
+</polling_location>
+<polling_location id="9950431">
+  <address>
+    <city>FARMINGTON</city>
+    <line1>20920 S DUPONT HWY</line1>
+    <state>DE</state>
+    <location_name>FARMINGTON FIRE HALL</location_name>
+    <zip>19950</zip>
+  </address>
+</polling_location>
+<polling_location id="9950432">
+  <address>
+    <city>DOVER</city>
+    <line1>400 CAMPUS DR</line1>
+    <state>DE</state>
+    <location_name>DEL TECH CORP TRAINING CENTER</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950433">
+  <address>
+    <city>DOVER</city>
+    <line1>1461 CHESTNUT GROVE RD</line1>
+    <state>DE</state>
+    <location_name>STATE FIRE SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950434">
+  <address>
+    <city>DOVER</city>
+    <line1>200 SAULSBURY RD</line1>
+    <state>DE</state>
+    <location_name>BPOE #1903 ELKS LODGE</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950435">
+  <address>
+    <city>DOVER</city>
+    <line1>855 COLLEGE ROAD</line1>
+    <state>DE</state>
+    <location_name>NORTH DOVER ELEMENTARY</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950436">
+  <address>
+    <city>DOVER</city>
+    <line1>200 SAULSBURY RD</line1>
+    <state>DE</state>
+    <location_name>BPOE #1903 ELKS LODGE</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950437">
+  <address>
+    <city>DOVER</city>
+    <line1>65 CARVER ROAD</line1>
+    <state>DE</state>
+    <location_name>WILLIAM HENRY MIDDLE SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950438">
+  <address>
+    <city>DOVER</city>
+    <line1>65 CARVER RD</line1>
+    <state>DE</state>
+    <location_name>WILLIAM HENRY MIDDLE SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950439">
+  <address>
+    <city>DOVER</city>
+    <line1>200 SAULSBURY RD</line1>
+    <state>DE</state>
+    <location_name>BPOE #1903 ELKS LODGE</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950440">
+  <address>
+    <city>DOVER</city>
+    <line1>700 WALKER ROAD</line1>
+    <state>DE</state>
+    <location_name>FAIRVIEW ELEMENTARY SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950441">
+  <address>
+    <city>DOVER</city>
+    <line1>955 S STATE ST</line1>
+    <state>DE</state>
+    <location_name>SOUTH DOVER ELEM SCHOOL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950442">
+  <address>
+    <city>DOVER</city>
+    <line1>65 CARVER RD</line1>
+    <state>DE</state>
+    <location_name>WILLIAM HENRY MIDDLE SCHOOL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950443">
+  <address>
+    <city>DOVER</city>
+    <line1>100 ENTERPRISE PL, STE 5</line1>
+    <state>DE</state>
+    <location_name>FEDERAL VOTING DISTRICT - KENT</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950444">
+  <address>
+    <city>DOVER</city>
+    <line1>852 S LITTLE CREEK RD</line1>
+    <state>DE</state>
+    <location_name>EAST DOVER ELEMENTARY SCHOOL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950445">
+  <address>
+    <city>DOVER</city>
+    <line1>955 S STATE ST</line1>
+    <state>DE</state>
+    <location_name>SOUTH DOVER ELEMENTARY SCHOOL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950446">
+  <address>
+    <city>DOVER</city>
+    <line1>360 WEBBS LN</line1>
+    <state>DE</state>
+    <location_name>W REILY BROWN ELEM SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950447">
+  <address>
+    <city>DOVER</city>
+    <line1>5 OLD NORTH ROAD</line1>
+    <state>DE</state>
+    <location_name>W B SIMPSON ELEMENTARY SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950448">
+  <address>
+    <city>DOVER</city>
+    <line1>360 WEBBS LN</line1>
+    <state>DE</state>
+    <location_name>W REILY BROWN ELEM SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950449">
+  <address>
+    <city>LITTLE CREEK</city>
+    <line1>311 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>LITTLE CREEK FIRE HALL</location_name>
+    <zip>19961</zip>
+  </address>
+</polling_location>
+<polling_location id="9950450">
+  <address>
+    <city>DOVER</city>
+    <line1>852 S LITTLE CREEK RD</line1>
+    <state>DE</state>
+    <location_name>EAST DOVER ELEMENTARY SCHOOL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950451">
+  <address>
+    <city>LITTLE CREEK</city>
+    <line1>311 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>LITTLE CREEK FIRE HALL</location_name>
+    <zip>19961</zip>
+  </address>
+</polling_location>
+<polling_location id="9950452">
+  <address>
+    <city>DOVER</city>
+    <line1>852 S LITTLE CREEK RD</line1>
+    <state>DE</state>
+    <location_name>EAST DOVER ELEMENTARY SCHOOL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950453">
+  <address>
+    <city>DOVER</city>
+    <line1>360 WEBBS LN</line1>
+    <state>DE</state>
+    <location_name>W REILY BROWN ELEM SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950454">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>238 SORGHUM MILL RD</line1>
+    <state>DE</state>
+    <location_name>ALLEN FREAR ELEMENTARY SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950455">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>2841 S STATE ST</line1>
+    <state>DE</state>
+    <location_name>F NEIL POSTLETHWAIT SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950456">
+  <address>
+    <city>VIOLA</city>
+    <line1>29 RURITAN LN</line1>
+    <state>DE</state>
+    <location_name>RURITAN CLUB VIOLA</location_name>
+    <zip>19979</zip>
+  </address>
+</polling_location>
+<polling_location id="9950457">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>2841 S STATE ST</line1>
+    <state>DE</state>
+    <location_name>F NEIL POSTLETHWAIT SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950458">
+  <address>
+    <city>MAGNOLIA</city>
+    <line1>2 N MAIN STREET</line1>
+    <state>DE</state>
+    <location_name>MAGNOLIA FIRE HALL</location_name>
+    <zip>19962</zip>
+  </address>
+</polling_location>
+<polling_location id="9950459">
+  <address>
+    <city>FREDERICA</city>
+    <line1>124 W FRONT ST</line1>
+    <state>DE</state>
+    <location_name>LAKE FOREST EAST ELEM SCHOOL</location_name>
+    <zip>19946</zip>
+  </address>
+</polling_location>
+<polling_location id="9950460">
+  <address>
+    <city>FREDERICA</city>
+    <line1>124 W FRONT ST</line1>
+    <state>DE</state>
+    <location_name>LAKE FOREST EAST ELEM SCHOOL</location_name>
+    <zip>19946</zip>
+  </address>
+</polling_location>
+<polling_location id="9950461">
+  <address>
+    <city>FELTON</city>
+    <line1>5407 KILLENS POND RD</line1>
+    <state>DE</state>
+    <location_name>LAKE FOREST HIGH SCHOOL</location_name>
+    <zip>19943</zip>
+  </address>
+</polling_location>
+<polling_location id="9950462">
+  <address>
+    <city>HOUSTON</city>
+    <line1>143 BROAD ST</line1>
+    <state>DE</state>
+    <location_name>HOUSTON FIRE HALL</location_name>
+    <zip>19954</zip>
+  </address>
+</polling_location>
+<polling_location id="9950463">
+  <address>
+    <city>MILFORD</city>
+    <line1>1019 N WALNUT ST</line1>
+    <state>DE</state>
+    <location_name>MILFORD HIGH SCHOOL</location_name>
+    <zip>19963</zip>
+  </address>
+</polling_location>
+<polling_location id="9950464">
+  <address>
+    <city>MILFORD</city>
+    <line1>1019 N WALNUT STREET</line1>
+    <state>DE</state>
+    <location_name>MILFORD HIGH SCHOOL</location_name>
+    <zip>19963</zip>
+  </address>
+</polling_location>
+<polling_location id="9950465">
+  <address>
+    <city>FREDERICA</city>
+    <line1>2 FRONT ST</line1>
+    <state>DE</state>
+    <location_name>FREDERICA FIRE HALL</location_name>
+    <zip>19946</zip>
+  </address>
+</polling_location>
+<polling_location id="9950466">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>5 OLD NORTH RD</line1>
+    <state>DE</state>
+    <location_name>W B SIMPSON ELEMENTARY SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950467">
+  <address>
+    <city>DOVER</city>
+    <line1>3874 UPPERKING RD</line1>
+    <state>DE</state>
+    <location_name>NELLIE STOKES ELEM SCHOOL</location_name>
+    <zip>19904</zip>
+  </address>
+</polling_location>
+<polling_location id="9950468">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>239 OLD NORTH RD</line1>
+    <state>DE</state>
+    <location_name>CAESAR RODNEY HIGH SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950469">
+  <address>
+    <city>VIOLA</city>
+    <line1>29 RURITAN LN</line1>
+    <state>DE</state>
+    <location_name>RURITAN CLUB VIOLA</location_name>
+    <zip>19979</zip>
+  </address>
+</polling_location>
+<polling_location id="9950470">
+  <address>
+    <city>WOODSIDE</city>
+    <line1>823 WALNUT SHADE RD</line1>
+    <state>DE</state>
+    <location_name>POLYTECH HIGH SCHOOL</location_name>
+    <zip>19980</zip>
+  </address>
+</polling_location>
+<polling_location id="9950471">
+  <address>
+    <city>WOODSIDE</city>
+    <line1>823 WALNUT SHADE RD</line1>
+    <state>DE</state>
+    <location_name>POLYTECH HIGH SCHOOL</location_name>
+    <zip>19980</zip>
+  </address>
+</polling_location>
+<polling_location id="9950472">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>2841 S STATE ST</line1>
+    <state>DE</state>
+    <location_name>F NEIL POSTLEWAIT SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950473">
+  <address>
+    <city>CAMDEN WYOMING</city>
+    <line1>238 SORGHUM MILL RD</line1>
+    <state>DE</state>
+    <location_name>ALLEN FREAR ELEMENTARY SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950474">
+  <address>
+    <city>DOVER</city>
+    <line1>594 VOSHELLS MILL STAR HILL RD</line1>
+    <state>DE</state>
+    <location_name>STARHILL ELEMENTARY SCHOOL</location_name>
+    <zip>19901</zip>
+  </address>
+</polling_location>
+<polling_location id="9950475">
+  <address>
+    <city>WOODSIDE</city>
+    <line1>823 WALNUT SHADE RD</line1>
+    <state>DE</state>
+    <location_name>POLYTECH HIGH SCHOOL</location_name>
+    <zip>19980</zip>
+  </address>
+</polling_location>
+<polling_location id="9950476">
+  <address>
+    <city>CAMDEN-WYOMING</city>
+    <line1>109 E CAM-WYO AVE</line1>
+    <state>DE</state>
+    <location_name>FRED FIFER MIDDLE SCHOOL</location_name>
+    <zip>19934</zip>
+  </address>
+</polling_location>
+<polling_location id="9950477">
+  <address>
+    <city>GREENWOOD</city>
+    <line1>12611 SUSSEX HWY</line1>
+    <state>DE</state>
+    <location_name>GREENWOOD FIRE HALL</location_name>
+    <zip>19950</zip>
+  </address>
+</polling_location>
+<polling_location id="9950478">
+  <address>
+    <city>BRIDGEVILLE</city>
+    <line1>315 MARKET ST</line1>
+    <state>DE</state>
+    <location_name>BRIDGEVILLE FIRE HALL</location_name>
+    <zip>19933</zip>
+  </address>
+</polling_location>
+<polling_location id="9950479">
+  <address>
+    <city>BRIDGEVILLE</city>
+    <line1>307 LAWS ST</line1>
+    <state>DE</state>
+    <location_name>WOODBRIDGE MIDDLE SCHOOL</location_name>
+    <zip>19933</zip>
+  </address>
+</polling_location>
+<polling_location id="9950480">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>SEASHORE HWY</line1>
+    <state>DE</state>
+    <location_name>DEL TECH HIGHER EDUCATION BLDG</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+<polling_location id="9950481">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>17099 COUNTY SEAT HWY</line1>
+    <state>DE</state>
+    <location_name>SUSSEX TECH HIGH SCHOOL</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+<polling_location id="9950482">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>18192 REDDEN RD</line1>
+    <state>DE</state>
+    <location_name>REDDEN COMMUNITY HALL</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+<polling_location id="9950483">
+  <address>
+    <city>ELLENDALE</city>
+    <line1>302 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>ELLENDALE FIRE HALL</location_name>
+    <zip>19941</zip>
+  </address>
+</polling_location>
+<polling_location id="9950484">
+  <address>
+    <city>MILFORD</city>
+    <line1>310 LOVER'S LANE</line1>
+    <state>DE</state>
+    <location_name>LULU ROSS ELEMENTARY SCHOOL</location_name>
+    <zip>19963</zip>
+  </address>
+</polling_location>
+<polling_location id="9950485">
+  <address>
+    <city>MILFORD</city>
+    <line1>311 LOVER'S LANE</line1>
+    <state>DE</state>
+    <location_name>MISPILLION ELEMENTARY SCHOOL</location_name>
+    <zip>19963</zip>
+  </address>
+</polling_location>
+<polling_location id="9950486">
+  <address>
+    <city>MILFORD</city>
+    <line1>310 LOVER'S LANE</line1>
+    <state>DE</state>
+    <location_name>LULU ROSS ELEMENTARY SCHOOL</location_name>
+    <zip>19963</zip>
+  </address>
+</polling_location>
+<polling_location id="9950487">
+  <address>
+    <city>LINCOLN</city>
+    <line1>8609 THIRD ST</line1>
+    <state>DE</state>
+    <location_name>MORRIS EARLY LEARNING CENTER</location_name>
+    <zip>19960</zip>
+  </address>
+</polling_location>
+<polling_location id="9950488">
+  <address>
+    <city>MILFORD</city>
+    <line1>8009 SLAUGHTER BEACH RD</line1>
+    <state>DE</state>
+    <location_name>MEMORIAL FIRE CO - STA. #2</location_name>
+    <zip>19963</zip>
+  </address>
+</polling_location>
+<polling_location id="9950489">
+  <address>
+    <city>ELLENDALE</city>
+    <line1>302 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>ELLENDALE FIRE HALL</location_name>
+    <zip>19941</zip>
+  </address>
+</polling_location>
+<polling_location id="9950490">
+  <address>
+    <city>LINCOLN</city>
+    <line1>22942 SLAUGHER NECK RD</line1>
+    <state>DE</state>
+    <location_name>SLAUGHTER NECK COMM. CENTER</location_name>
+    <zip>19960</zip>
+  </address>
+</polling_location>
+<polling_location id="9950491">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>SEASHORE HWY</line1>
+    <state>DE</state>
+    <location_name>DEL TECH - JASON BLDG</location_name>
+    <zip>19956</zip>
+  </address>
+</polling_location>
+<polling_location id="9950492">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>301-A W. MARKET ST</line1>
+    <state>DE</state>
+    <location_name>GEORGETOWN MIDDLE SCHOOL</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+<polling_location id="9950493">
+  <address>
+    <city>MILFORD</city>
+    <line1>8009 SLAUGHTER BEACH RD</line1>
+    <state>DE</state>
+    <location_name>MEMORIAL FIRE CO - STA. #2</location_name>
+    <zip>19963</zip>
+  </address>
+</polling_location>
+<polling_location id="9950494">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>SEASHORE HWY</line1>
+    <state>DE</state>
+    <location_name>DEL TECH - JASON BLDG</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+<polling_location id="9950495">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>664 N. BEDFORD ST. EXTD.</line1>
+    <state>DE</state>
+    <location_name>NORTH GEORGETOWN ELEMENTARY</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+<polling_location id="9950496">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>SUSSEX AVE DR</line1>
+    <state>DE</state>
+    <location_name>GEORGETOWN ELEMENTARY SCHOOL</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+<polling_location id="9950497">
+  <address>
+    <city>MILLSBORO</city>
+    <line1>24463 GRAVEL HILL RD</line1>
+    <state>DE</state>
+    <location_name>ZOAR CHURCH HALL</location_name>
+    <zip>19966</zip>
+  </address>
+</polling_location>
+<polling_location id="9950498">
+  <address>
+    <city>MILLSBORO</city>
+    <line1>26064 SCHOOL RD, LONG NECK</line1>
+    <state>DE</state>
+    <location_name>LONG NECK ELEMENTARY SCHOOL</location_name>
+    <zip>19966</zip>
+  </address>
+</polling_location>
+<polling_location id="9950499">
+  <address>
+    <city>MILLSBORO</city>
+    <line1>32628 OAK ORCHARD RD</line1>
+    <state>DE</state>
+    <location_name>INDIAN RIVER FIRE COMPANY</location_name>
+    <zip>19966</zip>
+  </address>
+</polling_location>
+<polling_location id="9950500">
+  <address>
+    <city>MILLSBORO</city>
+    <line1>31738 INDIAN MISSION RD</line1>
+    <state>DE</state>
+    <location_name>MID SUSSEX RESCUE SQUAD</location_name>
+    <zip>19966</zip>
+  </address>
+</polling_location>
+<polling_location id="9950501">
+  <address>
+    <city>MILLSBORO</city>
+    <line1>25375 BANKS RD, LONGNECK</line1>
+    <state>DE</state>
+    <location_name>INDIAN RIVER FIRE CO. SUB STA</location_name>
+    <zip>19966</zip>
+  </address>
+</polling_location>
+<polling_location id="9950502">
+  <address>
+    <city>DAGSBORO</city>
+    <line1>29772 ARMORY RD</line1>
+    <state>DE</state>
+    <location_name>INDIAN RIVER HIGH SCHOOL</location_name>
+    <zip>19939</zip>
+  </address>
+</polling_location>
+<polling_location id="9950503">
+  <address>
+    <city>MILLVILLE</city>
+    <line1>35554 ATLANTIC AVE</line1>
+    <state>DE</state>
+    <location_name>MILLVILLE FIRE HALL</location_name>
+    <zip>19967</zip>
+  </address>
+</polling_location>
+<polling_location id="9950504">
+  <address>
+    <city>OCEAN VIEW</city>
+    <line1>120 ATLANTIC AVE</line1>
+    <state>DE</state>
+    <location_name>LORD BALTIMORE ELEMENTARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="9950505">
+  <address>
+    <city>BETHANY</city>
+    <line1>215 HOLLYWOOD ST</line1>
+    <state>DE</state>
+    <location_name>BETHANY BEACH FIRE HALL</location_name>
+    <zip>19930</zip>
+  </address>
+</polling_location>
+<polling_location id="9950506">
+  <address>
+    <city>FENWICK ISLAND</city>
+    <line1>800 COASTAL HWY</line1>
+    <state>DE</state>
+    <location_name>FENWICK ISLAND TOWN HALL</location_name>
+    <zip>19944</zip>
+  </address>
+</polling_location>
+<polling_location id="9950507">
+  <address>
+    <city>FRANKFORD</city>
+    <line1>35943 ZION CHURCH RD, ROXANA</line1>
+    <state>DE</state>
+    <location_name>ROXANA FIRE HALL</location_name>
+    <zip>19945</zip>
+  </address>
+</polling_location>
+<polling_location id="9950508">
+  <address>
+    <city>FRANKFORD</city>
+    <line1>35943 ZION CHURCH RD, ROXANA</line1>
+    <state>DE</state>
+    <location_name>ROXANA FIRE HALL</location_name>
+    <zip>19945</zip>
+  </address>
+</polling_location>
+<polling_location id="9950509">
+  <address>
+    <line1>80 BETHANY RD, SELBYVILLE</line1>
+    <state>DE</state>
+    <location_name>SELBYVILLE MIDDLE SCHOOL</location_name>
+    <zip>19975</zip>
+  </address>
+</polling_location>
+<polling_location id="9950510">
+  <address>
+    <city>SEAFORD</city>
+    <line1>500 E. STEIN HWY</line1>
+    <state>DE</state>
+    <location_name>SEAFORD MIDDLE SCHOOL</location_name>
+    <zip>19973</zip>
+  </address>
+</polling_location>
+<polling_location id="9950511">
+  <address>
+    <city>SEAFORD</city>
+    <line1>399 N. MARKET ST</line1>
+    <state>DE</state>
+    <location_name>SEAFORD SENIOR HIGH SCHOOL</location_name>
+    <zip>19973</zip>
+  </address>
+</polling_location>
+<polling_location id="9950512">
+  <address>
+    <city>SEAFORD</city>
+    <line1>399 N. MARKET ST</line1>
+    <state>DE</state>
+    <location_name>SEAFORD SENIOR HIGH SCHOOL</location_name>
+    <zip>19973</zip>
+  </address>
+</polling_location>
+<polling_location id="9950513">
+  <address>
+    <city>SEAFORD</city>
+    <line1>414 HIGH ST</line1>
+    <state>DE</state>
+    <location_name>SEAFORD CITY HALL</location_name>
+    <zip>19973</zip>
+  </address>
+</polling_location>
+<polling_location id="9950514">
+  <address>
+    <city>SEAFORD</city>
+    <line1>511 SUSSEX AVE</line1>
+    <state>DE</state>
+    <location_name>WEST SEAFORD ELEMENTARY</location_name>
+    <zip>19973</zip>
+  </address>
+</polling_location>
+<polling_location id="9950515">
+  <address>
+    <city>SEAFORD</city>
+    <line1>200 E FIFTH ST, BLADES</line1>
+    <state>DE</state>
+    <location_name>BLADES FIRE HALL</location_name>
+    <zip>19973</zip>
+  </address>
+</polling_location>
+<polling_location id="9950516">
+  <address>
+    <city>SEAFORD</city>
+    <line1>900 SOUTH ARCH ST, BLADES</line1>
+    <state>DE</state>
+    <location_name>BLADES ELEMENTARY</location_name>
+    <zip>19973</zip>
+  </address>
+</polling_location>
+<polling_location id="9950517">
+  <address>
+    <city>LAUREL</city>
+    <line1>300 WILSON ST</line1>
+    <state>DE</state>
+    <location_name>NORTH LAUREL ELEMENTARY</location_name>
+    <zip>19956</zip>
+  </address>
+</polling_location>
+<polling_location id="9950518">
+  <address>
+    <city>LAUREL</city>
+    <line1>801 S CENTRAL AVE</line1>
+    <state>DE</state>
+    <location_name>LAUREL CTRL MID SCHL FIELDHSE</location_name>
+    <zip>19956</zip>
+  </address>
+</polling_location>
+<polling_location id="9950519">
+  <address>
+    <city>LAUREL</city>
+    <line1>205 W 10TH ST</line1>
+    <state>DE</state>
+    <location_name>LAUREL FIRE HALL</location_name>
+    <zip>19956</zip>
+  </address>
+</polling_location>
+<polling_location id="9950520">
+  <address>
+    <city>LAUREL</city>
+    <line1>1133 S. CENTRAL AVE</line1>
+    <state>DE</state>
+    <location_name>LAUREL HIGH SCHOOL</location_name>
+    <zip>19956</zip>
+  </address>
+</polling_location>
+<polling_location id="9950521">
+  <address>
+    <city>LAUREL</city>
+    <line1>1133 S. CENTRAL AVE</line1>
+    <state>DE</state>
+    <location_name>LAUREL HIGH SCHOOL</location_name>
+    <zip>19956</zip>
+  </address>
+</polling_location>
+<polling_location id="9950522">
+  <address>
+    <city>DELMAR</city>
+    <line1>GROVE &amp; BI-STATE BLVD</line1>
+    <state>DE</state>
+    <location_name>DELMAR FIRE HALL</location_name>
+    <zip>19940</zip>
+  </address>
+</polling_location>
+<polling_location id="9950523">
+  <address>
+    <city>DELMAR</city>
+    <line1>200 N 8TH ST</line1>
+    <state>DE</state>
+    <location_name>DELMAR HIGH SCHOOL</location_name>
+    <zip>19940</zip>
+  </address>
+</polling_location>
+<polling_location id="9950524">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>23697 DUPONT HWY</line1>
+    <state>DE</state>
+    <location_name>DOT TRANSPORTATION BLDG</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+<polling_location id="9950525">
+  <address>
+    <city>MILLSBORO</city>
+    <line1>37030 MILLSBORO HWY</line1>
+    <state>DE</state>
+    <location_name>GUMBORO FIRE HALL</location_name>
+    <zip>19966</zip>
+  </address>
+</polling_location>
+<polling_location id="9950526">
+  <address>
+    <city>MILLSBORO</city>
+    <line1>29346 IRON BRANCH RD</line1>
+    <state>DE</state>
+    <location_name>EAST MILLSBORO ELEMENTARY</location_name>
+    <zip>19966</zip>
+  </address>
+</polling_location>
+<polling_location id="9950527">
+  <address>
+    <city>FRANKFORD</city>
+    <line1>7 MAIN ST</line1>
+    <state>DE</state>
+    <location_name>FRANKFORD FIRE HALL</location_name>
+    <zip>19945</zip>
+  </address>
+</polling_location>
+<polling_location id="9950528">
+  <address>
+    <city>DAGSBORO</city>
+    <line1>28331 CLAYTON ST</line1>
+    <state>DE</state>
+    <location_name>DAGSBORO FIRE HALL</location_name>
+    <zip>19939</zip>
+  </address>
+</polling_location>
+<polling_location id="9950529">
+  <address>
+    <city>MILLSBORO</city>
+    <line1>109 E. STATE ST</line1>
+    <state>DE</state>
+    <location_name>MILLSBORO FIRE HALL</location_name>
+    <zip>19966</zip>
+  </address>
+</polling_location>
+<polling_location id="9950530">
+  <address>
+    <city>MILLSBORO</city>
+    <line1>322 WILSON HWY</line1>
+    <state>DE</state>
+    <location_name>MILLSBORO CIVIC CENTER</location_name>
+    <zip>19966</zip>
+  </address>
+</polling_location>
+<polling_location id="9950531">
+  <address>
+    <city>SELBYVILLE</city>
+    <line1>30 N. MAIN ST</line1>
+    <state>DE</state>
+    <location_name>SELBYVILLE FIRE HALL</location_name>
+    <zip>19975</zip>
+  </address>
+</polling_location>
+<polling_location id="9950532">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>26026 PATRIOTS WAY</line1>
+    <state>DE</state>
+    <location_name>SUSSEX CENTRAL HIGH SCHOOL</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+<polling_location id="9950533">
+  <address>
+    <city>GEORGETOWN</city>
+    <line1>119 N. RACE ST</line1>
+    <state>DE</state>
+    <location_name>FEDERAL VOTING DIST. - SUSSEX</location_name>
+    <zip>19947</zip>
+  </address>
+</polling_location>
+</vip_object>

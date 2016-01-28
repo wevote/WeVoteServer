@@ -1,0 +1,2447 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>State of Hawaii, Office of Elections</name>
+  <vip_id>15</vip_id>
+  <datetime>2014-09-09T08:53:00</datetime>
+</source>
+<polling_location id="897001">
+  <directions>Caf: 09-01</directions>
+  <address>
+    <city>Kahului</city>
+    <line1>410  S Hina Ave</line1>
+    <state>HI</state>
+    <location_name>Kahului Elem Sch</location_name>
+    <zip>96732</zip>
+  </address>
+</polling_location>
+<polling_location id="897002">
+  <directions>Caf: 09-02</directions>
+  <address>
+    <city>Kahului</city>
+    <line1>795 Onehee Ave</line1>
+    <state>HI</state>
+    <location_name>Maui Waena Inter Sch</location_name>
+    <zip>96732</zip>
+  </address>
+</polling_location>
+<polling_location id="897003">
+  <directions>Caf: 09-03</directions>
+  <address>
+    <city>Kahului</city>
+    <line1>335 S Papa Ave</line1>
+    <state>HI</state>
+    <location_name>Lihikai Elem Sch</location_name>
+    <zip>96732</zip>
+  </address>
+</polling_location>
+<polling_location id="897004">
+  <directions>Gym: 09-04</directions>
+  <address>
+    <city>Kahului</city>
+    <line1>660 S Lono Ave</line1>
+    <state>HI</state>
+    <location_name>Maui High Sch</location_name>
+    <zip>96732</zip>
+  </address>
+</polling_location>
+<polling_location id="897005">
+  <directions>Caf: 10-01</directions>
+  <address>
+    <city>Kihei</city>
+    <line1>131 S Kihei Rd</line1>
+    <state>HI</state>
+    <location_name>Kenolio Recreational Complex</location_name>
+    <zip>96753</zip>
+  </address>
+</polling_location>
+<polling_location id="897006">
+  <directions>Caf: 10-02</directions>
+  <address>
+    <city>Lahaina</city>
+    <line1>611 Front St</line1>
+    <state>HI</state>
+    <location_name>King Kamehameha III Elem Sch</location_name>
+    <zip>96761</zip>
+  </address>
+</polling_location>
+<polling_location id="897007">
+  <directions>Caf: 10-03</directions>
+  <address>
+    <city>Lahaina</city>
+    <line1>871 Lahainaluna Rd</line1>
+    <state>HI</state>
+    <location_name>Lahaina Inter Sch</location_name>
+    <zip>96761</zip>
+  </address>
+</polling_location>
+<polling_location id="897008">
+  <directions>Caf: 10-04</directions>
+  <address>
+    <city>Lahaina</city>
+    <line1>816 Niheu St</line1>
+    <state>HI</state>
+    <location_name>Princess Nahienaena Elem Sch</location_name>
+    <zip>96761</zip>
+  </address>
+</polling_location>
+<polling_location id="897009">
+  <directions>Mtg Rm: 10-05</directions>
+  <address>
+    <city>Lahaina</city>
+    <line1>1840 Honoapiilani Hwy</line1>
+    <state>HI</state>
+    <location_name>Lahaina Civic Ctr</location_name>
+    <zip>96761</zip>
+  </address>
+</polling_location>
+<polling_location id="897010">
+  <directions>Hall: 11-01</directions>
+  <address>
+    <city>Kihei</city>
+    <line1>100 Kulanihakoi St</line1>
+    <state>HI</state>
+    <location_name>Trinity Episcopal Church by the Sea</location_name>
+    <zip>96753</zip>
+  </address>
+</polling_location>
+<polling_location id="897011">
+  <directions>Caf: 11-02</directions>
+  <address>
+    <city>Kihei</city>
+    <line1>180 Alanui Ke Alii St</line1>
+    <state>HI</state>
+    <location_name>Kamalii Elem Sch</location_name>
+    <zip>96753</zip>
+  </address>
+</polling_location>
+<polling_location id="897012">
+  <directions>Comm Ctr: 11-03</directions>
+  <address>
+    <city>Kihei</city>
+    <line1>303 E Lipoa St</line1>
+    <state>HI</state>
+    <location_name>Kihei Comm Ctr</location_name>
+    <zip>96753</zip>
+  </address>
+</polling_location>
+<polling_location id="897013">
+  <directions>Caf: 11-04</directions>
+  <address>
+    <city>Kihei</city>
+    <line1>250 E Lipoa St</line1>
+    <state>HI</state>
+    <location_name>Kihei Elem Sch</location_name>
+    <zip>96753</zip>
+  </address>
+</polling_location>
+<polling_location id="897014">
+  <directions>Caf: 12-01</directions>
+  <address>
+    <city>Makawao</city>
+    <line1>120 Makani Rd</line1>
+    <state>HI</state>
+    <location_name>Kalama Inter Sch</location_name>
+    <zip>96768</zip>
+  </address>
+</polling_location>
+<polling_location id="897015">
+  <directions>Hall: 12-02</directions>
+  <address>
+    <city>Makawao</city>
+    <line1>931 Makawao Ave</line1>
+    <state>HI</state>
+    <location_name>Eddie Tam Memorial Ctr</location_name>
+    <zip>96768</zip>
+  </address>
+</polling_location>
+<polling_location id="897016">
+  <directions>Caf: 12-03</directions>
+  <address>
+    <city>Makawao</city>
+    <line1>2945 Iolani St</line1>
+    <state>HI</state>
+    <location_name>Pukalani Elem Sch</location_name>
+    <zip>96768</zip>
+  </address>
+</polling_location>
+<polling_location id="897017">
+  <directions>Hall: 12-04</directions>
+  <address>
+    <city>Makawao</city>
+    <line1>91 Pukalani St</line1>
+    <state>HI</state>
+    <location_name>Mayor Hannibal Tavares Comm Ctr</location_name>
+    <zip>96768</zip>
+  </address>
+</polling_location>
+<polling_location id="897018">
+  <directions>Comm Ctr: 12-05</directions>
+  <address>
+    <city>Kula</city>
+    <line1>4355 Lower Kula Rd</line1>
+    <state>HI</state>
+    <location_name>Kula Comm Ctr</location_name>
+    <zip>96790</zip>
+  </address>
+</polling_location>
+<polling_location id="897019">
+  <directions>Mtg Rm: 12-06</directions>
+  <address>
+    <city>Paia</city>
+    <line1>401 Alakapa Pl</line1>
+    <state>HI</state>
+    <location_name>Kaunoa Senior Citizen Ctr</location_name>
+    <zip>96779</zip>
+  </address>
+</polling_location>
+<polling_location id="897020">
+  <directions>Comm Ctr: 13-01</directions>
+  <address>
+    <city>Paia</city>
+    <line1>252 Hana Hwy</line1>
+    <state>HI</state>
+    <location_name>Paia Comm Ctr</location_name>
+    <zip>96779</zip>
+  </address>
+</polling_location>
+<polling_location id="897021">
+  <directions>Comm Ctr: 13-02</directions>
+  <address>
+    <city>Haiku</city>
+    <line1>2830 Hana Hwy</line1>
+    <state>HI</state>
+    <location_name>Haiku Comm Ctr</location_name>
+    <zip>96708</zip>
+  </address>
+</polling_location>
+<polling_location id="897022">
+  <directions>Caf: 13-03</directions>
+  <address>
+    <city>Hana</city>
+    <line1>4111 Hana Hwy</line1>
+    <state>HI</state>
+    <location_name>Hana High/Elem Sch</location_name>
+    <zip>96713</zip>
+  </address>
+</polling_location>
+<polling_location id="897023">
+  <directions>Caf: 13-04</directions>
+  <address>
+    <city>Lanai City</city>
+    <line1>555 Fraser Ave</line1>
+    <state>HI</state>
+    <location_name>Lanai High/Elem Sch</location_name>
+    <zip>96763</zip>
+  </address>
+</polling_location>
+<polling_location id="897024">
+  <directions>Comm Ctr: 13-05</directions>
+  <address>
+    <city>Kaunakakai</city>
+    <line1>Kamehameha V Hwy</line1>
+    <state>HI</state>
+    <location_name>Kilohana Comm Ctr</location_name>
+    <zip>96748</zip>
+  </address>
+</polling_location>
+<polling_location id="897025">
+  <directions>Caf: 13-06</directions>
+  <address>
+    <city>Kaunakakai</city>
+    <line1>30 Ailoa St</line1>
+    <state>HI</state>
+    <location_name>Kaunakakai Sch</location_name>
+    <zip>96748</zip>
+  </address>
+</polling_location>
+<polling_location id="897026">
+  <directions>Comm Ctr: 13-07</directions>
+  <address>
+    <city>Kaunakakai</city>
+    <line1>250 Maunaloa Rd</line1>
+    <state>HI</state>
+    <location_name>Maunaloa Comm Ctr</location_name>
+    <zip>96748</zip>
+  </address>
+</polling_location>
+<polling_location id="897027">
+  <directions>Comm Ctr: 13-08</directions>
+  <address>
+    <city>Kualapuu</city>
+    <line1>Alahula St</line1>
+    <state>HI</state>
+    <location_name>Kualapuu Comm Ctr</location_name>
+    <zip>96729</zip>
+  </address>
+</polling_location>
+<polling_location id="897028">
+  <directions>Hall: 13-09</directions>
+  <address>
+    <line1>County of Kalawao</line1>
+    <state>HI</state>
+    <location_name>Kalaupapa Settlement</location_name>
+  </address>
+</polling_location>
+<polling_location id="897029">
+  <directions>Caf: 14-01</directions>
+  <address>
+    <city>Hanalei</city>
+    <line1>5-5415 Kuhio Hwy</line1>
+    <state>HI</state>
+    <location_name>Hanalei Elem Sch</location_name>
+    <zip>96714</zip>
+  </address>
+</polling_location>
+<polling_location id="897030">
+  <directions>Caf: 14-02</directions>
+  <address>
+    <city>Kilauea</city>
+    <line1>2440 Kolo Rd</line1>
+    <state>HI</state>
+    <location_name>Kilauea Elem Sch</location_name>
+    <zip>96754</zip>
+  </address>
+</polling_location>
+<polling_location id="897031">
+  <directions>Hall: 14-03</directions>
+  <address>
+    <city>Anahola</city>
+    <line1>Kalalea Rd</line1>
+    <state>HI</state>
+    <location_name>Anahola Hawaiian Homes Clubhse</location_name>
+    <zip>96703</zip>
+  </address>
+</polling_location>
+<polling_location id="897032">
+  <directions>Caf: 14-04</directions>
+  <address>
+    <city>Kapaa</city>
+    <line1>4886 Kawaihau Rd</line1>
+    <state>HI</state>
+    <location_name>Kapaa Elem Sch</location_name>
+    <zip>96746</zip>
+  </address>
+</polling_location>
+<polling_location id="897033">
+  <directions>Mtg Rm: 14-05</directions>
+  <address>
+    <city>Kapaa</city>
+    <line1>4491 Kou St</line1>
+    <state>HI</state>
+    <location_name>Kapaa Neighborhood Ctr</location_name>
+    <zip>96746</zip>
+  </address>
+</polling_location>
+<polling_location id="897034">
+  <directions>Caf: 15-01</directions>
+  <address>
+    <city>Kapaa</city>
+    <line1>4867 Olohena Rd</line1>
+    <state>HI</state>
+    <location_name>Kapaa Middle Sch</location_name>
+    <zip>96746</zip>
+  </address>
+</polling_location>
+<polling_location id="897035">
+  <directions>Caf: 15-02</directions>
+  <address>
+    <city>Lihue</city>
+    <line1>4380 Hanamaulu Rd</line1>
+    <state>HI</state>
+    <location_name>King Kaumualii Elem Sch</location_name>
+    <zip>96766</zip>
+  </address>
+</polling_location>
+<polling_location id="897036">
+  <directions>Caf: 15-03</directions>
+  <address>
+    <city>Lihue</city>
+    <line1>4319 Hardy St</line1>
+    <state>HI</state>
+    <location_name>Wilcox Elem Sch</location_name>
+    <zip>96766</zip>
+  </address>
+</polling_location>
+<polling_location id="897037">
+  <directions>Caf: 15-04</directions>
+  <address>
+    <city>Lihue</city>
+    <line1>4431 Nuhou St</line1>
+    <state>HI</state>
+    <location_name>Chiefess Kamakahelei Middle Sch</location_name>
+    <zip>96766</zip>
+  </address>
+</polling_location>
+<polling_location id="897038">
+  <directions>Caf: 15-05</directions>
+  <address>
+    <city>Koloa</city>
+    <line1>3223 Poipu Rd</line1>
+    <state>HI</state>
+    <location_name>Koloa Elem Sch</location_name>
+    <zip>96756</zip>
+  </address>
+</polling_location>
+<polling_location id="897039">
+  <directions>Mtg Rm: 16-01</directions>
+  <address>
+    <city>Koloa</city>
+    <line1>3461 Weliweli Rd</line1>
+    <state>HI</state>
+    <location_name>Koloa Neighborhood Ctr</location_name>
+    <zip>96756</zip>
+  </address>
+</polling_location>
+<polling_location id="897040">
+  <directions>Gym: 16-02</directions>
+  <address>
+    <city>Kalaheo</city>
+    <line1>4480 Papalina Rd</line1>
+    <state>HI</state>
+    <location_name>Kalaheo Neighborhood Ctr</location_name>
+    <zip>96741</zip>
+  </address>
+</polling_location>
+<polling_location id="897041">
+  <directions>Mtg Rm: 16-03</directions>
+  <address>
+    <city>Eleele</city>
+    <line1>4451 Puolo Rd</line1>
+    <state>HI</state>
+    <location_name>Hanapepe Recreation Ctr</location_name>
+    <zip>96705</zip>
+  </address>
+</polling_location>
+<polling_location id="897042">
+  <directions>Mtg Rm: 16-04</directions>
+  <address>
+    <city>Waimea</city>
+    <line1>4556 Makeke Rd</line1>
+    <state>HI</state>
+    <location_name>Waimea Neighborhood Ctr</location_name>
+    <zip>96796</zip>
+  </address>
+</polling_location>
+<polling_location id="897043">
+  <directions>Mtg Rm: 16-05</directions>
+  <address>
+    <city>Kekaha</city>
+    <line1>8130 Elepaio Rd</line1>
+    <state>HI</state>
+    <location_name>Kekaha Neighborhood Ctr</location_name>
+    <zip>96752</zip>
+  </address>
+</polling_location>
+<polling_location id="897044">
+  <directions>Sch: 16-06</directions>
+  <address>
+    <city>Waimea</city>
+    <line1>Niihau</line1>
+    <state>HI</state>
+    <location_name>Niihau Elem/High Sch</location_name>
+    <zip>96796</zip>
+  </address>
+</polling_location>
+<polling_location id="897045">
+  <directions>Caf: 17-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>511 Lunalilo Home Rd</line1>
+    <state>HI</state>
+    <location_name>Kaiser High Sch</location_name>
+    <zip>96825</zip>
+  </address>
+</polling_location>
+<polling_location id="897046">
+  <directions>Caf: 17-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>189 Lunalilo Home Rd</line1>
+    <state>HI</state>
+    <location_name>Koko Head Elem Sch</location_name>
+    <zip>96825</zip>
+  </address>
+</polling_location>
+<polling_location id="897047">
+  <directions>Caf: 17-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>7788 Hawaii Kai Dr</line1>
+    <state>HI</state>
+    <location_name>Kamiloiki Elem Sch</location_name>
+    <zip>96825</zip>
+  </address>
+</polling_location>
+<polling_location id="897048">
+  <directions>Caf: 17-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>595 Pepeekeo St</line1>
+    <state>HI</state>
+    <location_name>Hahaione Elem Sch</location_name>
+    <zip>96825</zip>
+  </address>
+</polling_location>
+<polling_location id="897049">
+  <directions>Gym: 18-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>5919 Kalanianaole Hwy</line1>
+    <state>HI</state>
+    <location_name>Holy Trinity Church</location_name>
+    <zip>96825</zip>
+  </address>
+</polling_location>
+<polling_location id="897050">
+  <directions>Caf: 18-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>310 Halemaumau St</line1>
+    <state>HI</state>
+    <location_name>Niu Valley Middle Sch</location_name>
+    <zip>96821</zip>
+  </address>
+</polling_location>
+<polling_location id="897051">
+  <directions>Caf: 18-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>801 W Hind Dr</line1>
+    <state>HI</state>
+    <location_name>Aina Haina Elem Sch</location_name>
+    <zip>96821</zip>
+  </address>
+</polling_location>
+<polling_location id="897052">
+  <directions>Caf: 18-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>4680 Kalanianaole Hwy</line1>
+    <state>HI</state>
+    <location_name>Kalani High Sch</location_name>
+    <zip>96821</zip>
+  </address>
+</polling_location>
+<polling_location id="897053">
+  <directions>Caf: 19-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>4559 Kilauea Ave</line1>
+    <state>HI</state>
+    <location_name>Kahala Elem Sch</location_name>
+    <zip>96816</zip>
+  </address>
+</polling_location>
+<polling_location id="897054">
+  <directions>Caf: 19-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>3710 Leahi Ave</line1>
+    <state>HI</state>
+    <location_name>Waikiki Elem Sch</location_name>
+    <zip>96815</zip>
+  </address>
+</polling_location>
+<polling_location id="897055">
+  <directions>Caf: 19-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1045 19th Ave</line1>
+    <state>HI</state>
+    <location_name>Waialae Elem Sch</location_name>
+    <zip>96816</zip>
+  </address>
+</polling_location>
+<polling_location id="897056">
+  <directions>Caf: 19-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>3440 Leahi Ave</line1>
+    <state>HI</state>
+    <location_name>HI Ctr for Deaf/Blind</location_name>
+    <zip>96815</zip>
+  </address>
+</polling_location>
+<polling_location id="897057">
+  <directions>Caf: 19-05</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1240 7th Ave</line1>
+    <state>HI</state>
+    <location_name>Aliiolani Elem Sch</location_name>
+    <zip>96816</zip>
+  </address>
+</polling_location>
+<polling_location id="897058">
+  <directions>Caf: 20-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>4945 Kilauea Ave</line1>
+    <state>HI</state>
+    <location_name>Wilson Elem Sch</location_name>
+    <zip>96816</zip>
+  </address>
+</polling_location>
+<polling_location id="897059">
+  <directions>Caf: 20-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>2528 10th Ave</line1>
+    <state>HI</state>
+    <location_name>Anuenue Sch</location_name>
+    <zip>96816</zip>
+  </address>
+</polling_location>
+<polling_location id="897060">
+  <directions>Caf: 20-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1903 Palolo Ave</line1>
+    <state>HI</state>
+    <location_name>Jarrett Middle Sch</location_name>
+    <zip>96816</zip>
+  </address>
+</polling_location>
+<polling_location id="897061">
+  <directions>Caf: 20-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>2940 Kamakini St</line1>
+    <state>HI</state>
+    <location_name>Hokulani Elem Sch</location_name>
+    <zip>96816</zip>
+  </address>
+</polling_location>
+<polling_location id="897062">
+  <directions>Caf: 21-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>324 Kapahulu Ave</line1>
+    <state>HI</state>
+    <location_name>Jefferson Elem Sch</location_name>
+    <zip>96815</zip>
+  </address>
+</polling_location>
+<polling_location id="897063">
+  <directions>Caf: 21-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>2705 Kaimuki Ave</line1>
+    <state>HI</state>
+    <location_name>Kaimuki High Sch</location_name>
+    <zip>96816</zip>
+  </address>
+</polling_location>
+<polling_location id="897064">
+  <directions>Caf: 21-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>503 Kamoku St</line1>
+    <state>HI</state>
+    <location_name>Ala Wai Elem Sch</location_name>
+    <zip>96826</zip>
+  </address>
+</polling_location>
+<polling_location id="897065">
+  <directions>Caf: 21-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>810 Pumehana St</line1>
+    <state>HI</state>
+    <location_name>Lunalilo Elem Sch</location_name>
+    <zip>96826</zip>
+  </address>
+</polling_location>
+<polling_location id="897066">
+  <directions>Caf: 22-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>324 Kapahulu Ave</line1>
+    <state>HI</state>
+    <location_name>Jefferson Elem Sch</location_name>
+    <zip>96815</zip>
+  </address>
+</polling_location>
+<polling_location id="897067">
+  <directions>Lounge: 22-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>2015 Kapiolani Blvd</line1>
+    <state>HI</state>
+    <location_name>Ala Wai Comm Park</location_name>
+    <zip>96826</zip>
+  </address>
+</polling_location>
+<polling_location id="897068">
+  <directions>Rm 110: 22-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>634 Pensacola St</line1>
+    <state>HI</state>
+    <location_name>McKinley Comm Sch for Adults</location_name>
+    <zip>96814</zip>
+  </address>
+</polling_location>
+<polling_location id="897069">
+  <directions>: 23-01</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897070">
+  <directions>Caf: 23-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1776 University Ave</line1>
+    <state>HI</state>
+    <location_name>University Laboratory Sch</location_name>
+    <zip>96822</zip>
+  </address>
+</polling_location>
+<polling_location id="897071">
+  <directions>Hall: 23-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1660 S Beretania St</line1>
+    <state>HI</state>
+    <location_name>Central Union Church</location_name>
+    <zip>96826</zip>
+  </address>
+</polling_location>
+<polling_location id="897072">
+  <directions>Caf: 23-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>2655 Woodlawn Dr</line1>
+    <state>HI</state>
+    <location_name>Noelani Elem Sch</location_name>
+    <zip>96822</zip>
+  </address>
+</polling_location>
+<polling_location id="897073">
+  <directions>Caf: 23-05</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>3155 Manoa Rd</line1>
+    <state>HI</state>
+    <location_name>Manoa Elem Sch</location_name>
+    <zip>96822</zip>
+  </address>
+</polling_location>
+<polling_location id="897074">
+  <directions>Caf: 24-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1141 Kinau St</line1>
+    <state>HI</state>
+    <location_name>Kaahumanu Elem Sch</location_name>
+    <zip>96814</zip>
+  </address>
+</polling_location>
+<polling_location id="897075">
+  <directions>Agee Hall: 24-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1527 Keeaumoku St</line1>
+    <state>HI</state>
+    <location_name>Makiki District Park</location_name>
+    <zip>96822</zip>
+  </address>
+</polling_location>
+<polling_location id="897076">
+  <directions>Mtg Rm: 24-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1639 Keeaumoku St</line1>
+    <state>HI</state>
+    <location_name>Christ United Methodist Church</location_name>
+    <zip>96822</zip>
+  </address>
+</polling_location>
+<polling_location id="897077">
+  <directions>Caf: 24-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>615 Auwaiolimu St</line1>
+    <state>HI</state>
+    <location_name>Lincoln Elem Sch</location_name>
+    <zip>96813</zip>
+  </address>
+</polling_location>
+<polling_location id="897078">
+  <directions>: 25-01</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897079">
+  <directions>Caf: 25-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1202 Prospect St</line1>
+    <state>HI</state>
+    <location_name>Stevenson Middle Sch</location_name>
+    <zip>96822</zip>
+  </address>
+</polling_location>
+<polling_location id="897080">
+  <directions>Caf: 25-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>615 Auwaiolimu St</line1>
+    <state>HI</state>
+    <location_name>Lincoln Elem Sch</location_name>
+    <zip>96813</zip>
+  </address>
+</polling_location>
+<polling_location id="897081">
+  <directions>Caf: 25-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>49 Funchal St</line1>
+    <state>HI</state>
+    <location_name>Kawananakoa Middle Sch</location_name>
+    <zip>96813</zip>
+  </address>
+</polling_location>
+<polling_location id="897082">
+  <directions>Caf: 25-05</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>3055 Puiwa Ln</line1>
+    <state>HI</state>
+    <location_name>Nuuanu Elem Sch</location_name>
+    <zip>96817</zip>
+  </address>
+</polling_location>
+<polling_location id="897083">
+  <directions>Caf: 26-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1633 S King St</line1>
+    <state>HI</state>
+    <location_name>Washington Middle Sch</location_name>
+    <zip>96826</zip>
+  </address>
+</polling_location>
+<polling_location id="897084">
+  <directions>: 26-02</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897085">
+  <directions>Caf: 26-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1039 S King St</line1>
+    <state>HI</state>
+    <location_name>McKinley High Sch</location_name>
+    <zip>96814</zip>
+  </address>
+</polling_location>
+<polling_location id="897086">
+  <directions>: 26-04</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897087">
+  <directions>: 26-05</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897088">
+  <directions>Room 103: 26-06</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>919 Ala Moana Blvd</line1>
+    <state>HI</state>
+    <location_name>919 Ala Moana Bldg</location_name>
+    <zip>96814</zip>
+  </address>
+</polling_location>
+<polling_location id="897089">
+  <directions>Caf: 26-07</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1302 Queen Emma St</line1>
+    <state>HI</state>
+    <location_name>Central Middle Sch</location_name>
+    <zip>96813</zip>
+  </address>
+</polling_location>
+<polling_location id="897090">
+  <directions>Caf: 27-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>717 N Kuakini St</line1>
+    <state>HI</state>
+    <location_name>Lanakila Elem Sch</location_name>
+    <zip>96817</zip>
+  </address>
+</polling_location>
+<polling_location id="897091">
+  <directions>Caf: 27-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1618 Palama St</line1>
+    <state>HI</state>
+    <location_name>Likelike Elem Sch</location_name>
+    <zip>96817</zip>
+  </address>
+</polling_location>
+<polling_location id="897092">
+  <directions>Caf: 27-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>319 Wyllie St</line1>
+    <state>HI</state>
+    <location_name>Maemae Elem Sch</location_name>
+    <zip>96817</zip>
+  </address>
+</polling_location>
+<polling_location id="897093">
+  <directions>Caf: 27-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>717 N Kuakini St</line1>
+    <state>HI</state>
+    <location_name>Lanakila Elem Sch</location_name>
+    <zip>96817</zip>
+  </address>
+</polling_location>
+<polling_location id="897094">
+  <directions>: 27-05</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897095">
+  <directions>Caf: 28-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1929 Kamehameha IV Rd</line1>
+    <state>HI</state>
+    <location_name>Kaewai Elem Sch</location_name>
+    <zip>96819</zip>
+  </address>
+</polling_location>
+<polling_location id="897096">
+  <directions>Caf: 28-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1601 N School St</line1>
+    <state>HI</state>
+    <location_name>Kapalama Elem Sch</location_name>
+    <zip>96817</zip>
+  </address>
+</polling_location>
+<polling_location id="897097">
+  <directions>Caf: 28-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>2411 Kalihi St</line1>
+    <state>HI</state>
+    <location_name>Kalihi Uka Elem Sch</location_name>
+    <zip>96819</zip>
+  </address>
+</polling_location>
+<polling_location id="897098">
+  <directions>Caf: 28-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1929 Kamehameha IV Rd</line1>
+    <state>HI</state>
+    <location_name>Kaewai Elem Sch</location_name>
+    <zip>96819</zip>
+  </address>
+</polling_location>
+<polling_location id="897099">
+  <directions>Caf: 29-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1302 Queen Emma St</line1>
+    <state>HI</state>
+    <location_name>Central Middle Sch</location_name>
+    <zip>96813</zip>
+  </address>
+</polling_location>
+<polling_location id="897100">
+  <directions>Caf: 29-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>783 N King St</line1>
+    <state>HI</state>
+    <location_name>Kaiulani Elem Sch</location_name>
+    <zip>96817</zip>
+  </address>
+</polling_location>
+<polling_location id="897101">
+  <directions>Caf: 29-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1564 N King St</line1>
+    <state>HI</state>
+    <location_name>Farrington High Sch</location_name>
+    <zip>96817</zip>
+  </address>
+</polling_location>
+<polling_location id="897102">
+  <directions>Caf: 29-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1601 N School St</line1>
+    <state>HI</state>
+    <location_name>Kapalama Elem Sch</location_name>
+    <zip>96817</zip>
+  </address>
+</polling_location>
+<polling_location id="897103">
+  <directions>Caf: 30-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1121 Middle St</line1>
+    <state>HI</state>
+    <location_name>Fern Elem Sch</location_name>
+    <zip>96819</zip>
+  </address>
+</polling_location>
+<polling_location id="897104">
+  <directions>Caf: 30-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1121 Middle St</line1>
+    <state>HI</state>
+    <location_name>Fern Elem Sch</location_name>
+    <zip>96819</zip>
+  </address>
+</polling_location>
+<polling_location id="897105">
+  <directions>Caf: 30-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>3271 Salt Lake Blvd</line1>
+    <state>HI</state>
+    <location_name>Aliamanu Middle Sch</location_name>
+    <zip>96818</zip>
+  </address>
+</polling_location>
+<polling_location id="897106">
+  <directions>Caf: 30-04</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>4361 Salt Lake Blvd</line1>
+    <state>HI</state>
+    <location_name>Radford High Sch</location_name>
+    <zip>96818</zip>
+  </address>
+</polling_location>
+<polling_location id="897107">
+  <directions>Caf: 31-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1337 Mahiole St</line1>
+    <state>HI</state>
+    <location_name>Moanalua Elem Sch</location_name>
+    <zip>96819</zip>
+  </address>
+</polling_location>
+<polling_location id="897108">
+  <directions>Caf: 31-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>3271 Salt Lake Blvd</line1>
+    <state>HI</state>
+    <location_name>Aliamanu Middle Sch</location_name>
+    <zip>96818</zip>
+  </address>
+</polling_location>
+<polling_location id="897109">
+  <directions>Caf: 31-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>4361 Salt Lake Blvd</line1>
+    <state>HI</state>
+    <location_name>Radford High Sch</location_name>
+    <zip>96818</zip>
+  </address>
+</polling_location>
+<polling_location id="897110">
+  <directions>Caf: 31-04</directions>
+  <address>
+    <city>Aiea</city>
+    <line1>99-370 Moanalua Rd</line1>
+    <state>HI</state>
+    <location_name>Aiea Elem Sch</location_name>
+    <zip>96701</zip>
+  </address>
+</polling_location>
+<polling_location id="897111">
+  <directions>Caf: 31-05</directions>
+  <address>
+    <city>Aiea</city>
+    <line1>99-370 Moanalua Rd</line1>
+    <state>HI</state>
+    <location_name>Aiea Elem Sch</location_name>
+    <zip>96701</zip>
+  </address>
+</polling_location>
+<polling_location id="897112">
+  <directions>Caf: 32-01</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1289 Mahiole St</line1>
+    <state>HI</state>
+    <location_name>Moanalua Middle Sch</location_name>
+    <zip>96819</zip>
+  </address>
+</polling_location>
+<polling_location id="897113">
+  <directions>Caf: 32-02</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>2825 Ala Ilima St</line1>
+    <state>HI</state>
+    <location_name>Moanalua High Sch</location_name>
+    <zip>96818</zip>
+  </address>
+</polling_location>
+<polling_location id="897114">
+  <directions>Caf: 32-03</directions>
+  <address>
+    <city>Honolulu</city>
+    <line1>1131 Ala Lilikoi St</line1>
+    <state>HI</state>
+    <location_name>Salt Lake Elem Sch</location_name>
+    <zip>96818</zip>
+  </address>
+</polling_location>
+<polling_location id="897115">
+  <directions>Mtg Rm: 33-01</directions>
+  <address>
+    <city>Aiea</city>
+    <line1>99-795 Iwaiwa St</line1>
+    <state>HI</state>
+    <location_name>Halawa District Park</location_name>
+    <zip>96701</zip>
+  </address>
+</polling_location>
+<polling_location id="897116">
+  <directions>: 33-02</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897117">
+  <directions>Caf: 33-03</directions>
+  <address>
+    <city>Aiea</city>
+    <line1>98-1276 Ulune St</line1>
+    <state>HI</state>
+    <location_name>Aiea High Sch</location_name>
+    <zip>96701</zip>
+  </address>
+</polling_location>
+<polling_location id="897118">
+  <directions>Caf: 33-04</directions>
+  <address>
+    <city>Aiea</city>
+    <line1>98-1276 Ulune St</line1>
+    <state>HI</state>
+    <location_name>Aiea High Sch</location_name>
+    <zip>96701</zip>
+  </address>
+</polling_location>
+<polling_location id="897119">
+  <directions>Caf: 33-05</directions>
+  <address>
+    <city>Aiea</city>
+    <line1>98-940 Moanalua Rd</line1>
+    <state>HI</state>
+    <location_name>Pearlridge Elem Sch</location_name>
+    <zip>96701</zip>
+  </address>
+</polling_location>
+<polling_location id="897120">
+  <directions>Gym: 33-06</directions>
+  <address>
+    <city>Pearl City</city>
+    <line1>98-1016 Komo Mai Dr</line1>
+    <state>HI</state>
+    <location_name>Calvary Chapel of Honolulu</location_name>
+    <zip>96782</zip>
+  </address>
+</polling_location>
+<polling_location id="897121">
+  <directions>Caf: 34-01</directions>
+  <address>
+    <city>Aiea</city>
+    <line1>98-825 Moanalua Rd</line1>
+    <state>HI</state>
+    <location_name>Waimalu Elem Sch</location_name>
+    <zip>96701</zip>
+  </address>
+</polling_location>
+<polling_location id="897122">
+  <directions>Caf: 34-02</directions>
+  <address>
+    <city>Pearl City</city>
+    <line1>1419 Waimano Home Rd</line1>
+    <state>HI</state>
+    <location_name>Pearl City Highlands Elem Sch</location_name>
+    <zip>96782</zip>
+  </address>
+</polling_location>
+<polling_location id="897123">
+  <directions>Caf: 34-03</directions>
+  <address>
+    <city>Pearl City</city>
+    <line1>2306 Auhuhu St</line1>
+    <state>HI</state>
+    <location_name>Palisades Elem Sch</location_name>
+    <zip>96782</zip>
+  </address>
+</polling_location>
+<polling_location id="897124">
+  <directions>Caf: 35-01</directions>
+  <address>
+    <city>Pearl City</city>
+    <line1>791 Lehua Ave</line1>
+    <state>HI</state>
+    <location_name>Lehua Elem Sch</location_name>
+    <zip>96782</zip>
+  </address>
+</polling_location>
+<polling_location id="897125">
+  <directions>Caf: 35-02</directions>
+  <address>
+    <city>Pearl City</city>
+    <line1>1147 Kumano St</line1>
+    <state>HI</state>
+    <location_name>Manana Elem Sch</location_name>
+    <zip>96782</zip>
+  </address>
+</polling_location>
+<polling_location id="897126">
+  <directions>Caf: 35-03</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-455 Farrington Hwy</line1>
+    <state>HI</state>
+    <location_name>Waipahu Inter Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897127">
+  <directions>Rec Ctr: 35-04</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-1220 Lumikula St</line1>
+    <state>HI</state>
+    <location_name>Crestview Comm Park</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897128">
+  <directions>Caf: 35-05</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-1035 Kukula St</line1>
+    <state>HI</state>
+    <location_name>Waikele Elem Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897129">
+  <directions>Caf: 01-01</directions>
+  <address>
+    <city>Honokaa</city>
+    <line1>45-527 Pakalana St</line1>
+    <state>HI</state>
+    <location_name>Honokaa High Sch</location_name>
+    <zip>96727</zip>
+  </address>
+</polling_location>
+<polling_location id="897130">
+  <directions>Caf: 01-02</directions>
+  <address>
+    <city>Paauilo</city>
+    <line1>43-1497 Old Main Rd</line1>
+    <state>HI</state>
+    <location_name>Paauilo Elem Sch</location_name>
+    <zip>96776</zip>
+  </address>
+</polling_location>
+<polling_location id="897131">
+  <directions>Gym: 01-03</directions>
+  <address>
+    <city>Papa'aloa</city>
+    <line1>35-1994 Government Main Rd</line1>
+    <state>HI</state>
+    <location_name>Papaaloa Gym</location_name>
+    <zip>96780</zip>
+  </address>
+</polling_location>
+<polling_location id="897132">
+  <directions>Soc Hall: 01-04</directions>
+  <address>
+    <city>Ninole</city>
+    <line1>32-896 Mamalahoa Hwy</line1>
+    <state>HI</state>
+    <location_name>Honohina Hongwanji</location_name>
+    <zip>96773</zip>
+  </address>
+</polling_location>
+<polling_location id="897133">
+  <directions>Hall: 01-05</directions>
+  <address>
+    <city>Pepe'ekeo</city>
+    <line1>28-2892 Alia St</line1>
+    <state>HI</state>
+    <location_name>Kulaimano Comm Ctr</location_name>
+    <zip>96783</zip>
+  </address>
+</polling_location>
+<polling_location id="897134">
+  <directions>Caf: 01-06</directions>
+  <address>
+    <city>Papaikou</city>
+    <line1>27-330 Mamalahoa Hwy</line1>
+    <state>HI</state>
+    <location_name>Kalanianaole Elem/Inter Sch</location_name>
+    <zip>96781</zip>
+  </address>
+</polling_location>
+<polling_location id="897135">
+  <directions>Hall: 01-07</directions>
+  <address>
+    <city>Hilo</city>
+    <line1>145 Wainaku St</line1>
+    <state>HI</state>
+    <location_name>Puueo Multi-Culture Ctr</location_name>
+    <zip>96720</zip>
+  </address>
+</polling_location>
+<polling_location id="897136">
+  <directions>Caf: 01-08</directions>
+  <address>
+    <city>Hilo</city>
+    <line1>278 Ainako Ave</line1>
+    <state>HI</state>
+    <location_name>Ernest B DeSilva Elem Sch</location_name>
+    <zip>96720</zip>
+  </address>
+</polling_location>
+<polling_location id="897137">
+  <directions>Caf: 01-09</directions>
+  <address>
+    <city>Hilo</city>
+    <line1>1710 Kaumana Dr</line1>
+    <state>HI</state>
+    <location_name>Kaumana Elem Sch</location_name>
+    <zip>96720</zip>
+  </address>
+</polling_location>
+<polling_location id="897138">
+  <directions>Caf: 02-01</directions>
+  <address>
+    <city>Hilo</city>
+    <line1>556 Waianuenue Ave</line1>
+    <state>HI</state>
+    <location_name>Hilo High Sch</location_name>
+    <zip>96720</zip>
+  </address>
+</polling_location>
+<polling_location id="897139">
+  <directions>Stad: 02-02</directions>
+  <address>
+    <city>Hilo</city>
+    <line1>350 Kalanikoa St</line1>
+    <state>HI</state>
+    <location_name>Edith Kanakaole Tennis Stad</location_name>
+    <zip>96720</zip>
+  </address>
+</polling_location>
+<polling_location id="897140">
+  <directions>Caf: 02-03</directions>
+  <address>
+    <city>Hilo</city>
+    <line1>240 Desha Ave</line1>
+    <state>HI</state>
+    <location_name>Keaukaha Elem Sch</location_name>
+    <zip>96720</zip>
+  </address>
+</polling_location>
+<polling_location id="897141">
+  <directions>Caf: 02-04</directions>
+  <address>
+    <city>Hilo</city>
+    <line1>180 W Puainako St</line1>
+    <state>HI</state>
+    <location_name>Waiakea Elem Sch</location_name>
+    <zip>96720</zip>
+  </address>
+</polling_location>
+<polling_location id="897142">
+  <directions>Caf: 02-05</directions>
+  <address>
+    <city>Hilo</city>
+    <line1>155 W Kawili St</line1>
+    <state>HI</state>
+    <location_name>Waiakea High Sch</location_name>
+    <zip>96720</zip>
+  </address>
+</polling_location>
+<polling_location id="897143">
+  <directions>Hall: 03-01</directions>
+  <address>
+    <city>Hilo</city>
+    <line1>361 Haihai St</line1>
+    <state>HI</state>
+    <location_name>AJA Memorial Hall</location_name>
+    <zip>96720</zip>
+  </address>
+</polling_location>
+<polling_location id="897144">
+  <directions>: 03-02</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897145">
+  <directions>: 03-03</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897146">
+  <directions>Caf: 03-04</directions>
+  <address>
+    <city>Keaau</city>
+    <line1>16-725 Keaau-Pahoa Rd</line1>
+    <state>HI</state>
+    <location_name>Keaau High Sch</location_name>
+    <zip>96749</zip>
+  </address>
+</polling_location>
+<polling_location id="897147">
+  <directions>Caf: 03-05</directions>
+  <address>
+    <city>Mountain View</city>
+    <line1>18-1235 Volcano Rd</line1>
+    <state>HI</state>
+    <location_name>Mountain View Elem Sch</location_name>
+    <zip>96771</zip>
+  </address>
+</polling_location>
+<polling_location id="897148">
+  <directions>Comm Ctr: 03-06</directions>
+  <address>
+    <city>Volcano</city>
+    <line1>19-4030 Wright Rd</line1>
+    <state>HI</state>
+    <location_name>Cooper Ctr</location_name>
+    <zip>96785</zip>
+  </address>
+</polling_location>
+<polling_location id="897149">
+  <directions>Caf: 03-07</directions>
+  <address>
+    <city>Pahala</city>
+    <line1>96-3150 Pikake St</line1>
+    <state>HI</state>
+    <location_name>Kau High Sch</location_name>
+    <zip>96777</zip>
+  </address>
+</polling_location>
+<polling_location id="897150">
+  <directions>Comm Ctr: 04-01</directions>
+  <address>
+    <city>Keaau</city>
+    <line1>Makuu Dr</line1>
+    <state>HI</state>
+    <location_name>Hawaiian Paradise Comm Ctr</location_name>
+    <zip>96749</zip>
+  </address>
+</polling_location>
+<polling_location id="897151">
+  <directions>Caf: 04-02</directions>
+  <address>
+    <city>Pahoa</city>
+    <line1>15-890 Kahakai Blvd</line1>
+    <state>HI</state>
+    <location_name>Keonepoko Elem Sch</location_name>
+    <zip>96778</zip>
+  </address>
+</polling_location>
+<polling_location id="897152">
+  <directions>Comm Ctr: 04-03</directions>
+  <address>
+    <city>Pahoa</city>
+    <line1>15-3022 Kauhale St</line1>
+    <state>HI</state>
+    <location_name>Pahoa Comm Ctr</location_name>
+    <zip>96778</zip>
+  </address>
+</polling_location>
+<polling_location id="897153">
+  <directions>Caf: 04-04</directions>
+  <address>
+    <city>Pahoa</city>
+    <line1>15-3038 Pahoa Village Road</line1>
+    <state>HI</state>
+    <location_name>Pahoa High/Inter Sch</location_name>
+    <zip>96778</zip>
+  </address>
+</polling_location>
+<polling_location id="897154">
+  <directions>Caf: 05-01</directions>
+  <address>
+    <city>Naalehu</city>
+    <line1>95-5545 Mamalahoa Hwy</line1>
+    <state>HI</state>
+    <location_name>Naalehu Elem Sch</location_name>
+    <zip>96772</zip>
+  </address>
+</polling_location>
+<polling_location id="897155">
+  <directions>Comm Ctr: 05-02</directions>
+  <address>
+    <city>Captain Cook</city>
+    <line1>92-8924 Leilani Cir</line1>
+    <state>HI</state>
+    <location_name>Ocean View Comm Ctr</location_name>
+    <zip>96704</zip>
+  </address>
+</polling_location>
+<polling_location id="897156">
+  <directions>Pavilion: 05-03</directions>
+  <address>
+    <city>Milolii</city>
+    <line1>Milolii</line1>
+    <state>HI</state>
+    <location_name>Milolii Halau</location_name>
+    <zip>96726</zip>
+  </address>
+</polling_location>
+<polling_location id="897157">
+  <directions>Caf: 05-04</directions>
+  <address>
+    <city>Captain Cook</city>
+    <line1>86-4355 Mamalahoa Hwy</line1>
+    <state>HI</state>
+    <location_name>Hookena Elem Sch</location_name>
+    <zip>96704</zip>
+  </address>
+</polling_location>
+<polling_location id="897158">
+  <directions>Lanai: 05-05</directions>
+  <address>
+    <city>Captain Cook</city>
+    <line1>84-5140 Painted Church Rd</line1>
+    <state>HI</state>
+    <location_name>St Benedict Catholic Church</location_name>
+    <zip>96704</zip>
+  </address>
+</polling_location>
+<polling_location id="897159">
+  <directions>Caf: 05-06</directions>
+  <address>
+    <city>Kealakekua</city>
+    <line1>81-901 Onouli Rd</line1>
+    <state>HI</state>
+    <location_name>Konawaena Elem Sch</location_name>
+    <zip>96750</zip>
+  </address>
+</polling_location>
+<polling_location id="897160">
+  <directions>Caf: 05-07</directions>
+  <address>
+    <city>Kealakekua</city>
+    <line1>81-1043 Konawaena Sch Rd</line1>
+    <state>HI</state>
+    <location_name>Konawaena High Sch</location_name>
+    <zip>96750</zip>
+  </address>
+</polling_location>
+<polling_location id="897161">
+  <directions>Rec Ctr: 05-08</directions>
+  <address>
+    <city>Kailua-Kona</city>
+    <line1>76-6350 Pualani St</line1>
+    <state>HI</state>
+    <location_name>Kona Vistas Rec Ctr</location_name>
+    <zip>96740</zip>
+  </address>
+</polling_location>
+<polling_location id="897162">
+  <directions>Caf: 06-01</directions>
+  <address>
+    <city>Holualoa</city>
+    <line1>76-5957 Mamalahoa Hwy</line1>
+    <state>HI</state>
+    <location_name>Holualoa Elem Sch</location_name>
+    <zip>96725</zip>
+  </address>
+</polling_location>
+<polling_location id="897163">
+  <directions>Caf: 06-02</directions>
+  <address>
+    <city>Kailua-Kona</city>
+    <line1>76-147 Royal Poinciana Dr</line1>
+    <state>HI</state>
+    <location_name>Kahakai Elem Sch</location_name>
+    <zip>96740</zip>
+  </address>
+</polling_location>
+<polling_location id="897164">
+  <directions>Gym: 06-03</directions>
+  <address>
+    <city>Kailua-Kona</city>
+    <line1>75-5500 Kuakini Hwy</line1>
+    <state>HI</state>
+    <location_name>Kekuaokalani Gym at Kailua Park</location_name>
+    <zip>96745</zip>
+  </address>
+</polling_location>
+<polling_location id="897165">
+  <directions>Caf: 06-04</directions>
+  <address>
+    <city>Kailua-Kona</city>
+    <line1>74-5000 Puohulihuli St</line1>
+    <state>HI</state>
+    <location_name>Kealakehe High Sch</location_name>
+    <zip>96740</zip>
+  </address>
+</polling_location>
+<polling_location id="897166">
+  <directions>Comm Ctr: 06-05</directions>
+  <address>
+    <city>Kailua-Kona</city>
+    <line1>73-1073 Ka Imi Nani Dr.</line1>
+    <state>HI</state>
+    <location_name>Kona Palisades Comm Ctr</location_name>
+    <zip>96740</zip>
+  </address>
+</polling_location>
+<polling_location id="897167">
+  <directions>Caf: 07-01</directions>
+  <address>
+    <city>Kailua-Kona</city>
+    <line1>74-5062 Onipa`a Street</line1>
+    <state>HI</state>
+    <location_name>Kealakehe Intermediate Sch</location_name>
+    <zip>96740</zip>
+  </address>
+</polling_location>
+<polling_location id="897168">
+  <directions>Caf: 07-02</directions>
+  <address>
+    <city>Waikoloa</city>
+    <line1>68-1730 Hooko St</line1>
+    <state>HI</state>
+    <location_name>Waikoloa Elem Sch</location_name>
+    <zip>96738</zip>
+  </address>
+</polling_location>
+<polling_location id="897169">
+  <directions>Caf: 07-03</directions>
+  <address>
+    <city>Kapaau</city>
+    <line1>54-3611 Akoni Pule Hwy</line1>
+    <state>HI</state>
+    <location_name>Kohala High and Elem Sch</location_name>
+    <zip>96755</zip>
+  </address>
+</polling_location>
+<polling_location id="897170">
+  <directions>Conf Rm: 07-04</directions>
+  <address>
+    <city>Waimea</city>
+    <line1>67-5189 Kamamalu St</line1>
+    <state>HI</state>
+    <location_name>Waimea Civic Ctr</location_name>
+    <zip>96743</zip>
+  </address>
+</polling_location>
+<polling_location id="897171">
+  <directions>Gym: 07-05</directions>
+  <address>
+    <city>Waimea</city>
+    <line1>65-1078 Mamalahoa Hwy</line1>
+    <state>HI</state>
+    <location_name>Waimea New Hope Church</location_name>
+    <zip>96743</zip>
+  </address>
+</polling_location>
+<polling_location id="897172">
+  <directions>Caf: 08-01</directions>
+  <address>
+    <city>Wailuku</city>
+    <line1>2125 Kahekili Hwy</line1>
+    <state>HI</state>
+    <location_name>Waihee Elem Sch</location_name>
+    <zip>96793</zip>
+  </address>
+</polling_location>
+<polling_location id="897173">
+  <directions>Comm Ctr: 08-02</directions>
+  <address>
+    <city>Wailuku</city>
+    <line1>395 Waena Place</line1>
+    <state>HI</state>
+    <location_name>Velma McWayne Santos Comm Ctr</location_name>
+    <zip>96793</zip>
+  </address>
+</polling_location>
+<polling_location id="897174">
+  <directions>Caf: 08-03</directions>
+  <address>
+    <city>Wailuku</city>
+    <line1>1650 Kaahumanu Ave</line1>
+    <state>HI</state>
+    <location_name>Baldwin High Sch</location_name>
+    <zip>96793</zip>
+  </address>
+</polling_location>
+<polling_location id="897175">
+  <directions>Comm Ctr: 08-04</directions>
+  <address>
+    <city>Wailuku</city>
+    <line1>657 Kaumualii St.</line1>
+    <state>HI</state>
+    <location_name>Paukukalo Hwn Homes Comm Ctr</location_name>
+    <zip>96793</zip>
+  </address>
+</polling_location>
+<polling_location id="897176">
+  <directions>Caf: 08-05</directions>
+  <address>
+    <city>Wailuku</city>
+    <line1>260 S Market St</line1>
+    <state>HI</state>
+    <location_name>Iao Inter Sch</location_name>
+    <zip>96793</zip>
+  </address>
+</polling_location>
+<polling_location id="897177">
+  <directions>Caf: 08-06</directions>
+  <address>
+    <city>Kahului</city>
+    <line1>4650 S Kamehameha Ave</line1>
+    <state>HI</state>
+    <location_name>Pomaikai Elem Sch</location_name>
+    <zip>96732</zip>
+  </address>
+</polling_location>
+<polling_location id="897178">
+  <directions>Mtg Rm: 08-07</directions>
+  <address>
+    <city>Wailuku</city>
+    <line1>99 Mahalani St</line1>
+    <state>HI</state>
+    <location_name>Maui Economic Opportunity Ctr</location_name>
+    <zip>96793</zip>
+  </address>
+</polling_location>
+<polling_location id="897179">
+  <directions>Rec Bldg: 35-06</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-230 Paiwa St</line1>
+    <state>HI</state>
+    <location_name>Waipahu Field</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897180">
+  <directions>Caf: 36-01</directions>
+  <address>
+    <city>Mililani</city>
+    <line1>95-1140 Lehiwa Dr</line1>
+    <state>HI</state>
+    <location_name>Mililani Middle Sch</location_name>
+    <zip>96789</zip>
+  </address>
+</polling_location>
+<polling_location id="897181">
+  <directions>Caf: 36-02</directions>
+  <address>
+    <city>Mililani</city>
+    <line1>95-1111 Makaikai St</line1>
+    <state>HI</state>
+    <location_name>Mililani Mauka Elem Sch</location_name>
+    <zip>96789</zip>
+  </address>
+</polling_location>
+<polling_location id="897182">
+  <directions>Caf: 36-03</directions>
+  <address>
+    <city>Mililani</city>
+    <line1>95-1200 Meheula Pkwy</line1>
+    <state>HI</state>
+    <location_name>Mililani High Sch</location_name>
+    <zip>96789</zip>
+  </address>
+</polling_location>
+<polling_location id="897183">
+  <directions>Caf: 37-01</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-1091 Oli Loop</line1>
+    <state>HI</state>
+    <location_name>Kanoelani Elem Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897184">
+  <directions>Gym: 37-02</directions>
+  <address>
+    <city>Mililani</city>
+    <line1>95-1200 Meheula Pkwy</line1>
+    <state>HI</state>
+    <location_name>Mililani High Sch</location_name>
+    <zip>96789</zip>
+  </address>
+</polling_location>
+<polling_location id="897185">
+  <directions>Caf: 37-03</directions>
+  <address>
+    <city>Mililani</city>
+    <line1>94-380 Kuahelani Ave</line1>
+    <state>HI</state>
+    <location_name>Mililani Uka Elem Sch</location_name>
+    <zip>96789</zip>
+  </address>
+</polling_location>
+<polling_location id="897186">
+  <directions>Caf: 37-04</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-1035 Kukula St</line1>
+    <state>HI</state>
+    <location_name>Waikele Elem Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897187">
+  <directions>Caf: 38-01</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-1170 Waipahu St</line1>
+    <state>HI</state>
+    <location_name>August Ahrens Elem Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897188">
+  <directions>Caf: 38-02</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-1211 Farrington Hwy</line1>
+    <state>HI</state>
+    <location_name>Waipahu High Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897189">
+  <directions>Caf: 38-03</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-465 Waipahu St</line1>
+    <state>HI</state>
+    <location_name>Waipahu Elem Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897190">
+  <directions>Caf: 38-04</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-455 Farrington Hwy</line1>
+    <state>HI</state>
+    <location_name>Waipahu Inter Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897191">
+  <directions>Caf: 39-01</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-465 Waipahu St</line1>
+    <state>HI</state>
+    <location_name>Waipahu Elem Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897192">
+  <directions>Caf: 39-02</directions>
+  <address>
+    <city>Waipahu</city>
+    <line1>94-665 Kaaholo St</line1>
+    <state>HI</state>
+    <location_name>Kaleiopuu Elem Sch</location_name>
+    <zip>96797</zip>
+  </address>
+</polling_location>
+<polling_location id="897193">
+  <directions>Caf: 39-03</directions>
+  <address>
+    <city>Ewa Beach</city>
+    <line1>91-1280 Renton Rd</line1>
+    <state>HI</state>
+    <location_name>Ewa Elem Sch</location_name>
+    <zip>96706</zip>
+  </address>
+</polling_location>
+<polling_location id="897194">
+  <directions>Caf: 39-04</directions>
+  <address>
+    <city>Kapolei</city>
+    <line1>92-1300 Panana St</line1>
+    <state>HI</state>
+    <location_name>Mauka Lani Elem Sch</location_name>
+    <zip>96707</zip>
+  </address>
+</polling_location>
+<polling_location id="897195">
+  <directions>Caf: 40-01</directions>
+  <address>
+    <city>Ewa Beach</city>
+    <line1>91-1280 Renton Rd</line1>
+    <state>HI</state>
+    <location_name>Ewa Elem Sch</location_name>
+    <zip>96706</zip>
+  </address>
+</polling_location>
+<polling_location id="897196">
+  <directions>Caf: 40-02</directions>
+  <address>
+    <city>Ewa Beach</city>
+    <line1>91-1561 Keaunui Dr</line1>
+    <state>HI</state>
+    <location_name>Holomua Elem Sch</location_name>
+    <zip>96706</zip>
+  </address>
+</polling_location>
+<polling_location id="897197">
+  <directions>Caf: 40-03</directions>
+  <address>
+    <city>Ewa Beach</city>
+    <line1>91-980 North Rd</line1>
+    <state>HI</state>
+    <location_name>Campbell High Sch</location_name>
+    <zip>96706</zip>
+  </address>
+</polling_location>
+<polling_location id="897198">
+  <directions>: 40-04</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897199">
+  <directions>Caf: 41-01</directions>
+  <address>
+    <city>Ewa Beach</city>
+    <line1>91-980 North Rd</line1>
+    <state>HI</state>
+    <location_name>Campbell High Sch</location_name>
+    <zip>96706</zip>
+  </address>
+</polling_location>
+<polling_location id="897200">
+  <directions>Caf: 41-02</directions>
+  <address>
+    <city>Ewa Beach</city>
+    <line1>91-884 Ft Weaver Rd</line1>
+    <state>HI</state>
+    <location_name>Ilima Inter Sch</location_name>
+    <zip>96706</zip>
+  </address>
+</polling_location>
+<polling_location id="897201">
+  <directions>Caf: 41-03</directions>
+  <address>
+    <city>Ewa Beach</city>
+    <line1>91-740 Papipi Rd</line1>
+    <state>HI</state>
+    <location_name>Ewa Beach Elem Sch</location_name>
+    <zip>96706</zip>
+  </address>
+</polling_location>
+<polling_location id="897202">
+  <directions>Caf: 41-04</directions>
+  <address>
+    <city>Kapolei</city>
+    <line1>91-1119 Kamaaha Lp</line1>
+    <state>HI</state>
+    <location_name>Kapolei Elem Sch</location_name>
+    <zip>96707</zip>
+  </address>
+</polling_location>
+<polling_location id="897203">
+  <directions>Caf: 42-01</directions>
+  <address>
+    <city>Kapolei</city>
+    <line1>91-5007 Kapolei Parkway</line1>
+    <state>HI</state>
+    <location_name>Kapolei High Sch</location_name>
+    <zip>96707</zip>
+  </address>
+</polling_location>
+<polling_location id="897204">
+  <directions>Caf: 42-02</directions>
+  <address>
+    <city>Kapolei</city>
+    <line1>92-675 Anipeahi St</line1>
+    <state>HI</state>
+    <location_name>Makakilo Elem Sch</location_name>
+    <zip>96707</zip>
+  </address>
+</polling_location>
+<polling_location id="897205">
+  <directions>Caf: 42-03</directions>
+  <address>
+    <city>Kapolei</city>
+    <line1>92-1300 Panana St</line1>
+    <state>HI</state>
+    <location_name>Mauka Lani Elem Sch</location_name>
+    <zip>96707</zip>
+  </address>
+</polling_location>
+<polling_location id="897206">
+  <directions>: 43-01</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897207">
+  <directions>Caf: 43-02</directions>
+  <address>
+    <city>Kapolei</city>
+    <line1>91-1119 Kamaaha Lp</line1>
+    <state>HI</state>
+    <location_name>Kapolei Elem Sch</location_name>
+    <zip>96707</zip>
+  </address>
+</polling_location>
+<polling_location id="897208">
+  <directions>Rec Ctr: 43-03</directions>
+  <address>
+    <city>Kapolei</city>
+    <line1>91-015 Farrington Hwy</line1>
+    <state>HI</state>
+    <location_name>Kamokila Park</location_name>
+    <zip>96707</zip>
+  </address>
+</polling_location>
+<polling_location id="897209">
+  <directions>Caf: 43-04</directions>
+  <address>
+    <city>Waianae</city>
+    <line1>89-153 Mano Ave</line1>
+    <state>HI</state>
+    <location_name>Nanaikapono Elem Sch</location_name>
+    <zip>96792</zip>
+  </address>
+</polling_location>
+<polling_location id="897210">
+  <directions>Caf: 43-05</directions>
+  <address>
+    <city>Waianae</city>
+    <line1>87-360 Kulaaupuni St</line1>
+    <state>HI</state>
+    <location_name>Maili Elem Sch</location_name>
+    <zip>96792</zip>
+  </address>
+</polling_location>
+<polling_location id="897211">
+  <directions>Caf: 44-01</directions>
+  <address>
+    <city>Waianae</city>
+    <line1>85-626 Farrington Hwy</line1>
+    <state>HI</state>
+    <location_name>Waianae Inter Sch</location_name>
+    <zip>96792</zip>
+  </address>
+</polling_location>
+<polling_location id="897212">
+  <directions>Caf: 44-02</directions>
+  <address>
+    <city>Waianae</city>
+    <line1>84-760 Lahaina St</line1>
+    <state>HI</state>
+    <location_name>Makaha Elem Sch</location_name>
+    <zip>96792</zip>
+  </address>
+</polling_location>
+<polling_location id="897213">
+  <directions>Rec Ctr: 45-01</directions>
+  <address>
+    <city>Mililani</city>
+    <line1>94-200 Lanikuhana Ave</line1>
+    <state>HI</state>
+    <location_name>Mililani District Park</location_name>
+    <zip>96789</zip>
+  </address>
+</polling_location>
+<polling_location id="897214">
+  <directions>Caf: 45-02</directions>
+  <address>
+    <city>Mililani</city>
+    <line1>95-075 Kipapa Dr</line1>
+    <state>HI</state>
+    <location_name>Kipapa Elem Sch</location_name>
+    <zip>96789</zip>
+  </address>
+</polling_location>
+<polling_location id="897215">
+  <directions>: 45-03</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897216">
+  <directions>Caf: 45-04</directions>
+  <address>
+    <city>Waialua</city>
+    <line1>67-020 Waialua Beach Rd</line1>
+    <state>HI</state>
+    <location_name>Waialua Elem Sch</location_name>
+    <zip>96791</zip>
+  </address>
+</polling_location>
+<polling_location id="897217">
+  <directions>: 45-05</directions>
+  <address>
+    <state>HI</state>
+    <location_name>[Absentee Mail Only]</location_name>
+  </address>
+</polling_location>
+<polling_location id="897218">
+  <directions>Gym: 46-01</directions>
+  <address>
+    <city>Wahiawa</city>
+    <line1>77-230 Kamehameha Hwy</line1>
+    <state>HI</state>
+    <location_name>National Guard Armory</location_name>
+    <zip>96786</zip>
+  </address>
+</polling_location>
+<polling_location id="897219">
+  <directions>Caf: 46-02</directions>
+  <address>
+    <city>Wahiawa</city>
+    <line1>275 Rose St</line1>
+    <state>HI</state>
+    <location_name>Wahiawa Middle Sch</location_name>
+    <zip>96786</zip>
+  </address>
+</polling_location>
+<polling_location id="897220">
+  <directions>Caf: 46-03</directions>
+  <address>
+    <city>Wahiawa</city>
+    <line1>1515 California Ave</line1>
+    <state>HI</state>
+    <location_name>Leilehua High Sch</location_name>
+    <zip>96786</zip>
+  </address>
+</polling_location>
+<polling_location id="897221">
+  <directions>Caf: 46-04</directions>
+  <address>
+    <city>Wahiawa</city>
+    <line1>1001 Ihi Ihi Ave</line1>
+    <state>HI</state>
+    <location_name>Helemano Elem Sch</location_name>
+    <zip>96786</zip>
+  </address>
+</polling_location>
+<polling_location id="897222">
+  <directions>Caf: 47-01</directions>
+  <address>
+    <city>Haleiwa</city>
+    <line1>66-505 Haleiwa Rd</line1>
+    <state>HI</state>
+    <location_name>Haleiwa Elem Sch</location_name>
+    <zip>96712</zip>
+  </address>
+</polling_location>
+<polling_location id="897223">
+  <directions>Caf: 47-02</directions>
+  <address>
+    <city>Haleiwa</city>
+    <line1>59-360 Kamehameha Hwy</line1>
+    <state>HI</state>
+    <location_name>Sunset Beach Elem Sch</location_name>
+    <zip>96712</zip>
+  </address>
+</polling_location>
+<polling_location id="897224">
+  <directions>Caf: 47-03</directions>
+  <address>
+    <city>Kahuku</city>
+    <line1>56-490 Kamehameha Hwy</line1>
+    <state>HI</state>
+    <location_name>Kahuku High/Inter Sch</location_name>
+    <zip>96731</zip>
+  </address>
+</polling_location>
+<polling_location id="897225">
+  <directions>Caf: 47-04</directions>
+  <address>
+    <city>Hauula</city>
+    <line1>54-046 Kamehameha Hwy</line1>
+    <state>HI</state>
+    <location_name>Hauula Elem Sch</location_name>
+    <zip>96717</zip>
+  </address>
+</polling_location>
+<polling_location id="897226">
+  <directions>Caf: 48-01</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>47-280 Waihee Rd</line1>
+    <state>HI</state>
+    <location_name>Kahaluu Elem Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897227">
+  <directions>Caf: 48-02</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>47-280 Waihee Rd</line1>
+    <state>HI</state>
+    <location_name>Kahaluu Elem Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897228">
+  <directions>Caf: 48-03</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>47-470 Hui Aeko Pl</line1>
+    <state>HI</state>
+    <location_name>Ahuimanu Elem Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897229">
+  <directions>Caf: 48-04</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>46-155 Kamehameha Hwy</line1>
+    <state>HI</state>
+    <location_name>King Inter Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897230">
+  <directions>Caf: 48-05</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>45-259 Waikalua Rd</line1>
+    <state>HI</state>
+    <location_name>Benjamin Parker Elem Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897231">
+  <directions>Caf: 48-06</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>45-233 Kulauli St</line1>
+    <state>HI</state>
+    <location_name>Puohala Elem Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897232">
+  <directions>Caf: 49-01</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>46-202 Haiku Rd</line1>
+    <state>HI</state>
+    <location_name>Heeia Elem Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897233">
+  <directions>Caf: 49-02</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>45-828 Anoi Rd</line1>
+    <state>HI</state>
+    <location_name>Kapunahala Elem Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897234">
+  <directions>Caf: 49-03</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>45-495 Kamehameha Hwy</line1>
+    <state>HI</state>
+    <location_name>Kaneohe Elem Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897235">
+  <directions>Caf: 49-04</directions>
+  <address>
+    <city>Kaneohe</city>
+    <line1>45-386 Kaneohe Bay Dr</line1>
+    <state>HI</state>
+    <location_name>Castle High Sch</location_name>
+    <zip>96744</zip>
+  </address>
+</polling_location>
+<polling_location id="897236">
+  <directions>Caf: 49-05</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>1465 Ulupii St</line1>
+    <state>HI</state>
+    <location_name>Maunawili Elem Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897237">
+  <directions>Caf: 49-06</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>1465 Ulupii St</line1>
+    <state>HI</state>
+    <location_name>Maunawili Elem Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897238">
+  <directions>Caf: 50-01</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>730 Iliaina St</line1>
+    <state>HI</state>
+    <location_name>Kalaheo High Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897239">
+  <directions>Caf: 50-02</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>165 Kaiholu St</line1>
+    <state>HI</state>
+    <location_name>Kainalu Elem Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897240">
+  <directions>Caf: 50-03</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>315 Kuulei Rd</line1>
+    <state>HI</state>
+    <location_name>Kailua Elem Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897241">
+  <directions>Caf: 50-04</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>530 Keolu Dr</line1>
+    <state>HI</state>
+    <location_name>Kaelepulu Elem Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897242">
+  <directions>Caf: 51-01</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>530 Keolu Dr</line1>
+    <state>HI</state>
+    <location_name>Kaelepulu Elem Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897243">
+  <directions>Caf: 51-02</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>770 Keolu Dr</line1>
+    <state>HI</state>
+    <location_name>Enchanted Lake Elem Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897244">
+  <directions>Caf: 51-03</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>140 Alala Rd</line1>
+    <state>HI</state>
+    <location_name>Lanikai Elem Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897245">
+  <directions>Caf: 51-04</directions>
+  <address>
+    <city>Kailua</city>
+    <line1>1416 Keolu Dr</line1>
+    <state>HI</state>
+    <location_name>Keolu Elem Sch</location_name>
+    <zip>96734</zip>
+  </address>
+</polling_location>
+<polling_location id="897246">
+  <directions>Caf: 51-05</directions>
+  <address>
+    <city>Waimanalo</city>
+    <line1>41-1330 Kalanianaole Hwy</line1>
+    <state>HI</state>
+    <location_name>Waimanalo Elem/Inter Sch</location_name>
+    <zip>96795</zip>
+  </address>
+</polling_location>
+<polling_location id="897247">
+  <directions>Caf: 51-06</directions>
+  <address>
+    <city>Waimanalo</city>
+    <line1>41-133 Huli St</line1>
+    <state>HI</state>
+    <location_name>Pope Elem Sch</location_name>
+    <zip>96795</zip>
+  </address>
+</polling_location>
+<polling_location id="897999">
+  <directions>Comm Ctr: 04-03</directions>
+  <address>
+    <city>Keaau</city>
+    <line1>Makuu Dr</line1>
+    <state>HI</state>
+    <location_name>(Voters North of Lava Flow) Hawaiian Paradise Park Comm Ctr</location_name>
+    <zip>96749</zip>
+  </address>
+</polling_location>
+</vip_object>
