@@ -1,0 +1,321 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Highlands County, FL</name>
+  <vip_id>12055</vip_id>
+  <datetime>2015-12-02T02:45:01</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>AVON PARK ACTIVITIES CLUB</location_name>
+      <line1>109 E Main St</line1>
+      <city>Avon Park</city>
+      <state>FL</state>
+      <zip>33825</zip>
+   </address>
+   <directions>LOCATED ON MAIN STREET IN AVON PARK, ACROSS THE STREET FROM THE CITY HALL, EAST OF THE JACARANDA HOTEL.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>AVON PARK TAX COLLECTOR</location_name>
+      <line1>116 E Main St</line1>
+      <city>Avon Park</city>
+      <state>FL</state>
+      <zip>33825</zip>
+   </address>
+   <directions>LOCATED ON EAST MAIN STREET ON THE EAST SIDE OF CITY HALL.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>COMMUNITY BIBLE CHURCH</location_name>
+      <line1>1400 CR 17A NORTH</line1>
+      <city>Avon Park</city>
+      <state>FL</state>
+      <zip>33825</zip>
+   </address>
+   <directions>TURN OFF 64 EAST ONTO COUNTY ROAD 17A NORTH (TRUCK ROUTE), CHURCH IS ON RIGHT PAST EAST ALBRITTON ROAD.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>SUN 'N LAKE COMMUNITY CENTER</location_name>
+      <line1>3500 Edgewater Dr</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33872</zip>
+   </address>
+   <directions>TAKE SUN 'N LAKE BOULEVARD PAST SECOND ROUNDABOUT TO SUNRISE DRIVE, TURN LEFT THEN PROCEED TO EDGEWATER DRIVE, MAKE ANOTHER LEFT TO THE COMMUNITY CENTER ON THE LEFT.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>SEBRING HILLS CLUBHOUSE</location_name>
+      <line1>200 Lark Ave</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33872</zip>
+   </address>
+   <directions>TURN OFF US 27 ONTO THUNDERBIRD ROAD THEN IMMEDIATELY TURN LEFT ONTO SPOTTED OWL STREET WHICH DEAD ENDS AT THE SEBRING HILLS CLUBHOUSE AT LARK AVENUE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>HIGHLANDS SHRINE CLUB</location_name>
+      <line1>2604 SR 17 SOUTH</line1>
+      <city>Avon Park</city>
+      <state>FL</state>
+      <zip>33825</zip>
+   </address>
+   <directions>STATE ROAD 17 NORTH OF SEBRING, NORTH OF BONNET LAKE CAMPGROUNDS, WEST SIDE OF ROAD IN SHRINE CLUB BUILDING.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>SEBRING ELKS LODGE</location_name>
+      <line1>2618 Kenilworth Blvd</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33870</zip>
+   </address>
+   <directions>ON THE CORNER OF KENILWORTH BOULEVARD AND LAKEVIEW DRIVE ACROSS FROM THE KENILWORTH LODGE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>SEBRING RECREATION CLUB</location_name>
+      <line1>333 Pomegranate Ave</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33870</zip>
+   </address>
+   <directions>AT THE INTERSECTION OF POMEGRANATE AVENUE AND LIME STREET, ONE BLOCK WEST OF NORTH RIDGEWOOD DRIVE, NORTH OF THE CIRCLE IN SEBRING.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>BOYS &amp; GIRLS CLUB</location_name>
+      <line1>111 Martin Luther King Jr Blvd</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33870</zip>
+   </address>
+   <directions>ON THE CORNER OF MARTIN LUTHER KING JR BOULEVARD AND EAST CENTER AVENUE JUST NORTHEAST OF THE SEBRING AMTRAK STATION.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>SEBRING MASONIC LODGE</location_name>
+      <line1>1809 Home Ave</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33870</zip>
+   </address>
+   <directions>AT THE INTERSECTION OF SEBRING PARKWAY AND HOME AVENUE, WEST OF DINNER LAKE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>OLD DESOTO CITY HALL</location_name>
+      <line1>6305 CR 17 SOUTH</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33870</zip>
+   </address>
+   <directions>GO EAST ON HIGHWAY 98 TO COUNTY ROAD 17A SOUTH TURN LEFT HEADING NORTH, ONE STREET PAST FARA STREET TO THE OLD DESOTO CITY HALL ON LEFT SIDE OF THE ROAD ACROSS FROM THE BASEBALL FIELD.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>LORIDA COMMUNITY BLDG</location_name>
+      <line1>1909 Blessings Ave</line1>
+      <city>Lorida</city>
+      <state>FL</state>
+      <zip>33857</zip>
+   </address>
+   <directions>OFF HIGHWAY 98 WEST OF THE FIRST BAPTIST CHURCH OF LORIDA.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>FIRST BAPTIST CHURCH (LP)</location_name>
+      <line1>119 E Royal Palm St</line1>
+      <city>Lake Placid</city>
+      <state>FL</state>
+      <zip>33852</zip>
+   </address>
+   <directions>TURN SOUTH OFF EAST INTERLAKE BOULEVARD ONTO SOUTH OAK AVENUE THEN GO ONE BLOCK TO THE CHURCH FELLOWSHIP HALL AT THE INTERSECTION WITH EAST HIBISCUS STREET.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>VENUS UNITED METHODIST CHURCH</location_name>
+      <line1>962 CR 731</line1>
+      <city>Venus</city>
+      <state>FL</state>
+      <zip>33960</zip>
+   </address>
+   <directions>OFF US 27 SOUTH ONTO COUNTY ROAD 731 HEADING WEST APPROXIMATELY 3.5 MILES TO THE CHURCH ON THE LEFT.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>BIBLE FELLOWSHIP CHURCH</location_name>
+      <line1>3750 Hammock Rd</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33875</zip>
+   </address>
+   <directions>TURN OFF US 27 NORTH ONTO HAMMOCK ROAD HEADING WEST, GO 1.8 MILES, CHURCH IS ON RIGHT (NORTH) SIDE OF ROAD.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>AVON PARK LAKES CLUBHOUSE</location_name>
+      <line1>2714 Nautilus Dr</line1>
+      <city>Avon Park</city>
+      <state>FL</state>
+      <zip>33825</zip>
+   </address>
+   <directions>NORTH OF AVON PARK - TURN WEST OFF US 27 ONTO STRYKER ROAD, GO TO NORTH OLIVIA DRIVE AND TURN RIGHT, GO TO THE END AT NAUTILUS DRIVE AND TURN RIGHT TO THE CLUBHOUSE ON THE RIGHT.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>AMERICAN LEGION BLDG</location_name>
+      <line1>1490 US 27 North</line1>
+      <city>Lake Placid</city>
+      <state>FL</state>
+      <zip>33852</zip>
+   </address>
+   <directions>ON US 27, NORTH OF LAKE PLACID AND SOUTH OF LAKE HENRY DRIVE, ON THE WEST SIDE OF HIGHWAY.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>BRIGHTON BAPTIST CHURCH</location_name>
+      <line1>24050 SR 70 WEST</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34974</zip>
+   </address>
+   <directions>ON STATE ROAD 70, JUST WEST OF COUNTY ROAD 721 SW, WEST OF OKEECHOBEE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>SUN 'N LAKES SOUTH CLUBHOUSE</location_name>
+      <line1>440 S Sun N Lakes Blvd</line1>
+      <city>Lake Placid</city>
+      <state>FL</state>
+      <zip>33852</zip>
+   </address>
+   <directions>SOUTH OF LAKE PLACID, TURN ONTO SOUTH SUN 'N LAKES BOULEVARD FROM US 27 SOUTH, TO THE CLUBHOUSE INSIDE THE COMMUNITY PARK ACROSS FROM TULIP DRIVE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>SPRING LAKE COMMUNITY CENTER</location_name>
+      <line1>209 Spring Lake Blvd</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33876</zip>
+   </address>
+   <directions>TURN OFF HIGHWAY 98 ONTO SPRING LAKE BOULEVARD  PAST TENNIS COURTS AND BASKETBALL AREA TO THE COMMUNITY CENTER ON RIGHT AT SIGN.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>FIRST BAPTIST CHURCH OF LAKE JOSEPHINE</location_name>
+      <line1>111 Lake Josephine Dr</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33875</zip>
+   </address>
+   <directions>TURN OFF US 27 SOUTH AT JAYVEE CONVENIENCE STORE/GAS STATION, ONTO LAKE JOSEPHINE ROAD HEADING WEST. CHURCH IS IMMEDIATELY ON LEFT (SOUTH) SIDE OF ROAD. LOOK FOR FLAG POLE IN FRONT OF POLLING PLACE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>MARANATHA VILLAGE</location_name>
+      <line1>3945 Arbuckle Creek Rd</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33870</zip>
+   </address>
+   <directions>NORTH OF SEBRING ON STATE ROAD 17 TO ARBUCKLE CREEK ROAD (TURN RIGHT AT MARATHON GAS STATION). GO EAST APPROXIMATELY 2 MILES TO MARANATHA VILLAGE ON RIGHT.  COMMUNITY CENTER IS ON THE RIGHT AT RUTH STREET.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>FRANCIS II MHP CLUBHOUSE</location_name>
+      <line1>2800 Real McCoy Dr</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33870</zip>
+   </address>
+   <directions>FROM HIGHLANDS AVENUE TURN WEST ONTO DESOTO ROAD, GO TO REAL MCCOY DRIVE, TURN RIGHT HEADING NORTH TO CLUBHOUSE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>SEBRING FALLS CLUBHOUSE</location_name>
+      <line1>2100 Caribbean Rd</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33872</zip>
+   </address>
+   <directions>TURN WEST OFF US 27, NORTH OF HAMMOCK ROAD, ONTO RYANT BOULEVARD, STRAIGHT TO CARIBBEAN ROAD AND THE CLUBHOUSE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>CHURCH OF CHRIST</location_name>
+      <line1>3800 Sebring Pkwy</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33870</zip>
+   </address>
+   <directions>TURN OFF US 27 NORTH ONTO THE SEBRING PARKWAY HEADING EAST, GO PAST LIGHT AT MEMORIAL DRIVE AND THREE MORE BLOCKS.  CHURCH WILL BE ON LEFT (NORTH) SIDE OF PARKWAY.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>SUPERVISOR OF ELECTIONS OFFICE</location_name>
+      <line1>580S Commerce Ave</line1>
+      <city>Sebring</city>
+      <state>FL</state>
+      <zip>33870</zip>
+   </address>
+   <directions>MAIN OFFICE AT HIGHLANDS COUNTY GOVERNMENT CENTER.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

@@ -1,0 +1,299 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>COLUMBIA COUNTY, FL</name>
+  <vip_id>12023</vip_id>
+  <datetime>2015-11-25T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>DEEP CREEK COMMUNITY CENTER</location_name>
+      <line1>11936 N US HWY 441</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>North 441 HWY, 8 miles N of I-10
+USE FOR MAILING ADDRESS  SHANNON HALL,152 NW ERNEST FLEN
+WHITE SPRINGS FL 32096</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>WINFIELD COMMUNITY CENTER</location_name>
+      <line1>1324 NW WINFIELD ST</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>NORTH ON US 41 TOWARD WHITE SPRINGS, 1.8 MILES BEYOND I-10, EAST ON TO WINFIELD STREET 1.3 MILES. BUILDING ON LEFT BY PARK. </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>RICHARDSON COMMUNITY CENTER</location_name>
+      <line1>255 NE COACH ANDERS LN</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>NORTH ON HWY 441 TO COACH ANDERS LANE, TURN RIGHT AND TRAVEL TO AGGIE AVENUE. COMMUNITY CENTER IS ON THE NORTH SIDE OF COACH ANDERS LANE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>RICHARDSON COMMUNITY CENTER</location_name>
+      <line1>255 NE COACH ANDERS LN</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>NORTH ON HWY 441 TO COACH ANDERS LANE, TURN RIGHT AND TRAVEL TO AGGIE AVENUE. COMMUNITY CENTER IS ON THE NORTH SIDE OF COACH ANDERS</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>SUPERVISOR OF ELECTIONS</location_name>
+      <line1>971 W DUVAL ST</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>AT THE INTERSECTION OF HWY 90 AND WEST BAYA DRIVE</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>SUPERVISOR OF ELECTIONS</location_name>
+      <line1>971 W DUVAL ST</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>AT THE INTERSECTION OF HWY 90 AND WEST BAYA DRIVE</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>RICHARDSON COMMUNITY CENTER</location_name>
+      <line1>255 NE COACH ANDERS LN</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>NORTH ON HWY 441 TO COACH ANDERS LANE, TURN RIGHT AND TRAVEL TO AGGIE AVENUE. COMMUNITY CENTER IS ON THE NORTH SIDE OF COACH ANDERS</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>CHRIST CENTRAL MINISTRIES</location_name>
+      <line1>359 SW DYAL AVE</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32024</zip>
+   </address>
+   <directions>EAST SIDE OF SOUTH WEST DYAL AVENUE, 3/4 MILE SOUTH OF SW CR 242. 2 MILES EAST OF SR 247. 2 MILES WEST OF SR 47 </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>CHRIST CENTRAL MINISTRIES</location_name>
+      <line1>359 SW DYAL AVE</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32024</zip>
+   </address>
+   <directions>EAST SIDE OF SOUTH WEST DYAL AVENUE, 3/4 MILE SOUTH OF SW CR 242. 2 MILES EAST OF SR 247. 2 MILES WEST OF SR 47</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>FORT WHITE COMMUNITY CENTER</location_name>
+      <line1>17579 SW SR 47</line1>
+      <city>FORT WHITE</city>
+      <state>FL</state>
+      <zip>32038</zip>
+   </address>
+   <directions>STATE ROAD 47 ADJACENT TO FORT WHITE HIGH SCHOOL</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>WESTSIDE COMMUNITY CENTER</location_name>
+      <line1>431 SW BIRLEY AVE</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32024</zip>
+   </address>
+   <directions>E ON PINEMOUNT (CR 252)TOWARD TO LAKE CITY, TURN LEFT ON BIRLEY 1.5 MILES WESTSIDE ON RIGHT
+E ON 90 TURN RIGHT ON BIRLEY WESTSIDE .25 MILES.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>WINFIELD COMMUNITY CENTER</location_name>
+      <line1>1324 NW WINFIELD ST</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>NORTH ON US 41 TOWARD WHITE SPRINGS, 1.8 MILES BEYOND I-10, EAST ON TO WINFIELD STREET 1.3 MILES. BUILDING ON LEFT BY PARK.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>SOUTHSIDE REC COMPLEX-COACH BLDG</location_name>
+      <line1>1114 SW KUHN RD</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32024</zip>
+   </address>
+   <directions>Traveling S on St Rd 247, turn left on SW Bascom Norris Dr. Turn left onto SW Kuhn Rd (SW Ballpark Glen) at the entrance to the Complex. Follow the signs to the polling place.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>SUPERVISOR OF ELECTIONS</location_name>
+      <line1>971 W DUVAL ST</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>AT THE INTERSECTION OF HWY 90 AND WEST BAYA DRIVE</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>SUPERVISOR OF ELECTIONS</location_name>
+      <line1>971 W DUVAL ST</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>AT THE INTERSECTION OF HWY 90 AND WEST BAYA DRIVE</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>SUPERVISOR OF ELECTIONS</location_name>
+      <line1>971 W DUVAL ST</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>AT THE INTERSECTION OF HWY 90 AND WEST BAYA DRIVE</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>EASTSIDE BAPTIST CHURCH</location_name>
+      <line1>196 SE JAMES AVE</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32025</zip>
+   </address>
+   <directions>WITHIN 1 BLOCK SOUTH OF DUVAL STREET. WEST OF COUNTRY CLUB ROAD. 3RD BLOCK NORTH OF BAYA DRIVE.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>LULU COMMUNITY CENTER</location_name>
+      <line1>205 SE COMMUNITY DR</line1>
+      <city>LULU</city>
+      <state>FL</state>
+      <zip>32061</zip>
+   </address>
+   <directions>HWY 100 AT LULU</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>MASON CITY COMMUNITY CENTER</location_name>
+      <line1>11110 S US HWY 441</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32025</zip>
+   </address>
+   <directions>1 MILE NORTH OF I-75 ON US HIGHWAY 441</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>PHILIPPI BAPTIST CHURCH</location_name>
+      <line1>1444 SE COUNTY ROAD 18</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32024</zip>
+   </address>
+   <directions>From Grace &amp; Praise; travel south on 41/441 turn left onto County Road 18(SE Sebring Rd). Philippi Baptist Church is on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>SOUTHSIDE REC COMPLEX-COACH BLDG</location_name>
+      <line1>1114 SW KUHN RD</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32024</zip>
+   </address>
+   <directions>Traveling S on St Rd 247, Turn Left onto SW Bascom Norris Dr. Turn left onto SW Kuhn Rd (SW Ballpark Glen) at the entrance to the Complex. Follow the signs to the polling place.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>OUR REDEEMER LUTHERAN CHURCH</location_name>
+      <line1>5056 SW SR 47</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32024</zip>
+   </address>
+   <directions>SOUTH OF I-75 ON STATE ROAD 47</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>SUPERVISOR OF ELECTIONS</location_name>
+      <line1>971 W DUVAL ST</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32055</zip>
+   </address>
+   <directions>AT THE INTERSECTION OF HWY 90 AND WEST BAYA DRIVE</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>SOUTHSIDE REC COMPLEX-COACH BLDG</location_name>
+      <line1>1114 SW KUHN RD</line1>
+      <city>LAKE CITY</city>
+      <state>FL</state>
+      <zip>32025</zip>
+   </address>
+   <directions>Traveling S on St Rd 247, turn left onto Bascom Norris Dr.  Turn left onto SW Kuhn Rd (SW Ballpark Glen) at the entrance to the Comples.  Follow the sign to the polling place</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

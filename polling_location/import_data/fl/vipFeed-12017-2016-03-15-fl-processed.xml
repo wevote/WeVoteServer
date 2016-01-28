@@ -1,0 +1,525 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Citrus County, FL</name>
+  <vip_id>12017</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>UNASSIGNED PRECINCT</location_name>
+      <line1>0 Unassigned Precinct</line1>
+      <city>000.1</city>
+      <state>FL</state>
+      <zip>9999</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>RED LEVEL BAPTIST CHURCH</location_name>
+      <line1>11025 W Dunnellon Rd</line1>
+      <city>Crystal River</city>
+      <state>FL</state>
+      <zip>34428</zip>
+   </address>
+   <directions>From the City of Crystal River, travel N on Hwy 19.  Turn right on W Dunnellon Rd, proceed 1.2 miles on left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>C.R. METHODIST CHURCH</location_name>
+      <line1>4801 N Citrus Ave</line1>
+      <city>Crystal River</city>
+      <state>FL</state>
+      <zip>34428</zip>
+   </address>
+   <directions>From the City of Crystal River, take Citrus Avenue about 2 miles on right </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>RIVER GARDENS BAPTIST CHRUCH</location_name>
+      <line1>3429 W Dunnellon Rd</line1>
+      <city>Dunnellon</city>
+      <state>FL</state>
+      <zip>34433</zip>
+   </address>
+   <directions>On Hwy 488, from Highway 41 N, about 3 miles on the right</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>TO BE ANNOUNCED</location_name>
+      <line1>9220 N Citrus Spgs Blvd</line1>
+      <city>Citrus Springs</city>
+      <state>FL</state>
+      <zip>34434</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>FIRST BAPTIST CHURCH OF C.R.</location_name>
+      <line1>700 Citrus Ave</line1>
+      <city>Crystal River</city>
+      <state>FL</state>
+      <zip>34428</zip>
+   </address>
+   <directions>North of Crystal River inside the city limits on Citrus Ave                                                                                                                                             </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>CRYSTAL RIVER CITY HALL</location_name>
+      <line1>123 NW Highway 19</line1>
+      <city>Crystal River</city>
+      <state>FL</state>
+      <zip>34428</zip>
+   </address>
+   <directions>Crystal River City Hall - Located on Hwy 19 N of Crystal River</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>ST TIMOTHY LUTHERAN CHURCH</location_name>
+      <line1>1070 N Suncoast Blvd</line1>
+      <city>Crystal River</city>
+      <state>FL</state>
+      <zip>34429</zip>
+   </address>
+   <directions>traveling South from Crystal River just past Fort Island Trail on the right side of the Highway                                                                                                         </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>CRYSTAL OAKS CLUBHOUSE</location_name>
+      <line1>4958 W Crystal Oaks  Dr</line1>
+      <city>Lecanto</city>
+      <state>FL</state>
+      <zip>34461</zip>
+   </address>
+   <directions>Hwy 44 W to Crystal Oaks Subdivision, Turn right, on the Left on Crystal Oaks Blvd                                                                                                                      </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>V.F.W. POST #10087</location_name>
+      <line1>2170 W Vet Ln</line1>
+      <city>Beverly Hills</city>
+      <state>FL</state>
+      <zip>34465</zip>
+   </address>
+   <directions>Highway 491 to Veteran Lane - middle of town -  Superior Bank and Car Wash on the corner of Vet. Lane</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>PINE RIDGE COMMUNITY BUILDING</location_name>
+      <line1>5690 W Pine Ridge Blvd</line1>
+      <city>Beverly Hills</city>
+      <state>FL</state>
+      <zip>34465</zip>
+   </address>
+   <directions>Take Pine Ridge Blvd startiing from Hwy 491 about 11 miles on the left                                                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>CITRUS SPG COMMUNITY CENTER</location_name>
+      <line1>1570 W Citrus Springs Blvd</line1>
+      <city>Citrus Springs</city>
+      <state>FL</state>
+      <zip>34433</zip>
+   </address>
+   <directions>Highway 41 N to W Citrus Springs Blvd, 2.1 miles from  41N (same street the Citrus Springs Middle School is located) -</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>CHURCH OF GOD</location_name>
+      <line1>2180 NW 12th Ave</line1>
+      <city>Crystal River</city>
+      <state>FL</state>
+      <zip>34428</zip>
+   </address>
+   <directions>Located behind the Days Inn on NW 12th Ave or Tallahassee Rd.                                                                                                                                           </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>QUAIL RUN COMMUNITY BUILDING</location_name>
+      <line1>1490 E Redpoll Ter</line1>
+      <city>Hernando</city>
+      <state>FL</state>
+      <zip>34442</zip>
+   </address>
+   <directions>Located on Highway 491 close to the Highway 41 north and the red light in Holder                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>HERNANDO UNITED METHODIST CH</location_name>
+      <line1>2125 E Norvell Bryant HWY</line1>
+      <city>Hernando</city>
+      <state>FL</state>
+      <zip>34442</zip>
+   </address>
+   <directions>Hwy 486 about 1 miles on the right from the red light at 41 and 486 in Hernando </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>QUALITY INN @ CITRUS HILLS</location_name>
+      <line1>350 E Norvell Bryant HWY</line1>
+      <city>Hernando</city>
+      <state>FL</state>
+      <zip>34442</zip>
+   </address>
+   <directions>Located on the corner of N Citrus Hills Blvd and Hwy 486                                                                                                                                                </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>CENTRAL RIDGE LIBRARY</location_name>
+      <line1>425 W Roosevelt Blvd</line1>
+      <city>Beverly Hills</city>
+      <state>FL</state>
+      <zip>34465</zip>
+   </address>
+   <directions>On the corner of Forest Ridge Blvd and Roosevelt Blvd                                                                                                                                                   </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>KNIGHTS OF COLUMBUS</location_name>
+      <line1>2389 W Norvell Bryany HWY</line1>
+      <city>Lecanto</city>
+      <state>FL</state>
+      <zip>34461</zip>
+   </address>
+   <directions>Travel west towards Crystal River on W Norvell Bryant Hwy, 2 miles past Forest Ridge Blvd Intersection or the right</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>BEVERLY HILLS LIONS CLUB</location_name>
+      <line1>72 Civic Cir</line1>
+      <city>Beverly Hills</city>
+      <state>FL</state>
+      <zip>34465</zip>
+   </address>
+   <directions>Forest Ridge Blvd to Lake Beverly dr to the Civic Circle                                                                                                                                                </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>OUR LADY OF GRACE CHURCH</location_name>
+      <line1>6 Roosevelt Blvd</line1>
+      <city>Beverly Hills</city>
+      <state>FL</state>
+      <zip>34465</zip>
+   </address>
+   <directions>Highway 491 and Roosevelt Blvd                                                                                                                                                                          </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>BEVERLY HILLS RECREATION BLDG</location_name>
+      <line1>77 Civic Cir</line1>
+      <city>Beverly Hills</city>
+      <state>FL</state>
+      <zip>34465</zip>
+   </address>
+   <directions>Forest Ridge Blvd to Lake Beverly Dr to the Civic Circle                                                                                                                                                </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>GOOD SHEPHERD LUTHERAN</location_name>
+      <line1>439 E Norvell Bryant HWY</line1>
+      <city>Hernando</city>
+      <state>FL</state>
+      <zip>34442</zip>
+   </address>
+   <directions>Hwy 486 across from the Citrus Hills Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>CITRUS COUNTY BUILDERS ASSOC.</location_name>
+      <line1>1196 S Lecanto HWY</line1>
+      <city>Lecanto</city>
+      <state>FL</state>
+      <zip>34461</zip>
+   </address>
+   <directions>From the red light in Lecanto travel south on 491 about 1/2  mile on the right                                                                                                                          </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>NATIONAL GUARD ARMORY</location_name>
+      <line1>8551 W Venable St</line1>
+      <city>Crystal River</city>
+      <state>FL</state>
+      <zip>34429</zip>
+   </address>
+   <directions>Hwy 19 South next to the Crystal River Airport</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>WEST CITRUS ELKS LODGE</location_name>
+      <line1>7890 W Grover Cleveland Bvld</line1>
+      <city>Homosassa</city>
+      <state>FL</state>
+      <zip>34446</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>HOMOSASSA PUBLIC LIBRARY</location_name>
+      <line1>4100 S Grandmarch Ave</line1>
+      <city>Homosassa</city>
+      <state>FL</state>
+      <zip>34446</zip>
+   </address>
+   <directions>From Hwy 19 S. take Grover Cleveland Blvd 1/2 mile to Grandmarch Ave.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>HOMOSASSA CIVIC CLUB</location_name>
+      <line1>10974 W Creek Ln</line1>
+      <city>Homosassa</city>
+      <state>FL</state>
+      <zip>34448</zip>
+   </address>
+   <directions>Yulee Dr past Fire Station                                                                                                                                                                              </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>APOSTOLIC CHRISTIAN TABERNACLE</location_name>
+      <line1>7961 W Green Acres St</line1>
+      <city>Homosassa</city>
+      <state>FL</state>
+      <zip>34448</zip>
+   </address>
+   <directions>Travel South on Hwy 19 from Crystal River, located on the Corner of Green Acres St. and Hwy 19</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>CHASSAHOWITZKA FIRE STATION</location_name>
+      <line1>10300 S Riviera Dr</line1>
+      <city>Homosassa</city>
+      <state>FL</state>
+      <zip>34448</zip>
+   </address>
+   <directions>Miss Maggie Dr to Riviera Dr to Fire Station                                                                                                                                                            </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>HOMOSASSA METHODIST CHURCH</location_name>
+      <line1>8831 W Bradshaw St</line1>
+      <city>Homosassa</city>
+      <state>FL</state>
+      <zip>34448</zip>
+   </address>
+   <directions>Travel N on Hwy 19, 1/3 of a mile past W Green Acres St turn left on Bradshaw Street, 1/2 on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>CHASS.FIRE STATION#12 OAKPARK</location_name>
+      <line1>5000 W Oak Park Blvd</line1>
+      <city>Homosassa</city>
+      <state>FL</state>
+      <zip>34446</zip>
+   </address>
+   <directions>Oak Park Blvd across from Southern Woods                                                                                                                                                                </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>KNIGHTS OF COLUMBUS</location_name>
+      <line1>9020 W Atlas Dr</line1>
+      <city>Homosassa</city>
+      <state>FL</state>
+      <zip>34448</zip>
+   </address>
+   <directions>Directly across hwy 19 from Nissan Cars on Atlas Dr                                                                                                                                                     </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>FIRST BAPTIST CHURCH INVERNESS</location_name>
+      <line1>550 Pleasant Grove Rd</line1>
+      <city>Inverness</city>
+      <state>FL</state>
+      <zip>34452</zip>
+   </address>
+   <directions>Traveing from the City of Inverness, turn left at Apple Bee's, .5miles to Church on left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>CROSSROAD BAPTIST CHURCH</location_name>
+      <line1>5335 E Jasmine Ln</line1>
+      <city>Inverness</city>
+      <state>FL</state>
+      <zip>34453</zip>
+   </address>
+   <directions>41N before bowling alley on right, Jasmine Ln                                                                                                                                                           </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>CHURCH OF THE NAZARENE</location_name>
+      <line1>2101 N Florida Ave</line1>
+      <city>Hernando</city>
+      <state>FL</state>
+      <zip>34442</zip>
+   </address>
+   <directions>from Inverness hwy 41 North, before the red light at hwy 486 on the right</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>INVERNESS CITY HALL</location_name>
+      <line1>212 W Main St</line1>
+      <city>Inverness</city>
+      <state>FL</state>
+      <zip>34450</zip>
+   </address>
+   <directions>Three story building in Downtown Inverness off N Seminole Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>POINT O WOODS CLUBHOUSE</location_name>
+      <line1>9228 E Gospel Island Rd</line1>
+      <city>Inverness</city>
+      <state>FL</state>
+      <zip>34450</zip>
+   </address>
+   <directions>Four miles on Gospel Island Rd from N Apopka Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>CITRUS COUNTY AUDITORIUM</location_name>
+      <line1>3610 S Florida Ave</line1>
+      <city>Inverness</city>
+      <state>FL</state>
+      <zip>34452</zip>
+   </address>
+   <directions>Traveling south from the City of Inverness on Hwy 41 S just past the Inverness Airport on right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>AMERICAN ITALIAN SOCIAL CLUB</location_name>
+      <line1>4325 S Little Al Pt</line1>
+      <city>Inverness</city>
+      <state>FL</state>
+      <zip>34452</zip>
+   </address>
+   <directions>S Apopka Ave, to Oneida St, to Arbor to Little Al pt,
+Next to fire station</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>FLORAL CITY UNITED METHODIST</location_name>
+      <line1>8478 E Marvin St</line1>
+      <city>Floral City</city>
+      <state>FL</state>
+      <zip>34436</zip>
+   </address>
+   <directions>Old Floral City rd to E Marvin St., across from Floral City elementary school.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>FLORAL CITY LIONS CLUB</location_name>
+      <line1>8370 E Orange Ave</line1>
+      <city>Floral City</city>
+      <state>FL</state>
+      <zip>34436</zip>
+   </address>
+   <directions>Hwy 41S to E Orange Ave, next to Fire Station and Library</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>FIRST CHRISTIAN CHURCH</location_name>
+      <line1>2018 Colonade St</line1>
+      <city>Inverness</city>
+      <state>FL</state>
+      <zip>34453</zip>
+   </address>
+   <directions>From Inverness travel 44 West towards Crystal River- 1st right immediately after the new Race Trac Gas Station on Colonade Street</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>1ST PRESBYTERIAN CHURCH</location_name>
+      <line1>206 Washington Ave</line1>
+      <city>Inverness</city>
+      <state>FL</state>
+      <zip>34450</zip>
+   </address>
+   <directions>44 East towards Wildwood on right 1/2 mile                                                                                                                                                              </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

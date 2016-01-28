@@ -1,0 +1,128 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Dixie County, FL</name>
+  <vip_id>12029</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>FIRST DIST.COM. BLDG</location_name>
+      <line1>9333 NE 349 Hwy</line1>
+      <city>Old Town, Fl</city>
+      <state>FL</state>
+      <zip>32680</zip>
+   </address>
+   <directions>349 North approximately 12 miles First Dist. Community Center on left next door to fire station.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>MASONIC LODGE</location_name>
+      <line1>325 NE 134 St</line1>
+      <city>Cross City</city>
+      <state>FL</state>
+      <zip>32628</zip>
+   </address>
+   <directions>To the left and behind the Dixie County Courthouse</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>SCHOOL BD MTG. FACILITY</location_name>
+      <line1>841 SE 349 Hwy</line1>
+      <city>Old Town</city>
+      <state>FL</state>
+      <zip>32680</zip>
+   </address>
+   <directions>349 South - old OLD TOWN Elementary School building</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>SUWANNEE COM. CENTER</location_name>
+      <line1>23465 SE 349 Hwy</line1>
+      <city>Suwannee</city>
+      <state>FL</state>
+      <zip>32692</zip>
+   </address>
+   <directions>On left side of 349 in Suwannee, at county park</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>COM. BUILDING</location_name>
+      <line1>1950 SE 55A Hwy</line1>
+      <city>Cross City</city>
+      <state>FL</state>
+      <zip>32628</zip>
+   </address>
+   <directions>on right side of 55-A coming from Eugene</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>WARD AVE.</location_name>
+      <line1>103 SE 45 Ave</line1>
+      <city>Cross City</city>
+      <state>FL</state>
+      <zip>32628</zip>
+   </address>
+   <directions>Stockade Road / Ward Avenue, Across from Riel's Garage</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>CITY HALL</location_name>
+      <line1>99 NE 210 Ave</line1>
+      <city>Cross City</city>
+      <state>FL</state>
+      <zip>32628</zip>
+   </address>
+   <directions>Cross City, City Hall</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>COUNTY BLDG.</location_name>
+      <line1>376 SE 242 St</line1>
+      <city>Cross City</city>
+      <state>FL</state>
+      <zip>32628</zip>
+   </address>
+   <directions>Suwannee Lumber Road, at Shamrock behind the rock-pit</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>JENA COM. CENTER</location_name>
+      <line1>62 SW 812 st</line1>
+      <city>Steinhatchee</city>
+      <state>FL</state>
+      <zip>32359</zip>
+   </address>
+   <directions>On left of main road going in to Jena</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>HORSESHOE BCH COM.CTR</location_name>
+      <line1>18 5th Ave E</line1>
+      <city>Horseshoe Beach</city>
+      <state>FL</state>
+      <zip>32648</zip>
+   </address>
+   <directions>Horseshoe Beach City Hall</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

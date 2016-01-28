@@ -1,0 +1,405 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Monroe County</name>
+  <vip_id>12087</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>Jaycee Clubhouse</location_name>
+      <line1>3825 Flagler Ave</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Key West High School Auditorium</location_name>
+      <line1>2100 Flagler Ave</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Key West High School Auditorium</location_name>
+      <line1>2100 Flagler Ave</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Martin Luther King Pool</location_name>
+      <line1>300 Catherine St</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Old City Hall</location_name>
+      <line1>510 Greene St</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Gato Building Conference Room 1st Floor</location_name>
+      <line1>724 Truman Ave</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Moose Club</location_name>
+      <line1>700 Eisenhower Dr</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Glad Tiding Tabernacle</location_name>
+      <line1>1209 United St</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Senior Citizen Plza Auditorium</location_name>
+      <line1>1400 Kennedy Dr</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Church of Latter Day Saints</location_name>
+      <line1>3424 Northside Dr</line1>
+      <city>Key West</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Stock Island Fire Station</location_name>
+      <line1>5655 Maloney Ave</line1>
+      <city>Stock Is</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Big Coppitt Fire Station</location_name>
+      <line1>28 Emerald Dr</line1>
+      <city>Big Coppitt</city>
+      <state>FL</state>
+      <zip>33040</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Sugarloaf Fire Station</location_name>
+      <line1>17175 Overseas HWY</line1>
+      <city>Sugarloaf Shores</city>
+      <state>FL</state>
+      <zip>33044</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>Cudjoe Sheriff Sub-Station</location_name>
+      <line1>20950 Overses HWY</line1>
+      <city>Cudjoe</city>
+      <state>FL</state>
+      <zip>33050</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>BSA Florida Sea Base</location_name>
+      <line1>23800 Overseas HWY</line1>
+      <city>Summerland</city>
+      <state>FL</state>
+      <zip>33042</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>First Baptist Church</location_name>
+      <line1>300 Key Dear Blvd</line1>
+      <city>Big Pine</city>
+      <state>FL</state>
+      <zip>33043</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Big Pine Community Park Center    NEW 2016</location_name>
+      <line1>31009 Atlantis Dr</line1>
+      <city>Big Pine Key</city>
+      <state>FL</state>
+      <zip>33043</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>American Legion Marathon</location_name>
+      <line1>4115 Overseas HWY</line1>
+      <city>Marathon</city>
+      <state>FL</state>
+      <zip>33050</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>1st Baptist Church Marathon</location_name>
+      <line1>200 62nd Street Ocean</line1>
+      <city>Marathon</city>
+      <state>FL</state>
+      <zip>33050</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Presbyterian Kirk of the Keys</location_name>
+      <line1>8877 Overseas HWY</line1>
+      <city>Marathon</city>
+      <state>FL</state>
+      <zip>33050</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>Marathon Moose Lodge</location_name>
+      <line1>11601 1st Ave</line1>
+      <city>Marathon</city>
+      <state>FL</state>
+      <zip>33050</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Key Colony Beach City Hall</location_name>
+      <line1>600 W Ocean Dr</line1>
+      <city>Key Colony Bch</city>
+      <state>FL</state>
+      <zip>33051</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Marathon Moose Lodge</location_name>
+      <line1>11601 1st Avenue, Gulf</line1>
+      <city>Marathon</city>
+      <state>FL</state>
+      <zip>33050</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>Islamorada  Branch  Library</location_name>
+      <line1>81500 Overseas HWY</line1>
+      <city>Islamorada</city>
+      <state>FL</state>
+      <zip>33036</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>Plantation Key Courtroom B</location_name>
+      <line1>88820 OVERSEAS Hwy</line1>
+      <city>Plantation Key</city>
+      <state>FL</state>
+      <zip>33070</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Immanuel Lutheran Church</location_name>
+      <line1>108 Ocean Dr</line1>
+      <city>Tavernier</city>
+      <state>FL</state>
+      <zip>33070</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>Elks Club, Tavernier</location_name>
+      <line1>92600 Overseas HWY</line1>
+      <city>Tavernier</city>
+      <state>FL</state>
+      <zip>33070</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>Key Largo Civic Club</location_name>
+      <line1>209 Ocean Bay Dr</line1>
+      <city>Key Largo</city>
+      <state>FL</state>
+      <zip>33037</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Key Largo Civic Club</location_name>
+      <line1>209 Ocean Bay Dr</line1>
+      <city>Key Largo</city>
+      <state>FL</state>
+      <zip>33037</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>Monroe County Library, K.L.</location_name>
+      <line1>101485 Overseas HWY</line1>
+      <city>Key Largo</city>
+      <state>FL</state>
+      <zip>33037</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Monroe County Library, K.L.</location_name>
+      <line1>101485 Overseas HWY</line1>
+      <city>Key Largo</city>
+      <state>FL</state>
+      <zip>33037</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>Key Largo Baptist Church</location_name>
+      <line1>835 Largo Rd</line1>
+      <city>Key Largo</city>
+      <state>FL</state>
+      <zip>33037</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>The Academy at Ocean Reef</location_name>
+      <line1>395 South Harbor Dr</line1>
+      <city>Key Largo</city>
+      <state>FL</state>
+      <zip>33037</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

@@ -1,0 +1,1509 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Brevard County, FL</name>
+  <vip_id>12009</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>Harry T &amp; Harriette V Moore Cultural Complex</location_name>
+      <line1>2180 Freedom Ave</line1>
+      <city>Mims</city>
+      <state>FL</state>
+      <zip>32754</zip>
+   </address>
+   <directions>West of US1 off Parker Street
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Titusville City Hall</location_name>
+      <line1>555 S Washington Ave</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32796</zip>
+   </address>
+   <directions>Two blocks north of South Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Glory of God Anglican Church</location_name>
+      <line1>3735 N Indian River Dr</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32926</zip>
+   </address>
+   <directions>One-half mile north of 528.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Oak Park Elementary School</location_name>
+      <line1>3395 Dairy Rd</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32796</zip>
+   </address>
+   <directions>1.2 miles west of US1 </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Mims Scottsmoor Public Library</location_name>
+      <line1>3615 Lionel Rd</line1>
+      <city>Mims</city>
+      <state>FL</state>
+      <zip>32754</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Sandrift Community Center</location_name>
+      <line1>585 N Singleton Ave</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32796</zip>
+   </address>
+   <directions>1 mile East of 95 on 406 (Garden St), go North on Singleton Ave 1/2 mile up on east side of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Scottsmoor Meeting Hall</location_name>
+      <line1>3724 Magoon Ave</line1>
+      <city>Mims</city>
+      <state>FL</state>
+      <zip>32754</zip>
+   </address>
+   <directions>1 block East of US1. Corner of Magoon Ave. and Stanford St.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>YMCA</location_name>
+      <line1>2400 Harrison St</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>On the North West corner of the Harrison St and S Park Ave intersection</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Titusville Public Library</location_name>
+      <line1>2121 S Hopkins Ave</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>Just south of Titusville High School between Sycamore and Roosevelt</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>North Brevard Senior Center Inc</location_name>
+      <line1>909 Lane Ave</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>1 mile West of US1 on 405 (South St). South onto Lane Ave. On East side of street</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>South Lake Educational Center</location_name>
+      <line1>3755 Garden St</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32796</zip>
+   </address>
+   <directions>Just West of 95 on Garden St (406)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>First Baptist Church of IRC</location_name>
+      <line1>360 Knox Mc Rae Dr</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>1/3 mile West of US1. North West corner of Knox McRae Dr and Capron Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Apollo Elementary School</location_name>
+      <line1>3085 Knox Mc Rae Dr</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>On Knox Mc Rae between S Park Ave and Harrison St/Fox Lake Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>St. Patrick's Anglican Catholic Church</location_name>
+      <line1>4797 Curtis Blvd</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32927</zip>
+   </address>
+   <directions>East of Grissom Pkwy 1/3 mile</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>San Mateo Mobile Village</location_name>
+      <line1>5205 Sisson Rd</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>Sisson Rd 1/2 mile south of Cheney Hwy (St Rd 50) at San Mateo Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Indian River City Civic Center</location_name>
+      <line1>4220 S Hopkins Ave</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>S Hopkins between Knoz Mc Rae Dr and Coquina Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Titusville Garden Club</location_name>
+      <line1>5275 Sisson Rd</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>Between 405 and 50</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Madison Middle School</location_name>
+      <line1>3375 Dairy Rd</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32796</zip>
+   </address>
+   <directions>1 mile west of US1 on south side of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>Walter Butler Community Center</location_name>
+      <line1>4201 N Hwy 1</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32927</zip>
+   </address>
+   <directions>At Bernic G Jackson Park on US1 between Canveral Groves Blvd and Camp Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Central Community Church</location_name>
+      <line1>300 Tucker Ln</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32926</zip>
+   </address>
+   <directions>500 ft West of 95 off W King St (St Rd 520). South on Tucker Ln .25 miles</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>Agriculture Center</location_name>
+      <line1>3695 Lake Dr</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32926</zip>
+   </address>
+   <directions>Between Cox Rd and N Burnett Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Seventh-Day Adventist Church</location_name>
+      <line1>1500 Cox Rd</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32926</zip>
+   </address>
+   <directions>Cox Rd .25 mile  South of St Rd 524</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Enterprise Elementary School</location_name>
+      <line1>7000 Enterprise Rd</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32927</zip>
+   </address>
+   <directions>Fay Blvd west of 95 to Homestead Ave. Homestead north turns to Barksdale. Enterprise Rd on north side of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>Port St. John Public Library</location_name>
+      <line1>6500 Carole Ave</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32927</zip>
+   </address>
+   <directions>300 yrds West of train tracks on Fay Blvd, go south on Carole Ave .25 mile</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>Victory Baptist Church</location_name>
+      <line1>242 Capron Rd</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32927</zip>
+   </address>
+   <directions>Between Kings HWY and Elkcam Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Port St. John Community Center</location_name>
+      <line1>6650 Corto Rd</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32927</zip>
+   </address>
+   <directions>Off Grissom Pkwy between Curtis Blvd and Fay Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>New Life Christian Fellowship</location_name>
+      <line1>6755 S Washington Ave</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>1 mile south of the US1 - St Rd 405 intersection</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>Travis Recreation Center</location_name>
+      <line1>1999 Michigan Ave</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32926</zip>
+   </address>
+   <directions>Just west of the corner of Clearlake Road at BCC.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Rockledge Fire Station #1</location_name>
+      <line1>1800 South US 1</line1>
+      <city>Rockledge</city>
+      <state>FL</state>
+      <zip>32955</zip>
+   </address>
+   <directions>At the corner of Barton Blvd and US1.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>Courtenay Springs Village</location_name>
+      <line1>1200 S Courtenay Pky</line1>
+      <city>Merritt Island</city>
+      <state>FL</state>
+      <zip>32952</zip>
+   </address>
+   <directions>South of SR520, just south of the Merritt Island Airport.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Veterans Memorial Center</location_name>
+      <line1>400 S Sykes Creek Pkwy</line1>
+      <city>Merritt Island</city>
+      <state>FL</state>
+      <zip>32952</zip>
+   </address>
+   <directions>South of SR520, past Merritt Square Mall.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>Merritt Island Public Library</location_name>
+      <line1>1195 N Courtenay Pkwy</line1>
+      <city>Merritt Island</city>
+      <state>FL</state>
+      <zip>32953</zip>
+   </address>
+   <directions>Between Mustang Way and Grove Blvd. Across from Merritt Island HS</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>Cape View Elementary School</location_name>
+      <line1>8440 Rosalind Ave</line1>
+      <city>Cape Canaveral</city>
+      <state>FL</state>
+      <zip>32920</zip>
+   </address>
+   <directions>North off Washington Avenue, east of A1A.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>Moose Lodge #2073</location_name>
+      <line1>3150 N Courtenay Pkwy</line1>
+      <city>Merritt Island</city>
+      <state>FL</state>
+      <zip>32953</zip>
+   </address>
+   <directions>Off Courtenay Parkway, north of SR528.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>Kiwanis Island Park Gym</location_name>
+      <line1>950 Kiwanis Island Park Rd</line1>
+      <city>Merritt Island</city>
+      <state>FL</state>
+      <zip>32952</zip>
+   </address>
+   <directions>North off 520 1/3 mile East of Sykes Creek Pkwy. In the center of the East Merritt Island causeway</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>Cocoa Beach Community Church</location_name>
+      <line1>126 S Atlantic Ave</line1>
+      <city>Cocoa Beach</city>
+      <state>FL</state>
+      <zip>32931</zip>
+   </address>
+   <directions>Between S 1st St and S 2nd St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>Moose Lodge #1717</location_name>
+      <line1>221 Clearlake Rd</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32922</zip>
+   </address>
+   <directions>100 yards North of 520 (W King St)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>Shield of Faith Ministries</location_name>
+      <line1>1623 Minnie St</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32922</zip>
+   </address>
+   <directions>West of Minnie from Clearlake Rd. Between Fay St and Rosa St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>McLarty Recreation Hall</location_name>
+      <line1>790 Barton Blvd</line1>
+      <city>Rockledge</city>
+      <state>FL</state>
+      <zip>32955</zip>
+   </address>
+   <directions>In the North East corner of McLarty Park off Barton between S Fiske Blvd and US1</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>Zion Orthodox Primitive Baptist Ch</location_name>
+      <line1>715 S Fiske Blvd</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32922</zip>
+   </address>
+   <directions>1/2 mile south of W King St (St Rd 520)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>King Street Baptist Church</location_name>
+      <line1>1040 W King St</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32922</zip>
+   </address>
+   <directions>On the Northwest corner of the W King St (520) and Fiske Blvd intersection</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>Cocoa Presbyterian Church</location_name>
+      <line1>1404 Dixon Blvd</line1>
+      <city>Cocoa</city>
+      <state>FL</state>
+      <zip>32922</zip>
+   </address>
+   <directions>Between Clearlake Rd and Pineda St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>Church of Our Saviour Social Hall</location_name>
+      <line1>5301 N Atlantic Ave</line1>
+      <city>Cocoa Beach</city>
+      <state>FL</state>
+      <zip>32931</zip>
+   </address>
+   <directions>Off N Atlantic Ave (A1A) 1/2 mile north of 520 between Meade Ave and Alachua Ln</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="48">
+   <address>
+      <location_name>River of Life Assembly of God</location_name>
+      <line1>1890 N Courtenay Pkwy</line1>
+      <city>Merritt Island</city>
+      <state>FL</state>
+      <zip>32953-4333</zip>
+   </address>
+   <directions>Between Pioneer Rd and Crockett Blvd. Just north of Publix</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="49">
+   <address>
+      <location_name>Lighthouse Christian Church</location_name>
+      <line1>1250 N Banana River Dr</line1>
+      <city>Merritt Island</city>
+      <state>FL</state>
+      <zip>32952</zip>
+   </address>
+   <directions>1/2 way between 528 &amp; 520</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="50">
+   <address>
+      <location_name>Living Bread Christian Fellowship</location_name>
+      <line1>1801 S Orlando Ave</line1>
+      <city>Cocoa Beach</city>
+      <state>FL</state>
+      <zip>32931</zip>
+   </address>
+   <directions>off A1A Southbound between Olive St and Francis St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="51">
+   <address>
+      <location_name>Cocoa/Rockledge Garden Club</location_name>
+      <line1>1493 S Fiske Blvd</line1>
+      <city>Rockledge</city>
+      <state>FL</state>
+      <zip>32955</zip>
+   </address>
+   <directions>On the North West coner of the S Fiske Blvd and St Andrews Dr Intersection</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="52">
+   <address>
+      <location_name>Cape Canaveral Public Library</location_name>
+      <line1>201 Polk Ave</line1>
+      <city>Cape Canaveral</city>
+      <state>FL</state>
+      <zip>32920</zip>
+   </address>
+   <directions>Off A1A between Tyler Ave and TaylorAve. Next to the Cape Canaveral Police Dept</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="53">
+   <address>
+      <location_name>Riverside Presbyterian Church Hall</location_name>
+      <line1>3400 N Atlantic Ave</line1>
+      <city>Cocoa Beach</city>
+      <state>FL</state>
+      <zip>32931</zip>
+   </address>
+   <directions>On the West side of A1A 1/2 mile South of 520</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="54">
+   <address>
+      <location_name>Cocoa Beach Recreation Center</location_name>
+      <line1>321 Ramp Rd</line1>
+      <city>Cocoa Beach</city>
+      <state>FL</state>
+      <zip>32931</zip>
+   </address>
+   <directions>Off S Brevard Ave between S 4th St and S 6th St. Next to th Surf Side Playhouse</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="55">
+   <address>
+      <location_name>Hope United Church of Christ</location_name>
+      <line1>2555 S Fiske Blvd</line1>
+      <city>Rockledge</city>
+      <state>FL</state>
+      <zip>32955</zip>
+   </address>
+   <directions>1/2 mile south of Eyster Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="56">
+   <address>
+      <location_name>David R. Schechter Community Center</location_name>
+      <line1>1089 South Patrick Dr</line1>
+      <city>Satellite Beach</city>
+      <state>FL</state>
+      <zip>32937</zip>
+   </address>
+   <directions>On the NorthEast corner of the S Patrick Dr / Jackson Ct intersection.  Just West of Satellite HS</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="57">
+   <address>
+      <location_name>Front Street Civic Center</location_name>
+      <line1>2205 S Front St</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32901</zip>
+   </address>
+   <directions>East of US1, at the corner of Melbourne Avenue and Front Street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="58">
+   <address>
+      <location_name>First Baptist Church of Malabar</location_name>
+      <line1>1665 Malabar Rd</line1>
+      <city>Malabar</city>
+      <state>FL</state>
+      <zip>32950</zip>
+   </address>
+   <directions>Two miles west of US1 at Corey Road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="59">
+   <address>
+      <location_name>Grant Community Center</location_name>
+      <line1>4580 1st St</line1>
+      <city>Grant</city>
+      <state>FL</state>
+      <zip>32949</zip>
+   </address>
+   <directions>Take 1st Street west off US1.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="60">
+   <address>
+      <location_name>Palm Bay Community Center</location_name>
+      <line1>1502 Port Malabar Blvd NE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32905</zip>
+   </address>
+   <directions>1 mile east of Babcock. South side of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="61">
+   <address>
+      <location_name>Barefoot Bay Building A</location_name>
+      <line1>625 Barefoot Blvd</line1>
+      <city>Barefoot Bay</city>
+      <state>FL</state>
+      <zip>32976</zip>
+   </address>
+   <directions>1 mile West of US1 </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="62">
+   <address>
+      <location_name>Town Hall Community Center</location_name>
+      <line1>509 Ocean Ave</line1>
+      <city>Melbourne Beach</city>
+      <state>FL</state>
+      <zip>32951</zip>
+   </address>
+   <directions>300 Yards West of A1A</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="63">
+   <address>
+      <location_name>Lipscomb Park Community Center</location_name>
+      <line1>3316 Monroe St</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32901</zip>
+   </address>
+   <directions>1/4 West of US1 off University.  1/3 mile down Monroe on West side of road</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="64">
+   <address>
+      <location_name>Max K. Rodes Park Comm Center</location_name>
+      <line1>3410 Flanagan Rd</line1>
+      <city>West Melbourne</city>
+      <state>FL</state>
+      <zip>32904</zip>
+   </address>
+   <directions>1 Mile West of Minton Rd off Fell Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="65">
+   <address>
+      <location_name>Church of Our Savior</location_name>
+      <line1>1000 Jersey Ln NE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32905</zip>
+   </address>
+   <directions>1 mile West of US1 off Port Malabar Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="66">
+   <address>
+      <location_name>Veterans Memorial Complex</location_name>
+      <line1>2285 Minton Rd</line1>
+      <city>West Melbourne</city>
+      <state>FL</state>
+      <zip>32904</zip>
+   </address>
+   <directions>West on Henry immediate north on Meadowlane. Across from Police Dept</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="67">
+   <address>
+      <location_name>Central Baptist Church</location_name>
+      <line1>2503 S Country Club Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32901</zip>
+   </address>
+   <directions>1/2 mile South of W New Haven Ave. (192)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="68">
+   <address>
+      <location_name>Immaculate Conception Church</location_name>
+      <line1>3780 S A1A</line1>
+      <city>Melbourne Beach</city>
+      <state>FL</state>
+      <zip>32951</zip>
+   </address>
+   <directions>A1A just north of Publix</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="69">
+   <address>
+      <location_name>South Mainland Public Library-Micco</location_name>
+      <line1>7921 Ron Beatty Blvd</line1>
+      <city>Micco</city>
+      <state>FL</state>
+      <zip>32976</zip>
+   </address>
+   <directions>1/4 mile West of US1 between Barefoot Blvd and Micco Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="70">
+   <address>
+      <location_name>Grace Bible Church of Palm Bay</location_name>
+      <line1>3620 Bayside Lakes Blvd SE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32909</zip>
+   </address>
+   <directions>1/4 mile West of Eldron Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="71">
+   <address>
+      <location_name>First Presbyterian Church of PB</location_name>
+      <line1>1080 Port Malabar Blvd NE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32905</zip>
+   </address>
+   <directions>250 Yards East of Babcock St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="72">
+   <address>
+      <location_name>Peace Lutheran Church</location_name>
+      <line1>1801 Port Malabar Blvd NE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32905</zip>
+   </address>
+   <directions>NE corner of Port Malabar Blvd NE and Troutman Blvd NE</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="73">
+   <address>
+      <location_name>Palm Bay Fire Station #4</location_name>
+      <line1>1200 San Filippo Dr SE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32909</zip>
+   </address>
+   <directions>South corner of San Fillipo Dr SE and Wyoming Dr SE</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="74">
+   <address>
+      <location_name>Presbyterian Ch of Good Shepherd</location_name>
+      <line1>810 W Florida Ave</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32904</zip>
+   </address>
+   <directions>350 yards East of Dairy Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="75">
+   <address>
+      <location_name>Chapel by the Sea</location_name>
+      <line1>8240 A1A S</line1>
+      <city>Melbourne Beach</city>
+      <state>FL</state>
+      <zip>32951</zip>
+   </address>
+   <directions>1 mile south of the Aquarina Country Club</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="76">
+   <address>
+      <location_name>EFSC Palm Bay - Community Dining Rm</location_name>
+      <line1>250 Community College Pkwy</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32909</zip>
+   </address>
+   <directions>Off San Fillipo Dr 300 yards south of Malabar Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="77">
+   <address>
+      <location_name>Community of Christ</location_name>
+      <line1>1901 Emerson Dr SE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32909</zip>
+   </address>
+   <directions>SE corner of Emerson and Jupiter</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="78">
+   <address>
+      <location_name>St Timothy Lutheran Church Friendship Hall</location_name>
+      <line1>1903 Croton Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>South of Lake Washington Road and east of Wickham Road,</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="79">
+   <address>
+      <location_name>Ascension Lutheran Church</location_name>
+      <line1>1053 Pinetree Dr</line1>
+      <city>Indian Harbour Beach</city>
+      <state>FL</state>
+      <zip>32937</zip>
+   </address>
+   <directions>1/2 mile West of A1A</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="80">
+   <address>
+      <location_name>EFSC Melb - Student Ctr Atrium</location_name>
+      <line1>3865 N Wickham Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>SE corner of Wickham and Post</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="81">
+   <address>
+      <location_name>Emmanuel United Methodist Church</location_name>
+      <line1>2800 W Eau Gallie Blvd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>300 Yards East of Wickham Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="82">
+   <address>
+      <location_name>Trinity Presbyterian -- Beach House</location_name>
+      <line1>638 South Patrick Dr</line1>
+      <city>Satellite Beach</city>
+      <state>FL</state>
+      <zip>32937</zip>
+   </address>
+   <directions>1 mile south of Pineda Causeway</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="83">
+   <address>
+      <location_name>Scotty Culp Municipal Complex</location_name>
+      <line1>565 Cassia Blvd</line1>
+      <city>Satellite Beach</city>
+      <state>FL</state>
+      <zip>32937</zip>
+   </address>
+   <directions>Off S Patrick Dr 1.5 miles north of Banana River Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="84">
+   <address>
+      <location_name>The Springs of Suntree</location_name>
+      <line1>8300 Holiday Springs Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32940</zip>
+   </address>
+   <directions>Off Viera Blvd 1/2 mile west of US1</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="85">
+   <address>
+      <location_name>St Timothy Lutheran Church - Narthex</location_name>
+      <line1>1903 Croton Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>250 yards North of Aurora</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="86">
+   <address>
+      <location_name>Eau Gallie Civic Center</location_name>
+      <line1>1551 Highland Ave</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>Between Eau Gallie and Creel</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="87">
+   <address>
+      <location_name>I H B City Hall Council Chambers</location_name>
+      <line1>2055 South Patrick Dr</line1>
+      <city>Indian Harbour Beach</city>
+      <state>FL</state>
+      <zip>32937</zip>
+   </address>
+   <directions>NE corner of S Patrick Dr and Yacht Club Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="88">
+   <address>
+      <location_name>Palm Shores Town Hall</location_name>
+      <line1>5030 Paul Hurtt Ln</line1>
+      <city>Palm Shores</city>
+      <state>FL</state>
+      <zip>32940</zip>
+   </address>
+   <directions>Off US1 1 mile south of Pineda</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="89">
+   <address>
+      <location_name>Community Recreation Center</location_name>
+      <line1>1233 Yacht Club Blvd</line1>
+      <city>Indian Harbour Beach</city>
+      <state>FL</state>
+      <zip>32937</zip>
+   </address>
+   <directions>1/2 mile south of Banana River Dr off S Patrick Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="90">
+   <address>
+      <location_name>Brevard Baptist Association</location_name>
+      <line1>4235 S US 1</line1>
+      <city>Rockledge</city>
+      <state>FL</state>
+      <zip>32955</zip>
+   </address>
+   <directions>1/2 mile south of Barnes Blvd </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="91">
+   <address>
+      <location_name>Indian River Isles Rec Center</location_name>
+      <line1>6241 Halyard Ct</line1>
+      <city>Rockledge</city>
+      <state>FL</state>
+      <zip>32955</zip>
+   </address>
+   <directions>off US1 1 mile north of Suntree Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="92">
+   <address>
+      <location_name>Ascension Catholic Church</location_name>
+      <line1>2950 N Harbor City Blvd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>200 yards south of Parkway</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="93">
+   <address>
+      <location_name>POW/MIA Park</location_name>
+      <line1>5995 N US Hwy 1</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32940</zip>
+   </address>
+   <directions>500 yards north of Pineda Causeway</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="94">
+   <address>
+      <location_name>Cross Bridge Church</location_name>
+      <line1>651 Barnes Blvd</line1>
+      <city>Rockledge</city>
+      <state>FL</state>
+      <zip>32955</zip>
+   </address>
+   <directions>300 yards West of Murrell Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="95">
+   <address>
+      <location_name>Heritage Isle Club</location_name>
+      <line1>6800 Legacy Blvd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32940</zip>
+   </address>
+   <directions>1 mile South off Judge Fran Jamieson Way</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="96">
+   <address>
+      <location_name>Indian River Colony Club</location_name>
+      <line1>1600 Old Glory Blvd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32940</zip>
+   </address>
+   <directions>off Murrell between Viera Blvd and N Wickham Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="97">
+   <address>
+      <location_name>St Katherine Greek Orthodox Church</location_name>
+      <line1>5965 N Wickham Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32940</zip>
+   </address>
+   <directions>1/2 mile north of Pineda Causeway</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="98">
+   <address>
+      <location_name>Suntree United Methodist Church</location_name>
+      <line1>7400 N Wickham Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32940</zip>
+   </address>
+   <directions>300 Yards West of Pinehurst Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="99">
+   <address>
+      <location_name>First Baptist Ch of South Brevard</location_name>
+      <line1>4300 N Wickham Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>1/2 mile north of Post Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="100">
+   <address>
+      <location_name>Prince of Peace Anglican</location_name>
+      <line1>6895 Murrell Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32940</zip>
+   </address>
+   <directions>1/3 mile north of Spyglass Hill Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="101">
+   <address>
+      <location_name>Church at Viera</location_name>
+      <line1>9005 N Wickham Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32940</zip>
+   </address>
+   <directions>SW corner of N Wickham Rd and Stadium Pkwy</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="102">
+   <address>
+      <location_name>Fire Station #81</location_name>
+      <line1>4630 Lake Washington Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32934</zip>
+   </address>
+   <directions>Between Turtle Mound Rd and Harlock Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="103">
+   <address>
+      <location_name>Faith Fellowship Church</location_name>
+      <line1>2820 Business Center Blvd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>Off N Wickham 1/2 mile south of Pineda Cswy</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="104">
+   <address>
+      <location_name>Faith Viera Lutheran Church</location_name>
+      <line1>5550 Faith Dr</line1>
+      <city>Rockledge</city>
+      <state>FL</state>
+      <zip>32955</zip>
+   </address>
+   <directions>North off Viera Blvd between Murrell Rd and Independence Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="105">
+   <address>
+      <location_name>Holy Name of Jesus Catholic Church</location_name>
+      <line1>3050 N A1A</line1>
+      <city>Indialantic</city>
+      <state>FL</state>
+      <zip>32903</zip>
+   </address>
+   <directions>1/3 mile south of Eau Gallie Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="106">
+   <address>
+      <location_name>Sat Bch United Methodist Church</location_name>
+      <line1>450 Lee Ave</line1>
+      <city>Satellite Beach</city>
+      <state>FL</state>
+      <zip>32937</zip>
+   </address>
+   <directions>Off S Patrick Dr between Jackson Ave and Grant Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="107">
+   <address>
+      <location_name>Tropical Haven Auditorium</location_name>
+      <line1>1205 S Eddie Allen Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32901</zip>
+   </address>
+   <directions>Off W Nasa Blvd between Harris Rd and Airport Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="108">
+   <address>
+      <location_name>American Homesteading Foundation</location_name>
+      <line1>535 Hammock Rd</line1>
+      <city>Melbourne Village</city>
+      <state>FL</state>
+      <zip>32904</zip>
+   </address>
+   <directions>W on Sheridan, S on W Pine Rd, E on South Dr, N on Hammock Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="109">
+   <address>
+      <location_name>Space Coast Assoc. of Realtors</location_name>
+      <line1>1450 Sarno Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>1/3 mile west of N Apollo Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="110">
+   <address>
+      <location_name>West Melbourne Community Park</location_name>
+      <line1>3000 Minton Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32904</zip>
+   </address>
+   <directions>SW corner of Minton Rd and Fell Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="111">
+   <address>
+      <location_name>Lamplighter Village-Carriage House</location_name>
+      <line1>500 Lantern Blvd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32934</zip>
+   </address>
+   <directions>Off N John Rodes Blvd between W Eau Gallie Blvd and Dow Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="112">
+   <address>
+      <location_name>First Baptist Church of Indialantic</location_name>
+      <line1>170 Washington Ave</line1>
+      <city>Indialantic</city>
+      <state>FL</state>
+      <zip>32903</zip>
+   </address>
+   <directions>Off A1A between Flug Ave and Niemira Ave, 3/4 mile north of Melbourne Causeway</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="113">
+   <address>
+      <location_name>Eastminster Presbyterian Church</location_name>
+      <line1>106 N Riverside Pl</line1>
+      <city>Indialantic</city>
+      <state>FL</state>
+      <zip>32903</zip>
+   </address>
+   <directions>NW corner of 5th Ave and Riverside Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="114">
+   <address>
+      <location_name>Bowe Gardens Baptist Church</location_name>
+      <line1>2700 Sarno Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32935</zip>
+   </address>
+   <directions>1/3 mile east of N Wickham Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="115">
+   <address>
+      <location_name>Riverside Baptist Church</location_name>
+      <line1>3333 N Riverside Dr</line1>
+      <city>Indialantic</city>
+      <state>FL</state>
+      <zip>32903</zip>
+   </address>
+   <directions>2/3 mile south of Eau Gallie on Riverside Dr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="116">
+   <address>
+      <location_name>Trinity Towers East</location_name>
+      <line1>700 E Strawbridge Ave</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32901</zip>
+   </address>
+   <directions>Between Livingston St and Waverly Pl</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="117">
+   <address>
+      <location_name>Greater Palm Bay Senior Center</location_name>
+      <line1>1275 Culver Dr NE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32907</zip>
+   </address>
+   <directions>SE corner of Culver and Emerson</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="118">
+   <address>
+      <location_name>Beacon Baptist Church</location_name>
+      <line1>3185 Aurora Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32934</zip>
+   </address>
+   <directions>200 yards West of N Wickham Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="119">
+   <address>
+      <location_name>Port Malabar Holiday Park Rec Ctr</location_name>
+      <line1>215 Holiday Park Blvd NE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32907</zip>
+   </address>
+   <directions>off Malabar 1/2 mile west of 95. N on Holiday Park. Straight @ 4 way stop, follow around bends to Rec Ctr</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="120">
+   <address>
+      <location_name>Ridgewood Club Condo - Clubhouse</location_name>
+      <line1>763 Ridge Club Dr</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32934</zip>
+   </address>
+   <directions>off N Wickham Rd 1/3 mile South of Sarno</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="121">
+   <address>
+      <location_name>Palm Bay City Hall Council Chambers</location_name>
+      <line1>120 Malabar Rd SE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32907</zip>
+   </address>
+   <directions>200 yards east of Minton</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="122">
+   <address>
+      <location_name>Our Lady of Grace Catholic Church</location_name>
+      <line1>300 Malabar Rd SE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32907</zip>
+   </address>
+   <directions>300 yards west of Eldron Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="123">
+   <address>
+      <location_name>Harbor City Christian Church Hall</location_name>
+      <line1>3210 Aurora Rd</line1>
+      <city>Melbourne</city>
+      <state>FL</state>
+      <zip>32934</zip>
+   </address>
+   <directions>350 yards west of N Wickham Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="124">
+   <address>
+      <location_name>Ted Whitlock Com Center - PB Reg Park</location_name>
+      <line1>1951 Malabar Rd NW</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32907</zip>
+   </address>
+   <directions>Between Snapdragon Dr and Thunderbird Ave</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="125">
+   <address>
+      <location_name>CenterPointe Church</location_name>
+      <line1>891 Coply St SE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32909</zip>
+   </address>
+   <directions>Off Emerson 1/3 mile south of Malabar</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="126">
+   <address>
+      <location_name>Community Bible Church</location_name>
+      <line1>91 Emerson Dr NW</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32907</zip>
+   </address>
+   <directions>100 Yards east of Glendale Ave NW</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="127">
+   <address>
+      <location_name>Wesley United Methodist Church</location_name>
+      <line1>2075 Meadowlane Ave</line1>
+      <city>West Melbourne</city>
+      <state>FL</state>
+      <zip>32904</zip>
+   </address>
+   <directions>South off New Haven 200 yards east of Minton</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="128">
+   <address>
+      <location_name>Franklin T De Groodt Public Library</location_name>
+      <line1>6475 Minton Rd SE</line1>
+      <city>Palm Bay</city>
+      <state>FL</state>
+      <zip>32908</zip>
+   </address>
+   <directions>300 yards south of Malabar Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="129">
+   <address>
+      <location_name>Supervisor of Elections Office</location_name>
+      <line1>400 South St.</line1>
+      <city>Titusville</city>
+      <state>FL</state>
+      <zip>32780</zip>
+   </address>
+   <directions>200 yards West of US1</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

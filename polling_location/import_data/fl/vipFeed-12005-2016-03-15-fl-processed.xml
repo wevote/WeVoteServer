@@ -1,0 +1,536 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>BAY COUNTY, FL</name>
+  <vip_id>12005</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+<polling_location id="4">
+   <address>
+      <location_name>Fountain Fire Station</location_name>
+      <line1>17822 Center Dr</line1>
+      <city>Fountain</city>
+      <state>FL</state>
+      <zip>32438</zip>
+   </address>
+   <directions>Traveling north on Hwy 231 turn left onto Gardenia Street.  Turn right onto Park Place Rd.  Polling place will be on your left; Traveling south on Hwy 231 turn right onto Ivydell Street.  Turn left onto Park Place Rd.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Youngstown Fire Station</location_name>
+      <line1>11771 Hwy 231</line1>
+      <city>Youngstown</city>
+      <state>FL</state>
+      <zip>32466</zip>
+   </address>
+   <directions>Travel north on Hwy 231 for approximately 11 miles of Star Ave.  Polling place will be on your left; Travel south on Hwy 231 for approximately 1/2 of a mile from Co Rd 388.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Bear Creek Assembly of God</location_name>
+      <line1>11412 N Bear Creek Rd</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling north on Hwy 231 turn right onto N. Bear Creek Road.  The church will be approximately 7/10 of a mile on your right; Traveling south on Hwy 231 turn left onto N. Bear Creek  Road.   The church will be approximately 7/10 of a mile on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Bayou George Jaycee Clubhouse</location_name>
+      <line1>6010 Jaycee Dr</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling north on Hwy 231 turn left onto Hwy 2301.  Turn left on Jaycee Dr in approximately 4 miles.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Sand Hills Fire Station</location_name>
+      <line1>13010 Hwy 77</line1>
+      <city>Southport</city>
+      <state>FL</state>
+      <zip>32409</zip>
+   </address>
+   <directions>Travel north on Hwy 77 approximately 4 miles past Hwy 388. Polling place will be on your right; Travel south on Hwy 77 approximately 1 mile past Bozeman School.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Southport Community Bldg</location_name>
+      <line1>7734 Franklin Ave</line1>
+      <city>Southport</city>
+      <state>FL</state>
+      <zip>32409</zip>
+   </address>
+   <directions>Traveling north on Hwy 77 turn left on 2nd St.  Travel west approximately 1/10 of a mile and turn left on Franklin Ave.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>West Bay Advent Church</location_name>
+      <line1>6326 Laird Park Rd</line1>
+      <city>Panama City Beach</city>
+      <state>FL</state>
+      <zip>32413</zip>
+   </address>
+   <directions>Traveling north on Hwy 79 turn right onto School Dr.  Turn left onto Laird Park Rd; Polling place will be on your right; Traveling south on Hwy 79 passing the West Bay Bridge turn left onto School Dr.  Turn left on Laird Park Rd.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>1st Baptist of Sunnyside</location_name>
+      <line1>21321 Panama City Beach Pkwy</line1>
+      <city>Panama City Beach</city>
+      <state>FL</state>
+      <zip>32413</zip>
+   </address>
+   <directions>Traveling west on Back Beach Rd pass Hwy 79 for approximately 5 miles.  Polling place will be on the left.  Traveling east on Back Beach Rd pass Phillips Inlet Bridge for approximately 2.25 miles.  Polling place will be on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Woodstock Church of PCB</location_name>
+      <line1>17495 Panama City Beach Pkwy</line1>
+      <city>Panama City Beach</city>
+      <state>FL</state>
+      <zip>32413</zip>
+   </address>
+   <directions>Traveling west on Back Bch Rd 1 mile pass Hwy 79 turn left on Cobb Rd .  Polling place will be on the left;  Traveling east on Front Bch Rd turn right on Cobb Rd; Polling place will be on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Frank Brown Park Comm Bldg</location_name>
+      <line1>16200 Panama City Beach Pkwy</line1>
+      <city>Panama City Beach</city>
+      <state>FL</state>
+      <zip>32413</zip>
+   </address>
+   <directions>Traveling west on Back Bch Rd past Pier Park turn right onto Mandy Ln.  Polling place will be on your right;  Traveling east on Back Bch Rd pass Hwy 79 turn left on Mandy Ln.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>PCB Senior Center</location_name>
+      <line1>423 Lyndell Ln</line1>
+      <city>Panama City Beach</city>
+      <state>FL</state>
+      <zip>32407</zip>
+   </address>
+   <directions>Traveling east on Back Beach Rd turn right on Lyndell Ln.  Polling place will be on the right.  Traveling west on Hutchison Blvd pass Alf Coleman Rd.  Turn right on Lyndell Ln.  Polling place will be on the left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>The Palms Conference Center</location_name>
+      <line1>9201 Front Beach Rd</line1>
+      <city>Panama City Beach</city>
+      <state>FL</state>
+      <zip>32407</zip>
+   </address>
+   <directions>Traveling west on Front Beach Rd pass the Allison Ave intersection.  Continue west approximately 1/10 of a mile on Front Beach Rd.  Polling place will be on your left across from Zoo World.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Cornerstone Baptist Church</location_name>
+      <line1>213 Carolyn Ave</line1>
+      <city>Panama City Beach</city>
+      <state>FL</state>
+      <zip>32407</zip>
+   </address>
+   <directions>Traveling east on Front Beach Road, turn left at the intersection of Hwy 98 and Woodlawn Dr before the Hathaway Bridge.  Travel north on Woodlawn Dr to intersection of Carolyn Ave.  Turn left on Carolyn Ave and travel north approximately 1/10 of a mile.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>LaQuinta Inn</location_name>
+      <line1>1000 Thomas Dr</line1>
+      <city>Panama City Beach</city>
+      <state>FL</state>
+      <zip>32408</zip>
+   </address>
+   <directions>Traveling north on Thomas Drive turn left on Coastal Palms Blvd.  Polling place will be on your left across from Navy Base entrance.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Hampton Inn</location_name>
+      <line1>2909 Thomas Dr</line1>
+      <city>Panama City Beach</city>
+      <state>FL</state>
+      <zip>32408</zip>
+   </address>
+   <directions>Traveling south on Thomas Dr pass the Magnolia Beach Rd intersection.  Continue south approximately 3/10 of a mile on Thomas Dr.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>1st Baptist of Deerpoint Lake</location_name>
+      <line1>5940 Hwy 2311</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling on Hwy 2321 turn onto Hwy 2311 (High Point Rd).  Continue north approximately 1/10 of a mile on Hwy 2311.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Bayou George Assembly</location_name>
+      <line1>5715 N Hwy 231</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling north on Hwy 231 pass the Hwy 390 intersection.  Continue north approximately 1.5 miles on Hwy 231.  Polling place will be on your left prior to the Star Ave intersection.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Lynn Haven City Hall Annex</location_name>
+      <line1>108 E 9th St</line1>
+      <city>Lynn Haven</city>
+      <state>FL</state>
+      <zip>32444</zip>
+   </address>
+   <directions>Traveling north on Hwy 77 turn right on 9th St.  Travel east approximately 1/10 of a mile on 9th St.  Polling place will be on your left next to the Lynn Haven City Hall.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>1st Baptist Ch of Lynn Haven</location_name>
+      <line1>1005 Ohio Ave</line1>
+      <city>Lynn Haven</city>
+      <state>FL</state>
+      <zip>32444</zip>
+   </address>
+   <directions>Traveling north on Hwy 77 pass the Hwy 390 intersection.  Continue north approximately 3/10 of a mile on Hwy 77.  Polling place will be on your right next to Sheffield Park.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>North Bay Baptist Church</location_name>
+      <line1>1202 Virginia Ave</line1>
+      <city>Lynn Haven</city>
+      <state>FL</state>
+      <zip>32444</zip>
+   </address>
+   <directions>Traveling north on Hwy 390 turn left on Virginia Ave.  Travel north approximately 2/10 of a mile on Viriginia Ave.  Polling place will be on your left;  Traveling south on Hwy 77 turn right on W 12th St.  Travel west approoximately 3/10 of a mile on W 12th St.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>Harvest Worship Center</location_name>
+      <line1>3238 E Hwy 390</line1>
+      <city>Lynn Haven</city>
+      <state>FL</state>
+      <zip>32444</zip>
+   </address>
+   <directions>Traveling north on Transmitter Rd turn left on Hwy 390.  Travel west approximately 2/10 of a mile on Hwy 390.  Polling place will be on your left;  Traveling east on Hwy 390 pass the Hwy 389 intersection.  Continue east approximately 1 mile on Hwy 390.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>Emerald Coast Fellowship</location_name>
+      <line1>4102 Hwy 390</line1>
+      <city>Lynn Haven</city>
+      <state>FL</state>
+      <zip>32444</zip>
+   </address>
+   <directions>Traveling south on Hwy 390 pass the Jenks Ave intersection.  Continue south approximately 1/10 of a mile.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Salvation Army</location_name>
+      <line1>2601 S Hwy 77</line1>
+      <city>Lynn Haven</city>
+      <state>FL</state>
+      <zip>32444</zip>
+   </address>
+   <directions>Traveling north on Hwy 77 pass the Mosley Drive intersection.  Continue north 4/10 of a mile on Hwy 77.  Polling place will be on your right;  Traveling south on Hwy 77 pass W 26th St intersection.  Make nearest U-turn to travel  north on Hwy 77.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>Messiah Lutheran Church</location_name>
+      <line1>3701 W HWY 390</line1>
+      <city>Lynn Haven</city>
+      <state>FL</state>
+      <zip>32444</zip>
+   </address>
+   <directions>Traveling north on Hwy 390 pass Token Rd.  Continue north 1/10 of a mile on Hwy 390.  Polling place will be on your left next to the Mathison Retirement Center.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>Fellowship Baptist Church</location_name>
+      <line1>2501 Michigan Ave</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32401</zip>
+   </address>
+   <directions>Traveling on 23rd St turn onto Michigan Ave.  Travel north approximately 2/10 of a mile on Michgan Ave.  Polling place will be on your left</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Grace Presbyterian Church</location_name>
+      <line1>1415 Airport Rd</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32401</zip>
+   </address>
+   <directions>Traveling on 23rd St turn onto Lisenby Ave.  Travel north approximately 1/10 of a mile on Lisenby Ave. Polling place will be on your left;  Traveling on Hwy 390 turn onto Lisenby Ave.  Travel south on Lisenby Ave to the Aiport Rd intersection.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>The Rock (Gym)</location_name>
+      <line1>2413 Harris Ave</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32405</zip>
+   </address>
+   <directions>Traveling east on 23rd St turn left on Hwy 231.  Travel north approximately 1/10 of a mile on Hwy 231 and turn left on Harris Ave.  Travel west approximately 1/10 of a mile on Harris Ave.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>West Side Men's Club</location_name>
+      <line1>4201 W 22nd St</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32405</zip>
+   </address>
+   <directions>Traveling on 23rd St turn on Grant Ave.  Travel 1/4 of a mile south on Grant Ave and turn right on W 22nd St.  Travel approximately 3/16 of a mile west on W 22nd St and turn right on High Ave.  Travel north on High Ave to dead end.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Shaddai Shrine Center</location_name>
+      <line1>1101 W 19th St</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32405</zip>
+   </address>
+   <directions>Traveling south on Lisenby Ave turn left on W 19th St.  Travel east approximately 2/10 of a mile on W 19th St.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>First Assembly of God</location_name>
+      <line1>1701 N East Ave</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32405</zip>
+   </address>
+   <directions>Traveling on Hwy 98 turn onto East Ave.  Travel north approximately 2/10 of a mile on East Ave.  Polling place will on your left;  Traveling south on East Ave pass Hwy 231 intersection.  Travel south 1.5 miles on East Ave.  Polling place will on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Bay County Public Library</location_name>
+      <line1>898 W 11th St</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32401</zip>
+   </address>
+   <directions>Traveling east on 11th St pass Balboa Ave.  Polling place will be on the left.  Traveling west on 11th St pass Martin Luther King Blvd.  Continue west on 11th St for approximately 1.5 miles.  Polling place will be on the right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>Glenwood Community Ctr</location_name>
+      <line1>722 E 9th Crt</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32401</zip>
+   </address>
+   <directions>Traveling south on Martin Luther King Blvd make U-turn right after E 9th Ct.  Turn right on E 9th Ct.  Travel east approximately 1/10 of a mile on E 9th Ct.  Polling place will be on your right;  Traveling north on Martin Luther King Blvd turn right on E 9th Ct. Travel east approximately 1/10 of a mile on E 9th Ct.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>Bay County Extension Office</location_name>
+      <line1>2728 E 14th St</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32405</zip>
+   </address>
+   <directions>Traveling east on Hwy 98 turn right on East Ave.  Travel south approximately 2/10 of a mile and turn left on E 14th St.  Travel east approximately 2/10 of a mile on E 14th St.  Polling place will be on your right;  Traveling west on 11th St turn right on East Ave.  Travel north on East Ave and turn right on E 14th St.  Travel east approximately 2/10 of a mile.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>Marina Civic Center</location_name>
+      <line1>8 Harrison Ave</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32401</zip>
+   </address>
+   <directions>Travel south on Harrison Ave to the Panama City Marina.  Polling place will be on the left accross from Panama City Hall.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>1st United Trinity Center</location_name>
+      <line1>903 E 4th St</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32405</zip>
+   </address>
+   <directions>Traveling east on Hwy 98 approximately 2/10 of a mile pass Martin Luther King Blvd.  Polling place will be on the right; Traveling west on Hwy 98 pass Watson Bayou.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>Daffin Park Clubhouse</location_name>
+      <line1>320 Kraft Ave</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32401</zip>
+   </address>
+   <directions>Traveling west on Hwy 22 turn right on Kraft Ave.  Travel north on Kraft Ave approximately 2/10 of a mile turn right onto unnamed road towards softball field.  Polling place will be on your left;  Traveling east on Hwy 98 turn right on Kraft Ave.  Travel approximately 1/2 of a mile south on Kraft Ave turn left onto unnamed road towards softball field.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>Springfield Community Bldg</location_name>
+      <line1>3728 E 3rd St</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32401</zip>
+   </address>
+   <directions>Traveling south on Transmitter Rd turn right on Hwy 22.  Travel west approximately 2/10 of a mile on Hwy 22.  Polling place will be on your left;  Travel south on Old Business 98 turn left on 3rd St.  Travel east approximately 4/10 of a mile on 3rd St.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>Callaway United Methodist Ch</location_name>
+      <line1>6619 Hwy 22</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling west on Hwy 22 pass N Berthe Ave intersection.  Travel west approximately 2/10 of a mile on Hwy 22.  Polling place will be on your right;  Travel east on Hwy 22 pass N Comet Ave intersection.  Travel east approximately 2/10 of a mile on Hwy 22.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>Callaway Arts and Conf Ctr</location_name>
+      <line1>500 Callaway Pkwy</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling north on Tyndall Parkway turn right onto Hwy 22. Travel east on Hwy 22.  Continue traveling east on Hwy 22 passing by Star Ave for 1.25 miles.  Turn left on Callaway Park Way.  Travel north on Callaway Park Way.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>Parkway Presbyterian Church</location_name>
+      <line1>505 S Tyndall Pkwy</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling south on Tyndall Pkwy pass Hickory St intersection.  Polling place will be on your left;  Traveling north on Tyndall Pkwy pass Boat Race Rd intersection.  Continue north on Tyndall Pkwy approximately 4/10 of a mile.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>Callaway Community Building</location_name>
+      <line1>530 Beulah Ave</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling north on S Berthe Ave turn right onto Omoko St.  Travel east on Omoko St to Beulah Ave and turn right.  Travel south on Beulah Ave to dead end.  Polling place will be on your right;  Traveling east on Cherry St turn right on Beulah Ave.  Travel south on Beulah Ave to dead end.  Polling place will be on your right.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>Parker Community Building</location_name>
+      <line1>935 W Park St</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling east on E. Bush Hwy 98 turn right on to W. Park St (across from basketball court).  Polling place will be on the left next to the City Hall; Traveling west on E. Bush Hwy 98 turn left on to W. Park St (across from basketball court).  Polling place will be on the left next to the City Hall.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>Parker United Methodist Ch</location_name>
+      <line1>908 S Tyndall Pkwy</line1>
+      <city>Panama City</city>
+      <state>FL</state>
+      <zip>32404</zip>
+   </address>
+   <directions>Traveling south on Tyndall Pkwy pass Boat Race Rd.  Polling place will be on your right;  Traveling north on Tyndall Pkwy stay right at Y-intersection of Pitts Bayou and Tyndall Pkwy towards Callaway.  Continue north apprxomiately 3/10 of a mile on Tyndall Pkwy.  Polling place will be on your left before Boat Race Rd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="48">
+   <address>
+      <location_name>Mexico Beach Civic Center</location_name>
+      <line1>105 N 31st ST</line1>
+      <city>Mexico Beach</city>
+      <state>FL</state>
+      <zip>32456</zip>
+   </address>
+   <directions>Traveling east on Hwy 98 towards Mexico Beach turn left on 30th St.  Polling place will be on your left;  Traveling west on Hwy 98 towards Panama City turn right on 30th St.  Polling place will be on your left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+</vip_object>

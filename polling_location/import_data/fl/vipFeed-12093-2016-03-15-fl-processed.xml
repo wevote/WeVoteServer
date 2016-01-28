@@ -1,0 +1,140 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Okeechobee County, FL</name>
+  <vip_id>12093</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>ABIDING HOPE WORSHIP CENTER</location_name>
+      <line1>4550 N HWY 441</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34972</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>BASINGER COMMUNITY CENTER</location_name>
+      <line1>20350 N HWY 98</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34972</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>OAKVIEW BAPTIST CHURCH</location_name>
+      <line1>677 SW 32ND ST</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34974</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>OKEECHOBEE CIVIC CENTER</location_name>
+      <line1>1750 N HWY 98</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34972</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>GRACIOUS RV PARK</location_name>
+      <line1>6500 SE HWY 441</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34974</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>THE R.O.C.</location_name>
+      <line1>310 SW 5TH AVE</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34974</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>HAMPTON INN</location_name>
+      <line1>1200 E HWY 70</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34972</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>KOA</location_name>
+      <line1>4276 S HWY 441</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34974</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>NEW TESTAMENT BAPTIST CHURCH</location_name>
+      <line1>535 NE 28th Ave</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34972</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>CORNERSTONE BAPTIST CHURCH</location_name>
+      <line1>18387 N HWY 441</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34972</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>PALM VILLAGE RANCH CLUBHOUSE</location_name>
+      <line1>1200 SW 44th Blvd</line1>
+      <city>Okeechobee</city>
+      <state>FL</state>
+      <zip>34974</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

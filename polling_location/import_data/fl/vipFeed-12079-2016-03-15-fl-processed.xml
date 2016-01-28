@@ -1,0 +1,142 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Madison County, FL</name>
+  <vip_id>12079</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>MADISON</location_name>
+      <line1>182 NW Ag Center</line1>
+      <city>Madison</city>
+      <state>FL</state>
+      <zip>32340</zip>
+   </address>
+   <directions>182 NW Ag Center Cir., Madison, FL 32340</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>MADISON</location_name>
+      <line1>243 SW Arnold St</line1>
+      <city>Madison</city>
+      <state>FL</state>
+      <zip>32340</zip>
+   </address>
+   <directions>243 SW Arnold St</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>LEE</location_name>
+      <line1>286 NE CR 255</line1>
+      <city>Lee</city>
+      <state>FL</state>
+      <zip>32059</zip>
+   </address>
+   <directions>286 N. E. CR 255 North</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>SIRMANS</location_name>
+      <line1>118 SW Okaloo Way</line1>
+      <city>Greenville</city>
+      <state>FL</state>
+      <zip>32331</zip>
+   </address>
+   <directions>118 SW Okaloo Way, Greenville  FL 32331
+                                                                                                                                                               </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>GREENVILLE</location_name>
+      <line1>166 SW Onslow St</line1>
+      <city>Greenville</city>
+      <state>FL</state>
+      <zip>32331</zip>
+   </address>
+   <directions>166 SW Onslow St Greenville FL 32331                                                                                                                                                                    </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>HAMBURG</location_name>
+      <line1>7286 NW Lovett Rd</line1>
+      <city>Greenville</city>
+      <state>FL</state>
+      <zip>32331</zip>
+   </address>
+   <directions>7286 NW Lovett Road Greenville FL 32331</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>CHERRY LAKE</location_name>
+      <line1>7983 N SR 53</line1>
+      <city>Madison</city>
+      <state>FL</state>
+      <zip>32340</zip>
+   </address>
+   <directions>7983 N SR 53, Madison FL 32340</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>PINETTA</location_name>
+      <line1>509 NE Persimmon Dr</line1>
+      <city>Pinetta</city>
+      <state>FL</state>
+      <zip>32350</zip>
+   </address>
+   <directions>509 NE Persimmon Dr.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>ERIDU</location_name>
+      <line1>11389 SW Overstreet Ave</line1>
+      <city>Lamont</city>
+      <state>FL</state>
+      <zip>32336</zip>
+   </address>
+   <directions>11389 SW Overstreet Ave, Lamont, FL 32336</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>MADISON</location_name>
+      <line1>229 SW Pinckney St</line1>
+      <city>Madison</city>
+      <state>FL</state>
+      <zip>32340</zip>
+   </address>
+   <directions>229 SW Pinckney St., Rm 107, Madison, FL 32340                                                                                                                                                          </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>MADISON</location_name>
+      <line1>146 SE Bunker St</line1>
+      <city>Madison</city>
+      <state>FL</state>
+      <zip>32340</zip>
+   </address>
+   <directions>146 SE Bunker St Madison, Fl 32340                                                                                                                                                                      </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

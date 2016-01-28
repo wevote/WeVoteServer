@@ -1,0 +1,152 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Hardee County, FL</name>
+  <vip_id>12049</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+<polling_location id="4">
+   <address>
+      <location_name>FORT GREEN BAPTIST CHURCH</location_name>
+      <line1>2875 GREEN BAPTIST CHURCH RD</line1>
+      <city>BOWLING GREEN</city>
+      <state>FL</state>
+      <zip>33834</zip>
+   </address>
+   <directions>BAPTIST CHURCH RD OFF FR SR 62 W, FT GREEN BAPTIST CHURCH                                                                                                                                               </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>BOWLING GREEN FAITH ASSEMBLY OF GOD</location_name>
+      <line1>4937 Highway 17 North</line1>
+      <city>Bowling Green</city>
+      <state>FL</state>
+      <zip>33834</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>COUNCIL CHAMBERS BOWLING GREEN</location_name>
+      <line1>104 E Main St</line1>
+      <city>Bowling Green</city>
+      <state>FL</state>
+      <zip>33834</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>FIRST UNITED METHODIST CHURCH WAUC</location_name>
+      <line1>207 N 7th Ave</line1>
+      <city>Wauchula</city>
+      <state>FL</state>
+      <zip>33873</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>ONA BAPTIST CHURCH</location_name>
+      <line1>131 Bear Ln</line1>
+      <city>Ona</city>
+      <state>FL</state>
+      <zip>33865</zip>
+   </address>
+   <directions>FOX ST &amp; BEAR LN OFF FR HWY 64, ONA FL                                                                                                                                                                  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>COUNTY COMMISSION CHAMBERS</location_name>
+      <line1>412 W Orange St</line1>
+      <city>Wauchula</city>
+      <state>FL</state>
+      <zip>33873</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>ZOLFO SPRINGS CIVIC CENTER</location_name>
+      <line1>3210 Highway 17 South</line1>
+      <city>Zolfo Springs</city>
+      <state>FL</state>
+      <zip>33890</zip>
+   </address>
+   <directions>OFF HWY 17, ZOLFO SPRINGS FLA. 33890                                                                                                                                                                    </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>1ST MISSIONARY BAPTIST CHURCH</location_name>
+      <line1>1333 Martin Luther King Ave</line1>
+      <city>Wauchula</city>
+      <state>FL</state>
+      <zip>33873</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>NEW HOPE BAPTIST CHURCH</location_name>
+      <line1>1999 State Road 64 East</line1>
+      <city>Wauchula</city>
+      <state>FL</state>
+      <zip>33873</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>WAUCHULA CITY HALL</location_name>
+      <line1>225 E Main St</line1>
+      <city>Wauchula</city>
+      <state>FL</state>
+      <zip>33873</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>PRECO (REA) PARK, KNIGHT RD</location_name>
+      <line1>220 KNIGHT Rd</line1>
+      <city>WAUCHULA</city>
+      <state>FL</state>
+      <zip>33873</zip>
+   </address>
+   <directions>KNIGHT RD OFF FROM NORTH FLA AVE                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>NATIONAL GUARD ARMORY</location_name>
+      <line1>450 RODEO DR</line1>
+      <city>WAUCHULA</city>
+      <state>FL</state>
+      <zip>33873</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

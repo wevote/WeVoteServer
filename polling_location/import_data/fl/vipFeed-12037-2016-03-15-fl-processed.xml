@@ -1,0 +1,129 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Franklin County, FL</name>
+  <vip_id>12037</vip_id>
+  <datetime>2015-12-09T02:45:00</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>Volunteer Fire Department</location_name>
+      <line1>24 6th St</line1>
+      <city>Eastpoint</city>
+      <state>FL</state>
+      <zip>32328</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Mission by the Sea</location_name>
+      <line1>772 Alligator Dr</line1>
+      <city>Aliigator Point</city>
+      <state>FL</state>
+      <zip>323460000</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Florida National Guard Armory</location_name>
+      <line1>66 4th St</line1>
+      <city>Apalachicola</city>
+      <state>FL</state>
+      <zip>32320</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>American Legion</location_name>
+      <line1>801 W US HWY 98</line1>
+      <city>Apalachicola</city>
+      <state>FL</state>
+      <zip>32320</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Senior Citizens Center</location_name>
+      <line1>201 Avenue F</line1>
+      <city>Carrabelle</city>
+      <state>FL</state>
+      <zip>32322</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Chillas Hall</location_name>
+      <line1>156 A Heffernan Dr</line1>
+      <city>Lanark Village</city>
+      <state>FL</state>
+      <zip>32323</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>St. George Island Methodist Church</location_name>
+      <line1>201E Gulf Beach Dr</line1>
+      <city>St George Island</city>
+      <state>FL</state>
+      <zip>32328</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>American Legion Hall</location_name>
+      <line1>801 W US HWY 98</line1>
+      <city>Apalachicola</city>
+      <state>FL</state>
+      <zip>32320</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Carrabelle Annex</location_name>
+      <line1>1647 Hwy 98 E</line1>
+      <city>Carrabelle</city>
+      <state>FL</state>
+      <zip>32322</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Elections Office</location_name>
+      <line1>47 Ave F</line1>
+      <city>Apalachicola</city>
+      <state>FL</state>
+      <zip>32320</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

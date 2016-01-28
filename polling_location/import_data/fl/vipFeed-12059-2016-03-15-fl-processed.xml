@@ -1,0 +1,117 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Holmes County, FL</name>
+  <vip_id>12059</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>Ponce de Leon</location_name>
+      <line1>1580 Highway 90</line1>
+      <city>Ponce de Leon</city>
+      <state>FL</state>
+      <zip>32455</zip>
+   </address>
+   <directions>1580 HWY 90 Ponce de Leon FL 32455</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Pine Log</location_name>
+      <line1>1652 N Highway 81</line1>
+      <city>Westville</city>
+      <state>FL</state>
+      <zip>32464</zip>
+   </address>
+   <directions>1652 N Hwy 81 Westville FL 32464</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>New Hope</location_name>
+      <line1>1243 Highway 179A</line1>
+      <city>Westville</city>
+      <state>FL</state>
+      <zip>32464</zip>
+   </address>
+   <directions>1243 HWY 179A Westville FL 32464</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Bethlehem</location_name>
+      <line1>2767 Highway 160</line1>
+      <city>Bonifay</city>
+      <state>FL</state>
+      <zip>32425</zip>
+   </address>
+   <directions>2767 Hwy 160 Bonifay FL 32425</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Gritney</location_name>
+      <line1>2141 Tobe Retherford Rd</line1>
+      <city>Bonifay</city>
+      <state>FL</state>
+      <zip>32425</zip>
+   </address>
+   <directions>2141 Tobe Retherford Rd Bonifay FL 32425</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Noma</location_name>
+      <line1>3467 Skipper Ave</line1>
+      <city>Bonifay</city>
+      <state>FL</state>
+      <zip>32425</zip>
+   </address>
+   <directions>3467 Skipper Ave Bonifay FL 32425</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>West Bonifay</location_name>
+      <line1>1173 E Highway 90</line1>
+      <city>Bonifay</city>
+      <state>FL</state>
+      <zip>32425</zip>
+   </address>
+   <directions>1173 E HWY 90 Bonifay FL 32425</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>East Bonifay</location_name>
+      <line1>1173 E Highway 90</line1>
+      <city>Bonifay</city>
+      <state>FL</state>
+      <zip>32425</zip>
+   </address>
+   <directions>1173 E HWY 90 Bonifay FL 32425</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Bonifay City Hall</location_name>
+      <line1>301 N Harvey Etheridge St</line1>
+      <city>Bonifay</city>
+      <state>FL</state>
+      <zip>32425</zip>
+   </address>
+   <directions></directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

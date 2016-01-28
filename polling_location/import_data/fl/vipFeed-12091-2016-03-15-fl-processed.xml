@@ -1,0 +1,634 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Okaloosa County, FL</name>
+  <vip_id>12091</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>Baker Area Recreation Bldg</location_name>
+      <line1>5503 HWY 4</line1>
+      <city>Baker</city>
+      <state>FL</state>
+      <zip>32531</zip>
+   </address>
+   <directions>East side of Hwy 4, south of the center of Baker</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Blackman Community Center</location_name>
+      <line1>7590 HWY 189 N</line1>
+      <city>Baker</city>
+      <state>FL</state>
+      <zip>32531</zip>
+   </address>
+   <directions>West side of Hwy 189 N, just north of Hwy 2 intersection</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Milligan Assembly of God Church</location_name>
+      <line1>5408 Highway 4</line1>
+      <city>Baker</city>
+      <state>FL</state>
+      <zip>32531-8434</zip>
+   </address>
+   <directions>On the west side of Hwy 4, just over one mile north of Hwy 90
+</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>First Baptist Church of Holt</location_name>
+      <line1>532 HWY 90 W</line1>
+      <city>Holt</city>
+      <state>FL</state>
+      <zip>32564</zip>
+   </address>
+   <directions>From Hwy 85, go west on Hwy 90. Church is on the left side just before intersection of Hwy 189 and Hwy 90.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>First Baptist Church of Laurel Hill</location_name>
+      <line1>3972 2nd Ave</line1>
+      <city>Laurel Hill</city>
+      <state>FL</state>
+      <zip>32567</zip>
+   </address>
+   <directions>From Hwy 85, turn east onto 2nd Ave, near the Laurel Hill Grill.  Church is on the south side of the road about ¼ mile down  </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Auburn Pentecostal Church</location_name>
+      <line1>6144 HWY 85 N</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32536</zip>
+   </address>
+   <directions>West side of Hwy 85, just south of Auburn Rd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Dorcas Baptist Church</location_name>
+      <line1>5880 McCallum Rd</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32536</zip>
+   </address>
+   <directions>From Hwy 90, go north on Hwy 393, turn east at the firestation onto Dorcas Rd, turn left/north onto McCallum Rd.  Church is on the left/west side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Emmanuel Baptist Church</location_name>
+      <line1>3252 James Lee Blvd E</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32539</zip>
+   </address>
+   <directions>South side of James Lee Blvd/Hwy 90 E, just west of the Shoal River</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>New Beginnings Church</location_name>
+      <line1>412 James Lee Blvd W</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32536</zip>
+   </address>
+   <directions>Proceeding west from James Lee Blvd W/Ferdon Blvd N, church is on north side of James Lee Blvd W, approx ½ mile down next to Family Dollar.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Covenant Community Church</location_name>
+      <line1>1007 Gospel Rd</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32547</zip>
+   </address>
+   <directions>Sits back off west side of Lewis Turner Blvd, just north of the light at the Ron Crawford Recreation Center (old YMCA).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Lifepoint Church</location_name>
+      <line1>400 Ferdon Blvd S</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32536</zip>
+   </address>
+   <directions>Formerly named First Assembly of God.  Big glass church, west side of Ferdon Blvd S, south of the RR overpass, next to Good Things Donuts.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Carver Hill School</location_name>
+      <line1>461 School Ave W</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32536</zip>
+   </address>
+   <directions>From Ferdon Blvd S, turn west onto Duggan Ave (Eglin FCU), turn north onto Bay St.  About ½ mile up, turn west on School Ave, school is on south side of the road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Woodlawn Baptist Church</location_name>
+      <line1>824 Ferdon Blvd N</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32536</zip>
+   </address>
+   <directions>West side of Ferdon Blvd N, just north of the light at Stillwell/Northview Plaza.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>St. Jude's Episcopal Church</location_name>
+      <line1>200 Partin Dr N</line1>
+      <city>Niceville</city>
+      <state>FL</state>
+      <zip>32578</zip>
+   </address>
+   <directions>Northwest side of Partin Dr N/Hwy 285, about ¼ mile north of John Sims/Hwy 20, south of the library.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>First Baptist Church of Valparaiso</location_name>
+      <line1>444 Valparaiso Pkwy</line1>
+      <city>Valparaiso</city>
+      <state>FL</state>
+      <zip>32580</zip>
+   </address>
+   <directions>From John Sims Pkwy S, turn west on Valparaiso Pkwy/Hwy 190.  Building is on north side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Okaloosa County Administration Bldg</location_name>
+      <line1>1250 Eglin Pkwy</line1>
+      <city>Shalimar</city>
+      <state>FL</state>
+      <zip>32579</zip>
+   </address>
+   <directions>Northwest corner of Erwin Fleet Rd and Eglin Pkwy</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Wright Baptist Church</location_name>
+      <line1>795 Beal Pkwy NW</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32547-3080</zip>
+   </address>
+   <directions>From Racetrack Rd, turn south on Beal Pkwy.  Church is across from Harley dealership on Beal Pky.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Beachside Community Church</location_name>
+      <line1>200 Racetrack Rd NW</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32547</zip>
+   </address>
+   <directions>From Eglin Pkwy N, turn west onto Racetrack Rd.  Church is on north side of Racetrack Rd NW, about 1½ miles down, just west of Choctawhatchee High School.  Polling place entrance is on east side of building.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>Beulah First Baptist Church</location_name>
+      <line1>109 McGriff St</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32548</zip>
+   </address>
+   <directions>From Beal Pkwy, turn east on McGriff St (between Ford &amp; Regions Bank). Church is on north side about ¼ mile down.  From Eglin Pkwy, turn west on McGriff St (across from McDonalds).</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Destin Community Center</location_name>
+      <line1>101 Stahlman Ave</line1>
+      <city>Destin</city>
+      <state>FL</state>
+      <zip>32541</zip>
+   </address>
+   <directions>From Hwy 98/Harbor Blvd, turn north at first light east of the Bridge.  Community Center is on left/northwest.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="25">
+   <address>
+      <location_name>First Baptist Church</location_name>
+      <line1>28 North St</line1>
+      <city>Mary Esther</city>
+      <state>FL</state>
+      <zip>32569</zip>
+   </address>
+   <directions>North side of Hwy 98. About ¼ mile east of Hurlburt Field gate, turn north on Overstreet Dr (parking lot side), then turn east on North St.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="26">
+   <address>
+      <location_name>St Mary Catholic Church Parish Life Ctr</location_name>
+      <line1>110 St Mary Ave SW</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32548</zip>
+   </address>
+   <directions>From Hollywood Blvd, turn south on Robinwood Dr.  Turn west onto Coral Dr.  Life Center will be on the north side.  (Enter parking lot at western most entrance.)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="27">
+   <address>
+      <location_name>Eglin West Gate Chapel</location_name>
+      <line1>0 Eglin Blvd</line1>
+      <city>Eglin Afb</city>
+      <state>FL</state>
+      <zip>32542</zip>
+   </address>
+   <directions>Enter West Gate of Eglin AFB. Proceed straight on Eglin Blvd.  Chapel is on right side of Eglin Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="28">
+   <address>
+      <location_name>Knights of Columbus</location_name>
+      <line1>205 Carol Ave NW</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32547</zip>
+   </address>
+   <directions>On Carol Ave, across the street from Home Depot/Golden Corral.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="29">
+   <address>
+      <location_name>Holy Name of Jesus Catholic Church</location_name>
+      <line1>1200 Valparaiso Blvd</line1>
+      <city>Niceville</city>
+      <state>FL</state>
+      <zip>32578</zip>
+   </address>
+   <directions>East of Palm Blvd S, north side of Valparaiso Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="30">
+   <address>
+      <location_name>Christ Our Redeemer Catholic Church</location_name>
+      <line1>1028 White Point Rd</line1>
+      <city>Niceville</city>
+      <state>FL</state>
+      <zip>32578</zip>
+   </address>
+   <directions>From John Sims Pkwy/Hwy 20, turn south on White Point Road.  Church will be on east side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="31">
+   <address>
+      <location_name>Cinco Bayou Town Hall</location_name>
+      <line1>10 Yacht Club Dr</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32548</zip>
+   </address>
+   <directions>Street runs between Beal &amp; Eglin Pkwys, south of Cinco Bayou.  Town Hall is on north side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="32">
+   <address>
+      <location_name>Cinco Bayou Town Hall</location_name>
+      <line1>10 Yacht Club Dr</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32548</zip>
+   </address>
+   <directions>Street runs between Beal &amp; Eglin Pkwys, south of Cinco Bayou.  Town Hall is on north side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="33">
+   <address>
+      <location_name>Trinity United Meth. Church</location_name>
+      <line1>403 Racetrack Rd NW</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32547</zip>
+   </address>
+   <directions>South side of Racetrack Rd NW at intersection with Mar Walt Dr (hospital).  Close to west end of Racetrack. (Enter parking lot from westernmost drive.)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="34">
+   <address>
+      <location_name>Elks Lodge</location_name>
+      <line1>1335 Miracle Strip Pky</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32548</zip>
+   </address>
+   <directions>North side of Miracle Strip Pkwy/Hwy 98, just west of Gulf National Sea Shore.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="35">
+   <address>
+      <location_name>Bob Hope Village Welcome Ctr.</location_name>
+      <line1>92 Sunset Ln</line1>
+      <city>Shalimar</city>
+      <state>FL</state>
+      <zip>32579</zip>
+   </address>
+   <directions>From Eglin Pkwy or Poquito Rd, turn west on Sunset Ln.  Welcome Center is at entrance to Bob Hope Village.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="36">
+   <address>
+      <location_name>The Church of Christ</location_name>
+      <line1>232 Hollywood Blvd SE</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32548</zip>
+   </address>
+   <directions>From Eglin Pkwy, turn east on Hollywood Blvd.  Church is on south side about ¼ mile down.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="37">
+   <address>
+      <location_name>First Presbyterian Church</location_name>
+      <line1>1800 John Sims Pky</line1>
+      <city>Niceville</city>
+      <state>FL</state>
+      <zip>32578</zip>
+   </address>
+   <directions>Corner of Rocky Bayou Dr &amp; John Sims Pkwy, north side, west of Rocky Bayou Bridge.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="38">
+   <address>
+      <location_name>St. Peter Catholic Church</location_name>
+      <line1>100 Francis St</line1>
+      <city>Mary Esther</city>
+      <state>FL</state>
+      <zip>32569</zip>
+   </address>
+   <directions>From Hwy 98, turn north on Francis St., which is about 1¼ miles west of Hurlburt Field.  Church is at end of road on left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="39">
+   <address>
+      <location_name>Destin United Methodist Church</location_name>
+      <line1>200 Beach Dr</line1>
+      <city>Destin</city>
+      <state>FL</state>
+      <zip>32541</zip>
+   </address>
+   <directions>From Hwy 98/Harbor Blvd, turn north on Beach Dr.  Church is on east side about ¼ mile up.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="40">
+   <address>
+      <location_name>Holy Name of Jesus Catholic Church</location_name>
+      <line1>1200 Valparaiso Blvd</line1>
+      <city>Niceville</city>
+      <state>FL</state>
+      <zip>32578-2946</zip>
+   </address>
+   <directions>East of Palm Blvd S, north side of Valparaiso Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="41">
+   <address>
+      <location_name>Okaloosa County Administration Bldg</location_name>
+      <line1>1250 Eglin Pkwy</line1>
+      <city>Shalimar</city>
+      <state>FL</state>
+      <zip>32579</zip>
+   </address>
+   <directions>Northwest corner of Erwin Fleet Rd and Eglin Pkwy</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="42">
+   <address>
+      <location_name>The Salvation Army Chapel</location_name>
+      <line1>425 Mary Esther CTO</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32548-4019</zip>
+   </address>
+   <directions>Behind Sun Plaza Theatre, next to Salvation Army store</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="43">
+   <address>
+      <location_name>Sons of Italy Building</location_name>
+      <line1>808 South Dr</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32547</zip>
+   </address>
+   <directions>From Racetrack Rd, turn south on Patio or Auburn (either side of Choctaw Plaza), turn on South Central, turn south on South Dr, building on west side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="44">
+   <address>
+      <location_name>Christ Our Redeemer Catholic Church</location_name>
+      <line1>1028 White Point Rd</line1>
+      <city>Niceville</city>
+      <state>FL</state>
+      <zip>32578</zip>
+   </address>
+   <directions>From John Sims Pkwy/Hwy 20, turn right on White Point Road.  Church will be on east side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="45">
+   <address>
+      <location_name>St Mary Catholic Church Parish Life Ctr</location_name>
+      <line1>110 St Mary Ave SW</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32548</zip>
+   </address>
+   <directions>From Hollywood Blvd, turn south on Robinwood Dr.  Turn west onto Coral Dr.  Life Center will be on the north side.  (Enter parking lot at western most entrance.)</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="46">
+   <address>
+      <location_name>Abundant Life Church</location_name>
+      <line1>233 Hill Ave N</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32548</zip>
+   </address>
+   <directions>Southbound on Martin Luther King Jr Blvd, turn right on Butler Dr (street after Independence Rd leading to Hurlburt entrance). Church is at end of street.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="47">
+   <address>
+      <location_name>Holy Name of Jesus Catholic Church</location_name>
+      <line1>1200 Valparaiso Blvd</line1>
+      <city>Niceville</city>
+      <state>FL</state>
+      <zip>32578</zip>
+   </address>
+   <directions>East of Palm Blvd S, north side of Valparaiso Blvd.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="48">
+   <address>
+      <location_name>Destin United Methodist Church</location_name>
+      <line1>200 Beach Dr</line1>
+      <city>Destin</city>
+      <state>FL</state>
+      <zip>32541</zip>
+   </address>
+   <directions>From Hwy 98/Harbor Blvd, turn north on Beach Dr.  Church is on east side about ¼ mile up.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="49">
+   <address>
+      <location_name>Foxwood Country Club</location_name>
+      <line1>4927 Antioch Rd</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32536</zip>
+   </address>
+   <directions>From Hwy 85/Ferdon Blvd, turn west on PJ Adams Pkwy (becomes Antioch Rd).  Foxwood is on east side about 3½ miles down.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="50">
+   <address>
+      <location_name>Bluewater Community Church</location_name>
+      <line1>4580 Range Rd</line1>
+      <city>Niceville</city>
+      <state>FL</state>
+      <zip>32578</zip>
+   </address>
+   <directions>From Hwy 20, turn on Range Rd or north on Bluewater Blvd.  Church is on south side east of Bluewater Blvd</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="51">
+   <address>
+      <location_name>St Peter Catholic Church</location_name>
+      <line1>100 Francis St</line1>
+      <city>Mary Esther</city>
+      <state>FL</state>
+      <zip>32569</zip>
+   </address>
+   <directions>From Hwy 98, turn north on Francis St., which is about 1 1/4 miles west of Hurlburt Field.  Church is at end of road on left.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="52">
+   <address>
+      <location_name>The Meridian at Westwood</location_name>
+      <line1>1001 Mar Walt Dr NW</line1>
+      <city>Fort Walton Beach</city>
+      <state>FL</state>
+      <zip>32547</zip>
+   </address>
+   <directions>1st floor of building</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="53">
+   <address>
+      <location_name>Destin City Hall Annex</location_name>
+      <line1>4100 Indian Bayou Trl</line1>
+      <city>Destin</city>
+      <state>FL</state>
+      <zip>32541</zip>
+   </address>
+   <directions>From Hwy 98, turn north onto Indian Bayou Trail.  Go past City Hall and straight through round-about.  Annex is on the west side of the road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="54">
+   <address>
+      <location_name>Destin City Hall Annex</location_name>
+      <line1>4100 Indian Bayou Trl</line1>
+      <city>Destin</city>
+      <state>FL</state>
+      <zip>32541</zip>
+   </address>
+   <directions>From Hwy 98, turn north onto Indian Bayou Trail . Go past City Hall and straight through round-about.  Annex is on the west side of the road.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="55">
+   <address>
+      <location_name>Airport Road Church of Christ</location_name>
+      <line1>2845 Airport Rd</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32536</zip>
+   </address>
+   <directions>From Hwy 85/Ferdon Blvd, turn east on Airport Rd (light north of CHS).  Church is on the north side.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="56">
+   <address>
+      <location_name>Live Oak Baptist Church</location_name>
+      <line1>4565 Live Oak Church Rd</line1>
+      <city>Crestview</city>
+      <state>FL</state>
+      <zip>32536</zip>
+   </address>
+   <directions>From Hwy 85/Ferdon Blvd, turn east on Live Oak Church Rd (light before Shoal River Bridge).  Church is about ½ mile on east.</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>

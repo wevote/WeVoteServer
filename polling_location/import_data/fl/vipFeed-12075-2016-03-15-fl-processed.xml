@@ -1,0 +1,263 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election%20spec%20v3.0.xsd" schemaVersion="3.0">
+
+<source id="1">
+  <name>Levy County</name>
+  <vip_id>12075</vip_id>
+  <datetime>2015-12-02T02:45:00</datetime>
+</source>
+
+
+<polling_location id="4">
+   <address>
+      <location_name>Bronson Ag Bldg</location_name>
+      <line1>625 N Hathaway Ave</line1>
+      <city>Bronson</city>
+      <state>FL</state>
+      <zip>32621</zip>
+   </address>
+   <directions>625 N Hathaway Ave
+Bronson, FL 32621</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="5">
+   <address>
+      <location_name>Faith Baptist Tabernacle</location_name>
+      <line1>17531 NE HWY 27 ALT</line1>
+      <city>Williston</city>
+      <state>FL</state>
+      <zip>32696</zip>
+   </address>
+   <directions>17531 NE Hwy 27 Alt
+Williston, FL 32696</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="6">
+   <address>
+      <location_name>Bronson Dogan Cobb Bldg</location_name>
+      <line1>660 E Hathaway Ave</line1>
+      <city>Bronson</city>
+      <state>FL</state>
+      <zip>32621</zip>
+   </address>
+   <directions>660 E Hathaway Ave
+Bronson, FL 32621</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="7">
+   <address>
+      <location_name>Cedar Key City Hall</location_name>
+      <line1>490 Second St</line1>
+      <city>Cedar Key</city>
+      <state>FL</state>
+      <zip>32625</zip>
+   </address>
+   <directions>490 Second St
+Cedar Key, FL 32625</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="8">
+   <address>
+      <location_name>Willow Sink</location_name>
+      <line1>6731 NW 100th St</line1>
+      <city>Chiefland</city>
+      <state>FL</state>
+      <zip>32626</zip>
+   </address>
+   <directions>6731 NW 100th St
+Chiefland, FL 32626</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="9">
+   <address>
+      <location_name>Gulf Hammock Church of God</location_name>
+      <line1>3510 SE CR 326</line1>
+      <city>Gulf Hammock</city>
+      <state>FL</state>
+      <zip>32639</zip>
+   </address>
+   <directions>3510 SE Co Rd 326
+Gulf Hammock, FL 32639</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="10">
+   <address>
+      <location_name>Williston Community Center</location_name>
+      <line1>46 NW Main St</line1>
+      <city>Williston</city>
+      <state>FL</state>
+      <zip>32696</zip>
+   </address>
+   <directions>46 NW Main St
+Williston, FL 32696</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="11">
+   <address>
+      <location_name>Morriston Baptist Church</location_name>
+      <line1>3141 SE Hwy 41</line1>
+      <city>Morriston</city>
+      <state>FL</state>
+      <zip>32668</zip>
+   </address>
+   <directions>3141 SE Hwy 41
+Morriston, FL 32668</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="13">
+   <address>
+      <location_name>Inglis Community Center</location_name>
+      <line1>137 HWY 40 W</line1>
+      <city>Inglis</city>
+      <state>FL</state>
+      <zip>34449</zip>
+   </address>
+   <directions>137 Hwy 40 W
+Inglis, FL 34449</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="14">
+   <address>
+      <location_name>Pine Grove Baptist Church</location_name>
+      <line1>16655 NW CR 339</line1>
+      <city>Trenton</city>
+      <state>FL</state>
+      <zip>32693</zip>
+   </address>
+   <directions>16655 NW Co Rd 339
+Trenton, FL 32693</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="15">
+   <address>
+      <location_name>Miracle Vision Tabernacle Outreach</location_name>
+      <line1>18680 NE 75th St</line1>
+      <city>Williston</city>
+      <state>FL</state>
+      <zip>32696</zip>
+   </address>
+   <directions>18680 NE 75th St
+Williston, FL 32696</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="16">
+   <address>
+      <location_name>Fanning Springs City Hall</location_name>
+      <line1>17651 NW 90th Ct</line1>
+      <city>Fanning Springs</city>
+      <state>FL</state>
+      <zip>32693</zip>
+   </address>
+   <directions>17651 NW 90th Ct
+Fanning Springs, FL 32693</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="17">
+   <address>
+      <location_name>Tommy Usher Center</location_name>
+      <line1>506 SW 4th Ave</line1>
+      <city>Chiefland</city>
+      <state>FL</state>
+      <zip>32626</zip>
+   </address>
+   <directions>506 SW 4th Ave
+Chiefland, FL 32626</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="18">
+   <address>
+      <location_name>Bronson Town Hall</location_name>
+      <line1>660 E Hathaway Ave</line1>
+      <city>Bronson</city>
+      <state>FL</state>
+      <zip>32621</zip>
+   </address>
+   <directions>660 E Hathaway Ave
+Bronson, FL 32621</directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="19">
+   <address>
+      <location_name>Faith Baptist Tabernacle</location_name>
+      <line1>17531 NE HWY 27 ALT</line1>
+      <city>Williston</city>
+      <state>FL</state>
+      <zip>32696</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="20">
+   <address>
+      <location_name>Tommy Usher Center</location_name>
+      <line1>506 SW 4th Ave</line1>
+      <city>Chiefland</city>
+      <state>FL</state>
+      <zip>32626</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="21">
+   <address>
+      <location_name>Otter Creek Town Hall</location_name>
+      <line1>551 SW 2nd Ave</line1>
+      <city>Otter Creek</city>
+      <state>FL</state>
+      <zip>32683</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="22">
+   <address>
+      <location_name>Fowlers Bluff Fire House</location_name>
+      <line1>4591 NW CO Rd 347</line1>
+      <city>Chiefland</city>
+      <state>FL</state>
+      <zip>32626</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="23">
+   <address>
+      <location_name>Gulf Hammock</location_name>
+      <line1>2852 SE CO Rd 326</line1>
+      <city>Gulf Hammock</city>
+      <state>FL</state>
+      <zip>32639</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+
+<polling_location id="24">
+   <address>
+      <location_name>Fanning Springs City Hall</location_name>
+      <line1>17651 NW 90th Ct</line1>
+      <city>Trenton</city>
+      <state>FL</state>
+      <zip>32693</zip>
+   </address>
+   <directions>                                                                                                                                                                                                        </directions>
+   <polling_hours></polling_hours>
+</polling_location>
+</vip_object>
