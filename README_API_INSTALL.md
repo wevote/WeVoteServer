@@ -191,8 +191,12 @@ Sample data is provided. You can load this data by clicking the "Import Test Dat
 
     http://localhost:8000/admin
  
-If you need to retrieve fresh ballot data, you will need to sign up for a Google Civic API key.
-TODO: Describe the process of getting a Google Civic API Key
+If you need to retrieve fresh ballot data, you will need to sign up for a Google Civic API key:
+
+  - Go here:  https://console.developers.google.com/projectselector/apis/credentials?pli=1
+  - Create a new project
+  - Click Credentials -> New credentials -> API Key -> Browser Key
+  - Copy your newly generated key and paste it into config/environment_variables.json as the value for GOOGLE_CIVIC_API_KEY
     
 [Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
