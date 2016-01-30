@@ -91,14 +91,42 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
                 kind_of_ballot_item = OFFICE
                 ballot_item_id = ballot_item.contest_office_id
                 we_vote_id = ballot_item.contest_office_we_vote_id
+                try:
+                    candidate_list_object = CandidateCampaignList()
+                    results = candidate_list_object.retrieve_all_candidates_for_office(ballot_item_id, we_vote_id)
+                    candidates_to_display = []
+                    if results['candidate_list_found']:
+                        candidate_list = results['candidate_list']
+                        for candidate in candidate_list:
+                            # This should match values returned in candidates_retrieve_for_api
+                            one_candidate = {
+                                'id':                           candidate.id,
+                                'we_vote_id':                   candidate.we_vote_id,
+                                'ballot_item_display_name':     candidate.candidate_name,
+                                'candidate_photo_url':          candidate.fetch_photo_url(),
+                                'order_on_ballot':              candidate.order_on_ballot,
+                                'kind_of_ballot_item':          CANDIDATE,
+                            }
+                            candidates_to_display.append(one_candidate.copy())
+                except Exception as e:
+                    # status = 'FAILED candidates_retrieve. ' \
+                    #          '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                    candidates_to_display = []
+                one_ballot_item = {
+                    'ballot_item_display_name':     ballot_item.ballot_item_display_name,
+                    'google_civic_election_id':     ballot_item.google_civic_election_id,
+                    'google_ballot_placement':      ballot_item.google_ballot_placement,
+                    'local_ballot_order':           ballot_item.local_ballot_order,
+                    'kind_of_ballot_item':          kind_of_ballot_item,
+                    'id':                           ballot_item_id,
+                    'we_vote_id':                   we_vote_id,
+                    'candidate_list':               candidates_to_display,
+                }
+                ballot_items_to_display.append(one_ballot_item.copy())
             elif ballot_item.contest_measure_we_vote_id:
                 kind_of_ballot_item = MEASURE
                 ballot_item_id = ballot_item.contest_measure_id
                 we_vote_id = ballot_item.contest_measure_we_vote_id
-            else:
-                kind_of_ballot_item = ''
-
-            if positive_value_exists(kind_of_ballot_item):
                 one_ballot_item = {
                     'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                     'google_civic_election_id':     ballot_item.google_civic_election_id,

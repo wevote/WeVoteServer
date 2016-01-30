@@ -72,6 +72,14 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '     "kind_of_ballot_item": string,\n' \
                    '     "id": integer,\n' \
                    '     "we_vote_id": string,\n' \
+                   '     "candidate_list": list\n' \
+                   '      [\n' \
+                   '        "id": integer,\n' \
+                   '        "we_vote_id": string,\n' \
+                   '        "ballot_item_display_name": string,\n' \
+                   '        "candidate_photo_url": string,\n' \
+                   '        "order_on_ballot": integer,\n' \
+                   '      ],\n' \
                    '   ],\n' \
                    '}'
 
