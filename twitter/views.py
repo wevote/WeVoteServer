@@ -4,4 +4,3 @@
 
 # See also WeVoteServer/import_export_twitter/views.py for the code that interfaces with twitter (or other) servers
 
-# Create your views here.

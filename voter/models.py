@@ -170,7 +170,14 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
 
-    def retrieve_voter(self, voter_id, email='', voter_we_vote_id=''):
+    def retrieve_voter_by_twitter_request_token(self, twitter_request_token):
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token)
+
+    def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token=''):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
@@ -195,6 +202,11 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(voter_we_vote_id):
                 voter_on_stage = Voter.objects.get(
                     we_vote_id=voter_we_vote_id)
+                # If still here, we found an existing voter
+                voter_id = voter_on_stage.id
+            elif positive_value_exists(twitter_request_token):
+                voter_on_stage = Voter.objects.get(
+                    twitter_request_token=twitter_request_token)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             else:
@@ -226,6 +238,24 @@ class VoterManager(BaseUserManager):
         #  to ever be used
         logger.info("clear_out_abandoned_voter_records")
 
+    def save_twitter_user_values(self, voter, twitter_user_object):
+        # 'id': 132728535,
+        voter.twitter_id = twitter_user_object.id
+        # 'id_str': '132728535',
+        # 'utc_offset': 32400,
+        # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
+        # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
+        voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+        # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
+        # 'screen_name': 'jaeeeee',
+        voter.twitter_screen_name = twitter_user_object.screen_name
+        # 'lang': 'en',
+        # 'name': 'Jae Jung Chung',
+        # 'url': 'http://www.carbonize.co.kr',
+        # 'time_zone': 'Seoul',
+        voter.save()
+        return
+
 
 class Voter(AbstractBaseUser):
     """
@@ -256,6 +286,18 @@ class Voter(AbstractBaseUser):
     # Facebook username
     # Consider just using username
     fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
+
+    # Twitter session information
+    twitter_id = models.BigIntegerField(verbose_name="twitter integer id", null=True, blank=True)
+    twitter_screen_name = models.CharField(verbose_name='twitter screen name / handle',
+                                           max_length=255, null=True, unique=False)
+    twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
+
+    twitter_request_token = models.TextField(verbose_name='twitter request token', null=True, blank=True)
+    twitter_request_secret = models.TextField(verbose_name='twitter request secret', null=True, blank=True)
+    twitter_access_token = models.TextField(verbose_name='twitter access token', null=True, blank=True)
+    twitter_access_secret = models.TextField(verbose_name='twitter access secret', null=True, blank=True)
+    twitter_connection_active = models.BooleanField(default=False)
 
     # Custom We Vote fields
     middle_name = models.CharField(max_length=255, null=True, blank=True)
@@ -316,6 +358,12 @@ class Voter(AbstractBaseUser):
         # return self.first_name
         # The user is identified by their email address
         return self.email
+
+    def voter_can_retrieve_account(self):
+        if positive_value_exists(self.email):
+            return True
+        else:
+            return False
 
     def __str__(self):              # __unicode__ on Python 2
         # return self.get_full_name(self)

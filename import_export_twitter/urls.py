@@ -8,6 +8,10 @@ from . import views, views_admin
 
 
 urlpatterns = [
+    # views
+    url(r'^process_sign_in_response/$', views.process_sign_in_response_view, name='process_sign_in_response'),
+
+    # views_admin
     url(r'^(?P<organization_id>[0-9]+)/refresh_twitter_details/$',
         views_admin.refresh_twitter_details_view, name='refresh_twitter_details',),
     url(r'^(?P<organization_id>[0-9]+)/scrape_website_for_social_media/$',

@@ -11,6 +11,7 @@ from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
+from import_export_twitter.controllers import twitter_sign_in_start_for_api
 import json
 from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
@@ -444,6 +445,23 @@ def quick_info_retrieve_view(request):
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', "")
     return quick_info_retrieve_for_api(kind_of_ballot_item=kind_of_ballot_item,
                                        ballot_item_we_vote_id=ballot_item_we_vote_id)
+
+
+def twitter_sign_in_start_view(request):
+    """
+    Start off the process of signing in with Twitter
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    results = twitter_sign_in_start_for_api(voter_device_id)
+    json_data = {
+        'status': results['status'],
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'twitter_redirect_url': results['twitter_redirect_url'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_address_retrieve_view(request):

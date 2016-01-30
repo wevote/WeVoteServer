@@ -4,6 +4,8 @@
 
 # See also WeVoteServer/import_export_twitter/models.py for the code that interfaces with twitter (or other) servers
 
+from django.contrib.auth.backends import ModelBackend
+from django.contrib.auth.models import User
 from django.db import models
 
 

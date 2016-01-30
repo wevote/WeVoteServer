@@ -27,6 +27,12 @@ def voter_address_retrieve_for_api(voter_device_id):
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+    # ##################
+    # Temp code to test authentication
+    # user = PasswordlessAuthBackend.authenticate(username=user.username)
+    # login(request, user)
+    # ##################
+
     voter_address_manager = VoterAddressManager()
     results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
 

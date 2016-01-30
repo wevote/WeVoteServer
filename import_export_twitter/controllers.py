@@ -11,8 +11,9 @@ import re
 from socket import timeout
 import tweepy
 import urllib.request
+from voter.models import VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -69,13 +70,12 @@ def refresh_twitter_details(organization):
                 results = update_social_media_statistics_in_other_tables(organization)
                 status = "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_AND_SAVED"
     else:
-            status = "ORGANIZATION_TWITTER_DETAILS-CLEARING_DETAILS"
-            save_results = organization_manager.clear_organization_twitter_details(organization)
+        status = "ORGANIZATION_TWITTER_DETAILS-CLEARING_DETAILS"
+        save_results = organization_manager.clear_organization_twitter_details(organization)
 
-            if save_results['success']:
-                results = update_social_media_statistics_in_other_tables(organization)
-                status = "ORGANIZATION_TWITTER_DETAILS_CLEARED_FROM_DB"
-
+        if save_results['success']:
+            results = update_social_media_statistics_in_other_tables(organization)
+            status = "ORGANIZATION_TWITTER_DETAILS_CLEARED_FROM_DB"
 
     results = {
         'success':                  True,
@@ -278,4 +278,92 @@ def scrape_and_save_social_media_from_all_organizations(state_code=''):
         'twitter_handles_found':    twitter_handles_found,
         'facebook_pages_found':     facebook_pages_found,
     }
+    return results
+
+
+def twitter_sign_in_start_for_api(voter_device_id):  # twitterSignInStart
+    """
+
+    :param voter_device_id:
+    :return:
+    """
+    # Get voter_id from the voter_device_id so we can figure out which ballot_items to offer
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        results = {
+            'success': False,
+            'status': "VALID_VOTER_DEVICE_ID_MISSING",
+            'voter_device_id': voter_device_id,
+            'twitter_redirect_url': '',
+        }
+        return results
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if not positive_value_exists(results['voter_found']):
+        results = {
+            'status': "VALID_VOTER_MISSING",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'twitter_redirect_url': '',
+        }
+        return results
+
+    voter = results['voter']
+    callback_url = "http://localhost:8000/twitter/process_sign_in_response/"
+    redirect_url = ''
+
+    try:
+        # We take the Consumer Key and the Consumer Secret, and request a token & token_secret
+        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, callback_url)
+        redirect_url = auth.get_authorization_url()
+        request_token_dict = auth.request_token
+        twitter_request_token = ''
+        twitter_request_token_secret = ''
+
+        if 'oauth_token' in request_token_dict:
+            twitter_request_token = request_token_dict['oauth_token']
+        if 'oauth_token_secret' in request_token_dict:
+            twitter_request_token_secret = request_token_dict['oauth_token_secret']
+
+        # We save these values in the Voter table, and then return a redirect_url where the user can sign in
+        # Once they sign in to the Twitter login, they are redirected back to the We Vote callback_url
+        # On that callback_url page (a Django/Python page as opposed to ReactJS), we are told if they are signed in
+        #  on Twitter or not, and capture an access key we can use to retrieve information about the Twitter user
+        if positive_value_exists(twitter_request_token) and positive_value_exists(twitter_request_token_secret):
+            voter.twitter_request_token = twitter_request_token
+            voter.twitter_request_secret = twitter_request_token_secret
+            voter.save()
+
+            success = True
+            status = "TWITTER_REDIRECT_URL_RETRIEVED"
+        else:
+            success = False
+            status = "TWITTER_REDIRECT_URL_NOT_RETRIEVED"
+
+    except tweepy.RateLimitError:
+        success = False
+        status = 'TWITTER_RATE_LIMIT_ERROR'
+    except tweepy.error.TweepError as error_instance:
+        success = False
+        status = 'TWITTER_SIGN_IN_START: '
+        error_tuple = error_instance.args
+        for error_dict in error_tuple:
+            for one_error in error_dict:
+                status += '[' + one_error['message'] + '] '
+
+    if success:
+        results = {
+            'status': status,
+            'success': True,
+            'voter_device_id': voter_device_id,
+            'twitter_redirect_url': redirect_url,
+        }
+    else:
+        results = {
+            'status': status,
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'twitter_redirect_url': '',
+        }
     return results
