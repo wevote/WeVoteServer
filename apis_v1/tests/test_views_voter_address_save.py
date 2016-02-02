@@ -85,8 +85,9 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
 
         # First address save
         self.assertEqual(
-            json_data2['status'], 'VOTER_ADDRESS_SAVED',
-            "status: {status} (VOTER_ADDRESS_SAVED expected in voterAddressSaveView), "
+            json_data2['status'], 'VOTER_ADDRESS_SAVED, GOOGLE_CIVIC_API_ERROR: Election unknown',
+            "status: {status} (VOTER_ADDRESS_SAVED, GOOGLE_CIVIC_API_ERROR: Election unknown"
+            " expected in voterAddressSaveView), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data2['status'], voter_device_id=json_data2['voter_device_id']))
 
@@ -98,8 +99,9 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
 
         # First address update
         self.assertEqual(
-            json_data3['status'], 'VOTER_ADDRESS_SAVED',
-            "status: {status} (VOTER_ADDRESS_SAVED expected in voterAddressSaveView), "
+            json_data3['status'], 'VOTER_ADDRESS_SAVED, GOOGLE_CIVIC_API_ERROR: Election unknown',
+            "status: {status} (VOTER_ADDRESS_SAVED, GOOGLE_CIVIC_API_ERROR: Election unknown"
+            " expected in voterAddressSaveView), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data3['status'], voter_device_id=json_data3['voter_device_id']))
 

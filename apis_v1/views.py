@@ -32,7 +32,8 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
     position_public_oppose_count_for_ballot_item_for_api, \
     position_public_support_count_for_ballot_item_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
-from voter.controllers import voter_address_retrieve_for_api, voter_address_save_for_api, voter_retrieve_list_for_api
+from voter.controllers import voter_retrieve_for_api, voter_address_retrieve_for_api, voter_address_save_for_api, \
+    voter_photo_save_for_api, voter_retrieve_list_for_api
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
@@ -701,6 +702,56 @@ def voter_location_retrieve_from_ip_view(request):
     return voter_location_retrieve_from_ip_for_api(ip_address=ip_address)
 
 
+def voter_photo_save_view(request):
+    """
+    Save or update a photo for this voter
+    :param request:
+    :return:
+    """
+
+    status = ''
+
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    try:
+        facebook_profile_image_url_https = request.GET['facebook_profile_image_url_https']
+        facebook_profile_image_url_https = facebook_profile_image_url_https.strip()
+        facebook_photo_variable_exists = True
+    except KeyError:
+        facebook_profile_image_url_https = ''
+        facebook_photo_variable_exists = False
+
+    results = voter_photo_save_for_api(voter_device_id,
+                                       facebook_profile_image_url_https, facebook_photo_variable_exists)
+    voter_photo_saved = True if results['success'] else False
+
+    if not positive_value_exists(facebook_profile_image_url_https):
+        json_data = {
+            'status': results['status'],
+            'success': results['success'],
+            'voter_device_id': voter_device_id,
+            'facebook_profile_image_url_https': facebook_profile_image_url_https,
+            'voter_photo_saved': voter_photo_saved,
+        }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+
+        return response
+
+    status += results['status'] + ", "
+    # If here, we saved a valid photo
+
+    json_data = {
+        'status': status,
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'facebook_profile_image_url_https': facebook_profile_image_url_https,
+        'voter_photo_saved': voter_photo_saved,
+    }
+
+    response = HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    return response
+
+
 def voter_position_retrieve_view(request):
     """
     Retrieve all of the details about a single position based on unique identifier. voterPositionRetrieve
@@ -839,7 +890,7 @@ def voter_opposing_save_view(request):
     return voter_opposing_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
 
 
-class VoterRetrieveView(APIView):
+class VoterExportView(APIView):
     """
     Export raw voter data to JSON format
     """
@@ -857,6 +908,17 @@ class VoterRetrieveView(APIView):
             voter_list = results['voter_list']
             serializer = VoterSerializer(voter_list, many=True)
             return Response(serializer.data)
+
+
+def voter_retrieve_view(request):
+    """
+    Retrieve a single voter based on voter_device
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    results = voter_retrieve_for_api(voter_device_id=voter_device_id)
+    return HttpResponse(json.dumps(results), content_type='application/json')
 
 
 def voter_stop_opposing_save_view(request):

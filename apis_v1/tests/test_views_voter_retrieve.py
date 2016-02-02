@@ -21,7 +21,7 @@ class WeVoteAPIsV1TestsVoterRetrieve(TestCase):
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
         # self.voter_retrieve_url = "http://localhost:8000%s?format=json" % reverse("apis_v1:voterRetrieveView")
-        self.voter_retrieve_url = reverse("apis_v1:voterRetrieveView")
+        self.voter_retrieve_url = reverse("apis_v1:voterExportView")
 
     def test_retrieve_with_no_cookie(self):
         response = self.client.get(self.voter_retrieve_url)
@@ -30,7 +30,7 @@ class WeVoteAPIsV1TestsVoterRetrieve(TestCase):
         # Without a cookie, we don't expect valid response
         self.assertEqual('status' in json_data, True, "status expected in the json response, and not found")
         self.assertEqual('voter_device_id' in json_data, True,
-                         "voter_device_id expected in the voterRetrieveView json response, and not found")
+                         "voter_device_id expected in the voterExportView json response, and not found")
 
         self.assertEqual(
             json_data['status'], 'VALID_VOTER_DEVICE_ID_MISSING',
@@ -79,12 +79,12 @@ class WeVoteAPIsV1TestsVoterRetrieve(TestCase):
         json_data3 = json.loads(response3.content.decode())
 
         for one_voter in json_data3:
-            self.assertEqual('id' in one_voter, True, "id expected in the voterRetrieveView json response but not found")
+            self.assertEqual('id' in one_voter, True, "id expected in the voterExportView json response but not found")
             self.assertEqual('first_name' in one_voter, True,
-                             "first_name expected in the voterRetrieveView json response but not found")
+                             "first_name expected in the voterExportView json response but not found")
             self.assertEqual('last_name' in one_voter, True,
-                             "last_name expected in the voterRetrieveView json response but not found")
+                             "last_name expected in the voterExportView json response but not found")
             self.assertEqual('email' in one_voter, True,
-                             "email expected in the voterRetrieveView json response but not found")
+                             "email expected in the voterExportView json response but not found")
 
 

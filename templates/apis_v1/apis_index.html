@@ -34,9 +34,8 @@
     <tr>
         <td><a href="{% url 'apis_v1:voterAddressSaveDocs' %}">voterAddressSave</a></td>
         <td></td>
-        <td>Save or update address for an existing voter. The front end should call
-        voterBallotItemsRetrieveFromGoogleCivic (asynchronously) immediately following an address change. (If
-        the address has actually changed.)</td>
+        <td>Save or update address for an existing voter. Once the address is saved, the API server calls
+        voterBallotItemsRetrieveFromGoogleCivic (If the address has actually changed.)</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterCountDocs' %}">voterCount</a></td>
@@ -49,7 +48,12 @@
         <td>Create an empty voter entry attached to a voter_device_id</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve/?format=json</a></td>
+        <td><a href="{% url 'apis_v1:voterPhotoSaveDocs' %}">voterPhotoSave</a></td>
+        <td></td>
+        <td>Save photo (pulled from Facebook or Twitter) for an existing voter.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve</a></td>
         <td></td>
         <td>Export raw voter data to JSON format</td>
     </tr>

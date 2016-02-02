@@ -256,6 +256,36 @@ class VoterManager(BaseUserManager):
         voter.save()
         return
 
+    def update_voter_photos(self, voter_id, facebook_profile_image_url_https, facebook_photo_variable_exists):
+        results = self.retrieve_voter(voter_id)
+
+        if results['voter_found']:
+            voter = results['voter']
+
+            try:
+                if facebook_photo_variable_exists:
+                    voter.facebook_profile_image_url_https = facebook_profile_image_url_https
+                voter.save()
+                status = "SAVED_VOTER"
+                success = True
+            except Exception as e:
+                status = "UNABLE_TO_SAVE_VOTER"
+                success = False
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        else:
+            # If here, we were unable to find pre-existing Voter
+            status = "UNABLE_TO_FIND_VOTER"
+            voter = Voter()
+            success = False
+
+        results = {
+            'status':   status,
+            'success':  success,
+            'voter': voter,
+        }
+        return results
+
 
 class Voter(AbstractBaseUser):
     """
@@ -286,6 +316,7 @@ class Voter(AbstractBaseUser):
     # Facebook username
     # Consider just using username
     fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
+    facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook', blank=True, null=True)
 
     # Twitter session information
     twitter_id = models.BigIntegerField(verbose_name="twitter integer id", null=True, blank=True)
@@ -390,6 +421,13 @@ class Voter(AbstractBaseUser):
         """
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+    def voter_photo_url(self):
+        if self.facebook_profile_image_url_https:
+            return self.facebook_profile_image_url_https
+        elif self.twitter_profile_image_url_https:
+            return self.twitter_profile_image_url_https
+        return ''
 
 
 class VoterDeviceLink(models.Model):

@@ -19,7 +19,7 @@ def voter_address_retrieve_for_api(voter_device_id):
         return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not voter_id > 0:
+    if not positive_value_exists(voter_id):
         json_data = {
             'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
             'success': False,
@@ -80,7 +80,7 @@ def voter_address_save_for_api(voter_device_id, address_raw_text, address_variab
         return results
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if voter_id < 0:
+    if not positive_value_exists(voter_id):
         results = {
             'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
             'success': False,
@@ -120,7 +120,136 @@ def voter_address_save_for_api(voter_device_id, address_raw_text, address_variab
     return results
 
 
+def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, facebook_photo_variable_exists):
+    facebook_profile_image_url_https = facebook_profile_image_url_https.strip()
+
+    device_id_results = is_voter_device_id_valid(voter_device_id)
+    if not device_id_results['success']:
+        results = {
+                'status': device_id_results['status'],
+                'success': False,
+                'voter_device_id': voter_device_id,
+                'facebook_profile_image_url_https': facebook_profile_image_url_https,
+            }
+        return results
+
+    if not facebook_photo_variable_exists:
+        results = {
+                'status': "MISSING_VARIABLE-AT_LEAST_ONE_PHOTO",
+                'success': False,
+                'voter_device_id': voter_device_id,
+                'facebook_profile_image_url_https': facebook_profile_image_url_https,
+            }
+        return results
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if voter_id < 0:
+        results = {
+            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'facebook_profile_image_url_https': facebook_profile_image_url_https,
+        }
+        return results
+
+    # At this point, we have a valid voter
+
+    voter_manager = VoterManager()
+    results = voter_manager.update_voter_photos(voter_id,
+                                                facebook_profile_image_url_https, facebook_photo_variable_exists)
+
+    if results['success']:
+        if positive_value_exists(facebook_profile_image_url_https):
+            status = "VOTER_FACEBOOK_PHOTO_SAVED"
+        else:
+            status = "VOTER_PHOTOS_EMPTY_SAVED"
+
+        results = {
+                'status': status,
+                'success': True,
+                'voter_device_id': voter_device_id,
+                'facebook_profile_image_url_https': facebook_profile_image_url_https,
+            }
+
+    else:
+        results = {
+                'status': results['status'],
+                'success': False,
+                'voter_device_id': voter_device_id,
+                'facebook_profile_image_url_https': facebook_profile_image_url_https,
+            }
+    return results
+
+
+def voter_retrieve_for_api(voter_device_id):
+    """
+    Used by the api
+    :param voter_device_id:
+    :return:
+    """
+    device_id_results = is_voter_device_id_valid(voter_device_id)
+    if not device_id_results['success']:
+        json_data = {
+                'status': device_id_results['status'],
+                'success': False,
+                'voter_device_id': voter_device_id,
+            }
+        return json_data
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return json_data
+
+    # At this point, we have a valid voter_id
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_by_id(voter_id)
+    if results['voter_found']:
+        voter = results['voter']
+
+        status = 'VOTER_FOUND'
+        json_data = {
+            'status':                           status,
+            'success':                          True,
+            'voter_device_id':                  voter_device_id,
+            'voter_found':                      True,
+            'we_vote_id':                       voter.we_vote_id,
+            'first_name':                       voter.first_name,
+            'last_name':                        voter.last_name,
+            'email':                            voter.email,
+            'facebook_profile_image_url_https': voter.facebook_profile_image_url_https,
+            'voter_photo_url':                  voter.voter_photo_url(),
+        }
+        return json_data
+
+    else:
+        status = results['status']
+        json_data = {
+            'status':                           status,
+            'success':                          False,
+            'voter_device_id':                  voter_device_id,
+            'voter_found':                      False,
+            'we_vote_id':                       '',
+            'first_name':                       '',
+            'last_name':                        '',
+            'email':                            '',
+            'facebook_profile_image_url_https': '',
+            'voter_photo_url':                       '',
+        }
+        return json_data
+
+
 def voter_retrieve_list_for_api(voter_device_id):
+    """
+    This is used for voterExportView
+    :param voter_device_id:
+    :return:
+    """
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results2 = {
