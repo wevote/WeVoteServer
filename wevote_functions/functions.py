@@ -193,9 +193,12 @@ def extract_last_name_from_full_name(full_name):
 
 
 def get_ip_from_headers(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    x_forwarded_for = request.META.get('X-Forwarded-For')
+    http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         return x_forwarded_for.split(',')[-1].strip()
+    elif http_x_forwarded_for:
+        return http_x_forwarded_for.split(',')[-1].strip()
     else:
         return request.META.get('REMOTE_ADDR')
 
