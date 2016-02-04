@@ -6,7 +6,7 @@ from .base import *
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_environment_variable('SERVER_IN_DEBUG_MODE')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -20,18 +20,18 @@ DEBUG = True
 DATABASES = {
     # social graph & voter specific info
     'default': {
-        'ENGINE': get_environment_variable('DATABASE_ENGINE'),
-        'NAME': get_environment_variable('DATABASE_NAME'),
-        'USER': get_environment_variable('DATABASE_USER'),
+        'ENGINE':   get_environment_variable('DATABASE_ENGINE'),
+        'NAME':     get_environment_variable('DATABASE_NAME'),
+        'USER':     get_environment_variable('DATABASE_USER'),
         'PASSWORD': get_environment_variable('DATABASE_PASSWORD'),
-        'HOST': get_environment_variable('DATABASE_HOST'),  # localhost
-        'PORT': get_environment_variable('DATABASE_PORT'),  # 5432
+        'HOST':     get_environment_variable('DATABASE_HOST'),  # localhost
+        'PORT':     get_environment_variable('DATABASE_PORT'),  # 5432
     }
     # ballot, organizations & opinions
     # search
 }
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['*']
 
 # ########## Logging configurations ###########
 # Logging is configured in the config/environment_variables.json file

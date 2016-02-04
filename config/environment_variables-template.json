@@ -1,6 +1,7 @@
 {
   "_comment":                       "Note that WE_VOTE_SERVER_ROOT_URL should end without slash",
   "WE_VOTE_SERVER_ROOT_URL":        "http://localhost:8000",
+  "SERVER_IN_DEBUG_MODE":           true,
 
   "_comment":                       "local.py settings, including database",
   "DATABASE_ENGINE":                "django.db.backends.postgresql_psycopg2",
