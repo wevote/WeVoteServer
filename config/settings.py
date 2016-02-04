@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 try:
+    # If the WeVoteServer/config/production.py file exists, use it
     from config.production import *
 except ImportError as e:
     try:

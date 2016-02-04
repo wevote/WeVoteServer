@@ -55,6 +55,7 @@
   "SOCIAL_AUTH_FACEBOOK_SECRET":    "",
   "SOCIAL_AUTH_TWITTER_KEY":        "",
   "SOCIAL_AUTH_TWITTER_SECRET":     "",
+  "SOCIAL_AUTH_LOGIN_REDIRECT_URL": "http://localhost:8000/login",
 
   "_comment":                       "django secret key",
   "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
