@@ -3,12 +3,6 @@
 # -*- coding: UTF-8 -*-
 
 from config.base import get_environment_variable
-from organization.controllers import update_social_media_statistics_in_other_tables
-from organization.models import Organization, OrganizationManager
-import re
-from socket import timeout
-import tweepy
-import urllib.request
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists

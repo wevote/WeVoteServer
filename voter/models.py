@@ -9,7 +9,8 @@ from exception.models import handle_exception, handle_record_found_more_than_one
     handle_record_not_saved_exception
 from validate_email import validate_email
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, \
+    positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fetch_site_unique_id_prefix
 
 
@@ -87,7 +88,7 @@ class VoterManager(BaseUserManager):
     def delete_voter(self, email):
         email = self.normalize_email(email)
         voter_id = 0
-        voter_we_vote_id = None
+        voter_we_vote_id = ''
         voter_deleted = False
 
         if positive_value_exists(email) and validate_email(email):
@@ -626,7 +627,7 @@ def retrieve_voter_authority(request):
     return authority_results
 
 
-def voter_has_authority(request, authority_required={}):
+def voter_has_authority(request, authority_required):
     authority_results = retrieve_voter_authority(request)
     if not positive_value_exists(authority_results['is_active']):
         return False
@@ -883,6 +884,7 @@ class VoterAddressManager(models.Model):
 def voter_setup(request):
     generate_voter_device_id_if_needed = True
     voter_device_id = get_voter_device_id(request, generate_voter_device_id_if_needed)
+    voter_id = 0
     voter_id_found = False
     store_new_voter_device_id_in_cookie = True
 
