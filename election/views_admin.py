@@ -5,10 +5,11 @@
 from .controllers import election_remote_retrieve
 from .models import Election
 from .serializers import ElectionSerializer
+from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-# from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
@@ -18,13 +19,14 @@ from import_export_google_civic.controllers import retrieve_one_ballot_from_goog
 from polling_location.models import PollingLocation
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def election_all_ballots_retrieve_view(request, election_local_id=0):
     """
     Reach out to Google and retrieve (for one election):
@@ -33,6 +35,10 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     :param request:
     :return:
     """
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     # # Testing
@@ -144,8 +150,12 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def election_edit_view(request, election_local_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     election_local_id = convert_to_int(election_local_id)
     election_on_stage_found = False
@@ -172,13 +182,17 @@ def election_edit_view(request, election_local_id):
     return render(request, "election/election_edit.html", template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required()
 def election_edit_process_view(request):
     """
     Process the new or edit election forms
     :param request:
     :return:
     """
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     election_local_id = convert_to_int(request.POST['election_local_id'])
     election_name = request.POST['election_name']
     election_on_stage = Election()
@@ -213,8 +227,12 @@ def election_edit_process_view(request):
     return HttpResponseRedirect(reverse('election:election_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required()
 def election_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     election_list_query = Election.objects.all()
     election_list_query = election_list_query.order_by('election_day_text').reverse()
@@ -227,13 +245,17 @@ def election_list_view(request):
     return render(request, 'election/election_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required()
 def election_remote_retrieve_view(request):
     """
     Reach out to Google and retrieve the latest list of available elections
     :param request:
     :return:
     """
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     results = election_remote_retrieve()
 
     if not results['success']:
@@ -243,8 +265,12 @@ def election_remote_retrieve_view(request):
     return HttpResponseRedirect(reverse('election:election_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required()
 def election_summary_view(request, election_local_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     election_local_id = convert_to_int(election_local_id)
     election_on_stage_found = False
@@ -272,7 +298,6 @@ def election_summary_view(request, election_local_id):
 
 
 # This page does not need to be protected.
-# NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
 class ExportElectionDataView(APIView):
     def get(self, request, format=None):
         election_list = Election.objects.all()

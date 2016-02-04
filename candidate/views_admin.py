@@ -5,10 +5,11 @@
 from .controllers import candidates_import_from_sample_file, retrieve_candidate_photos
 from .models import CandidateCampaign, CandidateCampaignManager
 from .serializers import CandidateCampaignSerializer
+from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-# from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from election.models import Election
@@ -19,6 +20,7 @@ from import_export_vote_smart.votesmart_local import VotesmartApiError
 from position.models import PositionEntered
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
@@ -35,11 +37,16 @@ class ExportCandidateCampaignDataView(APIView):
         return Response(serializer.data)
 
 
+@login_required
 def candidates_import_from_sample_file_view(request):
     """
     This gives us sample organizations, candidate campaigns, and positions for testing
     :return:
     """
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     # We are importing candidate_campaigns data (and not politician data) because all we are doing is making sure we
     #  sync to the same We Vote ID. This is critical so we can link Positions to Organization & Candidate Campaign.
     # At this point (June 2015) we assume the politicians have been imported from Google Civic. We aren't assigning
@@ -51,8 +58,12 @@ def candidates_import_from_sample_file_view(request):
     return HttpResponseRedirect(reverse('import_export:import_export_index', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process
+@login_required
 def candidate_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
@@ -76,8 +87,12 @@ def candidate_list_view(request):
     return render(request, 'candidate/candidate_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process
+@login_required
 def candidate_new_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage': messages_on_stage,
@@ -85,8 +100,12 @@ def candidate_new_view(request):
     return render(request, 'candidate/candidate_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process
+@login_required
 def candidate_edit_view(request, candidate_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
     candidate_on_stage_found = False
@@ -138,13 +157,17 @@ def candidate_edit_view(request, candidate_id):
     return render(request, 'candidate/candidate_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process
+@login_required
 def candidate_edit_process_view(request):
     """
     Process the new or edit candidate forms
     :param request:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     candidate_id = convert_to_int(request.POST['candidate_id'])
     candidate_name = request.POST['candidate_name']
     twitter_handle = request.POST['twitter_handle']
@@ -185,8 +208,12 @@ def candidate_edit_process_view(request):
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process
+@login_required
 def candidate_retrieve_photos_view(request, candidate_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     candidate_id = convert_to_int(candidate_id)
     force_retrieve = request.GET.get('force_retrieve', 0)
 
@@ -208,8 +235,12 @@ def candidate_retrieve_photos_view(request, candidate_id):
     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
 
-# @login_required()  # Commented out while we are developing login process
+@login_required
 def retrieve_candidate_photos_for_election_view(request, election_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     google_civic_election_id = convert_to_int(election_id)
 
     # We only want to process if a google_civic_election_id comes in
@@ -237,8 +268,12 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
         var=google_civic_election_id))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def candidate_summary_view(request, candidate_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
     candidate_on_stage_found = False

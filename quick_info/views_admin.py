@@ -8,11 +8,12 @@ from .models import LANGUAGE_CHOICES, QuickInfo, QuickInfoManager, \
     NOT_SPECIFIED
 from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE, KIND_OF_BALLOT_ITEM_CHOICES
 from .serializers import QuickInfoSerializer, QuickInfoMasterSerializer
+from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignManager
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-# from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from election.models import Election
@@ -22,6 +23,7 @@ from measure.models import ContestMeasure, ContestMeasureManager
 from office.models import ContestOffice, ContestOfficeManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
@@ -45,8 +47,12 @@ class ExportQuickInfoMasterDataView(APIView):
         return Response(serializer.data)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def quick_info_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', '')
@@ -83,8 +89,12 @@ def quick_info_list_view(request):
     return render(request, 'quick_info/quick_info_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def quick_info_new_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     # If the voter tried to submit an entry, and it didn't save, capture the changed values for display
     language = request.POST.get('language', ENGLISH)
     info_text = request.POST.get('info_text', "")
@@ -184,8 +194,12 @@ def quick_info_new_view(request):
     return render(request, 'quick_info/quick_info_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def quick_info_edit_view(request, quick_info_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     form_submitted = request.POST.get('form_submitted', False)
     quick_info_id = convert_to_int(quick_info_id)
 
@@ -337,13 +351,17 @@ def quick_info_edit_view(request, quick_info_id):
     return render(request, 'quick_info/quick_info_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def quick_info_edit_process_view(request):
     """
     Process the new or edit quick_info forms
     :param request:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     quick_info_id = convert_to_int(request.POST.get('quick_info_id', False))
     quick_info_we_vote_id = convert_to_int(request.POST.get('quick_info_we_vote_id', False))
 
@@ -501,8 +519,12 @@ def quick_info_edit_process_view(request):
     return HttpResponseRedirect(reverse('quick_info:quick_info_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def quick_info_summary_view(request, quick_info_id):  # TODO to be updated
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     quick_info_id = convert_to_int(quick_info_id)
     quick_info_on_stage_found = False
@@ -528,8 +550,12 @@ def quick_info_summary_view(request, quick_info_id):  # TODO to be updated
     return render(request, 'quick_info/quick_info_summary.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def quick_info_master_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     language = request.GET.get('language', ENGLISH)
@@ -551,8 +577,12 @@ def quick_info_master_list_view(request):
     return render(request, 'quick_info/quick_info_master_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def quick_info_master_new_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     # If the voter tried to submit an entry, and it didn't save, capture the changed values for display
     kind_of_ballot_item = request.POST.get('kind_of_ballot_item', "")
     language = request.POST.get('language', ENGLISH)
@@ -582,8 +612,12 @@ def quick_info_master_new_view(request):
     return render(request, 'quick_info/quick_info_master_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def quick_info_master_edit_view(request, quick_info_master_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     form_submitted = request.POST.get('form_submitted', False)
     quick_info_master_id = convert_to_int(quick_info_master_id)
 
@@ -640,13 +674,17 @@ def quick_info_master_edit_view(request, quick_info_master_id):
     return render(request, 'quick_info/quick_info_master_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def quick_info_master_edit_process_view(request):
     """
     Process the new or edit quick_info_master forms
     :param request:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     quick_info_master_id = convert_to_int(request.POST.get('quick_info_master_id', False))
     quick_info_master_we_vote_id = convert_to_int(request.POST.get('quick_info_master_we_vote_id', False))
 

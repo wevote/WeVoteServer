@@ -312,6 +312,7 @@ class Voter(AbstractBaseUser):
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_verified_volunteer = models.BooleanField(default=False)
 
     # Facebook username
     # Consider just using username
@@ -379,10 +380,6 @@ class Voter(AbstractBaseUser):
         super(Voter, self).save(*args, **kwargs)
 
     def get_full_name(self):
-        # The user is identified by their email address
-        if self.email:
-            return self.email
-
         return self.first_name+" "+self.last_name
 
     def get_short_name(self):
@@ -547,6 +544,42 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
         return voter_device_link.voter_id
     return 0
 
+
+def retrieve_voter_authority(request):
+    voter_device_id = get_voter_device_id(request)
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if results['voter_found']:
+        voter = results['voter']
+        authority_results = {
+            'voter_found':              True,
+            'is_active':                positive_value_exists(voter.is_active),
+            'is_admin':                 positive_value_exists(voter.is_admin),
+            'is_verified_volunteer':    positive_value_exists(voter.is_verified_volunteer),
+        }
+        return authority_results
+
+    authority_results = {
+        'voter_found':              False,
+        'is_active':                False,
+        'is_admin':                 False,
+        'is_verified_volunteer':    False,
+    }
+    return authority_results
+
+
+def voter_has_authority(request, authority_required={}):
+    authority_results = retrieve_voter_authority(request)
+    if not positive_value_exists(authority_results['is_active']):
+        return False
+    if 'admin' in authority_required:
+        if positive_value_exists(authority_results['is_admin']):
+            return True
+    if 'verified_volunteer' in authority_required:
+        if positive_value_exists(authority_results['is_verified_volunteer']) or \
+                positive_value_exists(authority_results['is_admin']):
+            return True
+    return False
 
 # class VoterJurisdictionLink(models.Model):
 #     """

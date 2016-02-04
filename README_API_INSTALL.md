@@ -186,12 +186,15 @@ If you are not prompted to create a superuser, run the following command:
 
     python manage.py createsuperuser
     
-## Sample data and the GOOGLE_CIVIC_API_KEY
-Sample data is provided. You can load this data by clicking the "Import Test Data" link on this page (in the "Maintenance" section):
+## Sample data
+Sample data is provided. Go here:
 
     http://localhost:8000/admin
+    
+Find the "Import Test Data" link (in the "Maintenance" section), and click it. This initial import can take 2-3 minutes.
  
-If you need to retrieve fresh ballot data, you will need to sign up for a Google Civic API key:
+### Google Civic
+In order to retrieve fresh ballot data, you will need to sign up for a Google Civic API key:
 
   - Go here:  https://console.developers.google.com/projectselector/apis/credentials?pli=1
   - Create a new project
@@ -200,12 +203,46 @@ If you need to retrieve fresh ballot data, you will need to sign up for a Google
   - If you don't see it, go here and search for "Google Civic": https://console.developers.google.com/apis/library?project=atomic-router-681
   - When you find it, click the "Enable API" button.
   - Copy your newly generated key and paste it into config/environment_variables.json as the value for GOOGLE_CIVIC_API_KEY
+  
+### Vote Smart
+We also have a paid subscription with Vote Smart. You can sign up for a 
+[Vote Smart developer key](http://votesmart.org/share/api/register#.VrIx4VMrJhE), or reach out to 
+Dale.McGrew@WeVoteUSA.org to discuss using our organizational account.
+
+  - Copy your Vote Smart key and paste it into config/environment_variables.json as the value for VOTE_SMART_API_KEY
+  
+### Twitter
+Instructions coming soon.
+  
+### Running import scripts
+Although we keep https://api.wevoteusa.org up-to-date with the latest data from Google Civic, Vote Smart & Twitter, you
+may need to pull data into your local development environment in order to work on certain areas of WebApp. These are
+the steps.
+
+Save an address:
+
+    1. Go here: http://localhost:8000/apis/v1/docs/
+    2. Go here, and enter a full address near an upcoming election (ex: "2208 Ebb Tide Rd, Virginia Beach, VA 23451"): http://localhost:8000/apis/v1/docs/voterAddressSave/
+    3. You should get a status back equal to something like "VOTER_ADDRESS_SAVED"
+
+Verify you have the candidates you expect:
+
+    1. Go to "Candidates" here: http://localhost:8000/c/
+    2. Filter by Election
+    3. Click "Retrieve Candidate Photos for this Election"
+
+Import some positions:
+
+    1. Go to "Positions / Public Opinions" here: http://localhost:8000/pos/
+    2. Filter by Election
+    3. Click "Retrieve Positions from Vote Smart for this Election". This process can take 4-5 minutes.
+    4. Click "Generate Voter Guides"
     
-[Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
+[Working with WeVoteServer day-to-day](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
 ## Setup - Heroku Configuration
 
-NOTE: These instructions are in progress.
+NOTE: These instructions are in progress and currently out-of-date.
 
 We use Heroku for publishing a public version anyone can play with , and you can publish a public version too. Here are the instructions:
 https://devcenter.heroku.com/articles/getting-started-with-django

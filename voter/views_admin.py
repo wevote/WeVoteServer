@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import Voter
+from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -11,19 +12,24 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
+from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def voter_edit_process_view(request):
     """
     Process the new or edit voter forms
     :param request:
     :return:
     """
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     voter_id = convert_to_int(request.POST['voter_id'])
     voter_name = request.POST['voter_name']
 
@@ -53,8 +59,12 @@ def voter_edit_process_view(request):
     return HttpResponseRedirect(reverse('voter:voter_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def voter_edit_view(request, voter_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     voter_id = convert_to_int(voter_id)
     voter_on_stage_found = False
@@ -79,8 +89,12 @@ def voter_edit_view(request, voter_id):
     return render(request, 'voter/voter_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def voter_list_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     voter_list = Voter.objects.order_by('-last_login')
 
@@ -91,8 +105,12 @@ def voter_list_view(request):
     return render(request, 'voter/voter_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def voter_summary_view(request, voter_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     voter_id = convert_to_int(voter_id)
     voter_on_stage_found = False

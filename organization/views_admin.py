@@ -5,10 +5,11 @@
 from .controllers import organizations_import_from_sample_file
 from .models import Organization
 from .serializers import OrganizationSerializer
+from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-# from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
@@ -20,6 +21,7 @@ from position.models import PositionEntered, PositionEnteredManager, ANY_STANCE,
     STILL_DECIDING, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from voter.models import voter_has_authority
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
@@ -44,8 +46,12 @@ class ExportOrganizationDataView(APIView):
         return Response(serializer.data)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def organization_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     organization_state_code = request.GET.get('organization_state')
 
     messages_on_stage = get_messages(request)
@@ -65,8 +71,12 @@ def organization_list_view(request):
     return render(request, 'organization/organization_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def organization_new_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage': messages_on_stage,
@@ -74,8 +84,12 @@ def organization_new_view(request):
     return render(request, 'organization/organization_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def organization_edit_view(request, organization_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
     organization_on_stage_found = False
@@ -100,13 +114,17 @@ def organization_edit_view(request, organization_id):
     return render(request, 'organization/organization_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def organization_edit_process_view(request):
     """
     Process the new or edit organization forms
     :param request:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     organization_id = convert_to_int(request.POST['organization_id'])
     organization_name = request.POST['organization_name']
     organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
@@ -161,8 +179,12 @@ def organization_edit_process_view(request):
     return HttpResponseRedirect(reverse('organization:organization_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def organization_position_list_view(request, organization_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
@@ -213,8 +235,12 @@ def organization_position_list_view(request, organization_id):
     return render(request, 'organization/organization_position_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def organization_add_new_position_form_view(request, organization_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
     all_is_well = True
@@ -252,7 +278,7 @@ def organization_add_new_position_form_view(request, organization_id):
     return render(request, 'organization/organization_position_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def organization_delete_existing_position_process_form_view(request, organization_id, position_id):
     """
 
@@ -261,6 +287,10 @@ def organization_delete_existing_position_process_form_view(request, organizatio
     :param position_id:
     :return:
     """
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     organization_id = convert_to_int(organization_id)
     position_id = convert_to_int(position_id)
 
@@ -293,7 +323,7 @@ def organization_delete_existing_position_process_form_view(request, organizatio
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def organization_edit_existing_position_form_view(request, organization_id, position_id):
     """
     In edit, you can only change your stance and comments, not who or what the position is about
@@ -302,6 +332,10 @@ def organization_edit_existing_position_form_view(request, organization_id, posi
     :param position_id:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
     position_id = convert_to_int(position_id)
@@ -352,13 +386,17 @@ def organization_edit_existing_position_form_view(request, organization_id, posi
     return render(request, 'organization/organization_position_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def organization_save_new_or_edit_existing_position_process_form_view(request):
     """
 
     :param request:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     google_civic_election_id = convert_to_int(request.POST['google_civic_election_id'])
     organization_id = convert_to_int(request.POST['organization_id'])
     position_id = convert_to_int(request.POST['position_id'])
@@ -507,6 +545,10 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
 
 
 # def retrieve_organization_logos_from_wikipedia_view(request, organization_id):
+#     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+#     if not voter_has_authority(request, authority_required):
+#         return redirect_to_sign_in_page(request, authority_required)
+#
 #     organization_id = convert_to_int(organization_id)
 #     organization_manager = OrganizationManager()
 #     results = organization_manager.retrieve_organization(organization_id)

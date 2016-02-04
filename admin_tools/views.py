@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from candidate.controllers import candidates_import_from_sample_file
-# from django.contrib.auth.decorators import login_required
+from config.base import LOGIN_URL
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -14,11 +15,16 @@ from office.controllers import offices_import_from_sample_file
 from organization.controllers import organizations_import_from_sample_file
 from polling_location.controllers import import_and_save_all_polling_locations_data
 from position.controllers import positions_import_from_sample_file
-from voter.models import Voter, voter_setup
+from voter.models import Voter, voter_has_authority, voter_setup
 from wevote_functions.functions import positive_value_exists, set_voter_device_id
 
 
+@login_required
 def admin_home_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     results = voter_setup(request)
     voter_device_id = results['voter_device_id']
     store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
@@ -33,8 +39,12 @@ def admin_home_view(request):
     return response
 
 
-# @login_required()  # Commented out while we are developing login process
+@login_required
 def import_sample_data_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     # This routine works without requiring a Google Civic API key
 
     # We want to make sure that all voters have been updated to have a we_vote_id
@@ -114,8 +124,12 @@ def import_sample_data_view(request):
     return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process
+@login_required
 def delete_test_data_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     # We leave in place the polling locations data and the election data from Google civic
 
     # Delete candidate data from exported file
@@ -126,7 +140,33 @@ def delete_test_data_view(request):
     return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
 
 
+def redirect_to_sign_in_page(request, authority_required={}):
+    authority_required_text = ''
+    for each_authority in authority_required:
+        if each_authority == 'admin':
+            authority_required_text += 'or ' if len(authority_required_text) > 0 else ''
+            authority_required_text += 'has Admin rights'
+        if each_authority == 'verified_volunteer':
+            authority_required_text += 'or ' if len(authority_required_text) > 0 else ''
+            authority_required_text += 'has Verified Volunteer rights'
+    error_message = "You must sign in with account that " \
+                    "{authority_required_text} to see that page." \
+                    "".format(authority_required_text=authority_required_text)
+    messages.add_message(request, messages.ERROR, error_message)
+
+    if positive_value_exists(request.path):
+        next_url_variable = '?next=' + request.path
+    else:
+        next_url_variable = ''
+    return HttpResponseRedirect(LOGIN_URL + next_url_variable)
+
+
+@login_required
 def statistics_summary_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
     daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
     template_values = {

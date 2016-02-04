@@ -4,19 +4,26 @@
 
 from .controllers import refresh_twitter_details, retrieve_twitter_user_info, scrape_social_media_from_one_site, \
     scrape_and_save_social_media_from_all_organizations
+from admin_tools.views import redirect_to_sign_in_page
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import OrganizationManager
+from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def refresh_twitter_details_view(request, organization_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     organization_manager = OrganizationManager()
     results = organization_manager.retrieve_organization(organization_id)
 
@@ -31,8 +38,12 @@ def refresh_twitter_details_view(request, organization_id):
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def scrape_website_for_social_media_view(request, organization_id, force_retrieve=False):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     facebook_page = False
     twitter_handle = False
 
@@ -86,8 +97,12 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def scrape_social_media_from_all_organizations_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     organization_state_code = request.GET.get('organization_state', '')
 
     results = scrape_and_save_social_media_from_all_organizations(state_code=organization_state_code)

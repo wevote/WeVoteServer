@@ -4,10 +4,11 @@
 
 from .models import PositionEntered
 from .serializers import PositionSerializer
+from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-# from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -17,6 +18,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
 from position.models import PositionListManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
@@ -33,8 +35,12 @@ class ExportPositionDataView(APIView):
         return Response(serializer.data)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def position_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
@@ -56,8 +62,12 @@ def position_list_view(request):
     return render(request, 'position/position_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def position_new_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage': messages_on_stage,
@@ -65,8 +75,12 @@ def position_new_view(request):
     return render(request, 'position/position_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def position_edit_view(request, position_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     position_id = convert_to_int(position_id)
     position_on_stage_found = False
@@ -91,13 +105,17 @@ def position_edit_view(request, position_id):
     return render(request, 'position/position_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def position_edit_process_view(request):
     """
     Process the new or edit position forms
     :param request:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     position_id = convert_to_int(request.POST['position_id'])
     position_name = request.POST['position_name']
     twitter_handle = request.POST['twitter_handle']
@@ -137,8 +155,12 @@ def position_edit_process_view(request):
     return HttpResponseRedirect(reverse('position:position_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def position_summary_view(request, position_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     position_id = convert_to_int(position_id)
     position_on_stage_found = False
@@ -163,46 +185,51 @@ def position_summary_view(request, position_id):
     return render(request, 'position/position_summary.html', template_values)
 
 
+@login_required
 def relink_candidates_measures_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages.add_message(request, messages.INFO, 'TO BE BUILT: relink_candidates_measures_view')
     return HttpResponseRedirect(reverse('position:position_list', args=()))
 
-# # @login_required()  # Commented out while we are developing login process()
+# @login_required
 # def positions_display_list_related_to_candidate_campaign_any_position_view(request, candidate_campaign_id):
 #     stance_we_are_looking_for = ANY
 #     return positions_display_list_related_to_candidate_campaign(
 #         request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-# # @login_required()  # Commented out while we are developing login process()
+# @login_required
 # def positions_display_list_related_to_candidate_campaign_supporters_view(request, candidate_campaign_id):
 #     stance_we_are_looking_for = SUPPORT
 #     return positions_display_list_related_to_candidate_campaign(
 #         request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-# # @login_required()  # Commented out while we are developing login process()
+# @login_required
 # def positions_display_list_related_to_candidate_campaign_opposers_view(request, candidate_campaign_id):
 #     stance_we_are_looking_for = OPPOSE
 #     return positions_display_list_related_to_candidate_campaign(
 #         request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-# # @login_required()  # Commented out while we are developing login process()
+# @login_required
 # def positions_display_list_related_to_candidate_campaign_information_only_view(request, candidate_campaign_id):
 #     stance_we_are_looking_for = INFORMATION_ONLY
 #     return positions_display_list_related_to_candidate_campaign(
 #         request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-# # @login_required()  # Commented out while we are developing login process()
+# @login_required
 # def positions_display_list_related_to_candidate_campaign_deciders_view(request, candidate_campaign_id):
 #     stance_we_are_looking_for = STILL_DECIDING
 #     return positions_display_list_related_to_candidate_campaign(
 #         request, candidate_campaign_id, stance_we_are_looking_for)
 
 
-# # @login_required()  # Commented out while we are developing login process()
+# @login_required
 # def positions_display_list_related_to_candidate_campaign(request, candidate_campaign_id, stance_we_are_looking_for):
 #     show_only_followed_positions = convert_to_int(request.GET.get('f', 0))
 #     show_only_not_followed_positions = convert_to_int(request.GET.get('nf', 0))

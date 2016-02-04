@@ -4,11 +4,12 @@
 
 from .models import ContestOffice
 from .serializers import ContestOfficeSerializer
+from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-# from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from election.models import Election
@@ -16,6 +17,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
@@ -32,8 +34,12 @@ class ExportContestOfficeDataView(APIView):
         return Response(serializer.data)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def office_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
@@ -56,8 +62,12 @@ def office_list_view(request):
     return render(request, 'office/office_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def office_new_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage': messages_on_stage,
@@ -65,8 +75,12 @@ def office_new_view(request):
     return render(request, 'office/office_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def office_edit_view(request, office_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     office_id = convert_to_int(office_id)
     office_on_stage_found = False
@@ -91,13 +105,17 @@ def office_edit_view(request, office_id):
     return render(request, 'office/office_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def office_edit_process_view(request):
     """
     Process the new or edit office forms
     :param request:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     office_id = convert_to_int(request.POST['office_id'])
     office_name = request.POST['office_name']
     twitter_handle = request.POST['twitter_handle']
@@ -137,8 +155,12 @@ def office_edit_process_view(request):
     return HttpResponseRedirect(reverse('office:office_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def office_summary_view(request, office_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     office_id = convert_to_int(office_id)
     office_on_stage_found = False

@@ -4,7 +4,7 @@
 
 from django.http import JsonResponse
 from position.models import PositionEnteredManager
-from voter.models import fetch_voter_id_from_voter_device_link
+from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import get_voter_device_id
 

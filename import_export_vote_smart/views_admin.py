@@ -15,21 +15,28 @@ from .controllers import retrieve_and_match_candidate_from_vote_smart, \
 from .models import VoteSmartCandidate, VoteSmartCategory, VoteSmartRating, VoteSmartRatingOneCandidate, \
     VoteSmartSpecialInterestGroup, VoteSmartState
 from .votesmart_local import VotesmartApiError
+from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignManager, CandidateCampaign
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from exception.models import print_to_log
+from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_one_candidate_ratings_view(request, vote_smart_candidate_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     one_group_results = retrieve_vote_smart_ratings_by_candidate_into_local_db(vote_smart_candidate_id)
 
     if one_group_results['success']:
@@ -49,8 +56,12 @@ def import_one_candidate_ratings_view(request, vote_smart_candidate_id):
         return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_group_ratings_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     # state_code = request.GET.get('state_code', 'NA')  # Default to national
     # category_id = request.GET.get('category_id', 0)
 
@@ -77,8 +88,12 @@ def import_group_ratings_view(request):
     return HttpResponseRedirect(reverse('import_export_vote_smart:vote_smart_rating_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_one_group_ratings_view(request, special_interest_group_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     one_group_results = retrieve_vote_smart_ratings_by_group_into_local_db(special_interest_group_id)
 
     if one_group_results['success']:
@@ -92,10 +107,14 @@ def import_one_group_ratings_view(request, special_interest_group_id):
                                         args=(special_interest_group_id,)))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_states_view(request):
     """
     """
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     retrieve_and_save_vote_smart_states()
 
     template_values = {
@@ -104,8 +123,12 @@ def import_states_view(request):
     return render(request, 'import_export_vote_smart/vote_smart_import.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_photo_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     # NOTE: This view is for testing purposes. For the operational "Import Vote Smart Images" view, see:
     #  "candidate_retrieve_photos_view" in candidate/views_admin.py
     last_name = "Trump"
@@ -131,8 +154,12 @@ def import_photo_view(request):
     return render(request, 'import_export_vote_smart/vote_smart_import.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_special_interest_groups_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     # state_code = request.GET.get('state_code', 'NA')  # Default to national
     # category_id = request.GET.get('category_id', 0)
 
@@ -180,8 +207,12 @@ def import_special_interest_groups_view(request):
     return HttpResponseRedirect(reverse('import_export_vote_smart:vote_smart_special_interest_group_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def vote_smart_candidate_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     candidate_list = []
     candidate_list_found = False
@@ -209,8 +240,12 @@ def vote_smart_candidate_list_view(request):
     return render(request, 'import_export_vote_smart/candidate_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def vote_smart_rating_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     rating_list = []
     rating_list_found = False
@@ -242,8 +277,12 @@ def vote_smart_rating_list_view(request):
     return render(request, 'import_export_vote_smart/rating_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def special_interest_group_rating_list_view(request, special_interest_group_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     special_interest_group_id = convert_to_int(special_interest_group_id)
     # google_civic_election_id = request.GET.get('google_civic_election_id', 0)
@@ -299,8 +338,12 @@ def special_interest_group_rating_list_view(request, special_interest_group_id):
     return render(request, 'import_export_vote_smart/group_rating_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def vote_smart_special_interest_group_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
 
     special_interest_group_list = VoteSmartSpecialInterestGroup.objects.order_by('name')
@@ -313,8 +356,12 @@ def vote_smart_special_interest_group_list_view(request):
     return render(request, 'import_export_vote_smart/special_interest_group_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_vote_smart_position_categories_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     results = retrieve_vote_smart_position_categories_into_local_db()
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])
@@ -325,6 +372,10 @@ def import_vote_smart_position_categories_view(request):
 
 
 def retrieve_positions_from_vote_smart_for_election_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     try:
@@ -357,8 +408,11 @@ def retrieve_positions_from_vote_smart_for_election_view(request):
                                 "?google_civic_election_id=" + google_civic_election_id)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candidate_campaign_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
 
     results = transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id)
 
@@ -370,8 +424,11 @@ def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candida
     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def transfer_vote_smart_sigs_to_we_vote_orgs_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
 
     results = transfer_vote_smart_special_interest_groups_to_we_vote_organizations()
 
@@ -383,10 +440,14 @@ def transfer_vote_smart_sigs_to_we_vote_orgs_view(request):
     return HttpResponseRedirect(reverse('import_export_vote_smart:vote_smart_special_interest_group_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def state_detail_view(request, pk):
     """
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     state_id = pk
 
     template_values = {
@@ -395,18 +456,25 @@ def state_detail_view(request, pk):
     return render(request, 'import_export_vote_smart/state_detail.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def vote_smart_index_view(request):
     """
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
 
     template_values = {
     }
     return render(request, 'import_export_vote_smart/index.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def vote_smart_position_category_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
 
     position_category_list = VoteSmartCategory.objects.order_by('name')

@@ -28,12 +28,10 @@
     <p><a href=""></a>Translation Needed</p>
     <p><a href="{% url 'admin_tools:statistics_summary' %}">Quick Statistics</a></p>
     <p><a href="{% url 'apis_v1:apisIndex' %}" target="_blank">API Documentation</a></p>
-    <p>{# Move this to an integrations category? #}
-        {% if user and not user.is_anonymous %}
+    {% if user and not user.is_anonymous %}
+    <p>
             <span>Hello {{ user.get_full_name|default:"Voter" }}!</span>
             <a href="{% url 'auth:logout' %}?next={{ request.path }}">Logout</a>
-        {% else %}
-            <a href="{% url 'social:begin' 'facebook' %}?next={{ request.path }}">Login with Facebook</a>
-        {% endif %}
     </p>
+    {% endif %}
 {%  endblock %}

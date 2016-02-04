@@ -2,14 +2,17 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 from django.views import generic
 from .models import Politician, PoliticianTagLink
 from tag.models import Tag
+from voter.models import voter_has_authority
 
 
 class PoliticianIndexView(generic.ListView):
@@ -22,7 +25,12 @@ class PoliticianIndexView(generic.ListView):
 
 
 # TODO Next step is to get Twitter vacuum working so we can pull in Tweets automatically based on tags/handles
+@login_required
 def politician_detail_view(request, politician_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     politician_on_stage = get_object_or_404(Politician, id=politician_id)
     # post_list = Post.objects.filter
     template_values = {
@@ -33,12 +41,17 @@ def politician_detail_view(request, politician_id):
     return render(request, 'politician/politician_detail.html', template_values)
 
 
+@login_required
 def politician_tag_new_view(request, politician_id):
     """
     Form to add a new link tying a politician to twitter tags
     :param request:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     # for message in messages_on_stage:
     #     if message.level is ERROR:
@@ -57,10 +70,15 @@ def politician_tag_new_view(request, politician_id):
     return render(request, 'politician/politician_tag_new.html', template_values)
 
 
+@login_required
 def politician_tag_new_process_view(request, politician_id):
     """
     Process the form to add a new link tying a politician to twitter tags
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     politician_on_stage = get_object_or_404(Politician, id=politician_id)
     new_tag = request.POST['new_tag']
 

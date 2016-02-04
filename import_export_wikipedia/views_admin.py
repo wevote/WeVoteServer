@@ -4,18 +4,25 @@
 
 from .controllers import retrieve_all_organizations_logos_from_wikipedia, \
     retrieve_organization_logo_from_wikipedia_page, retrieve_wikipedia_page_from_wikipedia
+from admin_tools.views import redirect_to_sign_in_page
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from organization.models import OrganizationManager
+from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_organization_logo_from_wikipedia_view(request, organization_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     logo_found = False
 
     organization_manager = OrganizationManager()
@@ -57,8 +64,12 @@ def import_organization_logo_from_wikipedia_view(request, organization_id):
     return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def retrieve_all_organizations_logos_from_wikipedia_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     organization_state_code = request.GET.get('organization_state', '')
 
     results = retrieve_all_organizations_logos_from_wikipedia(organization_state_code)

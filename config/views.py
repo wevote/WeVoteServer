@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from datetime import datetime, timedelta
+from django.contrib.messages import get_messages
 from django.shortcuts import render
 from django.views.decorators.cache import cache_control
 # from politician.models import Politician
@@ -18,4 +19,9 @@ def start_view(request):
 
 def login_view(request):
     next = request.GET.get('next', '/')
-    return render(request, 'wevote_social/login.html', {'next': next})
+    messages_on_stage = get_messages(request)
+    template_values = {
+        'next': next,
+        'messages_on_stage': messages_on_stage,
+    }
+    return render(request, 'wevote_social/login.html', template_values)

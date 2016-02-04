@@ -4,14 +4,16 @@
 
 from .models import PollingLocation
 from .controllers import import_and_save_all_polling_locations_data
+from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-# from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
+from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, positive_value_exists
 import wevote_functions.admin
 
@@ -78,16 +80,24 @@ STATE_LIST_IMPORT = {
 }
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_polling_locations_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     # This should be updated to be a view with some import options
     messages.add_message(request, messages.INFO, 'TODO We need to create interface where we can control which '
                                                  'polling_locations import file to use.')
     return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def import_polling_locations_process_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     results = import_and_save_all_polling_locations_data()
 
     messages.add_message(request, messages.INFO,
@@ -99,13 +109,17 @@ def import_polling_locations_process_view(request):
     return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def polling_location_edit_process_view(request):
     """
     Process the new or edit polling_location forms
     :param request:
     :return:
     """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     polling_location_id = convert_to_int(request.POST['polling_location_id'])
     polling_location_name = request.POST['polling_location_name']
 
@@ -136,8 +150,12 @@ def polling_location_edit_process_view(request):
     return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def polling_location_edit_view(request, polling_location_local_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     polling_location_local_id = convert_to_int(polling_location_local_id)
     polling_location_on_stage_found = False
@@ -163,8 +181,12 @@ def polling_location_edit_view(request, polling_location_local_id):
     return render(request, 'polling_location/polling_location_edit.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def polling_location_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     polling_location_state = request.GET.get('polling_location_state')
     no_limit = False
 
@@ -198,8 +220,12 @@ def polling_location_list_view(request):
     return render(request, 'polling_location/polling_location_list.html', template_values)
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def polling_location_summary_view(request, polling_location_local_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     messages_on_stage = get_messages(request)
     polling_location_local_id = convert_to_int(polling_location_local_id)
     polling_location_on_stage_found = False

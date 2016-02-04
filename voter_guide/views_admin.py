@@ -3,6 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .models import VoterGuideList, VoterGuideManager
+from admin_tools.views import redirect_to_sign_in_page
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.contrib.messages import get_messages
@@ -11,11 +13,15 @@ from django.shortcuts import render
 from election.models import Election, TIME_SPAN_LIST
 from organization.models import Organization, OrganizationManager
 from position.models import PositionEntered
+from voter.models import voter_has_authority
 from wevote_functions.functions import positive_value_exists
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def generate_voter_guides_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
 
     voter_guide_stored_for_this_organization = []
     # voter_guide_stored_for_this_public_figure = []
@@ -85,8 +91,12 @@ def generate_voter_guides_view(request):
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()))
 
 
-# @login_required()  # Commented out while we are developing login process()
+@login_required
 def voter_guide_list_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     voter_guide_list = []
