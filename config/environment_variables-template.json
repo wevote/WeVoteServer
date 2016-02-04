@@ -1,4 +1,7 @@
 {
+  "_comment":                       "Note that WE_VOTE_SERVER_ROOT_URL should end without slash",
+  "WE_VOTE_SERVER_ROOT_URL":        "http://localhost:8000",
+
   "_comment":                       "local.py settings, including database",
   "DATABASE_ENGINE":                "django.db.backends.postgresql_psycopg2",
   "DATABASE_NAME":                  "WeVoteServerDB",
@@ -19,10 +22,10 @@
 
   "_comment":                       "import_export",
   "WE_VOTE_API_KEY":                "",
-  "ORGANIZATIONS_URL":              "http://my.wevoteusa.org/import_export/organizations/?format=json",
-  "CANDIDATE_CAMPAIGNS_URL":        "http://my.wevoteusa.org/import_export/candidate_campaigns/?format=json",
-  "POSITIONS_URL":                  "http://my.wevoteusa.org/import_export/positions/?format=json",
-  "QUICK_INFO_URL":                  "http://my.wevoteusa.org/import_export/quick_info/?format=json",
+  "ORGANIZATIONS_URL":              "https://api.wevoteusa.org/import_export/organizations/?format=json",
+  "CANDIDATE_CAMPAIGNS_URL":        "https://api.wevoteusa.org/import_export/candidate_campaigns/?format=json",
+  "POSITIONS_URL":                  "https://api.wevoteusa.org/import_export/positions/?format=json",
+  "QUICK_INFO_URL":                 "https://api.wevoteusa.org/import_export/quick_info/?format=json",
 
   "_comment":                       "import_export_google_civic",
   "GOOGLE_CIVIC_API_KEY":           "",
@@ -46,13 +49,14 @@
   "_comment":                       "import_export_voting_info_project",
   "VOTING_INFO_PROJECT_SAMPLE_XML_FILE": "import_export_voting_info_project/import_data/sample_feed.xml",
 
+  "_comment":                       "Django social sign in",
   "SOCIAL_AUTH_FACEBOOK_KEY":       "",
   "SOCIAL_AUTH_FACEBOOK_SECRET":    "",
   "SOCIAL_AUTH_TWITTER_KEY":        "",
   "SOCIAL_AUTH_TWITTER_SECRET":     "",
 
   "_comment":                       "django secret key",
-  "SECRET_KEY":                     "",
+  "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
 
   "_comment":                       "End of json_environment_variables.json"
 }

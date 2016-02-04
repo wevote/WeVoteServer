@@ -10,6 +10,7 @@ from candidate.controllers import candidate_retrieve_for_api, candidates_retriev
 from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
+from import_export_facebook.controllers import facebook_sign_in_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import twitter_sign_in_start_for_api
 import json
@@ -135,6 +136,26 @@ class ElectionsRetrieveView(APIView):
             election_list = results['election_list']
             serializer = ElectionSerializer(election_list, many=True)
             return Response(serializer.data)
+
+
+def facebook_sign_in_view(request):
+    """
+    Saving the results of signing in with Facebook
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    facebook_id = request.GET.get('facebook_id', None)
+    facebook_email = request.GET.get('facebook_email', None)
+    results = facebook_sign_in_for_api(voter_device_id, facebook_id, facebook_email)
+    json_data = {
+        'status': results['status'],
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'facebook_id': results['facebook_id'],
+        'facebook_email': results['facebook_email'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def measure_retrieve_view(request):

@@ -146,6 +146,18 @@ On OS X 10.10.5 I got an error (autoreconf: command not found), and had to do th
 ###  Run the command that downloads the GeoLite database from the WeVoteServer root folder (Where this README lives)
 
     $ ./manage.py update_geoip_data
+    
+### On Amazon Web Services
+
+Download latest paid database:
+    
+    $ cd WeVoteServer/geoip/import_data/
+    $ wget "https://download.maxmind.com/app/geoip_download? (FILL IN ACTUAL LINK FROM THEIR DOWNLOADS PAGE)"
+    $ mv geoip_download\?edition_id\=133\&date\=20160202 GeoIP-133_DATE_HERE.tar.gz
+    $ chmod 0777 GeoIP-133_DATE_HERE.tar.gz
+    $ tar zxvf GeoIP-133_DATE_HERE.tar.gz
+    $ cp GeoIP-133_20160202/GeoIPCity.dat .
+    $ chmod 0777 *.*
 
 ## Test that WeVoteServer is running
 

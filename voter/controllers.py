@@ -219,10 +219,11 @@ def voter_retrieve_for_api(voter_device_id):
             'voter_device_id':                  voter_device_id,
             'voter_found':                      True,
             'we_vote_id':                       voter.we_vote_id,
-            'first_name':                       voter.first_name,
-            'last_name':                        voter.last_name,
             'email':                            voter.email,
             'facebook_profile_image_url_https': voter.facebook_profile_image_url_https,
+            'first_name':                       voter.first_name,
+            'last_name':                        voter.last_name,
+            'signed_in_personal':               voter.signed_in_personal(),
             'voter_photo_url':                  voter.voter_photo_url(),
         }
         return json_data
@@ -235,11 +236,12 @@ def voter_retrieve_for_api(voter_device_id):
             'voter_device_id':                  voter_device_id,
             'voter_found':                      False,
             'we_vote_id':                       '',
-            'first_name':                       '',
-            'last_name':                        '',
             'email':                            '',
             'facebook_profile_image_url_https': '',
-            'voter_photo_url':                       '',
+            'first_name':                       '',
+            'last_name':                        '',
+            'signed_in_personal':               False,
+            'voter_photo_url':                  '',
         }
         return json_data
 

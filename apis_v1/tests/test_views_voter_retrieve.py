@@ -12,8 +12,6 @@ from django.http import SimpleCookie
 import json
 install_aliases()
 
-LOCALHOST_URL = "http://localhost:8000/"
-
 
 class WeVoteAPIsV1TestsVoterRetrieve(TestCase):
 

@@ -177,7 +177,15 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token)
 
-    def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token=''):
+    def retrieve_voter_by_facebook_id(self, facebook_id):
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
+        twitter_request_token = ''
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id)
+
+    def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=''):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
@@ -209,6 +217,11 @@ class VoterManager(BaseUserManager):
                     twitter_request_token=twitter_request_token)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+            elif positive_value_exists(facebook_id):
+                voter_on_stage = Voter.objects.get(
+                    facebook_id=facebook_id)
+                # If still here, we found an existing voter
+                voter_id = voter_on_stage.id
             else:
                 voter_id = 0
                 error_result = True
@@ -238,23 +251,63 @@ class VoterManager(BaseUserManager):
         #  to ever be used
         logger.info("clear_out_abandoned_voter_records")
 
+    def save_facebook_user_values(self, voter, facebook_id, facebook_email):
+        try:
+            if facebook_id == 0:
+                voter.facebook_id = 0
+            elif positive_value_exists(facebook_id):
+                voter.facebook_id = facebook_id
+
+            if facebook_email == '':
+                voter.facebook_email = ''
+            elif positive_value_exists(facebook_email):
+                voter.facebook_email = facebook_email
+
+            voter.save()
+            success = True
+            status = "SAVED_VOTER_TWITTER_VALUES"
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES"
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':   status,
+            'success':  success,
+            'voter':    voter,
+        }
+        return results
+
     def save_twitter_user_values(self, voter, twitter_user_object):
-        # 'id': 132728535,
-        voter.twitter_id = twitter_user_object.id
-        # 'id_str': '132728535',
-        # 'utc_offset': 32400,
-        # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
-        # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
-        voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
-        # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
-        # 'screen_name': 'jaeeeee',
-        voter.twitter_screen_name = twitter_user_object.screen_name
-        # 'lang': 'en',
-        # 'name': 'Jae Jung Chung',
-        # 'url': 'http://www.carbonize.co.kr',
-        # 'time_zone': 'Seoul',
-        voter.save()
-        return
+        try:
+            # 'id': 132728535,
+            voter.twitter_id = twitter_user_object.id
+            # 'id_str': '132728535',
+            # 'utc_offset': 32400,
+            # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
+            # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
+            voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+            # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
+            # 'screen_name': 'jaeeeee',
+            voter.twitter_screen_name = twitter_user_object.screen_name
+            # 'lang': 'en',
+            # 'name': 'Jae Jung Chung',
+            # 'url': 'http://www.carbonize.co.kr',
+            # 'time_zone': 'Seoul',
+            voter.save()
+            success = True
+            status = "SAVED_VOTER_TWITTER_VALUES"
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES"
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':   status,
+            'success':  success,
+            'voter':    voter,
+        }
+        return results
 
     def update_voter_photos(self, voter_id, facebook_profile_image_url_https, facebook_photo_variable_exists):
         results = self.retrieve_voter(voter_id)
@@ -266,23 +319,23 @@ class VoterManager(BaseUserManager):
                 if facebook_photo_variable_exists:
                     voter.facebook_profile_image_url_https = facebook_profile_image_url_https
                 voter.save()
-                status = "SAVED_VOTER"
+                status = "SAVED_VOTER_PHOTOS"
                 success = True
             except Exception as e:
-                status = "UNABLE_TO_SAVE_VOTER"
+                status = "UNABLE_TO_SAVE_VOTER_PHOTOS"
                 success = False
                 handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
         else:
             # If here, we were unable to find pre-existing Voter
-            status = "UNABLE_TO_FIND_VOTER"
+            status = "UNABLE_TO_FIND_VOTER_FOR_UPDATE_VOTER_PHOTOS"
             voter = Voter()
             success = False
 
         results = {
             'status':   status,
             'success':  success,
-            'voter': voter,
+            'voter':    voter,
         }
         return results
 
@@ -314,13 +367,15 @@ class Voter(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     is_verified_volunteer = models.BooleanField(default=False)
 
-    # Facebook username
-    # Consider just using username
+    # Facebook session information
+    facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
+    facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
+                                       null=True, blank=True)
     fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
     facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook', blank=True, null=True)
 
     # Twitter session information
-    twitter_id = models.BigIntegerField(verbose_name="twitter integer id", null=True, blank=True)
+    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, blank=True)
     twitter_screen_name = models.CharField(verbose_name='twitter screen name / handle',
                                            max_length=255, null=True, unique=False)
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
@@ -425,6 +480,9 @@ class Voter(AbstractBaseUser):
         elif self.twitter_profile_image_url_https:
             return self.twitter_profile_image_url_https
         return ''
+
+    def signed_in_personal(self):
+        return False
 
 
 class VoterDeviceLink(models.Model):

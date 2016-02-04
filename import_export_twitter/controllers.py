@@ -17,6 +17,9 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+
+WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+
 RE_FACEBOOK = r'//www\.facebook\.com/(?:#!/)?(\w+)'
 # RE_FACEBOOK = r'/(?:https?:\/\/)?(?:www\.)?facebook\.com\/(?:(?:\w)*#!\/)?(?:pages\/)?(?:[\w\-]*\/)*?(\/)?([^/?]*)/'
 FACEBOOK_BLACKLIST = ['group', 'group.php', 'None']
@@ -310,7 +313,7 @@ def twitter_sign_in_start_for_api(voter_device_id):  # twitterSignInStart
         return results
 
     voter = results['voter']
-    callback_url = "http://localhost:8000/twitter/process_sign_in_response/"
+    callback_url = WE_VOTE_SERVER_ROOT_URL + "/twitter/process_sign_in_response/"
     redirect_url = ''
 
     try:
