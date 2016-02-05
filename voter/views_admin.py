@@ -4,19 +4,105 @@
 
 from .models import Voter
 from admin_tools.views import redirect_to_sign_in_page
-from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
-from voter.models import voter_has_authority
-from wevote_functions.functions import convert_to_int
+from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority, voter_setup
 import wevote_functions.admin
+from wevote_functions.functions import convert_to_int, get_voter_device_id, set_voter_device_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+# This is open to anyone, and provides psql to update the database directly
+def voter_authenticate_manually_view(request):
+    messages_on_stage = get_messages(request)
+
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    store_new_voter_device_id_in_cookie = False
+    if not positive_value_exists(voter_device_id):
+        # Create a voter_device_id and voter in the database if one doesn't exist yet
+        results = voter_setup(request)
+        voter_device_id = results['voter_device_id']
+        store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_id = convert_to_int(voter_id)
+    voter_on_stage_found = False
+    voter_on_stage = Voter()
+    try:
+        voter_on_stage = Voter.objects.get(id=voter_id)
+        voter_on_stage_found = True
+    except Voter.MultipleObjectsReturned as e:
+        handle_record_found_more_than_one_exception(e, logger=logger)
+    except Voter.DoesNotExist:
+        # This is fine, we will display an error
+        pass
+
+    if voter_on_stage_found:
+        set_this_voter_as_admin = "UPDATE voter_voter SET is_admin=True WHERE id={voter_id};".format(voter_id=voter_id)
+        unset_this_voter_as_admin = "UPDATE voter_voter SET is_admin=False WHERE id={voter_id};".format(voter_id=voter_id)
+
+        set_as_verified_volunteer = "UPDATE voter_voter SET is_verified_volunteer=True WHERE id={voter_id};" \
+                                    "".format(voter_id=voter_id)
+        unset_as_verified_volunteer = "UPDATE voter_voter SET is_verified_volunteer=False WHERE id={voter_id};" \
+                                      "".format(voter_id=voter_id)
+        template_values = {
+            'messages_on_stage':            messages_on_stage,
+            'voter':                        voter_on_stage,
+            'is_authenticated':             request.user.is_authenticated(),
+            'set_this_voter_as_admin':      set_this_voter_as_admin,
+            'unset_this_voter_as_admin':    unset_this_voter_as_admin,
+            'set_as_verified_volunteer':    set_as_verified_volunteer,
+            'unset_as_verified_volunteer':  unset_as_verified_volunteer,
+        }
+    else:
+        template_values = {
+            'messages_on_stage': messages_on_stage,
+
+        }
+    response = render(request, 'voter/voter_authenticate_manually.html', template_values)
+
+    # We want to store the voter_device_id cookie if it is new
+    if positive_value_exists(voter_device_id) and positive_value_exists(store_new_voter_device_id_in_cookie):
+        set_voter_device_id(request, response, voter_device_id)
+
+    return response
+
+
+# This is open to anyone, and provides psql to update the database directly
+def voter_authenticate_manually_process_view(request):
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+
+    voter_id = convert_to_int(voter_id)
+    voter_signed_in = False
+    try:
+        voter_on_stage = Voter.objects.get(id=voter_id)
+        if voter_on_stage.is_admin:
+            voter_on_stage.backend = 'django.contrib.auth.backends.ModelBackend'
+            login(request, voter_on_stage)
+            messages.add_message(request, messages.INFO, 'Voter logged in.')
+            voter_signed_in = True
+        else:
+            messages.add_message(request, messages.INFO, 'This account does not have Admin access.')
+    except Voter.MultipleObjectsReturned as e:
+        handle_record_found_more_than_one_exception(e, logger=logger)
+        messages.add_message(request, messages.ERROR, 'More than one voter found. Voter not logged in.')
+    except Voter.DoesNotExist:
+        # This is fine, we will display an error
+        messages.add_message(request, messages.ERROR, 'Voter not found. Voter not logged in.')
+
+    if voter_signed_in:
+        return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+    else:
+        return HttpResponseRedirect(reverse('voter:authenticate_manually', args=()))
 
 
 @login_required
@@ -95,12 +181,17 @@ def voter_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_id = convert_to_int(voter_id)
+
     messages_on_stage = get_messages(request)
     voter_list = Voter.objects.order_by('-last_login')
 
     template_values = {
         'messages_on_stage': messages_on_stage,
         'voter_list': voter_list,
+        'voter_id_signed_in': voter_id,
     }
     return render(request, 'voter/voter_list.html', template_values)
 

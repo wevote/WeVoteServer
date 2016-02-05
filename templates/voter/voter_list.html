@@ -12,17 +12,25 @@
     <table border="1" cellpadding="10">
         <tr>
             <td>ID</td>
+            <td>We Vote ID</td>
             <td>Who</td>
+            <td>You</td>
             <td>Where</td>
             <td>FB?</td>
             <td>Tw?</td>
             <td>Admin</td>
+            <td>Verified Volunteer</td>
         </tr>
     {% for voter in voter_list %}
         <tr>
             <td>{{ voter.id }}</td>
+            <td>{{ voter.we_vote_id }}</td>
             <td><a href="{% url 'voter:voter_summary' voter.id %}">
             {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }}{% endif %}</a>
+            </td>
+            <!-- Is this you? //-->
+            <td>
+            {% if voter.id == voter_id_signed_in %}*{% else %}{% endif %}
             </td>
             <td>
                 &nbsp;
@@ -33,11 +41,15 @@
             </td>
             <!-- Twitter? //-->
             <td>
-            {% if voter.fb_username %}Y{% else %}{% endif %}
+            {% if voter.twitter_id %}@{{ voter.twitter_screen_name }}{% else %}{% endif %}
             </td>
             <!-- Is site administrator? //-->
             <td>
             {% if voter.is_admin %}Y{% else %}{% endif %}
+            </td>
+            <!-- Is verified volunteer? //-->
+            <td>
+            {% if voter.is_verified_volunteer %}Y{% else %}{% endif %}
             </td>
         </tr>
     {% endfor %}

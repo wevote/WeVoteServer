@@ -7,7 +7,7 @@
 {% endif %}
 
 {% if next %}
-    {% if user.is_authenticated %}
+    {% if request.user.is_authenticated %}
     <p>Your account doesn't have access to this page. To proceed,
     please login with an account that has access.</p>
     {% else %}
@@ -42,5 +42,10 @@
 
 {# Assumes you setup the password_reset view in your URLconf #}
 <p><a href="{% url 'auth:password_reset' %}">Lost password?</a></p>
+
+
+<p> {% if not request.user.is_authenticated %}
+    <a href="{% url 'voter:authenticate_manually' %}">Authenticate Manually</a>{% endif %}
+</p>
 
 {% endblock %}

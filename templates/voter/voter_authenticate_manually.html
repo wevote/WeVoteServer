@@ -1,0 +1,53 @@
+{# templates/voter/voter_authenticate_manually.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if voter %}
+    Authenticate Manually
+    {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}
+{% else %}No Voter Found
+{% endif %}{% endblock %}
+
+{%  block content %}
+
+<p>This page is to help with the initial set up of a database.</p>
+
+{% if voter %}
+
+    <h1>Authenticate Manually
+        {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}</h1>
+    <table border="1">
+    <tr>
+        <td>ID</td>
+        <td>{{ voter.id }}</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Admin?</td>
+        <td>{% if voter.is_admin %}Yes{% else %}No{% endif %}</td>
+        <td>{% if voter.is_admin %}TURN OFF: {{ unset_this_voter_as_admin }}
+        {% else %}TURN ON: {{ set_this_voter_as_admin }}{% endif %}</td>
+    </tr>
+    <tr>
+        <td>Verified Volunteer?</td>
+        <td>{% if voter.is_verified_volunteer %}Yes
+        {% else %}No{% endif %}</td>
+        <td>{% if voter.is_verified_volunteer %}TURN OFF: {{ unset_as_verified_volunteer }}
+        {% else %}TURN ON: {{ set_as_verified_volunteer }}{% endif %}</td>
+    </tr>
+    </table>
+
+    <p> {% if not is_authenticated %}
+            {% if voter.is_admin %}Since this account has admin authority,
+            <a href="{% url 'voter:authenticate_manually_process' %}">click here to authenticate within Django</a>{% endif %}
+        {% endif %}
+    </p>
+
+
+{% else %}
+
+    <h1>No Voter Found</h1>
+    Please visit the <a href="{% url 'voter:voter_list' %}">Voter List</a> page.
+
+{% endif %}
+
+{% endblock %}

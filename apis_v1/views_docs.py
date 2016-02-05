@@ -23,7 +23,10 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     voter_star_status_retrieve_doc, voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc
 from config.base import get_environment_variable
+from django.contrib.messages import get_messages
 from django.shortcuts import render
+from voter.models import voter_setup
+from wevote_functions.functions import set_voter_device_id, positive_value_exists
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
@@ -32,10 +35,23 @@ def apis_index_doc_view(request):
     """
     Show a list of available APIs
     """
+    # Create a voter_device_id and voter in the database if one doesn't exist yet
+    results = voter_setup(request)
+    voter_device_id = results['voter_device_id']
+    store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
+
+    messages_on_stage = get_messages(request)
     template_values = {
-        # 'key': value,
+        'next': next,
+        'messages_on_stage': messages_on_stage,
     }
-    return render(request, 'apis_v1/apis_index.html', template_values)
+    response = render(request, 'apis_v1/apis_index.html', template_values)
+
+    # We want to store the voter_device_id cookie if it is new
+    if positive_value_exists(voter_device_id) and positive_value_exists(store_new_voter_device_id_in_cookie):
+        set_voter_device_id(request, response, voter_device_id)
+
+    return response
 
 
 def ballot_item_options_retrieve_doc_view(request):

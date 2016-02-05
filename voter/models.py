@@ -436,7 +436,10 @@ class Voter(AbstractBaseUser):
         super(Voter, self).save(*args, **kwargs)
 
     def get_full_name(self):
-        return self.first_name+" "+self.last_name
+        full_name = self.first_name if positive_value_exists(self.first_name) else ''
+        full_name += " " if positive_value_exists(self.first_name) and positive_value_exists(self.last_name) else ''
+        full_name += self.last_name if positive_value_exists(self.last_name) else ''
+        return full_name
 
     def get_short_name(self):
         # return self.first_name

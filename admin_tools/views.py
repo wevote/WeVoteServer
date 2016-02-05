@@ -25,6 +25,7 @@ def admin_home_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    # Create a voter_device_id and voter in the database if one doesn't exist yet
     results = voter_setup(request)
     voter_device_id = results['voter_device_id']
     store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
