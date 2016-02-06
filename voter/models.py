@@ -486,6 +486,9 @@ class Voter(AbstractBaseUser):
         return ''
 
     def signed_in_personal(self):
+        if positive_value_exists(self.email) or positive_value_exists(self.facebook_id) or \
+                positive_value_exists(self.twitter_access_token) or positive_value_exists(self.is_authenticated()):
+            return True
         return False
 
 

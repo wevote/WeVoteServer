@@ -701,7 +701,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     return response
 
 
-def voter_location_retrieve_from_ip_view(request):
+def voter_location_retrieve_from_ip_view(request):  # GeoIP geo location
     """
     Take the IP address and return a location (voterLocationRetrieveFromIP)
     :param request:
