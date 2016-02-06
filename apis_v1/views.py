@@ -1,12 +1,12 @@
 # apis_v1/views.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-from django.http import HttpResponse
 
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
     organization_stop_following, voter_count, voter_create
 from ballot.controllers import ballot_item_options_retrieve_for_api, voter_ballot_items_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
+from django.http import HttpResponse
 from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
@@ -701,7 +701,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     return response
 
 
-def voter_location_retrieve_from_ip_view(request):
+def voter_location_retrieve_from_ip_view(request):  # GeoIP geo location
     """
     Take the IP address and return a location (voterLocationRetrieveFromIP)
     :param request:
