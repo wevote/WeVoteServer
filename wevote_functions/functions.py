@@ -198,7 +198,7 @@ def get_ip_from_headers(request):
     if x_forwarded_for:
         return x_forwarded_for.split(',')[-1].strip()
     elif http_x_forwarded_for:
-        return http_x_forwarded_for.split(',')[-1].strip()
+        return http_x_forwarded_for.split(',')[0].strip()
     else:
         return request.META.get('REMOTE_ADDR')
 

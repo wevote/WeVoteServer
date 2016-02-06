@@ -707,6 +707,9 @@ def voter_location_retrieve_from_ip_view(request):
     :param request:
     :return:
     """
+    x_forwarded_for = request.META.get('X-Forwarded-For')
+    http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
     ip_address = request.GET.get('ip_address') or get_ip_from_headers(request)
     if ip_address is None:
         # return HttpResponse('missing ip_address request parameter', status=400)
@@ -716,11 +719,13 @@ def voter_location_retrieve_from_ip_view(request):
             'voter_location_found': False,
             'voter_location': '',
             'ip_address': ip_address,
+            'x_forwarded_for': x_forwarded_for,
+            'http_x_forwarded_for': http_x_forwarded_for,
         }
 
         return HttpResponse(json.dumps(response_content), content_type='application/json')
 
-    return voter_location_retrieve_from_ip_for_api(ip_address=ip_address)
+    return voter_location_retrieve_from_ip_for_api(request, ip_address=ip_address)
 
 
 def voter_photo_save_view(request):

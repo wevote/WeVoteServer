@@ -12,12 +12,15 @@ import wevote_functions.admin
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-def voter_location_retrieve_from_ip_for_api(ip_address):
+def voter_location_retrieve_from_ip_for_api(request, ip_address):
     """
     Used by the api
     :param ip_address:
     :return:
     """
+    x_forwarded_for = request.META.get('X-Forwarded-For')
+    http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
     g = GeoIP()
     location = g.city(ip_address)
     if location is None:
@@ -29,6 +32,8 @@ def voter_location_retrieve_from_ip_for_api(ip_address):
             'voter_location_found': False,
             'voter_location': '',
             'ip_address': ip_address,
+            'x_forwarded_for': x_forwarded_for,
+            'http_x_forwarded_for': http_x_forwarded_for,
         }
     else:
         response_content = {
@@ -37,6 +42,8 @@ def voter_location_retrieve_from_ip_for_api(ip_address):
             'voter_location_found': True,
             'voter_location': '{0[city]}, {0[region]} {0[postal_code]}'.format(location),
             'ip_address': ip_address,
+            'x_forwarded_for': x_forwarded_for,
+            'http_x_forwarded_for': http_x_forwarded_for,
         }
 
     return HttpResponse(json.dumps(response_content), content_type='application/json')
