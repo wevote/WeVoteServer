@@ -33,6 +33,7 @@ urlpatterns = [
     url(r'^c/', include('candidate.urls', namespace="candidate")),
     url(r'^e/', include('election.urls', namespace="election")),
     url(r'^follow/', include('follow.urls', namespace="follow")),
+    url(r'^health/', views.health_view),  # A simple health check to make sure the site is running
     url(r'^import_export_google_civic/', include(
         'import_export_google_civic.urls', namespace="import_export_google_civic")),
     url(r'^import_export_twitter/', include('import_export_twitter.urls', namespace="import_export_twitter")),
