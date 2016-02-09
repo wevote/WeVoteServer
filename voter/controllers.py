@@ -224,6 +224,9 @@ def voter_retrieve_for_api(voter_device_id):
             'first_name':                       voter.first_name,
             'last_name':                        voter.last_name,
             'signed_in_personal':               voter.signed_in_personal(),
+            'signed_in_facebook':               voter.signed_in_facebook(),
+            'signed_in_google':                 voter.signed_in_google(),
+            'signed_in_twitter':                voter.signed_in_twitter(),
             'voter_photo_url':                  voter.voter_photo_url(),
         }
         return json_data
@@ -241,6 +244,9 @@ def voter_retrieve_for_api(voter_device_id):
             'first_name':                       '',
             'last_name':                        '',
             'signed_in_personal':               False,
+            'signed_in_facebook':               False,
+            'signed_in_google':                 False,
+            'signed_in_twitter':                False,
             'voter_photo_url':                  '',
         }
         return json_data

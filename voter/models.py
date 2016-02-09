@@ -491,6 +491,19 @@ class Voter(AbstractBaseUser):
             return True
         return False
 
+    def signed_in_facebook(self):
+        if positive_value_exists(self.facebook_email) or positive_value_exists(self.facebook_id):
+            return True
+        return False
+
+    def signed_in_google(self):
+        return False
+
+    def signed_in_twitter(self):
+        if positive_value_exists(self.twitter_access_token):
+            return True
+        return False
+
 
 class VoterDeviceLink(models.Model):
     """
