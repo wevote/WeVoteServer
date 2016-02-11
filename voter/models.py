@@ -252,23 +252,23 @@ class VoterManager(BaseUserManager):
         #  to ever be used
         logger.info("clear_out_abandoned_voter_records")
 
-    def save_facebook_user_values(self, voter, facebook_id, facebook_email):
+    def save_facebook_user_values(self, voter, facebook_id, facebook_email=''):
         try:
             if facebook_id == 0:
                 voter.facebook_id = 0
             elif positive_value_exists(facebook_id):
                 voter.facebook_id = facebook_id
 
-            if facebook_email == '':
+            if facebook_email == '' or facebook_email is False:
                 voter.facebook_email = ''
             elif positive_value_exists(facebook_email):
                 voter.facebook_email = facebook_email
 
             voter.save()
             success = True
-            status = "SAVED_VOTER_TWITTER_VALUES"
+            status = "SAVED_VOTER_FACEBOOK_VALUES"
         except Exception as e:
-            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES"
+            status = "UNABLE_TO_SAVE_VOTER_FACEBOOK_VALUES"
             success = False
             handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
@@ -492,7 +492,7 @@ class Voter(AbstractBaseUser):
         return False
 
     def signed_in_facebook(self):
-        if positive_value_exists(self.facebook_email) or positive_value_exists(self.facebook_id):
+        if positive_value_exists(self.facebook_id):
             return True
         return False
 

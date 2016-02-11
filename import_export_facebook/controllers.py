@@ -18,7 +18,7 @@ def facebook_sign_in_for_api(voter_device_id, facebook_id=None, facebook_email=N
     :param voter_device_id:
     :return:
     """
-    # Get voter_id from the voter_device_id so we can figure out which ballot_items to offer
+    # Get voter_id from the voter_device_id
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results = {
@@ -79,5 +79,53 @@ def facebook_sign_in_for_api(voter_device_id, facebook_id=None, facebook_email=N
             'voter_device_id': voter_device_id,
             'facebook_id': facebook_id,
             'facebook_email': facebook_email,
+        }
+    return results
+
+
+def facebook_disconnect_for_api(voter_device_id):  # facebookDisconnect
+    """
+
+    :param voter_device_id:
+    :return:
+    """
+    # Get voter_id from the voter_device_id
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        results = {
+            'success': False,
+            'status': "VALID_VOTER_DEVICE_ID_MISSING",
+            'voter_device_id': voter_device_id,
+        }
+        return results
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if not positive_value_exists(results['voter_found']):
+        results = {
+            'success': False,
+            'status': "VALID_VOTER_MISSING",
+            'voter_device_id': voter_device_id,
+        }
+        return results
+
+    voter = results['voter']
+
+    facebook_id = 0
+    results = voter_manager.save_facebook_user_values(voter, facebook_id)
+    status = results['status']
+    success = results['success']
+
+    if success:
+        results = {
+            'success': True,
+            'status': status,
+            'voter_device_id': voter_device_id,
+        }
+    else:
+        results = {
+            'success': False,
+            'status': status,
+            'voter_device_id': voter_device_id,
         }
     return results

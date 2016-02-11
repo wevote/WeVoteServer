@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from election.controllers import elections_retrieve_list_for_api
 from election.serializers import ElectionSerializer
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
-from import_export_facebook.controllers import facebook_sign_in_for_api
+from import_export_facebook.controllers import facebook_disconnect_for_api, facebook_sign_in_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import twitter_sign_in_start_for_api
 import json
@@ -136,6 +136,22 @@ class ElectionsRetrieveView(APIView):
             election_list = results['election_list']
             serializer = ElectionSerializer(election_list, many=True)
             return Response(serializer.data)
+
+
+def facebook_disconnect_view(request):
+    """
+    Disconnect this We Vote account from current Facebook account
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    results = facebook_disconnect_for_api(voter_device_id)
+    json_data = {
+        'status': results['status'],
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def facebook_sign_in_view(request):

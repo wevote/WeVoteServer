@@ -4,7 +4,7 @@
 
 from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_retrieve_doc, candidate_retrieve_doc, \
     candidates_retrieve_doc, device_id_generate_doc, \
-    elections_retrieve_doc, facebook_sign_in_doc, measure_retrieve_doc, office_retrieve_doc, \
+    elections_retrieve_doc, facebook_disconnect_doc, facebook_sign_in_doc, measure_retrieve_doc, office_retrieve_doc, \
     organization_count_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
@@ -105,6 +105,15 @@ def elections_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = elections_retrieve_doc.elections_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def facebook_disconnect_doc_view(request):
+    """
+    Show documentation about facebookDisconnect
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = facebook_disconnect_doc.facebook_disconnect_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
