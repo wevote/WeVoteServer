@@ -112,8 +112,17 @@ def device_id_generate_view(request):
         voter_device_id=voter_device_id
     ))
 
+    if positive_value_exists(voter_device_id):
+        success = True
+        status = "DEVICE_ID_GENERATE_VALUE_DOES_NOT_EXIST"
+    else:
+        success = False
+        status = "DEVICE_ID_GENERATE_VALUE_EXISTS"
+
     json_data = {
         'voter_device_id': voter_device_id,
+        'success': success,
+        'status': status,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
