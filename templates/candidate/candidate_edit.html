@@ -59,14 +59,28 @@
         </tr>
 
         {% for candidate_position in candidate_position_list %}
+        {% if not candidate_position.id %}
+        <tr>
+            <td colspan="3">
+            (missing candidate_position.id)
+            </td>
+        </tr>
+        {% else %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.id %}">
-                {{ candidate_position.organization.organization_name }}</a></td>
+            <td>
+                {% if candidate_position.organization_id %}
+                <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.id %}">
+                {{ candidate_position.organization.organization_name }}</a>
+                {% else %}
+                    (not an org)
+                {% endif %}
+            </td>
             <td>{{ candidate_position.get_stance_display }}
                 {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}</td>
             <td>{{ candidate_position.election.election_day_text }}</td>
         </tr>
+        {% endif %}
         {% endfor %}
 
         </table>
