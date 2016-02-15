@@ -580,6 +580,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'statement_html':           '',
             'more_info_url':            '',
             'last_updated':             '',
+            'voter_device_id':          voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -631,6 +632,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'statement_html':           position.statement_html,
             'more_info_url':            position.more_info_url,
             'last_updated':             '',
+            'voter_device_id':          voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -651,6 +653,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'statement_html':           '',
             'more_info_url':            '',
             'last_updated':             '',
+            'voter_device_id':          voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 

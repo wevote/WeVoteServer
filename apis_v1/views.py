@@ -544,6 +544,7 @@ def voter_address_retrieve_view(request):
             'success': voter_address_retrieve_results['success'],
             'status': voter_address_retrieve_results['status'],
             'address_found': voter_address_retrieve_results['address_found'],
+            'guess_if_no_address_saved': guess_if_no_address_saved,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -568,6 +569,7 @@ def voter_address_retrieve_view(request):
             'success': voter_address_retrieve_results['success'],
             'status': voter_address_retrieve_results['status'],
             'address_found': voter_address_retrieve_results['address_found'],
+            'guess_if_no_address_saved': guess_if_no_address_saved,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -624,6 +626,7 @@ def voter_address_retrieve_view(request):
                 'success': voter_address_retrieve_results['success'],
                 'status': status,
                 'address_found': voter_address_retrieve_results['address_found'],
+                'guess_if_no_address_saved': guess_if_no_address_saved,
             }
 
             response = HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -651,6 +654,7 @@ def voter_address_retrieve_view(request):
                 'success': False,
                 'status': status,
                 'address_found': False,
+                'guess_if_no_address_saved': guess_if_no_address_saved,
             }
             return HttpResponse(json.dumps(json_data), content_type='application/json')
 
