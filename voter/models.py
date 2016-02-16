@@ -74,6 +74,20 @@ class VoterManager(BaseUserManager):
                 password_not_valid = True
             voter.save()
             voter_id = voter.id
+        except voter.IntegrityError as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            try:
+                # Trying to save again will increment the 'we_vote_id_last_voter_integer'
+                # by calling 'fetch_next_we_vote_id_last_voter_integer'
+                # TODO We could get into a race condition where multiple creates could be failing at once, so we
+                #  should look more closely at this
+                voter.save()
+                voter_id = voter.id
+            except voter.IntegrityError as e:
+                handle_record_not_saved_exception(e, logger=logger)
+            except Exception as e:
+                handle_record_not_saved_exception(e, logger=logger)
+
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
 
