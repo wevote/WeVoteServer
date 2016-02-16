@@ -44,8 +44,9 @@
 <p><a href="{% url 'auth:password_reset' %}">Lost password?</a></p>
 
 
-<p> {% if not request.user.is_authenticated %}
-    <a href="{% url 'voter:authenticate_manually' %}">Authenticate Manually</a>{% endif %}
+<p> <a href="{% url 'voter:authenticate_manually' %}">Authenticate Manually</a>
+    {% if not request.user.is_authenticated %}
+    {% endif %}
 </p>
 
 {% endblock %}

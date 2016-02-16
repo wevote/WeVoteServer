@@ -214,7 +214,36 @@ def set_cookie(response, cookie_name, cookie_value, days_expire=None):
     response.set_cookie(cookie_name, cookie_value, max_age=max_age, expires=expires)
 
 
+def get_voter_api_device_id(request, generate_if_no_cookie=False):
+    """
+    This function retrieves the voter_api_device_id from the API server
+    :param request:
+    :param generate_if_no_cookie:
+    :return:
+    """
+    voter_api_device_id = ''
+    if 'voter_api_device_id' in request.COOKIES:
+        voter_api_device_id = request.COOKIES['voter_api_device_id']
+        logger.debug("from cookie, voter_api_device_id: {voter_api_device_id}".format(
+            voter_api_device_id=voter_api_device_id
+        ))
+    if voter_api_device_id == '' and generate_if_no_cookie:
+        voter_api_device_id = generate_voter_device_id()  # Stored in cookie below
+        # If we set this here, we won't know whether we need to store the cookie in set_voter_api_device_id
+        # request.COOKIES['voter_api_device_id'] = voter_api_device_id  # Set it here for use in remainder of page load
+        logger.debug("generate_voter_device_id, voter_api_device_id: {voter_api_device_id}".format(
+            voter_api_device_id=voter_api_device_id
+        ))
+    return voter_api_device_id
+
+
 def get_voter_device_id(request, generate_if_no_cookie=False):
+    """
+    This function retrieves the voter_device_id from the client
+    :param request:
+    :param generate_if_no_cookie:
+    :return:
+    """
     voter_device_id = ''
     if 'voter_device_id' in request.COOKIES:
         voter_device_id = request.COOKIES['voter_device_id']
@@ -259,9 +288,9 @@ def is_voter_device_id_valid(voter_device_id):
     return results
 
 
-def set_voter_device_id(request, response, voter_device_id):
-    if 'voter_device_id' not in request.COOKIES:
-        set_cookie(response, 'voter_device_id', voter_device_id)
+def set_voter_api_device_id(request, response, voter_api_device_id):
+    if 'voter_api_device_id' not in request.COOKIES:
+        set_cookie(response, 'voter_api_device_id', voter_api_device_id)
 
 
 def generate_random_string(string_length=88, chars=string.ascii_lowercase + string.ascii_uppercase + string.digits):

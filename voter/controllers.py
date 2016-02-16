@@ -62,10 +62,19 @@ def voter_address_retrieve_for_api(voter_device_id):
         return voter_address_retrieve_results
     else:
         voter_address_retrieve_results = {
-            'status': "VOTER_ADDRESS_NOT_RETRIEVED",
+            'status': "VOTER_ADDRESS_NOT_FOUND",
             'success': False,
             'address_found': False,
             'voter_device_id': voter_device_id,
+            'address_type': '',
+            'text_for_map_search': '',
+            'latitude': '',
+            'longitude': '',
+            'normalized_line1': '',
+            'normalized_line2': '',
+            'normalized_city': '',
+            'normalized_state': '',
+            'normalized_zip': '',
         }
         return voter_address_retrieve_results
 
