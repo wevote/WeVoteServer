@@ -115,6 +115,7 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -246,6 +247,9 @@ BOOTSTRAP3 = {
 
 CORS_ORIGIN_ALLOW_ALL = True  # CORS_ORIGIN_ALLOW_ALL: if True, the whitelist will not be used & all origins accepted
 CORS_ALLOW_CREDENTIALS = True
+# specify whether to replace the HTTP_REFERER header if CORS checks pass so that CSRF django middleware checks
+# will work with https
+CORS_REPLACE_HTTPS_REFERER = True
 
 # CORS_ORIGIN_WHITELIST = (
 #     'google.com',
