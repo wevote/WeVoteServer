@@ -10,7 +10,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from validate_email import validate_email
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, \
-    positive_value_exists
+    get_voter_api_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_voter_integer, fetch_site_unique_id_prefix
 
 
@@ -625,6 +625,7 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
 
 def retrieve_voter_authority(request):
     voter_device_id = get_voter_device_id(request)
+    # voter_api_device_id = get_voter_api_device_id(request)
     voter_manager = VoterManager()
     results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if results['voter_found']:
@@ -758,6 +759,7 @@ class VoterAddressManager(models.Model):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
+        voter_address_found = False
         voter_address_on_stage = VoterAddress()
 
         try:
@@ -769,6 +771,8 @@ class VoterAddressManager(models.Model):
                 voter_address_on_stage = VoterAddress.objects.get(voter_id=voter_id, address_type=address_type)
                 # If still here, we found an existing address
                 voter_address_id = voter_address_on_stage.id
+                voter_address_found = True if positive_value_exists(voter_address_on_stage.text_for_map_search) \
+                    else False
         except VoterAddress.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
@@ -782,7 +786,7 @@ class VoterAddressManager(models.Model):
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'voter_address_found':      True if voter_address_id > 0 else False,
+            'voter_address_found':      voter_address_found,
             'voter_address_id':         voter_address_id,
             'voter_address':            voter_address_on_stage,
         }
@@ -932,6 +936,7 @@ def voter_setup(request):
                 voter_device_link = results['voter_device_link']
                 voter_id = voter_device_link.voter_id
                 voter_id_found = True if voter_id > 0 else False
+                store_new_voter_device_id_in_cookie = True
             else:
                 voter_id = 0
                 voter_id_found = False
