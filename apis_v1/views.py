@@ -556,16 +556,16 @@ def voter_address_retrieve_view(request):
         # Do not guess at an address
         status += 'DO_NOT_GUESS_IF_NO_ADDRESS_SAVED'
         json_data = {
-            'voter_device_id': voter_address_retrieve_results['voter_device_id'],
-            'address_type': voter_address_retrieve_results['address_type'],
-            'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
-            'latitude': voter_address_retrieve_results['latitude'],
-            'longitude': voter_address_retrieve_results['longitude'],
-            'normalized_line1': voter_address_retrieve_results['normalized_line1'],
-            'normalized_line2': voter_address_retrieve_results['normalized_line2'],
-            'normalized_city': voter_address_retrieve_results['normalized_city'],
-            'normalized_state': voter_address_retrieve_results['normalized_state'],
-            'normalized_zip': voter_address_retrieve_results['normalized_zip'],
+            'voter_device_id': voter_device_id,
+            'address_type': '',
+            'text_for_map_search': '',
+            'latitude': '',
+            'longitude': '',
+            'normalized_line1': '',
+            'normalized_line2': '',
+            'normalized_city': '',
+            'normalized_state': '',
+            'normalized_zip': '',
             'success': voter_address_retrieve_results['success'],
             'status': voter_address_retrieve_results['status'],
             'address_found': voter_address_retrieve_results['address_found'],
@@ -611,23 +611,42 @@ def voter_address_retrieve_view(request):
             voter_address_retrieve_results = voter_address_retrieve_for_api(voter_device_id)
 
             status += voter_address_retrieve_results['status']
-
-            json_data = {
-                'voter_device_id': voter_device_id,
-                'address_type': voter_address_retrieve_results['address_type'],
-                'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
-                'latitude': voter_address_retrieve_results['latitude'],
-                'longitude': voter_address_retrieve_results['longitude'],
-                'normalized_line1': voter_address_retrieve_results['normalized_line1'],
-                'normalized_line2': voter_address_retrieve_results['normalized_line2'],
-                'normalized_city': voter_address_retrieve_results['normalized_city'],
-                'normalized_state': voter_address_retrieve_results['normalized_state'],
-                'normalized_zip': voter_address_retrieve_results['normalized_zip'],
-                'success': voter_address_retrieve_results['success'],
-                'status': status,
-                'address_found': voter_address_retrieve_results['address_found'],
-                'guess_if_no_address_saved': guess_if_no_address_saved,
-            }
+            if voter_address_retrieve_results['address_found']:
+                json_data = {
+                    'voter_device_id': voter_device_id,
+                    'address_type': voter_address_retrieve_results['address_type'],
+                    'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
+                    'latitude': voter_address_retrieve_results['latitude'],
+                    'longitude': voter_address_retrieve_results['longitude'],
+                    'normalized_line1': voter_address_retrieve_results['normalized_line1'],
+                    'normalized_line2': voter_address_retrieve_results['normalized_line2'],
+                    'normalized_city': voter_address_retrieve_results['normalized_city'],
+                    'normalized_state': voter_address_retrieve_results['normalized_state'],
+                    'normalized_zip': voter_address_retrieve_results['normalized_zip'],
+                    'success': voter_address_retrieve_results['success'],
+                    'status': status,
+                    'address_found': voter_address_retrieve_results['address_found'],
+                    'guess_if_no_address_saved': guess_if_no_address_saved,
+                }
+            else:
+                # Address not found from IP address
+                status += 'VOTER_ADDRESS_RETRIEVE_PART2_NO_ADDRESS'
+                json_data = {
+                    'voter_device_id': voter_device_id,
+                    'address_type': '',
+                    'text_for_map_search': '',
+                    'latitude': '',
+                    'longitude': '',
+                    'normalized_line1': '',
+                    'normalized_line2': '',
+                    'normalized_city': '',
+                    'normalized_state': '',
+                    'normalized_zip': '',
+                    'success': voter_address_retrieve_results['success'],
+                    'status': voter_address_retrieve_results['status'],
+                    'address_found': voter_address_retrieve_results['address_found'],
+                    'guess_if_no_address_saved': guess_if_no_address_saved,
+                }
 
             response = HttpResponse(json.dumps(json_data), content_type='application/json')
 
