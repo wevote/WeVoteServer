@@ -15,7 +15,8 @@ from exception.models import handle_record_found_more_than_one_exception, handle
     handle_record_not_saved_exception
 from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority, voter_setup
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_device_id, set_voter_device_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, get_voter_api_device_id, set_voter_api_device_id, \
+    positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -24,15 +25,15 @@ logger = wevote_functions.admin.get_logger(__name__)
 def voter_authenticate_manually_view(request):
     messages_on_stage = get_messages(request)
 
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    store_new_voter_device_id_in_cookie = False
-    if not positive_value_exists(voter_device_id):
+    voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
+    store_new_voter_api_device_id_in_cookie = False
+    if not positive_value_exists(voter_api_device_id):
         # Create a voter_device_id and voter in the database if one doesn't exist yet
         results = voter_setup(request)
-        voter_device_id = results['voter_device_id']
-        store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
+        voter_api_device_id = results['voter_device_id']
+        store_new_voter_api_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
     voter_id = convert_to_int(voter_id)
     voter_on_stage_found = False
     voter_on_stage = Voter()
@@ -69,17 +70,19 @@ def voter_authenticate_manually_view(request):
         }
     response = render(request, 'voter/voter_authenticate_manually.html', template_values)
 
-    # We want to store the voter_device_id cookie if it is new
-    if positive_value_exists(voter_device_id) and positive_value_exists(store_new_voter_device_id_in_cookie):
-        set_voter_device_id(request, response, voter_device_id)
+    # We want to store the voter_api_device_id cookie if it is new
+    # if positive_value_exists(voter_api_device_id) and positive_value_exists(store_new_voter_api_device_id_in_cookie):
+    # DALE 2016-02-15 Always set if we have a voter_api_device_id
+    if positive_value_exists(voter_api_device_id):
+        set_voter_api_device_id(request, response, voter_api_device_id)
 
     return response
 
 
 # This is open to anyone, and provides psql to update the database directly
 def voter_authenticate_manually_process_view(request):
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
+    voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     voter_id = convert_to_int(voter_id)
     voter_signed_in = False
@@ -181,8 +184,8 @@ def voter_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
+    voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
     voter_id = convert_to_int(voter_id)
 
     messages_on_stage = get_messages(request)

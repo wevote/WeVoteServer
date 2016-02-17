@@ -47,7 +47,7 @@ def voter_address_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        # 'organization_we_vote_id': 'wv85org1',
+        # 'voter_device_id': '',
     }
 
     api_response = '{\n' \

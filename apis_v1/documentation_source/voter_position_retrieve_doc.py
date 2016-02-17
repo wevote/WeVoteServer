@@ -10,7 +10,7 @@ def voter_position_retrieve_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -31,27 +31,6 @@ def voter_position_retrieve_doc_template_values(url_root):
                             '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
                             'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
-        # {
-        #     'name':         'office_we_vote_id',
-        #     'value':        'string',  # boolean, integer, long, string
-        #     'description':  'Office We Vote unique identifier. '
-        #                     '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
-        #                     'measure_we_vote_id',
-        # },
-        # {
-        #     'name':         'candidate_we_vote_id',
-        #     'value':        'string',  # boolean, integer, long, string
-        #     'description':  'Candidate We Vote unique identifier. '
-        #                     '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
-        #                     'measure_we_vote_id',
-        # },
-        # {
-        #     'name':         'measure_we_vote_id',
-        #     'value':        'string',  # boolean, integer, long, string
-        #     'description':  'Measure We Vote unique identifier. '
-        #                     '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
-        #                     'measure_we_vote_id',
-        # },
     ]
     optional_query_parameter_list = [
     ]

@@ -689,7 +689,7 @@ def voter_address_save_view(request):  # voterAddressSave
 
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     try:
-        text_for_map_search = request.POST['text_for_map_search']
+        text_for_map_search = request.GET['text_for_map_search']
         text_for_map_search = text_for_map_search.strip()
         address_variable_exists = True
     except KeyError:

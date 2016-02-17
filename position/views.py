@@ -10,7 +10,7 @@ from .models import ANY_STANCE, SUPPORT, NO_STANCE, INFORMATION_ONLY, STILL_DECI
     PositionListManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_device_id
+from wevote_functions.functions import get_voter_api_device_id
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -37,8 +37,8 @@ def positions_related_to_candidate_campaign_view(request, candidate_campaign_id,
         position_list_manager.retrieve_all_positions_for_candidate_campaign(
             candidate_campaign_id, candidate_campaign_we_vote_id, stance_we_are_looking_for)
 
-    voter_device_id = get_voter_device_id(request)
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_api_device_id = get_voter_api_device_id(request)
+    voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \

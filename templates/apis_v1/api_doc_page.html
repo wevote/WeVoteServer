@@ -15,11 +15,13 @@
         <form name="{{ api_name }}" method="{% if get_or_post == "GET" %}get{% else %}post{% endif %}" action="{% url try_now_link %}" target="_blank">
         {% csrf_token %}
             {% for query_parameter in required_query_parameter_list %}
-                {% if query_parameter.name != 'voter_device_id' and query_parameter.name != 'api_key' %}
+                {% if query_parameter.name != 'api_key' %}
                     {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
                     {{ query_parameter.name }}: <input type="text" name="{{ query_parameter.name }}" maxlength="50" size="30"
                         {% if query_parameter.name in try_now_link_variables_dict %}
                               value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                        {% elif query_parameter.name == 'voter_device_id' %}
+                              value="{{ voter_api_device_id }}"
                         {% endif %}>
                     {% elif query_parameter.value == 'boolean' %}
                         {{ query_parameter.name }}: <br />
@@ -30,11 +32,13 @@
                 {% endif %}
             {% endfor %}
             {% for query_parameter in optional_query_parameter_list %}
-                {% if query_parameter.name != 'voter_device_id' and query_parameter.name != 'api_key' %}
+                {% if query_parameter.name != 'api_key' %}
                     {% if query_parameter.value == 'string' or query_parameter.value == 'integer' or query_parameter.value == 'long' %}
                     {{ query_parameter.name }}: <input  type="text" name="{{ query_parameter.name }}" maxlength="50" size="30"
                         {% if query_parameter.name in try_now_link_variables_dict %}
                               value="{{ try_now_link_variables_dict|get_value_from_dict:query_parameter.name }}"
+                        {% elif query_parameter.name == 'voter_device_id' %}
+                              value="{{ voter_api_device_id }}"
                         {% endif %}>
                     {% elif query_parameter.value == 'boolean' %}
                         {{ query_parameter.name }}: <br />

@@ -216,7 +216,7 @@ def set_cookie(response, cookie_name, cookie_value, days_expire=None):
 
 def get_voter_api_device_id(request, generate_if_no_cookie=False):
     """
-    This function retrieves the voter_api_device_id from the API server
+    This function retrieves the voter_api_device_id from the cookies on API server
     :param request:
     :param generate_if_no_cookie:
     :return:
@@ -229,31 +229,22 @@ def get_voter_api_device_id(request, generate_if_no_cookie=False):
         ))
     if voter_api_device_id == '' and generate_if_no_cookie:
         voter_api_device_id = generate_voter_device_id()  # Stored in cookie below
-        # If we set this here, we won't know whether we need to store the cookie in set_voter_api_device_id
-        # request.COOKIES['voter_api_device_id'] = voter_api_device_id  # Set it here for use in remainder of page load
         logger.debug("generate_voter_device_id, voter_api_device_id: {voter_api_device_id}".format(
             voter_api_device_id=voter_api_device_id
         ))
     return voter_api_device_id
 
 
-def get_voter_device_id(request, generate_if_no_cookie=False):
+def get_voter_device_id(request, generate_if_no_value=False):
     """
-    This function retrieves the voter_device_id from the client
+    This function retrieves the voter_device_id from the GET values coming from a client
     :param request:
     :param generate_if_no_cookie:
     :return:
     """
     voter_device_id = request.GET.get('voter_device_id', '')
-    # if 'voter_device_id' in request.COOKIES:
-    #     voter_device_id = request.COOKIES['voter_device_id']
-    #     logger.debug("from cookie, voter_device_id: {voter_device_id}".format(
-    #         voter_device_id=voter_device_id
-    #     ))
-    if voter_device_id == '' and generate_if_no_cookie:
+    if voter_device_id == '' and generate_if_no_value:
         voter_device_id = generate_voter_device_id()  # Stored in cookie below
-        # If we set this here, we won't know whether we need to store the cookie in set_voter_device_id
-        # request.COOKIES['voter_device_id'] = voter_device_id  # Set it here for use in the remainder of this page load
         logger.debug("generate_voter_device_id, voter_device_id: {voter_device_id}".format(
             voter_device_id=voter_device_id
         ))
@@ -288,6 +279,7 @@ def is_voter_device_id_valid(voter_device_id):
     return results
 
 
+# TODO: To be deprecated since we don't want to set voter_device_id locally to the API server
 def set_voter_device_id(request, response, voter_device_id):
     if 'voter_device_id' not in request.COOKIES:
         set_cookie(response, 'voter_device_id', voter_device_id)

@@ -242,8 +242,8 @@ def relink_candidates_measures_view(request):
 #         position_list_manager.retrieve_all_positions_for_candidate_campaign(
 #             candidate_campaign_id, stance_we_are_looking_for)
 #
-#     voter_device_id = get_voter_device_id(request)
-#     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+#     voter_api_device_id = get_voter_api_device_id(request)
+#     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 #
 #     follow_organization_list_manager = FollowOrganizationList()
 #     organizations_followed_by_voter = \

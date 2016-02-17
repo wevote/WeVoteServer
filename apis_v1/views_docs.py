@@ -26,7 +26,7 @@ from config.base import get_environment_variable
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from voter.models import voter_setup
-from wevote_functions.functions import set_voter_device_id, positive_value_exists
+from wevote_functions.functions import get_voter_api_device_id, set_voter_api_device_id, positive_value_exists
 
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
@@ -37,8 +37,8 @@ def apis_index_doc_view(request):
     """
     # Create a voter_device_id and voter in the database if one doesn't exist yet
     results = voter_setup(request)
-    voter_device_id = results['voter_device_id']
-    store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
+    voter_api_device_id = results['voter_device_id']
+    store_new_voter_api_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
 
     messages_on_stage = get_messages(request)
     template_values = {
@@ -48,8 +48,8 @@ def apis_index_doc_view(request):
     response = render(request, 'apis_v1/apis_index.html', template_values)
 
     # We want to store the voter_device_id cookie if it is new
-    if positive_value_exists(voter_device_id) and positive_value_exists(store_new_voter_device_id_in_cookie):
-        set_voter_device_id(request, response, voter_device_id)
+    if positive_value_exists(voter_api_device_id) and positive_value_exists(store_new_voter_api_device_id_in_cookie):
+        set_voter_api_device_id(request, response, voter_api_device_id)
 
     return response
 
@@ -60,6 +60,7 @@ def ballot_item_options_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = ballot_item_options_retrieve_doc.ballot_item_options_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -69,6 +70,7 @@ def ballot_item_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = ballot_item_retrieve_doc.ballot_item_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -114,6 +116,7 @@ def facebook_disconnect_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = facebook_disconnect_doc.facebook_disconnect_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -123,6 +126,7 @@ def facebook_sign_in_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = facebook_sign_in_doc.facebook_sign_in_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -159,6 +163,7 @@ def organization_follow_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organization_follow_doc.organization_follow_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -168,6 +173,7 @@ def organizations_followed_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organizations_followed_retrieve_doc.organizations_followed_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -177,6 +183,7 @@ def organization_follow_ignore_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organization_follow_ignore_doc.organization_follow_ignore_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -186,6 +193,7 @@ def organization_stop_following_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organization_stop_following_doc.organization_stop_following_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -205,6 +213,7 @@ def organization_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organization_save_doc.organization_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -214,6 +223,7 @@ def organization_search_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organization_search_doc.organization_search_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -223,6 +233,7 @@ def position_list_for_ballot_item_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = position_list_for_ballot_item_doc.position_list_for_ballot_item_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -233,6 +244,7 @@ def position_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
 
     template_values = position_retrieve_doc.position_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -242,6 +254,7 @@ def position_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = position_save_doc.position_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -252,6 +265,7 @@ def position_oppose_count_for_ballot_item_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = position_oppose_count_for_ballot_item_doc.\
         position_oppose_count_for_ballot_item_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -262,6 +276,7 @@ def position_support_count_for_ballot_item_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = position_support_count_for_ballot_item_doc.\
         position_support_count_for_ballot_item_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -301,6 +316,7 @@ def twitter_sign_in_start_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = twitter_sign_in_start_doc.twitter_sign_in_start_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -310,6 +326,7 @@ def voter_address_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_address_retrieve_doc.voter_address_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -319,6 +336,7 @@ def voter_address_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_address_save_doc.voter_address_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -328,6 +346,7 @@ def voter_ballot_items_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_ballot_items_retrieve_doc.voter_ballot_items_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -338,6 +357,7 @@ def voter_ballot_items_retrieve_from_google_civic_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_ballot_items_retrieve_from_google_civic_doc.\
         voter_ballot_items_retrieve_from_google_civic_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -356,6 +376,7 @@ def voter_create_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_create_doc.voter_create_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -366,6 +387,7 @@ def voter_guide_possibility_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = \
         voter_guide_possibility_retrieve_doc.voter_guide_possibility_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -375,6 +397,7 @@ def voter_guide_possibility_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_guide_possibility_save_doc.voter_guide_possibility_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -384,6 +407,7 @@ def voter_guides_followed_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_guides_followed_retrieve_doc.voter_guides_followed_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -393,6 +417,7 @@ def voter_guides_to_follow_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_guides_to_follow_retrieve_doc.voter_guides_to_follow_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -402,6 +427,7 @@ def voter_location_retrieve_from_ip_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_location_retrieve_from_ip_doc.voter_location_retrieve_from_ip_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -411,6 +437,7 @@ def voter_photo_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_photo_save_doc.voter_photo_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -420,6 +447,7 @@ def voter_position_like_off_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_position_like_off_save_doc.voter_position_like_off_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -429,6 +457,7 @@ def voter_position_like_on_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_position_like_on_save_doc.voter_position_like_on_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -439,6 +468,7 @@ def voter_position_like_status_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_position_like_status_retrieve_doc.voter_position_like_status_retrieve_doc_template_values(
         url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -448,6 +478,7 @@ def position_like_count_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = position_like_count_doc.position_like_count_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -458,6 +489,7 @@ def voter_position_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
 
     template_values = voter_position_retrieve_doc.voter_position_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -467,6 +499,7 @@ def voter_position_comment_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_position_comment_save_doc.voter_position_comment_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -476,6 +509,7 @@ def voter_opposing_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_opposing_save_doc.voter_opposing_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -485,6 +519,7 @@ def voter_stop_opposing_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_stop_opposing_save_doc.voter_stop_opposing_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -494,6 +529,7 @@ def voter_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_retrieve_doc.voter_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -503,6 +539,7 @@ def voter_stop_supporting_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_stop_supporting_save_doc.voter_stop_supporting_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -512,6 +549,7 @@ def voter_supporting_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_supporting_save_doc.voter_supporting_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -521,6 +559,7 @@ def voter_star_off_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_star_off_save_doc.voter_star_off_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -530,6 +569,7 @@ def voter_star_on_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_star_on_save_doc.voter_star_on_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -539,4 +579,5 @@ def voter_star_status_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_star_status_retrieve_doc.voter_star_status_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)

@@ -10,7 +10,7 @@ def voter_star_status_retrieve_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -31,24 +31,6 @@ def voter_star_status_retrieve_doc_template_values(url_root):
                             '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
                             'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
-        # {
-        #     'name':         'office_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The office that the voter is starring. '
-        #                     '(Either office_id, candidate_id or measure_id must exist)',
-        # },
-        # {
-        #     'name':         'candidate_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The candidate that the voter is supporting. '
-        #                     '(Either office_id, candidate_id or measure_id must exist)',
-        # },
-        # {
-        #     'name':         'measure_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The measure that the voter is supporting. '
-        #                     '(Either office_id, candidate_id or measure_id must exist)',
-        # },
     ]
     optional_query_parameter_list = [
         # {

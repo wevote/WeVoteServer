@@ -16,7 +16,7 @@ from organization.controllers import organizations_import_from_sample_file
 from polling_location.controllers import import_and_save_all_polling_locations_data
 from position.controllers import positions_import_from_sample_file
 from voter.models import Voter, voter_has_authority, voter_setup
-from wevote_functions.functions import positive_value_exists, set_voter_device_id
+from wevote_functions.functions import positive_value_exists, set_voter_api_device_id
 
 
 @login_required
@@ -27,15 +27,15 @@ def admin_home_view(request):
 
     # Create a voter_device_id and voter in the database if one doesn't exist yet
     results = voter_setup(request)
-    voter_device_id = results['voter_device_id']
-    store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
+    voter_api_device_id = results['voter_device_id']
+    store_new_voter_api_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
     template_values = {
     }
     response = render(request, 'admin_tools/index.html', template_values)
 
-    # We want to store the voter_device_id cookie if it is new
-    if positive_value_exists(voter_device_id) and positive_value_exists(store_new_voter_device_id_in_cookie):
-        set_voter_device_id(request, response, voter_device_id)
+    # We want to store the voter_api_device_id cookie if it is new
+    if positive_value_exists(voter_api_device_id) and positive_value_exists(store_new_voter_api_device_id_in_cookie):
+        set_voter_api_device_id(request, response, voter_api_device_id)
 
     return response
 
