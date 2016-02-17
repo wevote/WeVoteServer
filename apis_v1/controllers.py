@@ -100,7 +100,7 @@ def voter_create(voter_device_id):
     if existing_voter_id:
         json_data = {
             'status': "VOTER_ALREADY_EXISTS",
-            'success': False,
+            'success': True,
             'voter_device_id': voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
