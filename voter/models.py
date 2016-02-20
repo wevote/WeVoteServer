@@ -500,8 +500,8 @@ class Voter(AbstractBaseUser):
         return ''
 
     def signed_in_personal(self):
-        if positive_value_exists(self.email) or positive_value_exists(self.facebook_id) or \
-                positive_value_exists(self.twitter_access_token) or positive_value_exists(self.is_authenticated()):
+        if positive_value_exists(self.email) or self.signed_in_facebook() or self.signed_in_twitter():
+            # or positive_value_exists(self.is_authenticated()):
             return True
         return False
 
@@ -558,21 +558,21 @@ class VoterDeviceLinkManager(models.Model):
 
         return results
 
-    def retrieve_voter_device_link(self, voter_device_id, voter_id, voter_device_link_id):
+    def retrieve_voter_device_link(self, voter_device_id, voter_id=0, voter_device_link_id=0):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         voter_device_link_on_stage = VoterDeviceLink()
 
         try:
-            if voter_device_id is not '':
+            if positive_value_exists(voter_device_id):
                 voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_device_id=voter_device_id)
                 voter_device_link_id = voter_device_link_on_stage.id
-            elif voter_id > 0:
+            elif positive_value_exists(voter_id):
                 voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_id=voter_id)
                 # If still here, we found an existing position
                 voter_device_link_id = voter_device_link_on_stage.id
-            elif voter_device_link_id > 0:
+            elif positive_value_exists(voter_device_link_id):
                 voter_device_link_on_stage = VoterDeviceLink.objects.get(id=voter_device_link_id)
                 # If still here, we found an existing position
                 voter_device_link_id = voter_device_link_on_stage.id
@@ -603,7 +603,7 @@ class VoterDeviceLinkManager(models.Model):
         voter_device_link_id = 0
 
         try:
-            if voter_device_id is not '' and voter_id > 0:
+            if positive_value_exists(voter_device_id) and positive_value_exists(voter_id):
                 voter_device_link_on_stage.voter_device_id = voter_device_id
                 voter_device_link_on_stage.voter_id = voter_id
                 voter_device_link_on_stage.save()
@@ -623,6 +623,38 @@ class VoterDeviceLinkManager(models.Model):
             'RecordNotSaved':               exception_record_not_saved,
             'voter_device_link_created':    True if voter_device_link_id > 0 else False,
             'voter_device_link':            voter_device_link_on_stage,
+        }
+        return results
+
+    def update_voter_device_link(self, voter_device_link, voter_object):
+        """
+        Take existing voter_device_link, and replace the voter attached to that voter_device_id
+        """
+        error_result = False
+        exception_record_not_saved = False
+        missing_required_variables = False
+        voter_device_link_id = 0
+
+        try:
+            if positive_value_exists(voter_device_link.voter_device_id) and positive_value_exists(voter_object.id):
+                voter_device_link.voter_id = voter_object.id
+                voter_device_link.save()
+
+                voter_device_link_id = voter_device_link.id
+            else:
+                missing_required_variables = True
+                voter_device_link_id = 0
+        except Exception as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            error_result = True
+            exception_record_not_saved = True
+
+        results = {
+            'error_result':                 error_result,
+            'missing_required_variables':   missing_required_variables,
+            'RecordNotSaved':               exception_record_not_saved,
+            'voter_device_link_updated':    True if voter_device_link_id > 0 else False,
+            'voter_device_link':            voter_device_link,
         }
         return results
 

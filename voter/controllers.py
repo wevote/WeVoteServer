@@ -199,7 +199,7 @@ def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, 
     return results
 
 
-def voter_retrieve_for_api(voter_device_id):
+def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
     """
     Used by the api
     :param voter_device_id:

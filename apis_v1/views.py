@@ -46,14 +46,14 @@ import wevote_functions.admin
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-def ballot_item_options_retrieve_view(request):
+def ballot_item_options_retrieve_view(request):  # ballotItemOptionsRetrieve
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     results = ballot_item_options_retrieve_for_api(google_civic_election_id)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
     return response
 
 
-def ballot_item_retrieve_view(request):
+def ballot_item_retrieve_view(request):  # ballotItemRetrieve
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -87,13 +87,13 @@ def ballot_item_retrieve_view(request):
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def candidate_retrieve_view(request):
+def candidate_retrieve_view(request):  # candidateRetrieve
     candidate_id = request.GET.get('candidate_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', None)
     return candidate_retrieve_for_api(candidate_id, candidate_we_vote_id)
 
 
-def candidates_retrieve_view(request):
+def candidates_retrieve_view(request):  # candidatesRetrieve
     office_id = request.GET.get('office_id', 0)
     office_we_vote_id = request.GET.get('office_we_vote_id', '')
     return candidates_retrieve_for_api(office_id, office_we_vote_id)
@@ -163,7 +163,7 @@ def facebook_disconnect_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def facebook_sign_in_view(request):
+def facebook_sign_in_view(request):  # facebookSignIn
     """
     Saving the results of signing in with Facebook
     :param request:
@@ -1112,7 +1112,7 @@ class VoterExportView(APIView):
             return Response(serializer.data)
 
 
-def voter_retrieve_view(request):
+def voter_retrieve_view(request):  # voterRetrieve
     """
     Retrieve a single voter based on voter_device
     :param request:
