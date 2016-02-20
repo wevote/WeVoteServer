@@ -126,7 +126,7 @@ def voter_create(voter_device_id):
     if voter_id:
         json_data = {
             'status': "VOTER_CREATED",
-            'success': False,
+            'success': True,
             'voter_device_id': voter_device_id,
             'voter_id': voter_id,  # We may want to remove this after initial testing
         }
