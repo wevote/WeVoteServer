@@ -670,10 +670,10 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
 
 
 def retrieve_voter_authority(request):
-    voter_device_id = get_voter_device_id(request)
-    # voter_api_device_id = get_voter_api_device_id(request)
+    # voter_device_id = get_voter_device_id(request)
+    voter_api_device_id = get_voter_api_device_id(request)
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
     if results['voter_found']:
         voter = results['voter']
         authority_results = {
