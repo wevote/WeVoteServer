@@ -468,9 +468,10 @@ class CandidateCampaignManager(models.Model):
         # elif not positive_value_exists(ocd_division_id):
         #     success = False
         #     status = 'MISSING_OCD_DIVISION_ID'
-        elif not positive_value_exists(contest_office_we_vote_id):  # and not positive_value_exists(contest_office_id):
-            success = False
-            status = 'MISSING_CONTEST_OFFICE_ID'
+        # DALE 2016-02-20 We are not requiring contest_office_id or contest_office_we_vote_id to match a candidate
+        # elif not positive_value_exists(contest_office_we_vote_id): # and not positive_value_exists(contest_office_id):
+        #     success = False
+        #     status = 'MISSING_CONTEST_OFFICE_ID'
         elif not positive_value_exists(google_civic_candidate_name):
             success = False
             status = 'MISSING_GOOGLE_CIVIC_CANDIDATE_NAME'
@@ -495,7 +496,8 @@ class CandidateCampaignManager(models.Model):
                         CandidateCampaign.objects.update_or_create(
                             google_civic_election_id__exact=google_civic_election_id,
                             # ocd_division_id__exact=ocd_division_id,
-                            contest_office_we_vote_id__exact=contest_office_we_vote_id,
+                            # 2016-02-20 We want to allow contest_office ids to change
+                            # contest_office_we_vote_id__exact=contest_office_we_vote_id,
                             google_civic_candidate_name__exact=google_civic_candidate_name,
                             defaults=updated_candidate_campaign_values)
 

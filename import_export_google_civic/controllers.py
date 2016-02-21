@@ -54,7 +54,7 @@ def process_candidates_from_structured_json(
     results = {}
     for one_candidate in candidates_structured_json:
         candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
-        # For some reason Google Civic API violates the JSON standard and uses a
+        # For some reason Google Civic API violates the JSON standard and uses a / in front of '
         candidate_name = candidate_name.replace('/', "'")
         # We want to save the name exactly as it comes from the Google Civic API
         google_civic_candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
@@ -65,7 +65,7 @@ def process_candidates_from_structured_json(
         email = one_candidate['email'] if 'email' in one_candidate else ''
         phone = one_candidate['phone'] if 'phone' in one_candidate else ''
 
-        # set them to channel values to empty
+        # Make sure we start with empty channel values
         facebook_url = ''
         twitter_url = ''
         google_plus_url = ''
@@ -83,14 +83,19 @@ def process_candidates_from_structured_json(
                     if one_channel['type'] == 'YouTube':
                         youtube_url = one_channel['id'] if 'id' in one_channel else ''
 
+        # DALE 2016-02-20 It would be helpful to call a service here that disambiguated the candidate
+        # ...and linked to a politician
+        # ...and looked to see if there were any other candidate_campaign entries for this election (in case the
+        #   Google Civic contest_office name changed so we generated another contest)
+
         we_vote_id = ''
-        if google_civic_election_id and ocd_division_id and contest_office_id and candidate_name:
+        # Make sure we have the minimum variables required to uniquely identify a candidate
+        if google_civic_election_id and contest_office_id and candidate_name:
+            # NOT using " and ocd_division_id"
             updated_candidate_campaign_values = {
                 # Values we search against
                 'google_civic_election_id': google_civic_election_id,
                 'ocd_division_id': ocd_division_id,
-                'contest_office_id': contest_office_id,
-                'contest_office_we_vote_id': contest_office_we_vote_id,
                 # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
                 #  updating candidate_name via subsequent Google Civic imports
                 'candidate_name': candidate_name,
@@ -107,6 +112,10 @@ def process_candidates_from_structured_json(
                 'google_plus_url': google_plus_url,
                 'youtube_url': youtube_url,
                 'google_civic_candidate_name': google_civic_candidate_name,
+                # 2016-02-20 Google Civic sometimes changes the name of contests, which can create a new contest
+                #  so we may need to update the candidate to a new contest_office_id
+                'contest_office_id': contest_office_id,
+                'contest_office_we_vote_id': contest_office_we_vote_id,
             }
             candidate_campaign_manager = CandidateCampaignManager()
             results = candidate_campaign_manager.update_or_create_candidate_campaign(
