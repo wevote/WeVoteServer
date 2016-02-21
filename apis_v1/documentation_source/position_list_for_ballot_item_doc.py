@@ -108,13 +108,16 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '   [\n' \
                    '     "position_id": integer,\n' \
                    '     "position_we_vote_id": string,\n' \
-                   '     "speaker_label": string,\n' \
+                   '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
+                   '     "speaker_display_name": string,\n' \
+                   '     "speaker_image_url_https": string,\n' \
                    '     "speaker_type": string, ' \
                    '      (One of these: \'ORGANIZATION\', \'VOTER\', \'PUBLIC_FIGURE\', \'UNKNOWN\',)\n' \
                    '     "speaker_id": integer,\n' \
                    '     "speaker_we_vote_id": string,\n' \
                    '     "is_support": boolean,\n' \
                    '     "is_oppose": boolean,\n' \
+                   '     "last_updated": string,\n' \
                    '   ],\n' \
                    '}'
 

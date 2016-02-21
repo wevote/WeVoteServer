@@ -291,7 +291,7 @@ def get_maximum_number_to_retrieve_from_request(request):
     return maximum_number_to_retrieve
 
 
-def position_list_for_ballot_item_view(request):
+def position_list_for_ballot_item_view(request):  # positionListForBallotItem
     """
     Retrieve the number of orgs and friends that support this (positionSupportCountForBallotItem)
     :param request:

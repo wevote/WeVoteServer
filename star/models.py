@@ -35,7 +35,7 @@ class StarItem(models.Model):
     # Is this person following or ignoring this organization?
     star_status = models.CharField(max_length=16, choices=STAR_CHOICES, default=ITEM_NOT_STARRED)
 
-    # The date the voter followed or stopped following this organization
+    # The date the voter starred or unstarred this ballot_item
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     # This is used when we want to export the organizations that a voter is following

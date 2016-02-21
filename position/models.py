@@ -11,7 +11,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
     handle_record_not_found_exception, handle_record_not_saved_exception
 from measure.models import ContestMeasure, ContestMeasureList
 from office.models import ContestOffice
-from organization.models import Organization
+from organization.models import Organization, OrganizationManager
 from twitter.models import TwitterUser
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
@@ -61,7 +61,17 @@ class PositionEntered(models.Model):
     ballot_item_display_name = models.CharField(verbose_name="text name for ballot item",
                                                 max_length=255, null=True, blank=True)
 
+    # What is the organization name, voter name, or public figure name? We cache this here for rapid display
+    speaker_display_name = models.CharField(
+        verbose_name="name of the org or person with position", max_length=255, null=True, blank=True, unique=False)
+    # We cache the url to an image for the org, voter, or public_figure for rapid display
+    speaker_image_url_https = models.URLField(verbose_name='url of https image for org or person with position',
+                                              blank=True, null=True)
+
     date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)
+    # The date the this position last changed
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
     # The organization this position is for
     organization_id = models.BigIntegerField(null=True, blank=True)
     organization_we_vote_id = models.CharField(
@@ -224,6 +234,13 @@ class PositionEntered(models.Model):
         if self.stance == STILL_DECIDING:
             return True
         return False
+
+    def last_updated(self):
+        if positive_value_exists(self.date_last_changed):
+            return str(self.date_last_changed)
+        elif positive_value_exists(self.date_entered):
+            return str(self.date_entered)
+        return ''
 
     def candidate_campaign(self):
         if not self.candidate_campaign_id:
@@ -979,6 +996,8 @@ class PositionEnteredManager(models.Model):
             'is_no_stance':             position_on_stage.is_no_stance(),
             'is_information_only':      position_on_stage.is_information_only(),
             'is_still_deciding':        position_on_stage.is_still_deciding(),
+            'date_last_changed':        position_on_stage.date_last_changed,
+            'date_entered':             position_on_stage.date_entered,
         }
         return results
 
@@ -1680,6 +1699,35 @@ class PositionEnteredManager(models.Model):
             'new_position_created':     new_position_created,
         }
         return results
+
+    def refresh_cached_position_info(self, position_object):
+        if positive_value_exists(position_object.organization_we_vote_id):
+            if not positive_value_exists(position_object.speaker_display_name) \
+                    or not positive_value_exists(position_object.speaker_image_url_https):
+                try:
+                    # We need to look in the organization table for speaker_display_name & speaker_image_url_https
+                    organization_manager = OrganizationManager()
+                    organization_id = 0
+                    results = organization_manager.retrieve_organization(organization_id,
+                                                                         position_object.organization_we_vote_id)
+                    if results['organization_found']:
+                        organization = results['organization']
+                        if not positive_value_exists(position_object.speaker_display_name):
+                            # speaker_display_name is missing so look it up from source
+                            position_object.speaker_display_name = organization.organization_name
+                        if not positive_value_exists(position_object.speaker_image_url_https):
+                            # speaker_image_url_https is missing so look it up from source
+                            position_object.speaker_image_url_https = organization.organization_photo_url()
+                        position_object.save()
+                except Exception as e:
+                    pass
+
+        elif positive_value_exists(position_object.voter_id):
+            pass
+        elif positive_value_exists(position_object.public_figure_we_vote_id):
+            pass
+
+        return position_object
 
     def delete_position(self, position_id):
         position_id = convert_to_int(position_id)

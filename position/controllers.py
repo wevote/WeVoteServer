@@ -40,6 +40,8 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -87,6 +89,8 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
             'ballot_item_display_name': position.ballot_item_display_name,
+            'speaker_display_name':     position.speaker_display_name,
+            'speaker_image_url_https':  position.speaker_image_url_https,
             'is_support':               results['is_support'],
             'is_oppose':                results['is_oppose'],
             'is_information_only':      results['is_information_only'],
@@ -100,7 +104,7 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'statement_text':           position.statement_text,
             'statement_html':           position.statement_html,
             'more_info_url':            position.more_info_url,
-            'last_updated':             '',
+            'last_updated':             position.last_updated(),
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -110,6 +114,8 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'position_id':              position_id,
             'position_we_vote_id':      we_vote_id,
             'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -171,6 +177,8 @@ def position_save_for_api(
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
             'ballot_item_display_name': ballot_item_display_name,
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -196,6 +204,8 @@ def position_save_for_api(
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
             'ballot_item_display_name': ballot_item_display_name,
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -241,6 +251,8 @@ def position_save_for_api(
             'position_we_vote_id':      position.we_vote_id,
             'new_position_created':     save_results['new_position_created'],
             'ballot_item_display_name': position.ballot_item_display_name,
+            'speaker_display_name':     position.speaker_display_name,
+            'speaker_image_url_https':  position.speaker_image_url_https,
             'is_support':               position.is_support(),
             'is_oppose':                position.is_oppose(),
             'is_information_only':      position.is_information_only(),
@@ -254,7 +266,7 @@ def position_save_for_api(
             'statement_text':           position.statement_text,
             'statement_html':           position.statement_html,
             'more_info_url':            position.more_info_url,
-            'last_updated':             '',
+            'last_updated':             position.last_updated(),
         }
         return results
     else:
@@ -266,6 +278,8 @@ def position_save_for_api(
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
             'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -284,13 +298,15 @@ def position_save_for_api(
         return results
 
 
-def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_id, measure_id,
+def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBallotItem
+                                          office_id, candidate_id, measure_id,
                                           stance_we_are_looking_for=ANY_STANCE,
                                           show_positions_this_voter_follows=True):
     """
     We want to return a JSON file with the position identifiers from orgs, friends and public figures the voter follows
     This list of information is used to retrieve the detailed information
     """
+    position_manager = PositionEnteredManager()
     # Get voter_id from the voter_device_id so we can know who is supporting/opposing
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -374,16 +390,27 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
             speaker_id = one_position.organization_id
             speaker_we_vote_id = one_position.organization_we_vote_id
             one_position_success = True
+            # Make sure we have this data to display
+            if not positive_value_exists(one_position.speaker_display_name) \
+                    or not positive_value_exists(one_position.speaker_image_url_https):
+                one_position = position_manager.refresh_cached_position_info(one_position)
         elif positive_value_exists(one_position.voter_id):
             speaker_type = VOTER
             speaker_id = one_position.voter_id
             speaker_we_vote_id = one_position.voter_we_vote_id
             one_position_success = True
+            # Make sure we have this data to display
+            if not positive_value_exists(one_position.speaker_display_name):
+                one_position = position_manager.refresh_cached_position_info(one_position)
         elif positive_value_exists(one_position.public_figure_we_vote_id):
             speaker_type = PUBLIC_FIGURE
             speaker_id = one_position.public_figure_id
             speaker_we_vote_id = one_position.public_figure_we_vote_id
             one_position_success = True
+            # Make sure we have this data to display
+            if not positive_value_exists(one_position.speaker_display_name) \
+                    or not positive_value_exists(one_position.speaker_image_url_https):
+                one_position = position_manager.refresh_cached_position_info(one_position)
         else:
             speaker_type = UNKNOWN_VOTER_GUIDE
             speaker_id = None
@@ -394,12 +421,15 @@ def position_list_for_ballot_item_for_api(voter_device_id, office_id, candidate_
             one_position_dict_for_api = {
                 'position_id':          one_position.id,
                 'position_we_vote_id':  one_position.we_vote_id,
-                'speaker_label':        'Organization Name TEMP',  # TODO DALE Add this to PositionEntered
+                'ballot_item_display_name': one_position.ballot_item_display_name,
+                'speaker_display_name': one_position.speaker_display_name,
+                'speaker_image_url_https': one_position.speaker_image_url_https,
                 'speaker_type':         speaker_type,
                 'speaker_id':           speaker_id,
                 'speaker_we_vote_id':   speaker_we_vote_id,
                 'is_support':           one_position.is_support(),
                 'is_oppose':            one_position.is_oppose(),
+                'last_updated':         one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
 
@@ -568,6 +598,9 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'success':                  False,
             'position_id':              0,
             'position_we_vote_id':      '',
+            'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -620,6 +653,9 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'status':                   results['status'],
             'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
+            'ballot_item_display_name': position.ballot_item_display_name,
+            'speaker_display_name':     position.speaker_display_name,
+            'speaker_image_url_https':  position.speaker_image_url_https,
             'is_support':               results['is_support'],
             'is_oppose':                results['is_oppose'],
             'is_information_only':      results['is_information_only'],
@@ -631,7 +667,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'statement_text':           position.statement_text,
             'statement_html':           position.statement_html,
             'more_info_url':            position.more_info_url,
-            'last_updated':             '',
+            'last_updated':             position.last_updated(),
             'voter_device_id':          voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -641,6 +677,9 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'success':                  False,
             'position_id':              0,
             'position_we_vote_id':      '',
+            'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -677,6 +716,9 @@ def voter_position_comment_save_for_api(
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
+            'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -701,6 +743,9 @@ def voter_position_comment_save_for_api(
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
+            'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -742,6 +787,9 @@ def voter_position_comment_save_for_api(
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
+            'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -762,6 +810,9 @@ def voter_position_comment_save_for_api(
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
+            'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -796,6 +847,9 @@ def voter_position_comment_save_for_api(
             'voter_device_id':          voter_device_id,
             'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
+            'ballot_item_display_name': position.ballot_item_display_name,
+            'speaker_display_name':     position.speaker_display_name,
+            'speaker_image_url_https':  position.speaker_image_url_https,
             'new_position_created':     save_results['new_position_created'],
             'is_support':               position.is_support(),
             'is_oppose':                position.is_oppose(),
@@ -806,7 +860,7 @@ def voter_position_comment_save_for_api(
             'measure_we_vote_id':       position.contest_measure_we_vote_id,
             'statement_text':           position.statement_text,
             'statement_html':           position.statement_html,
-            'last_updated':             '',
+            'last_updated':             position.last_updated(),
         }
         return json_data
     else:
@@ -817,6 +871,9 @@ def voter_position_comment_save_for_api(
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
+            'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,

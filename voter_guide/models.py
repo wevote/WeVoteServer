@@ -465,7 +465,7 @@ class VoterGuide(models.Model):
         return ''
 
     # The date of the last change to this voter_guide
-    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # TODO convert to date_last_changed
 
     # We want to map these here so they are available in the templates
     ORGANIZATION = ORGANIZATION
@@ -871,7 +871,7 @@ class VoterGuidePossibility(models.Model):
         default=ORGANIZATION)
 
     # The date of the last change to this voter_guide_possibility
-    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # TODO Convert to date_last_changed
 
     def __unicode__(self):
         return self.last_updated

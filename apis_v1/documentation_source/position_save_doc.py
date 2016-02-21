@@ -178,6 +178,8 @@ def position_save_doc_template_values(url_root):
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "new_position_created": boolean,\n' \
                    '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
+                   '  "speaker_display_name": string,\n' \
+                   '  "speaker_image_url_https": string,\n' \
                    '  "is_support": boolean,\n' \
                    '  "is_oppose": boolean,\n' \
                    '  "is_information_only": boolean,\n' \

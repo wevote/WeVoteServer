@@ -71,7 +71,7 @@ class QuickInfo(models.Model):
     # A link to any location with more information about this quick information
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more the full entry for this info')
 
-    last_updated = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)
+    last_updated = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)  # TODO Convert to date_last_changed
 
     # The unique id of the last person who edited this entry.
     last_editor_we_vote_id = models.CharField(
@@ -572,7 +572,7 @@ class QuickInfoMaster(models.Model):
     # A link to any location with more information about this quick information
     more_info_url = models.URLField(blank=True, null=True, verbose_name='url with more the full entry for this info')
 
-    last_updated = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)
+    last_updated = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)  # TODO convert to date_last_changed
 
     # The unique id of the last person who edited this entry.
     last_editor_we_vote_id = models.CharField(
