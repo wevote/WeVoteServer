@@ -88,6 +88,7 @@ def voter_authenticate_manually_process_view(request):
     voter_signed_in = False
     try:
         voter_on_stage = Voter.objects.get(id=voter_id)
+        # If the account associated with this voter_api_device_id is an admin, complete Django authentication
         if voter_on_stage.is_admin:
             voter_on_stage.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, voter_on_stage)
