@@ -262,14 +262,16 @@ SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'user_friends']
 SOCIAL_AUTH_TWITTER_KEY = get_environment_variable("SOCIAL_AUTH_TWITTER_KEY")
 SOCIAL_AUTH_TWITTER_SECRET = get_environment_variable("SOCIAL_AUTH_TWITTER_SECRET")
 
-SOCIAL_AUTH_LOGIN_ERROR_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
+SOCIAL_AUTH_LOGIN_ERROR_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_ERROR_URL")
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
-SOCIAL_AUTH_LOGIN_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
+SOCIAL_AUTH_LOGIN_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_URL")
 
-LOGIN_REDIRECT_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
-LOGIN_ERROR_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
-LOGIN_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
+LOGIN_REDIRECT_URL = get_environment_variable("LOGIN_REDIRECT_URL")
+LOGIN_ERROR_URL = get_environment_variable("LOGIN_ERROR_URL")
+LOGIN_URL = get_environment_variable("LOGIN_URL")
 
+# See description of authentication pipeline:
+# https://github.com/omab/python-social-auth/blob/master/docs/pipeline.rst
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',

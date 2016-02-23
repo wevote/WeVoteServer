@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import Voter
+from .models import Voter, VoterDeviceLinkManager
 from admin_tools.views import redirect_to_sign_in_page
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -19,6 +19,35 @@ from wevote_functions.functions import convert_to_int, get_voter_api_device_id, 
     positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+def login_complete_view(request):
+    try:
+        voter_api_device_id = get_voter_api_device_id(request)
+        if not positive_value_exists(voter_api_device_id):
+            messages.add_message(request, messages.INFO, 'Missing voter_api_device_id.')
+            return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+
+        voter_object = request.user
+        if not voter_object:
+            messages.add_message(request, messages.INFO, 'Missing voter.')
+            return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+
+        # Relink this voter_api_device_id to this Voter account
+        voter_device_manager = VoterDeviceLinkManager()
+        voter_device_link_results = voter_device_manager.retrieve_voter_device_link(voter_api_device_id)
+        voter_device_link = voter_device_link_results['voter_device_link']
+
+        update_voter_device_link_results = voter_device_manager.update_voter_device_link(
+           voter_device_link, voter_object)
+        if update_voter_device_link_results['voter_device_link_updated']:
+            messages.add_message(request, messages.INFO, 'Voter updated.')
+        else:
+            messages.add_message(request, messages.INFO, 'Voter could not be relinked.')
+    except:
+        messages.add_message(request, messages.INFO, 'Voter not updated.')
+
+    return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
 
 
 # This is open to anyone, and provides psql to update the database directly

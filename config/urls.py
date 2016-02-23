@@ -21,9 +21,7 @@ Including another URLconf
 
 from django.conf.urls import include, url
 
-from config import startup
-from config import views
-
+from config import startup, views
 
 urlpatterns = [
     url(r'^$', views.start_view),  # Default page if none of the other patterns work
