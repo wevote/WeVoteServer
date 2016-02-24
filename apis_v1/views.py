@@ -202,19 +202,25 @@ def organization_count_view(request):
 def organization_follow_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     organization_id = request.GET.get('organization_id', 0)
-    return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id,
+                               organization_we_vote_id=organization_we_vote_id)
 
 
 def organization_stop_following_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     organization_id = request.GET.get('organization_id', 0)
-    return organization_stop_following(voter_device_id=voter_device_id, organization_id=organization_id)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    return organization_stop_following(voter_device_id=voter_device_id, organization_id=organization_id,
+                                       organization_we_vote_id=organization_we_vote_id)
 
 
 def organization_follow_ignore_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     organization_id = request.GET.get('organization_id', 0)
-    return organization_follow_ignore(voter_device_id=voter_device_id, organization_id=organization_id)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    return organization_follow_ignore(voter_device_id=voter_device_id, organization_id=organization_id,
+                                      organization_we_vote_id=organization_we_vote_id)
 
 
 def organization_retrieve_view(request):

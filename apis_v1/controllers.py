@@ -36,34 +36,37 @@ def organization_count():
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organization_follow(voter_device_id, organization_id):
+def organization_follow(voter_device_id, organization_id=0, organization_we_vote_id=''):
     """
     Save that the voter wants to follow this org
     :param voter_device_id:
     :param organization_id:
     :return:
     """
-    return organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOWING)
+    return organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
+                                   follow_kind=FOLLOWING)
 
 
-def organization_stop_following(voter_device_id, organization_id):
+def organization_stop_following(voter_device_id, organization_id=0, organization_we_vote_id=''):
     """
     Save that the voter wants to stop following this org
     :param voter_device_id:
     :param organization_id:
     :return:
     """
-    return organization_follow_all(voter_device_id, organization_id, follow_kind=STOP_FOLLOWING)
+    return organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
+                                   follow_kind=STOP_FOLLOWING)
 
 
-def organization_follow_ignore(voter_device_id, organization_id):
+def organization_follow_ignore(voter_device_id, organization_id=0, organization_we_vote_id=''):
     """
     Save that the voter wants to ignore this org
     :param voter_device_id:
     :param organization_id:
     :return:
     """
-    return organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOW_IGNORE)
+    return organization_follow_all(voter_device_id, organization_id, organization_we_vote_id,
+                                   follow_kind=FOLLOW_IGNORE)
 
 
 def voter_count():

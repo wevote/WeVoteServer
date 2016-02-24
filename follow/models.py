@@ -72,28 +72,29 @@ class FollowOrganizationManager(models.Model):
     def __unicode__(self):
         return "FollowOrganizationManager"
 
-    def toggle_on_voter_following_organization(self, voter_id, organization_id):
+    def toggle_on_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id):
         following_status = FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, following_status)
 
-    def toggle_off_voter_following_organization(self, voter_id, organization_id):
+    def toggle_off_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id):
         following_status = STOP_FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, following_status)
 
-    def toggle_ignore_voter_following_organization(self, voter_id, organization_id):
+    def toggle_ignore_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id):
         following_status = FOLLOW_IGNORE
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, following_status)
 
-    def toggle_voter_following_organization(self, voter_id, organization_id, following_status):
+    def toggle_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id, following_status):
         # Does a follow_organization entry exist from this voter already exist?
         follow_organization_manager = FollowOrganizationManager()
-        results = follow_organization_manager.retrieve_follow_organization(0, voter_id, organization_id)
+        results = follow_organization_manager.retrieve_follow_organization(0, voter_id,
+                                                                           organization_id, organization_we_vote_id)
 
         follow_organization_on_stage_found = False
         follow_organization_on_stage_id = 0
@@ -121,12 +122,15 @@ class FollowOrganizationManager(models.Model):
                 # Create new follow_organization entry
                 # First make sure that organization_id is for a valid organization
                 organization_manager = OrganizationManager()
-                results = organization_manager.retrieve_organization(organization_id)
+                if positive_value_exists(organization_id):
+                    results = organization_manager.retrieve_organization(organization_id)
+                else:
+                    results = organization_manager.retrieve_organization(0, organization_we_vote_id)
                 if results['organization_found']:
                     organization = results['organization']
                     follow_organization_on_stage = FollowOrganization(
                         voter_id=voter_id,
-                        organization_id=organization_id,
+                        organization_id=organization.id,
                         organization_we_vote_id=organization.we_vote_id,
                         following_status=following_status,
                         # We don't need to update here because set set auto_now=True in the field
@@ -153,7 +157,10 @@ class FollowOrganizationManager(models.Model):
         }
         return results
 
-    def retrieve_follow_organization(self, follow_organization_id, voter_id, organization_id):
+    def retrieve_follow_organization(self, follow_organization_id, voter_id, organization_id, organization_we_vote_id):
+        """
+        follow_organization_id is the identifier for this table
+        """
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -165,11 +172,16 @@ class FollowOrganizationManager(models.Model):
                 follow_organization_on_stage = FollowOrganization.objects.get(id=follow_organization_id)
                 follow_organization_on_stage_id = organization_id.id
                 status = 'FOLLOW_ORGANIZATION_FOUND_WITH_ID'
-            elif voter_id > 0 and organization_id > 0:
+            elif positive_value_exists(voter_id) and positive_value_exists(organization_id):
                 follow_organization_on_stage = FollowOrganization.objects.get(
                     voter_id=voter_id, organization_id=organization_id)
                 follow_organization_on_stage_id = follow_organization_on_stage.id
                 status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_ID'
+            elif positive_value_exists(voter_id) and positive_value_exists(organization_we_vote_id):
+                follow_organization_on_stage = FollowOrganization.objects.get(
+                    voter_id=voter_id, organization_we_vote_id=organization_we_vote_id)
+                follow_organization_on_stage_id = follow_organization_on_stage.id
+                status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_WE_VOTE_ID'
         except FollowOrganization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True

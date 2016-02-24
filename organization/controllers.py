@@ -22,7 +22,7 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 ORGANIZATIONS_URL = get_environment_variable("ORGANIZATIONS_URL")
 
 
-def organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOWING):
+def organization_follow_all(voter_device_id, organization_id, organization_we_vote_id, follow_kind=FOLLOWING):
     if not positive_value_exists(voter_device_id):
         json_data = {
             'status': 'VALID_VOTER_DEVICE_ID_MISSING',
@@ -43,7 +43,7 @@ def organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOW
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     organization_id = convert_to_int(organization_id)
-    if not positive_value_exists(organization_id):
+    if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
         json_data = {
             'status': 'VALID_ORGANIZATION_ID_MISSING',
             'success': False,
@@ -54,29 +54,41 @@ def organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOW
 
     if follow_kind == FOLLOWING:
         follow_organization_manager = FollowOrganizationManager()
-        results = follow_organization_manager.toggle_on_voter_following_organization(voter_id, organization_id)
-        if results['success']:
+        results = follow_organization_manager.toggle_on_voter_following_organization(
+            voter_id, organization_id, organization_we_vote_id)
+        if results['follow_organization_found']:
             status = 'FOLLOWING'
             success = True
+            follow_organization = results['follow_organization']
+            organization_id = follow_organization.organization_id
+            organization_we_vote_id = follow_organization.organization_we_vote_id
         else:
             status = results['status']
             success = False
 
     elif follow_kind == FOLLOW_IGNORE:
         follow_organization_manager = FollowOrganizationManager()
-        results = follow_organization_manager.toggle_ignore_voter_following_organization(voter_id, organization_id)
-        if results['success']:
+        results = follow_organization_manager.toggle_ignore_voter_following_organization(
+            voter_id, organization_id, organization_we_vote_id)
+        if results['follow_organization_found']:
             status = 'IGNORING'
             success = True
+            follow_organization = results['follow_organization']
+            organization_id = follow_organization.organization_id
+            organization_we_vote_id = follow_organization.organization_we_vote_id
         else:
             status = results['status']
             success = False
     elif follow_kind == STOP_FOLLOWING:
         follow_organization_manager = FollowOrganizationManager()
-        results = follow_organization_manager.toggle_off_voter_following_organization(voter_id, organization_id)
-        if results['success']:
+        results = follow_organization_manager.toggle_off_voter_following_organization(
+            voter_id, organization_id, organization_we_vote_id)
+        if results['follow_organization_found']:
             status = 'STOPPED_FOLLOWING'
             success = True
+            follow_organization = results['follow_organization']
+            organization_id = follow_organization.organization_id
+            organization_we_vote_id = follow_organization.organization_we_vote_id
         else:
             status = results['status']
             success = False
@@ -89,6 +101,7 @@ def organization_follow_all(voter_device_id, organization_id, follow_kind=FOLLOW
         'success': success,
         'voter_device_id': voter_device_id,
         'organization_id': organization_id,
+        'organization_we_vote_id': organization_we_vote_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

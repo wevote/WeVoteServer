@@ -19,6 +19,14 @@ def organization_follow_ignore_doc_template_values(url_root):
             'description':  'Internal database unique identifier for organization',
         },
         {
+            'name':         'organization_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this organization across all networks '
+                            '(either organization_id OR organization_we_vote_id required -- not both.) '
+                            'NOTE: In the future we '
+                            'might support other identifiers used in the industry.',
+        },
+        {
             'name':         'api_key',
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
@@ -59,6 +67,7 @@ def organization_follow_ignore_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "organization_id": integer,\n' \
+                   '  "organization_we_vote_id": string,\n' \
                    '}'
 
     template_values = {
