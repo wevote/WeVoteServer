@@ -4,9 +4,9 @@
 
 from django.db import models
 from election.models import ElectionManager, TIME_SPAN_LIST
-
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception
+import operator
 from organization.models import Organization, OrganizationManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
@@ -634,21 +634,20 @@ class VoterGuideList(models.Model):
         return results
 
     def reorder_voter_guide_list(self, voter_guide_list, field_to_order_by, asc_or_desc='desc'):
-        def get_key_to_sort_by(voter_guide):
+        def get_key_to_sort_by():
             if field_to_order_by == 'twitter_followers_count':
-                return voter_guide.twitter_followers_count
+                return 'twitter_followers_count'
             else:
-                return voter_guide.twitter_followers_count
-
-        def getKey(voter_guide):
-            return voter_guide.twitter_followers_count
+                return 'twitter_followers_count'
 
         if not len(voter_guide_list):
-            return voter_guide_list
+            return []
 
+        # If we set this to 'desc', then Reverse the sort below. Otherwise sort 'asc' (ascending)
         is_desc = True if asc_or_desc == 'desc' else False
 
-        voter_guide_list_sorted = sorted(voter_guide_list, key=getKey, reverse=True)
+        voter_guide_list_sorted = sorted(voter_guide_list, key=operator.attrgetter(get_key_to_sort_by()),
+                                         reverse=is_desc)
 
         return voter_guide_list_sorted
 

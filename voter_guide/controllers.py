@@ -320,7 +320,7 @@ def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_
 
     position_list_manager = PositionListManager()
     if positive_value_exists(google_civic_election_id):
-        positions_list = position_list_manager.retrieve_all_positions_for_election(
+        all_positions_list = position_list_manager.retrieve_all_positions_for_election(
             google_civic_election_id, ANY_STANCE)
     else:
         voter_guide_list = []
@@ -338,17 +338,24 @@ def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_
     organizations_ignored_by_voter = \
         follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(voter_id)
 
-    positions_list = position_list_manager.remove_positions_ignored_by_voter(
-        positions_list, organizations_ignored_by_voter)
+    positions_list_minus_ignored = position_list_manager.remove_positions_ignored_by_voter(
+        all_positions_list, organizations_ignored_by_voter)
 
-    positions_list = position_list_manager.calculate_positions_not_followed_by_voter(
-        positions_list, organizations_followed_by_voter)
+    positions_list_minus_ignored_and_followed = position_list_manager.calculate_positions_not_followed_by_voter(
+        positions_list_minus_ignored, organizations_followed_by_voter)
 
     voter_guide_list = []
     # Cycle through the positions held by groups that you don't currently follow
     voter_guide_manager = VoterGuideManager()
-    for one_position in positions_list:
+    orgs_for_which_we_already_retrieved_voter_guide = []
+    for one_position in positions_list_minus_ignored_and_followed:
         if positive_value_exists(one_position.organization_we_vote_id):
+            # Make sure we haven't already retrieved the voter guide for this org
+            if one_position.organization_we_vote_id in orgs_for_which_we_already_retrieved_voter_guide:
+                continue
+
+            orgs_for_which_we_already_retrieved_voter_guide.append(one_position.organization_we_vote_id)
+
             if one_position.google_civic_election_id:
                 results = voter_guide_manager.retrieve_voter_guide(
                     voter_guide_id=0,
