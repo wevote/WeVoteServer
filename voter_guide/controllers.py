@@ -5,11 +5,11 @@
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList
+from itertools import chain
 import json
 from position.models import ANY_STANCE, PositionListManager
-from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterManager
-from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE, VoterGuideList, \
-    VoterGuideManager, VoterGuidePossibilityManager
+from voter.models import fetch_voter_id_from_voter_device_link
+from voter_guide.models import VoterGuideList, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
@@ -140,7 +140,6 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
     voter_guide_list = []
     voter_guides = []
     try:
-        # results = voter_guide_list_object.retrieve_voter_guides_for_election(google_civic_election_id)
         if positive_value_exists(kind_of_ballot_item) and positive_value_exists(ballot_item_we_vote_id):
             results = retrieve_voter_guides_to_follow_by_ballot_item(voter_id,
                                                                      kind_of_ballot_item, ballot_item_we_vote_id)
@@ -148,7 +147,10 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             status = results['status']
             voter_guide_list = results['voter_guide_list']
         elif positive_value_exists(google_civic_election_id):
-            results = retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_id)
+            # This retrieve also does the reordering
+            results = retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_id,
+                                                                  maximum_number_to_retrieve,
+                                                                  'twitter_followers_count', 'desc')
             success = results['success']
             status = results['status']
             voter_guide_list = results['voter_guide_list']
@@ -161,13 +163,14 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         success = False
 
-    if len(voter_guide_list):
-        # We want to order these voter guides by most twitter followers to least twitter followers
-        # This serves as a rough indicator of the influence of the group
-        voter_guide_list_manager = VoterGuideList()
-        voter_guide_list = voter_guide_list_manager.reorder_voter_guide_list(voter_guide_list,
-                                                                             'twitter_followers_count',
-                                                                             'desc')
+    # # Remove this
+    # if len(voter_guide_list):
+    #     # We want to order these voter guides by most twitter followers to least twitter followers
+    #     # This serves as a rough indicator of the influence of the group
+    #     voter_guide_list_manager = VoterGuideList()
+    #     voter_guide_list = voter_guide_list_manager.reorder_voter_guide_list(voter_guide_list,
+    #                                                                          'twitter_followers_count',
+    #                                                                          'desc')
 
     if success:
         number_added_to_list = 0
@@ -315,11 +318,22 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
     return results
 
 
-def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_id):
+def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_id,
+                                                maximum_number_to_retrieve=0, sort_by='', sort_order=''):
     voter_guide_list_found = False
+
+    # Start with orgs followed and ignored by this voter
+    follow_organization_list_manager = FollowOrganizationList()
+    organizations_followed_by_voter = \
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+    organizations_ignored_by_voter = \
+        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(voter_id)
 
     position_list_manager = PositionListManager()
     if positive_value_exists(google_civic_election_id):
+        # This method finds all ballot_items in this election, and then retrieves *all* positions by any org or person
+        # about each ballot_item. This will pick up We Vote positions or Vote Smart ratings, regardless of what time
+        # period they were entered for.
         all_positions_list = position_list_manager.retrieve_all_positions_for_election(
             google_civic_election_id, ANY_STANCE)
     else:
@@ -332,53 +346,80 @@ def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_
         }
         return results
 
-    follow_organization_list_manager = FollowOrganizationList()
-    organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
-    organizations_ignored_by_voter = \
-        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(voter_id)
-
     positions_list_minus_ignored = position_list_manager.remove_positions_ignored_by_voter(
         all_positions_list, organizations_ignored_by_voter)
 
     positions_list_minus_ignored_and_followed = position_list_manager.calculate_positions_not_followed_by_voter(
         positions_list_minus_ignored, organizations_followed_by_voter)
 
-    voter_guide_list = []
-    # Cycle through the positions held by groups that you don't currently follow
-    voter_guide_manager = VoterGuideManager()
-    orgs_for_which_we_already_retrieved_voter_guide = []
+    # For speed, we want to retrieve an ordered list of organization_we_vote_id's (not followed or ignored)
+    # that have a position in this election, so we only retrieve full voter_guide data for the limited list that we need
+    voter_guide_list_manager = VoterGuideList()
+    # This is a list of orgs that the voter isn't following or ignoring
+    organization_we_vote_id_list_by_google_civic_election_id = []
     for one_position in positions_list_minus_ignored_and_followed:
-        if positive_value_exists(one_position.organization_we_vote_id):
-            # Make sure we haven't already retrieved the voter guide for this org
-            if one_position.organization_we_vote_id in orgs_for_which_we_already_retrieved_voter_guide:
+        if positive_value_exists(one_position.organization_we_vote_id) and \
+                positive_value_exists(one_position.google_civic_election_id):
+            # Make sure we haven't already recorded that we want to retrieve the voter_guide for this org
+            if one_position.organization_we_vote_id in organization_we_vote_id_list_by_google_civic_election_id:
                 continue
 
-            orgs_for_which_we_already_retrieved_voter_guide.append(one_position.organization_we_vote_id)
+            organization_we_vote_id_list_by_google_civic_election_id.append(one_position.organization_we_vote_id)
 
-            if one_position.google_civic_election_id:
-                results = voter_guide_manager.retrieve_voter_guide(
-                    voter_guide_id=0,
-                    google_civic_election_id=one_position.google_civic_election_id,
-                    vote_smart_time_span=None,
-                    organization_we_vote_id=one_position.organization_we_vote_id)
-            else:
-                # vote_smart_time_span
-                results = voter_guide_manager.retrieve_voter_guide(
-                    voter_guide_id=0,
-                    google_civic_election_id=0,
-                    vote_smart_time_span=one_position.vote_smart_time_span,
-                    organization_we_vote_id=one_position.organization_we_vote_id)
+    # Now retrieve the voter_guides this voter can follow for this election
+    if positive_value_exists(len(organization_we_vote_id_list_by_google_civic_election_id)):
+        voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_election(
+            google_civic_election_id, organization_we_vote_id_list_by_google_civic_election_id,
+            maximum_number_to_retrieve, sort_by, sort_order)
 
-        elif positive_value_exists(one_position.public_figure_we_vote_id):
-            results['voter_guide_found'] = False
-        elif positive_value_exists(one_position.voter_we_vote_id):
-            results['voter_guide_found'] = False
+        if voter_guide_results['voter_guide_list_found']:
+            voter_guide_list_from_election_id = voter_guide_results['voter_guide_list']
         else:
-            results['voter_guide_found'] = False
+            voter_guide_list_from_election_id = []
+    else:
+        voter_guide_list_from_election_id = []
 
-        if results['voter_guide_found']:
-            voter_guide_list.append(results['voter_guide'])
+    # ###############################################################
+    # Then gather voter guides with ratings by vote_smart_time_span
+    # We give precedence to full voter guides from above, where we have an actual position of an org (as opposed to
+    # Vote Smart ratings)
+    maximum_number_of_guides_to_retrieve_by_time_span = \
+        maximum_number_to_retrieve - len(voter_guide_list_from_election_id)
+    voter_guide_list = []
+    if positive_value_exists(maximum_number_of_guides_to_retrieve_by_time_span):
+        # This is a list of orgs that the voter isn't following or ignoring
+        organization_we_vote_id_list_by_time_span = []
+        org_time_span_list_of_dicts = []
+        for one_position in positions_list_minus_ignored_and_followed:
+            if positive_value_exists(one_position.organization_we_vote_id) and \
+                    positive_value_exists(one_position.vote_smart_time_span):
+                # If here we want to grab the relevant rating
+                if one_position.organization_we_vote_id in organization_we_vote_id_list_by_time_span or \
+                                one_position.organization_we_vote_id in \
+                                organization_we_vote_id_list_by_google_civic_election_id:
+                    continue
+
+                organization_we_vote_id_list_by_time_span.append(one_position.organization_we_vote_id)
+                one_position_dict = {'organization_we_vote_id': one_position.organization_we_vote_id,
+                                     'vote_smart_time_span': one_position.vote_smart_time_span}
+                org_time_span_list_of_dicts.append(one_position_dict)
+
+        voter_guide_time_span_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_time_span(
+            org_time_span_list_of_dicts,
+            maximum_number_of_guides_to_retrieve_by_time_span, sort_by, sort_order)
+
+        if voter_guide_time_span_results['voter_guide_list_found']:
+            voter_guide_list_time_span = voter_guide_time_span_results['voter_guide_list']
+        else:
+            voter_guide_list_time_span = []
+
+        # Merge these two lists
+        # IFF we wanted to sort here:
+        # voter_guide_list = sorted(
+        #     chain(voter_guide_list_from_election_id, voter_guide_list_time_span),
+        #     key=attrgetter(sort_by))
+        # But we don't, we just want to combine them with existing order
+        voter_guide_list = list(chain(voter_guide_list_from_election_id, voter_guide_list_time_span))
 
     status = 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED'
     success = True
@@ -426,7 +467,6 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = retrieve_voter_guides_followed(voter_id)
-    success = results['success']
     status = results['status']
     voter_guide_list = results['voter_guide_list']
     voter_guides = []

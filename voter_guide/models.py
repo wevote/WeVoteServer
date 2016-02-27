@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from election.models import ElectionManager, TIME_SPAN_LIST
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception
@@ -591,6 +592,88 @@ class VoterGuideList(models.Model):
                 status = 'VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST'
             else:
                 status = 'NO_VOTER_GUIDES_FOUND_BY_ORGANIZATION_LIST'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    def retrieve_voter_guides_to_follow_by_election(self, google_civic_election_id, organization_we_vote_id_list,
+                                                    maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+        voter_guide_list = []
+        voter_guide_list_found = False
+        if not positive_value_exists(maximum_number_to_retrieve):
+            maximum_number_to_retrieve = 30
+
+        try:
+
+            if sort_order == 'desc':
+                voter_guide_queryset = VoterGuide.objects.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+            else:
+                voter_guide_queryset = VoterGuide.objects.order_by(sort_by)[:maximum_number_to_retrieve]
+
+            voter_guide_list = voter_guide_queryset.filter(
+                google_civic_election_id=google_civic_election_id &
+                Q(organization_we_vote_id__in=organization_we_vote_id_list)
+            )
+
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDE_FOUND'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    def retrieve_voter_guides_to_follow_by_time_span(self, org_time_span_list_of_dicts,
+                                                     maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+        voter_guide_list = []
+        voter_guide_list_found = False
+        if not positive_value_exists(maximum_number_to_retrieve):
+            maximum_number_to_retrieve = 30
+
+        try:
+            voter_guide_queryset = VoterGuide.objects.all()
+
+            # Retrieve all pairs that match vote_smart_time_span / organization_we_vote_id
+            filter_list = Q()
+            for item in org_time_span_list_of_dicts:
+                filter_list |= Q(vote_smart_time_span=item['vote_smart_time_span'],
+                                 organization_we_vote_id=item['organization_we_vote_id'])
+            voter_guide_queryset = voter_guide_queryset.filter(filter_list)
+
+            if sort_order == 'desc':
+                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+            else:
+                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
+
+            voter_guide_list = voter_guide_queryset
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDE_FOUND'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND'
             success = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)

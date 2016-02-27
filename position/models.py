@@ -628,7 +628,7 @@ class PositionListManager(models.Model):
             return position_list
 
         # We aren't going to search directly on google_civic_election_id, but instead assemble a list of the items
-        #  on the ballot and search on individual ids
+        #  on the ballot and then retrieve positions relating to any of those ballot_items (candidates or measures)
 
         # Candidate related positions
         candidate_campaign_we_vote_ids = []
