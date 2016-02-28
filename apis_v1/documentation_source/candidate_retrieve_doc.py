@@ -27,7 +27,7 @@ def candidate_retrieve_doc_template_values(url_root):
         },
         {
             'name':         'candidate_we_vote_id',
-            'value':        'integer',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for this candidate across all networks '
                             '(either candidate_id OR candidate_we_vote_id required -- not both.) '
                             'NOTE: In the future we might support other identifiers used in the industry.',

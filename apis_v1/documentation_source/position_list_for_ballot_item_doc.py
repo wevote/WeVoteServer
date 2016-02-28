@@ -31,24 +31,13 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                             '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
                             'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
-        # {
-        #     'name':         'office_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The office we want positions for. '
-        #                     '(One and only one of these must exist: office_id, candidate_id, or measure_id)',
-        # },
-        # {
-        #     'name':         'candidate_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The candidate we want positions for. '
-        #                     '(One and only one of these must exist: office_id, candidate_id, or measure_id)',
-        # },
-        # {
-        #     'name':         'measure_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The measure we want the oppose count for. '
-        #                     '(One and only one of these must exist: office_id, candidate_id, or measure_id)',
-        # },
+        {
+            'name':         'ballot_item_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this ballot_item across all networks '
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
+                            'NOTE: In the future we might support other identifiers used in the industry.',
+        },
     ]
     optional_query_parameter_list = [
         {
@@ -104,6 +93,7 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '  "kind_of_ballot_item": string, ' \
                    '   (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\',)\n' \
                    '  "ballot_item_id": integer,\n' \
+                   '  "ballot_item_we_vote_id": string,\n' \
                    '  "position_list": list\n' \
                    '   [\n' \
                    '     "position_id": integer,\n' \

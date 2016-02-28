@@ -312,27 +312,42 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
     show_positions_this_voter_follows = request.GET.get('show_positions_this_voter_follows', True)
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', "")
     if kind_of_ballot_item == OFFICE:
         office_id = ballot_item_id
+        office_we_vote_id = ballot_item_we_vote_id
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = 0
+        measure_we_vote_id = ''
     elif kind_of_ballot_item == CANDIDATE:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = ''
     elif kind_of_ballot_item == MEASURE:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = 0
+        measure_we_vote_id = ''
     return position_list_for_ballot_item_for_api(voter_device_id=voter_device_id,
                                                  office_id=office_id,
+                                                 office_we_vote_id=office_we_vote_id,
                                                  candidate_id=candidate_id,
+                                                 candidate_we_vote_id=candidate_we_vote_id,
                                                  measure_id=measure_id,
+                                                 measure_we_vote_id=measure_we_vote_id,
                                                  stance_we_are_looking_for=stance_we_are_looking_for,
                                                  show_positions_this_voter_follows=show_positions_this_voter_follows)
 

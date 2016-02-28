@@ -10,6 +10,8 @@ from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception, handle_record_not_saved_exception
 from follow.models import FollowOrganizationList
+from measure.models import ContestMeasureManager
+from office.models import ContestOfficeManager
 from organization.models import OrganizationManager
 import json
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
@@ -55,6 +57,8 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'statement_text':           '',
             'statement_html':           '',
             'more_info_url':            '',
+            'vote_smart_rating':        '',
+            'vote_smart_time_span':     '',
             'last_updated':             '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -104,6 +108,8 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'statement_text':           position.statement_text,
             'statement_html':           position.statement_html,
             'more_info_url':            position.more_info_url,
+            'vote_smart_rating':        position.vote_smart_rating,
+            'vote_smart_time_span':     position.vote_smart_time_span,
             'last_updated':             position.last_updated(),
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -129,6 +135,8 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'statement_text':           '',
             'statement_html':           '',
             'more_info_url':            '',
+            'vote_smart_rating':        '',
+            'vote_smart_time_span':     '',
             'last_updated':             '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -299,7 +307,9 @@ def position_save_for_api(
 
 
 def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBallotItem
-                                          office_id, candidate_id, measure_id,
+                                          office_id, office_we_vote_id,
+                                          candidate_id, candidate_we_vote_id,
+                                          measure_id, measure_we_vote_id,
                                           stance_we_are_looking_for=ANY_STANCE,
                                           show_positions_this_voter_follows=True):
     """
@@ -335,33 +345,96 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     position_list_manager = PositionListManager()
-    if positive_value_exists(candidate_id):
-        candidate_we_vote_id = ''
+    ballot_item_found = False
+    if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 candidate_id, candidate_we_vote_id, stance_we_are_looking_for)
         kind_of_ballot_item = CANDIDATE
-        ballot_item_id = candidate_id
-    elif positive_value_exists(measure_id):
-        measure_we_vote_id = ''
+
+        # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
+        # for this ballot_item, we retrieve the following so we can get the id and we_vote_id (per the request of
+        # the WebApp team)
+        candidate_campaign_manager = CandidateCampaignManager()
+        if positive_value_exists(candidate_id):
+            results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
+        else:
+            results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+
+        if results['candidate_campaign_found']:
+            candidate_campaign = results['candidate_campaign']
+            ballot_item_id = candidate_campaign.id
+            ballot_item_we_vote_id = candidate_campaign.we_vote_id
+            ballot_item_found = True
+        else:
+            ballot_item_id = candidate_id
+            ballot_item_we_vote_id = candidate_we_vote_id
+    elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
                 measure_id, measure_we_vote_id, stance_we_are_looking_for)
         kind_of_ballot_item = MEASURE
-        ballot_item_id = measure_id
-    elif positive_value_exists(office_id):
-        office_we_vote_id = ''
+
+        # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
+        # for this ballot_item, we retrieve the following so we can get the id and we_vote_id (per the request of
+        # the WebApp team)
+        contest_measure_manager = ContestMeasureManager()
+        if positive_value_exists(measure_id):
+            results = contest_measure_manager.retrieve_contest_measure_from_id(measure_id)
+        else:
+            results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(measure_we_vote_id)
+
+        if results['contest_measure_found']:
+            contest_measure = results['contest_measure']
+            ballot_item_id = contest_measure.id
+            ballot_item_we_vote_id = contest_measure.we_vote_id
+            ballot_item_found = True
+        else:
+            ballot_item_id = measure_id
+            ballot_item_we_vote_id = measure_we_vote_id
+    elif positive_value_exists(office_id) or positive_value_exists(office_we_vote_id):
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(
                 office_id, office_we_vote_id, stance_we_are_looking_for)
         kind_of_ballot_item = OFFICE
-        ballot_item_id = measure_id
+
+        # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
+        # for this ballot_item, we retrieve the following so we can get the id and we_vote_id (per the request of
+        # the WebApp team)
+        contest_office_manager = ContestOfficeManager()
+        if positive_value_exists(office_id):
+            results = contest_office_manager.retrieve_contest_office_from_id(office_id)
+        else:
+            results = contest_office_manager.retrieve_contest_office_from_we_vote_id(office_we_vote_id)
+
+        if results['contest_office_found']:
+            contest_office = results['contest_office']
+            ballot_item_id = contest_office.id
+            ballot_item_we_vote_id = contest_office.we_vote_id
+            ballot_item_found = True
+        else:
+            ballot_item_id = office_id
+            ballot_item_we_vote_id = office_we_vote_id
     else:
         position_list = []
         json_data = {
-            'status':           'POSITION_LIST_RETRIEVE_MISSING_BALLOT_ITEM_ID',
-            'success':          False,
-            'count':            0,
-            'kind_of_ballot_item': "UNKNOWN",
-            'ballot_item_id':   0,
-            'position_list':    position_list,
+            'status':                   'POSITION_LIST_RETRIEVE_MISSING_BALLOT_ITEM_ID',
+            'success':                  False,
+            'count':                    0,
+            'kind_of_ballot_item':      "UNKNOWN",
+            'ballot_item_id':           0,
+            'ballot_item_we_vote_id':   '',
+            'position_list':            position_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    if not ballot_item_found:
+        position_list = []
+        json_data = {
+            'status':                   'POSITION_LIST_RETRIEVE_BALLOT_ITEM_NOT_FOUND',
+            'success':                  False,
+            'count':                    0,
+            'kind_of_ballot_item':      "UNKNOWN",
+            'ballot_item_id':           ballot_item_id,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+            'position_list':            position_list,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -429,17 +502,20 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
                 'speaker_we_vote_id':   speaker_we_vote_id,
                 'is_support':           one_position.is_support(),
                 'is_oppose':            one_position.is_oppose(),
+                'vote_smart_rating':    one_position.vote_smart_rating,
+                'vote_smart_time_span': one_position.vote_smart_time_span,
                 'last_updated':         one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
 
     json_data = {
-        'status':           status,
-        'success':          success,
-        'count':            positions_count,
-        'kind_of_ballot_item': kind_of_ballot_item,
-        'ballot_item_id':   ballot_item_id,
-        'position_list':    position_list,
+        'status':                   status,
+        'success':                  success,
+        'count':                    positions_count,
+        'kind_of_ballot_item':      kind_of_ballot_item,
+        'ballot_item_id':           ballot_item_id,
+        'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+        'position_list':            position_list,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
