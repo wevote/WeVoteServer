@@ -9,8 +9,8 @@ from office.models import ContestOffice
 import re
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.functions import extract_first_name_from_full_name, extract_last_name_from_full_name, \
-    extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_first_name_from_full_name, \
+    extract_last_name_from_full_name, extract_state_from_ocd_division_id, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -453,13 +453,13 @@ class CandidateCampaignManager(models.Model):
             status = "RETRIEVE_CANDIDATE_NOT_FOUND"
 
         results = {
-            'success':                  True if candidate_campaign_id > 0 else False,
+            'success':                  True if convert_to_int(candidate_campaign_id) > 0 else False,
             'status':                   status,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'candidate_campaign_found': True if candidate_campaign_id > 0 else False,
-            'candidate_campaign_id':    candidate_campaign_id,
+            'candidate_campaign_found': True if convert_to_int(candidate_campaign_id) else False,
+            'candidate_campaign_id':    convert_to_int(candidate_campaign_id),
             'candidate_campaign_we_vote_id':    candidate_campaign_we_vote_id,
             'candidate_campaign':       candidate_campaign_on_stage,
         }

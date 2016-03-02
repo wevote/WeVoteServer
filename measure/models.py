@@ -7,7 +7,7 @@ from exception.models import handle_exception, handle_record_found_more_than_one
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_measure_integer, \
     fetch_next_we_vote_id_last_measure_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.functions import extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -295,13 +295,13 @@ class ContestMeasureManager(models.Model):
             status = "RETRIEVE_MEASURE_NOT_FOUND"
 
         results = {
-            'success':                      True if contest_measure_id > 0 else False,
+            'success':                      True if convert_to_int(contest_measure_id) > 0 else False,
             'status':                       status,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
-            'contest_measure_found':        True if contest_measure_id > 0 else False,
-            'contest_measure_id':           contest_measure_id,
+            'contest_measure_found':        True if convert_to_int(contest_measure_id) > 0 else False,
+            'contest_measure_id':           convert_to_int(contest_measure_id),
             'contest_measure_we_vote_id':   contest_measure_we_vote_id,
             'contest_measure':              contest_measure_on_stage,
         }
