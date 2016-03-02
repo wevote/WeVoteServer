@@ -242,6 +242,12 @@ def get_voter_device_id(request, generate_if_no_value=False):
     :param generate_if_no_cookie:
     :return:
     """
+    # First check the headers
+    voter_device_id = request.META.get('HTTP_X_HEADER_DEVICEID', '')
+    if positive_value_exists(voter_device_id):
+        return voter_device_id
+
+    # Then check for incoming GET value
     voter_device_id = request.GET.get('voter_device_id', '')
     if voter_device_id == '' and generate_if_no_value:
         voter_device_id = generate_voter_device_id()  # Stored in cookie below
