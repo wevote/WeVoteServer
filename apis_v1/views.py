@@ -288,9 +288,9 @@ def get_maximum_number_to_retrieve_from_request(request):
     if 'maximum_number_to_retrieve' in request.GET:
         maximum_number_to_retrieve = request.GET['maximum_number_to_retrieve']
     else:
-        maximum_number_to_retrieve = 20
+        maximum_number_to_retrieve = 40
     if maximum_number_to_retrieve is "":
-        maximum_number_to_retrieve = 20
+        maximum_number_to_retrieve = 40
     else:
         maximum_number_to_retrieve = convert_to_int(maximum_number_to_retrieve)
 
@@ -299,7 +299,6 @@ def get_maximum_number_to_retrieve_from_request(request):
 
 def position_list_for_ballot_item_view(request):  # positionListForBallotItem
     """
-    Retrieve the number of orgs and friends that support this (positionSupportCountForBallotItem)
     :param request:
     :return:
     """
@@ -422,18 +421,26 @@ def position_oppose_count_for_ballot_item_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = 0
-    return position_oppose_count_for_ballot_item_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id,
-                                                         measure_id=measure_id)
+        measure_we_vote_id = None
+    return position_oppose_count_for_ballot_item_for_api(
+        voter_device_id=voter_device_id,
+        candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def position_support_count_for_ballot_item_view(request):
@@ -445,18 +452,26 @@ def position_support_count_for_ballot_item_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = 0
-    return position_support_count_for_ballot_item_for_api(voter_device_id=voter_device_id, candidate_id=candidate_id,
-                                                          measure_id=measure_id)
+        measure_we_vote_id = None
+    return position_support_count_for_ballot_item_for_api(
+        voter_device_id=voter_device_id,
+        candidate_id=candidate_id, candidate_we_vote_id= candidate_we_vote_id,
+        measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def position_public_oppose_count_for_ballot_item_view(request):
@@ -1100,17 +1115,25 @@ def voter_opposing_save_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = 0
-    return voter_opposing_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+        measure_we_vote_id = None
+    return voter_opposing_save(voter_device_id=voter_device_id,
+                               candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+                               measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 class VoterExportView(APIView):
@@ -1153,17 +1176,25 @@ def voter_stop_opposing_save_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = 0
-    return voter_stop_opposing_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+        measure_we_vote_id = None
+    return voter_stop_opposing_save(voter_device_id=voter_device_id,
+                                    candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+                                    measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def voter_stop_supporting_save_view(request):
@@ -1175,17 +1206,25 @@ def voter_stop_supporting_save_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = 0
-    return voter_stop_supporting_save(voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+        measure_we_vote_id = None
+    return voter_stop_supporting_save(voter_device_id=voter_device_id,
+                                      candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+                                      measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def voter_supporting_save_view(request):
@@ -1197,18 +1236,25 @@ def voter_supporting_save_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = 0
-    return voter_supporting_save_for_api(
-        voter_device_id=voter_device_id, candidate_id=candidate_id, measure_id=measure_id)
+        measure_we_vote_id = None
+    return voter_supporting_save_for_api(voter_device_id=voter_device_id,
+                                         candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+                                         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def voter_star_off_save_view(request):
@@ -1220,25 +1266,40 @@ def voter_star_off_save_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == OFFICE:
         office_id = ballot_item_id
+        office_we_vote_id = ballot_item_we_vote_id
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = 0
+        measure_we_vote_id = ''
     elif kind_of_ballot_item == CANDIDATE:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = ''
     elif kind_of_ballot_item == MEASURE:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = 0
+        measure_we_vote_id = ''
     return voter_star_off_save_for_api(
-        voter_device_id=voter_device_id, office_id=office_id, candidate_id=candidate_id, measure_id=measure_id)
+        voter_device_id=voter_device_id,
+        office_id=office_id, office_we_vote_id=office_we_vote_id,
+        candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def voter_star_on_save_view(request):
@@ -1250,25 +1311,40 @@ def voter_star_on_save_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == OFFICE:
         office_id = ballot_item_id
+        office_we_vote_id = ballot_item_we_vote_id
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = 0
+        measure_we_vote_id = ''
     elif kind_of_ballot_item == CANDIDATE:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = ''
     elif kind_of_ballot_item == MEASURE:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = 0
+        measure_we_vote_id = ''
     return voter_star_on_save_for_api(
-        voter_device_id=voter_device_id, office_id=office_id, candidate_id=candidate_id, measure_id=measure_id)
+        voter_device_id=voter_device_id,
+        office_id=office_id, office_we_vote_id=office_we_vote_id,
+        candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def voter_star_status_retrieve_view(request):
@@ -1280,26 +1356,37 @@ def voter_star_status_retrieve_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == OFFICE:
         office_id = ballot_item_id
+        office_we_vote_id = ballot_item_we_vote_id
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = 0
+        measure_we_vote_id = ''
     elif kind_of_ballot_item == CANDIDATE:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = ''
     elif kind_of_ballot_item == MEASURE:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         office_id = 0
+        office_we_vote_id = ''
         candidate_id = 0
+        candidate_we_vote_id = ''
         measure_id = 0
+        measure_we_vote_id = ''
     return voter_star_status_retrieve_for_api(
         voter_device_id=voter_device_id,
-        office_id=office_id,
-        candidate_id=candidate_id,
-        measure_id=measure_id,
-    )
+        office_id=office_id, office_we_vote_id=office_we_vote_id,
+        candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)

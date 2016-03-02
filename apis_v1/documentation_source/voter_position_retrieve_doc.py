@@ -26,7 +26,7 @@ def voter_position_retrieve_doc_template_values(url_root):
         },
         {
             'name':         'ballot_item_we_vote_id',
-            'value':        'integer',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'The unique we_vote identifier for this ballot_item '
                             '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
                             'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',

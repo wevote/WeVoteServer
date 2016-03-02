@@ -187,6 +187,16 @@ class ContestMeasureManager(models.Model):
             return results['contest_measure_id']
         return 0
 
+    def fetch_contest_measure_we_vote_id_from_id(self, contest_measure_id):
+        contest_measure_we_vote_id = ''
+        maplight_id = ''
+        contest_measure_manager = ContestMeasureManager()
+        results = contest_measure_manager.retrieve_contest_measure(
+            contest_measure_id, contest_measure_we_vote_id, maplight_id)
+        if results['success']:
+            return results['contest_measure_we_vote_id']
+        return 0
+
     def update_or_create_contest_measure(self, we_vote_id, google_civic_election_id, district_id, district_name,
                                          measure_title, state_code,
                                          update_contest_measure_values):  # , create_contest_measure_values
@@ -262,14 +272,17 @@ class ContestMeasureManager(models.Model):
             if positive_value_exists(contest_measure_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(id=contest_measure_id)
                 contest_measure_id = contest_measure_on_stage.id
+                contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
                 status = "RETRIEVE_MEASURE_FOUND_BY_ID"
             elif positive_value_exists(contest_measure_we_vote_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
                 contest_measure_id = contest_measure_on_stage.id
+                contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
                 status = "RETRIEVE_MEASURE_FOUND_BY_WE_VOTE_ID"
             elif positive_value_exists(maplight_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(maplight_id=maplight_id)
                 contest_measure_id = contest_measure_on_stage.id
+                contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
                 status = "RETRIEVE_MEASURE_FOUND_BY_MAPLIGHT_ID"
             else:
                 status = "RETRIEVE_MEASURE_SEARCH_INDEX_MISSING"
@@ -287,10 +300,10 @@ class ContestMeasureManager(models.Model):
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
-            'contest_measure_found':         True if contest_measure_id > 0 else False,
-            'contest_measure_id':            contest_measure_id,
-            'contest_measure_we_vote_id':    contest_measure_we_vote_id,
-            'contest_measure':               contest_measure_on_stage,
+            'contest_measure_found':        True if contest_measure_id > 0 else False,
+            'contest_measure_id':           contest_measure_id,
+            'contest_measure_we_vote_id':   contest_measure_we_vote_id,
+            'contest_measure':              contest_measure_on_stage,
         }
         return results
 

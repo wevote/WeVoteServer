@@ -1723,7 +1723,20 @@ class PositionEnteredManager(models.Model):
                     pass
 
         elif positive_value_exists(position_object.voter_id):
-            pass
+            if not positive_value_exists(position_object.speaker_display_name):
+                try:
+                    # We need to look in the voter table for speaker_display_name
+                    voter_manager = VoterManager()
+                    results = voter_manager.retrieve_voter_by_id(position_object.voter_id)
+                    if results['voter_found']:
+                        voter = results['voter']
+                        if not positive_value_exists(position_object.speaker_display_name):
+                            # speaker_display_name is missing so look it up from source
+                            position_object.speaker_display_name = voter.get_full_name()
+                        position_object.save()
+                except Exception as e:
+                    pass
+
         elif positive_value_exists(position_object.public_figure_we_vote_id):
             pass
 

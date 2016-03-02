@@ -90,7 +90,7 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "count": integer,\n' \
-                   '  "kind_of_ballot_item": string, ' \
+                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE), ' \
                    '   (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\',)\n' \
                    '  "ballot_item_id": integer,\n' \
                    '  "ballot_item_we_vote_id": string,\n' \

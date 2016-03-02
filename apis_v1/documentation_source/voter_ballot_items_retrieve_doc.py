@@ -69,7 +69,7 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '     "google_civic_election_id": integer,\n' \
                    '     "google_ballot_placement": integer,\n' \
                    '     "local_ballot_order": integer,\n' \
-                   '     "kind_of_ballot_item": string,\n' \
+                   '     "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
                    '     "id": integer,\n' \
                    '     "we_vote_id": string,\n' \
                    '     "candidate_list": list\n' \

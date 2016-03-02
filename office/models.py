@@ -134,6 +134,16 @@ class ContestOfficeManager(models.Model):
             return results['contest_office_id']
         return 0
 
+    def fetch_contest_office_we_vote_id_from_id(self, contest_office_id):
+        maplight_id = 0
+        contest_office_we_vote_id = ''
+        contest_office_manager = ContestOfficeManager()
+        results = contest_office_manager.retrieve_contest_office(
+            contest_office_id, contest_office_we_vote_id, maplight_id)
+        if results['success']:
+            return results['contest_office_we_vote_id']
+        return 0
+
     def update_or_create_contest_office(self, we_vote_id, google_civic_election_id, district_id, district_name,
                                         office_name, state_code, updated_contest_office_values):
         """
@@ -198,14 +208,17 @@ class ContestOfficeManager(models.Model):
             if positive_value_exists(contest_office_id):
                 contest_office_on_stage = ContestOffice.objects.get(id=contest_office_id)
                 contest_office_id = contest_office_on_stage.id
+                contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_ID"
             elif positive_value_exists(contest_office_we_vote_id):
                 contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
                 contest_office_id = contest_office_on_stage.id
+                contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_WE_VOTE_ID"
             elif positive_value_exists(maplight_id):
                 contest_office_on_stage = ContestOffice.objects.get(maplight_id=maplight_id)
                 contest_office_id = contest_office_on_stage.id
+                contest_office_we_vote_id = contest_office_on_stage.we_vote_id
                 status = "RETRIEVE_OFFICE_FOUND_BY_MAPLIGHT_ID"
             else:
                 status = "RETRIEVE_OFFICE_SEARCH_INDEX_MISSING"
