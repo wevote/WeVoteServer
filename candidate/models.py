@@ -409,7 +409,7 @@ class CandidateCampaignManager(models.Model):
 
     # NOTE: searching by all other variables seems to return a list of objects
     def retrieve_candidate_campaign(
-            self, candidate_campaign_id, we_vote_id=None, candidate_maplight_id=None,
+            self, candidate_campaign_id, candidate_campaign_we_vote_id=None, candidate_maplight_id=None,
             candidate_name=None, candidate_vote_smart_id=None):
         error_result = False
         exception_does_not_exist = False
@@ -422,8 +422,8 @@ class CandidateCampaignManager(models.Model):
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_ID"
-            elif positive_value_exists(we_vote_id):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(we_vote_id=we_vote_id)
+            elif positive_value_exists(candidate_campaign_we_vote_id):
+                candidate_campaign_on_stage = CandidateCampaign.objects.get(we_vote_id=candidate_campaign_we_vote_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_WE_VOTE_ID"
