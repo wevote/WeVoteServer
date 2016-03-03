@@ -49,7 +49,7 @@ def voter_star_off_save_for_api(voter_device_id,
         # Since we can take in either office_id or office_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(office_id):
             office_we_vote_id = contest_office_manager.fetch_contest_office_we_vote_id_from_id(office_id)
-        elif positive_value_exists(measure_we_vote_id):
+        elif positive_value_exists(office_we_vote_id):
             office_id = contest_office_manager.fetch_contest_office_id_from_we_vote_id(office_we_vote_id)
 
         results = star_item_manager.toggle_off_voter_starred_office(voter_id, office_id)
@@ -151,7 +151,7 @@ def voter_star_on_save_for_api(voter_device_id,
         # Since we can take in either office_id or office_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(office_id):
             office_we_vote_id = contest_office_manager.fetch_contest_office_we_vote_id_from_id(office_id)
-        elif positive_value_exists(measure_we_vote_id):
+        elif positive_value_exists(office_we_vote_id):
             office_id = contest_office_manager.fetch_contest_office_id_from_we_vote_id(office_we_vote_id)
 
         results = star_item_manager.toggle_on_voter_starred_office(voter_id, office_id)
@@ -263,7 +263,7 @@ def voter_star_status_retrieve_for_api(voter_device_id,
         # Since we can take in either office_id or office_we_vote_id, we need to retrieve the value we don't have
         if positive_value_exists(office_id):
             office_we_vote_id = contest_office_manager.fetch_contest_office_we_vote_id_from_id(office_id)
-        elif positive_value_exists(measure_we_vote_id):
+        elif positive_value_exists(office_we_vote_id):
             office_id = contest_office_manager.fetch_contest_office_id_from_we_vote_id(office_we_vote_id)
 
         # Zero out the unused values
