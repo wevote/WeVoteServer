@@ -36,26 +36,6 @@ def voter_position_retrieve_doc_template_values(url_root):
     ]
 
     potential_status_codes_list = [
-        # {
-        #     'code':         'RETRIEVE_POSITION_FOUND_WITH_POSITION_ID',
-        #     'description':  'The position was found using the internal id',
-        # },
-        # {
-        #     'code':         'RETRIEVE_POSITION_FOUND_WITH_WE_VOTE_ID',
-        #     'description':  'The position was found using the we_vote_id',
-        # },
-        # {
-        #     'code':         'POSITION_RETRIEVE_BOTH_IDS_MISSING',
-        #     'description':  'One identifier required. Neither provided.',
-        # },
-        # {
-        #     'code':         'POSITION_NOT_FOUND_WITH_ID',
-        #     'description':  'The position was not found with internal id.',
-        # },
-        # {
-        #     'code':         'ERROR_<specifics here>',
-        #     'description':  'An internal description of what error prevented the retrieve of the position.',
-        # },
     ]
 
     try_now_link_variables_dict = {
@@ -76,6 +56,8 @@ def voter_position_retrieve_doc_template_values(url_root):
                    '  "office_we_vote_id": string,\n' \
                    '  "candidate_we_vote_id": string,\n' \
                    '  "measure_we_vote_id": string,\n' \
+                   '  "kind_of_ballot_item": string (OFFICE, CANDIDATE, MEASURE),\n' \
+                   '  "ballot_item_we_vote_id": string,\n' \
                    '  "stance": string (SUPPORT, OPPOSE, INFO_ONLY, or NO_STANCE),\n' \
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \

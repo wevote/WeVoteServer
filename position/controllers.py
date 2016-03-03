@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import PositionEntered, PositionEnteredManager, PositionListManager, ANY_STANCE, NO_STANCE
-from ballot.models import OFFICE, CANDIDATE, POLITICIAN, MEASURE
+from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -653,12 +653,44 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
     if not results['success']:
         return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
+    if positive_value_exists(office_we_vote_id):
+        kind_of_ballot_item = OFFICE
+        ballot_item_we_vote_id = office_we_vote_id
+    elif positive_value_exists(candidate_we_vote_id):
+        kind_of_ballot_item = CANDIDATE
+        ballot_item_we_vote_id = candidate_we_vote_id
+    elif positive_value_exists(measure_we_vote_id):
+        kind_of_ballot_item = MEASURE
+        ballot_item_we_vote_id = candidate_we_vote_id
+    else:
+        kind_of_ballot_item = ''
+        ballot_item_we_vote_id = ''
+
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
+            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                  False,
+            'position_id':              0,
+            'position_we_vote_id':      '',
+            'ballot_item_display_name': '',
+            'speaker_display_name':     '',
+            'speaker_image_url_https':  '',
+            'is_support':               False,
+            'is_oppose':                False,
+            'is_information_only':      False,
+            'google_civic_election_id': '',
+            'office_we_vote_id':        office_we_vote_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'measure_we_vote_id':       measure_we_vote_id,
+            'kind_of_ballot_item':      kind_of_ballot_item,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+            'stance':                   '',
+            'statement_text':           '',
+            'statement_html':           '',
+            'more_info_url':            '',
+            'last_updated':             '',
+            'voter_device_id':          voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -681,9 +713,11 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'is_oppose':                False,
             'is_information_only':      False,
             'google_civic_election_id': '',
-            'office_we_vote_id':        '',
-            'candidate_we_vote_id':     '',
-            'measure_we_vote_id':       '',
+            'office_we_vote_id':        office_we_vote_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'measure_we_vote_id':       measure_we_vote_id,
+            'kind_of_ballot_item':      kind_of_ballot_item,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'stance':                   '',
             'statement_text':           '',
             'statement_html':           '',
@@ -707,21 +741,6 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
         results = position_manager.retrieve_voter_contest_measure_position_with_we_vote_id(
             voter_id, measure_we_vote_id)
 
-    # retrieve_position results
-    # results = {
-    #     'error_result':             error_result,
-    #     'DoesNotExist':             exception_does_not_exist,
-    #     'MultipleObjectsReturned':  exception_multiple_object_returned,
-    #     'position_found':           True if position_id > 0 else False,
-    #     'position_id':              position_id,
-    #     'position':                 position_on_stage,
-    #     'is_support':               position_on_stage.is_support(),
-    #     'is_oppose':                position_on_stage.is_oppose(),
-    #     'is_no_stance':             position_on_stage.is_no_stance(),
-    #     'is_information_only':      position_on_stage.is_information_only(),
-    #     'is_still_deciding':        position_on_stage.is_still_deciding(),
-    # }
-
     if results['position_found']:
         position = results['position']
         json_data = {
@@ -739,6 +758,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'office_we_vote_id':        position.contest_office_we_vote_id,
             'candidate_we_vote_id':     position.candidate_campaign_we_vote_id,
             'measure_we_vote_id':       position.contest_measure_we_vote_id,
+            'kind_of_ballot_item':      kind_of_ballot_item,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'stance':                   position.stance,
             'statement_text':           position.statement_text,
             'statement_html':           position.statement_html,
@@ -750,7 +771,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
     else:
         json_data = {
             'status':                   results['status'],
-            'success':                  False,
+            'success':                  True,
             'position_id':              0,
             'position_we_vote_id':      '',
             'ballot_item_display_name': '',
@@ -760,9 +781,11 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'is_oppose':                False,
             'is_information_only':      False,
             'google_civic_election_id': '',
-            'office_we_vote_id':        '',
-            'candidate_we_vote_id':     '',
-            'measure_we_vote_id':       '',
+            'office_we_vote_id':        office_we_vote_id,
+            'candidate_we_vote_id':     candidate_we_vote_id,
+            'measure_we_vote_id':       measure_we_vote_id,
+            'kind_of_ballot_item':      kind_of_ballot_item,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
             'stance':                   '',
             'statement_text':           '',
             'statement_html':           '',
