@@ -307,7 +307,7 @@ class ContestMeasureManager(models.Model):
         }
         return results
 
-    def fetch_contest_measure_id_from_contest_measure_we_vote_id(self, contest_measure_we_vote_id):
+    def fetch_contest_measure_id_from_we_vote_id(self, contest_measure_we_vote_id):
         """
         Take in contest_measure_we_vote_id and return internal/local-to-this-database contest_measure_id
         :param contest_measure_we_vote_id:
@@ -318,16 +318,12 @@ class ContestMeasureManager(models.Model):
             if positive_value_exists(contest_measure_we_vote_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
                 contest_measure_id = contest_measure_on_stage.id
-            # else:
-            #     logger.warn("fetch_contest_measure_id_from_contest_measure_we_vote_id no contest_measure_we_vote_id")
 
         except ContestMeasure.MultipleObjectsReturned as e:
-            # logger.warn("fetch_contest_measure_id_from_we_vote_id ContestMeasure.MultipleObjectsReturned")
             handle_record_found_more_than_one_exception(e, logger=logger)
 
         except ContestMeasure.DoesNotExist:
             contest_measure_id = 0
-            # logger.warn("fetch_contest_measure_id_from_contest_measure_we_vote_id ContestMeasure.DoesNotExist")
 
         return contest_measure_id
 
