@@ -59,7 +59,7 @@ def candidates_import_from_sample_file(request=None, load_from_uri=False):
         # Look it up for this local database. If we don't find it, then we know the contest_office hasn't been imported
         # from another server yet, so we fail out.
         contest_office_manager = ContestOfficeManager()
-        contest_office_id = contest_office_manager.fetch_contest_office_id_from_contest_office_we_vote_id(
+        contest_office_id = contest_office_manager.fetch_contest_office_id_from_we_vote_id(
             contest_office_we_vote_id)
         if positive_value_exists(candidate_name) and positive_value_exists(google_civic_election_id) \
                 and positive_value_exists(we_vote_id) and positive_value_exists(contest_office_id):

@@ -243,7 +243,7 @@ class ContestOfficeManager(models.Model):
         }
         return results
 
-    def fetch_contest_office_id_from_contest_office_we_vote_id(self, contest_office_we_vote_id):
+    def fetch_contest_office_id_from_we_vote_id(self, contest_office_we_vote_id):
         """
         Take in contest_office_we_vote_id and return internal/local-to-this-database contest_office_id
         :param contest_office_we_vote_id:
@@ -254,16 +254,12 @@ class ContestOfficeManager(models.Model):
             if positive_value_exists(contest_office_we_vote_id):
                 contest_office_on_stage = ContestOffice.objects.get(we_vote_id=contest_office_we_vote_id)
                 contest_office_id = contest_office_on_stage.id
-            # else:
-            #     logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id no contest_office_we_vote_id")
 
         except ContestOffice.MultipleObjectsReturned as e:
-            # logger.warn("fetch_contest_office_id_from_we_vote_id ContestOffice.MultipleObjectsReturned")
             handle_record_found_more_than_one_exception(e, logger=logger)
 
         except ContestOffice.DoesNotExist:
             contest_office_id = 0
-            # logger.warn("fetch_contest_office_id_from_contest_office_we_vote_id ContestOffice.DoesNotExist")
 
         return contest_office_id
 
