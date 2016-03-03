@@ -200,7 +200,18 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id)
 
-    def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=''):
+    def retrieve_voter_by_twitter_id(self, twitter_id):
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
+        twitter_request_token = ''
+        facebook_id = 0
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
+                                            twitter_id)
+
+    def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=0,
+                       twitter_id=0):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
@@ -235,6 +246,11 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(facebook_id):
                 voter_on_stage = Voter.objects.get(
                     facebook_id=facebook_id)
+                # If still here, we found an existing voter
+                voter_id = voter_on_stage.id
+            elif positive_value_exists(twitter_id):
+                voter_on_stage = Voter.objects.get(
+                    twitter_id=twitter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             else:
@@ -296,15 +312,52 @@ class VoterManager(BaseUserManager):
     def save_twitter_user_values(self, voter, twitter_user_object):
         try:
             # 'id': 132728535,
-            voter.twitter_id = twitter_user_object.id
+            if positive_value_exists(twitter_user_object.id):
+                voter.twitter_id = twitter_user_object.id
             # 'id_str': '132728535',
             # 'utc_offset': 32400,
             # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
-            voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+            if positive_value_exists(twitter_user_object.profile_image_url_https):
+                voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
             # 'screen_name': 'jaeeeee',
-            voter.twitter_screen_name = twitter_user_object.screen_name
+            if positive_value_exists(twitter_user_object.screen_name):
+                voter.twitter_screen_name = twitter_user_object.screen_name
+            # 'lang': 'en',
+            # 'name': 'Jae Jung Chung',
+            # 'url': 'http://www.carbonize.co.kr',
+            # 'time_zone': 'Seoul',
+            voter.save()
+            success = True
+            status = "SAVED_VOTER_TWITTER_VALUES"
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES"
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':   status,
+            'success':  success,
+            'voter':    voter,
+        }
+        return results
+
+    def save_twitter_user_values_from_dict(self, voter, twitter_user_dict):
+        try:
+            # 'id': 132728535,
+            if 'id' in twitter_user_dict:
+                voter.twitter_id = twitter_user_dict['id']
+            # 'id_str': '132728535',
+            # 'utc_offset': 32400,
+            # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
+            # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
+            if 'profile_image_url_https' in twitter_user_dict:
+                voter.twitter_profile_image_url_https = twitter_user_dict['profile_image_url_https']
+            # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
+            # 'screen_name': 'jaeeeee',
+            if 'screen_name' in twitter_user_dict:
+                voter.twitter_screen_name = twitter_user_dict['screen_name']
             # 'lang': 'en',
             # 'name': 'Jae Jung Chung',
             # 'url': 'http://www.carbonize.co.kr',

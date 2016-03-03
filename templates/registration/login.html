@@ -1,6 +1,9 @@
 {% extends "template_base.html" %}
 
 {% block content %}
+{% if request.user.is_authenticated %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+{% endif %}
 
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
@@ -41,12 +44,14 @@
 </form>
 
 {# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'auth:password_reset' %}">Lost password?</a></p>
+{#  <p><a href="{% url 'auth:password_reset' %}">Lost password?</a></p> #}
 
 
 <p> <a href="{% url 'voter:authenticate_manually' %}">Authenticate Manually</a>
     {% if not request.user.is_authenticated %}
     {% endif %}
 </p>
+
+<p><a href="{% url 'auth:logout' %}">Sign Out</a></p>
 
 {% endblock %}

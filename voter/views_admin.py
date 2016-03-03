@@ -33,6 +33,9 @@ def login_complete_view(request):
             messages.add_message(request, messages.INFO, 'Missing voter.')
             return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
 
+        # TODO Write the Twitter or Facebook information to the voter table so we can access it via the APIs
+        # Currently all of the twitter authentication for Django is in the separate social_auth* tables
+
         # Relink this voter_api_device_id to this Voter account
         voter_device_manager = VoterDeviceLinkManager()
         voter_device_link_results = voter_device_manager.retrieve_voter_device_link(voter_api_device_id)
@@ -86,6 +89,7 @@ def voter_authenticate_manually_view(request):
         template_values = {
             'messages_on_stage':            messages_on_stage,
             'voter':                        voter_on_stage,
+            'voter_api_device_id':          voter_api_device_id,
             'is_authenticated':             request.user.is_authenticated(),
             'set_this_voter_as_admin':      set_this_voter_as_admin,
             'unset_this_voter_as_admin':    unset_this_voter_as_admin,
@@ -167,7 +171,7 @@ def voter_edit_process_view(request):
             # Update
             voter_on_stage.voter_name = voter_name
             voter_on_stage.save()
-            messages.add_message(request, messages.INFO, 'Voter updated.')
+            messages.add_message(request, messages.INFO, 'Voter information updated.')
         else:
             # Create new
             messages.add_message(request, messages.INFO, 'We do not support adding new Voters.')

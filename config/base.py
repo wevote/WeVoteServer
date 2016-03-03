@@ -124,6 +124,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'wevote_social.middleware.SocialMiddleware',
+    'wevote_social.middleware.WeVoteSocialAuthExceptionMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -276,14 +277,16 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',
     'social.pipeline.social_auth.auth_allowed',
-    'social.pipeline.social_auth.social_user',
-    'voter.utils.authenticate_associate_by_email',  # Order in this pipeline matters
+    # 'social.pipeline.social_auth.social_user',
+    'wevote_social.utils.social_user',  # Order in this pipeline matters
+    'wevote_social.utils.authenticate_associate_by_email',  # Order in this pipeline matters
     'social.pipeline.user.get_username',
     'social.pipeline.social_auth.associate_by_email',
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
-    'social.pipeline.user.user_details'
+    'social.pipeline.user.user_details',
+    'wevote_social.utils.switch_user'  # Order in this pipeline matters
 )
 
 

@@ -249,12 +249,17 @@ def get_voter_device_id(request, generate_if_no_value=False):
 
     # Then check for incoming GET value
     voter_device_id = request.GET.get('voter_device_id', '')
-    if voter_device_id == '' and generate_if_no_value:
+    if positive_value_exists(voter_device_id):
+        return voter_device_id
+
+    if generate_if_no_value:
         voter_device_id = generate_voter_device_id()  # Stored in cookie below
         logger.debug("generate_voter_device_id, voter_device_id: {voter_device_id}".format(
             voter_device_id=voter_device_id
         ))
-    return voter_device_id
+        return voter_device_id
+    else:
+        return ''
 
 
 def is_voter_device_id_valid(voter_device_id):
