@@ -94,7 +94,6 @@ def voter_address_save_for_api(voter_device_id, voter_id, address_raw_text):
                 'voter_device_id': voter_device_id,
                 'text_for_map_search': address_raw_text,
             }
-
     # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':
         # delete all currently matching addresses and save again
     else:

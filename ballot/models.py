@@ -628,14 +628,23 @@ class BallotReturnedManager(models.Model):
             else:
                 ballot_returned = None
             if positive_value_exists(ballot_returned_id):
+                text_for_map_search = ''
                 if 'line1' in google_civic_address_dict:
                     ballot_returned.normalized_line1 = google_civic_address_dict['line1']
+                    text_for_map_search += ballot_returned.normalized_line1 + ", "
                 if 'line2' in google_civic_address_dict:
                     ballot_returned.normalized_line2 = google_civic_address_dict['line2']
+                    text_for_map_search += ballot_returned.normalized_line2 + ", "
                 ballot_returned.normalized_city = google_civic_address_dict['city']
+                text_for_map_search += ballot_returned.normalized_city + ", "
                 ballot_returned.normalized_state = google_civic_address_dict['state']
+                text_for_map_search += ballot_returned.normalized_state + " "
                 if 'zip' in google_civic_address_dict:
                     ballot_returned.normalized_zip = google_civic_address_dict['zip']
+                    text_for_map_search += ballot_returned.normalized_zip
+
+                ballot_returned.text_for_map_search = text_for_map_search
+
                 ballot_returned.save()
                 status = "SAVED_BALLOT_RETURNED_WITH_NORMALIZED_VALUES"
                 success = True
@@ -679,19 +688,30 @@ class BallotReturnedManager(models.Model):
                 return True
         elif positive_value_exists(ballot_returned.normalized_zip):
             return True
+        if not positive_value_exists(ballot_returned.text_for_map_search):
+            return True
         return False
 
     def update_ballot_returned_with_normalized_values(self, google_civic_address_dict, ballot_returned):
         try:
+            text_for_map_search = ''
             if self.is_ballot_returned_different(google_civic_address_dict, ballot_returned):
                 if 'line1' in google_civic_address_dict:
                     ballot_returned.normalized_line1 = google_civic_address_dict['line1']
+                    text_for_map_search += ballot_returned.normalized_line1 + ", "
                 if 'line2' in google_civic_address_dict:
                     ballot_returned.normalized_line2 = google_civic_address_dict['line2']
+                    text_for_map_search += ballot_returned.normalized_line2 + ", "
                 ballot_returned.normalized_city = google_civic_address_dict['city']
+                text_for_map_search += ballot_returned.normalized_city + ", "
                 ballot_returned.normalized_state = google_civic_address_dict['state']
+                text_for_map_search += ballot_returned.normalized_state + " "
                 if 'zip' in google_civic_address_dict:
                     ballot_returned.normalized_zip = google_civic_address_dict['zip']
+                    text_for_map_search += ballot_returned.normalized_zip
+
+                ballot_returned.text_for_map_search = text_for_map_search
+
                 ballot_returned.save()
                 status = "UPDATED_BALLOT_RETURNED_WITH_NORMALIZED_VALUES"
                 success = True

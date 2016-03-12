@@ -556,6 +556,7 @@ def voter_address_retrieve_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     guess_if_no_address_saved = request.GET.get('guess_if_no_address_saved', True)
     if guess_if_no_address_saved == 'false':
         guess_if_no_address_saved = False
@@ -621,8 +622,7 @@ def voter_address_retrieve_view(request):
             address_variable_exists = True
             text_for_map_search = voter_location_results['voter_location']
             status += '*** ' + text_for_map_search + ' ***, '
-            voter_address_save_results = voter_address_save_for_api(voter_device_id, text_for_map_search,
-                                                                    address_variable_exists)
+            voter_address_save_results = voter_address_save_for_api(voter_device_id, voter_id, text_for_map_search)
             voter_address_saved = True if voter_address_save_results['success'] else False
 
             status += voter_address_save_results['status'] + ", "
