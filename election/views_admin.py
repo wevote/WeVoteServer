@@ -41,14 +41,6 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
-    # # Testing
-    # messages.add_message(request, messages.INFO,
-    #                      'election_local_id: {election_local_id}, '
-    #                      'google_civic_election_id: {google_civic_election_id}.'.format(
-    #                          election_local_id=election_local_id,
-    #                          google_civic_election_id=google_civic_election_id,
-    #                      ))
-
     try:
         if positive_value_exists(election_local_id):
             election_on_stage = Election.objects.get(id=election_local_id)
@@ -107,10 +99,10 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
             text_for_map_search, election_on_stage.google_civic_election_id)
         if one_ballot_results['success']:
             one_ballot_json = one_ballot_results['structured_json']
-            store_one_ballot_results = store_one_ballot_from_google_civic_api(one_ballot_json)
+            store_one_ballot_results = store_one_ballot_from_google_civic_api(one_ballot_json, 0,
+                                                                              polling_location.we_vote_id)
             if store_one_ballot_results['success']:
                 success = True
-        # TODO: Record locally the address that failed (or succeeded) here?
 
         if success:
             ballots_retrieved += 1

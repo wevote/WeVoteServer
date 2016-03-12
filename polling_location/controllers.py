@@ -5,10 +5,11 @@
 import glob
 
 from .models import PollingLocationManager
+from wevote_functions.functions import positive_value_exists
 import xml.etree.ElementTree as MyElementTree
 
 
-def import_and_save_all_polling_locations_data():
+def import_and_save_all_polling_locations_data(state_code=''):
     # In most states we can visit this URL (example is 'va' or virginia):
     # https://data.votinginfoproject.org/feeds/va/?order=D
     # and download the first zip file.
@@ -19,8 +20,14 @@ def import_and_save_all_polling_locations_data():
     for xml_path in glob.glob('polling_location/import_data/*/vipFeed-*.xml'):
         if 'ignore' in xml_path:
             continue
-        print('  loading:', xml_path)
-        all_results.append(import_and_save_polling_location_data(xml_path))
+        if positive_value_exists(state_code):
+            state_code_folder_path = "/" + state_code + "/"
+            if state_code_folder_path in xml_path:
+                print('  loading:', xml_path)
+                all_results.append(import_and_save_polling_location_data(xml_path))
+        else:
+            print('  loading:', xml_path)
+            all_results.append(import_and_save_polling_location_data(xml_path))
 
     return merge_polling_location_results(*all_results)
 

@@ -35,12 +35,14 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
 from voter.controllers import voter_retrieve_for_api, voter_address_retrieve_for_api, voter_address_save_for_api, \
     voter_photo_save_for_api, voter_retrieve_list_for_api
+from voter.models import fetch_voter_id_from_voter_device_link, VoterDeviceLinkManager
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
-from wevote_functions.functions import generate_voter_device_id, get_voter_device_id, \
-    get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie, positive_value_exists, convert_to_int
 import wevote_functions.admin
+from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, \
+    get_google_civic_election_id_from_cookie, is_voter_device_id_valid, set_google_civic_election_id_cookie, \
+    positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -716,12 +718,13 @@ def voter_address_retrieve_view(request):
 
 def voter_address_save_view(request):  # voterAddressSave
     """
-    Save or update an address for this voter
+    Save or update an address for this voter. Once the address is saved, update the ballot information.
     :param request:
     :return:
     """
 
     status = ''
+    voter_id = 0
 
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     try:
@@ -732,61 +735,58 @@ def voter_address_save_view(request):  # voterAddressSave
         text_for_map_search = ''
         address_variable_exists = False
 
-    results = voter_address_save_for_api(voter_device_id, text_for_map_search, address_variable_exists)
+    device_id_results = is_voter_device_id_valid(voter_device_id)
+    if not device_id_results['success']:
+        results = {
+                'status': device_id_results['status'],
+                'success': False,
+                'voter_device_id': voter_device_id,
+            }
+        return results
+
+    if not address_variable_exists:
+        results = {
+                'status': "MISSING_POST_VARIABLE-ADDRESS",
+                'success': False,
+                'voter_device_id': voter_device_id,
+            }
+        return results
+
+    # We retrieve voter_device_link
+    voter_device_link_manager = VoterDeviceLinkManager()
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+    if voter_device_link_results['voter_device_link_found']:
+        voter_device_link = voter_device_link_results['voter_device_link']
+        voter_id = voter_device_link.voter_id
+    else:
+        error_results = {
+            'status': "VOTER_DEVICE_LINK_NOT_FOUND_FROM_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return error_results
+
+    if not positive_value_exists(voter_id):
+        error_results = {
+            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return error_results
+
+    # Save the address value, and clear out ballot_saved information
+    results = voter_address_save_for_api(voter_device_id, voter_id, text_for_map_search)
     voter_address_saved = True if results['success'] else False
 
-    if not positive_value_exists(text_for_map_search):
-        json_data = {
-            'status': results['status'],
-            'success': results['success'],
-            'voter_device_id': voter_device_id,
-            'text_for_map_search': text_for_map_search,
-            'voter_address_saved': voter_address_saved,
-            'google_civic_election_id': 0,
-        }
-        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+    if voter_address_saved:
+        # Remove the former google_civic_election_id from this voter_device_id
+        voter_device_link_manager.update_voter_device_link_with_election_id(voter_device_link, 0)
 
-        # Reset google_civic_election_id to 0 whenever we save an empty address
-        google_civic_election_id = 0
-        set_google_civic_election_id_cookie(request, response, google_civic_election_id)
+    # We let voter_ballot_items_retrieve_for_api figure out which election to return
+    google_civic_election_id = 0
+    json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id)
 
-        return response
-
-    status += results['status'] + ' *** ' + text_for_map_search + ' ***, '
-
-    # If here, we saved an address
-    google_civic_election_id = get_google_civic_election_id_from_cookie(request)
-
-    if positive_value_exists(google_civic_election_id):
-        google_civic_election_id = convert_to_int(google_civic_election_id)
-        if google_civic_election_id == 2000:
-            use_test_election = True
-        else:
-            use_test_election = False
-    else:
-        use_test_election = False
-
-    results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,
-                                                                    use_test_election)
-
-    status += results['status']
-    google_civic_election_id = results['google_civic_election_id']
-
-    json_data = {
-        'status': status,
-        'success': results['success'],
-        'voter_device_id': voter_device_id,
-        'text_for_map_search': text_for_map_search,
-        'voter_address_saved': voter_address_saved,
-        'google_civic_election_id': google_civic_election_id,
-    }
-
-    response = HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    # Reset google_civic_election_id to the new election whenever we save a new address
-    set_google_civic_election_id_cookie(request, response, google_civic_election_id)
-
-    return response
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_ballot_items_retrieve_view(request):
@@ -799,26 +799,17 @@ def voter_ballot_items_retrieve_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     # If passed in, we want to look at
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
     use_test_election = request.GET.get('use_test_election', False)
     use_test_election = False if use_test_election == 'false' else use_test_election
     use_test_election = False if use_test_election == 'False' else use_test_election
 
-    if positive_value_exists(use_test_election):
-        google_civic_election_id = 2000  # The Google Civic API Test election
-    elif not positive_value_exists(google_civic_election_id):
-        # We look in the cookies for google_civic_election_id
-        google_civic_election_id = get_google_civic_election_id_from_cookie(request)
+    if use_test_election:
+        google_civic_election_id = 2000  # The Google Civic test election
 
-    # This 'voter_ballot_items_retrieve_for_api' lives in apis_v1/controllers.py
-    results = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id)
-    response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+    json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id)
 
-    # Save google_civic_election_id in the cookie so the interface knows
-    google_civic_election_id_from_ballot_retrieve = results['google_civic_election_id']
-    if positive_value_exists(google_civic_election_id_from_ballot_retrieve):
-        set_google_civic_election_id_cookie(request, response, results['google_civic_election_id'])
-
-    return response
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_ballot_items_retrieve_from_google_civic_view(request):

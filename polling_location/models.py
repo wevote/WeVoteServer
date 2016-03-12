@@ -6,6 +6,7 @@ from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.functions import extract_zip_formatted_from_zip9
+from wevote_settings.models import fetch_next_we_vote_id_last_polling_location_integer, fetch_site_unique_id_prefix
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -18,6 +19,9 @@ class PollingLocation(models.Model):
     # We rely on the default internal id field too
     # The ID of this polling location from VIP. (It seems to only be unique within each state.)
     polling_location_id = models.CharField(max_length=255, verbose_name="vip polling_location id", null=False)
+    we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of this polling location", max_length=255, default=None, null=True,
+        blank=True, unique=True)
     location_name = models.CharField(max_length=255, verbose_name="location name", null=True, blank=True)
     polling_hours_text = models.CharField(max_length=255, verbose_name="polling hours", null=True, blank=True)
     directions_text = models.TextField(
@@ -49,6 +53,25 @@ class PollingLocation(models.Model):
                 text_for_map_search += " "
             text_for_map_search += self.get_formatted_zip()
         return text_for_map_search
+
+    # We override the save function so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_last_polling_location_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "ploc" = tells us this is a unique id for a PollingLocation
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}ploc{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+        super(PollingLocation, self).save(*args, **kwargs)
 
 
 class PollingLocationManager(models.Model):
@@ -86,12 +109,12 @@ class PollingLocationManager(models.Model):
                     'polling_location_id': polling_location_id,
                     'state': state,
                     # The rest of the values
-                    'location_name': location_name.strip(),
-                    'polling_hours_text': polling_hours_text.strip(),
-                    'directions_text': directions_text.strip(),
-                    'line1': line1.strip(),
+                    'location_name': location_name.strip() if location_name else '',
+                    'polling_hours_text': polling_hours_text.strip() if polling_hours_text else '',
+                    'directions_text': directions_text.strip() if directions_text else '',
+                    'line1': line1.strip() if line1 else '',
                     'line2': line2,
-                    'city': city.strip(),
+                    'city': city.strip() if city else '',
                     'zip_long': zip_long,
                 }
                 # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's

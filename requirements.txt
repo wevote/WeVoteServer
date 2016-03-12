@@ -34,6 +34,7 @@ static3==0.5.1
 tweepy==3.5.0
 Unipath==1.1
 uritemplate==0.6
+usaddress==0.5.5
 validate-email==1.3
 # python-votesmart=0.3.3  # Using local version instead since 0.3.3 not Py 3 compatible
 wikipedia==1.4.0

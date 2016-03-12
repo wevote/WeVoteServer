@@ -32,12 +32,6 @@ def voter_address_retrieve_for_api(voter_device_id):
         }
         return voter_address_retrieve_results
 
-    # ##################
-    # Temp code to test authentication
-    # user = PasswordlessAuthBackend.authenticate(username=user.username)
-    # login(request, user)
-    # ##################
-
     voter_address_manager = VoterAddressManager()
     results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
 
@@ -79,33 +73,7 @@ def voter_address_retrieve_for_api(voter_device_id):
         return voter_address_retrieve_results
 
 
-def voter_address_save_for_api(voter_device_id, address_raw_text, address_variable_exists):
-    device_id_results = is_voter_device_id_valid(voter_device_id)
-    if not device_id_results['success']:
-        results = {
-                'status': device_id_results['status'],
-                'success': False,
-                'voter_device_id': voter_device_id,
-            }
-        return results
-
-    if not address_variable_exists:
-        results = {
-                'status': "MISSING_POST_VARIABLE-ADDRESS",
-                'success': False,
-                'voter_device_id': voter_device_id,
-            }
-        return results
-
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        results = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return results
-
+def voter_address_save_for_api(voter_device_id, voter_id, address_raw_text):
     # At this point, we have a valid voter
 
     voter_address_manager = VoterAddressManager()

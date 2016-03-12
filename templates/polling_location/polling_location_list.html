@@ -8,7 +8,9 @@
 
 <h1>Polling Locations</h1>
 
-    <p><a href="{% url 'polling_location:import_polling_locations_process' %}">Import Polling Locations File Now</a> (this can take 60-90 seconds)</p>
+    <p><a href="{% url 'polling_location:import_polling_locations_process' %}?polling_location_state={{ polling_location_state }}">
+        Import Polling Locations File{% if polling_location_state %} (for "{{ polling_location_state }}"){% endif %}</a>
+        (this can take 60-90 seconds)</p>
 
     {% if state_list %}
     <form name="polling_location_state_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
@@ -17,9 +19,9 @@
     <select id="polling_location_state" name="polling_location_state">
         <option value="" {% if '' == polling_location_state %} selected="selected"{% endif %}>
             -- Filter by State --</option>
-    {% for key, state in state_list.items %}
+    {% for key, state in state_list %}
         <option value="{{ key }}"
-                {% if key == polling_location_state %} selected="selected"{% endif %}>
+                {% if key|lower == polling_location_state|lower %} selected="selected"{% endif %}>
             {{ state }}</option>
     {% endfor %}
     </select>

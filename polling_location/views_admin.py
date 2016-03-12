@@ -19,6 +19,7 @@ import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+# These are states for which we have polling location data
 STATE_LIST_IMPORT = {
         'AK': 'Alaska',
         'AL': 'Alabama',
@@ -26,29 +27,29 @@ STATE_LIST_IMPORT = {
         # 'AS': 'American Samoa',
         'AZ': 'Arizona',
         'CA': 'California',
-        # 'CO': 'Colorado',
-        # 'CT': 'Connecticut',
-        # 'DC': 'District of Columbia',
-        # 'DE': 'Delaware',
-        # 'FL': 'Florida',
-        # 'GA': 'Georgia',
+        'CO': 'Colorado',
+        'CT': 'Connecticut',
+        'DC': 'District of Columbia',
+        'DE': 'Delaware',
+        'FL': 'Florida',
+        'GA': 'Georgia',
         # 'GU': 'Guam',
-        # 'HI': 'Hawaii',
-        # 'IA': 'Iowa',
-        # 'ID': 'Idaho',
-        # 'IL': 'Illinois',
-        # 'IN': 'Indiana',
-        # 'KS': 'Kansas',
-        # 'KY': 'Kentucky',
-        # 'LA': 'Louisiana',
-        # 'MA': 'Massachusetts',
-        # 'MD': 'Maryland',
-        # 'ME': 'Maine',
-        # 'MI': 'Michigan',
-        # 'MN': 'Minnesota',
-        # 'MO': 'Missouri',
+        'HI': 'Hawaii',
+        'IA': 'Iowa',
+        'ID': 'Idaho',
+        'IL': 'Illinois',
+        'IN': 'Indiana',
+        'KS': 'Kansas',
+        'KY': 'Kentucky',
+        'LA': 'Louisiana',
+        'MA': 'Massachusetts',
+        'MD': 'Maryland',
+        'ME': 'Maine',
+        'MI': 'Michigan',
+        'MN': 'Minnesota',
+        'MO': 'Missouri',
         # 'MP': 'Northern Mariana Islands',
-        # 'MS': 'Mississippi',
+        'MS': 'Mississippi',
         'MT': 'Montana',
         # 'NA': 'National',
         'NC': 'North Carolina',
@@ -56,23 +57,23 @@ STATE_LIST_IMPORT = {
         'NE': 'Nebraska',
         'NH': 'New Hampshire',
         'NJ': 'New Jersey',
-        # 'NM': 'New Mexico',
+        'NM': 'New Mexico',
         'NV': 'Nevada',
         'NY': 'New York',
-        # 'OH': 'Ohio',
-        # 'OK': 'Oklahoma',
-        # 'OR': 'Oregon',
-        # 'PA': 'Pennsylvania',
+        'OH': 'Ohio',
+        'OK': 'Oklahoma',
+        'OR': 'Oregon',
+        'PA': 'Pennsylvania',
         # 'PR': 'Puerto Rico',
         'RI': 'Rhode Island',
-        # 'SC': 'South Carolina',
-        # 'SD': 'South Dakota',
-        # 'TN': 'Tennessee',
-        # 'TX': 'Texas',
-        # 'UT': 'Utah',
+        'SC': 'South Carolina',
+        'SD': 'South Dakota',
+        'TN': 'Tennessee',
+        'TX': 'Texas',
+        'UT': 'Utah',
         'VA': 'Virginia',
         # 'VI': 'Virgin Islands',
-        # 'VT': 'Vermont',
+        'VT': 'Vermont',
         'WA': 'Washington',
         'WI': 'Wisconsin',
         'WV': 'West Virginia',
@@ -98,7 +99,10 @@ def import_polling_locations_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    results = import_and_save_all_polling_locations_data()
+    polling_location_state = request.GET.get('polling_location_state', '')
+    # polling_location_state = 'mo'  # State code for Missouri
+
+    results = import_and_save_all_polling_locations_data(polling_location_state.lower())
 
     messages.add_message(request, messages.INFO,
                          'Polling locations retrieved from file. '
@@ -106,7 +110,9 @@ def import_polling_locations_process_view(request):
                              saved=results['saved'],
                              updated=results['updated'],
                              not_processed=results['not_processed'],))
-    return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()))
+    return HttpResponseRedirect(reverse('polling_location:polling_location_list',
+                                        args=()) + "?polling_location_state={var}".format(
+        var=polling_location_state))
 
 
 @login_required
@@ -210,12 +216,14 @@ def polling_location_list_view(request):
 
     messages_on_stage = get_messages(request)
 
+    sorted_state_list = sorted(state_list.items())
+
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'polling_location_list':    polling_location_list,
         'polling_location_count':   polling_location_count,
         'polling_location_state':   polling_location_state,
-        'state_list':               state_list,
+        'state_list':               sorted_state_list,
     }
     return render(request, 'polling_location/polling_location_list.html', template_values)
 

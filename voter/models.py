@@ -584,6 +584,10 @@ class VoterDeviceLink(models.Model):
     # The voter_id associated with voter_device_id
     voter_id = models.IntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
 
+    # The unique ID of the election (provided by Google Civic) that the voter is looking at on this device
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=False)
+
     def generate_voter_device_id(self):
         # A simple mapping to this function
         return generate_voter_device_id()
@@ -679,9 +683,13 @@ class VoterDeviceLinkManager(models.Model):
         }
         return results
 
-    def update_voter_device_link(self, voter_device_link, voter_object):
+    def update_voter_device_link_with_election_id(self, voter_device_link, google_civic_election_id):
+        voter_object = None
+        return self.update_voter_device_link(voter_device_link, voter_object, google_civic_election_id)
+
+    def update_voter_device_link(self, voter_device_link, voter_object=None, google_civic_election_id=0):
         """
-        Take existing voter_device_link, and replace the voter attached to that voter_device_id
+        Update existing voter_device_link with a new voter_id or google_civic_election_id
         """
         error_result = False
         exception_record_not_saved = False
@@ -689,8 +697,14 @@ class VoterDeviceLinkManager(models.Model):
         voter_device_link_id = 0
 
         try:
-            if positive_value_exists(voter_device_link.voter_device_id) and positive_value_exists(voter_object.id):
-                voter_device_link.voter_id = voter_object.id
+            if positive_value_exists(voter_device_link.voter_device_id):
+                if voter_object and positive_value_exists(voter_object.id):
+                    voter_device_link.voter_id = voter_object.id
+                if positive_value_exists(google_civic_election_id):
+                    voter_device_link.google_civic_election_id = google_civic_election_id
+                elif google_civic_election_id == 0:
+                    # If set literally to 0, save it
+                    voter_device_link.google_civic_election_id = 0
                 voter_device_link.save()
 
                 voter_device_link_id = voter_device_link.id
@@ -812,6 +826,9 @@ class VoterAddress(models.Model):
     refreshed_from_google = models.BooleanField(
         verbose_name="have normalized fields been updated from Google since address change?", default=False)
 
+    voter_ballot_saved_id = models.IntegerField(verbose_name="the ballot associated with this address",
+                                                null=True, blank=False, unique=False)
+
 
 class VoterAddressManager(models.Model):
 
@@ -854,38 +871,58 @@ class VoterAddressManager(models.Model):
                 ballot_map_text += voter_address.text_for_map_search
         return ballot_map_text
 
-    def retrieve_address(self, voter_address_id, voter_id, address_type):
+    def retrieve_address(self, voter_address_id, voter_id=0, address_type=''):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
-        voter_address_found = False
         voter_address_on_stage = VoterAddress()
+        voter_address_has_value = False
 
         try:
             if positive_value_exists(voter_address_id):
                 voter_address_on_stage = VoterAddress.objects.get(id=voter_address_id)
                 voter_address_id = voter_address_on_stage.id
+                voter_address_found = True
+                status = "VOTER_ADDRESS_FOUND_BY_ID"
+                success = True
+                voter_address_has_value = True if positive_value_exists(voter_address_on_stage.text_for_map_search) \
+                    else False
             elif positive_value_exists(voter_id) and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS,
                                                                       FORMER_BALLOT_ADDRESS):
                 voter_address_on_stage = VoterAddress.objects.get(voter_id=voter_id, address_type=address_type)
                 # If still here, we found an existing address
                 voter_address_id = voter_address_on_stage.id
-                voter_address_found = True if positive_value_exists(voter_address_on_stage.text_for_map_search) \
+                voter_address_found = True
+                status = "VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE"
+                success = True
+                voter_address_has_value = True if positive_value_exists(voter_address_on_stage.text_for_map_search) \
                     else False
+            else:
+                voter_address_found = False
+                status = "VOTER_ADDRESS_NOT_FOUND-MISSING_REQUIRED_VARIABLES"
+                success = False
         except VoterAddress.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
+            status = "VOTER_ADDRESS_MULTIPLE_OBJECTS_RETURNED"
             exception_multiple_object_returned = True
+            success = False
+            voter_address_found = False
         except VoterAddress.DoesNotExist:
             error_result = True
+            status = "VOTER_ADDRESS_DOES_NOT_EXIST"
             exception_does_not_exist = True
+            success = True
+            voter_address_found = False
 
         results = {
-            'success':                  True if voter_address_id > 0 else False,
+            'success':                  success,
+            'status':                   status,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'voter_address_found':      voter_address_found,
+            'voter_address_has_value':  voter_address_has_value,
             'voter_address_id':         voter_address_id,
             'voter_address':            voter_address_on_stage,
         }
@@ -927,22 +964,26 @@ class VoterAddressManager(models.Model):
         exception_multiple_object_returned = False
         new_address_created = False
 
-        if voter_id > 0 and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
+        if positive_value_exists(voter_id) and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
             try:
                 updated_values = {
                     # Values we search against
                     'voter_id': voter_id,
                     'address_type': address_type,
-                    # The rest of the values
-                    'text_for_map_search': raw_address_text,
-                    'latitude': None,
-                    'longitude': None,
-                    'normalized_line1': None,
-                    'normalized_line2': None,
-                    'normalized_city': None,
-                    'normalized_state': None,
-                    'normalized_zip': None,
-                    'refreshed_from_google': False,
+                    # The rest of the values are to be saved
+                    'text_for_map_search':      raw_address_text,
+                    'latitude':                 None,
+                    'longitude':                None,
+                    'normalized_line1':         None,
+                    'normalized_line2':         None,
+                    'normalized_city':          None,
+                    'normalized_state':         None,
+                    'normalized_zip':           None,
+                    # We clear out former values for these so voter_ballot_items_retrieve_for_api resets them
+                    'refreshed_from_google':    False,
+                    'google_civic_election_id': 0,
+                    'election_day_text':        '',
+                    'voter_ballot_saved_id':    0,
                 }
 
                 voter_address_on_stage, new_address_created = VoterAddress.objects.update_or_create(
@@ -999,6 +1040,35 @@ class VoterAddressManager(models.Model):
             'status':   status,
             'success':  success,
             'voter_address': voter_address,
+        }
+        return results
+
+    def update_existing_voter_address_object(self, voter_address_object):
+        results = self.retrieve_address(voter_address_object.id)
+
+        if results['success']:
+            try:
+                voter_address_object.save()  # Save the incoming object
+                status = "UPDATED_EXISTING_VOTER_ADDRESS"
+                success = True
+                voter_address_found = True
+            except Exception as e:
+                status = "UNABLE_TO_UPDATE_EXISTING_VOTER_ADDRESS"
+                success = False
+                voter_address_found = False
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+        else:
+            # If here, we were unable to find pre-existing VoterAddress
+            status = "UNABLE_TO_FIND_AND_UPDATE_VOTER_ADDRESS"
+            voter_address_object = None
+            success = False
+            voter_address_found = False
+
+        results = {
+            'status':               status,
+            'success':              success,
+            'voter_address':        voter_address_object,
+            'voter_address_found':  voter_address_found,
         }
         return results
 
