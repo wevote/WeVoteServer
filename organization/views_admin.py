@@ -187,7 +187,7 @@ def organization_position_list_view(request, organization_id):
 
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     organization_on_stage_found = False
     try:
         organization_query = Organization.objects.filter(id=organization_id)

@@ -49,7 +49,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 def ballot_item_options_retrieve_view(request):  # ballotItemOptionsRetrieve
-    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     results = ballot_item_options_retrieve_for_api(google_civic_election_id)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
     return response
@@ -798,7 +798,7 @@ def voter_ballot_items_retrieve_view(request):
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     # If passed in, we want to look at
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     use_test_election = request.GET.get('use_test_election', False)
     use_test_election = False if use_test_election == 'false' else use_test_election
@@ -881,7 +881,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', '')
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     use_test_election = request.GET.get('use_test_election', False)
     use_test_election = False if use_test_election == 'false' else use_test_election
     use_test_election = False if use_test_election == 'False' else use_test_election

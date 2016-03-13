@@ -42,7 +42,7 @@ def position_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     messages_on_stage = get_messages(request)
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     position_list_manager = PositionListManager()
 

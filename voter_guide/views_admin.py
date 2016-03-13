@@ -14,7 +14,7 @@ from election.models import Election, TIME_SPAN_LIST
 from organization.models import Organization, OrganizationManager
 from position.models import PositionEntered
 from voter.models import voter_has_authority
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 
 @login_required
@@ -97,7 +97,7 @@ def voter_guide_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     voter_guide_list = []
     voter_guide_list_object = VoterGuideList()

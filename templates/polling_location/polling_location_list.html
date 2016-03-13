@@ -44,6 +44,9 @@
             <td>
             {% if polling_location.zip_long %}{{ polling_location.get_formatted_zip }}{% else %}{% endif %}
             </td>
+            <td>
+                {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
+            </td>
 {#            <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}" style="font-size: .65em">(edit)</a></td>#}
         </tr>
     {% endfor %}

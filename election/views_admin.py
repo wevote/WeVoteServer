@@ -39,7 +39,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     try:
         if positive_value_exists(election_local_id):
@@ -65,9 +65,9 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
 
         polling_location_list = PollingLocation.objects.all()
         polling_location_list = polling_location_list.filter(state__iexact=state)
-        # Include a limit of 500 ballots to pull per election
+        # We used to have a limit of 500 ballots to pull per election, but now retrieve all
         # Ordering by "location_name" creates a bit of (locational) random order
-        polling_location_list = polling_location_list.order_by('location_name')[:500]
+        polling_location_list = polling_location_list.order_by('location_name')  # [:500]
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '
@@ -88,7 +88,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     ballots_retrieved = 0
     ballots_not_retrieved = 0
     ballots_with_contests_retrieved = 0
-    # DEPRECATED: We now retrieve up to 500 locations from each state
+    # We used to only retrieve up to 500 locations from each state, but we don't limit now
     # # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
     # number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
     for polling_location in polling_location_list:
@@ -112,7 +112,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         if one_ballot_results['contests_retrieved']:
             ballots_with_contests_retrieved += 1
 
-        # # DEPRECATED: We now retrieve up to 500 locations from each state
+        # We used to only retrieve up to 500 locations from each state, but we don't limit now
         # # Break out of this loop, assuming we have a minimum number of ballots with contests retrieved
         # #  If we don't achieve the minimum number of ballots_with_contests_retrieved, break out at the emergency level
         # emergency = (ballots_retrieved + ballots_not_retrieved) >= (3 * number_of_polling_locations_to_retrieve)

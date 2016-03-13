@@ -13,7 +13,7 @@ from office.models import ContestOfficeList
 from voter.models import BALLOT_ADDRESS, VoterAddressManager, \
     VoterDeviceLinkManager
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -331,10 +331,13 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
             # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
             pass
 
-    if voter_address.voter_ballot_saved_id:
+    voter_address_google_civic_election_id = voter_address.google_civic_election_id
+    voter_address_google_civic_election_id = convert_to_int(voter_address_google_civic_election_id)
+    if positive_value_exists(voter_address_google_civic_election_id) \
+            and voter_address_google_civic_election_id != 2000:
         # If we have already linked an address to a VoterBallotSaved entry, use this
-        voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_id(
-            voter_address.voter_ballot_saved_id)
+        voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_voter_id(
+            voter_id, voter_address_google_civic_election_id)
         if voter_ballot_saved_results['voter_ballot_saved_found']:
             voter_ballot_saved = voter_ballot_saved_results['voter_ballot_saved']
             results = {
@@ -348,24 +351,25 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
         else:
             # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
             pass
-    elif voter_address.text_for_map_search:
-        # If we are here, check to see if the voter_ballot_saved entry exists but was not
-        # linked properly in the VoterAddress table
-        voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_address_text(
-            voter_id, voter_address.text_for_map_search)
-        if voter_ballot_saved_results['voter_ballot_saved_found']:
-            voter_ballot_saved = voter_ballot_saved_results['voter_ballot_saved']
-            results = {
-                'status':                   "VOTER_BALLOT_SAVED_FOUND_FROM_ADDRESS_TEXT",
-                'success':                  True,
-                'google_civic_election_id': voter_ballot_saved.google_civic_election_id,
-                'voter_ballot_saved_found': True,
-                'voter_ballot_saved':       voter_ballot_saved
-            }
-            return results
-        else:
-            # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
-            pass
+    # NOTE: We don't want to look up voter_ballot_saved by address text, because it might be a test election
+    # elif voter_address.text_for_map_search:
+    #     # If we are here, check to see if the voter_ballot_saved entry exists but was not
+    #     # linked properly in the VoterAddress table
+    #     voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_address_text(
+    #         voter_id, voter_address.text_for_map_search)
+    #     if voter_ballot_saved_results['voter_ballot_saved_found']:
+    #         voter_ballot_saved = voter_ballot_saved_results['voter_ballot_saved']
+    #         results = {
+    #             'status':                   "VOTER_BALLOT_SAVED_FOUND_FROM_ADDRESS_TEXT",
+    #             'success':                  True,
+    #             'google_civic_election_id': voter_ballot_saved.google_civic_election_id,
+    #             'voter_ballot_saved_found': True,
+    #             'voter_ballot_saved':       voter_ballot_saved
+    #         }
+    #         return results
+    #     else:
+    #         # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
+    #         pass
 
     error_results = {
         'status':                   "VOTER_BALLOT_SAVED_NOT_FOUND_FROM_EXISTING_DATA",
