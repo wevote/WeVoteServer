@@ -239,7 +239,7 @@ def get_voter_device_id(request, generate_if_no_value=False):
     """
     This function retrieves the voter_device_id from the GET values coming from a client
     :param request:
-    :param generate_if_no_cookie:
+    :param generate_if_no_value:
     :return:
     """
     # First check the headers

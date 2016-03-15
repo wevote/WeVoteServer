@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
-    organization_stop_following, voter_count, voter_create
+    organization_stop_following, voter_count, voter_create_for_api
 from ballot.controllers import ballot_item_options_retrieve_for_api, voter_ballot_items_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from django.http import HttpResponse
@@ -838,7 +838,7 @@ def voter_count_view(request):
 
 def voter_create_view(request):
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    return voter_create(voter_device_id)
+    return voter_create_for_api(voter_device_id)
 
 
 def voter_guide_possibility_retrieve_view(request):

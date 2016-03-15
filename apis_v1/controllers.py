@@ -10,7 +10,7 @@ from organization.models import Organization
 from organization.controllers import organization_follow_all
 from voter.models import fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterDeviceLinkManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid
+from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -92,10 +92,15 @@ def voter_count():
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_create(voter_device_id):
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+def voter_create_for_api(voter_device_id):
+    # If a voter_device_id isn't passed in, automatically create a new voter_device_id
+    if not positive_value_exists(voter_device_id):
+        voter_device_id = generate_voter_device_id()
+    else:
+        # If a voter_device_id is passed in that isn't valid, we want to throw an error
+        results = is_voter_device_id_valid(voter_device_id)
+        if results['success']:
+            return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     voter_id = 0
     # Make sure a voter record hasn't already been created for this
@@ -108,7 +113,7 @@ def voter_create(voter_device_id):
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    # Create a new voter and return the id
+    # Create a new voter and return the voter_device_id
     voter_manager = VoterManager()
     results = voter_manager.create_voter()
 
@@ -131,7 +136,7 @@ def voter_create(voter_device_id):
             'status': "VOTER_CREATED",
             'success': True,
             'voter_device_id': voter_device_id,
-            'voter_id': voter_id,  # We may want to remove this after initial testing
+            'voter_id': voter_id,  # We want to remove this -- the front end should not be using the voter_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:

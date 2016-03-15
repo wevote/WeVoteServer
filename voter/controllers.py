@@ -2,9 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, VoterManager
+from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, \
+    VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -172,27 +173,64 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
     :param voter_device_id:
     :return:
     """
-    device_id_results = is_voter_device_id_valid(voter_device_id)
-    if not device_id_results['success']:
-        json_data = {
-                'status': device_id_results['status'],
-                'success': False,
-                'voter_device_id': voter_device_id,
-            }
-        return json_data
-
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return json_data
-
-    # At this point, we have a valid voter_id
-
     voter_manager = VoterManager()
+    voter_id = 0
+    voter_created = False
+
+    if positive_value_exists(voter_device_id):
+        # If a voter_device_id is passed in that isn't valid, we want to throw an error
+        device_id_results = is_voter_device_id_valid(voter_device_id)
+        if not device_id_results['success']:
+            json_data = {
+                    'status':           device_id_results['status'],
+                    'success':          False,
+                    'voter_device_id':  voter_device_id,
+                    'voter_created':    False,
+                    'voter_found':      False,
+                }
+            return json_data
+
+        voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+        if not positive_value_exists(voter_id):
+            json_data = {
+                'status':           "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+                'success':          False,
+                'voter_device_id':  voter_device_id,
+                'voter_created':    False,
+                'voter_found':      False,
+            }
+            return json_data
+    else:
+        # If a voter_device_id isn't passed in, automatically create a new voter_device_id and voter
+        voter_device_id = generate_voter_device_id()
+        results = voter_manager.create_voter()
+
+        if results['voter_created']:
+            voter = results['voter']
+
+            # Now save the voter_device_link
+            voter_device_link_manager = VoterDeviceLinkManager()
+            results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter.id)
+
+            if results['voter_device_link_created']:
+                voter_device_link = results['voter_device_link']
+                voter_id_found = True if voter_device_link.voter_id > 0 else False
+
+                if voter_id_found:
+                    voter_id = voter_device_link.voter_id
+                    voter_created = True
+
+        if not positive_value_exists(voter_id):
+            json_data = {
+                'status':           "VOTER_NOT_FOUND_AFTER_BEING_CREATED",
+                'success':          False,
+                'voter_device_id':  voter_device_id,
+                'voter_created':    False,
+                'voter_found':      False,
+            }
+            return json_data
+
+    # At this point, we should have a valid voter_id
     results = voter_manager.retrieve_voter_by_id(voter_id)
     if results['voter_found']:
         voter = results['voter']
@@ -202,6 +240,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'status':                           status,
             'success':                          True,
             'voter_device_id':                  voter_device_id,
+            'voter_created':                    voter_created,
             'voter_found':                      True,
             'we_vote_id':                       voter.we_vote_id,
             'facebook_id':                      voter.facebook_id,
@@ -224,6 +263,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'status':                           status,
             'success':                          False,
             'voter_device_id':                  voter_device_id,
+            'voter_created':                    False,
             'voter_found':                      False,
             'we_vote_id':                       '',
             'facebook_id':                      '',

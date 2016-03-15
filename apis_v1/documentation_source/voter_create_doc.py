@@ -13,19 +13,15 @@ def voter_create_doc_template_values(url_root):
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
+    ]
+    optional_query_parameter_list = [
         {
             'name':         'voter_device_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier (from cookie - not URL variable) linked to '
-                            'a voter record on the server',
+                            'a voter record on the server. If you do not pass in a voter_device_id, generate one, link'
+                            'it to the newly created voter, and return it.',
         },
-    ]
-    optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
     ]
 
     potential_status_codes_list = [
