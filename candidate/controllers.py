@@ -311,6 +311,11 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
 
 
 def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
+    vote_smart_candidate_exists = False
+    vote_smart_candidate_just_retrieved = False
+    vote_smart_candidate_photo_exists = False
+    vote_smart_candidate_photo_just_retrieved = False
+
     # Has this candidate already been linked to a Vote Smart candidate?
     candidate_retrieve_results = retrieve_and_match_candidate_from_vote_smart(we_vote_candidate, force_retrieve)
 
@@ -321,14 +326,25 @@ def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
         photo_retrieve_results = retrieve_candidate_photo_from_vote_smart(we_vote_candidate)
         status = photo_retrieve_results['status']
         success = photo_retrieve_results['success']
+        vote_smart_candidate_exists = True
+        vote_smart_candidate_just_retrieved = candidate_retrieve_results['vote_smart_candidate_just_retrieved']
+
+        if success:
+            vote_smart_candidate_photo_exists = photo_retrieve_results['vote_smart_candidate_photo_exists']
+            vote_smart_candidate_photo_just_retrieved = \
+                photo_retrieve_results['vote_smart_candidate_photo_just_retrieved']
     else:
         status = candidate_retrieve_results['status'] + ' '
         status += 'RETRIEVE_CANDIDATE_PHOTOS_NO_CANDIDATE_MATCH'
         success = False
 
     results = {
-        'success':  success,
-        'status':   status
+        'success':                                      success,
+        'status':                                       status,
+        'vote_smart_candidate_exists':                  vote_smart_candidate_exists,
+        'vote_smart_candidate_just_retrieved':          vote_smart_candidate_just_retrieved,
+        'vote_smart_candidate_photo_just_retrieved':    vote_smart_candidate_photo_just_retrieved,
+        'vote_smart_candidate_photo_exists':            vote_smart_candidate_photo_exists,
     }
 
     return results

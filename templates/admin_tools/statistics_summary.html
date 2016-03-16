@@ -16,10 +16,25 @@
             <td>Date</td>
             <td># of Calls</td>
         </tr>
-       {% for daily_summary in daily_summary_list %}
+       {% for google_civic_daily_summary in google_civic_daily_summary_list %}
         <tr>
-            <td>{{ daily_summary.date_string }}</td>
-            <td>{{ daily_summary.count }}</td>
+            <td>{{ google_civic_daily_summary.date_string }}</td>
+            <td>{{ google_civic_daily_summary.count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+<h4>Vote Smart API Calls</h4>
+<p>We track the number of calls to the Vote Smart API so we don't overwhelm their servers.</p>
+    <table border="1" cellpadding="5" cellspacing="1">
+         <tr>
+            <td>Date</td>
+            <td># of Calls</td>
+        </tr>
+       {% for vote_smart_daily_summary in vote_smart_daily_summary_list %}
+        <tr>
+            <td>{{ vote_smart_daily_summary.date_string }}</td>
+            <td>{{ vote_smart_daily_summary.count }}</td>
         </tr>
         {% endfor %}
     </table>

@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.shortcuts import render
 from election.controllers import elections_import_from_sample_file
 from import_export_google_civic.models import GoogleCivicApiCounterManager
+from import_export_vote_smart.models import VoteSmartApiCounterManager
 from office.controllers import offices_import_from_sample_file
 from organization.controllers import organizations_import_from_sample_file
 from polling_location.controllers import import_and_save_all_polling_locations_data
@@ -169,9 +170,12 @@ def statistics_summary_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-    daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
+    google_civic_daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
+    vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+    vote_smart_daily_summary_list = vote_smart_api_counter_manager.retrieve_daily_summaries()
     template_values = {
-        'daily_summary_list':   daily_summary_list,
+        'google_civic_daily_summary_list':  google_civic_daily_summary_list,
+        'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
     }
     response = render(request, 'admin_tools/statistics_summary.html', template_values)
 

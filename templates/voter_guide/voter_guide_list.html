@@ -8,24 +8,25 @@
 
 <h1>Voter Guides</h1>
 
-    <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_list' %}">
-        {% csrf_token %}
-{% if election_list %}
-    <select id="google_civic_election_id" name="google_civic_election_id">
-    <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
-        -- Filter by Election --</option>
-{% for election in election_list %}
-    <option value="{{ election.google_civic_election_id }}"
-            {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
-        {{ election.election_name }} - {{ election.election_day_text }}</option>
-{% endfor %}
-    </select>
-    </form>
+    <p>Voter guides cannot currently be filtered by google_civic_election_id.</p>
 
-
-{% else %}
-    <p>(no elections found)</p>
-{% endif %}{# End of if election_list #}
+{#    <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_list' %}">#}
+{#        {% csrf_token %}#}
+{#{% if election_list %}#}
+{#    <select id="google_civic_election_id" name="google_civic_election_id">#}
+{#    <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>#}
+{#        -- Filter by Election --</option>#}
+{#{% for election in election_list %}#}
+{#    <option value="{{ election.google_civic_election_id }}"#}
+{#            {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>#}
+{#        {{ election.election_name }} - {{ election.election_day_text }}</option>#}
+{#{% endfor %}#}
+{#    </select>#}
+{#    </form>#}
+{##}
+{#{% else %}#}
+{#    <p>(no elections found)</p>#}
+{#{% endif %}{# End of if election_list #}
 <p></p>
 {% if voter_guide_list %}
     <table border="1" cellpadding="5" cellspacing="5">

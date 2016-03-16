@@ -7,7 +7,7 @@ from .controllers import retrieve_and_match_candidate_from_vote_smart, \
     retrieve_vote_smart_candidate_bio_into_local_db, \
     retrieve_vote_smart_position_categories_into_local_db, \
     retrieve_vote_smart_officials_into_local_db, retrieve_and_save_vote_smart_states, \
-    retrieve_vote_smart_ratings_by_candidate_into_local_db, retrieve_vote_smart_ratings_by_group_into_local_db, \
+    retrieve_vote_smart_ratings_for_candidate_into_local_db, retrieve_vote_smart_ratings_by_group_into_local_db, \
     retrieve_vote_smart_special_interest_group_into_local_db, \
     retrieve_vote_smart_special_interest_groups_into_local_db, \
     transfer_vote_smart_special_interest_groups_to_we_vote_organizations, \
@@ -37,7 +37,7 @@ def import_one_candidate_ratings_view(request, vote_smart_candidate_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    one_group_results = retrieve_vote_smart_ratings_by_candidate_into_local_db(vote_smart_candidate_id)
+    one_group_results = retrieve_vote_smart_ratings_for_candidate_into_local_db(vote_smart_candidate_id)
 
     if one_group_results['success']:
         messages.add_message(request, messages.INFO, "Ratings for one candidate retrieved. ")
@@ -376,7 +376,7 @@ def retrieve_positions_from_vote_smart_for_election_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     try:
         candidate_list = CandidateCampaign.objects.all()
@@ -384,16 +384,37 @@ def retrieve_positions_from_vote_smart_for_election_view(request):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
         candidate_list = candidate_list.order_by('candidate_name')[:500]
     except CandidateCampaign.DoesNotExist:
-        messages.add_message(request, messages.INFO, "Could not find any candidates.")
-        pass
+        messages.add_message(request, messages.INFO, "Could not find any candidates for google_civic_election_id: "
+                                                     "{google_civic_election_id}."
+                                                     "".format(google_civic_election_id=google_civic_election_id))
+        return HttpResponseRedirect(reverse('position:position_list', args=()))
 
+    vote_smart_candidates_that_exist = 0
+    vote_smart_candidates_created = 0
+    vote_smart_candidates_not_found = 0
+    we_vote_organizations_created = 0
+    organization_positions_that_exist = 0
+    organization_positions_created = 0
     # Do a first pass through where we get positions for candidates for whom we already have an id
     for we_vote_candidate in candidate_list:
         if we_vote_candidate.vote_smart_id:
-            retrieve_vote_smart_ratings_by_candidate_into_local_db(we_vote_candidate.vote_smart_id)
-            transfer_vote_smart_ratings_to_positions_for_candidate(we_vote_candidate.id)
+            retrieve_results = retrieve_vote_smart_ratings_for_candidate_into_local_db(we_vote_candidate.vote_smart_id)
+            transfer_results = transfer_vote_smart_ratings_to_positions_for_candidate(we_vote_candidate.id)
 
-    # Then we cycle through again, and if we find a Vote Smart id, we get positions for that candidate
+            if retrieve_results['rating_one_candidate_exists']:
+                vote_smart_candidates_that_exist += 1
+            if retrieve_results['rating_one_candidate_created']:
+                vote_smart_candidates_created += 1
+
+            if transfer_results['we_vote_organizations_created']:
+                we_vote_organizations_created += 1
+            if transfer_results['organization_positions_that_exist']:
+                organization_positions_that_exist += 1
+            if transfer_results['organization_positions_created']:
+                organization_positions_created += 1
+
+    # Then we cycle through again, reach out to Vote Smart to match the candidate if we did not have a vote_smart_id,
+    # and if we find a new Vote Smart id, we get positions for that candidate
     for we_vote_candidate in candidate_list:
         if not we_vote_candidate.vote_smart_id:
             force_retrieve = False
@@ -401,11 +422,42 @@ def retrieve_positions_from_vote_smart_for_election_view(request):
             if results['success'] and results['we_vote_candidate_id']:
                 we_vote_candidate = results['we_vote_candidate']
                 if we_vote_candidate.vote_smart_id:
-                    retrieve_vote_smart_ratings_by_candidate_into_local_db(we_vote_candidate.vote_smart_id)
-                    transfer_vote_smart_ratings_to_positions_for_candidate(we_vote_candidate.id)
+                    retrieve_results = retrieve_vote_smart_ratings_for_candidate_into_local_db(
+                        we_vote_candidate.vote_smart_id)
+                    transfer_results = transfer_vote_smart_ratings_to_positions_for_candidate(we_vote_candidate.id)
+
+                    if retrieve_results['rating_one_candidate_exists']:
+                        vote_smart_candidates_that_exist += 1
+                    if retrieve_results['rating_one_candidate_created']:
+                        vote_smart_candidates_created += 1
+
+                    if transfer_results['we_vote_organizations_created']:
+                        we_vote_organizations_created += 1
+                    if transfer_results['organization_positions_that_exist']:
+                        organization_positions_that_exist += 1
+                    if transfer_results['organization_positions_created']:
+                        organization_positions_created += 1
+            else:
+                vote_smart_candidates_not_found += 1
+
+    message = "{vote_smart_candidates_that_exist} candidates from Vote Smart looked at, " \
+              "{vote_smart_candidates_created} new candidates cached from Vote Smart, " \
+              "{vote_smart_candidates_not_found} candidates not found in Vote Smart, " \
+              "{we_vote_organizations_created} organizations created in We Vote, " \
+              "{organization_positions_that_exist} positions from Vote Smart already exist locally, and " \
+              "{organization_positions_created} positions from Vote Smart just created locally.".\
+        format(vote_smart_candidates_that_exist=vote_smart_candidates_that_exist,
+               vote_smart_candidates_created=vote_smart_candidates_created,
+               vote_smart_candidates_not_found=vote_smart_candidates_not_found,
+               we_vote_organizations_created=we_vote_organizations_created,
+               organization_positions_that_exist=organization_positions_that_exist,
+               organization_positions_created=organization_positions_created)
+
+    print_to_log(logger, exception_message_optional=message)
+    messages.add_message(request, messages.INFO, message)
 
     return HttpResponseRedirect(reverse('position:position_list', args=()) +
-                                "?google_civic_election_id=" + google_civic_election_id)
+                                "?google_civic_election_id=" + str(google_civic_election_id))
 
 
 @login_required

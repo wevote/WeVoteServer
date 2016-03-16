@@ -66,6 +66,7 @@ def candidate_list_view(request):
 
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    candidate_list = []
 
     try:
         candidate_list = CandidateCampaign.objects.all()
@@ -133,7 +134,6 @@ def candidate_edit_view(request, candidate_id):
             rating_list = []
 
         # Working with We Vote Positions
-        candidate_position_list_found = False
         try:
             candidate_position_list = PositionEntered.objects.order_by('stance')
             candidate_position_list = candidate_position_list.filter(candidate_campaign_id=candidate_id)
@@ -241,6 +241,7 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    candidate_list = []
     google_civic_election_id = convert_to_int(election_id)
 
     # We only want to process if a google_civic_election_id comes in
@@ -255,14 +256,44 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
     except CandidateCampaign.DoesNotExist:
         pass
 
-    display_messages = False
+    display_messages_per_candidate = False
     force_retrieve = False
+    num_candidates_reviewed = 0
+    num_with_vote_smart_ids = 0
+    num_candidates_just_retrieved = 0
+
+    num_with_vote_smart_photos = 0
+    num_candidate_photos_just_retrieved = 0
     # Loop through all of the candidates in this election
     for we_vote_candidate in candidate_list:
+        num_candidates_reviewed += 1
         retrieve_candidate_results = retrieve_candidate_photos(we_vote_candidate, force_retrieve)
+        if retrieve_candidate_results['vote_smart_candidate_exists']:
+            num_with_vote_smart_ids += 1
+        if retrieve_candidate_results['vote_smart_candidate_just_retrieved']:
+            num_candidates_just_retrieved += 1
 
-        if retrieve_candidate_results['status'] and display_messages:
+        if retrieve_candidate_results['vote_smart_candidate_photo_exists']:
+            num_with_vote_smart_photos += 1
+        if retrieve_candidate_results['vote_smart_candidate_photo_just_retrieved']:
+            num_candidate_photos_just_retrieved += 1
+
+        if retrieve_candidate_results['status'] and display_messages_per_candidate:
             messages.add_message(request, messages.INFO, retrieve_candidate_results['status'])
+
+    message = "{num_candidates_reviewed} candidates reviewed, " \
+              "{num_with_vote_smart_ids} with Vote Smart Ids, " \
+              "{num_candidates_just_retrieved} candidates just retrieved, " \
+              "{num_with_vote_smart_photos} with Vote Smart Photos, and " \
+              "{num_candidate_photos_just_retrieved} photos just retrieved.".\
+        format(num_candidates_reviewed=num_candidates_reviewed,
+               num_with_vote_smart_ids=num_with_vote_smart_ids,
+               num_candidates_just_retrieved=num_candidates_just_retrieved,
+               num_with_vote_smart_photos=num_with_vote_smart_photos,
+               num_candidate_photos_just_retrieved=num_candidate_photos_just_retrieved)
+
+    print_to_log(logger, exception_message_optional=message)
+    messages.add_message(request, messages.INFO, message)
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}".format(
         var=google_civic_election_id))

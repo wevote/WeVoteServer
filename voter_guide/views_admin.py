@@ -92,6 +92,84 @@ def generate_voter_guides_view(request):
 
 
 @login_required
+def generate_voter_guides_for_one_election_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR,
+                             'Cannot generate voter guides for one election: google_civic_election_id missing')
+        return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()))
+
+    voter_guide_stored_for_this_organization = []
+    # voter_guide_stored_for_this_public_figure = []
+    # voter_guide_stored_for_this_voter = []
+
+    voter_guide_created_count = 0
+    voter_guide_updated_count = 0
+
+    # What elections do we want to generate voter_guides for?
+    election_list = Election.objects.all()
+
+    # Cycle through organizations
+    organization_list = Organization.objects.all()
+    for organization in organization_list:
+        # Cycle through elections. Find out position count for this org for each election.
+        # If > 0, then create a voter_guide entry
+        if organization.id not in voter_guide_stored_for_this_organization:
+            # organization hasn't had voter guides stored yet in this run through.
+            # Search for positions with this organization_id and google_civic_election_id
+            positions_count = PositionEntered.objects.filter(
+                organization_id=organization.id,
+                google_civic_election_id=google_civic_election_id).count()
+            if positions_count > 0:
+                voter_guide_manager = VoterGuideManager()
+                results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                    organization.we_vote_id, google_civic_election_id)
+                if results['success']:
+                    if results['new_voter_guide_created']:
+                        voter_guide_created_count += 1
+                    else:
+                        voter_guide_updated_count += 1
+
+            for time_span in TIME_SPAN_LIST:
+                # organization hasn't had voter guides stored yet.
+                # Search for positions with this organization_id and time_span
+                positions_count = PositionEntered.objects.filter(
+                    organization_id=organization.id,
+                    vote_smart_time_span=time_span).count()
+                if positions_count > 0:
+                    voter_guide_manager = VoterGuideManager()
+                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
+                        organization.we_vote_id, time_span)
+                    if results['success']:
+                        if results['new_voter_guide_created']:
+                            voter_guide_created_count += 1
+                        else:
+                            voter_guide_updated_count += 1
+
+            voter_guide_stored_for_this_organization.append(organization.id)
+
+    # Cycle through public figures
+    # voter_guide_manager = VoterGuideManager()
+    # voter_guide_manager.update_or_create_public_figure_voter_guide(1234, 'wv02')
+
+    # Cycle through voters
+    # voter_guide_manager = VoterGuideManager()
+    # voter_guide_manager.update_or_create_voter_voter_guide(1234, 'wv03')
+
+    messages.add_message(request, messages.INFO,
+                         '{voter_guide_created_count} voter guides created, '
+                         '{voter_guide_updated_count} updated.'.format(
+                             voter_guide_created_count=voter_guide_created_count,
+                             voter_guide_updated_count=voter_guide_updated_count,
+                         ))
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()))
+
+
+@login_required
 def voter_guide_list_view(request):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
