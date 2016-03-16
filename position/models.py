@@ -252,7 +252,6 @@ class PositionEntered(models.Model):
             logger.error("position.candidate_campaign Found multiple")
             return
         except CandidateCampaign.DoesNotExist:
-            logger.error("position.candidate_campaign did not find")
             return
         return candidate_campaign
 
@@ -266,7 +265,6 @@ class PositionEntered(models.Model):
             logger.error("position.election Found multiple")
             return
         except Election.DoesNotExist:
-            logger.error("position.election did not find")
             return
         return election
 
@@ -280,7 +278,6 @@ class PositionEntered(models.Model):
             logger.error("position.organization Found multiple")
             return
         except Organization.DoesNotExist:
-            logger.error("position.organization did not find")
             return
         return organization
 

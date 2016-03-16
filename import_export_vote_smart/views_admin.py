@@ -440,13 +440,15 @@ def retrieve_positions_from_vote_smart_for_election_view(request):
             else:
                 vote_smart_candidates_not_found += 1
 
-    message = "{vote_smart_candidates_that_exist} candidates from Vote Smart looked at, " \
+    message = "Google Civic Election ID: {election_id}, " \
+              "{vote_smart_candidates_that_exist} candidates from Vote Smart looked at, " \
               "{vote_smart_candidates_created} new candidates cached from Vote Smart, " \
               "{vote_smart_candidates_not_found} candidates not found in Vote Smart, " \
               "{we_vote_organizations_created} organizations created in We Vote, " \
               "{organization_positions_that_exist} positions from Vote Smart already exist locally, and " \
               "{organization_positions_created} positions from Vote Smart just created locally.".\
-        format(vote_smart_candidates_that_exist=vote_smart_candidates_that_exist,
+        format(election_id=google_civic_election_id,
+               vote_smart_candidates_that_exist=vote_smart_candidates_that_exist,
                vote_smart_candidates_created=vote_smart_candidates_created,
                vote_smart_candidates_not_found=vote_smart_candidates_not_found,
                we_vote_organizations_created=we_vote_organizations_created,

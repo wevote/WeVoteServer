@@ -217,37 +217,43 @@ def position_support_count_for_ballot_item_for_api(voter_device_id,
                                    measure_id, measure_we_vote_id, stance_we_are_looking_for)
 
 
-def position_public_oppose_count_for_ballot_item_for_api(candidate_id, measure_id):
+def position_public_oppose_count_for_ballot_item_for_api(candidate_id, candidate_we_vote_id,
+                                                         measure_id, measure_we_vote_id):
     stance_we_are_looking_for = OPPOSE
-    return positions_public_count_for_api(candidate_id, measure_id, stance_we_are_looking_for)
+    return positions_public_count_for_api(candidate_id, candidate_we_vote_id,
+                                          measure_id, measure_we_vote_id, stance_we_are_looking_for)
 
 
-def position_public_support_count_for_ballot_item_for_api(candidate_id, measure_id):
+def position_public_support_count_for_ballot_item_for_api(candidate_id, candidate_we_vote_id,
+                                                          measure_id, measure_we_vote_id):
     stance_we_are_looking_for = SUPPORT
-    return positions_public_count_for_api(candidate_id, measure_id, stance_we_are_looking_for)
+    return positions_public_count_for_api(candidate_id, candidate_we_vote_id,
+                                          measure_id, measure_we_vote_id, stance_we_are_looking_for)
 
 
-def positions_public_count_for_api(candidate_id, measure_id, stance_we_are_looking_for):
-    if positive_value_exists(candidate_id):
-        results = positions_public_count_for_candidate_campaign(candidate_id, stance_we_are_looking_for)
+def positions_public_count_for_api(candidate_id, candidate_we_vote_id, measure_id, measure_we_vote_id,
+                                   stance_we_are_looking_for):
+    if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
+        results = positions_public_count_for_candidate_campaign(candidate_id, candidate_we_vote_id,
+                                                                stance_we_are_looking_for)
         json_data = results['json_data']
         return HttpResponse(json.dumps(json_data), content_type='application/json')
-    elif positive_value_exists(measure_id):
-        results = positions_public_count_for_contest_measure(measure_id, stance_we_are_looking_for)
+    elif positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
+        results = positions_public_count_for_contest_measure(measure_id, measure_we_vote_id,
+                                                             stance_we_are_looking_for)
         json_data = results['json_data']
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
-        status = 'UNABLE_TO_RETRIEVE-CANDIDATE_ID_AND_MEASURE_ID_MISSING'
-        success = False
+        pass
 
     json_data = {
-        'status': status,
-        'success': success,
+        'status': 'UNABLE_TO_RETRIEVE-CANDIDATE_ID_AND_MEASURE_ID_MISSING',
+        'success': False,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def positions_public_count_for_candidate_campaign(candidate_id, stance_we_are_looking_for):
+def positions_public_count_for_candidate_campaign(candidate_id, candidate_we_vote_id, stance_we_are_looking_for):
     """
     We want to return a JSON file with the number of orgs and public figures who support
     this particular candidate's campaign
@@ -256,17 +262,28 @@ def positions_public_count_for_candidate_campaign(candidate_id, stance_we_are_lo
     #  application layer
 
     position_list_manager = PositionListManager()
-    candidate_we_vote_id = ''
     all_positions_count_for_candidate_campaign = \
         position_list_manager.retrieve_public_positions_count_for_candidate_campaign(
             candidate_id,
             candidate_we_vote_id,
             stance_we_are_looking_for)
 
+    if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
+        candidate_campaign_manager = CandidateCampaignManager()
+        # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
+        if positive_value_exists(candidate_id):
+            candidate_we_vote_id = candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_id)
+        elif positive_value_exists(candidate_we_vote_id):
+            candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+
     json_data = {
-        'status': 'SUCCESSFUL_RETRIEVE_OF_PUBLIC_POSITION_COUNT_RE_CANDIDATE',
-        'success': True,
-        'count': all_positions_count_for_candidate_campaign,
+        'status':                   'SUCCESSFUL_RETRIEVE_OF_PUBLIC_POSITION_COUNT_RE_CANDIDATE',
+        'success':                  True,
+        'count':                    all_positions_count_for_candidate_campaign,
+        'ballot_item_id':           convert_to_int(candidate_id),
+        'ballot_item_we_vote_id':   candidate_we_vote_id,
+        'kind_of_ballot_item':      CANDIDATE,
+
     }
     results = {
         'json_data': json_data,
@@ -274,7 +291,7 @@ def positions_public_count_for_candidate_campaign(candidate_id, stance_we_are_lo
     return results
 
 
-def positions_public_count_for_contest_measure(measure_id, stance_we_are_looking_for):
+def positions_public_count_for_contest_measure(measure_id, measure_we_vote_id, stance_we_are_looking_for):
     """
     We want to return a JSON file with the number of orgs and public figures who support
     this particular measure
@@ -283,14 +300,25 @@ def positions_public_count_for_contest_measure(measure_id, stance_we_are_looking
     #  application layer
 
     position_list_manager = PositionListManager()
-    measure_we_vote_id = ''
     all_positions_count_for_contest_measure = \
         position_list_manager.retrieve_public_positions_count_for_contest_measure(
             measure_id, measure_we_vote_id, stance_we_are_looking_for)
+
+    if positive_value_exists(measure_id) or positive_value_exists(measure_we_vote_id):
+        contest_measure_manager = ContestMeasureManager()
+        # Since we can take in either measure_id or measure_we_vote_id, we need to retrieve the value we don't have
+        if positive_value_exists(measure_id):
+            measure_we_vote_id = contest_measure_manager.fetch_contest_measure_we_vote_id_from_id(measure_id)
+        elif positive_value_exists(measure_we_vote_id):
+            measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
+
     json_data = {
-        'status': 'SUCCESSFUL_RETRIEVE_OF_PUBLIC_POSITION_COUNT_FOR_CONTEST_MEASURE',
-        'success': True,
-        'count': all_positions_count_for_contest_measure,
+        'status':                   'SUCCESSFUL_RETRIEVE_OF_PUBLIC_POSITION_COUNT_FOR_CONTEST_MEASURE',
+        'success':                  True,
+        'count':                    all_positions_count_for_contest_measure,
+        'ballot_item_id':           convert_to_int(measure_id),
+        'ballot_item_we_vote_id':   measure_we_vote_id,
+        'kind_of_ballot_item':      MEASURE,
     }
     results = {
         'json_data': json_data,

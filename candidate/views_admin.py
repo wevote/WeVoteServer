@@ -281,12 +281,14 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
         if retrieve_candidate_results['status'] and display_messages_per_candidate:
             messages.add_message(request, messages.INFO, retrieve_candidate_results['status'])
 
-    message = "{num_candidates_reviewed} candidates reviewed, " \
+    message = "Google Civic Election ID: {election_id}, " \
+              "{num_candidates_reviewed} candidates reviewed, " \
               "{num_with_vote_smart_ids} with Vote Smart Ids, " \
               "{num_candidates_just_retrieved} candidates just retrieved, " \
               "{num_with_vote_smart_photos} with Vote Smart Photos, and " \
               "{num_candidate_photos_just_retrieved} photos just retrieved.".\
-        format(num_candidates_reviewed=num_candidates_reviewed,
+        format(election_id=google_civic_election_id,
+               num_candidates_reviewed=num_candidates_reviewed,
                num_with_vote_smart_ids=num_with_vote_smart_ids,
                num_candidates_just_retrieved=num_candidates_just_retrieved,
                num_with_vote_smart_photos=num_with_vote_smart_photos,

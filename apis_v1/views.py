@@ -472,52 +472,66 @@ def position_support_count_for_ballot_item_view(request):
         measure_we_vote_id = None
     return position_support_count_for_ballot_item_for_api(
         voter_device_id=voter_device_id,
-        candidate_id=candidate_id, candidate_we_vote_id= candidate_we_vote_id,
+        candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def position_public_oppose_count_for_ballot_item_view(request):
     """
-    Retrieve the number of orgs and friends that oppose this (positionOpposeCountForBallotItem)
+    Retrieve the number of orgs and public figures that publicly oppose this (positionPublicOpposeCountForBallotItem)
     :param request:
     :return:
     """
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = 0
-    return position_public_oppose_count_for_ballot_item_for_api(candidate_id=candidate_id,
-                                                                measure_id=measure_id)
+        measure_we_vote_id = None
+    return position_public_oppose_count_for_ballot_item_for_api(
+        candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def position_public_support_count_for_ballot_item_view(request):
     """
-    Retrieve the number of orgs and friends that support this (positionSupportCountForBallotItem)
+    Retrieve the number of orgs and public figures that publicly support this (positionPublicSupportCountForBallotItem)
     :param request:
     :return:
     """
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
-    # ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
+        candidate_we_vote_id = ballot_item_we_vote_id
         measure_id = 0
+        measure_we_vote_id = None
     elif kind_of_ballot_item == MEASURE:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = ballot_item_id
+        measure_we_vote_id = ballot_item_we_vote_id
     else:
         candidate_id = 0
+        candidate_we_vote_id = None
         measure_id = 0
-    return position_public_support_count_for_ballot_item_for_api(candidate_id=candidate_id,
-                                                                 measure_id=measure_id)
+        measure_we_vote_id = None
+    return position_public_support_count_for_ballot_item_for_api(
+        candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+        measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
 def quick_info_retrieve_view(request):
