@@ -175,6 +175,15 @@ def choose_election_and_prepare_ballot_data(voter_device_link, google_civic_elec
         # Return voter_ballot_saved
         return results
 
+    results = {
+        'status':                   "BALLOT_NOT_FOUND_OR_GENERATED",
+        'success':                  False,
+        'google_civic_election_id': google_civic_election_id,
+        'voter_ballot_saved_found': False,
+        'voter_ballot_saved':       None,
+    }
+    return results
+
 
 def generate_ballot_data(voter_device_link, voter_address):
     voter_device_id = voter_device_link.voter_device_id

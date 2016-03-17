@@ -1007,15 +1007,20 @@ class VoterBallotSavedManager(models.Model):
         voter_ballot_saved_found = False
         try:
             if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
-                voter_ballot_saved = VoterBallotSaved.objects.create(
+                voter_ballot_saved, created = VoterBallotSaved.objects.update_or_create(
                     voter_id=voter_id,
                     google_civic_election_id=google_civic_election_id,
-                    election_date=election_date_text,
-                    election_description_text=election_description_text,
-                    original_text_for_map_search=original_text_for_map_search,
-                    substituted_address_nearby=substituted_address_nearby,
-                    is_from_substituted_address=is_from_substituted_address,
-                    is_from_test_ballot=is_from_test_ballot)
+                    defaults={
+                        'voter_id': voter_id,
+                        'google_civic_election_id': google_civic_election_id,
+                        'election_date': election_date_text,
+                        'election_description_text': election_description_text,
+                        'original_text_for_map_search': original_text_for_map_search,
+                        'substituted_address_nearby': substituted_address_nearby,
+                        'is_from_substituted_address': is_from_substituted_address,
+                        'is_from_test_ballot': is_from_test_ballot
+                    }
+                )
                 voter_ballot_saved_found = voter_ballot_saved.id
                 status = "BALLOT_SAVED"
                 success = True
