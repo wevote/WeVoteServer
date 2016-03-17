@@ -32,12 +32,13 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
             'status':                       status,
             'success':                      False,
             'voter_device_id':              voter_device_id,
+            'ballot_found':                 False,
             'ballot_item_list':             [],
             'google_civic_election_id':     google_civic_election_id,
             'text_for_map_search':          '',
             'substituted_address_nearby':   '',
             'ballot_caveat':                '',
-            'is_from_substituted_address':     False,
+            'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
         }
         return error_json_data
@@ -51,12 +52,13 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
             'status':                       status,
             'success':                      False,
             'voter_device_id':              voter_device_id,
+            'ballot_found':                 False,
             'ballot_item_list':             [],
             'google_civic_election_id':     google_civic_election_id,
             'text_for_map_search':          '',
             'substituted_address_nearby':   '',
             'ballot_caveat':                '',
-            'is_from_substituted_address':     False,
+            'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
         }
         return error_json_data
@@ -65,12 +67,13 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
     voter_address_id = 0
     address_type = BALLOT_ADDRESS
     voter_address_results = voter_address_manager.retrieve_address(voter_address_id, voter_id, address_type)
+    status += " " + voter_address_results['status']
     if not positive_value_exists(voter_address_results['voter_address_has_value']):
-        status += " " + voter_address_results['status']
         error_json_data = {
             'status':                       status,
             'success':                      voter_address_results['success'],
             'voter_device_id':              voter_device_id,
+            'ballot_found':                 False,
             'ballot_item_list':             [],
             'google_civic_election_id':     0,
             'text_for_map_search':          '',
@@ -84,18 +87,19 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
     voter_address = voter_address_results['voter_address']
 
     results = choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id, voter_address)
+    status += " " + results['status']
     if not results['voter_ballot_saved_found']:
-        status += " " + results['status']
         error_json_data = {
             'status':                       status,
-            'success':                      False,
+            'success':                      True,
             'voter_device_id':              voter_device_id,
+            'ballot_found':                 False,
             'ballot_item_list':             [],
             'google_civic_election_id':     0,
-            'text_for_map_search':          '',
+            'text_for_map_search':          voter_address.text_for_map_search,
             'substituted_address_nearby':   '',
             'ballot_caveat':                '',
-            'is_from_substituted_address':     False,
+            'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
         }
         return error_json_data
@@ -122,6 +126,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
             'status':                       status,
             'success':                      True,
             'voter_device_id':              voter_device_id,
+            'ballot_found':                 True,
             'ballot_item_list':             results['ballot_item_list'],
             'google_civic_election_id':     google_civic_election_id,
             'text_for_map_search':          voter_ballot_saved.original_text_for_map_search,
@@ -137,6 +142,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
         'status':                       status,
         'success':                      True,
         'voter_device_id':              voter_device_id,
+        'ballot_found':                 False,
         'ballot_item_list':             [],
         'google_civic_election_id':     0,
         'text_for_map_search':          '',

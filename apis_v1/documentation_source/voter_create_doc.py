@@ -48,8 +48,11 @@ def voter_create_doc_template_values(url_root):
     }
 
     api_response = '{\n' \
+                   '  "success": boolean,\n' \
                    '  "status": status string,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
+                   '  "voter_id": integer,\n' \
+                   '  "voter_we_vote_id": string,\n' \
                    '}'
 
     template_values = {

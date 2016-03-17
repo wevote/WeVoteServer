@@ -17,7 +17,7 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
         self.voter_count_url = reverse("apis_v1:voterCountView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
 
-    def test_count_with_no_cookie(self):
+    def test_count_with_no_voter_device_id(self):
         """
         This API should work even if person isn't signed in
         :return:
@@ -202,4 +202,4 @@ class WeVoteAPIsV1TestsOrganizationRetrieve(TestCase):
                 success=json_data8['success'], status=json_data8['status']))
 
     # There shouldn't be any difference if there is a signed in voter or not
-    # def test_count_with_cookie(self):
+    # def test_count_with_voter_device_id(self):

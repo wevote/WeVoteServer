@@ -755,6 +755,7 @@ def voter_address_save_view(request):  # voterAddressSave
                 'status': device_id_results['status'],
                 'success': False,
                 'voter_device_id': voter_device_id,
+                'text_for_map_search': text_for_map_search,
             }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -763,6 +764,7 @@ def voter_address_save_view(request):  # voterAddressSave
                 'status': "MISSING_POST_VARIABLE-ADDRESS",
                 'success': False,
                 'voter_device_id': voter_device_id,
+                'text_for_map_search': text_for_map_search,
             }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -777,6 +779,7 @@ def voter_address_save_view(request):  # voterAddressSave
             'status': "VOTER_DEVICE_LINK_NOT_FOUND_FROM_DEVICE_ID",
             'success': False,
             'voter_device_id': voter_device_id,
+            'text_for_map_search': text_for_map_search,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -785,6 +788,7 @@ def voter_address_save_view(request):  # voterAddressSave
             'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
             'success': False,
             'voter_device_id': voter_device_id,
+            'text_for_map_search': text_for_map_search,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -850,7 +854,7 @@ def voter_count_view(request):
     return voter_count()
 
 
-def voter_create_view(request):
+def voter_create_view(request):  # voterCreate
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
     return voter_create_for_api(voter_device_id)
 
@@ -930,16 +934,17 @@ def voter_location_retrieve_from_ip_view(request):  # GeoIP geo location
     :param request:
     :return:
     """
-    voter_location_results = voter_location_retrieve_from_ip_for_api(request)
+    ip_address = request.GET.get('ip_address', '')
+    voter_location_results = voter_location_retrieve_from_ip_for_api(request, ip_address)
 
     json_data = {
         'success': voter_location_results['success'],
-        'status': voter_location_results['success'],
-        'voter_location_found': voter_location_results['success'],
-        'voter_location': voter_location_results['success'],
-        'ip_address': voter_location_results['success'],
-        'x_forwarded_for': voter_location_results['success'],
-        'http_x_forwarded_for': voter_location_results['success'],
+        'status': voter_location_results['status'],
+        'voter_location_found': voter_location_results['voter_location_found'],
+        'voter_location': voter_location_results['voter_location'],
+        'ip_address': voter_location_results['ip_address'],
+        'x_forwarded_for': voter_location_results['x_forwarded_for'],
+        'http_x_forwarded_for': voter_location_results['http_x_forwarded_for'],
     }
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')

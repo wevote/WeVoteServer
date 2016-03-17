@@ -102,6 +102,7 @@ def voter_address_save_for_api(voter_device_id, voter_id, address_raw_text):
                 'status': results['status'],
                 'success': False,
                 'voter_device_id': voter_device_id,
+                'text_for_map_search': address_raw_text,
             }
     return results
 
@@ -203,6 +204,21 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
     else:
         # If a voter_device_id isn't passed in, automatically create a new voter_device_id and voter
         voter_device_id = generate_voter_device_id()
+
+        # We make sure a voter record hasn't already been created for this new voter_device_id, so we don't create a
+        # security hole by giving a new person access to an existing account. This should never happen because it is
+        # so unlikely that we will ever generate an existing voter_device_id with generate_voter_device_id.
+        existing_voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+        if existing_voter_id:
+            json_data = {
+                'status':           "VOTER_ALREADY_EXISTS_BUT_ACCESS_RESTRICTED",
+                'success':          False,
+                'voter_device_id':  voter_device_id,
+                'voter_created':    False,
+                'voter_found':      False,
+            }
+            return json_data
+
         results = voter_manager.create_voter()
 
         if results['voter_created']:
@@ -235,7 +251,10 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
     if results['voter_found']:
         voter = results['voter']
 
-        status = 'VOTER_FOUND'
+        if voter_created:
+            status = 'VOTER_CREATED'
+        else:
+            status = 'VOTER_FOUND'
         json_data = {
             'status':                           status,
             'success':                          True,

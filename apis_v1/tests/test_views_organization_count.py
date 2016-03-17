@@ -3,8 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.core.urlresolvers import reverse
-from django.test import Client, TestCase
-from django.http import SimpleCookie
+from django.test import TestCase
 import json
 from organization.models import Organization
 
@@ -17,7 +16,7 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
         self.voter_create_url = reverse("apis_v1:voterCreateView")
 
-    def test_count_with_no_cookie(self):
+    def test_count_with_no_voter_device_id(self):
         """
         This API should work even if person isn't signed in
         :return:
@@ -86,7 +85,7 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
             "organization_count: {organization_count}".format(
                 success=json_data3['success'], organization_count=json_data3['organization_count']))
 
-    def test_count_with_cookie(self):
+    def test_count_with_voter_device_id(self):
         """
         Test the various cookie states
         :return:
@@ -101,14 +100,12 @@ class WeVoteAPIsV1TestsOrganizationCount(TestCase):
         self.assertEqual('voter_device_id' in json_data0, True,
                          "voter_device_id expected in the deviceIdGenerateView json response")
 
-        # Now save the retrieved voter_device_id in a mock cookie
-        cookies = SimpleCookie()
-        cookies["voter_device_id"] = json_data0['voter_device_id']
-        self.client = Client(HTTP_COOKIE=cookies.output(header='', sep='; '))
+        # Now put the voter_device_id in a variable we can use below
+        voter_device_id = json_data0['voter_device_id'] if 'voter_device_id' in json_data0 else ''
 
         #######################################
         # Test for status: VOTER_CREATED
-        response02 = self.client.get(self.voter_create_url)
+        response02 = self.client.get(self.voter_create_url, {'voter_device_id': voter_device_id})
         json_data02 = json.loads(response02.content.decode())
 
         self.assertEqual('status' in json_data02, True,

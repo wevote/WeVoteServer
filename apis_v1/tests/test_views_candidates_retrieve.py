@@ -17,7 +17,7 @@ class WeVoteAPIsV1TestsCandidatesRetrieve(TestCase):
         self.voter_create_url = reverse("apis_v1:voterCreateView")
         self.candidates_retrieve_url = reverse("apis_v1:candidatesRetrieveView")
 
-    def test_retrieve_with_no_cookie(self):
+    def test_retrieve_with_no_voter_device_id(self):
         #######################################
         # Without a cookie or required variables, we don't expect valid response
         response01 = self.client.get(self.candidates_retrieve_url)

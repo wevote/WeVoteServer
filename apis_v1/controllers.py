@@ -92,24 +92,31 @@ def voter_count():
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_create_for_api(voter_device_id):
+def voter_create_for_api(voter_device_id):  # voterCreate
     # If a voter_device_id isn't passed in, automatically create a new voter_device_id
     if not positive_value_exists(voter_device_id):
         voter_device_id = generate_voter_device_id()
     else:
         # If a voter_device_id is passed in that isn't valid, we want to throw an error
         results = is_voter_device_id_valid(voter_device_id)
-        if results['success']:
+        if not results['success']:
             return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
     voter_id = 0
+    voter_we_vote_id = ''
     # Make sure a voter record hasn't already been created for this
-    existing_voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if existing_voter_id:
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if results['voter_found']:
+        voter = results['voter']
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
         json_data = {
             'status': "VOTER_ALREADY_EXISTS",
             'success': True,
             'voter_device_id': voter_device_id,
+            'voter_id':         voter_id,
+            'voter_we_vote_id': voter_we_vote_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -129,21 +136,26 @@ def voter_create_for_api(voter_device_id):
             voter_id_found = True if voter_device_link.voter_id > 0 else False
 
             if voter_id_found:
-                voter_id = voter_device_link.voter_id
+                voter_id = voter.id
+                voter_we_vote_id = voter.we_vote_id
 
     if voter_id:
         json_data = {
-            'status': "VOTER_CREATED",
-            'success': True,
-            'voter_device_id': voter_device_id,
-            'voter_id': voter_id,  # We want to remove this -- the front end should not be using the voter_id
+            'status':           "VOTER_CREATED",
+            'success':          True,
+            'voter_device_id':  voter_device_id,
+            'voter_id':         voter_id,
+            'voter_we_vote_id': voter_we_vote_id,
+
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
         json_data = {
-            'status': "VOTER_NOT_CREATED",
-            'success': False,
-            'voter_device_id': voter_device_id,
+            'status':           "VOTER_NOT_CREATED",
+            'success':          False,
+            'voter_device_id':  voter_device_id,
+            'voter_id':         0,
+            'voter_we_vote_id': '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
