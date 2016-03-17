@@ -751,20 +751,20 @@ def voter_address_save_view(request):  # voterAddressSave
 
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
-        results = {
+        json_data = {
                 'status': device_id_results['status'],
                 'success': False,
                 'voter_device_id': voter_device_id,
             }
-        return results
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     if not address_variable_exists:
-        results = {
+        json_data = {
                 'status': "MISSING_POST_VARIABLE-ADDRESS",
                 'success': False,
                 'voter_device_id': voter_device_id,
             }
-        return results
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     # We retrieve voter_device_link
     voter_device_link_manager = VoterDeviceLinkManager()
@@ -773,20 +773,20 @@ def voter_address_save_view(request):  # voterAddressSave
         voter_device_link = voter_device_link_results['voter_device_link']
         voter_id = voter_device_link.voter_id
     else:
-        error_results = {
+        json_data = {
             'status': "VOTER_DEVICE_LINK_NOT_FOUND_FROM_DEVICE_ID",
             'success': False,
             'voter_device_id': voter_device_id,
         }
-        return error_results
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     if not positive_value_exists(voter_id):
-        error_results = {
+        json_data = {
             'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
             'success': False,
             'voter_device_id': voter_device_id,
         }
-        return error_results
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     # Save the address value, and clear out ballot_saved information
     results = voter_address_save_for_api(voter_device_id, voter_id, text_for_map_search)
