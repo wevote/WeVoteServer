@@ -264,6 +264,10 @@ def retrieve_candidate_photos_for_election_view(request, election_id):
 
     num_with_vote_smart_photos = 0
     num_candidate_photos_just_retrieved = 0
+
+    message = "About to loop through all of the candidates in this election and retrieve photos."
+    print_to_log(logger, exception_message_optional=message)
+
     # Loop through all of the candidates in this election
     for we_vote_candidate in candidate_list:
         num_candidates_reviewed += 1

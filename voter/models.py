@@ -826,9 +826,6 @@ class VoterAddress(models.Model):
     refreshed_from_google = models.BooleanField(
         verbose_name="have normalized fields been updated from Google since address change?", default=False)
 
-    voter_ballot_saved_id = models.IntegerField(verbose_name="the ballot associated with this address",
-                                                null=True, blank=False, unique=False)
-
 
 class VoterAddressManager(models.Model):
 
@@ -877,6 +874,10 @@ class VoterAddressManager(models.Model):
         exception_multiple_object_returned = False
         voter_address_on_stage = VoterAddress()
         voter_address_has_value = False
+
+        if not positive_value_exists(address_type):
+            # Provide a default
+            address_type = BALLOT_ADDRESS
 
         try:
             if positive_value_exists(voter_address_id):
@@ -963,6 +964,8 @@ class VoterAddressManager(models.Model):
         status = ''
         exception_multiple_object_returned = False
         new_address_created = False
+        voter_address_on_stage = None
+        voter_address_on_stage_found = False
 
         if positive_value_exists(voter_id) and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
             try:
@@ -983,11 +986,11 @@ class VoterAddressManager(models.Model):
                     'refreshed_from_google':    False,
                     'google_civic_election_id': 0,
                     'election_day_text':        '',
-                    'voter_ballot_saved_id':    0,
                 }
 
                 voter_address_on_stage, new_address_created = VoterAddress.objects.update_or_create(
                     voter_id__exact=voter_id, address_type=address_type, defaults=updated_values)
+                voter_address_on_stage_found = voter_address_on_stage.id
                 success = True
             except VoterAddress.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
@@ -1005,6 +1008,8 @@ class VoterAddressManager(models.Model):
             'voter_address_saved':      success,
             'address_type':             address_type,
             'new_address_created':      new_address_created,
+            'voter_address_found':      voter_address_on_stage_found,
+            'voter_address':            voter_address_on_stage,
         }
         return results
 

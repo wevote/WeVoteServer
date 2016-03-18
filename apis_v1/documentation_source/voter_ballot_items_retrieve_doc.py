@@ -62,6 +62,12 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "text_for_map_search": string,\n' \
+                   '  "substituted_address_nearby": string,\n' \
+                   '  "ballot_found": boolean,\n' \
+                   '  "ballot_caveat": string,\n' \
+                   '  "is_from_substituted_address": boolean,\n' \
+                   '  "is_from_test_ballot": boolean,\n' \
                    '  "ballot_item_list": list\n' \
                    '   [\n' \
                    '     "ballot_item_display_name": string,\n' \

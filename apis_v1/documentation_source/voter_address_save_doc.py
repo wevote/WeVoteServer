@@ -62,21 +62,43 @@ def voter_address_save_doc_template_values(url_root):
     }
 
     api_response = '{\n' \
-                   '  "status": string (description of what happened),\n' \
-                   '  "success": boolean (did the save and the google civic ballot retrieve happen?),\n' \
+                   '  "status": string,\n' \
+                   '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "voter_address_saved": boolean (did the voter address save happen?),\n' \
-                   '  "text_for_map_search": string (the value just saved),\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "text_for_map_search": string,\n' \
+                   '  "substituted_address_nearby": string,\n' \
+                   '  "ballot_found": boolean,\n' \
+                   '  "ballot_caveat": string,\n' \
+                   '  "is_from_substituted_address": boolean,\n' \
+                   '  "is_from_test_ballot": boolean,\n' \
+                   '  "ballot_item_list": list\n' \
+                   '   [\n' \
+                   '     "ballot_item_display_name": string,\n' \
+                   '     "voter_id": integer,\n' \
+                   '     "google_civic_election_id": integer,\n' \
+                   '     "google_ballot_placement": integer,\n' \
+                   '     "local_ballot_order": integer,\n' \
+                   '     "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
+                   '     "id": integer,\n' \
+                   '     "we_vote_id": string,\n' \
+                   '     "candidate_list": list\n' \
+                   '      [\n' \
+                   '        "id": integer,\n' \
+                   '        "we_vote_id": string,\n' \
+                   '        "ballot_item_display_name": string,\n' \
+                   '        "candidate_photo_url": string,\n' \
+                   '        "order_on_ballot": integer,\n' \
+                   '      ],\n' \
+                   '   ],\n' \
                    '}'
 
     template_values = {
         'api_name': 'voterAddressSave',
         'api_slug': 'voterAddressSave',
         'api_introduction':
-            "Save or create an address for the current voter. Whenever the address is updated, we should follow this "
-            "call with a call to voterBallotItemsRetrieveFromGoogleCivic"
-            "",
+            "Save or create an address for the current voter. Then return the same results as we return with "
+            "voterBallotItemsRetrieve.",
         'try_now_link': 'apis_v1:voterAddressSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

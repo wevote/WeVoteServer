@@ -911,7 +911,7 @@ class VoterBallotSavedManager(models.Model):
         voter_ballot_saved_id = 0
         google_civic_election_id = 0
         return self.retrieve_voter_ballot_saved(voter_ballot_saved_id, voter_id, google_civic_election_id,
-                                               text_for_map_search)
+                                                text_for_map_search)
 
     def retrieve_voter_ballot_saved(self, voter_ballot_saved_id, voter_id=0, google_civic_election_id=0,
                                     text_for_map_search=''):

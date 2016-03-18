@@ -114,7 +114,6 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
     # Update voter_address to include matching google_civic_election_id and voter_ballot_saved entry
     if positive_value_exists(google_civic_election_id):
         voter_address.google_civic_election_id = google_civic_election_id
-        voter_address.voter_ballot_saved_id = voter_ballot_saved.id
         voter_address_manager.update_existing_voter_address_object(voter_address)
 
         # Get and return the ballot_item_list
@@ -226,6 +225,10 @@ def generate_ballot_data(voter_device_link, voter_address):
         is_from_substituted_address = False
         substituted_address_nearby = ''
         is_from_test_address = False
+
+        # Update the voter_address with this google_civic_election_id TODO DALE
+
+        # Save the meta information for this ballot data
         save_results = voter_ballot_saved_manager.create_voter_ballot_saved(
             voter_id,
             results['google_civic_election_id'],
@@ -277,6 +280,8 @@ def generate_ballot_data(voter_device_link, voter_address):
         is_from_substituted_address = False
         substituted_address_nearby = ''
         is_from_test_address = True
+        # Since this is a test address, we don't want to save the google_civic_election_id (of 2000)
+        # with the voter_address
         save_results = voter_ballot_saved_manager.create_voter_ballot_saved(
             voter_id,
             results['google_civic_election_id'],
@@ -346,7 +351,10 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
             # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
             pass
 
-    voter_address_google_civic_election_id = voter_address.google_civic_election_id
+    if voter_address.google_civic_election_id is None:
+        voter_address_google_civic_election_id = 0
+    else:
+        voter_address_google_civic_election_id = voter_address.google_civic_election_id
     voter_address_google_civic_election_id = convert_to_int(voter_address_google_civic_election_id)
     if positive_value_exists(voter_address_google_civic_election_id) \
             and voter_address_google_civic_election_id != 2000:

@@ -754,8 +754,8 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         status += 'MISSING_ADDRESS_TEXT_FOR_BALLOT_SEARCH'
         success = False
 
-    # If a google_civic_election_id was not returned, search again using a test election, so that
-    #  during our initial user testing, ballot data is returned in areas where elections don't currently exist
+    # If a google_civic_election_id was not returned, outside of this function we search again using a test election,
+    # so that during our initial user testing, ballot data is returned in areas where elections don't currently exist
 
     results = {
         'success': success,

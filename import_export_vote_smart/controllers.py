@@ -15,6 +15,7 @@ from .votesmart_local import votesmart, VotesmartApiError
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 import copy
+from exception.models import handle_record_found_more_than_one_exception
 from position.models import PositionEnteredManager, PERCENT_RATING
 import requests
 import wevote_functions.admin
@@ -339,44 +340,74 @@ def retrieve_vote_smart_ratings_for_candidate_into_local_db(vote_smart_candidate
             # Note that this filter is specific to the getCandidateRating call
             one_rating_filtered = vote_smart_candidate_rating_filter(one_rating)
             one_rating_filtered['candidateId'] = vote_smart_candidate_id
-            vote_smart_rating_one_candidate, rating_one_candidate_created_temp = \
-                VoteSmartRatingOneCandidate.objects.update_or_create(
-                    ratingId=one_rating_filtered['ratingId'],
-                    sigId=one_rating_filtered['sigId'],
-                    candidateId=one_rating_filtered['candidateId'],
-                    timeSpan=one_rating_filtered['timeSpan'],
-                    defaults=one_rating_filtered)
+            try:
+                vote_smart_rating_one_candidate, rating_one_candidate_created_temp = \
+                    VoteSmartRatingOneCandidate.objects.update_or_create(
+                        ratingId=one_rating_filtered['ratingId'],
+                        sigId=one_rating_filtered['sigId'],
+                        candidateId=one_rating_filtered['candidateId'],
+                        timeSpan=one_rating_filtered['timeSpan'],
+                        defaults=one_rating_filtered)
 
-            if not rating_one_candidate_exists:
-                # Once set to True, this stays true
-                rating_one_candidate_exists = True if vote_smart_rating_one_candidate.candidateId else False
+                if not rating_one_candidate_exists:
+                    # Once set to True, this stays true
+                    rating_one_candidate_exists = True if vote_smart_rating_one_candidate.candidateId else False
 
-            if not rating_one_candidate_created:
-                # Once set to True, this stays true
-                rating_one_candidate_created = True if rating_one_candidate_created_temp else False
+                if not rating_one_candidate_created:
+                    # Once set to True, this stays true
+                    rating_one_candidate_created = True if rating_one_candidate_created_temp else False
 
-            if vote_smart_rating_one_candidate.candidateId:
-                # We start with one_rating_filtered, and add additional data with each loop below
-                category_branch = one_rating.categories['category']
-                if type(category_branch) is list:
-                    category_list = category_branch
-                else:
-                    category_list = [category_branch]
-                for one_category in category_list:
-                    # Now save the category/categories for this rating
-                    rating_values_for_category_save = copy.deepcopy(one_rating_filtered)
-                    rating_values_for_category_save['categoryId'] = one_category['categoryId']
-                    rating_values_for_category_save['categoryName'] = one_category['name']  # Changed to "categoryName"
-                    del rating_values_for_category_save['ratingText']
-                    del rating_values_for_category_save['ratingName']
-                    del rating_values_for_category_save['rating']
-                    vote_smart_category_link, created = VoteSmartRatingCategoryLink.objects.update_or_create(
-                            ratingId=one_rating_filtered['ratingId'],
-                            sigId=one_rating_filtered['sigId'],
-                            candidateId=one_rating_filtered['candidateId'],
-                            timeSpan=one_rating_filtered['timeSpan'],
-                            categoryId=one_category['categoryId'],
-                            defaults=rating_values_for_category_save)
+                if vote_smart_rating_one_candidate.candidateId:
+                    # We start with one_rating_filtered, and add additional data with each loop below
+                    category_branch = one_rating.categories['category']
+                    if type(category_branch) is list:
+                        category_list = category_branch
+                    else:
+                        category_list = [category_branch]
+                    for one_category in category_list:
+                        # Now save the category/categories for this rating
+                        rating_values_for_category_save = copy.deepcopy(one_rating_filtered)
+                        rating_values_for_category_save['categoryId'] = one_category['categoryId']
+                        rating_values_for_category_save['categoryName'] = one_category['name']
+                        del rating_values_for_category_save['ratingText']
+                        del rating_values_for_category_save['ratingName']
+                        del rating_values_for_category_save['rating']
+                        try:
+                            vote_smart_category_link, created = VoteSmartRatingCategoryLink.objects.update_or_create(
+                                    ratingId=one_rating_filtered['ratingId'],
+                                    sigId=one_rating_filtered['sigId'],
+                                    candidateId=one_rating_filtered['candidateId'],
+                                    timeSpan=one_rating_filtered['timeSpan'],
+                                    categoryId=one_category['categoryId'],
+                                    defaults=rating_values_for_category_save)
+                        except VoteSmartRatingCategoryLink.MultipleObjectsReturned as e:
+                            exception_message_optional = "retrieve_vote_smart_ratings_for_candidate_into_local_db, " \
+                                                         "VoteSmartRatingCategoryLink.objects.update_or_create: " \
+                                                         "ratingId: {ratingId}, " \
+                                                         "sigId: {sigId}, " \
+                                                         "candidateId: {candidateId}, " \
+                                                         "timeSpan: {timeSpan}, " \
+                                                         "categoryId: {categoryId}, " \
+                                                         "".format(ratingId=one_rating_filtered['ratingId'],
+                                                                   sigId=one_rating_filtered['sigId'],
+                                                                   candidateId=one_rating_filtered['candidateId'],
+                                                                   timeSpan=one_rating_filtered['timeSpan'],
+                                                                   categoryId=one_category['categoryId'])
+                            handle_record_found_more_than_one_exception(
+                                e, logger=logger, exception_message_optional=exception_message_optional)
+            except VoteSmartRatingOneCandidate.MultipleObjectsReturned as e:
+                exception_message_optional = "retrieve_vote_smart_ratings_for_candidate_into_local_db, " \
+                                             "VoteSmartRatingOneCandidate.objects.update_or_create: " \
+                                             "ratingId: {ratingId}, " \
+                                             "sigId: {sigId}, " \
+                                             "candidateId: {candidateId}, " \
+                                             "timeSpan: {timeSpan}, " \
+                                             "".format(ratingId=one_rating_filtered['ratingId'],
+                                                       sigId=one_rating_filtered['sigId'],
+                                                       candidateId=one_rating_filtered['candidateId'],
+                                                       timeSpan=one_rating_filtered['timeSpan'])
+                handle_record_found_more_than_one_exception(
+                    e, logger=logger, exception_message_optional=exception_message_optional)
             status = "VOTE_SMART_RATINGS_BY_CANDIDATE_PROCESSED"
         success = True
     except VotesmartApiError as error_instance:
@@ -423,13 +454,27 @@ def retrieve_vote_smart_ratings_by_group_into_local_db(special_interest_group_id
                 rating_one_candidate_filtered['timeSpan'] = one_rating.timespan
                 rating_one_candidate_filtered['ratingName'] = one_rating.ratingName
                 rating_one_candidate_filtered['ratingText'] = one_rating.ratingText
-                vote_smart_rating_one_candidate, rating_one_candidate_created = \
-                    VoteSmartRatingOneCandidate.objects.update_or_create(
-                        ratingId=one_rating.ratingId,
-                        sigId=special_interest_group_id,
-                        candidateId=rating_one_candidate_filtered['candidateId'],
-                        timeSpan=one_rating.timespan,
-                        defaults=rating_one_candidate_filtered)
+                try:
+                    vote_smart_rating_one_candidate, rating_one_candidate_created = \
+                        VoteSmartRatingOneCandidate.objects.update_or_create(
+                            ratingId=one_rating.ratingId,
+                            sigId=special_interest_group_id,
+                            candidateId=rating_one_candidate_filtered['candidateId'],
+                            timeSpan=one_rating.timespan,
+                            defaults=rating_one_candidate_filtered)
+                except VoteSmartRatingOneCandidate.MultipleObjectsReturned as e:
+                    exception_message_optional = "retrieve_vote_smart_ratings_for_candidate_into_local_db, " \
+                                                 "VoteSmartRatingOneCandidate.objects.update_or_create: " \
+                                                 "ratingId: {ratingId}, " \
+                                                 "sigId: {sigId}, " \
+                                                 "candidateId: {candidateId}, " \
+                                                 "timeSpan: {timeSpan}, " \
+                                                 "".format(ratingId=one_rating_filtered['ratingId'],
+                                                           sigId=one_rating_filtered['sigId'],
+                                                           candidateId=one_rating_filtered['candidateId'],
+                                                           timeSpan=one_rating_filtered['timeSpan'])
+                    handle_record_found_more_than_one_exception(
+                        e, logger=logger, exception_message_optional=exception_message_optional)
         status = "VOTE_SMART_RATINGS_BY_GROUP_PROCESSED"
         success = True
     except VotesmartApiError as error_instance:

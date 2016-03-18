@@ -435,7 +435,7 @@ class VoterGuide(models.Model):
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)
 
-    # TODO DALE We want to cache the voter guide name, but in case we haven't, we force the lookup
+    # We usually cache the voter guide name, but in case we haven't, we force the lookup
     def voter_guide_display_name(self):
         if self.display_name:
             return self.display_name

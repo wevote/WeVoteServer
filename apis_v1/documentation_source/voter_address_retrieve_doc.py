@@ -55,6 +55,9 @@ def voter_address_retrieve_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "text_for_map_search": string (the value submitted and saved),\n' \
                    '  "address_type": string (one char: B = Ballot address),\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "guess_if_no_address_saved": boolean,\n' \
+                   '  "address_found": boolean,\n' \
                    '  "latitude": string (value from Google),\n' \
                    '  "longitude": string (value from Google),\n' \
                    '  "normalized_line1": string (value from Google),\n' \

@@ -43,6 +43,8 @@ def voter_address_retrieve_for_api(voter_device_id):
             'voter_device_id': voter_device_id,
             'address_type': voter_address.address_type if voter_address.address_type else '',
             'text_for_map_search': voter_address.text_for_map_search if voter_address.text_for_map_search else '',
+            'google_civic_election_id': voter_address.google_civic_election_id if voter_address.google_civic_election_id
+            else 0,
             'latitude': voter_address.latitude if voter_address.latitude else '',
             'longitude': voter_address.longitude if voter_address.longitude else '',
             'normalized_line1': voter_address.normalized_line1 if voter_address.normalized_line1 else '',
@@ -63,6 +65,7 @@ def voter_address_retrieve_for_api(voter_device_id):
             'voter_device_id': voter_device_id,
             'address_type': '',
             'text_for_map_search': '',
+            'google_civic_election_id': 0,
             'latitude': '',
             'longitude': '',
             'normalized_line1': '',

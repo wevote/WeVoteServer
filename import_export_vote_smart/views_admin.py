@@ -389,6 +389,9 @@ def retrieve_positions_from_vote_smart_for_election_view(request):
                                                      "".format(google_civic_election_id=google_civic_election_id))
         return HttpResponseRedirect(reverse('position:position_list', args=()))
 
+    message = "Entering retrieve_positions_from_vote_smart_for_election."
+    print_to_log(logger, exception_message_optional=message)
+
     vote_smart_candidates_that_exist = 0
     vote_smart_candidates_created = 0
     vote_smart_candidates_not_found = 0
@@ -412,6 +415,9 @@ def retrieve_positions_from_vote_smart_for_election_view(request):
                 organization_positions_that_exist += 1
             if transfer_results['organization_positions_created']:
                 organization_positions_created += 1
+
+    message = "About to cycle through candidates for whom we don't have Vote Smart IDs for."
+    print_to_log(logger, exception_message_optional=message)
 
     # Then we cycle through again, reach out to Vote Smart to match the candidate if we did not have a vote_smart_id,
     # and if we find a new Vote Smart id, we get positions for that candidate

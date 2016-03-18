@@ -375,21 +375,6 @@ def positive_value_exists(value):
     return bool(value)
 
 
-def get_google_civic_election_id_from_cookie(request):
-    google_civic_election_id = 0
-    if 'google_civic_election_id' in request.COOKIES:
-        google_civic_election_id = request.COOKIES['google_civic_election_id']
-        logger.debug("from cookie, google_civic_election_id: {google_civic_election_id}".format(
-            google_civic_election_id=google_civic_election_id
-        ))
-    return google_civic_election_id
-
-
-def set_google_civic_election_id_cookie(request, response, google_civic_election_id):
-    # We are leaving request as an incoming variable in case we need to use it in the future.
-    set_cookie(response, 'google_civic_election_id', google_civic_election_id)
-
-
 def convert_state_text_to_state_code(state_text):
     for state_code, state_name in STATE_CODE_MAP.items():
         if state_text.lower() == state_name.lower():
