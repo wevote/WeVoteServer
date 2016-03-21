@@ -33,22 +33,41 @@ class VoterGuideManager(models.Manager):
     def update_or_create_organization_voter_guide_by_election_id(self, organization_we_vote_id,
                                                                  google_civic_election_id):
         google_civic_election_id = convert_to_int(google_civic_election_id)
-        new_voter_guide = VoterGuide()
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
+        organization_found = False
         if not google_civic_election_id or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE'
             success = False
             new_voter_guide_created = False
         else:
+            # Retrieve the organization object so we can bring over values
+            organization_manager = OrganizationManager()
+            results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+            if results['organization_found']:
+                organization_found = True
+                organization = results['organization']
+
+            # Now update voter_guide
             try:
-                updated_values = {
-                    # Values we search against below
-                    'google_civic_election_id': google_civic_election_id,
-                    'voter_guide_owner_type': voter_guide_owner_type,
-                    'organization_we_vote_id': organization_we_vote_id,
-                    # The rest of the values
-                }
+                if organization_found:
+                    updated_values = {
+                        # Values we search against below
+                        'google_civic_election_id': google_civic_election_id,
+                        'organization_we_vote_id':  organization_we_vote_id,
+                        # The rest of the values
+                        'voter_guide_owner_type':   voter_guide_owner_type,
+                        'twitter_handle':           organization.organization_twitter_handle,
+                        'display_name':             organization.organization_name,
+                    }
+                else:
+                    updated_values = {
+                        # Values we search against below
+                        'google_civic_election_id': google_civic_election_id,
+                        'organization_we_vote_id':  organization_we_vote_id,
+                        # The rest of the values
+                        'voter_guide_owner_type':   voter_guide_owner_type,
+                    }
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
                     organization_we_vote_id__exact=organization_we_vote_id,
@@ -75,7 +94,6 @@ class VoterGuideManager(models.Manager):
         return results
 
     def update_or_create_organization_voter_guide_by_time_span(self, organization_we_vote_id, vote_smart_time_span):
-        new_voter_guide = VoterGuide()
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
         if not vote_smart_time_span or not organization_we_vote_id:
@@ -83,14 +101,33 @@ class VoterGuideManager(models.Manager):
             success = False
             new_voter_guide_created = False
         else:
+            # Retrieve the organization object so we can bring over values
+            organization_manager = OrganizationManager()
+            results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+            if results['organization_found']:
+                organization_found = True
+                organization = results['organization']
+
+            # Now update voter_guide
             try:
-                updated_values = {
-                    # Values we search against below
-                    'vote_smart_time_span': vote_smart_time_span,
-                    'voter_guide_owner_type': voter_guide_owner_type,
-                    'organization_we_vote_id': organization_we_vote_id,
-                    # The rest of the values
-                }
+                if organization_found:
+                    updated_values = {
+                        # Values we search against below
+                        'vote_smart_time_span':     vote_smart_time_span,
+                        'organization_we_vote_id':  organization_we_vote_id,
+                        # The rest of the values
+                        'voter_guide_owner_type':   voter_guide_owner_type,
+                        'twitter_handle':           organization.organization_twitter_handle,
+                        'display_name':             organization.organization_name,
+                    }
+                else:
+                    updated_values = {
+                        # Values we search against below
+                        'vote_smart_time_span':     vote_smart_time_span,
+                        'organization_we_vote_id':  organization_we_vote_id,
+                        # The rest of the values
+                        'voter_guide_owner_type':   voter_guide_owner_type,
+                    }
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     vote_smart_time_span__exact=vote_smart_time_span,
                     organization_we_vote_id__exact=organization_we_vote_id,
@@ -422,6 +459,7 @@ class VoterGuide(models.Model):
         verbose_name="the period in which the organization stated this position", max_length=255, null=True,
         blank=True, unique=False)
 
+    # This might be the organization name, or the
     display_name = models.CharField(
         verbose_name="display title for this voter guide", max_length=255, null=True, blank=True, unique=False)
 
@@ -432,6 +470,7 @@ class VoterGuide(models.Model):
         verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,
         default=ORGANIZATION)
 
+    twitter_handle = models.CharField(verbose_name='twitter screen_name', max_length=255, null=True, unique=False)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)
 
@@ -440,17 +479,20 @@ class VoterGuide(models.Model):
         if self.display_name:
             return self.display_name
         elif self.voter_guide_owner_type == ORGANIZATION:
-            organization_manager = OrganizationManager()
-            organization_id = 0
-            organization_we_vote_id = self.organization_we_vote_id
-            results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
-            if results['organization_found']:
-                organization = results['organization']
-                organization_name = organization.organization_name
-                return organization_name
+            return self.retrieve_organization_display_name()
         return ''
 
-    # TODO DALE We want to cache the image_url, but in case we haven't, we force the lookup
+    def retrieve_organization_display_name(self):
+        organization_manager = OrganizationManager()
+        organization_id = 0
+        organization_we_vote_id = self.organization_we_vote_id
+        results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+        if results['organization_found']:
+            organization = results['organization']
+            organization_name = organization.organization_name
+            return organization_name
+
+    # We try to cache the image_url, but in case we haven't, we force the lookup
     def voter_guide_image_url(self):
         if self.image_url:
             return self.image_url
@@ -608,6 +650,7 @@ class VoterGuideList(models.Model):
         return results
 
     def retrieve_voter_guides_to_follow_by_election(self, google_civic_election_id, organization_we_vote_id_list,
+                                                    search_string,
                                                     maximum_number_to_retrieve=0, sort_by='', sort_order=''):
         voter_guide_list = []
         voter_guide_list_found = False
@@ -615,11 +658,15 @@ class VoterGuideList(models.Model):
             maximum_number_to_retrieve = 30
 
         try:
+            voter_guide_queryset = VoterGuide.objects.all()
+            if search_string:
+                voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
+                                                                   Q(twitter_handle__icontains=search_string))
 
             if sort_order == 'desc':
-                voter_guide_queryset = VoterGuide.objects.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
             else:
-                voter_guide_queryset = VoterGuide.objects.order_by(sort_by)[:maximum_number_to_retrieve]
+                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
 
             voter_guide_list = voter_guide_queryset.filter(
                 google_civic_election_id=google_civic_election_id &
@@ -646,8 +693,12 @@ class VoterGuideList(models.Model):
         }
         return results
 
-    def retrieve_voter_guides_to_follow_by_time_span(self, org_time_span_list_of_dicts,
+    def retrieve_voter_guides_to_follow_by_time_span(self, orgs_we_need_found_by_position_and_time_span_list_of_dicts,
+                                                     search_string,
                                                      maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+        """
+        Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
+        """
         voter_guide_list = []
         voter_guide_list_found = False
         if not positive_value_exists(maximum_number_to_retrieve):
@@ -658,10 +709,14 @@ class VoterGuideList(models.Model):
 
             # Retrieve all pairs that match vote_smart_time_span / organization_we_vote_id
             filter_list = Q()
-            for item in org_time_span_list_of_dicts:
+            for item in orgs_we_need_found_by_position_and_time_span_list_of_dicts:
                 filter_list |= Q(vote_smart_time_span=item['vote_smart_time_span'],
                                  organization_we_vote_id=item['organization_we_vote_id'])
             voter_guide_queryset = voter_guide_queryset.filter(filter_list)
+
+            if search_string:
+                voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
+                                                                   Q(twitter_handle__icontains=search_string))
 
             if sort_order == 'desc':
                 voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
@@ -678,7 +733,7 @@ class VoterGuideList(models.Model):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {

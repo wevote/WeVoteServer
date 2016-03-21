@@ -99,7 +99,8 @@ def voter_guide_possibility_save_for_api(voter_device_id, voter_guide_possibilit
 
 def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFollow
                                             kind_of_ballot_item='', ballot_item_we_vote_id='',
-                                            google_civic_election_id=0, maximum_number_to_retrieve=0):
+                                            google_civic_election_id=0, search_string='',
+                                            maximum_number_to_retrieve=0):
     # Get voter_id from the voter_device_id so we can figure out which voter_guides to offer
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -109,6 +110,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             'voter_device_id': voter_device_id,
             'voter_guides': [],
             'google_civic_election_id': google_civic_election_id,
+            'search_string': search_string,
             'ballot_item_we_vote_id': ballot_item_we_vote_id,
         }
         results = {
@@ -127,6 +129,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             'voter_device_id': voter_device_id,
             'voter_guides': [],
             'google_civic_election_id': google_civic_election_id,
+            'search_string': search_string,
             'ballot_item_we_vote_id': ballot_item_we_vote_id,
         }
         results = {
@@ -142,15 +145,17 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
     try:
         if positive_value_exists(kind_of_ballot_item) and positive_value_exists(ballot_item_we_vote_id):
             results = retrieve_voter_guides_to_follow_by_ballot_item(voter_id,
-                                                                     kind_of_ballot_item, ballot_item_we_vote_id)
+                                                                     kind_of_ballot_item, ballot_item_we_vote_id,
+                                                                     search_string)
             success = results['success']
             status = results['status']
             voter_guide_list = results['voter_guide_list']
         elif positive_value_exists(google_civic_election_id):
             # This retrieve also does the reordering
-            results = retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_id,
-                                                                  maximum_number_to_retrieve,
-                                                                  'twitter_followers_count', 'desc')
+            results = retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_election_id,
+                                                                          search_string,
+                                                                          maximum_number_to_retrieve,
+                                                                          'twitter_followers_count', 'desc')
             success = results['success']
             status = results['status']
             voter_guide_list = results['voter_guide_list']
@@ -162,15 +167,6 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         status = 'FAILED voter_guides_to_follow_retrieve_for_api, retrieve_voter_guides_for_election ' \
                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         success = False
-
-    # # Remove this
-    # if len(voter_guide_list):
-    #     # We want to order these voter guides by most twitter followers to least twitter followers
-    #     # This serves as a rough indicator of the influence of the group
-    #     voter_guide_list_manager = VoterGuideList()
-    #     voter_guide_list = voter_guide_list_manager.reorder_voter_guide_list(voter_guide_list,
-    #                                                                          'twitter_followers_count',
-    #                                                                          'desc')
 
     if success:
         number_added_to_list = 0
@@ -200,6 +196,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'voter_device_id': voter_device_id,
                 'voter_guides': voter_guides,
                 'google_civic_election_id': google_civic_election_id,
+                'search_string': search_string,
                 'ballot_item_we_vote_id': ballot_item_we_vote_id,
                 'maximum_number_to_retrieve': maximum_number_to_retrieve,
             }
@@ -210,6 +207,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'voter_device_id': voter_device_id,
                 'voter_guides': voter_guides,
                 'google_civic_election_id': google_civic_election_id,
+                'search_string': search_string,
                 'ballot_item_we_vote_id': ballot_item_we_vote_id,
                 'maximum_number_to_retrieve': maximum_number_to_retrieve,
             }
@@ -228,6 +226,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             'voter_device_id': voter_device_id,
             'voter_guides': [],
             'google_civic_election_id': google_civic_election_id,
+            'search_string': search_string,
             'ballot_item_we_vote_id': ballot_item_we_vote_id,
             'maximum_number_to_retrieve': maximum_number_to_retrieve,
         }
@@ -241,7 +240,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         return results
 
 
-def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item, ballot_item_we_vote_id):
+def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item, ballot_item_we_vote_id,
+                                                   search_string):
     voter_guide_list_found = False
 
     position_list_manager = PositionListManager()
@@ -262,6 +262,7 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
         results = {
             'success':                      False,
             'status':                       "VOTER_GUIDES_BALLOT_RELATED_VARIABLES_MISSING",
+            'search_string':              search_string,
             'voter_guide_list_found':       False,
             'voter_guide_list':             voter_guide_list,
         }
@@ -301,7 +302,18 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
             results['voter_guide_found'] = False
 
         if results['voter_guide_found']:
-            voter_guide_list.append(results['voter_guide'])
+            voter_guide = results['voter_guide']
+            # If we passed in search_string, make sure they are in this entry.
+            # If they aren't, don't return voter guide
+            if positive_value_exists(search_string):
+                search_string = str(search_string)  # Make sure search_string is a string
+                twitter_handle = str(voter_guide.twitter_handle)
+                display_name = str(voter_guide.display_name)
+
+                if search_string.lower() in twitter_handle.lower() or search_string.lower() in display_name.lower():
+                    voter_guide_list.append(voter_guide)
+            else:
+                voter_guide_list.append(voter_guide)
 
     status = 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED'
     success = True
@@ -312,14 +324,15 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
     results = {
         'success':                      success,
         'status':                       status,
+        'search_string':              search_string,
         'voter_guide_list_found':       voter_guide_list_found,
         'voter_guide_list':             voter_guide_list,
     }
     return results
 
 
-def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_id,
-                                                maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_election_id, search_string,
+                                                        maximum_number_to_retrieve=0, sort_by='', sort_order=''):
     voter_guide_list_found = False
 
     # Start with orgs followed and ignored by this voter
@@ -334,7 +347,7 @@ def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_
         # This method finds all ballot_items in this election, and then retrieves *all* positions by any org or person
         # about each ballot_item. This will pick up We Vote positions or Vote Smart ratings, regardless of what time
         # period they were entered for.
-        all_positions_list = position_list_manager.retrieve_all_positions_for_election(
+        all_positions_list_for_election = position_list_manager.retrieve_all_positions_for_election(
             google_civic_election_id, ANY_STANCE)
     else:
         voter_guide_list = []
@@ -347,29 +360,41 @@ def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_
         return results
 
     positions_list_minus_ignored = position_list_manager.remove_positions_ignored_by_voter(
-        all_positions_list, organizations_ignored_by_voter)
+        all_positions_list_for_election, organizations_ignored_by_voter)
 
     positions_list_minus_ignored_and_followed = position_list_manager.calculate_positions_not_followed_by_voter(
         positions_list_minus_ignored, organizations_followed_by_voter)
 
-    # For speed, we want to retrieve an ordered list of organization_we_vote_id's (not followed or ignored)
-    # that have a position in this election, so we only retrieve full voter_guide data for the limited list that we need
+    if not len(positions_list_minus_ignored_and_followed):
+        # If no positions are found, exit
+        voter_guide_list = []
+        results = {
+            'success':                      True,
+            'status':                       "NO_VOTER_GUIDES_FOUND_FOR_THIS_ELECTION",
+            'voter_guide_list_found':       False,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    # We want to retrieve an ordered list of organization_we_vote_id's (not followed or ignored) that have a position
+    # in this election. For speed we only retrieve full voter_guide data for the limited list that we need
     voter_guide_list_manager = VoterGuideList()
     # This is a list of orgs that the voter isn't following or ignoring
-    organization_we_vote_id_list_by_google_civic_election_id = []
+    org_list_found_by_google_civic_election_id = []
     for one_position in positions_list_minus_ignored_and_followed:
+        # If the
         if positive_value_exists(one_position.organization_we_vote_id) and \
                 positive_value_exists(one_position.google_civic_election_id):
             # Make sure we haven't already recorded that we want to retrieve the voter_guide for this org
-            if one_position.organization_we_vote_id in organization_we_vote_id_list_by_google_civic_election_id:
+            if one_position.organization_we_vote_id in org_list_found_by_google_civic_election_id:
                 continue
 
-            organization_we_vote_id_list_by_google_civic_election_id.append(one_position.organization_we_vote_id)
+            org_list_found_by_google_civic_election_id.append(one_position.organization_we_vote_id)
 
-    # Now retrieve the voter_guides this voter can follow for this election
-    if positive_value_exists(len(organization_we_vote_id_list_by_google_civic_election_id)):
+    # First, retrieve the voter_guides stored by org and google_civic_election_id
+    if positive_value_exists(len(org_list_found_by_google_civic_election_id)):
         voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_election(
-            google_civic_election_id, organization_we_vote_id_list_by_google_civic_election_id,
+            google_civic_election_id, org_list_found_by_google_civic_election_id, search_string,
             maximum_number_to_retrieve, sort_by, sort_order)
 
         if voter_guide_results['voter_guide_list_found']:
@@ -379,47 +404,53 @@ def retrieve_voter_guides_to_follow_by_election(voter_id, google_civic_election_
     else:
         voter_guide_list_from_election_id = []
 
-    # ###############################################################
-    # Then gather voter guides with ratings by vote_smart_time_span
+    # Second, retrieve the voter_guides stored by org & vote_smart_time_span
+    # All positions were found above with position_list_manager.retrieve_all_positions_for_election
     # We give precedence to full voter guides from above, where we have an actual position of an org (as opposed to
     # Vote Smart ratings)
     maximum_number_of_guides_to_retrieve_by_time_span = \
         maximum_number_to_retrieve - len(voter_guide_list_from_election_id)
     voter_guide_list = []
     if positive_value_exists(maximum_number_of_guides_to_retrieve_by_time_span):
-        # This is a list of orgs that the voter isn't following or ignoring
-        organization_we_vote_id_list_by_time_span = []
-        org_time_span_list_of_dicts = []
+        org_list_found_by_time_span = []
+        orgs_we_need_found_by_position_and_time_span_list_of_dicts = []
         for one_position in positions_list_minus_ignored_and_followed:
+            # If this was a position found that was based on vote_smart_time_span...
+            #  (That is, ignore the positions already retrieved based on google_civic_election_id)
             if positive_value_exists(one_position.organization_we_vote_id) and \
                     positive_value_exists(one_position.vote_smart_time_span):
-                # If here we want to grab the relevant rating
-                if one_position.organization_we_vote_id in organization_we_vote_id_list_by_time_span or \
-                                one_position.organization_we_vote_id in \
-                                organization_we_vote_id_list_by_google_civic_election_id:
+                # This shouldn't be possible, but we have it here for safety
+                org_found_by_election_id_above = one_position.organization_we_vote_id in \
+                    org_list_found_by_google_civic_election_id
+                # If we already recorded that we want to look for this org under a different time span...
+                org_found_by_different_time_span = one_position.organization_we_vote_id in \
+                    org_list_found_by_time_span
+                # Don't record that we want to look for a voter guide by this org we_vote_id or time span
+                if org_found_by_election_id_above or org_found_by_different_time_span:
                     continue
 
-                organization_we_vote_id_list_by_time_span.append(one_position.organization_we_vote_id)
+                org_list_found_by_time_span.append(one_position.organization_we_vote_id)
                 one_position_dict = {'organization_we_vote_id': one_position.organization_we_vote_id,
                                      'vote_smart_time_span': one_position.vote_smart_time_span}
-                org_time_span_list_of_dicts.append(one_position_dict)
+                orgs_we_need_found_by_position_and_time_span_list_of_dicts.append(one_position_dict)
 
         voter_guide_time_span_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_time_span(
-            org_time_span_list_of_dicts,
+            orgs_we_need_found_by_position_and_time_span_list_of_dicts,
+            search_string,
             maximum_number_of_guides_to_retrieve_by_time_span, sort_by, sort_order)
 
         if voter_guide_time_span_results['voter_guide_list_found']:
-            voter_guide_list_time_span = voter_guide_time_span_results['voter_guide_list']
+            voter_guide_list_from_time_span = voter_guide_time_span_results['voter_guide_list']
         else:
-            voter_guide_list_time_span = []
+            voter_guide_list_from_time_span = []
 
         # Merge these two lists
         # IFF we wanted to sort here:
         # voter_guide_list = sorted(
-        #     chain(voter_guide_list_from_election_id, voter_guide_list_time_span),
+        #     chain(voter_guide_list_from_election_id, voter_guide_list_from_time_span),
         #     key=attrgetter(sort_by))
         # But we don't, we just want to combine them with existing order
-        voter_guide_list = list(chain(voter_guide_list_from_election_id, voter_guide_list_time_span))
+        voter_guide_list = list(chain(voter_guide_list_from_election_id, voter_guide_list_from_time_span))
 
     status = 'SUCCESSFUL_RETRIEVE_OF_POSITIONS_NOT_FOLLOWED'
     success = True

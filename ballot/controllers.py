@@ -226,7 +226,7 @@ def generate_ballot_data(voter_device_link, voter_address):
         substituted_address_nearby = ''
         is_from_test_address = False
 
-        # Update the voter_address with this google_civic_election_id TODO DALE
+        # We update the voter_address with this google_civic_election_id outside of this function
 
         # Save the meta information for this ballot data
         save_results = voter_ballot_saved_manager.create_voter_ballot_saved(

@@ -34,7 +34,7 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
     position_public_oppose_count_for_ballot_item_for_api, \
     position_public_support_count_for_ballot_item_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
-from voter.controllers import voter_retrieve_for_api, voter_address_retrieve_for_api, voter_address_save_for_api, \
+from voter.controllers import voter_retrieve_for_api, voter_address_retrieve_for_api, \
     voter_photo_save_for_api, voter_retrieve_list_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
     VoterDeviceLinkManager
@@ -944,6 +944,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', '')
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    search_string = request.GET.get('search_string', '')
     use_test_election = request.GET.get('use_test_election', False)
     use_test_election = False if use_test_election == 'false' else use_test_election
     use_test_election = False if use_test_election == 'False' else use_test_election
@@ -983,7 +984,8 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
                 google_civic_election_id = 2000  # The Google Civic API Test election
 
     results = voter_guides_to_follow_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
-                                                      google_civic_election_id, maximum_number_to_retrieve)
+                                                      google_civic_election_id, search_string,
+                                                      maximum_number_to_retrieve)
     return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
 
 

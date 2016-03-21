@@ -40,6 +40,11 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                             'ballot for the voter\'s address.',
         },
         {
+            'name':         'search_string',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'A string of keyword(s) to search for (to find twitter handle or org name).',
+        },
+        {
             'name':         'use_test_election',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'If you need to request a test election, pass this with the value \'True\'. Note that '
@@ -78,6 +83,7 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "search_string": string,\n' \
                    '  "maximum_number_to_retrieve": integer,\n' \
                    '  "voter_guides": list\n' \
                    '   [\n' \
