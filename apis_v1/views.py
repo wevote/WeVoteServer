@@ -102,10 +102,11 @@ def candidates_retrieve_view(request):  # candidatesRetrieve
     return candidates_retrieve_for_api(office_id, office_we_vote_id)
 
 
-def device_id_generate_view(request):
+def device_id_generate_view(request):  # deviceIdGenerate
     """
     This API call is used by clients to generate a transient unique identifier (device_id - stored on client)
     which ties the device to a persistent voter_id (mapped together and stored on the server).
+    Note: This call does not create a voter account -- that must be done in voterCreate.
 
     :param request:
     :return: Unique device id that can be stored in a cookie
@@ -956,7 +957,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     else:
         if positive_value_exists(use_test_election):
             google_civic_election_id = 2000  # The Google Civic API Test election
-        elif positive_value_exists(google_civic_election_id):
+        elif positive_value_exists(google_civic_election_id) or google_civic_election_id == 0:
             # If an election was specified, we can skip down to retrieving the voter_guides
             pass
         else:
@@ -979,9 +980,8 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
             results = choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address)
             google_civic_election_id = results['google_civic_election_id']
 
-            if not positive_value_exists(google_civic_election_id):
-                # We always want to offer voter guides to follow, and the test election returns some
-                google_civic_election_id = 2000  # The Google Civic API Test election
+        # In order to return voter_guides that are independent of an election or ballot_item, we need to pass in
+        # google_civic_election_id as 0
 
     results = voter_guides_to_follow_retrieve_for_api(voter_device_id, kind_of_ballot_item, ballot_item_we_vote_id,
                                                       google_civic_election_id, search_string,

@@ -107,7 +107,11 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
             "Look up the election and ballot items that this person is focused on. Return the organizations, "
             "public figures, and voters that have shared voter guides available to follow. Take into consideration "
             "which voter guides the voter has previously ignored. "
-            "Do not show voter guides the voter is already following.",
+            "Do not show voter guides the voter is already following."
+            "If neither ballot_item_we_vote_id (paired with kind_of_ballot_item) nor google_civic_election_id are"
+            "passed in, and google_civic_election_id is set to '0', then simply return a list of voter guides "
+            "that haven't been followed yet. If google_civic_election_id is NOT set to 0, the routine tries to"
+            "figure out which election is being looked at in the voter_device_link or the voter_address.",
         'try_now_link': 'apis_v1:voterGuidesToFollowRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

@@ -744,6 +744,54 @@ class VoterGuideList(models.Model):
         }
         return results
 
+    def retrieve_voter_guides_to_follow_generic(self, organization_we_vote_ids_followed_or_ignored_by_voter,
+                                                search_string,
+                                                maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+        """
+        Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
+        """
+        voter_guide_list = []
+        voter_guide_list_found = False
+        if not positive_value_exists(maximum_number_to_retrieve):
+            maximum_number_to_retrieve = 30
+
+        try:
+            voter_guide_queryset = VoterGuide.objects.all()
+
+            if len(organization_we_vote_ids_followed_or_ignored_by_voter):
+                voter_guide_queryset = voter_guide_queryset.exclude(
+                    organization_we_vote_id__in=organization_we_vote_ids_followed_or_ignored_by_voter)
+
+            if search_string:
+                voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
+                                                                   Q(twitter_handle__icontains=search_string))
+
+            if sort_order == 'desc':
+                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+            else:
+                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
+
+            voter_guide_list = voter_guide_queryset
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDE_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
     def retrieve_all_voter_guides(self):
         voter_guide_list = []
         voter_guide_list_found = False

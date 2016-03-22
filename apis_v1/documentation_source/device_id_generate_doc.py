@@ -40,7 +40,8 @@ def device_id_generate_doc_template_values(url_root):
         'api_slug': 'deviceIdGenerate',
         'api_introduction':
             "Generate a transient unique identifier (device_id - stored on client) "
-            "which ties the device to a persistent voter_id (mapped together and stored on the server).",
+            "which ties the device to a persistent voter_id (mapped together and stored on the server)."
+            "Note: This call does not create a voter account -- that must be done in voterCreate.",
         'try_now_link': 'apis_v1:deviceIdGenerateView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
