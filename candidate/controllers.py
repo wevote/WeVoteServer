@@ -272,6 +272,7 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
                 'we_vote_id':                   candidate.we_vote_id,
                 'ballot_item_display_name':     candidate.candidate_name,
                 'candidate_photo_url':          candidate.fetch_photo_url(),
+                'party':                        candidate.party,
                 'order_on_ballot':              candidate.order_on_ballot,
                 'kind_of_ballot_item':          CANDIDATE,
             }
