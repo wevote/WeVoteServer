@@ -200,7 +200,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
             'politician_id':                candidate_campaign.politician_id,
             'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
             # 'google_civic_candidate_name': candidate_campaign.google_civic_candidate_name,
-            'party':                        candidate_campaign.maplight_id,
+            'party':                        candidate_campaign.party,
             'ocd_division_id':              candidate_campaign.ocd_division_id,
             'state_code':                   candidate_campaign.state_code,
             'candidate_url':                candidate_campaign.candidate_url,

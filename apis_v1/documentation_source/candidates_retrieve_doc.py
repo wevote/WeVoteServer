@@ -58,6 +58,7 @@ def candidates_retrieve_doc_template_values(url_root):
                    '     "we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string,\n' \
                    '     "candidate_photo_url": string,\n' \
+                   '     "party": string,\n' \
                    '     "order_on_ballot": integer,\n' \
                    '   ],\n' \
                    '}'
