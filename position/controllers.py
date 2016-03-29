@@ -9,7 +9,7 @@ from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception, handle_record_not_saved_exception
-from follow.models import FollowOrganizationList
+from follow.models import FollowOrganizationManager, FollowOrganizationList
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from organization.models import OrganizationManager
@@ -322,12 +322,12 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
     if not results['success']:
         position_list = []
         json_data = {
-            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
-            'success': False,
-            'count':            0,
-            'kind_of_ballot_item': "UNKNOWN",
-            'ballot_item_id':   0,
-            'position_list':    position_list,
+            'status':               'VALID_VOTER_DEVICE_ID_MISSING',
+            'success':              False,
+            'count':                0,
+            'kind_of_ballot_item':  "UNKNOWN",
+            'ballot_item_id':       0,
+            'position_list':        position_list,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -335,12 +335,12 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
     if not positive_value_exists(voter_id):
         position_list = []
         json_data = {
-            'status': "VALID_VOTER_ID_MISSING ",
-            'success': False,
-            'count':            0,
-            'kind_of_ballot_item': "UNKNOWN",
-            'ballot_item_id':   0,
-            'position_list':    position_list,
+            'status':               "VALID_VOTER_ID_MISSING ",
+            'success':              False,
+            'count':                0,
+            'kind_of_ballot_item':  "UNKNOWN",
+            'ballot_item_id':       0,
+            'position_list':        position_list,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -516,6 +516,237 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
         'ballot_item_id':           ballot_item_id,
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         'position_list':            position_list,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForOpinionMaker
+                                            organization_id, organization_we_vote_id,
+                                            public_figure_id, public_figure_we_vote_id,
+                                            stance_we_are_looking_for=ANY_STANCE):
+    """
+    We want to return a JSON file with a list of positions held by orgs and public figures the voter follows
+    We retrieve the positions of friends separately (since we have to deal with stricter security with friends.
+    """
+    is_following = False
+    is_ignoring = False
+    opinion_maker_display_name = ''
+    opinion_maker_image_url_https = ''
+    status = ''
+    success = False
+    all_positions_list = []
+
+    if positive_value_exists(organization_id) or positive_value_exists(organization_we_vote_id):
+        kind_of_opinion_maker = ORGANIZATION
+        kind_of_opinion_maker_text = "ORGANIZATION"  # For returning a value via the API
+        opinion_maker_id = organization_id
+        opinion_maker_we_vote_id = organization_we_vote_id
+    elif positive_value_exists(public_figure_id) or positive_value_exists(public_figure_we_vote_id):
+        kind_of_opinion_maker = PUBLIC_FIGURE
+        kind_of_opinion_maker_text = "PUBLIC_FIGURE"
+        opinion_maker_id = public_figure_id
+        opinion_maker_we_vote_id = public_figure_we_vote_id
+    else:
+        kind_of_opinion_maker = UNKNOWN_VOTER_GUIDE
+        kind_of_opinion_maker_text = "UNKNOWN_VOTER_GUIDE"
+        opinion_maker_id = 0
+        opinion_maker_we_vote_id = ''
+
+    position_manager = PositionEnteredManager()
+    # Get voter_id from the voter_device_id so we can know who is supporting/opposing
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        position_list = []
+        json_data = {
+            'status':                           'VALID_VOTER_DEVICE_ID_MISSING_OPINION_MAKER_POSITION_LIST',
+            'success':                          False,
+            'count':                            0,
+            'kind_of_opinion_maker':            kind_of_opinion_maker_text,
+            'opinion_maker_id':                 opinion_maker_id,
+            'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
+            'opinion_maker_display_name':       opinion_maker_display_name,
+            'opinion_maker_image_url_https':    opinion_maker_image_url_https,
+            'is_following':                     is_following,
+            'is_ignoring':                      is_ignoring,
+            'position_list':                    position_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        position_list = []
+        json_data = {
+            'status':                           "VALID_VOTER_ID_MISSING_OPINION_MAKER_POSITION_LIST ",
+            'success':                          False,
+            'count':                            0,
+            'kind_of_opinion_maker':            kind_of_opinion_maker_text,
+            'opinion_maker_id':                 opinion_maker_id,
+            'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
+            'opinion_maker_display_name':       opinion_maker_display_name,
+            'opinion_maker_image_url_https':    opinion_maker_image_url_https,
+            'is_following':                     is_following,
+            'is_ignoring':                      is_ignoring,
+            'position_list':                    position_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    position_list_manager = PositionListManager()
+    opinion_maker_found = False
+    if kind_of_opinion_maker == ORGANIZATION:
+        # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
+        # for this opinion_maker, we retrieve the following so we can get the id and we_vote_id (per the request of
+        # the WebApp team)
+        organization_manager = OrganizationManager()
+        if positive_value_exists(organization_id):
+            results = organization_manager.retrieve_organization_from_id(organization_id)
+        else:
+            results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+
+        if results['organization_found']:
+            organization = results['organization']
+            opinion_maker_id = organization.id
+            opinion_maker_we_vote_id = organization.we_vote_id
+            opinion_maker_display_name = organization.organization_name
+            opinion_maker_image_url_https = organization.organization_photo_url()
+            opinion_maker_found = True
+
+            follow_organization_manager = FollowOrganizationManager()
+            voter_we_vote_id = ''
+            following_results = follow_organization_manager.retrieve_voter_following_org_status(
+                voter_id, voter_we_vote_id, opinion_maker_id, opinion_maker_we_vote_id)
+            if following_results['is_following']:
+                is_following = True
+            elif following_results['is_ignoring']:
+                is_ignoring = True
+
+            all_positions_list = position_list_manager.retrieve_all_positions_for_organization(
+                    organization_id, organization_we_vote_id, stance_we_are_looking_for)
+        else:
+            opinion_maker_id = organization_id
+            opinion_maker_we_vote_id = organization_we_vote_id
+    elif kind_of_opinion_maker == PUBLIC_FIGURE:
+        all_positions_list = position_list_manager.retrieve_all_positions_for_public_figure(
+                public_figure_id, public_figure_we_vote_id, stance_we_are_looking_for)
+
+        # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
+        # for this opinion_maker, we retrieve the following so we can have the id and we_vote_id (per the request of
+        # the WebApp team)
+        # TODO Do we want to give public figures an entry separate from their voter account? Needs to be implemented.
+        # candidate_campaign_manager = CandidateCampaignManager()
+        # if positive_value_exists(candidate_id):
+        #     results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
+        # else:
+        #     results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+        #
+        # if results['candidate_campaign_found']:
+        #     candidate_campaign = results['candidate_campaign']
+        #     ballot_item_id = candidate_campaign.id
+        #     ballot_item_we_vote_id = candidate_campaign.we_vote_id
+        #     opinion_maker_found = True
+        # else:
+        #     ballot_item_id = candidate_id
+        #     ballot_item_we_vote_id = candidate_we_vote_id
+    else:
+        position_list = []
+        json_data = {
+            'status':                           'POSITION_LIST_RETRIEVE_MISSING_OPINION_MAKER_ID',
+            'success':                          False,
+            'count':                            0,
+            'kind_of_opinion_maker':            kind_of_opinion_maker_text,
+            'opinion_maker_id':                 opinion_maker_id,
+            'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
+            'opinion_maker_display_name':       opinion_maker_display_name,
+            'opinion_maker_image_url_https':    opinion_maker_image_url_https,
+            'is_following':                     is_following,
+            'is_ignoring':                      is_ignoring,
+            'position_list':                    position_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    if not opinion_maker_found:
+        position_list = []
+        json_data = {
+            'status':                           'POSITION_LIST_RETRIEVE_OPINION_MAKER_NOT_FOUND',
+            'success':                          False,
+            'count':                            0,
+            'kind_of_opinion_maker':            kind_of_opinion_maker_text,
+            'opinion_maker_id':                 opinion_maker_id,
+            'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
+            'opinion_maker_display_name':       opinion_maker_display_name,
+            'opinion_maker_image_url_https':    opinion_maker_image_url_https,
+            'is_following':                     is_following,
+            'is_ignoring':                      is_ignoring,
+            'position_list':                    position_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    position_list = []
+    for one_position in all_positions_list:
+        # Whose position is it?
+        if positive_value_exists(one_position.candidate_campaign_we_vote_id):
+            kind_of_ballot_item = CANDIDATE
+            ballot_item_id = one_position.candidate_campaign_id
+            ballot_item_we_vote_id = one_position.candidate_campaign_we_vote_id
+            one_position_success = True
+            # Make sure we have this data to display
+            if not positive_value_exists(one_position.ballot_item_display_name) \
+                    or not positive_value_exists(one_position.ballot_item_image_url_https):
+                one_position = position_manager.refresh_cached_position_info(one_position)
+        elif positive_value_exists(one_position.public_figure_we_vote_id):
+            kind_of_ballot_item = MEASURE
+            ballot_item_id = one_position.public_figure_id
+            ballot_item_we_vote_id = one_position.public_figure_we_vote_id
+            one_position_success = True
+            # Make sure we have this data to display
+            if not positive_value_exists(one_position.ballot_item_display_name) \
+                    or not positive_value_exists(one_position.ballot_item_image_url_https):
+                one_position = position_manager.refresh_cached_position_info(one_position)
+        elif positive_value_exists(one_position.public_figure_we_vote_id):
+            kind_of_ballot_item = OFFICE
+            ballot_item_id = one_position.public_figure_id
+            ballot_item_we_vote_id = one_position.public_figure_we_vote_id
+            one_position_success = True
+            # Make sure we have this data to display
+            if not positive_value_exists(one_position.ballot_item_display_name) \
+                    or not positive_value_exists(one_position.ballot_item_image_url_https):
+                one_position = position_manager.refresh_cached_position_info(one_position)
+        else:
+            kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
+            ballot_item_id = None
+            ballot_item_we_vote_id = None
+            one_position_success = False
+
+        if one_position_success:
+            one_position_dict_for_api = {
+                'position_id':                  one_position.id,
+                'position_we_vote_id':          one_position.we_vote_id,
+                'ballot_item_display_name':     one_position.ballot_item_display_name,
+                'ballot_item_image_url_https':  one_position.ballot_item_image_url_https,
+                'kind_of_ballot_item':          kind_of_ballot_item,
+                'ballot_item_id':               ballot_item_id,
+                'ballot_item_we_vote_id':       ballot_item_we_vote_id,
+                'is_support':                   one_position.is_support(),
+                'is_oppose':                    one_position.is_oppose(),
+                'vote_smart_rating':            one_position.vote_smart_rating,
+                'vote_smart_time_span':         one_position.vote_smart_time_span,
+                'last_updated':                 one_position.last_updated(),
+            }
+            position_list.append(one_position_dict_for_api)
+
+    status += ' POSITION_LIST_FOR_OPINION_MAKER_SUCCEEDED'
+    success = True
+    json_data = {
+        'status':                           status,
+        'success':                          success,
+        'count':                            len(position_list),
+        'kind_of_opinion_maker':            kind_of_opinion_maker_text,
+        'opinion_maker_id':                 opinion_maker_id,
+        'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
+        'opinion_maker_display_name':       opinion_maker_display_name,
+        'opinion_maker_image_url_https':    opinion_maker_image_url_https,
+        'is_following':                     is_following,
+        'is_ignoring':                      is_ignoring,
+        'position_list':                    position_list,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

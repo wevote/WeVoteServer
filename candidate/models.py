@@ -269,6 +269,9 @@ class CandidateCampaign(models.Model):
         full_name = self.candidate_name
         return extract_last_name_from_full_name(full_name)
 
+    def party_display(self):
+        return candidate_party_display(self.party)
+
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
@@ -291,7 +294,19 @@ class CandidateCampaign(models.Model):
         super(CandidateCampaign, self).save(*args, **kwargs)
 
 
-#
+def candidate_party_display(raw_party):
+    if raw_party == 'DEM':
+        return 'Democrat'
+    if raw_party == 'Democratic':
+        return 'Democrat'
+    elif raw_party == 'LIB':
+        return 'Libertarian'
+    elif raw_party == 'REP':
+        return 'Republican'
+    else:
+        return raw_party
+
+
 def mimic_google_civic_initials(name):
     modified_name = name.replace(' A ', ' A. ')
     modified_name = modified_name.replace(' B ', ' B. ')

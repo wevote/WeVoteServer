@@ -95,8 +95,8 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         self.assertEqual('voter_guides' in json_data04, True,
                          "voter_guides expected in the voterGuidesToFollowRetrieveView json response but not found")
         self.assertEqual(
-            json_data04['status'], 'NO_VOTER_GUIDES_FOUND',
-            "status: {status} (NO_VOTER_GUIDES_FOUND expected), "
+            json_data04['status'], 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC NO_VOTER_GUIDES_FOUND',
+            "status: {status} ('SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC NO_VOTER_GUIDES_FOUND' expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data04['status'], voter_device_id=json_data04['voter_device_id']))
 

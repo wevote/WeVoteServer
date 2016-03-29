@@ -3,14 +3,14 @@
 # -*- coding: UTF-8 -*-
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
-from candidate.models import CandidateCampaign, CandidateCampaignList
+from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignList
 from django.db import models
 from django.db.models import Q
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
-from measure.models import ContestMeasure, ContestMeasureList
-from office.models import ContestOffice
+from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureList
+from office.models import ContestOffice, ContestOfficeManager
 from organization.models import Organization, OrganizationManager
 from twitter.models import TwitterUser
 from voter.models import Voter, VoterManager
@@ -60,6 +60,9 @@ class PositionEntered(models.Model):
     test = models.BigIntegerField(null=True, blank=True)
     ballot_item_display_name = models.CharField(verbose_name="text name for ballot item",
                                                 max_length=255, null=True, blank=True)
+    # We cache the url to an image for the candidate, measure or office for rapid display
+    ballot_item_image_url_https = models.URLField(verbose_name='url of https image for candidate, measure or office',
+                                                  blank=True, null=True)
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
@@ -600,6 +603,70 @@ class PositionListManager(models.Model):
                 # If we passed in the stance "ANY" it means we want to not filter down the list
                 position_list = position_list.filter(stance=stance_we_are_looking_for)
             # position_list = position_list.filter(election_id=election_id)
+            if len(position_list):
+                position_list_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+
+        if position_list_found:
+            return position_list
+        else:
+            position_list = []
+            return position_list
+
+    def retrieve_all_positions_for_organization(self, organization_id, organization_we_vote_id,
+                                                stance_we_are_looking_for):
+        if stance_we_are_looking_for not \
+                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            position_list = []
+            return position_list
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
+        #  which means we want to return all stances
+
+        if not positive_value_exists(organization_id) and not \
+                positive_value_exists(organization_we_vote_id):
+            position_list = []
+            return position_list
+
+        # Retrieve the support positions for this candidate_campaign_id
+        position_list = []
+        position_list_found = False
+        try:
+            position_list = PositionEntered.objects.order_by('-vote_smart_time_span', '-google_civic_election_id')
+            if positive_value_exists(organization_id):
+                position_list = position_list.filter(organization_id=organization_id)
+            else:
+                position_list = position_list.filter(organization_we_vote_id=organization_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                    position_list = position_list.filter(
+                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+                else:
+                    position_list = position_list.filter(stance=stance_we_are_looking_for)
+            # Limit to positions in the last x years - currently we are not limiting
+            # position_list = position_list.filter(election_id=election_id)
+
+            # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
+            if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                revised_position_list = []
+                for one_position in position_list:
+                    if stance_we_are_looking_for == SUPPORT:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_support():
+                                revised_position_list.append(one_position)
+                        else:
+                            revised_position_list.append(one_position)
+                    elif stance_we_are_looking_for == OPPOSE:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_oppose():
+                                revised_position_list.append(one_position)
+                        else:
+                            revised_position_list.append(one_position)
+                position_list = revised_position_list
+
             if len(position_list):
                 position_list_found = True
         except Exception as e:
@@ -1698,6 +1765,9 @@ class PositionEnteredManager(models.Model):
         return results
 
     def refresh_cached_position_info(self, position_object):
+        position_change = False
+
+        # Start with "speaker" information (Organization, Voter, or Public Figure)
         if positive_value_exists(position_object.organization_we_vote_id):
             if not positive_value_exists(position_object.speaker_display_name) \
                     or not positive_value_exists(position_object.speaker_image_url_https):
@@ -1712,13 +1782,13 @@ class PositionEnteredManager(models.Model):
                         if not positive_value_exists(position_object.speaker_display_name):
                             # speaker_display_name is missing so look it up from source
                             position_object.speaker_display_name = organization.organization_name
+                            position_change = True
                         if not positive_value_exists(position_object.speaker_image_url_https):
                             # speaker_image_url_https is missing so look it up from source
                             position_object.speaker_image_url_https = organization.organization_photo_url()
-                        position_object.save()
+                            position_change = True
                 except Exception as e:
                     pass
-
         elif positive_value_exists(position_object.voter_id):
             if not positive_value_exists(position_object.speaker_display_name):
                 try:
@@ -1730,12 +1800,48 @@ class PositionEnteredManager(models.Model):
                         if not positive_value_exists(position_object.speaker_display_name):
                             # speaker_display_name is missing so look it up from source
                             position_object.speaker_display_name = voter.get_full_name()
-                        position_object.save()
+                            position_change = True
                 except Exception as e:
                     pass
 
         elif positive_value_exists(position_object.public_figure_we_vote_id):
             pass
+
+        # Now move onto "ballot_item" information
+        if not positive_value_exists(position_object.ballot_item_display_name) \
+                or not positive_value_exists(position_object.ballot_item_image_url_https):
+            # Candidate
+            if positive_value_exists(position_object.candidate_campaign_id) or \
+                    positive_value_exists(position_object.candidate_campaign_we_vote_id):
+                try:
+                    # We need to look in the voter table for speaker_display_name
+                    candidate_campaign_manager = CandidateCampaignManager()
+                    results = candidate_campaign_manager.retrieve_candidate_campaign(
+                        position_object.candidate_campaign_id, position_object.candidate_campaign_we_vote_id)
+                    if results['candidate_campaign_found']:
+                        candidate = results['candidate_campaign']
+                        if not positive_value_exists(position_object.ballot_item_display_name):
+                            # ballot_item_display_name is missing so look it up from source
+                            position_object.ballot_item_display_name = candidate.candidate_name
+                            position_change = True
+                        if not positive_value_exists(position_object.ballot_item_image_url_https):
+                            # ballot_item_image_url_https is missing so look it up from source
+                            position_object.ballot_item_image_url_https = candidate.fetch_photo_url()
+                            position_change = True
+                except Exception as e:
+                    pass
+            # Measure
+            elif positive_value_exists(position_object.contest_measure_id) or \
+                    positive_value_exists(position_object.contest_measure_we_vote_id):
+                # TODO DALE Build this out
+                pass
+            # Office
+            elif positive_value_exists(position_object.contest_office_id) or \
+                    positive_value_exists(position_object.contest_office_we_vote_id):
+                pass
+
+        if position_change:
+            position_object.save()
 
         return position_object
 

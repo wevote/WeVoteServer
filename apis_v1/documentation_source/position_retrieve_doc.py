@@ -84,15 +84,18 @@ def position_retrieve_doc_template_values(url_root):
                    '  "position_id": integer (the internal id of the position found),\n' \
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "speaker_display_name": string,\n' \
-                   '  "speaker_display_name": string,\n' \
                    '  "speaker_image_url_https": string,\n' \
                    '  "is_support": boolean,\n' \
                    '  "is_oppose": boolean,\n' \
                    '  "is_information_only": boolean,\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "voter_id": integer,\n' \
+                   '  "vote_smart_rating": string,\n' \
+                   '  "vote_smart_time_span": string,\n' \
                    '  "candidate_we_vote_id": string,\n' \
                    '  "measure_we_vote_id": string,\n' \
+                   '  "office_we_vote_id": string,\n' \
                    '  "stance": string (support/oppose/info only),\n' \
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \

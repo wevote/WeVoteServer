@@ -56,6 +56,15 @@ class OrganizationManager(models.Manager):
         }
         return results
 
+    def retrieve_organization_from_id(self, organization_id):
+        return self.retrieve_organization(organization_id)
+
+    def retrieve_organization_from_we_vote_id(self, organization_we_vote_id):
+        return self.retrieve_organization(0, organization_we_vote_id)
+
+    def retrieve_organization_from_vote_smart_id(self, vote_smart_id):
+        return self.retrieve_organization(0, '', vote_smart_id)
+
     def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None):
         error_result = False
         exception_does_not_exist = False

@@ -8,7 +8,8 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     organization_count_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, \
-    position_like_count_doc, position_list_for_ballot_item_doc, position_oppose_count_for_ballot_item_doc, \
+    position_like_count_doc, position_list_for_ballot_item_doc, position_list_for_opinion_maker_doc, \
+    position_oppose_count_for_ballot_item_doc, \
     position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
     position_public_support_count_for_ballot_item_doc, position_support_count_for_ballot_item_doc, \
     quick_info_retrieve_doc, twitter_sign_in_start_doc, \
@@ -233,6 +234,16 @@ def position_list_for_ballot_item_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = position_list_for_ballot_item_doc.position_list_for_ballot_item_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def position_list_for_opinion_maker_doc_view(request):
+    """
+    Show documentation about positionListForOpinionMaker
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = position_list_for_opinion_maker_doc.position_list_for_opinion_maker_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

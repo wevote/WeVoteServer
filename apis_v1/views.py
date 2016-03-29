@@ -19,7 +19,8 @@ from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api, organizations_followed_retrieve_for_api
-from position.controllers import position_list_for_ballot_item_for_api, position_retrieve_for_api, \
+from position.controllers import position_list_for_ballot_item_for_api, position_list_for_opinion_maker_for_api, \
+    position_retrieve_for_api, \
     position_save_for_api, voter_position_retrieve_for_api, voter_position_comment_save_for_api
 from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
 from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
@@ -41,6 +42,7 @@ from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, 
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
+from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, \
     is_voter_device_id_valid, positive_value_exists
@@ -353,6 +355,43 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
                                                  measure_we_vote_id=measure_we_vote_id,
                                                  stance_we_are_looking_for=stance_we_are_looking_for,
                                                  show_positions_this_voter_follows=show_positions_this_voter_follows)
+
+
+def position_list_for_opinion_maker_view(request):  # positionListForOpinionMaker
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    stance = request.GET.get('stance', ANY_STANCE)
+    if stance in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+        stance_we_are_looking_for = stance
+    else:
+        stance_we_are_looking_for = ANY_STANCE
+    kind_of_opinion_maker = request.GET.get('kind_of_opinion_maker', "")
+    opinion_maker_id = request.GET.get('opinion_maker_id', 0)
+    opinion_maker_we_vote_id = request.GET.get('opinion_maker_we_vote_id', "")
+    if (kind_of_opinion_maker == ORGANIZATION) or (kind_of_opinion_maker == "ORGANIZATION"):
+        organization_id = opinion_maker_id
+        organization_we_vote_id = opinion_maker_we_vote_id
+        public_figure_id = 0
+        public_figure_we_vote_id = ''
+    elif (kind_of_opinion_maker == PUBLIC_FIGURE) or (kind_of_opinion_maker == "PUBLIC_FIGURE"):
+        organization_id = 0
+        organization_we_vote_id = ''
+        public_figure_id = opinion_maker_id
+        public_figure_we_vote_id = opinion_maker_we_vote_id
+    else:
+        organization_id = 0
+        organization_we_vote_id = ''
+        public_figure_id = 0
+        public_figure_we_vote_id = ''
+    return position_list_for_opinion_maker_for_api(voter_device_id=voter_device_id,
+                                                   organization_id=organization_id,
+                                                   organization_we_vote_id=organization_we_vote_id,
+                                                   public_figure_id=public_figure_id,
+                                                   public_figure_we_vote_id=public_figure_we_vote_id,
+                                                   stance_we_are_looking_for=stance_we_are_looking_for)
 
 
 def position_retrieve_view(request):
