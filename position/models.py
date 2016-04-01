@@ -678,6 +678,75 @@ class PositionListManager(models.Model):
             position_list = []
             return position_list
 
+    def retrieve_all_positions_for_voter_simple(self, voter_id=0, voter_we_vote_id='', google_civic_election_id=0):
+        if not positive_value_exists(voter_id) and not positive_value_exists(voter_we_vote_id):
+            position_list = []
+            results = {
+                'status':               'MISSING_VOTER_ID',
+                'success':              False,
+                'position_list_found':  False,
+                'position_list':        position_list,
+            }
+            return results
+
+        # Retrieve all positions for this voter
+        position_list_found = False
+        try:
+            position_list = PositionEntered.objects.all()
+            if positive_value_exists(voter_id):
+                position_list = position_list.filter(voter_id=voter_id)
+            else:
+                position_list = position_list.filter(voter_we_vote_id=voter_we_vote_id)
+            if positive_value_exists(google_civic_election_id):
+                position_list = position_list.filter(google_civic_election_id=google_civic_election_id)
+            position_list = position_list.order_by('-google_civic_election_id')
+
+            if len(position_list):
+                position_list_found = True
+        except Exception as e:
+            position_list = []
+            results = {
+                'status':               'VOTER_POSITION_SEARCH_FAILED',
+                'success':              False,
+                'position_list_found':  False,
+                'position_list':        position_list,
+            }
+            return results
+
+        if position_list_found:
+            simple_position_list = []
+            for position in position_list:
+                if positive_value_exists(position.candidate_campaign_we_vote_id):
+                    ballot_item_we_vote_id = position.candidate_campaign_we_vote_id
+                elif positive_value_exists(position.contest_measure_we_vote_id):
+                    ballot_item_we_vote_id = position.contest_measure_we_vote_id
+                else:
+                    continue
+
+                one_position = {
+                    'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+                    'is_support':               position.is_support(),
+                    'is_oppose':                position.is_oppose(),
+                }
+                simple_position_list.append(one_position)
+
+            results = {
+                'status':               'VOTER_POSITION_LIST_FOUND',
+                'success':              True,
+                'position_list_found':  True,
+                'position_list':        simple_position_list,
+            }
+            return results
+        else:
+            position_list = []
+            results = {
+                'status':               'VOTER_POSITION_LIST_NOT_FOUND',
+                'success':              True,
+                'position_list_found':  False,
+                'position_list':        position_list,
+            }
+            return results
+
     def retrieve_all_positions_for_election(self, google_civic_election_id, stance_we_are_looking_for=ANY_STANCE):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):

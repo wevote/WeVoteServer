@@ -20,8 +20,8 @@ from office.controllers import office_retrieve_for_api
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api, organizations_followed_retrieve_for_api
 from position.controllers import position_list_for_ballot_item_for_api, position_list_for_opinion_maker_for_api, \
-    position_retrieve_for_api, \
-    position_save_for_api, voter_position_retrieve_for_api, voter_position_comment_save_for_api
+    position_retrieve_for_api, position_save_for_api, voter_all_positions_retrieve_for_api, \
+    voter_position_retrieve_for_api, voter_position_comment_save_for_api
 from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
 from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
@@ -1131,6 +1131,21 @@ def voter_position_retrieve_view(request):
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id
+    )
+
+
+def voter_all_positions_retrieve_view(request):
+    """
+    Retrieve a list of all support or oppose positions for one voter. voterAllPositionsRetrieve
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    return voter_all_positions_retrieve_for_api(
+        voter_device_id=voter_device_id,
+        google_civic_election_id=google_civic_election_id
     )
 
 

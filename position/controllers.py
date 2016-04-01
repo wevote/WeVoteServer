@@ -1027,6 +1027,54 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+# We retrieve the position for this voter for one ballot item. Could just be the stance, but for now we are
+# retrieving the entire position
+def voter_all_positions_retrieve_for_api(voter_device_id, google_civic_election_id):
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        json_data = {
+            'status':                   "VOTER_DEVICE_ID_NOT_VALID-VOTER_ALL_POSITIONS",
+            'success':                  False,
+            'position_list_found':      False,
+            'position_list':            [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_ALL_POSITIONS",
+            'success':                  False,
+            'position_list_found':      False,
+            'position_list':            [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    position_list_manager = PositionListManager()
+    voter_we_vote_id = ''
+
+    results = position_list_manager.retrieve_all_positions_for_voter_simple(voter_id, voter_we_vote_id,
+                                                                            google_civic_election_id)
+
+    if results['position_list_found']:
+        position_list = results['position_list']
+        json_data = {
+            'status':                   results['status'],
+            'success':                  True,
+            'position_list_found':      True,
+            'position_list':            position_list,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        json_data = {
+            'status':                   "VOTER_POSITIONS_NOT_FOUND-NONE_EXIST",
+            'success':                  True,
+            'position_list_found':      False,
+            'position_list':            [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 def voter_position_comment_save_for_api(
         voter_device_id, position_id, position_we_vote_id,
         google_civic_election_id,
@@ -1067,7 +1115,7 @@ def voter_position_comment_save_for_api(
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         json_data = {
-            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_POSITION_COMMENT",
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'position_id':              position_id,
