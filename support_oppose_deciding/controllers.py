@@ -2,15 +2,15 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from ballot.controllers import voter_ballot_items_retrieve_for_one_election_for_api
 from ballot.models import CANDIDATE, MEASURE, OFFICE
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateCampaignManager, CandidateCampaignList
 from measure.models import ContestMeasureManager
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList
 import json
-from position.models import SUPPORT, OPPOSE, \
-    PositionEnteredManager, PositionListManager
-from voter.models import fetch_voter_id_from_voter_device_link
+from position.models import SUPPORT, OPPOSE, PositionEnteredManager, PositionListManager
+from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager, VoterDeviceLinkManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists
 
@@ -229,6 +229,163 @@ def position_public_support_count_for_ballot_item_for_api(candidate_id, candidat
     stance_we_are_looking_for = SUPPORT
     return positions_public_count_for_api(candidate_id, candidate_we_vote_id,
                                           measure_id, measure_we_vote_id, stance_we_are_looking_for)
+
+
+def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_election_id=0,
+                                                 show_positions_this_voter_follows=True):
+    """
+    We want to return a JSON file with the a list of the support and oppose counts from the orgs, friends and
+    public figures the voter follows
+    """
+    # Get voter_id from the voter_device_id so we can know whose stars to retrieve
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        json_data = {
+            'status':                   "VALID_VOTER_DEVICE_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS",
+            'success':                  False,
+            'google_civic_election_id': google_civic_election_id,
+            'ballot_item_list':         [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status':                   "VALID_VOTER_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS",
+            'success':                  False,
+            'google_civic_election_id': google_civic_election_id,
+            'ballot_item_list':         [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    if not positive_value_exists(google_civic_election_id):
+        # We must have an election id to proceed -- otherwise we don't know what ballot items to work with
+        voter_device_link_manager = VoterDeviceLinkManager()
+        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+        if voter_device_link_results['voter_device_link_found']:
+            voter_device_link = voter_device_link_results['voter_device_link']
+            if positive_value_exists(voter_device_link.google_civic_election_id):
+                google_civic_election_id = voter_device_link.google_civic_election_id
+        if not positive_value_exists(google_civic_election_id):
+            voter_address_manager = VoterAddressManager()
+            voter_address_results = voter_address_manager.retrieve_address(0, voter_id)
+            if voter_address_results['voter_address_found']:
+                voter_address = voter_address_results['voter_address']
+                if positive_value_exists(voter_address.google_civic_election_id):
+                    google_civic_election_id = voter_address.google_civic_election_id
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    if not positive_value_exists(google_civic_election_id):
+        json_data = {
+            'status':                   "GOOGLE_CIVIC_ELECTION_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS",
+            'success':                  False,
+            'google_civic_election_id': google_civic_election_id,
+            'ballot_item_list':         [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    position_list_manager = PositionListManager()
+    candidate_list_object = CandidateCampaignList()
+
+    follow_organization_list_manager = FollowOrganizationList()
+    organizations_followed_by_voter = \
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+
+    # Get a list of all candidates and measures from this election (in the active election)
+    ballot_item_results = voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id,
+                                                                               google_civic_election_id)
+    ballot_item_list = ballot_item_results['ballot_item_list']
+
+    # The list where we capture results
+    ballot_item_list_results = []
+
+    # ballot_item_list is populated with contest_office and contest_measure entries
+    for one_ballot_item in ballot_item_list:
+        # Retrieve all positions for each ballot item
+        if one_ballot_item['kind_of_ballot_item'] == OFFICE:
+            results = candidate_list_object.retrieve_all_candidates_for_office(0, one_ballot_item['we_vote_id'])
+            success = results['success']
+            candidate_list = results['candidate_list']
+
+            if success:
+                for candidate in candidate_list:
+                    # Loop through all candidates under this office
+                    support_positions_list_for_one_ballot_item = \
+                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
+                            0, candidate.we_vote_id, SUPPORT)
+                    oppose_positions_list_for_one_ballot_item = \
+                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
+                            0, candidate.we_vote_id, OPPOSE)
+                    finalize_results = finalize_support_and_oppose_positions_count(
+                        voter_id, show_positions_this_voter_follows,
+                        organizations_followed_by_voter,
+                        support_positions_list_for_one_ballot_item,
+                        oppose_positions_list_for_one_ballot_item)
+                    one_ballot_item_results = {
+                        'ballot_item_we_vote_id': candidate.we_vote_id,
+                        'support_count': finalize_results['support_positions_count'],
+                        'oppose_count': finalize_results['oppose_positions_count'],
+                    }
+                    ballot_item_list_results.append(one_ballot_item_results)
+        elif one_ballot_item['kind_of_ballot_item'] == MEASURE:
+            support_positions_list_for_one_ballot_item = \
+                position_list_manager.retrieve_all_positions_for_contest_measure(0, one_ballot_item['we_vote_id'],
+                                                                                 SUPPORT)
+            oppose_positions_list_for_one_ballot_item = \
+                position_list_manager.retrieve_all_positions_for_contest_measure(0, one_ballot_item['we_vote_id'],
+                                                                                 OPPOSE)
+            finalize_results = finalize_support_and_oppose_positions_count(
+                voter_id, show_positions_this_voter_follows,
+                organizations_followed_by_voter,
+                support_positions_list_for_one_ballot_item,
+                oppose_positions_list_for_one_ballot_item)
+            one_ballot_item_results = {
+                'ballot_item_we_vote_id': one_ballot_item['we_vote_id'],
+                'support_count': finalize_results['support_positions_count'],
+                'oppose_count': finalize_results['oppose_positions_count'],
+            }
+            ballot_item_list_results.append(one_ballot_item_results)
+        else:
+            # Skip the rest of this loop
+            continue
+
+    results = {
+        'success':                  True,
+        'status':                   "POSITIONS_COUNT_FOR_ALL_BALLOT_ITEMS",
+        'google_civic_election_id': google_civic_election_id,
+        'ballot_item_list':         ballot_item_list_results,
+    }
+    return results
+
+
+def finalize_support_and_oppose_positions_count(voter_id, show_positions_this_voter_follows,
+                                                organizations_followed_by_voter,
+                                                support_positions_list_for_one_ballot_item,
+                                                oppose_positions_list_for_one_ballot_item):
+    position_list_manager = PositionListManager()
+    if show_positions_this_voter_follows:
+        support_positions_followed = position_list_manager.calculate_positions_followed_by_voter(
+            voter_id, support_positions_list_for_one_ballot_item, organizations_followed_by_voter)
+        support_positions_count = len(support_positions_followed)
+
+        oppose_positions_followed = position_list_manager.calculate_positions_followed_by_voter(
+            voter_id, oppose_positions_list_for_one_ballot_item, organizations_followed_by_voter)
+        oppose_positions_count = len(oppose_positions_followed)
+
+    else:
+        support_positions_not_followed = position_list_manager.calculate_positions_not_followed_by_voter(
+            support_positions_list_for_one_ballot_item, organizations_followed_by_voter)
+        support_positions_count = len(support_positions_not_followed)
+
+        oppose_positions_not_followed = position_list_manager.calculate_positions_not_followed_by_voter(
+            oppose_positions_list_for_one_ballot_item, organizations_followed_by_voter)
+        oppose_positions_count = len(oppose_positions_not_followed)
+
+    results = {
+        'support_positions_count':  support_positions_count,
+        'oppose_positions_count':   oppose_positions_count,
+    }
+    return results
 
 
 def positions_public_count_for_api(candidate_id, candidate_we_vote_id, measure_id, measure_we_vote_id,

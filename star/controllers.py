@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import StarItemManager
+from .models import StarItemList, StarItemManager
 from ballot.models import CANDIDATE, MEASURE, OFFICE
 from candidate.models import CandidateCampaignManager
 from django.http import HttpResponse
@@ -367,5 +367,49 @@ def voter_star_status_retrieve_for_api(voter_device_id,
         'ballot_item_id':           0,
         'ballot_item_we_vote_id':   '',
         'kind_of_ballot_item':      '',
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_all_stars_status_retrieve_for_api(voter_device_id):
+    # Get voter_id from the voter_device_id so we can know whose stars to retrieve
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        json_data = {
+            'status':       "VALID_VOTER_DEVICE_ID_MISSING",
+            'success':      False,
+            'star_list':    [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status':       "VALID_VOTER_ID_MISSING",
+            'success':      False,
+            'star_list':    [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    star_item_list = StarItemList()
+    results = star_item_list.retrieve_star_item_list_for_voter(voter_id)
+    status = results['status']
+    success = results['success']
+
+    star_list = []
+    if success:
+        star_item_list = results['star_item_list']
+        for star_item in star_item_list:
+            # Create a list of star information needed by API
+            one_star = {
+                'ballot_item_we_vote_id':   star_item.ballot_item_we_vote_id(),
+                'star_on':                  star_item.is_starred(),
+            }
+            star_list.append(one_star)
+
+    json_data = {
+        'status':       status,
+        'success':      success,
+        'star_list':    star_list,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

@@ -129,11 +129,18 @@ specify the level assigned to each message. You can change this to info items by
 
 ###  Install the C library
 
+Start by changing directories into your WeVoteServer folder:
+
+    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
     $ git clone https://github.com/maxmind/geoip-api-c.git
     $ cd geoip-api-c
     $ ./bootstrap
     $ ./configure
     $ make
+    
+In the "make check" step, you may see some errors like "make[2]: * [install-libLTLIBRARIES] Error 1". 
+These errors won't prevent geoip from working.
+    
     $ make check
     $ make install
     $ cd ..
@@ -142,6 +149,22 @@ On OS X 10.10.5 I got an error (autoreconf: command not found), and had to do th
     
     $ brew install automake
     $ brew install libtool
+    
+    
+#### “libGeoIP.so.1: cannot open..."
+On Amazon Linux (Fedora), if you get a “libGeoIP.so.1: cannot open shared object No such file or directory” error 
+when you run WeVoteServer:
+
+    $ sudo vi /etc/ld.so.conf
+    
+Add on a new line:
+
+    /usr/local/lib
+     
+Then run:
+
+    $ sudo ldconfig
+
 
 ###  Run the command that downloads the GeoLite database from the WeVoteServer root folder (Where this README lives)
 

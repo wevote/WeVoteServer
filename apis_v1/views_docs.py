@@ -12,8 +12,9 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     position_oppose_count_for_ballot_item_doc, \
     position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
     position_public_support_count_for_ballot_item_doc, position_support_count_for_ballot_item_doc, \
-    quick_info_retrieve_doc, twitter_sign_in_start_doc, \
-    voter_address_retrieve_doc, voter_address_save_doc, voter_all_positions_retrieve_doc, \
+    positions_count_for_all_ballot_items_doc, \
+    quick_info_retrieve_doc, twitter_sign_in_start_doc, voter_address_retrieve_doc, \
+    voter_address_save_doc, voter_all_positions_retrieve_doc, voter_all_stars_status_retrieve_doc, \
     voter_ballot_items_retrieve_doc, voter_ballot_items_retrieve_from_google_civic_doc, voter_count_doc, \
     voter_create_doc, voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
     voter_guides_followed_retrieve_doc, \
@@ -311,6 +312,17 @@ def position_public_support_count_for_ballot_item_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def positions_count_for_all_ballot_items_doc_view(request):
+    """
+    Show documentation about positionSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = positions_count_for_all_ballot_items_doc.positions_count_for_all_ballot_items_doc_template_values(
+        url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def quick_info_retrieve_doc_view(request):
     """
     Show documentation about quickInfoRetrieve
@@ -500,6 +512,17 @@ def voter_all_positions_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
 
     template_values = voter_all_positions_retrieve_doc.voter_all_positions_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_all_stars_status_retrieve_doc_view(request):
+    """
+    Show documentation about voterAllStarsStatusRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+
+    template_values = voter_all_stars_status_retrieve_doc.voter_all_stars_status_retrieve_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
