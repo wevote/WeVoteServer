@@ -246,7 +246,7 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
             'google_civic_election_id': google_civic_election_id,
             'ballot_item_list':         [],
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
@@ -256,7 +256,7 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
             'google_civic_election_id': google_civic_election_id,
             'ballot_item_list':         [],
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     if not positive_value_exists(google_civic_election_id):
         # We must have an election id to proceed -- otherwise we don't know what ballot items to work with
@@ -282,7 +282,7 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
             'google_civic_election_id': google_civic_election_id,
             'ballot_item_list':         [],
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     position_list_manager = PositionListManager()
     candidate_list_object = CandidateCampaignList()
@@ -349,13 +349,13 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
             # Skip the rest of this loop
             continue
 
-    results = {
+    json_data = {
         'success':                  True,
         'status':                   "POSITIONS_COUNT_FOR_ALL_BALLOT_ITEMS",
         'google_civic_election_id': google_civic_election_id,
         'ballot_item_list':         ballot_item_list_results,
     }
-    return results
+    return json_data
 
 
 def finalize_support_and_oppose_positions_count(voter_id, show_positions_this_voter_follows,
