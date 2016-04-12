@@ -4,9 +4,11 @@
 
 from candidate.models import CandidateCampaign
 from django.db import models
+from django.db.models import F
+from geopy.geocoders import get_geocoder_for_service
+
 from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
-import usaddress
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
@@ -490,8 +492,8 @@ class BallotReturned(models.Model):
 
     text_for_map_search = models.CharField(max_length=255, blank=False, null=False, verbose_name='address as entered')
 
-    latitude = models.CharField(max_length=255, blank=True, null=True, verbose_name='latitude returned from Google')
-    longitude = models.CharField(max_length=255, blank=True, null=True, verbose_name='longitude returned from Google')
+    latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
+    longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
     normalized_line1 = models.CharField(max_length=255, blank=True, null=True,
                                         verbose_name='normalized address line 1 returned from Google')
     normalized_line2 = models.CharField(max_length=255, blank=True, null=True,
@@ -738,126 +740,34 @@ class BallotReturnedManager(models.Model):
         :param google_civic_election_id:
         :return:
         """
-        exception_does_not_exist = False
-        exception_multiple_object_returned = False
         ballot_returned_found = False
-        ballot_returned = BallotReturned()
-        city = ''
-        state = ''
-        zip_code = ''
-        success = False
+        ballot_returned = None
 
-        address_as_ordered_dict = usaddress.tag(text_for_map_search)
-        # Docs: http://usaddress.readthedocs.org/en/latest/
-        address_element_found = False
-        for one_address in address_as_ordered_dict:
-            if 'PlaceName' in one_address:
-                city = one_address['PlaceName']
-                address_element_found = True
-            if 'StateName' in one_address:
-                state = one_address['StateName']
-                address_element_found = True
-            if 'ZipCode' in one_address:
-                zip_code = one_address['ZipCode']
-                address_element_found = True
-            if address_element_found:
-                break
+        google_client = get_geocoder_for_service('google')()
+        location = google_client.geocode(text_for_map_search)
+        if location is None:
+            status = 'Could not find location matching "{}"'.format(text_for_map_search)
+        else:
+            address = location.address
+            # address has format "line_1, state zip, USA"
+            state = address.split(', ')[-2][:2]
+            ballot = BallotReturned.objects.\
+                filter(normalized_state=state).\
+                annotate(distance=(F('latitude') - location.latitude) ** 2 + (F('longitude') - location.longitude) ** 2).\
+                order_by('distance').first()
 
-        # This is an extremely rudimentary location search for basic testing
-        try:
-            if positive_value_exists(city) or positive_value_exists(state) or positive_value_exists(zip_code):
-                # Start with narrowest search
-                ballot_returned_queryset = BallotReturned.objects.all()
-                if positive_value_exists(google_civic_election_id):
-                    ballot_returned_queryset = ballot_returned_queryset.filter(
-                        google_civic_election_id=google_civic_election_id)
-                # Use both zip and city if they exist
-                if positive_value_exists(city):
-                    ballot_returned_queryset = ballot_returned_queryset.filter(normalized_city__iexact=city)
-                if positive_value_exists(zip_code):
-                    ballot_returned_queryset = ballot_returned_queryset.filter(normalized_zip__iexact=zip_code)
-                if positive_value_exists(state):
-                    ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state)
-                # Return the latest google_civic_election_id first
-                ballot_returned_list = ballot_returned_queryset.order_by('-google_civic_election_id')
-
-                if len(ballot_returned_list):
-                    status = "BALLOT_RETURNED_LIST_FOUND1: {city}, {state} {zip}" \
-                             "".format(city=city, state=state, zip=zip_code)
-                    for ballot_returned in ballot_returned_list:
-                        ballot_returned_found = True
-                        success = True
-                        break
-                elif positive_value_exists(city) or positive_value_exists(state):
-                    # ...and expand the search to city/state if needed
-                    ballot_returned_queryset = BallotReturned.objects.all()
-                    if positive_value_exists(google_civic_election_id):
-                        ballot_returned_queryset = ballot_returned_queryset.filter(
-                            google_civic_election_id=google_civic_election_id)
-                    # Only search by city and/or state
-                    if positive_value_exists(city):
-                        ballot_returned_queryset = ballot_returned_queryset.filter(normalized_city__iexact=city)
-                    if positive_value_exists(state):
-                        ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state)
-                    # Return the latest google_civic_election_id first
-                    ballot_returned_list = ballot_returned_queryset.order_by('-google_civic_election_id')
-
-                    if len(ballot_returned_list):
-                        status = "BALLOT_RETURNED_LIST_FOUND2: {city}, {state} {zip}" \
-                                 "".format(city=city, state=state, zip=zip_code)
-                        for ballot_returned in ballot_returned_list:
-                            ballot_returned_found = True
-                            success = True
-                            break
-                    elif positive_value_exists(state):
-                        # ...and expand the search to just state if needed
-                        ballot_returned_queryset = BallotReturned.objects.all()
-                        if positive_value_exists(google_civic_election_id):
-                            ballot_returned_queryset = ballot_returned_queryset.filter(
-                                google_civic_election_id=google_civic_election_id)
-                        # Only search by state
-                        if positive_value_exists(state):
-                            ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state)
-                        # Return the latest google_civic_election_id first
-                        ballot_returned_list = ballot_returned_queryset.order_by('-google_civic_election_id')
-
-                        if len(ballot_returned_list):
-                            status = "BALLOT_RETURNED_LIST_FOUND2: {city}, {state} {zip}" \
-                                     "".format(city=city, state=state, zip=zip_code)
-                            for ballot_returned in ballot_returned_list:
-                                ballot_returned_found = True
-                                success = True
-                                break
-                        else:
-                            success = True
-                            status = "BALLOT_RETURNED_LIST_NOT_FOUND"
-                    else:
-                        ballot_returned_found = False
-                        success = False
-                        status = "COULD_NOT_RETRIEVE_BALLOT_RETURNED-MISSING_VARIABLES3"
-                else:
-                    ballot_returned_found = False
-                    success = False
-                    status = "COULD_NOT_RETRIEVE_BALLOT_RETURNED-MISSING_VARIABLES2"
+            if ballot is not None:
+                ballot_returned = ballot
+                ballot_returned_found = True
+                status = 'Ballot returned found.'
             else:
-                ballot_returned_found = False
-                success = False
-                status = "COULD_NOT_RETRIEVE_BALLOT_RETURNED-MISSING_VARIABLES1"
+                status = 'No stored ballot matches the state {}.'.format(state)
 
-        except BallotReturned.DoesNotExist:
-            exception_does_not_exist = True
-            success = True
-            status = "BALLOT_RETURNED_NOT_FOUND"
-
-        results = {
-            'success':                  success,
-            'status':                   status,
-            'DoesNotExist':             exception_does_not_exist,
-            'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'ballot_returned_found':    ballot_returned_found,
-            'ballot_returned':          ballot_returned,
+        return {
+            'status': status,
+            'ballot_returned_found': ballot_returned_found,
+            'ballot_returned': ballot_returned,
         }
-        return results
 
 
 class VoterBallotSaved(models.Model):
