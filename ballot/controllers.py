@@ -89,6 +89,12 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
     results = choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id, voter_address)
     status += " " + results['status']
     if not results['voter_ballot_saved_found']:
+        if positive_value_exists(voter_address.text_for_map_search):
+            ballot_caveat = "We could not find a ballot near '{text_for_map_search}'.".format(
+                text_for_map_search=voter_address.text_for_map_search)
+        else:
+            ballot_caveat = "Please save your address so we can find your ballot."
+
         error_json_data = {
             'status':                       status,
             'success':                      True,
@@ -98,7 +104,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
             'google_civic_election_id':     0,
             'text_for_map_search':          voter_address.text_for_map_search,
             'substituted_address_nearby':   '',
-            'ballot_caveat':                '',
+            'ballot_caveat':                ballot_caveat,
             'is_from_substituted_address':  False,
             'is_from_test_ballot':          False,
         }
@@ -181,8 +187,8 @@ def choose_election_and_prepare_ballot_data(voter_device_link, google_civic_elec
         return results
 
     results = {
-        'status':                   "BALLOT_NOT_FOUND_OR_GENERATED",
-        'success':                  False,
+        'status':                   "BALLOT_NOT_FOUND_OR_GENERATED-SUFFICIENT_ADDRESS_PROBABLY_MISSING",
+        'success':                  True,
         'google_civic_election_id': google_civic_election_id,
         'voter_ballot_saved_found': False,
         'voter_ballot_saved':       None,
