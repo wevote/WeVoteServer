@@ -467,14 +467,19 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
             if not positive_value_exists(one_position.speaker_display_name) \
                     or not positive_value_exists(one_position.speaker_image_url_https):
                 one_position = position_manager.refresh_cached_position_info(one_position)
+            speaker_display_name = one_position.speaker_display_name
         elif positive_value_exists(one_position.voter_id):
             speaker_type = VOTER
             speaker_id = one_position.voter_id
             speaker_we_vote_id = one_position.voter_we_vote_id
             one_position_success = True
             # Make sure we have this data to display
-            if not positive_value_exists(one_position.speaker_display_name):
+            if not positive_value_exists(one_position.speaker_display_name) \
+                    or not positive_value_exists(one_position.voter_we_vote_id) \
+                    or not positive_value_exists(one_position.speaker_image_url_https):
                 one_position = position_manager.refresh_cached_position_info(one_position)
+
+            speaker_display_name = "You"
         elif positive_value_exists(one_position.public_figure_we_vote_id):
             speaker_type = PUBLIC_FIGURE
             speaker_id = one_position.public_figure_id
@@ -484,8 +489,10 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
             if not positive_value_exists(one_position.speaker_display_name) \
                     or not positive_value_exists(one_position.speaker_image_url_https):
                 one_position = position_manager.refresh_cached_position_info(one_position)
+            speaker_display_name = one_position.speaker_display_name
         else:
             speaker_type = UNKNOWN_VOTER_GUIDE
+            speaker_display_name = "Unknown"
             speaker_id = None
             speaker_we_vote_id = None
             one_position_success = False
@@ -495,7 +502,7 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
                 'position_id':          one_position.id,
                 'position_we_vote_id':  one_position.we_vote_id,
                 'ballot_item_display_name': one_position.ballot_item_display_name,
-                'speaker_display_name': one_position.speaker_display_name,
+                'speaker_display_name': speaker_display_name,
                 'speaker_image_url_https': one_position.speaker_image_url_https,
                 'speaker_type':         speaker_type,
                 'speaker_id':           speaker_id,
