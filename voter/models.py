@@ -582,7 +582,7 @@ class VoterDeviceLink(models.Model):
     voter_device_id = models.CharField(verbose_name='voter device id',
                                        max_length=255, null=False, blank=False, unique=True)
     # The voter_id associated with voter_device_id
-    voter_id = models.IntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
+    voter_id = models.BigIntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
 
     # The unique ID of the election (provided by Google Civic) that the voter is looking at on this device
     google_civic_election_id = models.PositiveIntegerField(
@@ -799,7 +799,7 @@ class VoterAddress(models.Model):
     # We are relying on built-in Python id field
 
     # The voter_id that owns this address
-    voter_id = models.IntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
+    voter_id = models.BigIntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
     address_type = models.CharField(
         verbose_name="type of address", max_length=1, choices=ADDRESS_TYPE_CHOICES, default=BALLOT_ADDRESS)
 

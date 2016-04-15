@@ -605,7 +605,7 @@ class Organization(models.Model):
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)
     state_served_code = models.CharField(verbose_name="state this organization serves", max_length=2, null=True, blank=True)
     # The vote_smart special interest group sigId for this organization
-    vote_smart_id = models.IntegerField(
+    vote_smart_id = models.BigIntegerField(
         verbose_name="vote smart special interest group id", null=True, blank=True, unique=True)
     organization_description = models.TextField(
         verbose_name="Text description of this organization.", null=True, blank=True)
@@ -631,7 +631,7 @@ class Organization(models.Model):
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
 
-    wikipedia_page_id = models.IntegerField(verbose_name="pageid", null=True, blank=True)
+    wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
     wikipedia_thumbnail_url = models.URLField(verbose_name='url of wikipedia logo thumbnail', blank=True, null=True)

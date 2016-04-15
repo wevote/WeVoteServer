@@ -43,9 +43,9 @@ class BallotItem(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
 
-    google_ballot_placement = models.SmallIntegerField(
+    google_ballot_placement = models.BigIntegerField(
         verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)
-    local_ballot_order = models.SmallIntegerField(
+    local_ballot_order = models.IntegerField(
         verbose_name="locally calculated order this item should appear on the ballot", null=True, blank=True)
 
     # The id for this contest office specific to this server.

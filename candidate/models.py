@@ -157,7 +157,7 @@ class CandidateCampaign(models.Model):
         verbose_name="we vote permanent id for the office this candidate is running for", max_length=255, default=None,
         null=True, blank=True, unique=False)
     # politician (internal) link to local We Vote Politician entry. During setup we need to allow this to be null.
-    politician_id = models.IntegerField(verbose_name="politician unique identifier", null=True, blank=True)
+    politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
     politician_we_vote_id = models.CharField(
         verbose_name="we vote politician id", max_length=255, null=True, blank=True)
@@ -196,7 +196,7 @@ class CandidateCampaign(models.Model):
     # The voice phone number for the candidate's campaign office.
     candidate_phone = models.CharField(verbose_name="candidate campaign phone", max_length=255, null=True, blank=True)
 
-    wikipedia_page_id = models.IntegerField(verbose_name="pageid", null=True, blank=True)
+    wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
     wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
