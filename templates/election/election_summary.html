@@ -33,6 +33,29 @@
     together the measures, races and candidates.
     </p>
 
+{% if ballot_returned_list %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <td></td>
+            <td>Polling Location</td>
+            <td>Text for Map Search</td>
+            <td>Street</td>
+            <td>Voter Id</td>
+        </tr>
+    {% for balot_returned in ballot_returned_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><a href="{% url 'polling_location:polling_location_summary_by_we_vote_id' balot_returned.polling_location_we_vote_id %}">{{ balot_returned.polling_location_we_vote_id }}</a></td>
+            <td>{{ balot_returned.text_for_map_search }}</td>
+            <td>{{ balot_returned.normalized_line1 }}</td>
+            <td>{{ balot_returned.voter_id }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no ballot_returned data found)</p>
+{% endif %}
+
 {% else %}
 
     <h1>No Election Found</h1>

@@ -641,11 +641,17 @@ class VoterGuideList(models.Model):
                      '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
             success = False
 
+        # If we have multiple voter guides for one org, we only want to show the most recent
+        if voter_guide_list_found:
+            voter_guide_list_filtered = self.remove_older_voter_guides_for_each_org(voter_guide_list)
+        else:
+            voter_guide_list_filtered = []
+
         results = {
             'success':                      success,
             'status':                       status,
             'voter_guide_list_found':       voter_guide_list_found,
-            'voter_guide_list':             voter_guide_list,
+            'voter_guide_list':             voter_guide_list_filtered,
         }
         return results
 
@@ -784,13 +790,55 @@ class VoterGuideList(models.Model):
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
+        # If we have multiple voter guides for one org, we only want to show the most recent
+        if voter_guide_list_found:
+            voter_guide_list_filtered = self.remove_older_voter_guides_for_each_org(voter_guide_list)
+        else:
+            voter_guide_list_filtered = []
+
         results = {
             'success':                      success,
             'status':                       status,
             'voter_guide_list_found':       voter_guide_list_found,
-            'voter_guide_list':             voter_guide_list,
+            'voter_guide_list':             voter_guide_list_filtered,
         }
         return results
+
+    def remove_older_voter_guides_for_each_org(self, voter_guide_list):
+        # If we have multiple voter guides for one org, we only want to show the most recent
+        organization_already_reviewed = []
+        organization_with_multiple_voter_guides = []
+        newest_voter_guide_for_org = {}  # Figure out the newest voter guide per org that we should show
+        for one_voter_guide in voter_guide_list:
+            if one_voter_guide.organization_we_vote_id:
+                if one_voter_guide.organization_we_vote_id not in organization_already_reviewed:
+                    organization_already_reviewed.append(one_voter_guide.organization_we_vote_id)
+                # Are we dealing with a time span (instead of google_civic_election_id)?
+                if positive_value_exists(one_voter_guide.vote_smart_time_span):
+                    # Take the first four digits of one_voter_guide.vote_smart_time_span
+                    first_four_digits = convert_to_int(one_voter_guide.vote_smart_time_span[:4])
+                    # And figure out the newest voter guide for each org
+                    if one_voter_guide.organization_we_vote_id in newest_voter_guide_for_org:
+                        # If we are here, it means we have seen this organization once already
+                        if one_voter_guide.organization_we_vote_id not in organization_with_multiple_voter_guides:
+                            organization_with_multiple_voter_guides.append(one_voter_guide.organization_we_vote_id)
+                        # If this voter guide is newer than the one already looked at, update newest_voter_guide_for_org
+                        if first_four_digits > newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id]:
+                            newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id] = first_four_digits
+                    else:
+                        newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id] = first_four_digits
+
+        voter_guide_list_filtered = []
+        for one_voter_guide in voter_guide_list:
+            if one_voter_guide.organization_we_vote_id in organization_with_multiple_voter_guides:
+                first_four_digits = convert_to_int(one_voter_guide.vote_smart_time_span[:4])
+                if newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id] == first_four_digits:
+                    # If this voter guide is the newest from among the organization's voter guides, include in results
+                    voter_guide_list_filtered.append(one_voter_guide)
+            else:
+                voter_guide_list_filtered.append(one_voter_guide)
+
+        return voter_guide_list_filtered
 
     def retrieve_all_voter_guides(self):
         voter_guide_list = []

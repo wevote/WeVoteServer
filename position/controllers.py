@@ -8,6 +8,7 @@ from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
+from election.models import fetch_election_state
 from exception.models import handle_record_not_found_exception, handle_record_not_saved_exception
 from follow.models import FollowOrganizationManager, FollowOrganizationList
 from measure.models import ContestMeasureManager
@@ -192,6 +193,7 @@ def position_save_for_api(
             'is_information_only':      False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
+            'state_code':               '',
             'voter_id':                 0,
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
@@ -219,6 +221,7 @@ def position_save_for_api(
             'is_information_only':      False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
+            'state_code':               '',
             'voter_id':                 0,
             'office_we_vote_id':        office_we_vote_id,
             'candidate_we_vote_id':     candidate_we_vote_id,
@@ -231,6 +234,9 @@ def position_save_for_api(
         }
         return results
 
+    # Look up the state_code from the election
+    state_code = fetch_election_state(google_civic_election_id)
+
     position_manager = PositionEnteredManager()
     save_results = position_manager.update_or_create_position(
         position_id=position_id,
@@ -239,6 +245,7 @@ def position_save_for_api(
         public_figure_we_vote_id=public_figure_we_vote_id,
         voter_we_vote_id=voter_we_vote_id,
         google_civic_election_id=google_civic_election_id,
+        state_code=state_code,
         ballot_item_display_name=ballot_item_display_name,
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
@@ -266,6 +273,7 @@ def position_save_for_api(
             'is_information_only':      position.is_information_only(),
             'organization_we_vote_id':  position.organization_we_vote_id,
             'google_civic_election_id': position.google_civic_election_id,
+            'state_code':               position.state_code,
             'voter_id':                 position.voter_id,
             'office_we_vote_id':        '',  # position.office_we_vote_id,
             'candidate_we_vote_id':     position.candidate_campaign_we_vote_id,
@@ -535,6 +543,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     We want to return a JSON file with a list of positions held by orgs and public figures the voter follows
     We retrieve the positions of friends separately (since we have to deal with stricter security with friends.
     """
+    # TODO DALE Add google_civic_election_id and state_code
     is_following = False
     is_ignoring = False
     opinion_maker_display_name = ''
@@ -732,6 +741,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'kind_of_ballot_item':          kind_of_ballot_item,
                 'ballot_item_id':               ballot_item_id,
                 'ballot_item_we_vote_id':       ballot_item_we_vote_id,
+                'ballot_item_state_code':       one_position.state_code,
                 'is_support':                   one_position.is_support(),
                 'is_oppose':                    one_position.is_oppose(),
                 'vote_smart_rating':            one_position.vote_smart_rating,

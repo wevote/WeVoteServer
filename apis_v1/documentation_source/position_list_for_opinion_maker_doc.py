@@ -22,7 +22,7 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
             'name':         'kind_of_opinion_maker',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The kind of ballot item we want positions for. '
-                            ' (One of these: \'ORGANIZATION\', \'PUBLIC_FIGURE\')\n' \
+                            ' (One of these: \'ORGANIZATION\', \'PUBLIC_FIGURE\')\n'
         },
         {
             'name':         'opinion_maker_id',
@@ -46,6 +46,17 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
             'description':  'Default is ANY_STANCE. '
                             'Other options include SUPPORT, STILL_DECIDING, INFO_ONLY, NO_STANCE, OPPOSE, '
                             'PERCENT_RATING',
+        },
+        {
+            'name':         'google_civic_election_id',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'The unique identifier for a particular election. If not provided, return all positions'
+                            ' for this organization. If this variable is included, state_code will be ignored.',
+        },
+        {
+            'name':         'state_code',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The us state we want ballot item positions for. '
         },
     ]
 

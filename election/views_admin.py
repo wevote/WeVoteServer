@@ -6,6 +6,7 @@ from .controllers import election_remote_retrieve
 from .models import Election
 from .serializers import ElectionSerializer
 from admin_tools.views import redirect_to_sign_in_page
+from ballot.models import BallotReturnedListManager
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -274,13 +275,22 @@ def election_summary_view(request, election_local_id):
     except Election.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except Election.DoesNotExist:
-        # This is fine, create new
+        # This is fine, proceed anyways
         pass
 
     if election_on_stage_found:
+        ballot_returned_list_manager = BallotReturnedListManager()
+        ballot_returned_list_results = ballot_returned_list_manager.retrieve_ballot_returned_list_for_election(
+            election_on_stage.google_civic_election_id)
+
+        if ballot_returned_list_results['success']:
+            ballot_returned_list = ballot_returned_list_results['ballot_returned_list']
+        else:
+            ballot_returned_list = []
         template_values = {
-            'messages_on_stage': messages_on_stage,
-            'election': election_on_stage,
+            'messages_on_stage':    messages_on_stage,
+            'election':             election_on_stage,
+            'ballot_returned_list': ballot_returned_list,
         }
     else:
         template_values = {

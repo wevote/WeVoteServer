@@ -257,3 +257,33 @@ def polling_location_summary_view(request, polling_location_local_id):
             'messages_on_stage': messages_on_stage,
         }
     return render(request, 'polling_location/polling_location_summary.html', template_values)
+
+
+@login_required
+def polling_location_summary_by_we_vote_id_view(request, polling_location_we_vote_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    messages_on_stage = get_messages(request)
+    polling_location_on_stage_found = False
+    polling_location_on_stage = PollingLocation()
+    try:
+        polling_location_on_stage = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
+        polling_location_on_stage_found = True
+    except PollingLocation.MultipleObjectsReturned as e:
+        handle_record_found_more_than_one_exception(e, logger=logger)
+    except PollingLocation.DoesNotExist:
+        # This is fine, create new
+        pass
+
+    if polling_location_on_stage_found:
+        template_values = {
+            'messages_on_stage': messages_on_stage,
+            'polling_location': polling_location_on_stage,
+        }
+    else:
+        template_values = {
+            'messages_on_stage': messages_on_stage,
+        }
+    return render(request, 'polling_location/polling_location_summary.html', template_values)

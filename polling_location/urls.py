@@ -17,4 +17,6 @@ urlpatterns = [
         name='polling_location_edit'),
     url(r'^(?P<polling_location_local_id>[0-9]+)/summary/$', views_admin.polling_location_summary_view,
         name='polling_location_summary'),
+    url(r'^(?P<polling_location_we_vote_id>[0-9a-z]+)/summary/$',
+        views_admin.polling_location_summary_by_we_vote_id_view, name='polling_location_summary_by_we_vote_id'),
 ]

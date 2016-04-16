@@ -257,9 +257,12 @@ class CandidateCampaign(models.Model):
         return self.twitter_url
 
     def get_candidate_state(self):
-        # Pull this from ocdDivisionId
-        ocd_division_id = self.ocd_division_id
-        return extract_state_from_ocd_division_id(ocd_division_id)
+        if self.state_code:
+            return self.state_code
+        else:
+            # Pull this from ocdDivisionId
+            ocd_division_id = self.ocd_division_id
+            return extract_state_from_ocd_division_id(ocd_division_id)
 
     def extract_first_name(self):
         full_name = self.candidate_name

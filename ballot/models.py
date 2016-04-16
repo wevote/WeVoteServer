@@ -770,6 +770,43 @@ class BallotReturnedManager(models.Model):
         }
 
 
+class BallotReturnedListManager(models.Model):
+    """
+    A way to work with a list of ballot_returned entries
+    """
+
+    def retrieve_ballot_returned_list_for_election(self, google_civic_election_id):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+        ballot_returned_list = []
+        ballot_returned_list_found = False
+        try:
+            ballot_returned_queryset = BallotReturned.objects.all()
+            ballot_returned_list = ballot_returned_queryset.filter(
+                google_civic_election_id=google_civic_election_id)
+
+            if len(ballot_returned_list):
+                ballot_returned_list_found = True
+                status = 'BALLOT_RETURNED_LIST_FOUND'
+            else:
+                status = 'NO_BALLOT_RETURNED_LIST_FOUND'
+        except BallotItem.DoesNotExist:
+            # No ballot items found. Not a problem.
+            status = 'NO_BALLOT_RETURNED_LIST_FOUND_DOES_NOT_EXIST'
+            ballot_returned_list = []
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_ballot_returned_list_for_election ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+        results = {
+            'success':                      True if ballot_returned_list_found else False,
+            'status':                       status,
+            'ballot_returned_list_found':   ballot_returned_list_found,
+            'ballot_returned_list':         ballot_returned_list,
+        }
+        return results
+
+
 class VoterBallotSaved(models.Model):
     """
     This is a table with a meta data about a voter's various elections they have looked at and might return to

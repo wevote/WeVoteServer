@@ -92,6 +92,11 @@ def process_candidates_from_structured_json(
         # Make sure we have the minimum variables required to uniquely identify a candidate
         if google_civic_election_id and contest_office_id and candidate_name:
             # NOT using " and ocd_division_id"
+
+            # Make sure there isn't an alternate entry for this election and contest_office
+            # Note: This doesn't deal with Presidential candidates
+            # TODO DALE
+
             updated_candidate_campaign_values = {
                 # Values we search against
                 'google_civic_election_id': google_civic_election_id,

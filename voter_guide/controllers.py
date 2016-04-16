@@ -178,6 +178,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             one_voter_guide = {
                 'we_vote_id': voter_guide.we_vote_id,
                 'google_civic_election_id': voter_guide.google_civic_election_id,
+                'time_span': voter_guide.vote_smart_time_span,
                 'voter_guide_display_name': voter_guide.voter_guide_display_name(),
                 'voter_guide_image_url': voter_guide.voter_guide_image_url(),
                 'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
@@ -562,6 +563,7 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
             one_voter_guide = {
                 'we_vote_id': voter_guide.we_vote_id,
                 'google_civic_election_id': voter_guide.google_civic_election_id,
+                'time_span': voter_guide.vote_smart_time_span,
                 'voter_guide_display_name': voter_guide.voter_guide_display_name(),
                 'voter_guide_image_url': voter_guide.voter_guide_image_url(),
                 'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
@@ -596,7 +598,7 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def retrieve_voter_guides_followed(voter_id):
+def retrieve_voter_guides_followed(voter_id):  # voterGuidesFollowedRetrieve
     voter_guide_list_found = False
 
     follow_organization_list_manager = FollowOrganizationList()

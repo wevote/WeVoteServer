@@ -5,7 +5,7 @@
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.functions import extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
 
 
 TIME_SPAN_LIST = [
@@ -116,3 +116,52 @@ class ElectionManager(models.Model):
             'election_list':    election_list,
         }
         return results
+
+    def retrieve_election(self, google_civic_election_id):
+        google_civic_election_id = convert_to_int(google_civic_election_id)
+
+        election = Election()
+        try:
+            if positive_value_exists(google_civic_election_id):
+                election = Election.objects.get(google_civic_election_id=google_civic_election_id)
+                if election.id:
+                    election_found = True
+                    status = "ELECTION_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID"
+                else:
+                    election_found = False
+                    status = "ELECTION_NOT_FOUND_WITH_GOOGLE_CIVIC_ELECTION_ID"
+                success = True
+            else:
+                election_found = False
+                status = "Insufficient variables included to retrieve one voter guide."
+                success = False
+        except Election.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger)
+            election_found = False
+            status = "ERROR_MORE_THAN_ONE_ELECTION_FOUND"
+            success = False
+        except Election.DoesNotExist:
+            election_found = False
+            status = "ELECTION_NOT_FOUND"
+            success = True
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'election_found':           election_found,
+            'google_civic_election_id': google_civic_election_id,
+            'election':                 election,
+        }
+        return results
+
+
+def fetch_election_state(google_civic_election_id):
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    election_manager = ElectionManager()
+    results = election_manager.retrieve_election(google_civic_election_id)
+    if results['election_found']:
+        election = results['election']
+        return election.get_election_state()
+    else:
+        return ''

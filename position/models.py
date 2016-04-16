@@ -97,6 +97,8 @@ class PositionEntered(models.Model):
                                                 max_length=255, null=True, blank=False, default=0)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
+    # State code
+    state_code = models.CharField(verbose_name="us state of the ballot item position is for", max_length=2, null=True, blank=True)
     # ### Values from Vote Smart ###
     vote_smart_rating_id = models.BigIntegerField(null=True, blank=True, unique=False)
     # Usually in one of these two formats 2015, 2014-2015
@@ -511,7 +513,7 @@ class PositionListManager(models.Model):
         return positions_ignored_by_voter
 
     def retrieve_all_positions_for_candidate_campaign(self, candidate_campaign_id, candidate_campaign_we_vote_id,
-                                                      stance_we_are_looking_for):
+                                                      stance_we_are_looking_for, most_recent_only=True):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -569,14 +571,23 @@ class PositionListManager(models.Model):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
-        if position_list_found:
-            return position_list
+        # If we have multiple positions for one org, we only want to show the most recent.
+        if most_recent_only:
+            if position_list_found:
+                position_list_filtered = self.remove_older_positions_for_each_org(position_list)
+            else:
+                position_list_filtered = []
         else:
-            position_list = []
-            return position_list
+            position_list_filtered = position_list
+
+        if position_list_found:
+            return position_list_filtered
+        else:
+            position_list_filtered = []
+            return position_list_filtered
 
     def retrieve_all_positions_for_contest_measure(self, contest_measure_id, contest_measure_we_vote_id,
-                                                   stance_we_are_looking_for):
+                                                   stance_we_are_looking_for, most_recent_only=True):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -608,11 +619,20 @@ class PositionListManager(models.Model):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
-        if position_list_found:
-            return position_list
+        # If we have multiple positions for one org, we only want to show the most recent.
+        if most_recent_only:
+            if position_list_found:
+                position_list_filtered = self.remove_older_positions_for_each_org(position_list)
+            else:
+                position_list_filtered = []
         else:
-            position_list = []
-            return position_list
+            position_list_filtered = position_list
+
+        if position_list_found:
+            return position_list_filtered
+        else:
+            position_list_filtered = []
+            return position_list_filtered
 
     def retrieve_all_positions_for_organization(self, organization_id, organization_we_vote_id,
                                                 stance_we_are_looking_for):
@@ -804,6 +824,42 @@ class PositionListManager(models.Model):
         else:
             position_list = []
             return position_list
+
+    def remove_older_positions_for_each_org(self, position_list):
+        # If we have multiple positions for one org, we only want to show the most recent
+        organization_already_reviewed = []
+        organization_with_multiple_positions = []
+        newest_position_for_org = {}  # Figure out the newest position per org that we should show
+        for one_position in position_list:
+            if one_position.organization_we_vote_id:
+                if one_position.organization_we_vote_id not in organization_already_reviewed:
+                    organization_already_reviewed.append(one_position.organization_we_vote_id)
+                # Are we dealing with a time span (instead of google_civic_election_id)?
+                if positive_value_exists(one_position.vote_smart_time_span):
+                    # Take the first four digits of one_position.vote_smart_time_span
+                    first_four_digits = convert_to_int(one_position.vote_smart_time_span[:4])
+                    # And figure out the newest position for each org
+                    if one_position.organization_we_vote_id in newest_position_for_org:
+                        # If we are here, it means we have seen this organization once already
+                        if one_position.organization_we_vote_id not in organization_with_multiple_positions:
+                            organization_with_multiple_positions.append(one_position.organization_we_vote_id)
+                        # If this position is newer than the one already looked at, update newest_position_for_org
+                        if first_four_digits > newest_position_for_org[one_position.organization_we_vote_id]:
+                            newest_position_for_org[one_position.organization_we_vote_id] = first_four_digits
+                    else:
+                        newest_position_for_org[one_position.organization_we_vote_id] = first_four_digits
+
+        position_list_filtered = []
+        for one_position in position_list:
+            if one_position.organization_we_vote_id in organization_with_multiple_positions:
+                first_four_digits = convert_to_int(one_position.vote_smart_time_span[:4])
+                if newest_position_for_org[one_position.organization_we_vote_id] == first_four_digits:
+                    # If this position is the newest from among the organization's positions, include in results
+                    position_list_filtered.append(one_position)
+            else:
+                position_list_filtered.append(one_position)
+
+        return position_list_filtered
 
     def retrieve_public_positions_count_for_candidate_campaign(self, candidate_campaign_id,
                                                                candidate_campaign_we_vote_id,
@@ -1306,6 +1362,7 @@ class PositionEnteredManager(models.Model):
             public_figure_we_vote_id=False,
             voter_we_vote_id=False,
             google_civic_election_id=False,
+            state_code=False,
             ballot_item_display_name=False,
             office_we_vote_id=False,
             candidate_we_vote_id=False,
@@ -1369,6 +1426,8 @@ class PositionEnteredManager(models.Model):
                         position_on_stage.fetch_organization_id_from_we_vote_id(organization_we_vote_id)
                 if google_civic_election_id:
                     position_on_stage.google_civic_election_id = google_civic_election_id
+                if state_code:
+                    position_on_stage.state_code = state_code
                 if ballot_item_display_name:
                     position_on_stage.ballot_item_display_name = ballot_item_display_name
                 if office_we_vote_id:
@@ -1740,6 +1799,9 @@ class PositionEnteredManager(models.Model):
                 if google_civic_election_id is False:
                     google_civic_election_id = None
 
+                if state_code is False:
+                    state_code = None
+
                 if ballot_item_display_name is False:
                     ballot_item_display_name = None
 
@@ -1797,6 +1859,7 @@ class PositionEnteredManager(models.Model):
                     voter_we_vote_id=voter_we_vote_id,
                     voter_id=voter_id,
                     google_civic_election_id=google_civic_election_id,
+                    state_code=state_code,
                     ballot_item_display_name=ballot_item_display_name,
                     contest_office_we_vote_id=office_we_vote_id,
                     contest_office_id=contest_office_id,
@@ -1888,7 +1951,8 @@ class PositionEnteredManager(models.Model):
 
         # Now move onto "ballot_item" information
         if not positive_value_exists(position_object.ballot_item_display_name) \
-                or not positive_value_exists(position_object.ballot_item_image_url_https):
+                or not positive_value_exists(position_object.ballot_item_image_url_https) \
+                or not positive_value_exists(position_object.state_code):
             # Candidate
             if positive_value_exists(position_object.candidate_campaign_id) or \
                     positive_value_exists(position_object.candidate_campaign_we_vote_id):
@@ -1906,6 +1970,10 @@ class PositionEnteredManager(models.Model):
                         if not positive_value_exists(position_object.ballot_item_image_url_https):
                             # ballot_item_image_url_https is missing so look it up from source
                             position_object.ballot_item_image_url_https = candidate.fetch_photo_url()
+                            position_change = True
+                        if not positive_value_exists(position_object.state_code):
+                            # ballot_item_image_url_https is missing so look it up from source
+                            position_object.state_code = candidate.get_candidate_state()
                             position_change = True
                 except Exception as e:
                     pass
