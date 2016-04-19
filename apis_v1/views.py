@@ -374,6 +374,7 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
     opinion_maker_we_vote_id = request.GET.get('opinion_maker_we_vote_id', "")
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', "")
+    filter_for_voter = request.GET.get('filter_for_voter', True)
     if (kind_of_opinion_maker == ORGANIZATION) or (kind_of_opinion_maker == "ORGANIZATION"):
         organization_id = opinion_maker_id
         organization_we_vote_id = opinion_maker_we_vote_id
@@ -389,13 +390,15 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
         organization_we_vote_id = ''
         public_figure_id = 0
         public_figure_we_vote_id = ''
-    # TODO DALE Add google_civic_election_id and state_code
     return position_list_for_opinion_maker_for_api(voter_device_id=voter_device_id,
                                                    organization_id=organization_id,
                                                    organization_we_vote_id=organization_we_vote_id,
                                                    public_figure_id=public_figure_id,
                                                    public_figure_we_vote_id=public_figure_we_vote_id,
-                                                   stance_we_are_looking_for=stance_we_are_looking_for)
+                                                   stance_we_are_looking_for=stance_we_are_looking_for,
+                                                   filter_for_voter=filter_for_voter,
+                                                   google_civic_election_id=google_civic_election_id,
+                                                   state_code=state_code)
 
 
 def position_retrieve_view(request):

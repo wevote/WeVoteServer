@@ -93,9 +93,11 @@ def process_candidates_from_structured_json(
         if google_civic_election_id and contest_office_id and candidate_name:
             # NOT using " and ocd_division_id"
 
-            # Make sure there isn't an alternate entry for this election and contest_office
-            # Note: This doesn't deal with Presidential candidates
-            # TODO DALE
+            # Make sure there isn't an alternate entry for this election and contest_office (under a similar but
+            # slightly different name TODO
+            # Note: This doesn't deal with duplicate Presidential candidates. These duplicates are caused because
+            # candidates are tied to a particular google_civic_election_id, so there is a different candidate entry
+            # for each Presidential candidate for each state.
 
             updated_candidate_campaign_values = {
                 # Values we search against

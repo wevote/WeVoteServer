@@ -32,6 +32,9 @@ class VoterGuideManager(models.Manager):
     """
     def update_or_create_organization_voter_guide_by_election_id(self, organization_we_vote_id,
                                                                  google_civic_election_id):
+        """
+        This creates voter_guides, and also refreshes voter guides with updated organization data
+        """
         google_civic_election_id = convert_to_int(google_civic_election_id)
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
@@ -57,7 +60,10 @@ class VoterGuideManager(models.Manager):
                         'organization_we_vote_id':  organization_we_vote_id,
                         # The rest of the values
                         'voter_guide_owner_type':   voter_guide_owner_type,
+                        'image_url':                organization.organization_photo_url(),
                         'twitter_handle':           organization.organization_twitter_handle,
+                        'twitter_description':      organization.twitter_description,
+                        'twitter_followers_count':  organization.twitter_followers_count,
                         'display_name':             organization.organization_name,
                     }
                 else:
@@ -111,6 +117,10 @@ class VoterGuideManager(models.Manager):
             # Now update voter_guide
             try:
                 if organization_found:
+                    if organization.twitter_followers_count is None:
+                        twitter_followers_count = 0
+                    else:
+                        twitter_followers_count = convert_to_int(organization.twitter_followers_count)
                     updated_values = {
                         # Values we search against below
                         'vote_smart_time_span':     vote_smart_time_span,
@@ -119,6 +129,9 @@ class VoterGuideManager(models.Manager):
                         'voter_guide_owner_type':   voter_guide_owner_type,
                         'twitter_handle':           organization.organization_twitter_handle,
                         'display_name':             organization.organization_name,
+                        'image_url':                organization.organization_photo_url(),
+                        'twitter_description':      organization.twitter_description,
+                        'twitter_followers_count':  twitter_followers_count,
                     }
                 else:
                     updated_values = {
@@ -419,6 +432,72 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
+    def refresh_cached_voter_guide_info(self, voter_guide):
+        """
+        Make sure that the voter guide information has been updated with the latest information in the organization
+        table. NOTE: Dale started building this routine, and then discovered
+        that update_or_create_organization_voter_guide_by_election_id does this "refresh" function
+        """
+        voter_guide_change = False
+
+        # Start with "speaker" information (Organization, Voter, or Public Figure)
+        if positive_value_exists(voter_guide.organization_we_vote_id):
+            if not positive_value_exists(voter_guide.display_name) \
+                    or not positive_value_exists(voter_guide.image_url) \
+                    or not positive_value_exists(voter_guide.twitter_handle) \
+                    or not positive_value_exists(voter_guide.twitter_description):
+                try:
+                    # We need to look in the organization table for display_name & image_url
+                    organization_manager = OrganizationManager()
+                    organization_id = 0
+                    results = organization_manager.retrieve_organization(organization_id,
+                                                                         voter_guide.organization_we_vote_id)
+                    if results['organization_found']:
+                        organization = results['organization']
+                        if not positive_value_exists(voter_guide.speaker_display_name):
+                            # speaker_display_name is missing so look it up from source
+                            voter_guide.speaker_display_name = organization.organization_name
+                            voter_guide_change = True
+                        if not positive_value_exists(voter_guide.speaker_image_url_https):
+                            # speaker_image_url_https is missing so look it up from source
+                            voter_guide.speaker_image_url_https = organization.organization_photo_url()
+                            voter_guide_change = True
+                except Exception as e:
+                    pass
+        elif positive_value_exists(voter_guide.voter_id):
+            pass  # The following to be updated
+            # if not positive_value_exists(voter_guide.speaker_display_name) or \
+            #         not positive_value_exists(voter_guide.voter_we_vote_id) or \
+            #         not positive_value_exists(voter_guide.speaker_image_url_https):
+            #     try:
+            #         # We need to look in the voter table for speaker_display_name
+            #         voter_manager = VoterManager()
+            #         results = voter_manager.retrieve_voter_by_id(voter_guide.voter_id)
+            #         if results['voter_found']:
+            #             voter = results['voter']
+            #             if not positive_value_exists(voter_guide.speaker_display_name):
+            #                 # speaker_display_name is missing so look it up from source
+            #                 voter_guide.speaker_display_name = voter.get_full_name()
+            #                 voter_guide_change = True
+            #             if not positive_value_exists(voter_guide.voter_we_vote_id):
+            #                 # speaker_we_vote_id is missing so look it up from source
+            #                 voter_guide.voter_we_vote_id = voter.we_vote_id
+            #                 voter_guide_change = True
+            #             if not positive_value_exists(voter_guide.speaker_image_url_https):
+            #                 # speaker_image_url_https is missing so look it up from source
+            #                 voter_guide.speaker_image_url_https = voter.voter_photo_url()
+            #                 voter_guide_change = True
+            #     except Exception as e:
+            #         pass
+
+        elif positive_value_exists(voter_guide.public_figure_we_vote_id):
+            pass
+
+        if voter_guide_change:
+            voter_guide.save()
+
+        return voter_guide
+
 
 class VoterGuide(models.Model):
     # We are relying on built-in Python id field
@@ -471,8 +550,10 @@ class VoterGuide(models.Model):
         default=ORGANIZATION)
 
     twitter_handle = models.CharField(verbose_name='twitter screen_name', max_length=255, null=True, unique=False)
+    twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
+                                           max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
-                                                  null=False, blank=True, default=0)
+                                                  null=True, blank=True, default=0)
 
     # We usually cache the voter guide name, but in case we haven't, we force the lookup
     def voter_guide_display_name(self):

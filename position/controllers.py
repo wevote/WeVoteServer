@@ -538,20 +538,22 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
 def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForOpinionMaker
                                             organization_id, organization_we_vote_id,
                                             public_figure_id, public_figure_we_vote_id,
-                                            stance_we_are_looking_for=ANY_STANCE):
+                                            stance_we_are_looking_for=ANY_STANCE,
+                                            filter_for_voter=True,
+                                            google_civic_election_id=0,
+                                            state_code=''):
     """
-    We want to return a JSON file with a list of positions held by orgs and public figures the voter follows
-    We retrieve the positions of friends separately (since we have to deal with stricter security with friends.
+    We want to return a JSON file with a list of positions held by orgs and public figures
+    We retrieve the positions of friends separately (since we have to deal with stricter security with friends).
     """
-    # TODO DALE Add google_civic_election_id and state_code
     is_following = False
     is_ignoring = False
     opinion_maker_display_name = ''
     opinion_maker_image_url_https = ''
     status = ''
-    success = False
     all_positions_list = []
 
+    # Convert incoming variables to "opinion_maker"
     if positive_value_exists(organization_id) or positive_value_exists(organization_we_vote_id):
         kind_of_opinion_maker = ORGANIZATION
         kind_of_opinion_maker_text = "ORGANIZATION"  # For returning a value via the API
@@ -584,6 +586,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'opinion_maker_image_url_https':    opinion_maker_image_url_https,
             'is_following':                     is_following,
             'is_ignoring':                      is_ignoring,
+            'google_civic_election_id':         google_civic_election_id,
+            'state_code':                       state_code,
             'position_list':                    position_list,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -602,6 +606,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'opinion_maker_image_url_https':    opinion_maker_image_url_https,
             'is_following':                     is_following,
             'is_ignoring':                      is_ignoring,
+            'google_civic_election_id':         google_civic_election_id,
+            'state_code':                       state_code,
             'position_list':                    position_list,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -636,13 +642,15 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 is_ignoring = True
 
             all_positions_list = position_list_manager.retrieve_all_positions_for_organization(
-                    organization_id, organization_we_vote_id, stance_we_are_looking_for)
+                    organization_id, organization_we_vote_id, stance_we_are_looking_for,
+                    filter_for_voter, voter_device_id, google_civic_election_id, state_code)
         else:
             opinion_maker_id = organization_id
             opinion_maker_we_vote_id = organization_we_vote_id
     elif kind_of_opinion_maker == PUBLIC_FIGURE:
         all_positions_list = position_list_manager.retrieve_all_positions_for_public_figure(
-                public_figure_id, public_figure_we_vote_id, stance_we_are_looking_for)
+                public_figure_id, public_figure_we_vote_id, stance_we_are_looking_for,
+                filter_for_voter, voter_device_id, google_civic_election_id, state_code)
 
         # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
         # for this opinion_maker, we retrieve the following so we can have the id and we_vote_id (per the request of
@@ -675,6 +683,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'opinion_maker_image_url_https':    opinion_maker_image_url_https,
             'is_following':                     is_following,
             'is_ignoring':                      is_ignoring,
+            'google_civic_election_id':         google_civic_election_id,
+            'state_code':                       state_code,
             'position_list':                    position_list,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -692,6 +702,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'opinion_maker_image_url_https':    opinion_maker_image_url_https,
             'is_following':                     is_following,
             'is_ignoring':                      is_ignoring,
+            'google_civic_election_id':         google_civic_election_id,
+            'state_code':                       state_code,
             'position_list':                    position_list,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
@@ -704,28 +716,16 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             ballot_item_id = one_position.candidate_campaign_id
             ballot_item_we_vote_id = one_position.candidate_campaign_we_vote_id
             one_position_success = True
-            # Make sure we have this data to display
-            if not positive_value_exists(one_position.ballot_item_display_name) \
-                    or not positive_value_exists(one_position.ballot_item_image_url_https):
-                one_position = position_manager.refresh_cached_position_info(one_position)
         elif positive_value_exists(one_position.public_figure_we_vote_id):
             kind_of_ballot_item = MEASURE
             ballot_item_id = one_position.public_figure_id
             ballot_item_we_vote_id = one_position.public_figure_we_vote_id
             one_position_success = True
-            # Make sure we have this data to display
-            if not positive_value_exists(one_position.ballot_item_display_name) \
-                    or not positive_value_exists(one_position.ballot_item_image_url_https):
-                one_position = position_manager.refresh_cached_position_info(one_position)
         elif positive_value_exists(one_position.public_figure_we_vote_id):
             kind_of_ballot_item = OFFICE
             ballot_item_id = one_position.public_figure_id
             ballot_item_we_vote_id = one_position.public_figure_we_vote_id
             one_position_success = True
-            # Make sure we have this data to display
-            if not positive_value_exists(one_position.ballot_item_display_name) \
-                    or not positive_value_exists(one_position.ballot_item_image_url_https):
-                one_position = position_manager.refresh_cached_position_info(one_position)
         else:
             kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
             ballot_item_id = None
@@ -733,6 +733,11 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             one_position_success = False
 
         if one_position_success:
+            # Make sure we have this data to display. If we don't, refresh PositionEntered table from other tables.
+            if not positive_value_exists(one_position.ballot_item_display_name) \
+                    or not positive_value_exists(one_position.ballot_item_image_url_https) \
+                    or not positive_value_exists(one_position.state_code):
+                one_position = position_manager.refresh_cached_position_info(one_position)
             one_position_dict_for_api = {
                 'position_id':                  one_position.id,
                 'position_we_vote_id':          one_position.we_vote_id,
@@ -746,6 +751,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'is_oppose':                    one_position.is_oppose(),
                 'vote_smart_rating':            one_position.vote_smart_rating,
                 'vote_smart_time_span':         one_position.vote_smart_time_span,
+                'google_civic_election_id':     one_position.google_civic_election_id,
                 'last_updated':                 one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
@@ -763,6 +769,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         'opinion_maker_image_url_https':    opinion_maker_image_url_https,
         'is_following':                     is_following,
         'is_ignoring':                      is_ignoring,
+        'google_civic_election_id':         google_civic_election_id,
+        'state_code':                       state_code,
         'position_list':                    position_list,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')

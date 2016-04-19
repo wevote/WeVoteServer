@@ -4,6 +4,7 @@
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
 from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignList
+from ballot.controllers import choose_election_from_existing_data
 from django.db import models
 from django.db.models import Q
 from election.models import Election
@@ -13,7 +14,7 @@ from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasure
 from office.models import ContestOffice, ContestOfficeManager
 from organization.models import Organization, OrganizationManager
 from twitter.models import TwitterUser
-from voter.models import Voter, VoterManager
+from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_position_integer, fetch_site_unique_id_prefix
@@ -635,7 +636,9 @@ class PositionListManager(models.Model):
             return position_list_filtered
 
     def retrieve_all_positions_for_organization(self, organization_id, organization_we_vote_id,
-                                                stance_we_are_looking_for):
+                                                stance_we_are_looking_for,
+                                                filter_for_voter, voter_device_id,
+                                                google_civic_election_id, state_code):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -666,8 +669,44 @@ class PositionListManager(models.Model):
                         Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
                 else:
                     position_list = position_list.filter(stance=stance_we_are_looking_for)
-            # Limit to positions in the last x years - currently we are not limiting
-            # position_list = position_list.filter(election_id=election_id)
+
+            # We can filter by only one of these
+            if positive_value_exists(filter_for_voter):  # This is the default option
+                # If we can figure out the google_civic_election_id, only return opinions related to this election
+                # Look in the places we cache google_civic_election_id
+                google_civic_election_id = 0
+                voter_device_link_manager = VoterDeviceLinkManager()
+                voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+                voter_device_link = voter_device_link_results['voter_device_link']
+                if voter_device_link_results['voter_device_link_found']:
+                    voter_id = voter_device_link.voter_id
+                    voter_address_manager = VoterAddressManager()
+                    voter_address_results = voter_address_manager.retrieve_address(0, voter_id)
+                    if voter_address_results['voter_address_found']:
+                        voter_address = voter_address_results['voter_address']
+                    else:
+                        voter_address = VoterAddress()
+                else:
+                    voter_address = VoterAddress()
+                results = choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address)
+                google_civic_election_id = results['google_civic_election_id']
+
+                if positive_value_exists(google_civic_election_id):
+                    all_positions_for_this_election = self.retrieve_all_positions_for_election(
+                        google_civic_election_id, stance_we_are_looking_for)
+                    ids_for_all_positions_for_this_election = []
+                    for one_position in all_positions_for_this_election:
+                        ids_for_all_positions_for_this_election.append(one_position.id)
+                    # Limit positions we can retrieve for an org to only the items in this election
+                    position_list = position_list.filter(id__in=ids_for_all_positions_for_this_election)
+
+                # Else, figure out what state the person is in and show opinions to any item in the state
+            elif positive_value_exists(google_civic_election_id):
+                # Please note that this option doesn't catch Vote Smart ratings, which are not
+                # linked by google_civic_election_id
+                position_list = position_list.filter(google_civic_election_id=google_civic_election_id)
+            elif positive_value_exists(state_code):
+                position_list = position_list.filter(state_code__iexact=state_code)
 
             # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
             if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
@@ -697,6 +736,15 @@ class PositionListManager(models.Model):
         else:
             position_list = []
             return position_list
+
+    def retrieve_all_positions_for_public_figure(self, public_figure_id, public_figure_we_vote_id,
+                                                 stance_we_are_looking_for,
+                                                 filter_for_voter, voter_device_id,
+                                                 google_civic_election_id, state_code):
+        # TODO DALE Implement this: retrieve_all_positions_for_public_figure,
+        # model after retrieve_all_positions_for_organization
+        position_list = []
+        return position_list
 
     def retrieve_all_positions_for_voter_simple(self, voter_id=0, voter_we_vote_id='', google_civic_election_id=0):
         if not positive_value_exists(voter_id) and not positive_value_exists(voter_we_vote_id):

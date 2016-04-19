@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import VoterGuideList, VoterGuideManager
+from .models import VoterGuide, VoterGuideList, VoterGuideManager
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -164,6 +164,40 @@ def generate_voter_guides_for_one_election_view(request):
                          '{voter_guide_created_count} voter guides created, '
                          '{voter_guide_updated_count} updated.'.format(
                              voter_guide_created_count=voter_guide_created_count,
+                             voter_guide_updated_count=voter_guide_updated_count,
+                         ))
+    return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()))
+
+
+@login_required
+def refresh_existing_voter_guides_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    voter_guide_updated_count = 0
+
+    # Cycle through existing voter_guides
+    voter_guide_list_manager = VoterGuideList()
+    voter_guide_manager = VoterGuideManager()
+    results = voter_guide_list_manager.retrieve_all_voter_guides()
+    if results['voter_guide_list_found']:
+        voter_guide_list = results['voter_guide_list']
+        for voter_guide in voter_guide_list:
+            if positive_value_exists(voter_guide.organization_we_vote_id):
+                if positive_value_exists(voter_guide.google_civic_election_id):
+                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                        voter_guide.organization_we_vote_id, voter_guide.google_civic_election_id)
+                    if results['success']:
+                        voter_guide_updated_count += 1
+                elif positive_value_exists(voter_guide.vote_smart_time_span):
+                    results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
+                        voter_guide.organization_we_vote_id, voter_guide.vote_smart_time_span)
+                    if results['success']:
+                        voter_guide_updated_count += 1
+
+    messages.add_message(request, messages.INFO,
+                         '{voter_guide_updated_count} updated.'.format(
                              voter_guide_updated_count=voter_guide_updated_count,
                          ))
     return HttpResponseRedirect(reverse('voter_guide:voter_guide_list', args=()))
