@@ -4,6 +4,7 @@
 
 # See also WeVoteServer/twitter/controllers.py for routines that manage internal twitter data
 
+from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import Organization, OrganizationManager
@@ -48,9 +49,38 @@ class GetOutOfLoopLocal(Exception):
     pass
 
 
-def refresh_twitter_details(organization):
+def refresh_twitter_candidate_details(candidate_campaign):
+    candidate_campaign_manager = CandidateCampaignManager()
+
+    if not candidate_campaign:
+        status = "TWITTER_CANDIDATE_DETAILS_NOT_RETRIEVED-CANDIDATE_MISSING"
+        results = {
+            'success':                  False,
+            'status':                   status,
+        }
+        return results
+
+    if candidate_campaign.candidate_twitter_handle:
+        status = "TWITTER_CANDIDATE_DETAILS-REACHING_OUT_TO_TWITTER"
+        results = retrieve_twitter_user_info(candidate_campaign.candidate_twitter_handle)
+
+        if results['success']:
+            status = "TWITTER_CANDIDATE_DETAILS_RETRIEVED_FROM_TWITTER"
+            save_results = candidate_campaign_manager.update_candidate_twitter_details(
+                candidate_campaign, results['twitter_json'])
+    else:
+        status = "TWITTER_CANDIDATE_DETAILS-CLEARING_DETAILS"
+        save_results = candidate_campaign_manager.clear_candidate_twitter_details(candidate_campaign)
+
+    results = {
+        'success':                  True,
+        'status':                   status,
+    }
+    return results
+
+
+def refresh_twitter_organization_details(organization):
     organization_manager = OrganizationManager()
-    status = "ENTERING_REFRESH_TWITTER_DETAILS"
 
     if not organization:
         status = "ORGANIZATION_TWITTER_DETAILS_NOT_RETRIEVED-ORG_MISSING"

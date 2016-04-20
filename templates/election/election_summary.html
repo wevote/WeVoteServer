@@ -42,13 +42,13 @@
             <td>Street</td>
             <td>Voter Id</td>
         </tr>
-    {% for balot_returned in ballot_returned_list %}
+    {% for ballot_returned in ballot_returned_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'polling_location:polling_location_summary_by_we_vote_id' balot_returned.polling_location_we_vote_id %}">{{ balot_returned.polling_location_we_vote_id }}</a></td>
-            <td>{{ balot_returned.text_for_map_search }}</td>
-            <td>{{ balot_returned.normalized_line1 }}</td>
-            <td>{{ balot_returned.voter_id }}</td>
+            <td>{% if ballot_returned.polling_location_we_vote_id %}<a href="{% url 'polling_location:polling_location_summary_by_we_vote_id' ballot_returned.polling_location_we_vote_id %}">{{ ballot_returned.polling_location_we_vote_id }}</a>{% endif %}</td>
+            <td>{{ ballot_returned.text_for_map_search }}</td>
+            <td>{{ ballot_returned.normalized_line1 }}</td>
+            <td>{{ ballot_returned.voter_id }}</td>
         </tr>
     {% endfor %}
     </table>

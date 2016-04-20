@@ -54,7 +54,7 @@ class CandidateCampaignList(models.Model):
                 candidate_queryset = candidate_queryset.filter(contest_office_id=office_id)
             elif positive_value_exists(office_we_vote_id):
                 candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id=office_we_vote_id)
-            candidate_queryset = candidate_queryset.order_by('candidate_name')
+            candidate_queryset = candidate_queryset.order_by('-twitter_followers_count')
             candidate_list = candidate_queryset
 
             if len(candidate_list):
@@ -188,7 +188,25 @@ class CandidateCampaign(models.Model):
     # The URL for the candidate's campaign web site.
     candidate_url = models.URLField(verbose_name='website url of candidate campaign', blank=True, null=True)
     facebook_url = models.URLField(verbose_name='facebook url of candidate campaign', blank=True, null=True)
+
     twitter_url = models.URLField(verbose_name='twitter url of candidate campaign', blank=True, null=True)
+    twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
+    candidate_twitter_handle = models.CharField(
+        verbose_name='candidate twitter screen_name', max_length=255, null=True, unique=False)
+    twitter_name = models.CharField(
+        verbose_name="org name from twitter", max_length=255, null=True, blank=True)
+    twitter_location = models.CharField(
+        verbose_name="org location from twitter", max_length=255, null=True, blank=True)
+    twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
+                                                  null=False, blank=True, default=0)
+    twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
+    twitter_profile_background_image_url_https = models.URLField(verbose_name='tile-able background from twitter',
+                                                                 blank=True, null=True)
+    twitter_profile_banner_url_https = models.URLField(verbose_name='profile banner image from twitter',
+                                                       blank=True, null=True)
+    twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
+                                           max_length=255, null=True, blank=True)
+
     google_plus_url = models.URLField(verbose_name='google plus url of candidate campaign', blank=True, null=True)
     youtube_url = models.URLField(verbose_name='youtube url of candidate campaign', blank=True, null=True)
     # The email address for the candidate's campaign.
@@ -229,8 +247,10 @@ class CandidateCampaign(models.Model):
             return
         return office
 
-    def fetch_photo_url(self):
-        if self.photo_url_from_maplight:
+    def candidate_photo_url(self):
+        if self.twitter_profile_image_url_https:
+            return self.twitter_profile_image_url_https_original()
+        elif self.photo_url_from_maplight:
             return self.photo_url_from_maplight
         elif self.photo_url_from_vote_smart:
             return self.photo_url_from_vote_smart_large()
@@ -241,7 +261,7 @@ class CandidateCampaign(models.Model):
             # "http://votersedge.org/sites/all/modules/map/modules/map_proposition/images/politicians/2662.jpg"
         # else:
         #     politician_manager = PoliticianManager()
-        #     return politician_manager.fetch_photo_url(self.politician_id)
+        #     return politician_manager.politician_photo_url(self.politician_id)
 
     def photo_url_from_vote_smart_large(self):
         if positive_value_exists(self.photo_url_from_vote_smart):
@@ -255,6 +275,24 @@ class CandidateCampaign(models.Model):
     def fetch_twitter_handle(self):
         # TODO extract the twitter handle from twitter_url if we don't have it stored as a handle yet
         return self.twitter_url
+
+    def twitter_profile_image_url_https_bigger(self):
+        if self.twitter_profile_image_url_https:
+            return self.twitter_profile_image_url_https.replace("_normal", "_bigger")
+        else:
+            return ''
+
+    def twitter_profile_image_url_https_original(self):
+        if self.twitter_profile_image_url_https:
+            return self.twitter_profile_image_url_https.replace("_normal", "")
+        else:
+            return ''
+
+    def generate_twitter_link(self):
+        if self.candidate_twitter_handle:
+            return "https://twitter.com/{twitter_handle}".format(twitter_handle=self.candidate_twitter_handle)
+        else:
+            return ''
 
     def get_candidate_state(self):
         if self.state_code:
@@ -549,5 +587,95 @@ class CandidateCampaignManager(models.Model):
             'MultipleObjectsReturned':          exception_multiple_object_returned,
             'new_candidate_created':            new_candidate_created,
             'candidate_campaign':               candidate_campaign_on_stage,
+        }
+        return results
+
+    def update_candidate_twitter_details(self, candidate, twitter_json):
+        """
+        Update a candidate entry with details retrieved from the Twitter API.
+        """
+        success = False
+        status = "ENTERING_UPDATE_CANDIDATE_TWITTER_DETAILS"
+        values_changed = False
+
+        if candidate:
+            if positive_value_exists(twitter_json['id']):
+                if convert_to_int(twitter_json['id']) != candidate.twitter_user_id:
+                    candidate.twitter_user_id = convert_to_int(twitter_json['id'])
+                    values_changed = True
+            if positive_value_exists(twitter_json['screen_name']):
+                if twitter_json['screen_name'] != candidate.candidate_twitter_handle:
+                    candidate.candidate_twitter_handle = twitter_json['screen_name']
+                    values_changed = True
+            if positive_value_exists(twitter_json['name']):
+                if twitter_json['name'] != candidate.twitter_name:
+                    candidate.twitter_name = twitter_json['name']
+                    values_changed = True
+            if positive_value_exists(twitter_json['followers_count']):
+                if convert_to_int(twitter_json['followers_count']) != candidate.twitter_followers_count:
+                    candidate.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+                    values_changed = True
+            if positive_value_exists(twitter_json['profile_image_url_https']):
+                if twitter_json['profile_image_url_https'] != candidate.twitter_profile_image_url_https:
+                    candidate.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+                    values_changed = True
+            if positive_value_exists(twitter_json['profile_banner_url']):
+                if twitter_json['profile_banner_url'] != candidate.twitter_profile_banner_url_https:
+                    candidate.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
+                    values_changed = True
+            if positive_value_exists(twitter_json['profile_background_image_url_https']):
+                if twitter_json['profile_background_image_url_https'] != \
+                        candidate.twitter_profile_background_image_url_https:
+                    candidate.twitter_profile_background_image_url_https = \
+                        twitter_json['profile_background_image_url_https']
+                    values_changed = True
+            if positive_value_exists(twitter_json['description']):
+                if twitter_json['description'] != candidate.twitter_description:
+                    candidate.twitter_description = twitter_json['description']
+                    values_changed = True
+            if positive_value_exists(twitter_json['location']):
+                if twitter_json['location'] != candidate.twitter_location:
+                    candidate.twitter_location = twitter_json['location']
+                    values_changed = True
+
+            if values_changed:
+                candidate.save()
+                success = True
+                status = "SAVED_CANDIDATE_TWITTER_DETAILS"
+            else:
+                success = True
+                status = "NO_CHANGES_SAVED_TO_CANDIDATE_TWITTER_DETAILS"
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'candidate':    candidate,
+        }
+        return results
+
+    def clear_candidate_twitter_details(self, candidate):
+        """
+        Update an candidate entry with details retrieved from the Twitter API.
+        """
+        success = False
+        status = "ENTERING_UPDATE_CANDIDATE_TWITTER_DETAILS"
+
+        if candidate:
+            candidate.twitter_user_id = 0
+            # We leave the handle in place
+            # candidate.candidate_twitter_handle = ""
+            candidate.twitter_name = ''
+            candidate.twitter_followers_count = 0
+            candidate.twitter_profile_image_url_https = ''
+            candidate.twitter_description = ''
+            candidate.twitter_location = ''
+            candidate.save()
+            success = True
+            status = "CLEARED_CANDIDATE_TWITTER_DETAILS"
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'candidate':    candidate,
         }
         return results

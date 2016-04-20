@@ -52,7 +52,7 @@
             <td>State</td>
             <td>Election</td>
             <td>Office</td>
-            <td>Twitter URL</td>
+            <td>Twitter Handle</td>
             <td>Id</td>
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
@@ -62,9 +62,9 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {% if candidate.fetch_photo_url %}
+                {% if candidate.candidate_photo_url %}
                 <a href="{% url 'candidate:candidate_edit' candidate.id %}">
-                    <img src='{{ candidate.fetch_photo_url }}' height="25px" />
+                    <img src='{{ candidate.candidate_photo_url }}' height="25px" />
                 </a>
                 {% endif %}
             </td>
@@ -72,7 +72,7 @@
             <td>{{ candidate.get_candidate_state }}</td>
             <td>{{ candidate.election.election_name }}</td>
             <td><a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a></td>
-            <td>{{ candidate.twitter_url }}</td>
+            <td>{% if candidate.candidate_twitter_handle %}{{ candidate.candidate_twitter_handle }}{% endif %}</td>
             <td>{{ candidate.id }}</td>
             <td>{{ candidate.we_vote_id }}</td>
             <td>{{ candidate.vote_smart_id }}</td>

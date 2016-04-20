@@ -355,8 +355,9 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
     position_list_manager = PositionListManager()
     ballot_item_found = False
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
+        return_only_latest_position_per_speaker = True
         all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                candidate_id, candidate_we_vote_id, stance_we_are_looking_for)
+                candidate_id, candidate_we_vote_id, stance_we_are_looking_for, return_only_latest_position_per_speaker)
         kind_of_ballot_item = CANDIDATE
 
         # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions

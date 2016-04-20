@@ -17,10 +17,11 @@
     Twitter: {% if organization.generate_twitter_link %}
         <a href="{{ organization.generate_twitter_link }}" target="_blank">{{ organization.organization_twitter_handle }}</a>
         ({{ organization.twitter_followers_count }} Followers)
-        {% endif %} (<a href="{% url 'import_export_twitter:refresh_twitter_details' organization.id %}">refresh Twitter details</a>)<br />
+        {% endif %} (<a href="{% url 'import_export_twitter:refresh_twitter_organization_details' organization.id %}">refresh Twitter details</a>)<br />
     Twitter Name: {{ organization.twitter_name }}<br />
     Twitter Description: {{ organization.twitter_description }}<br />
     Twitter Location: {{ organization.twitter_location }}<br />
+    Profile Banner: {{ organization.twitter_profile_banner_url_https }}<br />
     Facebook: {% if organization.generate_facebook_link %}
         <a href="{{ organization.generate_facebook_link }}" target="_blank">{{ organization.organization_facebook }}</a>{% endif %}<br />
     Wikipedia Page: {% if organization.wikipedia_page_title %}
@@ -104,6 +105,11 @@
     {% if organization.twitter_profile_image_url_https_original %}
         <img src="{{ organization.twitter_profile_image_url_https_original }}"><br />
         Twitter Image (Original)<br />
+    {% endif %}
+
+    {% if organization.twitter_profile_banner_url_https %}
+        <img src="{{ organization.twitter_profile_banner_url_https }}"><br />
+        Twitter Banner<br />
     {% endif %}
 {% endif %}
 

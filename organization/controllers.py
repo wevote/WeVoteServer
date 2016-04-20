@@ -302,7 +302,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
             'organization_email': '',
             'organization_website': '',
             'organization_twitter_handle': '',
-            'organization_twitter_description': '',
+            'twitter_description': '',
             'twitter_followers_count': '',
             'organization_facebook': '',
             'organization_photo_url': '',
@@ -326,7 +326,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
             'organization_twitter_handle':
                 organization.organization_twitter_handle if positive_value_exists(
                     organization.organization_twitter_handle) else '',
-            'organization_twitter_description':
+            'twitter_description':
                 organization.twitter_description if positive_value_exists(
                     organization.twitter_description) else '',
             'twitter_followers_count':
@@ -350,7 +350,7 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
             'organization_email': '',
             'organization_website': '',
             'organization_twitter_handle': '',
-            'organization_twitter_description': '',
+            'twitter_description': '',
             'twitter_followers_count': '',
             'organization_facebook': '',
             'organization_photo_url': '',

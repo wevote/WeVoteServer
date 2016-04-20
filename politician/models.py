@@ -100,7 +100,7 @@ class Politician(models.Model):
         else:
             return self.first_name + " " + self.last_name
 
-    def fetch_photo_url(self):
+    def politician_photo_url(self):
         """
         fetch URL of politician's photo from TheUnitedStatesIo repo
         """
@@ -129,13 +129,13 @@ class PoliticianManager(models.Model):
         # TODO Recommend by Hy Carrel
         pass
 
-    def fetch_photo_url(self, politician_id):
+    def politician_photo_url(self, politician_id):
         politician_manager = PoliticianManager()
         results = politician_manager.retrieve_politician(politician_id)
 
         if results['success']:
             politician = results['politician']
-            return politician.fetch_photo_url()
+            return politician.politician_photo_url()
         return ""
 
     def retrieve_politician(self, politician_id):  # , we_vote_id=None

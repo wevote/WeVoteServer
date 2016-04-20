@@ -169,9 +169,13 @@ def candidate_edit_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     candidate_id = convert_to_int(request.POST['candidate_id'])
-    candidate_name = request.POST['candidate_name']
-    twitter_handle = request.POST['twitter_handle']
-    candidate_website = request.POST['candidate_website']
+    candidate_name = request.POST.get('candidate_name', False)
+    candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
+    candidate_url = request.POST.get('candidate_url', False)
+
+    if not positive_value_exists(candidate_id):
+        messages.add_message(request, messages.INFO, 'CandidateCampaign could not be updated. No candidate_id.')
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
@@ -187,16 +191,17 @@ def candidate_edit_process_view(request):
     try:
         if candidate_on_stage_found:
             # Update
-            candidate_on_stage.candidate_name = candidate_name
-            candidate_on_stage.twitter_handle = twitter_handle
-            candidate_on_stage.candidate_website = candidate_website
+            if candidate_twitter_handle is not False:
+                candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+            if candidate_url is not False:
+                candidate_on_stage.candidate_url = candidate_url
             candidate_on_stage.save()
             messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
         else:
             # Create new
             candidate_on_stage = CandidateCampaign(
                 candidate_name=candidate_name,
-                twitter_handle=twitter_handle,
+                candidate_twitter_handle=candidate_twitter_handle,
                 candidate_website=candidate_website,
             )
             candidate_on_stage.save()
@@ -204,8 +209,9 @@ def candidate_edit_process_view(request):
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save candidate.')
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
 
 @login_required

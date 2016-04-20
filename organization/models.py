@@ -365,6 +365,16 @@ class OrganizationManager(models.Manager):
                 if twitter_json['profile_image_url_https'] != organization.twitter_profile_image_url_https:
                     organization.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
                     values_changed = True
+            if positive_value_exists(twitter_json['profile_banner_url']):
+                if twitter_json['profile_banner_url'] != organization.twitter_profile_banner_url_https:
+                    organization.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
+                    values_changed = True
+            if positive_value_exists(twitter_json['profile_background_image_url_https']):
+                if twitter_json['profile_background_image_url_https'] != \
+                        organization.twitter_profile_background_image_url_https:
+                    organization.twitter_profile_background_image_url_https = \
+                        twitter_json['profile_background_image_url_https']
+                    values_changed = True
             if positive_value_exists(twitter_json['description']):
                 if twitter_json['description'] != organization.twitter_description:
                     organization.twitter_description = twitter_json['description']
@@ -626,8 +636,13 @@ class Organization(models.Model):
     twitter_location = models.CharField(
         verbose_name="org location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
-                                                  null=True, blank=True)
-    twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
+                                                  null=False, blank=True, default=0)
+    twitter_profile_image_url_https = models.URLField(verbose_name='url of user logo from twitter',
+                                                      blank=True, null=True)
+    twitter_profile_background_image_url_https = models.URLField(verbose_name='tile-able background from twitter',
+                                                                 blank=True, null=True)
+    twitter_profile_banner_url_https = models.URLField(verbose_name='profile banner image from twitter',
+                                                       blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
 

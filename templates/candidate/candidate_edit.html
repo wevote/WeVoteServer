@@ -19,8 +19,19 @@
 <p>Candidate Name: {{ candidate.candidate_name }}</p>
 <p>Candidate We Vote ID: {{ candidate.we_vote_id }}</p>
 <p>Vote Smart ID: {{ candidate.vote_smart_id }}</p>
-<p>Twitter URL: {{ candidate.twitter_url }}</p>
-<p>Website: {{ candidate.candidate_url }}</p>
+<p>Website: <input type="text" name="candidate_url" id="candidate_url_id" value="{% if candidate %}{{ candidate.candidate_url}}{% endif %}" /></p>
+<p>Twitter URL: {{ candidate.twitter_url }} (from Vote Smart)<br />
+    Twitter Handle: {% if candidate.generate_twitter_link %}
+        <a href="{{ candidate.generate_twitter_link }}" target="_blank">{{ candidate.candidate_twitter_handle }}</a>
+        ({{ organization.twitter_followers_count }} Followers)<br />
+    Change: <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" value="{% if candidate %}{{ candidate.candidate_twitter_handle }}{% endif %}" />
+        {% else %}
+    <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" value="{% if candidate %}{{ candidate.twitter_handle }}{% endif %}" />
+        {% endif %}
+    (<a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">refresh Twitter details</a>)<br />
+    Twitter Name: {{ candidate.twitter_name }}<br />
+    Twitter Description: {{ candidate.twitter_description }}<br />
+    Twitter Location: {{ candidate.twitter_location }}<br />
 
 {% else %}
 {#    <label for="candidate_name_id">Candidate Name</label>#}
@@ -39,8 +50,8 @@
 <br />
 {% if candidate %}
 <a href="{% url 'candidate:candidate_retrieve_photos' candidate.id %}">Retrieve photos</a><br />
-    {% if candidate.fetch_photo_url %}
-    <img src='{{ candidate.fetch_photo_url }}' />
+    {% if candidate.candidate_photo_url %}
+    <img src='{{ candidate.candidate_photo_url }}' />
     {% endif %}
 {% endif %}
 
@@ -122,6 +133,17 @@
             <p>(no special interest group ratings found)</p>
         {% endif %}
     {% endif %}{# End of if candidate.vote_smart_id #}
+    <br />
+
+    {% if candidate.twitter_profile_image_url_https_original %}
+        <img src="{{ candidate.twitter_profile_image_url_https_original }}"><br />
+        Twitter Image (Original)<br />
+    {% endif %}
+
+    {% if candidate.twitter_profile_banner_url_https %}
+        <img src="{{ candidate.twitter_profile_banner_url_https }}"><br />
+        Twitter Banner<br />
+    {% endif %}
 {% endif %}{# End of if candidate #}
 
 {% endblock %}
