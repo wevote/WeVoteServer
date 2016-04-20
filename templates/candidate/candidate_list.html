@@ -59,6 +59,7 @@
             <td>Election</td>
             <td>Office</td>
             <td>Twitter Handle</td>
+            <td>Followers</td>
             <td>Id</td>
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
@@ -79,6 +80,7 @@
             <td>{{ candidate.election.election_name }}</td>
             <td><a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a></td>
             <td>{% if candidate.candidate_twitter_handle %}{{ candidate.candidate_twitter_handle }}{% endif %}</td>
+            <td>{% if candidate.twitter_followers_count %}{{ candidate.twitter_followers_count }}{% endif %}</td>
             <td>{{ candidate.id }}</td>
             <td>{{ candidate.we_vote_id }}</td>
             <td>{{ candidate.vote_smart_id }}</td>
