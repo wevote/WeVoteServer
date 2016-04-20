@@ -30,11 +30,17 @@
         <a href="{% url 'candidate:photos_for_election' google_civic_election_id %}" target="_blank" >
             Retrieve Candidate Photos for this Election</a> (3-10 minutes)<br />
 
+        <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}" target="_blank" >
+            Retrieve Candidate Twitter Info for this Election</a> (3-10 minutes)<br />
+
         <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
             Retrieve Positions from Vote Smart for this Election</a> (5-15 minutes)<br />
 
         <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-            Generate Voter Guides for this Election</a> (about 1 minute)
+            Generate Voter Guides for this Election</a> (about 1 minute)<br />
+
+        <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+            Find and Remove Duplicate Candidates for this Election</a> (about 1 minute)
     {% endif %}
     </p>
 

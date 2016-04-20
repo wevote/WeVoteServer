@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import refresh_twitter_candidate_details, refresh_twitter_organization_details, \
-    retrieve_twitter_user_info, scrape_social_media_from_one_site, \
+    retrieve_twitter_user_info, scrape_social_media_from_one_site, refresh_twitter_candidate_details_for_election, \
     scrape_and_save_social_media_from_all_organizations
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignManager
@@ -15,13 +15,13 @@ from organization.controllers import update_social_media_statistics_in_other_tab
 from organization.models import OrganizationManager
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 @login_required
-def refresh_twitter_candidate_details_view(request, candidate_id):  # TODO DALE
+def refresh_twitter_candidate_details_view(request, candidate_id):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -139,3 +139,28 @@ def scrape_social_media_from_all_organizations_view(request):
 
     return HttpResponseRedirect(reverse('organization:organization_list', args=()) +
                                 '?organization_state=' + organization_state_code)
+
+
+@login_required
+def refresh_twitter_candidate_details_for_election_view(request, election_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = convert_to_int(election_id)
+
+    results = refresh_twitter_candidate_details_for_election(google_civic_election_id=google_civic_election_id)
+
+    if not results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        twitter_handles_added = results['twitter_handles_added']
+        profiles_refreshed_with_twitter_data = results['profiles_refreshed_with_twitter_data']
+        messages.add_message(request, messages.INFO,
+                             "Social media retrieved. Twitter handles added: {twitter_handles_added}, "
+                             "Profiles refreshed with Twitter data: {profiles_refreshed_with_twitter_data}".format(
+                                twitter_handles_added=twitter_handles_added,
+                                profiles_refreshed_with_twitter_data=profiles_refreshed_with_twitter_data))
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                '?google_civic_election_id=' + election_id)

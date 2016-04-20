@@ -17,10 +17,11 @@
 {% if candidate %}
 <p><strong>Values from Google Civic API (do not edit)</strong></p>
 <p>Candidate Name: {{ candidate.candidate_name }}</p>
-<p>Candidate We Vote ID: {{ candidate.we_vote_id }}</p>
+<p>Candidate We Vote ID: {{ candidate.we_vote_id }}<br />
+Election: {{ candidate.google_civic_election_id }}</p>
 <p>Vote Smart ID: {{ candidate.vote_smart_id }}</p>
 <p>Website: <input type="text" name="candidate_url" id="candidate_url_id" value="{% if candidate %}{{ candidate.candidate_url}}{% endif %}" /></p>
-<p>Twitter URL: {{ candidate.twitter_url }} (from Vote Smart)<br />
+<p>Twitter URL: {{ candidate.twitter_url }} (from Google Civic)<br />
     Twitter Handle: {% if candidate.generate_twitter_link %}
         <a href="{{ candidate.generate_twitter_link }}" target="_blank">{{ candidate.candidate_twitter_handle }}</a>
         ({{ organization.twitter_followers_count }} Followers)<br />

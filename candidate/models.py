@@ -20,18 +20,6 @@ class CandidateCampaignList(models.Model):
     This is a class to make it easy to retrieve lists of Candidates
     """
 
-    def retrieve_candidate_campaigns_for_this_election_list(self):
-        """
-        This is used by the admin tools to show CandidateCampaigns
-        """
-        candidates_list_temp = CandidateCampaign.objects.all()
-        # Order by candidate_name.
-        # To order by last name we will need to make some guesses in some case about what the last name is.
-        candidates_list_temp = candidates_list_temp.order_by('candidate_name')
-        # TODO Temp google_civic_election_id
-        # candidates_list_temp = candidates_list_temp.filter(google_civic_election_id=1)
-        return candidates_list_temp
-
     def retrieve_all_candidates_for_office(self, office_id, office_we_vote_id):
         candidate_list = []
         candidate_list_found = False
@@ -131,6 +119,72 @@ class CandidateCampaignList(models.Model):
             'candidate_list_found':     candidate_list_found,
             'candidate_list_objects':   candidate_list_objects if return_list_of_objects else [],
             'candidate_list_light':     candidate_list_light,
+        }
+        return results
+
+    def is_automatic_merge_ok(self, candidate_option1, candidate_option2):
+        automatic_merge_ok = True
+        status = ""
+        if candidate_option1.candidate_name != candidate_option2.candidate_name:
+            automatic_merge_ok = False
+            status += " candidate_name:"
+        if candidate_option1.candidate_twitter_handle != candidate_option2.candidate_twitter_handle:
+            automatic_merge_ok = False
+            status += " candidate_twitter_handle:"
+        if candidate_option1.candidate_url != candidate_option2.candidate_url:
+            automatic_merge_ok = False
+            status += " candidate_url:"
+
+        if not automatic_merge_ok:
+            status = "Different: " + status
+
+        results = {
+            "status":               status,
+            "automatic_merge_ok":   automatic_merge_ok,
+        }
+        return results
+
+    def do_automatic_merge(self, candidate_option1, candidate_option2):
+        success = False
+        status = "do_automatic_merge NOT IMPLEMENTED YET"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+        }
+        return results
+
+    def find_and_remove_duplicate_candidates(self, google_civic_election_id, merge=False, remove=False):
+        success = False
+        status = "find_and_remove_duplicate_candidates NOT IMPLEMENTED YET"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+        }
+        return results
+
+    def retrieve_candidate_campaigns_from_all_elections_list(self):
+        """
+        This is used by the admin tools to show CandidateCampaigns in a drop-down for example
+        """
+        candidates_list_temp = CandidateCampaign.objects.all()
+        # Order by candidate_name.
+        # To order by last name we will need to make some guesses in some case about what the last name is.
+        candidates_list_temp = candidates_list_temp.order_by('candidate_name')
+        return candidates_list_temp
+
+    def remove_duplicate_candidate(self, candidate_id, google_civic_election_id):
+        # TODO DALE We need to look delete the positions associated with this candidate, and convert them to belong
+        # to candidate we leave in place.
+
+        success = False
+        status = "COULD_NOT_DELETE_DUPLICATE_CANDIDATE"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
         }
         return results
 
@@ -619,7 +673,7 @@ class CandidateCampaignManager(models.Model):
                 if twitter_json['profile_image_url_https'] != candidate.twitter_profile_image_url_https:
                     candidate.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
                     values_changed = True
-            if positive_value_exists(twitter_json['profile_banner_url']):
+            if ('profile_banner_url' in twitter_json) and positive_value_exists(twitter_json['profile_banner_url']):
                 if twitter_json['profile_banner_url'] != candidate.twitter_profile_banner_url_https:
                     candidate.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
                     values_changed = True

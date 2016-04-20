@@ -262,7 +262,7 @@ def organization_add_new_position_form_view(request, organization_id):
     # Prepare a drop down of candidates competing in this election
     candidate_campaign_list = CandidateCampaignList()
     candidate_campaigns_for_this_election_list \
-        = candidate_campaign_list.retrieve_candidate_campaigns_for_this_election_list()
+        = candidate_campaign_list.retrieve_candidate_campaigns_from_all_elections_list()
 
     if all_is_well:
         election_list = Election.objects.all()

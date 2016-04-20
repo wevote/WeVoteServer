@@ -4,17 +4,18 @@
 
 # See also WeVoteServer/twitter/controllers.py for routines that manage internal twitter data
 
-from candidate.models import CandidateCampaignManager
+from candidate.models import CandidateCampaignManager, CandidateCampaignList
 from config.base import get_environment_variable
 from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import Organization, OrganizationManager
 import re
 from socket import timeout
+import string
 import tweepy
 import urllib.request
 from voter.models import VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -310,6 +311,41 @@ def scrape_and_save_social_media_from_all_organizations(state_code=''):
         'status':                   status,
         'twitter_handles_found':    twitter_handles_found,
         'facebook_pages_found':     facebook_pages_found,
+    }
+    return results
+
+
+def refresh_twitter_candidate_details_for_election(google_civic_election_id):
+    twitter_handles_added = 0
+    profiles_refreshed_with_twitter_data = 0
+
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    candidate_list_manager = CandidateCampaignList()
+    return_list_of_objects = True
+    candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
+        google_civic_election_id, return_list_of_objects)
+    if candidates_results['candidate_list_found']:
+        candidate_list = candidates_results['candidate_list_objects']
+
+        for candidate in candidate_list:
+            # Extract twitter_handle from google_civic_election information
+            if positive_value_exists(candidate.twitter_url) \
+                    and not positive_value_exists(candidate.candidate_twitter_handle):
+                # If we got a twitter_url from Google Civic, and we haven't already stored a twitter handle, move it
+                candidate.candidate_twitter_handle = candidate.twitter_url.replace("https://twitter.com/", "")
+                candidate.save()
+                twitter_handles_added += 1
+            if positive_value_exists(candidate.candidate_twitter_handle):
+                refresh_twitter_candidate_details(candidate)
+                profiles_refreshed_with_twitter_data += 1
+
+    status = "CANDIDATE_SOCIAL_MEDIA_RETRIEVED"
+    results = {
+        'success':                              True,
+        'status':                               status,
+        'twitter_handles_added':                twitter_handles_added,
+        'profiles_refreshed_with_twitter_data': profiles_refreshed_with_twitter_data,
     }
     return results
 

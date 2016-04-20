@@ -14,6 +14,9 @@ urlpatterns = [
     # views_admin
     url(r'^(?P<candidate_id>[0-9]+)/refresh_twitter_candidate_details/$',
         views_admin.refresh_twitter_candidate_details_view, name='refresh_twitter_candidate_details',),
+    url(r'^(?P<election_id>[0-9]+)/refresh_twitter_candidate_details_for_election/$',
+        views_admin.refresh_twitter_candidate_details_for_election_view,
+        name='refresh_twitter_candidate_details_for_election',),
     url(r'^(?P<organization_id>[0-9]+)/refresh_twitter_organization_details/$',
         views_admin.refresh_twitter_organization_details_view, name='refresh_twitter_organization_details',),
     url(r'^(?P<organization_id>[0-9]+)/scrape_website_for_social_media/$',

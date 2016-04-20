@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import candidates_import_from_sample_file, retrieve_candidate_photos
-from .models import CandidateCampaign, CandidateCampaignManager
+from .models import CandidateCampaign, CandidateCampaignList, CandidateCampaignManager
 from .serializers import CandidateCampaignSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
@@ -173,6 +173,9 @@ def candidate_edit_process_view(request):
     candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
     candidate_url = request.POST.get('candidate_url', False)
 
+    remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+
     if not positive_value_exists(candidate_id):
         messages.add_message(request, messages.INFO, 'CandidateCampaign could not be updated. No candidate_id.')
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
@@ -202,7 +205,7 @@ def candidate_edit_process_view(request):
             candidate_on_stage = CandidateCampaign(
                 candidate_name=candidate_name,
                 candidate_twitter_handle=candidate_twitter_handle,
-                candidate_website=candidate_website,
+                candidate_url=candidate_url,
             )
             candidate_on_stage.save()
             messages.add_message(request, messages.INFO, 'New candidate saved.')
@@ -211,7 +214,11 @@ def candidate_edit_process_view(request):
         messages.add_message(request, messages.ERROR, 'Could not save candidate.')
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+    if remove_duplicate_process:
+        return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+    else:
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
 
 @login_required
@@ -239,6 +246,150 @@ def candidate_retrieve_photos_view(request, candidate_id):
     if retrieve_candidate_results['status'] and display_messages:
         messages.add_message(request, messages.INFO, retrieve_candidate_results['status'])
     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+
+
+@login_required
+def find_and_remove_duplicate_candidates_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    candidate_list = []
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    number_of_duplicate_candidates_processed = 0
+    number_of_duplicate_candidates_failed = 0
+    number_of_duplicates_could_not_process = 0
+
+    # TODO DALE Consider moving to candidate_campaign_list.find_and_remove_duplicate_candidates ?
+
+    # We only want to process if a google_civic_election_id comes in
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+
+    try:
+        # We sort by ID so that the entry which was saved first becomes the "master"
+        candidate_list = CandidateCampaign.objects.order_by('id')
+        candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+    except CandidateCampaign.DoesNotExist:
+        pass
+
+    # Loop through all of the candidates in this election
+    candidate_campaign_list_manager = CandidateCampaignList()
+    for we_vote_candidate in candidate_list:
+        # Search for other candidates within this election that match name and election
+        try:
+            candidate_duplicates_query = CandidateCampaign.objects.order_by('candidate_name')
+            candidate_duplicates_query = candidate_duplicates_query.filter(
+                google_civic_election_id=google_civic_election_id)
+            candidate_duplicates_query = candidate_duplicates_query.filter(
+                candidate_name=we_vote_candidate.candidate_name)
+            candidate_duplicates_query = candidate_duplicates_query.exclude(id=we_vote_candidate.id)
+            number_of_duplicates = candidate_duplicates_query.count()
+            if number_of_duplicates > 1:
+                # Our system can't deal with this yet
+                number_of_duplicates_could_not_process += 1
+                pass
+            elif number_of_duplicates == 1:
+                candidate_duplicate_list = candidate_duplicates_query
+
+                # If we can automatically merge, we should do it
+                is_automatic_merge_ok_results = candidate_campaign_list_manager.is_automatic_merge_ok(
+                    we_vote_candidate, candidate_duplicate_list[0])
+                if is_automatic_merge_ok_results['automatic_merge_ok']:
+                    automatic_merge_results = candidate_campaign_list_manager.do_automatic_merge(
+                        we_vote_candidate, candidate_duplicate_list[0])
+                    if automatic_merge_results['success']:
+                        number_of_duplicate_candidates_processed += 1
+                    else:
+                        number_of_duplicate_candidates_failed += 1
+                else:
+                    # If we cannot automatically merge, direct to a page where we can look at the two side-by-side
+                    message = "Google Civic Election ID: {election_id}, " \
+                              "{num_of_duplicate_candidates_processed} duplicates processed, " \
+                              "{number_of_duplicate_candidates_failed} duplicate merges failed, " \
+                              "{number_of_duplicates_could_not_process} could not be processed because 3 exist " \
+                              "".format(election_id=google_civic_election_id,
+                                        num_of_duplicate_candidates_processed=number_of_duplicate_candidates_processed,
+                                        number_of_duplicate_candidates_failed=number_of_duplicate_candidates_failed,
+                                        number_of_duplicates_could_not_process=number_of_duplicates_could_not_process)
+
+                    messages.add_message(request, messages.INFO, message)
+
+                    message = "{is_automatic_merge_ok_results_status} " \
+                              "".format(is_automatic_merge_ok_results_status=is_automatic_merge_ok_results['status'])
+                    messages.add_message(request, messages.ERROR, message)
+
+                    messages_on_stage = get_messages(request)
+                    template_values = {
+                        'messages_on_stage': messages_on_stage,
+                        'candidate_option1': we_vote_candidate,
+                        'candidate_option2': candidate_duplicate_list[0],
+                    }
+                    return render(request, 'candidate/candidate_merge.html', template_values)
+
+        except CandidateCampaign.DoesNotExist:
+            pass
+
+    message = "Google Civic Election ID: {election_id}, " \
+              "{number_of_duplicate_candidates_processed} duplicates processed, " \
+              "{number_of_duplicate_candidates_failed} duplicate merges failed, " \
+              "{number_of_duplicates_could_not_process} could not be processed because 3 exist " \
+              "".format(election_id=google_civic_election_id,
+                        number_of_duplicate_candidates_processed=number_of_duplicate_candidates_processed,
+                        number_of_duplicate_candidates_failed=number_of_duplicate_candidates_failed,
+                        number_of_duplicates_could_not_process=number_of_duplicates_could_not_process)
+
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}".format(
+        var=google_civic_election_id))
+
+
+@login_required
+def remove_duplicate_candidate_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    candidate_id = request.GET.get('candidate_id', 0)
+
+    remove_duplicate_process = request.GET.get('remove_duplicate_process', False)
+
+    missing_variables = False
+
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
+        missing_variables = True
+    if not positive_value_exists(candidate_id):
+        messages.add_message(request, messages.ERROR, "Candidate ID required.")
+        missing_variables = True
+
+    if missing_variables:
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}"
+                                                                                   "".format(
+            var=google_civic_election_id))
+
+    candidate_campaign_list_manager = CandidateCampaignList()
+    results = candidate_campaign_list_manager.remove_duplicate_candidate(candidate_id, google_civic_election_id)
+    if results['success']:
+        if remove_duplicate_process:
+            # Continue this process
+            return HttpResponseRedirect(reverse('candidate:find_and_remove_duplicate_candidates', args=()) +
+                                        "?google_civic_election_id=" + google_civic_election_id)
+        else:
+            messages.add_message(request, messages.ERROR, results['status'])
+            return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+    else:
+        messages.add_message(request, messages.ERROR, "Could not remove candidate {candidate_id} '{candidate_name}'."
+                                                      "".format(candidate_id=candidate_id,
+                                                                candidate_name=candidate_id))  # TODO Add candidate_name
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}"
+                                                                                   "".format(
+            var=google_civic_election_id))
 
 
 @login_required
