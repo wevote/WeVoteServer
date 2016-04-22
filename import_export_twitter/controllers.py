@@ -268,28 +268,30 @@ def scrape_and_save_social_media_from_all_organizations(state_code=''):
 
     organization_list = organization_list_query
     for organization in organization_list:
-        twitter_handle = ''
-        facebook_page = ''
+        twitter_handle = False
+        facebook_page = False
         if not organization.organization_website:
             continue
         if (not positive_value_exists(organization.organization_twitter_handle)) or force_retrieve:
             scrape_results = scrape_social_media_from_one_site(organization.organization_website)
 
-            if scrape_results['twitter_handle_found']:
+            # Only include a change if we have a new value (do not try to save blank value)
+            if scrape_results['twitter_handle_found'] and positive_value_exists(scrape_results['twitter_handle']):
                 twitter_handle = scrape_results['twitter_handle']
                 twitter_handles_found += 1
 
-            if scrape_results['facebook_page_found']:
+            if scrape_results['facebook_page_found'] and positive_value_exists(scrape_results['facebook_page']):
                 facebook_page = scrape_results['facebook_page']
                 facebook_pages_found += 1
 
-        save_results = organization_manager.update_organization_social_media(organization, twitter_handle,
-                                                                             facebook_page)
+            save_results = organization_manager.update_organization_social_media(organization, twitter_handle,
+                                                                                 facebook_page)
 
         if save_results['success']:
             organization = save_results['organization']
 
         # ######################################
+        # If we have a Twitter handle for this org, refresh the data
         if organization.organization_twitter_handle:
             results = retrieve_twitter_user_info(organization.organization_twitter_handle)
 
@@ -300,10 +302,59 @@ def scrape_and_save_social_media_from_all_organizations(state_code=''):
                 if save_results['success']:
                     results = update_social_media_statistics_in_other_tables(organization)
         # ######################################
-
         # temp_count += 1
         # if temp_count > 10:
         #     break
+
+    status = "ORGANIZATION_SOCIAL_MEDIA_RETRIEVED"
+    results = {
+        'success':                  True,
+        'status':                   status,
+        'twitter_handles_found':    twitter_handles_found,
+        'facebook_pages_found':     facebook_pages_found,
+    }
+    return results
+
+
+def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_election_id=0):
+    facebook_pages_found = 0
+    twitter_handles_found = 0
+    force_retrieve = False
+    status = ""
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    candidate_manager = CandidateCampaignManager()
+    candidate_list_manager = CandidateCampaignList()
+    return_list_of_objects = True
+    results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
+                                                                                  return_list_of_objects)
+    status += results['status']
+    if results['success']:
+        candidate_list = results['candidate_list_objects']
+    else:
+        candidate_list = []
+
+    for candidate in candidate_list:
+        twitter_handle = False
+        facebook_page = False
+        if not candidate.candidate_url:
+            continue
+        if (not positive_value_exists(candidate.candidate_twitter_handle)) or force_retrieve:
+            scrape_results = scrape_social_media_from_one_site(candidate.candidate_url)
+
+            # Only include a change if we have a new value (do not try to save blank value)
+            if scrape_results['twitter_handle_found'] and positive_value_exists(scrape_results['twitter_handle']):
+                twitter_handle = scrape_results['twitter_handle']
+                twitter_handles_found += 1
+
+            if scrape_results['facebook_page_found'] and positive_value_exists(scrape_results['facebook_page']):
+                facebook_page = scrape_results['facebook_page']
+                facebook_pages_found += 1
+
+            save_results = candidate_manager.update_candidate_social_media(candidate, twitter_handle, facebook_page)
+
+        # ######################################
+        # We refresh the Twitter information in another function
 
     status = "ORGANIZATION_SOCIAL_MEDIA_RETRIEVED"
     results = {
@@ -346,6 +397,42 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id):
         'status':                               status,
         'twitter_handles_added':                twitter_handles_added,
         'profiles_refreshed_with_twitter_data': profiles_refreshed_with_twitter_data,
+    }
+    return results
+
+
+def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_id=0):
+    twitter_handles_transferred = 0
+    status = ""
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    candidate_list_object = CandidateCampaignList()
+    return_list_of_objects = True
+    results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
+                                                                                  return_list_of_objects)
+    status += results['status']
+    if results['success']:
+        candidate_list = results['candidate_list_objects']
+    else:
+        candidate_list = []
+
+    for candidate in candidate_list:
+        if not candidate.twitter_url:
+            continue
+        # Only proceed if we don't already have a twitter_handle
+        if not positive_value_exists(candidate.candidate_twitter_handle):
+            candidate.candidate_twitter_handle = candidate.twitter_url.replace("https://twitter.com/", "")
+            candidate.save()
+            twitter_handles_transferred += 1
+
+        # ######################################
+        # We refresh the Twitter information in another function
+
+    status += " CANDIDATE_TWITTER_HANDLES_TRANSFERRED"
+    results = {
+        'success':                      True,
+        'status':                       status,
+        'twitter_handles_transferred':  twitter_handles_transferred,
     }
     return results
 

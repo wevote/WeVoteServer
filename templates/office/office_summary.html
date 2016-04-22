@@ -42,11 +42,10 @@
         </tr>
     {% for candidate in candidate_list %}
         <tr>
-            <td><a href="{% url 'candidate:candidate_summary' candidate.id %}">{{ candidate.candidate_name }}</a></td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a></td>
             <td>{{ candidate.get_candidate_state }}</td>
             <td>{{ candidate.election.election_name }}</td>
             <td>{{ candidate.election.election_day_text }}</td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}
     </table>

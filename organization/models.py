@@ -297,12 +297,13 @@ class OrganizationManager(models.Manager):
     def update_organization_social_media(self, organization, organization_twitter_handle=False,
                                          organization_facebook=False):
         """
-        Update an organization entry with general social media data.
+        Update an organization entry with general social media data. If a value is passed in False
+        it means "Do not update"
         """
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         success = False
-        status = "ENTERING_UPDATE_OR_CREATE_ORGANIZATION"
+        status = "ENTERING_UPDATE_ORGANIZATION_SOCIAL_MEDIA"
         values_changed = False
 
         organization_twitter_handle = organization_twitter_handle.strip() if organization_twitter_handle else False

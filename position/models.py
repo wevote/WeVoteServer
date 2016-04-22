@@ -815,7 +815,8 @@ class PositionListManager(models.Model):
             }
             return results
 
-    def retrieve_all_positions_for_election(self, google_civic_election_id, stance_we_are_looking_for=ANY_STANCE):
+    def retrieve_all_positions_for_election(self, google_civic_election_id, stance_we_are_looking_for=ANY_STANCE,
+                                            public_only=False):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -854,6 +855,10 @@ class PositionListManager(models.Model):
         position_list_found = False
         try:
             position_list = PositionEntered.objects.order_by('date_entered')
+            if public_only:
+                position_list = position_list.filter(
+                    Q(voter_id__isnull=True) |
+                    Q(voter_id__exact=0))
             position_list = position_list.filter(
                 Q(candidate_campaign_we_vote_id__in=candidate_campaign_we_vote_ids) |
                 Q(contest_measure_we_vote_id__in=contest_measure_we_vote_ids))

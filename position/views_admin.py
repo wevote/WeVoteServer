@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PositionEntered
+from .models import ANY_STANCE, PositionEntered
 from .serializers import PositionSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
@@ -47,7 +47,9 @@ def position_list_view(request):
     position_list_manager = PositionListManager()
 
     if positive_value_exists(google_civic_election_id):
-        position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id)
+        public_only = True
+        position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
+                                                                                  public_only)
     else:
         position_list = PositionEntered.objects.order_by('position_id')[:500]  # This order_by is temp
 

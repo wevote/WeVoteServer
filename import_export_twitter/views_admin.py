@@ -4,7 +4,8 @@
 
 from .controllers import refresh_twitter_candidate_details, refresh_twitter_organization_details, \
     retrieve_twitter_user_info, scrape_social_media_from_one_site, refresh_twitter_candidate_details_for_election, \
-    scrape_and_save_social_media_from_all_organizations
+    scrape_and_save_social_media_for_candidates_in_one_election, scrape_and_save_social_media_from_all_organizations, \
+    transfer_candidate_twitter_handles_from_google_civic
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignManager
 from django.contrib.auth.decorators import login_required
@@ -142,6 +143,29 @@ def scrape_social_media_from_all_organizations_view(request):
 
 
 @login_required
+def scrape_social_media_for_candidates_in_one_election_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    results = scrape_and_save_social_media_for_candidates_in_one_election(
+        google_civic_election_id=google_civic_election_id)
+
+    if not results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        twitter_handles_found = results['twitter_handles_found']
+        messages.add_message(request, messages.INFO,
+                             "Social media retrieved. Twitter handles found: {twitter_handles_found}".format(
+                                 twitter_handles_found=twitter_handles_found))
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                '?google_civic_election_id=' + str(google_civic_election_id))
+
+
+@login_required
 def refresh_twitter_candidate_details_for_election_view(request, election_id):
     authority_required = {'admin'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
@@ -164,3 +188,26 @@ def refresh_twitter_candidate_details_for_election_view(request, election_id):
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
                                 '?google_civic_election_id=' + election_id)
+
+
+@login_required
+def transfer_candidate_twitter_handles_from_google_civic_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    results = transfer_candidate_twitter_handles_from_google_civic(
+        google_civic_election_id=google_civic_election_id)
+
+    if not results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        twitter_handles_transferred = results['twitter_handles_transferred']
+        messages.add_message(request, messages.INFO,
+                             "Twitter handles transferred: {twitter_handles_transferred}".format(
+                                 twitter_handles_transferred=twitter_handles_transferred))
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                '?google_civic_election_id=' + str(google_civic_election_id))

@@ -644,6 +644,48 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
+    def update_candidate_social_media(self, candidate, candidate_twitter_handle=False, candidate_facebook=False):
+        """
+        Update a candidate entry with general social media data. If a value is passed in False
+        it means "Do not update"
+        """
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        success = False
+        status = "ENTERING_UPDATE_CANDIDATE_SOCIAL_MEDIA"
+        values_changed = False
+
+        candidate_twitter_handle = candidate_twitter_handle.strip() if candidate_twitter_handle else False
+        candidate_facebook = candidate_facebook.strip() if candidate_facebook else False
+        # candidate_image = candidate_image.strip() if candidate_image else False
+
+        if candidate:
+            if candidate_twitter_handle:
+                if candidate_twitter_handle != candidate.candidate_twitter_handle:
+                    candidate.candidate_twitter_handle = candidate_twitter_handle
+                    values_changed = True
+            if candidate_facebook:
+                if candidate_facebook != candidate.facebook_url:
+                    candidate.facebook_url = candidate_facebook
+                    values_changed = True
+
+            if values_changed:
+                candidate.save()
+                success = True
+                status = "SAVED_CANDIDATE_SOCIAL_MEDIA"
+            else:
+                success = True
+                status = "NO_CHANGES_SAVED_TO_CANDIDATE_SOCIAL_MEDIA"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'DoesNotExist':             exception_does_not_exist,
+            'MultipleObjectsReturned':  exception_multiple_object_returned,
+            'candidate':                candidate,
+        }
+        return results
+
     def update_candidate_twitter_details(self, candidate, twitter_json):
         """
         Update a candidate entry with details retrieved from the Twitter API.

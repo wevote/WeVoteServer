@@ -27,20 +27,26 @@
 {% if candidate_list %}
     <p>
     {% if google_civic_election_id %}
-        <a href="{% url 'candidate:photos_for_election' google_civic_election_id %}" target="_blank" >
-            Retrieve Candidate Photos for this Election</a> (3-10 minutes)<br />
+        Prepare: <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+            Find and Remove Duplicate Candidates for this Election</a> (about 1 minute)<br />
 
-        <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}" target="_blank" >
-            Retrieve Candidate Twitter Info for this Election</a> (3-10 minutes)<br />
+        1. <a href="{% url 'candidate:photos_for_election' google_civic_election_id %}" target="_blank" >
+            Retrieve Candidate Photos from Vote Smart for this Election</a> (3-10 minutes)<br />
 
-        <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+        2. <a href="{% url 'import_export_twitter:transfer_candidate_twitter_handles_from_google_civic' %}?google_civic_election_id={{ google_civic_election_id }}" >
+            Transfer Twitter handles from Google Civic Data</a> (30 seconds)<br />
+
+        3. <a href="{% url 'import_export_twitter:scrape_social_media_for_candidates_in_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+            Go to Candidate Sites and get Twitter Handles for this Election</a> (1-2 minutes)<br />
+
+        4. <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}" target="_blank" >
+            Retrieve/Refresh Candidate Twitter Info for this Election</a> (1-2 minutes)<br />
+
+        5. <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
             Retrieve Positions from Vote Smart for this Election</a> (5-15 minutes)<br />
 
-        <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-            Generate Voter Guides for this Election</a> (about 1 minute)<br />
-
-        <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-            Find and Remove Duplicate Candidates for this Election</a> (about 1 minute)
+        6. <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
+            Generate Voter Guides for this Election</a> (about 1 minute)
     {% endif %}
     </p>
 
@@ -79,8 +85,9 @@
             <td>{{ candidate.get_candidate_state }}</td>
             <td>{{ candidate.election.election_name }}</td>
             <td><a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a></td>
-            <td>{% if candidate.candidate_twitter_handle %}{{ candidate.candidate_twitter_handle }}{% endif %}</td>
-            <td>{% if candidate.twitter_followers_count %}{{ candidate.twitter_followers_count }}{% endif %}</td>
+            <td>{% if candidate.candidate_twitter_handle %}{{ candidate.candidate_twitter_handle }}<br />
+                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
             <td>{{ candidate.id }}</td>
             <td>{{ candidate.we_vote_id }}</td>
             <td>{{ candidate.vote_smart_id }}</td>
