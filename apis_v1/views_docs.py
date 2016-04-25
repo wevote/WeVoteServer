@@ -21,7 +21,7 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     voter_guides_to_follow_retrieve_doc, voter_location_retrieve_from_ip_doc, voter_photo_save_doc, \
     voter_position_like_off_save_doc, voter_position_like_on_save_doc, voter_position_like_status_retrieve_doc, \
     voter_position_comment_save_doc, voter_position_retrieve_doc, \
-    voter_opposing_save_doc, voter_retrieve_doc, voter_star_off_save_doc, voter_star_on_save_doc, \
+    voter_opposing_save_doc, voter_retrieve_doc, voter_sign_out_doc, voter_star_off_save_doc, voter_star_on_save_doc, \
     voter_star_status_retrieve_doc, voter_stop_opposing_save_doc, \
     voter_stop_supporting_save_doc, voter_supporting_save_doc
 from config.base import get_environment_variable
@@ -594,6 +594,16 @@ def voter_supporting_save_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_supporting_save_doc.voter_supporting_save_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_sign_out_doc_view(request):
+    """
+    Show documentation about voterStarOffSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_sign_out_doc.voter_sign_out_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

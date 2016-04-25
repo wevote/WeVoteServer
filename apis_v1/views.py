@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
-    organization_stop_following, voter_count, voter_create_for_api
+    organization_stop_following, voter_count
 from ballot.controllers import ballot_item_options_retrieve_for_api, choose_election_from_existing_data, \
     voter_ballot_items_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
@@ -36,14 +36,14 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
     position_public_oppose_count_for_ballot_item_for_api, \
     position_public_support_count_for_ballot_item_for_api, positions_count_for_all_ballot_items_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
-from voter.controllers import voter_retrieve_for_api, voter_address_retrieve_for_api, \
-    voter_photo_save_for_api, voter_retrieve_list_for_api
+from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, \
+    voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
     VoterDeviceLinkManager
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
-from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER
+from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, \
     is_voter_device_id_valid, positive_value_exists
@@ -139,7 +139,7 @@ class ElectionsRetrieveView(APIView):
     Export raw voter data to JSON format
     """
     def get(self, request):  # Removed: , format=None
-        voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+        voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
         results = elections_retrieve_list_for_api(voter_device_id)
 
         if 'success' not in results:
@@ -160,7 +160,7 @@ def facebook_disconnect_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     results = facebook_disconnect_for_api(voter_device_id)
     json_data = {
         'status': results['status'],
@@ -176,7 +176,7 @@ def facebook_sign_in_view(request):  # facebookSignIn
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     facebook_id = request.GET.get('facebook_id', None)
     facebook_email = request.GET.get('facebook_email', None)
     results = facebook_sign_in_for_api(voter_device_id, facebook_id, facebook_email)
@@ -207,7 +207,7 @@ def organization_count_view(request):
 
 
 def organization_follow_api_view(request):
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     return organization_follow(voter_device_id=voter_device_id, organization_id=organization_id,
@@ -215,7 +215,7 @@ def organization_follow_api_view(request):
 
 
 def organization_stop_following_api_view(request):
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     return organization_stop_following(voter_device_id=voter_device_id, organization_id=organization_id,
@@ -223,7 +223,7 @@ def organization_stop_following_api_view(request):
 
 
 def organization_follow_ignore_api_view(request):
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.GET.get('organization_id', 0)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
     return organization_follow_ignore(voter_device_id=voter_device_id, organization_id=organization_id,
@@ -248,7 +248,7 @@ def organization_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     organization_id = request.POST.get('organization_id', 0)
     organization_we_vote_id = request.POST.get('organization_we_vote_id', '')
     organization_name = request.POST.get('organization_name', False)
@@ -285,7 +285,7 @@ def organization_search_view(request):
 
 
 def organizations_followed_retrieve_api_view(request):
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
     return organizations_followed_retrieve_for_api(voter_device_id=voter_device_id,
                                                    maximum_number_to_retrieve=maximum_number_to_retrieve)
@@ -309,7 +309,7 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     stance = request.GET.get('stance', ANY_STANCE)
     if stance in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
         stance_we_are_looking_for = stance
@@ -363,7 +363,7 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     stance = request.GET.get('stance', ANY_STANCE)
     if stance in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
         stance_we_are_looking_for = stance
@@ -407,7 +407,7 @@ def position_retrieve_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     position_id = request.GET.get('position_id', 0)
     position_we_vote_id = request.GET.get('position_we_vote_id', '')
     return position_retrieve_for_api(
@@ -425,7 +425,7 @@ def position_save_view(request):
     """
     # We set values that aren't passed in, to False so we know to treat them as null or unchanged. This allows us to
     #  only change the values we want to
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     position_id = request.POST.get('position_id', False)
     position_we_vote_id = request.POST.get('position_we_vote_id', False)
     organization_we_vote_id = request.POST.get('organization_we_vote_id', False)
@@ -468,7 +468,7 @@ def position_oppose_count_for_ballot_item_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -499,7 +499,7 @@ def position_support_count_for_ballot_item_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -588,7 +588,7 @@ def positions_count_for_all_ballot_items_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     results = positions_count_for_all_ballot_items_for_api(
@@ -620,7 +620,7 @@ def twitter_sign_in_start_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     results = twitter_sign_in_start_for_api(voter_device_id)
     json_data = {
         'status': results['status'],
@@ -637,7 +637,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     guess_if_no_address_saved = request.GET.get('guess_if_no_address_saved', True)
     if guess_if_no_address_saved == 'false':
@@ -807,7 +807,7 @@ def voter_address_save_view(request):  # voterAddressSave
     """
     google_civic_election_id = 0
 
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     try:
         text_for_map_search = request.GET['text_for_map_search']
         text_for_map_search = text_for_map_search.strip()
@@ -901,7 +901,7 @@ def voter_ballot_items_retrieve_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     # If passed in, we want to look at
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
@@ -966,7 +966,7 @@ def voter_count_view(request):
 
 
 def voter_create_view(request):  # voterCreate
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return voter_create_for_api(voter_device_id)
 
 
@@ -976,7 +976,7 @@ def voter_guide_possibility_retrieve_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_guide_possibility_url = request.GET.get('voter_guide_possibility_url', '')
     return voter_guide_possibility_retrieve_for_api(voter_device_id=voter_device_id,
                                                     voter_guide_possibility_url=voter_guide_possibility_url)
@@ -988,14 +988,14 @@ def voter_guide_possibility_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_guide_possibility_url = request.POST.get('voter_guide_possibility_url', '')
     return voter_guide_possibility_save_for_api(voter_device_id=voter_device_id,
                                                 voter_guide_possibility_url=voter_guide_possibility_url)
 
 
 def voter_guides_followed_retrieve_view(request):
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
     return voter_guides_followed_retrieve_for_api(voter_device_id=voter_device_id,
                                                   maximum_number_to_retrieve=maximum_number_to_retrieve)
@@ -1007,7 +1007,7 @@ def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetriev
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', '')
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', '')
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
@@ -1086,7 +1086,7 @@ def voter_photo_save_view(request):
 
     status = ''
 
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     try:
         facebook_profile_image_url_https = request.GET['facebook_profile_image_url_https']
         facebook_profile_image_url_https = facebook_profile_image_url_https.strip()
@@ -1133,7 +1133,7 @@ def voter_position_retrieve_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     # ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -1167,7 +1167,7 @@ def voter_all_positions_retrieve_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     return voter_all_positions_retrieve_for_api(
@@ -1182,7 +1182,7 @@ def voter_position_like_off_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     position_like_id = request.GET.get('position_like_id', 0)
     position_entered_id = request.GET.get('position_entered_id', 0)
     return voter_position_like_off_save_for_api(
@@ -1195,7 +1195,7 @@ def voter_position_like_on_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     position_entered_id = request.GET.get('position_entered_id', 0)
     return voter_position_like_on_save_for_api(
         voter_device_id=voter_device_id, position_entered_id=position_entered_id)
@@ -1207,7 +1207,7 @@ def voter_position_like_status_retrieve_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     position_entered_id = request.GET.get('position_entered_id', 0)
     return voter_position_like_status_retrieve_for_api(
         voter_device_id=voter_device_id, position_entered_id=position_entered_id)
@@ -1220,7 +1220,7 @@ def position_like_count_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     position_entered_id = request.GET.get('position_entered_id', 0)
     limit_to_voters_network = request.GET.get('limit_to_voters_network', False)
     return position_like_count_for_api(voter_device_id=voter_device_id, position_entered_id=position_entered_id,
@@ -1233,7 +1233,7 @@ def voter_position_comment_save_view(request):  # voterPositionCommentSave
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     position_id = request.POST.get('position_id', False)
     position_we_vote_id = request.POST.get('position_we_vote_id', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', False)
@@ -1264,7 +1264,7 @@ def voter_opposing_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -1293,7 +1293,7 @@ class VoterExportView(APIView):
     Export raw voter data to JSON format
     """
     def get(self, request):  # Removed: , format=None
-        voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+        voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
         results = voter_retrieve_list_for_api(voter_device_id)
 
         if 'success' not in results:
@@ -1314,9 +1314,39 @@ def voter_retrieve_view(request):  # voterRetrieve
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     results = voter_retrieve_for_api(voter_device_id=voter_device_id)
     return HttpResponse(json.dumps(results), content_type='application/json')
+
+
+def voter_sign_out_view(request):  # voterSignOut
+    """
+    Sign out from this device. (Delete this voter_device_id from the database, OR if sign_out_all_devices is True,
+    sign out from all devices.)
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    sign_out_all_devices = request.GET.get('sign_out_all_devices', 0)
+
+    if not positive_value_exists(voter_device_id):
+        success = False
+        status = "VOTER_SIGN_OUT_VOTER_DEVICE_ID_DOES_NOT_EXIST"
+        json_data = {
+            'voter_device_id':      voter_device_id,
+            'sign_out_all_devices': sign_out_all_devices,
+            'success':              success,
+            'status':               status,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = voter_sign_out_for_api(voter_device_id=voter_device_id, sign_out_all_devices=sign_out_all_devices)
+
+    json_data = {
+        'voter_device_id':      voter_device_id,
+        'sign_out_all_devices': sign_out_all_devices,
+        'success':              results['success'],
+        'status':               results['status'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_stop_opposing_save_view(request):
@@ -1325,7 +1355,7 @@ def voter_stop_opposing_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -1355,7 +1385,7 @@ def voter_stop_supporting_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -1385,7 +1415,7 @@ def voter_supporting_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -1415,7 +1445,7 @@ def voter_star_off_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -1460,7 +1490,7 @@ def voter_star_on_save_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -1505,7 +1535,7 @@ def voter_star_status_retrieve_view(request):
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
@@ -1550,6 +1580,6 @@ def voter_all_stars_status_retrieve_view(request):  # voterAllStarsStatusRetriev
     :param request:
     :return:
     """
-    voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return voter_all_stars_status_retrieve_for_api(
         voter_device_id=voter_device_id)

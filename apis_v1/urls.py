@@ -79,12 +79,13 @@ urlpatterns = [
         views.voter_position_like_status_retrieve_view, name='voterPositionLikeStatusRetrieveView'),
     url(r'^voterPositionRetrieve/', views.voter_position_retrieve_view, name='voterPositionRetrieveView'),
     url(r'^voterRetrieve/', views.voter_retrieve_view, name='voterRetrieveView'),
-    url(r'^voterSupportingSave/', views.voter_supporting_save_view, name='voterSupportingSaveView'),
+    url(r'^voterSignOut/', views.voter_sign_out_view, name='voterSignOutView'),
     url(r'^voterStarOffSave/', views.voter_star_off_save_view, name='voterStarOffSaveView'),
     url(r'^voterStarOnSave/', views.voter_star_on_save_view, name='voterStarOnSaveView'),
     url(r'^voterStarStatusRetrieve/', views.voter_star_status_retrieve_view, name='voterStarStatusRetrieveView'),
     url(r'^voterStopOpposingSave/', views.voter_stop_opposing_save_view, name='voterStopOpposingSaveView'),
     url(r'^voterStopSupportingSave/', views.voter_stop_supporting_save_view, name='voterStopSupportingSaveView'),
+    url(r'^voterSupportingSave/', views.voter_supporting_save_view, name='voterSupportingSaveView'),
 
     ##########################
     # API Documentation Views
@@ -168,6 +169,7 @@ urlpatterns = [
     url(r'^docs/voterPositionLikeStatusRetrieve/$',
         views_docs.voter_position_like_status_retrieve_doc_view, name='voterPositionLikeStatusRetrieveDocs'),
     url(r'^docs/voterRetrieve/$', views_docs.voter_retrieve_doc_view, name='voterRetrieveDocs'),
+    url(r'^docs/voterSignOut/$', views_docs.voter_sign_out_doc_view, name='voterSignOutDocs'),
     url(r'^docs/voterStarOffSave/$', views_docs.voter_star_off_save_doc_view, name='voterStarOffSaveDocs'),
     url(r'^docs/voterStarOnSave/$', views_docs.voter_star_on_save_doc_view, name='voterStarOnSaveDocs'),
     url(r'^docs/voterStarStatusRetrieve/$',

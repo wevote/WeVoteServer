@@ -465,6 +465,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     'google_civic_election_id':     ballot_item.google_civic_election_id,
                     'google_ballot_placement':      ballot_item.google_ballot_placement,
                     'local_ballot_order':           ballot_item.local_ballot_order,
+                    'measure_subtitle':             ballot_item.measure_subtitle,
                     'kind_of_ballot_item':          kind_of_ballot_item,
                     'id':                           ballot_item_id,
                     'we_vote_id':                   we_vote_id,

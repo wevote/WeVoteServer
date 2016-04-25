@@ -18,8 +18,8 @@ def voter_retrieve_doc_template_values(url_root):
         {
             'name':         'voter_device_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'An 88 character unique identifier (from cookie - not URL variable) linked to '
-                            'a voter record on the server. If not provided, a new voter_device_id (and voter entry) '
+            'description':  'An 88 character unique identifier linked to a voter record on the server. '
+                            'If not provided, a new voter_device_id (and voter entry) '
                             'will be generated, and the voter_device_id will be returned.',
         },
     ]

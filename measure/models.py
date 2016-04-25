@@ -27,8 +27,8 @@ class ContestMeasure(models.Model):
     # The title of the measure (e.g. 'Proposition 42').
     measure_title = models.CharField(verbose_name="measure title", max_length=255, null=False, blank=False)
     # A brief description of the referendum. This field is only populated for contests of type 'Referendum'.
-    measure_subtitle = models.CharField(verbose_name="google civic referendum subtitle",
-                                        max_length=255, null=False, blank=False)
+    measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
+                                        null=True, blank=True, default="")
     # The text of the measure. This field is only populated for contests of type 'Referendum'.
     measure_text = models.TextField(verbose_name="measure text", null=True, blank=False)
     # A link to the referendum. This field is only populated for contests of type 'Referendum'.

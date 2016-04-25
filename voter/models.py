@@ -607,6 +607,46 @@ class VoterDeviceLinkManager(models.Model):
     def __str__(self):              # __unicode__ on Python 2
         return "Voter Device Id Manager"
 
+    def delete_all_voter_device_links(self, voter_device_id):
+        voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+
+        try:
+            if positive_value_exists(voter_id):
+                VoterDeviceLink.objects.filter(voter_id=voter_id).delete()
+                status = "DELETE_ALL_VOTER_DEVICE_LINKS_SUCCESSFUL"
+                success = True
+            else:
+                status = "DELETE_ALL_VOTER_DEVICE_LINKS-MISSING_VARIABLES"
+                success = False
+        except Exception as e:
+            status = "DELETE_ALL_VOTER_DEVICE_LINKS-DATABASE_DELETE_EXCEPTION"
+            success = False
+
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+
+    def delete_voter_device_link(self, voter_device_id):
+        try:
+            if positive_value_exists(voter_device_id):
+                VoterDeviceLink.objects.filter(voter_device_id=voter_device_id).delete()
+                status = "DELETE_VOTER_DEVICE_LINK_SUCCESSFUL"
+                success = True
+            else:
+                status = "DELETE_VOTER_DEVICE_LINK-MISSING_VARIABLES"
+                success = False
+        except Exception as e:
+            status = "DELETE_VOTER_DEVICE_LINK-DATABASE_DELETE_EXCEPTION"
+            success = False
+
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+
     def retrieve_voter_device_link_from_voter_device_id(self, voter_device_id):
         voter_id = 0
         voter_device_link_id = 0

@@ -253,7 +253,7 @@ def get_voter_device_id(request, generate_if_no_value=False):
         return voter_device_id
 
     if generate_if_no_value:
-        voter_device_id = generate_voter_device_id()  # Stored in cookie below
+        voter_device_id = generate_voter_device_id()
         logger.debug("generate_voter_device_id, voter_device_id: {voter_device_id}".format(
             voter_device_id=voter_device_id
         ))

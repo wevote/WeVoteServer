@@ -64,8 +64,11 @@ class BallotItem(models.Model):
     contest_measure_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for this measure", max_length=255, default=None, null=True,
         blank=True, unique=False)
-    # This is a sortable name
+    # This is a sortable name, either the candidate name or the measure name
     ballot_item_display_name = models.CharField(verbose_name="a label we can sort by", max_length=255, null=True, blank=True)
+
+    measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
+                                        null=True, blank=True, default="")
 
     def is_contest_office(self):
         if self.contest_office_id:
@@ -93,7 +96,7 @@ class BallotItem(models.Model):
 class BallotItemManager(models.Model):
     def update_or_create_ballot_item_for_voter(
             self, voter_id, google_civic_election_id, google_ballot_placement,
-            ballot_item_display_name, local_ballot_order,
+            ballot_item_display_name, measure_subtitle, local_ballot_order,
             contest_office_id=0, contest_office_we_vote_id='',
             contest_measure_id=0, contest_measure_we_vote_id=''):
         exception_multiple_object_returned = False
@@ -131,6 +134,7 @@ class BallotItemManager(models.Model):
                     'google_ballot_placement': google_ballot_placement,
                     'local_ballot_order': local_ballot_order,
                     'ballot_item_display_name': ballot_item_display_name,
+                    'measure_subtitle': measure_subtitle,
                 }
                 # We search with contest_measure_id and contest_office_id because they are (will be) integers,
                 #  which will be a faster search
@@ -151,8 +155,7 @@ class BallotItemManager(models.Model):
                     ballot_item_on_stage.google_ballot_placement = google_ballot_placement
                     ballot_item_on_stage.local_ballot_order = local_ballot_order
                     ballot_item_on_stage.ballot_item_display_name = ballot_item_display_name
-                    ballot_item_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
-                    ballot_item_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
+                    ballot_item_on_stage.measure_subtitle = measure_subtitle
                     ballot_item_on_stage.save()
 
                     success = True
@@ -177,7 +180,7 @@ class BallotItemManager(models.Model):
 
     def update_or_create_ballot_item_for_polling_location(
             self, polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
-            ballot_item_display_name, local_ballot_order,
+            ballot_item_display_name, measure_subtitle, local_ballot_order,
             contest_office_id=0, contest_office_we_vote_id='',
             contest_measure_id=0, contest_measure_we_vote_id=''):
         exception_multiple_object_returned = False
@@ -215,6 +218,7 @@ class BallotItemManager(models.Model):
                     'google_ballot_placement': google_ballot_placement,
                     'local_ballot_order': local_ballot_order,
                     'ballot_item_display_name': ballot_item_display_name,
+                    'measure_subtitle': measure_subtitle,
                 }
                 # We search with contest_measure_id and contest_office_id because they are (will be) integers,
                 #  which will be a faster search
@@ -235,8 +239,7 @@ class BallotItemManager(models.Model):
                     ballot_item_on_stage.google_ballot_placement = google_ballot_placement
                     ballot_item_on_stage.local_ballot_order = local_ballot_order
                     ballot_item_on_stage.ballot_item_display_name = ballot_item_display_name
-                    ballot_item_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
-                    ballot_item_on_stage.contest_measure_we_vote_id = contest_measure_we_vote_id
+                    ballot_item_on_stage.measure_subtitle = measure_subtitle
                     ballot_item_on_stage.save()
 
                     success = True
@@ -461,7 +464,7 @@ class BallotItemListManager(models.Model):
             create_results = ballot_item_manager.update_or_create_ballot_item_for_voter(
                 to_voter_id, ballot_returned.google_civic_election_id,
                 ballot_item.google_ballot_placement,
-                ballot_item.ballot_item_display_name, ballot_item.local_ballot_order,
+                ballot_item.ballot_item_display_name, ballot_item.measure_subtitle, ballot_item.local_ballot_order,
                 ballot_item.contest_office_id, ballot_item.contest_office_we_vote_id,
                 ballot_item.contest_measure_id, ballot_item.contest_measure_we_vote_id)
 

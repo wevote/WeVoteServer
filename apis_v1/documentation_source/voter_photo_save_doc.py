@@ -16,8 +16,7 @@ def voter_photo_save_doc_template_values(url_root):
         {
             'name':         'voter_device_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'An 88 character unique identifier (from cookie - not URL variable) linked to '
-                            'a voter record on the server',
+            'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
             'name':         'facebook_profile_image_url_https',

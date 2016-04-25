@@ -8,9 +8,9 @@ from follow.models import FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 import json
 from organization.models import Organization
 from organization.controllers import organization_follow_all
-from voter.models import fetch_voter_id_from_voter_device_link, Voter, VoterManager, VoterDeviceLinkManager
+from voter.models import fetch_voter_id_from_voter_device_link, Voter, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import is_voter_device_id_valid
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -90,74 +90,6 @@ def voter_count():
         'voter_count': voter_count_all,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-def voter_create_for_api(voter_device_id):  # voterCreate
-    # If a voter_device_id isn't passed in, automatically create a new voter_device_id
-    if not positive_value_exists(voter_device_id):
-        voter_device_id = generate_voter_device_id()
-    else:
-        # If a voter_device_id is passed in that isn't valid, we want to throw an error
-        results = is_voter_device_id_valid(voter_device_id)
-        if not results['success']:
-            return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
-
-    voter_id = 0
-    voter_we_vote_id = ''
-    # Make sure a voter record hasn't already been created for this
-    voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-    if results['voter_found']:
-        voter = results['voter']
-        voter_id = voter.id
-        voter_we_vote_id = voter.we_vote_id
-        json_data = {
-            'status': "VOTER_ALREADY_EXISTS",
-            'success': True,
-            'voter_device_id': voter_device_id,
-            'voter_id':         voter_id,
-            'voter_we_vote_id': voter_we_vote_id,
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-    # Create a new voter and return the voter_device_id
-    voter_manager = VoterManager()
-    results = voter_manager.create_voter()
-
-    if results['voter_created']:
-        voter = results['voter']
-
-        # Now save the voter_device_link
-        voter_device_link_manager = VoterDeviceLinkManager()
-        results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter.id)
-
-        if results['voter_device_link_created']:
-            voter_device_link = results['voter_device_link']
-            voter_id_found = True if voter_device_link.voter_id > 0 else False
-
-            if voter_id_found:
-                voter_id = voter.id
-                voter_we_vote_id = voter.we_vote_id
-
-    if voter_id:
-        json_data = {
-            'status':           "VOTER_CREATED",
-            'success':          True,
-            'voter_device_id':  voter_device_id,
-            'voter_id':         voter_id,
-            'voter_we_vote_id': voter_we_vote_id,
-
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
-    else:
-        json_data = {
-            'status':           "VOTER_NOT_CREATED",
-            'success':          False,
-            'voter_device_id':  voter_device_id,
-            'voter_id':         0,
-            'voter_we_vote_id': '',
-        }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_retrieve_list_for_api(voter_device_id):

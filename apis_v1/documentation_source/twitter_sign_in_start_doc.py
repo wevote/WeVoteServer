@@ -20,11 +20,6 @@ def twitter_sign_in_start_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
     ]
 
     potential_status_codes_list = [
