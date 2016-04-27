@@ -22,6 +22,7 @@ Including another URLconf
 from django.conf.urls import include, url
 
 from config import startup, views
+from admin_tools.views import login_user, logout_user
 
 urlpatterns = [
     url(r'^$', views.start_view),  # Default page if none of the other patterns work
@@ -53,6 +54,8 @@ urlpatterns = [
     url(r'^voter/', include('voter.urls', namespace="voter")),
     url(r'^vg/', include('voter_guide.urls', namespace="voter_guide")),
     # Authentication
+    url(r'^login/$', login_user, name="login_user"),
+    url(r'^logout/$', logout_user, name="logout_user"),
     url('', include('django.contrib.auth.urls', namespace="auth")),  # This line provides all of the following patterns:
     # login, logout, password_reset, password_reset_done, password_reset_confirm, password_reset_complete
 ]

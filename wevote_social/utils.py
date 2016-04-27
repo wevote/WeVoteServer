@@ -76,6 +76,7 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):
                     results = voter_manager.save_twitter_user_values_from_dict(social.user, twitter_user_dict)
                     if results['success']:
                         social.user = results['voter']
+                        user = results['voter']
 
     return {'social': social,
             'user': user,

@@ -3,57 +3,53 @@
 
 {% block title %}{% if voter %}
     {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}
-{% else %}No Voter Found{% endif %}{% endblock %}
+{% else %}Create New Voter Account{% endif %}{% endblock %}
 
 {%  block content %}
 
-{% if voter.id %}
-    <a href="{% url 'voter:voter_summary' voter.id %}">< Back to {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %} Summary</a>
-{% else %}
-    <a href="{% url 'voter:voter_list' %}">< Back to Voters</a>
-{% endif %}
+<a href="{% url 'voter:voter_list' %}">< Back to Voters</a>
+
+<h1>{% if voter %}Edit {{ voter.first_name|default_if_none:"" }} {{ voter.last_name|default_if_none:"" }}{% else %}Create New Voter Account{% endif %}</h1>
+<form action="{% url "voter:voter_edit_process" %}" method="post">
+{% csrf_token %}
+
+<input type="hidden" name="voter_id" value="{% if voter %}{{ voter.id }}{% else %}0{% endif %}">
 
 {% if voter %}
-    <h1>Edit {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}</h1>
-
-{#    <form action="{% url "voter:voter_edit_process" voter.id %}" method="post">#}
-{#    {% csrf_token %}#}
-{#    <table>#}
-{#        <tr>#}
-{#            <td>Local ID:</td>#}
-{#            <td>{{ voter.id }}</td>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td>Polling Location Name:</td>#}
-{#            <td>{{ voter.voter_name }}</td>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td>Day of Polling Location:</td>#}
-{#            <td>{{ voter.voter_date_text }}</td>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td>Google Civic ID:</td>#}
-{#            <td>{{ voter.google_civic_voter_id }}</td>#}
-{#        </tr>#}
-{#        <tr>#}
-{#            <td>OCD Division ID:</td>#}
-{#            <td>{{ voter.raw_ocd_division_id }}</td>#}
-{#        </tr>#}
-{#    </table>#}
-{##}
-{#    <input type="hidden" name="voter_id" value="{{ voter.id }}">#}
-{#    #}
-{##}
-{#    <p><a href="{% url 'voter:voter_list' %}">cancel</a>#}
-    {# <input type="submit" value="Update Organization" /> #}
-{#    </p>#}
-{#    </form>#}
-    (There are no Voter fields to edit at this time)
-
-{% else %}
-     <h1>No Voter Found</h1>
-
-    Please visit the <a href="{% url 'voter:voter_list' %}">Voter List</a> page.
+<p>Voter ID: {{ voter.id }}<br />
+We Vote ID: {{ voter.we_vote_id }}</p>
 {% endif %}
 
+<label for="first_name_id">First Name</label>
+<input type="text" name="first_name" id="first_name_id" value="{% if voter %}{{ voter.first_name|default_if_none:"" }}{% endif %}" /><br />
+
+<label for="last_name_id">Last Name</label>
+<input type="text" name="last_name" id="last_name_id" value="{% if voter %}{{ voter.last_name|default_if_none:"" }}{% endif %}" /><br />
+
+<label for="organization_twitter_handle_id">Twitter Handle</label>
+<input type="text" name="twitter_screen_name" id="twitter_screen_name_id" value="{% if voter %}{{ voter.twitter_screen_name|default_if_none:"" }}{% endif %}" /><br />
+
+<label for="email_id">Email</label>
+<input type="text" name="email" id="email_id" value="{% if voter %}{{ voter.email|default_if_none:"" }}{% endif %}" /><br />
+
+<label for="password_text_id">New Password</label>
+<input type="text" name="password_text" id="password_text_id" value="" /> (Enter password to reset)<br />
+<p><a href="{% url 'voter:voter_list' %}">cancel</a>
+<input type="submit" value="{% if voter %}Update Voter Account{% else %}Create New Voter Account{% endif %}" /></p>
+
+</form>
+{% if voter %}
+    {% if voter.is_verified_volunteer %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=verified_volunteer">Remove Verified Volunteer Rights</a></p>
+    {% else %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=verified_volunteer">Grant Verified Volunteer Rights</a></p>
+    {% endif %}
+
+    {% if voter.is_admin %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_removed=admin">Remove Admin Rights</a></p>
+    {% else %}
+<p><a href="{% url 'voter:voter_change_authority_process' %}?voter_id={{ voter_id }}&authority_granted=admin">Grant Admin Rights</a></p>
+    {% endif %}
+
+{% endif %}
 {% endblock %}

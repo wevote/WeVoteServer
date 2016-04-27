@@ -481,10 +481,13 @@ class Voter(AbstractBaseUser):
     # We also want to auto-generate we_vote_id
     def save(self, *args, **kwargs):
         if self.email:
-            self.email = self.email.lower().strip()
-            if not validate_email(self.email):  # ...make sure it is a valid email
-                # If it isn't a valid email, don't save the value as an email -- just save a blank field
-                self.email = None
+            self.email = self.email.lower().strip()  # Hopefully reduces junk to ""
+            if self.email != "":  # If it's not blank
+                if not validate_email(self.email):  # ...make sure it is a valid email
+                    # If it isn't a valid email, don't save the value as an email -- just save a blank field
+                    self.email = None
+        if self.email == "":
+            self.email = None
         if self.we_vote_id:
             self.we_vote_id = self.we_vote_id.strip()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
@@ -777,7 +780,6 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
 
 
 def retrieve_voter_authority(request):
-    # voter_device_id = get_voter_device_id(request)
     voter_api_device_id = get_voter_api_device_id(request)
     voter_manager = VoterManager()
     results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
@@ -1119,19 +1121,25 @@ class VoterAddressManager(models.Model):
 
 
 def voter_setup(request):
-    generate_voter_device_id_if_needed = True
-    voter_device_id = get_voter_device_id(request, generate_voter_device_id_if_needed)
+    """
+    This is only used for sign in on the API server, and is not used for WebApp
+    :param request:
+    :return:
+    """
+    generate_voter_api_device_id_if_needed = True
+    voter_api_device_id = get_voter_api_device_id(request, generate_voter_api_device_id_if_needed)
+
     voter_id = 0
     voter_id_found = False
-    store_new_voter_device_id_in_cookie = True
+    store_new_voter_api_device_id_in_cookie = True
 
     voter_device_link_manager = VoterDeviceLinkManager()
-    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_api_device_id)
     if results['voter_device_link_found']:
         voter_device_link = results['voter_device_link']
         voter_id = voter_device_link.voter_id
         voter_id_found = True if positive_value_exists(voter_id) else False
-        store_new_voter_device_id_in_cookie = False if positive_value_exists(voter_id_found) else True
+        store_new_voter_api_device_id_in_cookie = False if positive_value_exists(voter_id_found) else True
 
     # If existing voter not found, create a new voter
     if not voter_id_found:
@@ -1144,21 +1152,21 @@ def voter_setup(request):
             voter_id = voter.id
 
             # Now save the voter_device_link
-            results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter_id)
+            results = voter_device_link_manager.save_new_voter_device_link(voter_api_device_id, voter_id)
 
             if results['voter_device_link_created']:
                 voter_device_link = results['voter_device_link']
                 voter_id = voter_device_link.voter_id
                 voter_id_found = True if voter_id > 0 else False
-                store_new_voter_device_id_in_cookie = True
+                store_new_voter_api_device_id_in_cookie = True
             else:
                 voter_id = 0
                 voter_id_found = False
 
     final_results = {
-        'voter_id':                 voter_id,
-        'voter_device_id':          voter_device_id,
-        'voter_id_found':           voter_id_found,
-        'store_new_voter_device_id_in_cookie':   store_new_voter_device_id_in_cookie,
+        'voter_id':                                 voter_id,
+        'voter_api_device_id':                      voter_api_device_id,
+        'voter_id_found':                           voter_id_found,
+        'store_new_voter_api_device_id_in_cookie':  store_new_voter_api_device_id_in_cookie,
     }
     return final_results

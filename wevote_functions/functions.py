@@ -211,7 +211,11 @@ def set_cookie(response, cookie_name, cookie_value, days_expire=None):
         max_age = days_expire * 24 * 60 * 60
     expires = datetime.datetime.strftime(datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age),
                                          "%a, %d-%b-%Y %H:%M:%S GMT")
-    response.set_cookie(cookie_name, cookie_value, max_age=max_age, expires=expires)
+    response.set_cookie(cookie_name, cookie_value, max_age=max_age, expires=expires, path="/")
+
+
+def delete_cookie(response, cookie_name):
+    response.delete_cookie(cookie_name, path="/")
 
 
 def get_voter_api_device_id(request, generate_if_no_cookie=False):
@@ -299,6 +303,10 @@ def set_voter_device_id(request, response, voter_device_id):
 def set_voter_api_device_id(request, response, voter_api_device_id):
     if 'voter_api_device_id' not in request.COOKIES:
         set_cookie(response, 'voter_api_device_id', voter_api_device_id)
+
+
+def delete_voter_api_device_id_cookie(response):
+    delete_cookie(response, 'voter_api_device_id')
 
 
 def generate_random_string(string_length=88, chars=string.ascii_lowercase + string.ascii_uppercase + string.digits):

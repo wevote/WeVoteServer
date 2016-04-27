@@ -39,8 +39,8 @@ def apis_index_doc_view(request):
     """
     # Create a voter_device_id and voter in the database if one doesn't exist yet
     results = voter_setup(request)
-    voter_api_device_id = results['voter_device_id']
-    store_new_voter_api_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
+    voter_api_device_id = results['voter_api_device_id']
+    store_new_voter_api_device_id_in_cookie = results['store_new_voter_api_device_id_in_cookie']
 
     messages_on_stage = get_messages(request)
     template_values = {
