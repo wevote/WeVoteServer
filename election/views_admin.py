@@ -23,6 +23,7 @@ from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_settings.models import fetch_next_we_vote_election_id_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -154,13 +155,17 @@ def election_edit_view(request, election_local_id):
     election_on_stage_found = False
     election_on_stage = Election()
 
-    try:
-        election_on_stage = Election.objects.get(id=election_local_id)
-        election_on_stage_found = True
-    except Election.MultipleObjectsReturned as e:
-        handle_record_found_more_than_one_exception(e, logger=logger)
-    except Election.DoesNotExist:
-        # This is fine, create new
+    if positive_value_exists(election_local_id):
+        try:
+            election_on_stage = Election.objects.get(id=election_local_id)
+            election_on_stage_found = True
+        except Election.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+        except Election.DoesNotExist:
+            # This is fine, create new
+            pass
+    else:
+        # If here we are creating a
         pass
 
     if election_on_stage_found:
@@ -186,9 +191,13 @@ def election_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    election_local_id = convert_to_int(request.POST['election_local_id'])
-    election_name = request.POST['election_name']
+    election_local_id = convert_to_int(request.POST.get('election_local_id', 0))
+    election_name = request.POST.get('election_name', False)
+    election_day_text = request.POST.get('election_day_text', False)
+    state_code = request.POST.get('state_code', False)
+
     election_on_stage = Election()
+    election_changed = False
 
     # Check to see if this election is already being used anywhere
     election_on_stage_found = False
@@ -202,14 +211,43 @@ def election_edit_process_view(request):
 
     try:
         if election_on_stage_found:
-            # Update
-            election_on_stage.election_name = election_name
-            election_on_stage.save()
-            messages.add_message(request, messages.INFO, 'Election updated.')
+            if convert_to_int(election_on_stage.google_civic_election_id) < 1000000:
+                # If here, this is an election created by Google Civic and we limit what fields to update
+                # Update
+                if state_code is not False:
+                    election_on_stage.state_code = state_code
+                    election_changed = True
+
+                if election_changed:
+                    election_on_stage.save()
+                    messages.add_message(request, messages.INFO, 'Google Civic-created election updated.')
+            else:
+                # If here, this is a We Vote created election
+                # Update
+                if election_name is not False:
+                    election_on_stage.election_name = election_name
+                    election_changed = True
+
+                if election_day_text is not False:
+                    election_on_stage.election_day_text = election_day_text
+                    election_changed = True
+
+                if state_code is not False:
+                    election_on_stage.state_code = state_code
+                    election_changed = True
+
+                if election_changed:
+                    election_on_stage.save()
+                    messages.add_message(request, messages.INFO, 'We Vote-created election updated.')
         else:
             # Create new
+            next_local_election_id_integer = fetch_next_we_vote_election_id_integer()
+
             election_on_stage = Election(
+                google_civic_election_id=next_local_election_id_integer,
                 election_name=election_name,
+                election_day_text=election_day_text,
+                state_code=state_code,
             )
             election_on_stage.save()
             messages.add_message(request, messages.INFO, 'New election saved.')

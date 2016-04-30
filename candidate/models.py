@@ -353,8 +353,11 @@ class CandidateCampaign(models.Model):
             return self.state_code
         else:
             # Pull this from ocdDivisionId
-            ocd_division_id = self.ocd_division_id
-            return extract_state_from_ocd_division_id(ocd_division_id)
+            if positive_value_exists(self.ocd_division_id):
+                ocd_division_id = self.ocd_division_id
+                return extract_state_from_ocd_division_id(ocd_division_id)
+            else:
+                return ''
 
     def extract_first_name(self):
         full_name = self.candidate_name

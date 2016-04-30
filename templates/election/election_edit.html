@@ -1,30 +1,54 @@
 {# templates/election/election_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if election %}{{ election.election_name  }}{% else %}No Election Found{% endif %}{% endblock %}
+{% block title %}{% if election %}{{ election.election_name  }}{% else %}Create New Election{% endif %}{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
 
 <a href="{% url 'election:election_list' %}">< Back to Elections</a>
 
-{% if election %}
-    <h1>Edit {{ election.election_name }}</h1>
+<h1>{% if election %}Edit {{ election.election_name|default_if_none:"" }}{% else %}
+    Create New Election{% endif %}</h1>
+<form action="{% url "election:election_edit_process" %}" method="post">
+{% csrf_token %}
 
-    <form action="{% url "election:election_edit_process" %}" method="post">
-    {% csrf_token %}
+<input type="hidden" name="election_id" value="{% if election %}{{ election.id }}{% else %}0{% endif %}">
+
     <table>
+{% if election %}
         <tr>
             <td>Local ID:</td>
             <td>{{ election.id }}</td>
         </tr>
+{% endif %}
         <tr>
             <td>Election Name:</td>
-            <td>{{ election.election_name }}</td>
+            <td>
+{% if election %}
+    {% if election.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow the name to be edited. #}
+        {{ election.election_name }}
+    {% else %}
+        <input type="text" name="election_name" id="election_name_id" value="{{ election.election_name|default_if_none:"" }}" /><br />
+    {% endif %}
+{% else %}
+     <input type="text" name="election_name" id="election_name_id" value="" /><br />
+{% endif %}</td>
         </tr>
         <tr>
             <td>Day of Election:</td>
-            <td>{{ election.election_day_text }}</td>
+            <td>
+{% if election %}
+    {% if election.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow the election_day_text to be edited. #}
+        {{ election.election_day_text }}
+    {% else %}
+        <input type="text" name="election_day_text" id="election_day_text_id" value="{% if election %}{{ election.election_day_text|default_if_none:"" }}{% endif %}" /> (Format: "2016-04-26")<br />
+    {% endif %}
+{% else %}
+    <input type="text" name="election_day_text" id="election_day_text_id" value="" /> (Format: "2016-04-26")<br />
+{% endif %}</td>
         </tr>
+{% if election %}
         <tr>
             <td>Google Civic ID:</td>
             <td>{{ election.google_civic_election_id }}</td>
@@ -33,24 +57,23 @@
             <td>OCD Division ID:</td>
             <td>{{ election.raw_ocd_division_id }}</td>
         </tr>
-
-        {#<label for="election_name_id">Organization Name</label>#}
-        {#<input type="text" name="election_name" id="election_name_id" value="{{ election.name }}" />#}
+{% endif %}
+        <tr>
+            <td>State Code:</td>
+            <td>
+            <input type="text" name="state_code" id="state_code_id" value="{% if election %}{{ election.state_code|default_if_none:"" }}{% endif %}" /><br />
+            </td>
         </tr>
     </table>
 
-    <input type="hidden" name="election_id" value="{{ election.id }}">
-    (There are no Election fields to edit at this time)
-
-    <p><a href="{% url 'election:election_list' %}">cancel</a>
-    {# <input type="submit" value="Update Organization" /> #}
-    </p>
-    </form>
-
+{% if election %}
+<p><a href="{% url 'election:election_summary' election.id %}">cancel</a>
 {% else %}
-     <h1>No Election Found</h1>
-
-    Please visit the <a href="{% url 'election:election_list' %}">Election List</a> page.
+<p><a href="{% url 'election:election_list' %}">cancel</a>
 {% endif %}
+
+<input type="submit" value="{% if election %}Update Election{% else %}Create New Election{% endif %}" /></p>
+
+</form>
 
 {% endblock %}

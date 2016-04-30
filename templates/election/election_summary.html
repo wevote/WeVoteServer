@@ -4,6 +4,7 @@
 {% block title %}{% if election %}{{ election.election_name }} Summary{% else %}No Election Found{% endif %}{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
 
 <a href="{% url 'election:election_list' %}">< Back to Elections</a>
 
@@ -23,15 +24,33 @@
             <td>OCD Division ID:</td>
             <td>{{ election.raw_ocd_division_id }}</td>
         </tr>
+        <tr>
+            <td>State Code:</td>
+            <td>{{ election.state_code }}</td>
+        </tr>
     </table>
 
     <p><a href="{% url 'election:election_edit' election.id %}">edit</a></p>
 
+
+    <p>
+        <a href="{% url 'office:office_list' %}?google_civic_election_id={{ election.google_civic_election_id }}">
+            See Offices for this Election</a><br />
+    </p>
+
+    <p>
+        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}">
+            See Candidates for this Election</a><br />
+    </p>
+
+
+{% if election.google_civic_election_id|convert_to_int < 1000000 %}
     <p>
     <a href="{% url 'election:election_all_ballots_retrieve' election.id %}">Retrieve Ballot Data for this Election</a><br />
     Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
     together the measures, races and candidates.
     </p>
+{% endif %}
 
 {% if ballot_returned_list %}
     <table border="1" cellpadding="10">

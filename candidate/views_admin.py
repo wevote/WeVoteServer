@@ -6,13 +6,14 @@ from .controllers import candidates_import_from_sample_file, retrieve_candidate_
 from .models import CandidateCampaign, CandidateCampaignList, CandidateCampaignManager
 from .serializers import CandidateCampaignSerializer
 from admin_tools.views import redirect_to_sign_in_page
+from office.models import ContestOffice
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
-from election.models import Election
+from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
@@ -94,9 +95,12 @@ def candidate_new_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
     messages_on_stage = get_messages(request)
     template_values = {
-        'messages_on_stage': messages_on_stage,
+        'messages_on_stage':        messages_on_stage,
+        'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'candidate/candidate_edit.html', template_values)
 
@@ -144,11 +148,21 @@ def candidate_edit_view(request, candidate_id):
             handle_record_not_found_exception(e, logger=logger)
             candidate_position_list = []
 
+        # Working with Offices for this election
+        try:
+            contest_office_list = ContestOffice.objects.order_by('office_name')
+            contest_office_list = contest_office_list.filter(
+                google_civic_election_id=candidate_on_stage.google_civic_election_id)
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            contest_office_list = []
+
         template_values = {
             'messages_on_stage':        messages_on_stage,
             'candidate':                candidate_on_stage,
             'rating_list':              rating_list,
             'candidate_position_list':  candidate_position_list,
+            'office_list':              contest_office_list,
         }
     else:
         template_values = {
@@ -176,20 +190,17 @@ def candidate_edit_process_view(request):
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
 
-    if not positive_value_exists(candidate_id):
-        messages.add_message(request, messages.INFO, 'CandidateCampaign could not be updated. No candidate_id.')
-        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
-
     # Check to see if this candidate is already being used anywhere
     candidate_on_stage_found = False
     candidate_on_stage = CandidateCampaign()
-    try:
-        candidate_query = CandidateCampaign.objects.filter(id=candidate_id)
-        if len(candidate_query):
-            candidate_on_stage = candidate_query[0]
-            candidate_on_stage_found = True
-    except Exception as e:
-        handle_record_not_found_exception(e, logger=logger)
+    if positive_value_exists(candidate_id):
+        try:
+            candidate_query = CandidateCampaign.objects.filter(id=candidate_id)
+            if len(candidate_query):
+                candidate_on_stage = candidate_query[0]
+                candidate_on_stage_found = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
 
     try:
         if candidate_on_stage_found:
@@ -202,12 +213,27 @@ def candidate_edit_process_view(request):
             messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
         else:
             # Create new
+            # election must be found
+            election_manager = ElectionManager()
+            election_results = election_manager.retrieve_election(google_civic_election_id)
+            if election_results['election_found']:
+                election = election_results['election']
+                state_code = election.get_election_state()
+            else:
+                messages.add_message(request, messages.ERROR, 'Could not find election -- required to save candidate.')
+                return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+
             candidate_on_stage = CandidateCampaign(
                 candidate_name=candidate_name,
-                candidate_twitter_handle=candidate_twitter_handle,
-                candidate_url=candidate_url,
+                google_civic_election_id=google_civic_election_id,
+                state_code=state_code,
             )
+            if candidate_twitter_handle is not False:
+                candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
+            if candidate_url is not False:
+                candidate_on_stage.candidate_url = candidate_url
             candidate_on_stage.save()
+            candidate_id = candidate_on_stage.id
             messages.add_message(request, messages.INFO, 'New candidate saved.')
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)

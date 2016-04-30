@@ -47,6 +47,10 @@ class Election(models.Model):
     #     if case():  # default
     #         is_general_election = True
 
+    # The state code for the election. This is not directly provided from Google Civic, but useful when we are
+    # entering elections manually.
+    state_code = models.CharField(verbose_name="state code for the election", max_length=2, null=True, blank=True)
+
     def get_election_state(self):
         # Pull this from ocdDivisionId
         ocd_division_id = self.ocd_division_id

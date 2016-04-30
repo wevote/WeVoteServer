@@ -25,8 +25,8 @@
     {% endif %}{# End of if election_list #}
 
 {% if candidate_list %}
-    <p>
     {% if google_civic_election_id %}
+    <p>
         Prepare: <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
             Find and Remove Duplicate Candidates for this Election</a> (about 1 minute)<br />
 
@@ -46,13 +46,13 @@
             Retrieve Positions from Vote Smart for this Election</a> (5-15 minutes - Open in New Window)<br />
 
         6. <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
-            Generate Voter Guides for this Election</a> (about 1 minute)
-    {% endif %}
+            Generate Voter Guides for this Election</a> (about 1 minute)<br />
+        <br />
+        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
     </p>
+    {% endif %}
 
     <p>
-        <a href="{% url 'candidate:candidate_new' %}">Add New Candidate</a><br />
-
         <a href="{% url 'candidate:candidates_export' %}?format=json" target="_blank" >Export Candidates</a><br />
     </p>
 
@@ -84,7 +84,13 @@
             <td><a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a></td>
             <td>{{ candidate.get_candidate_state }}</td>
             <td>{{ candidate.election.election_name }}</td>
-            <td><a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a></td>
+            <td>
+        {% if candidate.office %}
+                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
+        {% else %}
+            (office missing)
+        {% endif %}
+            </td>
             <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
                     target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
                 ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
@@ -101,7 +107,7 @@
 {% else %}
     <p>(no candidates found)</p>
     <p>
-        <a href="{% url 'candidate:candidate_new' %}">Add New Candidate</a><br />
+        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
     </p>
 {% endif %}
 

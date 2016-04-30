@@ -36,5 +36,7 @@
 {% else %}
     <p>(no elections found)</p>
 {% endif %}
-    {#        <a href="{% url 'office:offices_import' %}" >Import Offices</a>#}
+    <p>
+        <a href="{% url 'election:election_edit' 0 %}" >Add Upcoming Election Manually</a>
+    </p>
 {% endblock %}

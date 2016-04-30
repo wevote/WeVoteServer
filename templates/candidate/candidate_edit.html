@@ -4,6 +4,7 @@
 {% block title %}{% if candidate %}{{ candidate.candidate_name  }}{% else %}New Candidate{% endif %}{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
 <a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
 
 <h1>{% if candidate %}Edit {{ candidate.candidate_name }}{% else %}New Candidate{% endif %}</h1>
@@ -18,7 +19,30 @@
 <p><strong>Values from Google Civic API (do not edit)</strong></p>
 <p>Candidate Name: {{ candidate.candidate_name }}</p>
 <p>Candidate We Vote ID: {{ candidate.we_vote_id }}<br />
-Election: {{ candidate.google_civic_election_id }}</p>
+Election: {{ candidate.google_civic_election_id }}{% if candidate.election %} ({{ candidate.election.election_name }}){% endif %}<br />
+
+Office:
+{% if candidate.google_civic_election_id|convert_to_int >= 1000000 %}
+{# If here, this is a We Vote election #}
+    {% if office_list %}
+        <select id="office_id" name="office_id">
+            <option value="0" {% if 0 == candidate.contest_office_id %} selected="selected"{% endif %}>
+                -- Offices --</option>
+        {% for office in office_list %}
+            <option value="{{ office.contest_office_id }}"
+                    {% if office.contest_office_id|slugify == candiate.contest_office_id|slugify %} selected="selected"{% endif %}>
+                {{ office.contest_name }}</option>
+        {% endfor %}
+        </select>
+    {% else %}
+        (no offices found)
+    {% endif %}
+{% else %}
+    {{ candidate.contest_office_we_vote_id }}{% if candidate.office %} ({{ candidate.office.office_name }}){% endif %}
+{% endif %}
+
+</p>
+
 <p>Vote Smart ID: {{ candidate.vote_smart_id }}</p>
 <p>Website: <input type="text" name="candidate_url" id="candidate_url_id" value="{% if candidate %}{{ candidate.candidate_url}}{% endif %}" /></p>
 <p>Twitter URL: {{ candidate.twitter_url }} (from Google Civic)<br />
@@ -36,14 +60,19 @@ Election: {{ candidate.google_civic_election_id }}</p>
     Twitter Followers: {{ candidate.twitter_followers_count }}<br />
 
 {% else %}
-{#    <label for="candidate_name_id">Candidate Name</label>#}
-{#    <input type="text" name="candidate_name" id="candidate_name_id" value="{% if candidate %}{{ candidate.candidate_name }}{% endif %}" /><br />#}
-{##}
-{#    <label for="twitter_handle_id">Twitter </label>#}
-{#    <input type="text" name="twitter_handle" id="twitter_handle_id" value="{% if candidate %}{{ candidate.twitter_handle }}{% endif %}" /><br />#}
-{##}
-{#    <label for="candidate_website_id">Candidate Website</label>#}
-{#    <input type="text" name="candidate_website" id="candidate_website_id" value="{% if candidate %}{{ candidate.candidate_website }}{% endif %}" /><br />#}
+    The ability to add a new candidate is meant for pre-population of candidates before the data is
+    available from Google Civic.<br />
+    <label for="candidate_name_id">Candidate Name</label>
+    <input type="text" name="candidate_name" id="candidate_name_id" value="{% if candidate %}{{ candidate.candidate_name }}{% endif %}" /><br />
+
+    <label for="twitter_handle_id">Twitter </label>
+    <input type="text" name="twitter_handle" id="twitter_handle_id" value="{% if candidate %}{{ candidate.twitter_handle }}{% endif %}" /><br />
+
+    <label for="candidate_website_id">Candidate Website</label>
+    <input type="text" name="candidate_website" id="candidate_website_id" value="{% if candidate %}{{ candidate.candidate_website }}{% endif %}" /><br />
+
+    <label for="google_civic_election_id_id">Google Civic Election Id</label>
+    <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" value="{{ google_civic_election_id }}" /><br />
 {% endif %}
 <p><a href="{% url 'candidate:candidate_list' %}">cancel</a>
 <input type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
