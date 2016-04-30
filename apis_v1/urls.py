@@ -86,6 +86,7 @@ urlpatterns = [
     url(r'^voterStopOpposingSave/', views.voter_stop_opposing_save_view, name='voterStopOpposingSaveView'),
     url(r'^voterStopSupportingSave/', views.voter_stop_supporting_save_view, name='voterStopSupportingSaveView'),
     url(r'^voterSupportingSave/', views.voter_supporting_save_view, name='voterSupportingSaveView'),
+    url(r'^voterUpdate/', views.voter_update_view, name='voterUpdateView'),
 
     ##########################
     # API Documentation Views
@@ -179,4 +180,5 @@ urlpatterns = [
     url(r'^docs/voterStopSupportingSave/$',
         views_docs.voter_stop_supporting_save_doc_view, name='voterStopSupportingSaveDocs'),
     url(r'^docs/voterSupportingSave/$', views_docs.voter_supporting_save_doc_view, name='voterSupportingSaveDocs'),
+    url(r'^docs/voterUpdate/$', views_docs.voter_update_doc_view, name='voterUpdateDocs'),
 ]

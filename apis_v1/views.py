@@ -39,7 +39,7 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, \
     voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
-    VoterDeviceLinkManager
+    VoterDeviceLinkManager, VoterManager
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
@@ -1583,3 +1583,141 @@ def voter_all_stars_status_retrieve_view(request):  # voterAllStarsStatusRetriev
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return voter_all_stars_status_retrieve_for_api(
         voter_device_id=voter_device_id)
+
+
+def voter_update_view(request):  # voterUpdate
+    """
+    Update profile-related information for this voter
+    :param request:
+    :return:
+    """
+
+    voter_updated = False
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    # If we have an incoming GET value for a variable, use it. If we don't pass "False" into voter_update_for_api
+    # as a signal to not change the variable. (To set variables to False, pass in the string "False".)
+    try:
+        facebook_email = request.GET['facebook_email']
+        facebook_email = facebook_email.strip()
+        if facebook_email.lower() == 'false':
+            facebook_email = False
+    except KeyError:
+        facebook_email = False
+
+    try:
+        facebook_profile_image_url_https = request.GET['facebook_profile_image_url_https']
+        facebook_profile_image_url_https = facebook_profile_image_url_https.strip()
+        if facebook_profile_image_url_https.lower() == 'false':
+            facebook_profile_image_url_https = False
+    except KeyError:
+        facebook_profile_image_url_https = False
+
+    try:
+        first_name = request.GET['first_name']
+        first_name = first_name.strip()
+        if first_name.lower() == 'false':
+            first_name = False
+    except KeyError:
+        first_name = False
+
+    try:
+        middle_name = request.GET['middle_name']
+        middle_name = middle_name.strip()
+        if middle_name.lower() == 'false':
+            middle_name = False
+    except KeyError:
+        middle_name = False
+
+    try:
+        last_name = request.GET['last_name']
+        last_name = last_name.strip()
+        if last_name.lower() == 'false':
+            last_name = False
+    except KeyError:
+        last_name = False
+
+    try:
+        twitter_profile_image_url_https = request.GET['twitter_profile_image_url_https']
+        twitter_profile_image_url_https = twitter_profile_image_url_https.strip()
+        if twitter_profile_image_url_https.lower() == 'false':
+            twitter_profile_image_url_https = False
+    except KeyError:
+        twitter_profile_image_url_https = False
+
+    device_id_results = is_voter_device_id_valid(voter_device_id)
+    if not device_id_results['success']:
+        json_data = {
+                'status':                           device_id_results['status'],
+                'success':                          False,
+                'voter_device_id':                  voter_device_id,
+                'facebook_email':                   facebook_email,
+                'facebook_profile_image_url_https': facebook_profile_image_url_https,
+                'first_name':                       first_name,
+                'middle_name':                      middle_name,
+                'last_name':                        last_name,
+                'twitter_profile_image_url_https':  twitter_profile_image_url_https,
+                'voter_updated':                    voter_updated,
+            }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+        return response
+
+    at_least_one_variable_has_changed = True if \
+        facebook_email or facebook_profile_image_url_https \
+        or first_name or middle_name or last_name \
+        else False
+
+    if not at_least_one_variable_has_changed:
+        json_data = {
+                'status':                           "MISSING_VARIABLE-NO_VARIABLES_PASSED_IN_TO_CHANGE",
+                'success':                          True,
+                'voter_device_id':                  voter_device_id,
+                'facebook_email':                   facebook_email,
+                'facebook_profile_image_url_https': facebook_profile_image_url_https,
+                'first_name':                       first_name,
+                'middle_name':                      middle_name,
+                'last_name':                        last_name,
+                'twitter_profile_image_url_https':  twitter_profile_image_url_https,
+                'voter_updated':                    voter_updated,
+            }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+        return response
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if voter_id < 0:
+        json_data = {
+            'status':                           "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'success':                          False,
+            'voter_device_id':                  voter_device_id,
+            'facebook_email':                   facebook_email,
+            'facebook_profile_image_url_https': facebook_profile_image_url_https,
+            'first_name':                       first_name,
+            'middle_name':                      middle_name,
+            'last_name':                        last_name,
+            'twitter_profile_image_url_https':  twitter_profile_image_url_https,
+            'voter_updated':                    voter_updated,
+        }
+        response = HttpResponse(json.dumps(json_data), content_type='application/json')
+        return response
+
+    # At this point, we have a valid voter
+    voter_manager = VoterManager()
+    results = voter_manager.update_voter(voter_id, facebook_email, facebook_profile_image_url_https,
+                                         first_name, middle_name, last_name, twitter_profile_image_url_https)
+
+    json_data = {
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+        'facebook_email':                   facebook_email,
+        'facebook_profile_image_url_https': facebook_profile_image_url_https,
+        'first_name':                       first_name,
+        'middle_name':                      middle_name,
+        'last_name':                        last_name,
+        'twitter_profile_image_url_https':  twitter_profile_image_url_https,
+        'voter_updated':                    results['voter_updated'],
+    }
+
+    response = HttpResponse(json.dumps(json_data), content_type='application/json')
+    return response

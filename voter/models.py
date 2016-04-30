@@ -407,6 +407,60 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def update_voter(self, voter_id, facebook_email, facebook_profile_image_url_https,
+                     first_name, middle_name, last_name,
+                     twitter_profile_image_url_https):
+        voter_updated = False
+        results = self.retrieve_voter(voter_id)
+
+        if results['voter_found']:
+            voter = results['voter']
+
+            try:
+                should_save_voter = False
+                if facebook_email is not False:
+                    voter.facebook_email = facebook_email
+                    should_save_voter = True
+                if facebook_profile_image_url_https is not False:
+                    voter.facebook_profile_image_url_https = facebook_profile_image_url_https
+                    should_save_voter = True
+                if first_name is not False:
+                    voter.first_name = first_name
+                    should_save_voter = True
+                if middle_name is not False:
+                    voter.middle_name = middle_name
+                    should_save_voter = True
+                if last_name is not False:
+                    voter.last_name = last_name
+                    should_save_voter = True
+                if twitter_profile_image_url_https is not False:
+                    voter.last_name = last_name
+                    should_save_voter = True
+                if should_save_voter:
+                    voter.save()
+                    voter_updated = True
+                status = "UPDATED_VOTER"
+                success = True
+            except Exception as e:
+                status = "UNABLE_TO_UPDATE_VOTER"
+                success = False
+                voter_updated = False
+
+        else:
+            # If here, we were unable to find pre-existing Voter
+            status = "UNABLE_TO_FIND_VOTER_FOR_UPDATE_VOTER"
+            voter = Voter()
+            success = False
+            voter_updated = False
+
+        results = {
+            'status':           status,
+            'success':          success,
+            'voter':            voter,
+            'voter_updated':    voter_updated,
+        }
+        return results
+
 
 class Voter(AbstractBaseUser):
     """
@@ -429,6 +483,7 @@ class Voter(AbstractBaseUser):
     # username = models.CharField(unique=True, max_length=20, validators=[alphanumeric])  # Increase max_length to 255
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True, null=True, blank=True)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
+    middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     is_active = models.BooleanField(default=True)
@@ -455,7 +510,6 @@ class Voter(AbstractBaseUser):
     twitter_connection_active = models.BooleanField(default=False)
 
     # Custom We Vote fields
-    middle_name = models.CharField(max_length=255, null=True, blank=True)
 #     image_displayed
 #     image_twitter
 #     image_facebook

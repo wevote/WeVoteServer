@@ -49,7 +49,12 @@
         <td>Create an empty voter entry attached to a voter_device_id</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterPhotoSaveDocs' %}">voterPhotoSave</a></td>
+        <td><a href="{% url 'apis_v1:voterUpdateDocs' %}">voterUpdate</a></td>
+        <td></td>
+        <td>Save profile-related fields for an existing voter.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterPhotoSaveDocs' %}">voterPhotoSave - DEPRECATED, PLEASE USE voterUpdate</a></td>
         <td></td>
         <td>Save photo (pulled from Facebook or Twitter) for an existing voter.</td>
     </tr>
