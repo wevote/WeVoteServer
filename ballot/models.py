@@ -534,19 +534,23 @@ class BallotReturnedManager(models.Model):
         return "BallotReturnedManager"
 
     def retrieve_ballot_returned_from_voter_id(self, voter_id, google_civic_election_id):
+        ballot_returned_id = 0
         ballot_returned_manager = BallotReturnedManager()
-        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(google_civic_election_id,
+        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(ballot_returned_id,
+                                                                                       google_civic_election_id,
                                                                                        voter_id)
 
     def retrieve_ballot_returned_from_polling_location_we_vote_id(self, polling_location_we_vote_id,
                                                                   google_civic_election_id):
+        ballot_returned_id = 0
         voter_id = 0
         ballot_returned_manager = BallotReturnedManager()
-        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(google_civic_election_id,
+        return ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(ballot_returned_id,
+                                                                                       google_civic_election_id,
                                                                                        voter_id,
                                                                                        polling_location_we_vote_id)
 
-    def retrieve_existing_ballot_returned_by_identifier(self, google_civic_election_id,
+    def retrieve_existing_ballot_returned_by_identifier(self, ballot_returned_id, google_civic_election_id=0,
                                                         voter_id=0, polling_location_we_vote_id=''):
         """
         Search by voter_id (or polling_location_we_vote_id) + google_civic_election_id to see if have an entry
@@ -561,7 +565,14 @@ class BallotReturnedManager(models.Model):
         ballot_returned = BallotReturned()
 
         try:
-            if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
+            if positive_value_exists(ballot_returned_id):
+                ballot_returned = BallotReturned.objects.get(id=ballot_returned_id)
+                # If still here, we found an existing ballot_returned
+                ballot_returned_id = ballot_returned.id
+                ballot_returned_found = True if positive_value_exists(ballot_returned_id) else False
+                success = True
+                status = "BALLOT_RETURNED_FOUND_FROM_VOTER_ID"
+            elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
                 ballot_returned = BallotReturned.objects.get(voter_id=voter_id,
                                                              google_civic_election_id=google_civic_election_id)
                 # If still here, we found an existing ballot_returned
@@ -738,7 +749,9 @@ class BallotReturnedManager(models.Model):
 
     def find_closest_ballot_returned(self, text_for_map_search, google_civic_election_id=0):
         """
-        We search for the closest address for this election in the ballot_returned table.
+        We search for the closest address for this election in the ballot_returned table. We never have to worry
+        about test elections being returned with this routine, because we don't store ballot_returned entries for
+        test elections.
         :param text_for_map_search:
         :param google_civic_election_id:
         :return:

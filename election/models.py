@@ -52,9 +52,15 @@ class Election(models.Model):
     state_code = models.CharField(verbose_name="state code for the election", max_length=2, null=True, blank=True)
 
     def get_election_state(self):
-        # Pull this from ocdDivisionId
-        ocd_division_id = self.ocd_division_id
-        return extract_state_from_ocd_division_id(ocd_division_id)
+        if positive_value_exists(self.state_code):
+            return self.state_code
+        else:
+            # Pull this from ocdDivisionId
+            if positive_value_exists(self.ocd_division_id):
+                ocd_division_id = self.ocd_division_id
+                return extract_state_from_ocd_division_id(ocd_division_id)
+            else:
+                return ''
 
 
 class ElectionManager(models.Model):

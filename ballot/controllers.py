@@ -172,6 +172,7 @@ def choose_election_and_prepare_ballot_data(voter_device_link, google_civic_elec
         }
         return results
 
+    # This routine finds a ballot saved for this voter
     results = choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address)
     if results['voter_ballot_saved_found']:
         # Return voter_ballot_saved
@@ -179,7 +180,8 @@ def choose_election_and_prepare_ballot_data(voter_device_link, google_civic_elec
 
     # If here, then we need to either:
     # 1) Get ballot data from Google Civic for the actual VoterAddress
-    # 2) Copy ballot data from a nearby address, previously retrieved from Google Civic and cached within We Vote
+    # 2) Copy ballot data from a nearby address, previously retrieved from Google Civic and cached within We Vote, or
+    #    generated within We Vote (google_civic_election_id >= 1000000
     # 3) Get test ballot data from Google Civic
     results = generate_ballot_data(voter_device_link, voter_address)
     if results['voter_ballot_saved_found']:
@@ -278,6 +280,9 @@ def generate_ballot_data(voter_device_link, voter_address):
         }
         return results
 
+    # NOTE: If there is a ballot_returned entry for a We Vote generated election (google_civic_election_id > 1000000,
+    # we don't need to add a special case here. TODO DALE
+
     # 3) Get test ballot data from Google Civic
     use_test_election = True
     results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,
@@ -323,7 +328,6 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
 
     # If a google_civic_election_id was passed in, then we simply return the ballot that was saved
     if positive_value_exists(google_civic_election_id):
-        # voter_ballot_saved_results = retrieve_voter_ballot_saved(
         voter_ballot_saved_results = voter_ballot_saved_manager.retrieve_voter_ballot_saved_by_voter_id(
             voter_id, google_civic_election_id)
         if voter_ballot_saved_results['voter_ballot_saved_found']:
@@ -337,7 +341,7 @@ def choose_election_from_existing_data(voter_device_link, google_civic_election_
             }
             return results
         else:
-            # If here, then we expected a VoterBallotSaved entry, but didn't find it. Unable to repair the data
+            # If here, then we expected a VoterBallotSaved entry for this voter, but didn't find it
             pass
 
     if positive_value_exists(voter_device_link.google_civic_election_id):

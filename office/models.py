@@ -80,9 +80,13 @@ class ContestOffice(models.Model):
     def get_office_state(self):
         if positive_value_exists(self.state_code):
             return self.state_code
-        # Pull this from ocdDivisionId
-        ocd_division_id = self.ocd_division_id
-        return extract_state_from_ocd_division_id(ocd_division_id)
+        else:
+            # Pull this from ocdDivisionId
+            if positive_value_exists(self.ocd_division_id):
+                ocd_division_id = self.ocd_division_id
+                return extract_state_from_ocd_division_id(ocd_division_id)
+            else:
+                return ''
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):

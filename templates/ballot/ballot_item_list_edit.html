@@ -1,0 +1,139 @@
+{# templates/ballot/ballot_item_list_edit.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if ballot_returned %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}
+    New Ballot{% endif %}{% endblock %}
+
+{% block content %}
+{% load template_filters %}
+<a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ google_civic_election_id }}">
+    < Back to Election</a>
+
+<h1>{% if ballot_returned %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}New Ballot{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+<form action="{% url "ballot:ballot_item_list_edit_process" %}" method="post">
+{% csrf_token %}
+    <input type="hidden" name="ballot_returned_id" value="{% if ballot_returned %}{{ ballot_returned.id }}{% else %}0{% endif %}">
+
+{% if ballot_returned %}
+    {% if ballot_returned.google_civic_election_id|convert_to_int < 1000000 %}
+    <p><strong>Values from Google Civic API (cannot edit)</strong></p>
+    {% endif %}
+<p>Polling Location We Vote ID: {{ ballot_returned.polling_location_we_vote_id }}</p>
+<p>Election: {{ google_civic_election_id }}{% if election %} ({{ election.election_name }}){% endif %}<br />
+Date: {{ election.election_day_text }}</p>
+
+<h4>Ballot Items</h4>
+{% for ballot_item in ballot_item_list %}
+    {% if ballot_item.google_civic_election_id|convert_to_int < 1000000 %}
+    {# If here, this is an election from Google Civic #}
+        {% if ballot_item.contest_office_we_vote_id %}
+            {{ ballot_item.local_ballot_order }}: {{ ballot_item.ballot_item_display_name }} ({{ ballot_item.contest_office_we_vote_id }})<br />
+        {% endif %}
+    {% else %}
+    {# If here, this is a We Vote election #}
+        {% if ballot_item.contest_office_we_vote_id %}{# kind_of_ballot_item (contest_office or contest_measure) #}
+            {% if office_list %}
+                <select id="contest_office_id_id" name="contest_office_id">
+                    <option value="0" {% if 0 == ballot_item.contest_office_id %} selected="selected"{% endif %}>
+                        -- Offices --</option>
+                {% for office in office_list %}
+                    <option value="{{ office.id }}"
+                            {% if office.id|slugify == ballot_item.contest_office_id|slugify %} selected="selected"{% endif %}>
+                        {{ office.office_name }}</option>
+                {% endfor %}
+                </select>
+            {% else %}
+                (no offices found)
+            {% endif %}
+            <br />
+        {% endif %}{# end of kind_of_ballot_item (contest_office or contest_measure) #}
+    {% endif %}
+{% endfor %}{# for ballot_item in ballot_item_list #}
+
+
+{% else %}
+    Add ballot items to a ballot before the data is available from Google Civic.<br />
+
+    {% if office_list %}
+    {# When adding a new candidate, we require the office they are running for be included #}
+    <label for="contest_office_id_id">Office</label>
+        <select id="contest_office_id_id" name="contest_office_id">
+            <option value="0" {% if 0 == contest_office_id %} selected="selected"{% endif %}>
+                -- Offices --</option>
+        {% for office in office_list %}
+            <option value="{{ office.id }}"
+                    {% if office.id|slugify == contest_office_id|slugify %} selected="selected"{% endif %}>
+                {{ office.office_name }}</option>
+        {% endfor %}
+        </select>
+        <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+            Add New Office</a> (in new window)
+        <br />
+    {% endif %}
+
+{% endif %}
+<p><a href="{% url 'election:election_summary' election.id %}">cancel</a>
+<input type="submit" value="{% if ballot_returned %}Update Ballot{% else %}Save New Ballot{% endif %}" /></p>
+</form>
+
+<br />
+
+{# Only show other candidates running for this office when we are entering a new candidate #}
+{% if candidate_list %}
+<h5>Existing Candidates for this Office</h5>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Candidate Name</td>
+            <td>State</td>
+            <td>Election</td>
+            <td>Office</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
+            <td>&nbsp;</td>
+        </tr>
+    {% for candidate in candidate_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if candidate.candidate_photo_url %}
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}">
+                    <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a></td>
+            <td>{{ candidate.get_candidate_state }}</td>
+            <td>{{ candidate.election.election_name }}</td>
+            <td>
+        {% if candidate.office %}
+                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
+        {% else %}
+            (office missing)
+        {% endif %}
+            </td>
+            <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
+                    target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
+                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
+            <td>{{ candidate.id }}</td>
+            <td>{{ candidate.we_vote_id }}</td>
+            <td>{{ candidate.vote_smart_id }}</td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    {# Don't display anything if there aren't any other candidates captured for this office yet #}
+{% endif %}
+
+{% endblock %}

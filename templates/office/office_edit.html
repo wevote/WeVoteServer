@@ -1,35 +1,74 @@
 {# templates/office/office_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if office %}{{ office.office_name  }}{% else %}New Office{% endif %}{% endblock %}
+{% block title %}{% if office %}{{ office.office_name }}{% else %}Create New Office{% endif %}{% endblock %}
 
 {%  block content %}
-<h1>{% if office %}Edit {{ office.office_name }}{% else %}New Office{% endif %}</h1>
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% load template_filters %}
 
-
+<h1>{% if office %}Edit {{ office.office_name|default_if_none:"" }}{% else %}
+    Create New Office{% endif %}</h1>
 <form action="{% url "office:office_edit_process" %}" method="post">
 {% csrf_token %}
-    <input type="hidden" name="office_id" value="{% if office %}{{ office.id }}{% else %}0{% endif %}">
+
+<input type="hidden" name="office_id" value="{% if office %}{{ office.id }}{% else %}0{% endif %}">
+
+    <table>
+{% if office %}
+        <tr>
+            <td>Local Office ID:</td>
+            <td>{{ office.id }}</td>
+        </tr>
+        <tr>
+            <td>Office We Vote ID:</td>
+            <td>{{ office.we_vote_id }}</td>
+        </tr>
+{% endif %}
+        <tr>
+            <td>Office Name:</td>
+            <td>
+{% if office %}
+    {% if office.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow the name to be edited. #}
+        {{ office.office_name }}
+    {% else %}
+        <input type="text" name="office_name" id="office_name_id" value="{{ office.office_name|default_if_none:"" }}" /><br />
+    {% endif %}
+{% else %}
+     <input type="text" name="office_name" id="office_name_id" value="" /><br />
+{% endif %}</td>
+        </tr>
+        <tr>
+            <td>Google Civic ID:</td>
+            <td>
+{% if office %}
+    {% if office.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow it to be edited. #}
+        {{ office.google_civic_election_id }}
+    {% else %}
+        <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" value="{% if office %}{{ office.google_civic_election_id|default_if_none:"" }}{% endif %}" /><br />
+    {% endif %}
+{% else %}
+    <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" value="{{ google_civic_election_id }}" /><br />
+{% endif %}</td>
+        </tr>
+{% if office %}
+        <tr>
+            <td>State Code:</td>
+            <td>{{ office.get_office_state }}</td>
+        </tr>
+        <tr>
+            <td>Primary Party:</td>
+            <td>{{ office.primary_party }}</td>
+        </tr>
+{% endif %}
+    </table>
 
 {% if office %}
-<p><strong>Values from Google Civic API (do not edit)</strong></p>
-<p>Office Name: {{ office.office_name }}</p>
-<p>Twitter URL: {{ office.twitter_url }}</p>
-<p>Website: {{ office.office_url }}</p>
-
+<p><a href="{% url 'office:office_summary' office.id %}">cancel</a>
 {% else %}
-{#    <label for="office_name_id">Office Name</label>#}
-{#    <input type="text" name="office_name" id="office_name_id" value="{% if office %}{{ office.office_name }}{% endif %}" /><br />#}
-{##}
-{#    <label for="twitter_handle_id">Twitter </label>#}
-{#    <input type="text" name="twitter_handle" id="twitter_handle_id" value="{% if office %}{{ office.twitter_handle }}{% endif %}" /><br />#}
-{##}
-{#    <label for="office_website_id">Office Website</label>#}
-{#    <input type="text" name="office_website" id="office_website_id" value="{% if office %}{{ office.office_website }}{% endif %}" /><br />#}
+<p><a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
 {% endif %}
-<p><a href="{% url 'office:office_list' %}">cancel</a>
-<input type="submit" value="{% if office %}Update Office{% else %}Save New Office{% endif %}" /></p>
-</form>
 
+<input type="submit" value="{% if office %}Update Office{% else %}Create New Office{% endif %}" /></p>
+
+</form>
 {% endblock %}

@@ -28,11 +28,15 @@
 {% if office_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
+            <td>ID</td>
+            <td>We Vote ID</td>
             <td>Office Name</td>
             <td>State</td>
         </tr>
     {% for office in office_list %}
         <tr>
+            <td>{{ office.id }}</td>
+            <td>{{ office.we_vote_id }}</td>
             <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
             <td>{{ office.state_code }}</td>
         </tr>
@@ -48,7 +52,7 @@
     <p>(no offices found)</p>
 {% endif %}
 
-<p><a href="{% url 'office:office_new' %}">Add New Office</a></p>
+<p><a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Office</a></p>
 
     <script>
         $(function() {

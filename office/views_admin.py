@@ -68,9 +68,12 @@ def office_new_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
     messages_on_stage = get_messages(request)
     template_values = {
-        'messages_on_stage': messages_on_stage,
+        'messages_on_stage':        messages_on_stage,
+        'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'office/office_edit.html', template_values)
 
@@ -83,6 +86,8 @@ def office_edit_view(request, office_id):
 
     messages_on_stage = get_messages(request)
     office_id = convert_to_int(office_id)
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
     office_on_stage_found = False
     try:
         office_on_stage = ContestOffice.objects.get(id=office_id)
@@ -95,12 +100,14 @@ def office_edit_view(request, office_id):
 
     if office_on_stage_found:
         template_values = {
-            'messages_on_stage': messages_on_stage,
-            'office': office_on_stage,
+            'messages_on_stage':        messages_on_stage,
+            'office':                   office_on_stage,
+            'google_civic_election_id': google_civic_election_id,
         }
     else:
         template_values = {
-            'messages_on_stage': messages_on_stage,
+            'messages_on_stage':        messages_on_stage,
+            'google_civic_election_id': google_civic_election_id,
         }
     return render(request, 'office/office_edit.html', template_values)
 
@@ -116,12 +123,11 @@ def office_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    office_id = convert_to_int(request.POST['office_id'])
-    office_name = request.POST['office_name']
-    twitter_handle = request.POST['twitter_handle']
-    office_website = request.POST['office_website']
+    office_id = convert_to_int(request.POST.get('office_id', 0))
+    office_name = request.POST.get('office_name', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
 
-    # Check to see if this office is already being used anywhere
+    # Check to see if this office is already in the database
     office_on_stage_found = False
     try:
         office_query = ContestOffice.objects.filter(id=office_id)
@@ -134,17 +140,16 @@ def office_edit_process_view(request):
     try:
         if office_on_stage_found:
             # Update
-            office_on_stage.office_name = office_name
-            office_on_stage.twitter_handle = twitter_handle
-            office_on_stage.office_website = office_website
+            if office_on_stage.google_civic_election_id >= 1000000 and office_name is not False:
+                office_on_stage.office_name = office_name
             office_on_stage.save()
-            messages.add_message(request, messages.INFO, 'ContestOffice updated.')
+            messages.add_message(request, messages.INFO, 'Office updated.')
+            google_civic_election_id = office_on_stage.google_civic_election_id
         else:
             # Create new
             office_on_stage = ContestOffice(
                 office_name=office_name,
-                twitter_handle=twitter_handle,
-                office_website=office_website,
+                google_civic_election_id=google_civic_election_id,
             )
             office_on_stage.save()
             messages.add_message(request, messages.INFO, 'New office saved.')
@@ -152,7 +157,8 @@ def office_edit_process_view(request):
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save office.')
 
-    return HttpResponseRedirect(reverse('office:office_list', args=()))
+    return HttpResponseRedirect(reverse('office:office_list', args=()) +
+                                "?google_civic_election_id=" + google_civic_election_id)
 
 
 @login_required
@@ -168,6 +174,7 @@ def office_summary_view(request, office_id):
     try:
         office_on_stage = ContestOffice.objects.get(id=office_id)
         office_on_stage_found = True
+        google_civic_election_id = office_on_stage.google_civic_election_id
     except ContestOffice.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except ContestOffice.DoesNotExist:

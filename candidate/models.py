@@ -277,6 +277,10 @@ class CandidateCampaign(models.Model):
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
 
+    # Official Statement from Candidate in Ballot Guide
+    ballot_guide_official_statement = models.TextField(verbose_name="official candidate statement from ballot guide",
+                                                       null=True, blank=True, default="")
+
     def election(self):
         try:
             election = Election.objects.get(google_civic_election_id=self.google_civic_election_id)
@@ -349,7 +353,7 @@ class CandidateCampaign(models.Model):
             return ''
 
     def get_candidate_state(self):
-        if self.state_code:
+        if positive_value_exists(self.state_code):
             return self.state_code
         else:
             # Pull this from ocdDivisionId

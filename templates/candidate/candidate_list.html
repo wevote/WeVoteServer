@@ -29,6 +29,8 @@
     <p>
         Prepare: <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
             Find and Remove Duplicate Candidates for this Election</a> (about 1 minute)<br />
+        Prepare: <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
+            Generate One Sample Ballot</a> (about 1 minute)<br />
 
         1. <a href="{% url 'candidate:photos_for_election' google_civic_election_id %}" target="_blank" >
             Retrieve Candidate Photos from Vote Smart for this Election</a> (3-10 minutes - Open in New Window)<br />

@@ -875,8 +875,15 @@ def voter_address_save_view(request):  # voterAddressSave
             voter_device_id, text_for_map_search, use_test_election)
 
         # Update voter_address with the google_civic_election_id retrieved from Google Civic
-        # and clear out ballot_saved information
+        # and clear out ballot_saved information IFF we got a valid google_civic_election_id back
         google_civic_election_id = convert_to_int(google_retrieve_results['google_civic_election_id'])
+
+        if not positive_value_exists(google_civic_election_id):
+            # Check to see if we have a We Vote generated election
+            google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
+                voter_device_id, text_for_map_search, use_test_election)
+
+        # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
         voter_address.google_civic_election_id = google_civic_election_id
         voter_address_update_results = voter_address_manager.update_existing_voter_address_object(voter_address)
 
