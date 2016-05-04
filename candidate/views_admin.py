@@ -106,12 +106,24 @@ def candidate_new_view(request):
         handle_record_not_found_exception(e, logger=logger)
         contest_office_list = []
 
+    # Its helpful to see existing candidates when entering a new candidate
+    candidate_list = []
+    try:
+        candidate_list = CandidateCampaign.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+        candidate_list = candidate_list.order_by('candidate_name')[:500]
+    except CandidateCampaign.DoesNotExist:
+        # This is fine, create new
+        pass
+
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'office_list':              contest_office_list,
         'contest_office_id':        contest_office_id,
         'google_civic_election_id': google_civic_election_id,
+        'candidate_list':           candidate_list,
     }
     return render(request, 'candidate/candidate_edit.html', template_values)
 

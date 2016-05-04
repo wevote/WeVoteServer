@@ -99,7 +99,7 @@ Office:
     <label for="ballot_guide_official_statement_id">Official Candidate Statement</label>
     <textarea name="ballot_guide_official_statement" id="ballot_guide_official_statement_id">{{ candidate.ballot_guide_official_statement }}</textarea><br />
 {% endif %}
-<p><a href="{% url 'candidate:candidate_list' %}">cancel</a>
+<p><a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
 <input type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 </form>
 
@@ -202,7 +202,7 @@ Office:
 
 {# Only show other candidates running for this office when we are entering a new candidate #}
 {% if candidate_list %}
-<h5>Existing Candidates for this Office</h5>
+<h5>Existing Candidates</h5>
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td>&nbsp;</td>

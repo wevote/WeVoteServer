@@ -4,33 +4,99 @@
 {% block title %}{% if organization %}{{ organization.organization_name  }}{% else %}New Organization{% endif %}{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
 <h1>{% if organization %}{{ organization.organization_name }}{% else %}New Organization{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+{% if organizations_list %}
+    <h3>Is the organization you are adding one of these?</h3>
+    <table cellpadding="5" cellspacing="5" border="1">
+        <tr>
+            <td></td>
+            <td></td>
+            <td>Organization</td>
+            <td>Twitter</td>
+            <td>Facebook</td>
+            <td>Website</td>
+            <td>Wikipedia?</td>
+            <td></td>
+        </tr>
+    {% for possible_organization in organizations_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ possible_organization.organization_id }}</td>
+            <td><a href="{% url 'organization:organization_position_list' possible_organization.organization_id %}" target="_blank">{{ possible_organization.organization_name }}</a> (view in new window)</td>
+            <td>{% if possible_organization.organization_twitter_handle %}{{ possible_organization.organization_twitter_handle }}{% endif %}</td>
+            <td>{% if possible_organization.organization_facebook %}{{ possible_organization.organization_facebook }}{% endif %}</td>
+            <td>{% if possible_organization.organization_website %}{{ possible_organization.organization_website }}{% endif %}</td>
+            <td>{% if possible_organization.wikipedia_page_id %}
+                <a href="{{ possible_organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
+            <td><a href="{% url 'organization:organization_edit' possible_organization.organization_id %}">CHOOSE</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+    <p></p>
+{% endif %}
+
+
+
+{% if organization %}
+{% else %}
+    <p>If you include the twitter handle and website for this organization below, we will have a better chance of preventing duplicate
+    entries.</p>
+{% endif %}
 
 <form action="{% url "organization:organization_edit_process" %}" method="post">
 {% csrf_token %}
     <input type="hidden" name="organization_id" value="{% if organization %}{{ organization.id }}{% else %}0{% endif %}">
 
     <label for="organization_name_id">Organization Name</label>
-    <input type="text" name="organization_name" id="organization_name_id" value="{% if organization %}{{ organization.organization_name }}{% endif %}" /><br />
+    <input type="text" name="organization_name" id="organization_name_id"
+           value="{% if organization %}{{ organization.organization_name }}{% else %}{{ organization_name }}{% endif %}" /><br />
 
     <label for="organization_twitter_handle_id">Twitter Handle</label>
-    <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id" value="{% if organization %}{{ organization.organization_twitter_handle }}{% endif %}" /><br />
+    <input type="text" name="organization_twitter_handle" id="organization_twitter_handle_id"
+           value="{% if organization %}{{ organization.organization_twitter_handle }}{% else %}{{ organization_twitter_handle }}{% endif %}" /><br />
 
     <label for="organization_facebook_id">Facebook</label>
-    <input type="text" name="organization_facebook" id="organization_facebook_id" value="{% if organization %}{{ organization.organization_facebook }}{% endif %}" /><br />
+    <input type="text" name="organization_facebook" id="organization_facebook_id"
+           value="{% if organization %}{{ organization.organization_facebook }}{% else %}{{ organization_facebook }}{% endif %}" /><br />
 
     <label for="organization_website_id">Organization Website</label>
-    <input type="text" name="organization_website" id="organization_website_id" value="{% if organization %}{{ organization.organization_website }}{% endif %}" /><br />
+    <input type="text" name="organization_website" id="organization_website_id"
+           value="{% if organization %}{{ organization.organization_website }}{% else %}{{ organization_website }}{% endif %}" /><br />
 
     <label for="wikipedia_page_title_id">Wikipedia Page Title</label>
-    <input type="text" name="wikipedia_page_title" id="wikipedia_page_title_id" value="{% if organization %}{{ organization.wikipedia_page_title }}{% endif %}" /><br />
+    <input type="text" name="wikipedia_page_title" id="wikipedia_page_title_id"
+           value="{% if organization %}{{ organization.wikipedia_page_title }}{% else %}{{ wikipedia_page_title }}{% endif %}" /><br />
 
     <label for="wikipedia_photo_url_id">Wikipedia Photo URL</label>
-    <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id" value="{% if organization %}{{ organization.wikipedia_photo_url }}{% endif %}" /><br />
+    <input type="text" name="wikipedia_photo_url" id="wikipedia_photo_url_id"
+           value="{% if organization %}{{ organization.wikipedia_photo_url }}{% else %}{{ wikipedia_photo_url }}{% endif %}" /><br />
 
-<p><a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
-<input type="submit" value="{% if organization %}Update Organization{% else %}Save New Organization{% endif %}" /></p>
+<p>
+
+{% if upcoming_election_list %}
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Create Voter Guide for this Election --</option>
+    {% for election in upcoming_election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select><br />
+    <br />
+{% endif %}
+
+{% if organization %}
+    <a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>
+{% else %}
+    <a href="{% url 'organization:organization_list' %}">cancel</a>
+{% endif %}
+    <input type="submit" value="{% if organization %}Update Organization{% else %}Save New Organization{% endif %}" />
+</p>
 </form>
 
 
@@ -44,8 +110,6 @@
         <img src="{{ organization.wikipedia_photo_url }}"><br />
         Full size<br />
     {% endif %}
-
-
 {% endif %}
 
 {% endblock %}

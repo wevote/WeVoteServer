@@ -5,7 +5,7 @@
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
-from wevote_functions.functions import extract_zip_formatted_from_zip9
+from wevote_functions.functions import extract_zip_formatted_from_zip9, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_polling_location_integer, fetch_site_unique_id_prefix
 
 
@@ -137,3 +137,76 @@ class PollingLocationManager(models.Model):
             'new_polling_location_created': new_polling_location_created,
         }
         return results
+
+    def retrieve_polling_location_by_id(self, polling_location_id=0, polling_location_we_vote_id=''):
+        # Retrieve a polling_location entry
+        try:
+            if positive_value_exists(polling_location_id):
+                polling_location = PollingLocation.objects.get(id=polling_location_id)
+                polling_location_found = True if polling_location.id else False
+            elif positive_value_exists(polling_location_we_vote_id):
+                polling_location = PollingLocation.objects.get(we_vote_id=polling_location_we_vote_id)
+                polling_location_found = True if polling_location.id else False
+            else:
+                polling_location_found = False
+        except PollingLocation.MultipleObjectsReturned as e:
+            success = False
+            polling_location_found = False
+        except PollingLocation.DoesNotExist:
+            success = True
+            polling_location_found = False
+        except Exception as e:
+            polling_location_found = False
+            pass
+
+        if polling_location_found:
+            results = {
+                'status':                   "POLLING_LOCATION_FOUND",
+                'success':                  True,
+                'polling_location_found':   polling_location_found,
+                'polling_location':         polling_location,
+            }
+            return results
+        else:
+            polling_location = PollingLocation()
+            results = {
+                'status':                  "POLLING_LOCATION_NOT_FOUND",
+                'success':                 True,
+                'polling_location_found':  False,
+                'polling_location':        polling_location,
+            }
+            return results
+
+    def retrieve_polling_locations_in_city_or_state(self, state='', city=''):
+        # Retrieve a list of polling_location entries
+        polling_location_list_found = False
+        polling_location_list = []
+        try:
+            polling_location_list = PollingLocation.objects.all()
+            if positive_value_exists(state):
+                polling_location_list = polling_location_list.filter(state__iexact=state)
+            if positive_value_exists(city):
+                polling_location_list = polling_location_list.filter(city__iexact=city)
+            polling_location_list = polling_location_list.order_by("city")
+
+            if len(polling_location_list):
+                polling_location_list_found = True
+        except Exception as e:
+            pass
+
+        if polling_location_list_found:
+            results = {
+                'status':                       "POLLING_LOCATIONS_FOUND",
+                'success':                      True,
+                'polling_location_list_found':  True,
+                'polling_location_list':        polling_location_list,
+            }
+            return results
+        else:
+            results = {
+                'status':                       "POLLING_LOCATIONS_NOT_FOUND",
+                'success':                      True,
+                'polling_location_list_found':  False,
+                'polling_location_list':        [],
+            }
+            return results

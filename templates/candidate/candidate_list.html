@@ -71,19 +71,18 @@
             <td>Id</td>
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
-            <td>&nbsp;</td>
         </tr>
     {% for candidate in candidate_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
                 {% if candidate.candidate_photo_url %}
-                <a href="{% url 'candidate:candidate_edit' candidate.id %}">
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}">
                     <img src='{{ candidate.candidate_photo_url }}' height="25px" />
                 </a>
                 {% endif %}
             </td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a></td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ candidate.candidate_name }}</a></td>
             <td>{{ candidate.get_candidate_state }}</td>
             <td>{{ candidate.election.election_name }}</td>
             <td>
@@ -100,7 +99,6 @@
             <td>{{ candidate.id }}</td>
             <td>{{ candidate.we_vote_id }}</td>
             <td>{{ candidate.vote_smart_id }}</td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}
     </table>

@@ -45,7 +45,7 @@
 
 {% if election.google_civic_election_id|convert_to_int >= 1000000 %}
     <p>
-        <a href="{% url 'ballot:ballot_item_list_edit' election.google_civic_election_id %}">
+        <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}">
             Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)<br />
     </p>
 {% endif %}

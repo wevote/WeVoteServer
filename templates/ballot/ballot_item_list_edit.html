@@ -1,7 +1,7 @@
 {# templates/ballot/ballot_item_list_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if ballot_returned %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}
+{% block title %}{% if ballot_returned.id %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}
     New Ballot{% endif %}{% endblock %}
 
 {% block content %}
@@ -9,131 +9,116 @@
 <a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ google_civic_election_id }}">
     < Back to Election</a>
 
-<h1>{% if ballot_returned %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}New Ballot{% endif %}</h1>
+<h1>{% if ballot_returned.id %}Ballot for '{{ ballot_returned.text_for_map_search|title }}'{% else %}New Ballot{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
 <form action="{% url "ballot:ballot_item_list_edit_process" %}" method="post">
 {% csrf_token %}
     <input type="hidden" name="ballot_returned_id" value="{% if ballot_returned %}{{ ballot_returned.id }}{% else %}0{% endif %}">
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}">
 
-{% if ballot_returned %}
+{% if ballot_returned.id %}
+{# If here we are working with an existing ballot_returned entry #}
     {% if ballot_returned.google_civic_election_id|convert_to_int < 1000000 %}
-    <p><strong>Values from Google Civic API (cannot edit)</strong></p>
+        <p><strong>This ballot is from Google Civic API and cannot be edited.</strong></p>
     {% endif %}
-<p>Polling Location We Vote ID: {{ ballot_returned.polling_location_we_vote_id }}</p>
-<p>Election: {{ google_civic_election_id }}{% if election %} ({{ election.election_name }}){% endif %}<br />
-Date: {{ election.election_day_text }}</p>
+    <p>Polling Location We Vote ID: {{ ballot_returned.polling_location_we_vote_id }}</p>
+    <p>Election: {{ google_civic_election_id }}{% if election %} ({{ election.election_name }}){% endif %}<br />
+    Date: {{ election.election_day_text }}</p>
 
-<h4>Ballot Items</h4>
-{% for ballot_item in ballot_item_list %}
-    {% if ballot_item.google_civic_election_id|convert_to_int < 1000000 %}
-    {# If here, this is an election from Google Civic #}
-        {% if ballot_item.contest_office_we_vote_id %}
-            {{ ballot_item.local_ballot_order }}: {{ ballot_item.ballot_item_display_name }} ({{ ballot_item.contest_office_we_vote_id }})<br />
-        {% endif %}
-    {% else %}
-    {# If here, this is a We Vote election #}
+    <h4>Existing Ballot Items</h4>
+    {% for ballot_item in ballot_item_list %}
         {% if ballot_item.contest_office_we_vote_id %}{# kind_of_ballot_item (contest_office or contest_measure) #}
-            {% if office_list %}
-                <select id="contest_office_id_id" name="contest_office_id">
-                    <option value="0" {% if 0 == ballot_item.contest_office_id %} selected="selected"{% endif %}>
-                        -- Offices --</option>
-                {% for office in office_list %}
-                    <option value="{{ office.id }}"
-                            {% if office.id|slugify == ballot_item.contest_office_id|slugify %} selected="selected"{% endif %}>
-                        {{ office.office_name }}</option>
-                {% endfor %}
-                </select>
-            {% else %}
-                (no offices found)
+            {{ ballot_item.local_ballot_order }}: {{ ballot_item.ballot_item_display_name }} ({{ ballot_item.contest_office_we_vote_id }})
+            {% if ballot_item.google_civic_election_id|convert_to_int >= 1000000 %}
+            {# If here, this is a We Vote #}
+                - Delete
             {% endif %}
             <br />
-        {% endif %}{# end of kind_of_ballot_item (contest_office or contest_measure) #}
-    {% endif %}
-{% endfor %}{# for ballot_item in ballot_item_list #}
-
+        {% endif %}
+    {% endfor %}{# for ballot_item in ballot_item_list #}
 
 {% else %}
-    Add ballot items to a ballot before the data is available from Google Civic.<br />
+{# If here we are creating a new ballot_returned entry #}
+    We manually create ballots within We Vote before Google Civic data is available, so we can get started matching
+    local voter guides to candidates and measures.<br />
+    <br />
+    {% if polling_location_found %}
+        <a href="{% url 'polling_location:polling_location_summary' polling_location.id %}" target="_blank">
+            {% if polling_location.location_name %}{{ polling_location.location_name }}{% else %}missing location name{% endif %}</a>
+            - {{ polling_location.get_text_for_map_search|title }}
+            {% if polling_location.we_vote_id %}({{ polling_location.we_vote_id }}){% endif %}
+        <br />
+        <input type="hidden" name="polling_location_id" value="{{ polling_location.id }}">
+  {% else %}
+        {# Choose polling location for this ballot_returned #}
+        {% if polling_location_list %}
+            <label for="polling_location_id_id">Polling Locations</label>
+            <select id="polling_location_id_id" name="polling_location_id">
+                <option value="0" {% if 0 == polling_location_id %} selected="selected"{% endif %}>
+                    -- Polling Locations --</option>
+            {% for polling_location in polling_location_list %}
+                <option value="{{ polling_location.id }}"
+                        {% if polling_location.id|slugify == polling_location_id|slugify %} selected="selected"{% endif %}>
+                    {{ polling_location.get_text_for_map_search|title }} - {{ polling_location.we_vote_id }}</option>
+            {% endfor %}
+            </select>
+            <br />
+        {% else %}
+            (There are no polling locations to choose from)<br />
+        {% endif %}
+    {% endif %}
 
+{% endif %}
+
+{% if google_civic_election_id|convert_to_int >= 1000000 %}
+{# If here, we are looking at a We Vote election #}
+    {# ################################### #}
     {% if office_list %}
-    {# When adding a new candidate, we require the office they are running for be included #}
-    <label for="contest_office_id_id">Office</label>
-        <select id="contest_office_id_id" name="contest_office_id">
-            <option value="0" {% if 0 == contest_office_id %} selected="selected"{% endif %}>
-                -- Offices --</option>
+        <h4>Add New Office</h4>
+        {# Office Option 1 #}
+        <label for="contest_office1_id_id">New Office 1</label>
+        <select id="contest_office1_id_id" name="contest_office1_id">
+            <option value="0" >-- Choose Office --</option>
         {% for office in office_list %}
-            <option value="{{ office.id }}"
-                    {% if office.id|slugify == contest_office_id|slugify %} selected="selected"{% endif %}>
-                {{ office.office_name }}</option>
+            <option value="{{ office.id }}">{{ office.office_name }}</option>
         {% endfor %}
         </select>
+
+    {% else %}
+        (no offices exist -- you need to
         <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-            Add New Office</a> (in new window)
-        <br />
+            add offices first</a> (in new window))
     {% endif %}
+    <br />
 
+    {# ################################### #}
+    {% if measure_list %}
+        <h4>Add New Measure</h4>
+        {# Measure Option 1 #}
+        <label for="contest_measure1_id_id">New Measure 1</label>
+        <select id="contest_measure1_id_id" name="contest_measure1_id">
+            <option value="0">-- Choose Measure --</option>
+        {% for measure in measure_list %}
+            <option value="{{ measure.id }}">{{ measure.measure_title }}</option>
+        {% endfor %}
+        </select>
+
+    {% else %}
+        (no measures exist -- you need to
+        <a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+            add measures first</a> (in new window))
+    {% endif %}
+    <br />
 {% endif %}
-<p><a href="{% url 'election:election_summary' election.id %}">cancel</a>
-<input type="submit" value="{% if ballot_returned %}Update Ballot{% else %}Save New Ballot{% endif %}" /></p>
+
+{% if google_civic_election_id|convert_to_int >= 1000000 or google_civic_election_id|convert_to_int == 0 %}
+    <br />
+    <p><a href="{% url 'election:election_summary' election.id %}">cancel</a>
+    <input type="submit" value="{% if ballot_returned %}Update Ballot{% else %}Save New Ballot{% endif %}" /></p>
+{% endif %}
 </form>
-
 <br />
-
-{# Only show other candidates running for this office when we are entering a new candidate #}
-{% if candidate_list %}
-<h5>Existing Candidates for this Office</h5>
-    <table border="1" cellpadding="5" cellspacing="5">
-        <tr>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>Candidate Name</td>
-            <td>State</td>
-            <td>Election</td>
-            <td>Office</td>
-            <td>Twitter Handle</td>
-            <td>Website</td>
-            <td>Id</td>
-            <td>We Vote Id</td>
-            <td>Vote Smart Id</td>
-            <td>&nbsp;</td>
-        </tr>
-    {% for candidate in candidate_list %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if candidate.candidate_photo_url %}
-                <a href="{% url 'candidate:candidate_edit' candidate.id %}">
-                    <img src='{{ candidate.candidate_photo_url }}' height="25px" />
-                </a>
-                {% endif %}
-            </td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a></td>
-            <td>{{ candidate.get_candidate_state }}</td>
-            <td>{{ candidate.election.election_name }}</td>
-            <td>
-        {% if candidate.office %}
-                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
-        {% else %}
-            (office missing)
-        {% endif %}
-            </td>
-            <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
-                    target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
-                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
-            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
-            <td>{{ candidate.id }}</td>
-            <td>{{ candidate.we_vote_id }}</td>
-            <td>{{ candidate.vote_smart_id }}</td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
-        </tr>
-    {% endfor %}
-    </table>
-
-    <p></p>
-{% else %}
-    {# Don't display anything if there aren't any other candidates captured for this office yet #}
-{% endif %}
 
 {% endblock %}

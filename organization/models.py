@@ -366,7 +366,7 @@ class OrganizationManager(models.Manager):
                 if twitter_json['profile_image_url_https'] != organization.twitter_profile_image_url_https:
                     organization.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
                     values_changed = True
-            if positive_value_exists(twitter_json['profile_banner_url']):
+            if 'profile_banner_url' in twitter_json and positive_value_exists(twitter_json['profile_banner_url']):
                 if twitter_json['profile_banner_url'] != organization.twitter_profile_banner_url_https:
                     organization.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
                     values_changed = True

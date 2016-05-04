@@ -7,7 +7,8 @@
 {%  block content %}
 <!-- START organization/templates/organization/organization_position_edit.html //-->
 
-    <p><a href="{% url 'organization:organization_position_list' organization.id %}">< Back to Organization Positions</a></p>
+    <p><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
+        < Back to Organization Positions</a></p>
 
 <h1>{% if not organization_position %}Enter Position for {% endif %}{{ organization.organization_name }}{% if organization_position %}<br />
 Position on {{ organization_position.candidate_campaign.candidate_name }}{% endif %}</h1>
@@ -33,7 +34,7 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
     <select id="google_civic_election_id_id" name="google_civic_election_id">
     {% for election in election_list %}
     <option value="{{ election.google_civic_election_id }}"
-            {% if election.google_civic_election_id == organization_position.google_civic_election_id %} selected="selected"{% endif %}>
+            {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
         {{ election.election_name }} - {{ election.election_day_text }}</option>
     {% endfor %}
     </select>
@@ -108,5 +109,21 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
     <p><a href="{% url 'organization:organization_position_list' organization.id %}">cancel</a>&nbsp;&nbsp;
     <input type="submit" value="{% if organization_position %}Update Position{% else %}Save New Position{% endif %}" /></p>
 </form>
+
+{% if organization_position %}
+<p>&nbsp;</p>
+<p>
+    <a href="{% url 'candidate:candidate_edit' organization_position.candidate_campaign.id %}" target="_blank">
+        Jump to {{ organization_position.candidate_campaign.candidate_name }}</a>
+        (open in new window)
+</p>
+{% endif %}
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
 
 {% endblock %}

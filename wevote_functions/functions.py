@@ -192,6 +192,19 @@ def extract_last_name_from_full_name(full_name):
     return last_name
 
 
+def extract_twitter_handle_from_text_string(twitter_text_string):
+    """
+
+    :param twitter_text_string:
+    :return:
+    """
+    twitter_text_string = str(twitter_text_string)
+    twitter_text_string.strip()
+    twitter_text_string = twitter_text_string.replace("https://twitter.com/", "")
+    twitter_text_string = twitter_text_string.replace("@", "")
+    return twitter_text_string
+
+
 def get_ip_from_headers(request):
     x_forwarded_for = request.META.get('X-Forwarded-For')
     http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
