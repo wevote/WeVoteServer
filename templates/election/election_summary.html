@@ -61,23 +61,24 @@
 
 {% if ballot_returned_list %}
     <h5>Ballot Returned Entries</h5>
+    These are ballots that voters can find from WebApp.<br />
     <table border="1" cellpadding="10">
         <tr>
             <td></td>
             <td>Ballot Returned ID</td>
             <td>Polling Location</td>
             <td>Text for Map Search</td>
-            <td>Street</td>
             <td>Voter Id</td>
+            <td>&nbsp;</td>
         </tr>
     {% for ballot_returned in ballot_returned_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}">{{ ballot_returned.id }}</a></td>
-            <td>{% if ballot_returned.polling_location_we_vote_id %}<a href="{% url 'polling_location:polling_location_summary_by_we_vote_id' ballot_returned.polling_location_we_vote_id %}">{{ ballot_returned.polling_location_we_vote_id }}</a>{% endif %}</td>
+            <td>{{ ballot_returned.polling_location_we_vote_id }}</td>
             <td>{{ ballot_returned.text_for_map_search }}</td>
-            <td>{{ ballot_returned.normalized_line1 }}</td>
             <td>{{ ballot_returned.voter_id }}</td>
+            <td><a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}">(edit)</a></td>
         </tr>
     {% endfor %}
     </table>

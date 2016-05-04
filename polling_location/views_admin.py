@@ -127,7 +127,7 @@ def polling_location_edit_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     polling_location_id = convert_to_int(request.POST['polling_location_id'])
-    polling_location_name = request.POST['polling_location_name']
+    polling_location_name = request.POST.get('polling_location_name', False)
 
     # Check to see if this polling_location is already being used anywhere
     polling_location_on_stage_found = False

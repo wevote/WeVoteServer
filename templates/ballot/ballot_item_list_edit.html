@@ -53,6 +53,10 @@
         <input type="hidden" name="polling_location_id" value="{{ polling_location.id }}">
   {% else %}
         {# Choose polling location for this ballot_returned #}
+        Search for City: <input type="text" name="polling_location_city" value="{{ polling_location_city }}" />
+        or ZIP: <input type="text" name="polling_location_zip" value="{{ polling_location_zip }}" />
+        <input type="submit" value="Search" />
+        <br />
         {% if polling_location_list %}
             <label for="polling_location_id_id">Polling Locations</label>
             <select id="polling_location_id_id" name="polling_location_id">

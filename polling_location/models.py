@@ -177,7 +177,7 @@ class PollingLocationManager(models.Model):
             }
             return results
 
-    def retrieve_polling_locations_in_city_or_state(self, state='', city=''):
+    def retrieve_polling_locations_in_city_or_state(self, state='', city='', polling_location_zip=''):
         # Retrieve a list of polling_location entries
         polling_location_list_found = False
         polling_location_list = []
@@ -187,6 +187,8 @@ class PollingLocationManager(models.Model):
                 polling_location_list = polling_location_list.filter(state__iexact=state)
             if positive_value_exists(city):
                 polling_location_list = polling_location_list.filter(city__iexact=city)
+            if positive_value_exists(polling_location_zip):
+                polling_location_list = polling_location_list.filter(zip_long__icontains=polling_location_zip)
             polling_location_list = polling_location_list.order_by("city")
 
             if len(polling_location_list):

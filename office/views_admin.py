@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
-from election.models import Election
+from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from rest_framework.views import APIView
@@ -126,6 +126,15 @@ def office_edit_process_view(request):
     office_id = convert_to_int(request.POST.get('office_id', 0))
     office_name = request.POST.get('office_name', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    primary_party = request.POST.get('primary_party', False)
+
+    election_state = ''
+    if google_civic_election_id:
+        election_manager = ElectionManager()
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            election = results['election']
+            election_state = election.get_election_state()
 
     # Check to see if this office is already in the database
     office_on_stage_found = False
@@ -140,8 +149,12 @@ def office_edit_process_view(request):
     try:
         if office_on_stage_found:
             # Update
-            if office_on_stage.google_civic_election_id >= 1000000 and office_name is not False:
+            if convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and office_name is not False:
                 office_on_stage.office_name = office_name
+            if convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and primary_party is not False:
+                office_on_stage.primary_party = primary_party
+            if positive_value_exists(election_state):
+                office_on_stage.state_code = election_state
             office_on_stage.save()
             messages.add_message(request, messages.INFO, 'Office updated.')
             google_civic_election_id = office_on_stage.google_civic_election_id
@@ -150,7 +163,10 @@ def office_edit_process_view(request):
             office_on_stage = ContestOffice(
                 office_name=office_name,
                 google_civic_election_id=google_civic_election_id,
+                state_code=election_state,
             )
+            if convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and primary_party is not False:
+                office_on_stage.primary_party = primary_party
             office_on_stage.save()
             messages.add_message(request, messages.INFO, 'New office saved.')
     except Exception as e:

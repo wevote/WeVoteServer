@@ -23,7 +23,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
+    positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -215,6 +216,8 @@ def candidate_edit_process_view(request):
     candidate_id = convert_to_int(request.POST['candidate_id'])
     candidate_name = request.POST.get('candidate_name', False)
     candidate_twitter_handle = request.POST.get('candidate_twitter_handle', False)
+    if positive_value_exists(candidate_twitter_handle):
+        candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate_twitter_handle)
     candidate_url = request.POST.get('candidate_url', False)
     contest_office_id = request.POST.get('contest_office_id', False)
     ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)

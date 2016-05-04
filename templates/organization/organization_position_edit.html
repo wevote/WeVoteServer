@@ -48,7 +48,7 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
         <option value="0">-- select candidate --</option>
         {% for candidate_campaign_from_loop in candidate_campaigns_for_this_election_list %}
         <option value="{{ candidate_campaign_from_loop.id }}"
-                {% if candidate_campaign_from_loop.id == organization_position.candidate_campaign.id %} selected="selected"
+                {% if candidate_campaign_from_loop.id == candidate_campaign_id %} selected="selected"
                 {% endif %}>{{ candidate_campaign_from_loop.candidate_name }}</option>
         {% endfor %}
     {% else %}
@@ -60,21 +60,21 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
 
 
 {# Measure Campaign #}
-{% if is_in_edit_mode %}
+{#{% if is_in_edit_mode %}#}
     {# EDIT EXISTING: There is no need to display anything here #}
-    <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">
-{% else %}
+{#    <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">#}
+{#{% else %}#}
     {# ADD NEW: Show the drop-down of campaigns this org can have enter a position for #}
-    <label for="contest_measure_id_id">Measure (ID for now)</label>
-    {% if organization_position %}
-    Existing organization_position selected
-    <input type="text" name="contest_measure_name" id="contest_measure_id" value="{{ organization_position.contest_measure.id }}" />
-    {% else %}
-    <input type="text" name="contest_measure_id" id="contest_measure_id_id" value="" />
-    {% endif %}
-
-    <br />
-{% endif %}
+{#    <label for="contest_measure_id_id">Measure (ID for now)</label>#}
+{#    {% if organization_position %}#}
+{#    Existing organization_position selected#}
+{#    <input type="text" name="contest_measure_name" id="contest_measure_id" value="{{ organization_position.contest_measure.id }}" />#}
+{#    {% else %}#}
+{#    <input type="text" name="contest_measure_id" id="contest_measure_id_id" value="" />#}
+{#    {% endif %}#}
+{##}
+{#    <br />#}
+{#{% endif %}#}
 
 {# Stance #}
     <label for="stance_id">Your Stance:</label>

@@ -87,7 +87,7 @@ Office:
     <label for="candidate_name_id">Candidate Name</label>
     <input type="text" name="candidate_name" id="candidate_name_id" value="{% if candidate %}{{ candidate.candidate_name }}{% endif %}" /><br />
 
-    <label for="candidate_twitter_handle_id">Twitter </label>
+    <label for="candidate_twitter_handle_id">Twitter Handle</label>
     <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" value="{% if candidate %}{{ candidate.candidate_twitter_handle }}{% endif %}" /><br />
 
     <label for="candidate_url_id">Candidate Website</label>
@@ -114,6 +114,10 @@ Office:
     {% if candidate.vote_smart_id %}
         <p><a href="{% url 'import_export_vote_smart:transfer_vote_smart_ratings_to_positions_for_candidate' candidate.id %}">Transfer Vote Smart Ratings to We Vote Positions</a></p>
     {% endif %}
+
+        <p><a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate.we_vote_id }}" target="_blank">
+            Add Position (start with Organization taking the Position)</a> (open in new window)</p>
+
     {% if candidate_position_list %}
         <table border="1">
         <tr>

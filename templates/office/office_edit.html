@@ -44,10 +44,10 @@
     {% if office.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow it to be edited. #}
         {{ office.google_civic_election_id }}
     {% else %}
-        <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" value="{% if office %}{{ office.google_civic_election_id|default_if_none:"" }}{% endif %}" /><br />
+        <input type="text" name="google_civic_election_id" value="{% if office %}{{ office.google_civic_election_id|default_if_none:"" }}{% endif %}" /><br />
     {% endif %}
 {% else %}
-    <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" value="{{ google_civic_election_id }}" /><br />
+    <input type="text" name="google_civic_election_id" value="{{ google_civic_election_id }}" /><br />
 {% endif %}</td>
         </tr>
 {% if office %}
@@ -57,7 +57,13 @@
         </tr>
         <tr>
             <td>Primary Party:</td>
-            <td>{{ office.primary_party }}</td>
+            <td>
+    {% if office.google_civic_election_id|convert_to_int < 1000000 %}{# If we have an id issued by Google, don't allow it to be edited. #}
+                {{ office.primary_party }}
+    {% else %}
+                <input type="text" name="primary_party" value="{{ primary_party }}" /><br />
+    {% endif %}
+            </td>
         </tr>
 {% endif %}
     </table>

@@ -34,6 +34,11 @@
     <a href="{% url 'import_export_twitter:scrape_website_for_social_media' organization.id %}">Scrape org website for Twitter Acounts</a>
 </p>
 
+<p>
+    <a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
+        Add New Position</a>
+</p>
+
 {% if election_list %}
     <form name="organization_position_choose_election" method="get" action="{% url 'organization:organization_position_list' organization.id %}">
         {% csrf_token %}
@@ -74,8 +79,6 @@
 {% else %}
     <p>(no positions found)</p>
 {% endif %}
-    <p><a href="{% url 'organization:organization_position_new' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
-        Add New Position</a></p>
 
     <script>
         $(function() {

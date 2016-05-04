@@ -6,6 +6,7 @@ from .controllers import organizations_import_from_sample_file
 from .models import Organization
 from .serializers import OrganizationSerializer
 from admin_tools.views import redirect_to_sign_in_page
+from candidate.models import CandidateCampaign, CandidateCampaignList, CandidateCampaignManager
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -14,7 +15,6 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
-from candidate.models import CandidateCampaign, CandidateCampaignList
 from election.models import Election, ElectionManager
 from organization.models import OrganizationListManager, OrganizationManager
 from position.models import PositionEntered, PositionEnteredManager, ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
@@ -53,7 +53,9 @@ def organization_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    organization_state_code = request.GET.get('organization_state')
+    organization_state_code = request.GET.get('organization_state', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
@@ -64,10 +66,12 @@ def organization_list_view(request):
     organization_list = organization_list_query
 
     template_values = {
-        'messages_on_stage':    messages_on_stage,
-        'organization_list':    organization_list,
-        'state_list':           STATE_CODE_MAP,
-        'organization_state':   organization_state_code,
+        'messages_on_stage':        messages_on_stage,
+        'organization_list':        organization_list,
+        'state_list':               STATE_CODE_MAP,
+        'organization_state':       organization_state_code,
+        'google_civic_election_id': google_civic_election_id,
+        'candidate_we_vote_id':     candidate_we_vote_id,
     }
     return render(request, 'organization/organization_list.html', template_values)
 
@@ -256,6 +260,8 @@ def organization_position_list_view(request, organization_id):
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+
     organization_on_stage_found = False
     try:
         organization_query = Organization.objects.filter(id=organization_id)
@@ -287,18 +293,20 @@ def organization_position_list_view(request, organization_id):
 
         if organization_position_list_found:
             template_values = {
-                'messages_on_stage': messages_on_stage,
-                'organization': organization_on_stage,
-                'organization_position_list': organization_position_list,
-                'election_list': election_list,
-                'google_civic_election_id': google_civic_election_id,
+                'messages_on_stage':            messages_on_stage,
+                'organization':                 organization_on_stage,
+                'organization_position_list':   organization_position_list,
+                'election_list':                election_list,
+                'google_civic_election_id':     google_civic_election_id,
+                'candidate_we_vote_id':         candidate_we_vote_id,
             }
         else:
             template_values = {
-                'messages_on_stage': messages_on_stage,
-                'organization': organization_on_stage,
-                'election_list': election_list,
-                'google_civic_election_id': google_civic_election_id,
+                'messages_on_stage':            messages_on_stage,
+                'organization':                 organization_on_stage,
+                'election_list':                election_list,
+                'google_civic_election_id':     google_civic_election_id,
+                'candidate_we_vote_id':         candidate_we_vote_id,
             }
     return render(request, 'organization/organization_position_list.html', template_values)
 
@@ -310,6 +318,16 @@ def organization_add_new_position_form_view(request, organization_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
+
+    # We pass candidate_we_vote_id to this page to pre-populate the form
+    candidate_campaign_id = 0
+    if positive_value_exists(candidate_we_vote_id):
+        candidate_campaign_manager = CandidateCampaignManager()
+        results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+        if results['candidate_campaign_found']:
+            candidate_campaign = results['candidate_campaign']
+            candidate_campaign_id = candidate_campaign.id
 
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
@@ -343,6 +361,7 @@ def organization_add_new_position_form_view(request, organization_id):
         election_list = Election.objects.all()
         template_values = {
             'candidate_campaigns_for_this_election_list':   candidate_campaigns_for_this_election_list,
+            'candidate_campaign_id':                        candidate_campaign_id,
             'messages_on_stage':                            messages_on_stage,
             'organization':                                 organization_on_stage,
             'organization_position_candidate_campaign_id':  0,
@@ -457,6 +476,7 @@ def organization_edit_existing_position_form_view(request, organization_id, posi
             'possible_stances_list':                        ORGANIZATION_STANCE_CHOICES,
             'stance_selected':                              organization_position_on_stage.stance,
             'election_list':                                election_list,
+            # 'candidate_campaign_id':                        candidate_campaign_id,
         }
 
     return render(request, 'organization/organization_position_edit.html', template_values)

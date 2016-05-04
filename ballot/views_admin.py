@@ -30,6 +30,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
     # We can accept either, but give preference to polling_location_id
     polling_location_id = request.GET.get('polling_location_id', 0)
     polling_location_we_vote_id = request.GET.get('polling_location_we_vote_id', '')
+    polling_location_city = request.GET.get('polling_location_city', '')
+    polling_location_zip = request.GET.get('polling_location_zip', '')
 
     ballot_returned_found = False
     ballot_returned = BallotReturned()
@@ -54,6 +56,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
         results = election_manager.retrieve_election(google_civic_election_id)
         if results['election_found']:
             election = results['election']
+            election_state = election.get_election_state()
 
         # Get a list of offices for this election so we can create drop downs
         try:
@@ -81,7 +84,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
 
     polling_location_list = []
     if not polling_location_found:
-        results = polling_location_manager.retrieve_polling_locations_in_city_or_state(election_state)
+        results = polling_location_manager.retrieve_polling_locations_in_city_or_state(
+            election_state, polling_location_city, polling_location_zip)
         if results['polling_location_list_found']:
             polling_location_list = results['polling_location_list']
 
@@ -106,6 +110,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
         'polling_location_found':       polling_location_found,
         'polling_location':             polling_location,
         'polling_location_list':        polling_location_list,
+        'polling_location_city':        polling_location_city,
+        'polling_location_zip':         polling_location_zip,
         'ballot_item_list':             ballot_item_list,
         'google_civic_election_id':     google_civic_election_id,
     }
@@ -126,12 +132,10 @@ def ballot_item_list_edit_process_view(request):
     ballot_returned_id = convert_to_int(request.POST.get('ballot_returned_id', 0))
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     polling_location_id = convert_to_int(request.POST.get('polling_location_id', 0))
+    polling_location_city = request.POST.get('polling_location_city', '')
+    polling_location_zip = request.POST.get('polling_location_zip', '')
     contest_office1_id = request.POST.get('contest_office1_id', 0)
     contest_office1_order = request.POST.get('contest_office1_order', 0)
-    contest_office2_id = request.POST.get('contest_office2_id', 0)
-    contest_office2_order = request.POST.get('contest_office2_order', 0)
-    contest_office3_id = request.POST.get('contest_office3_id', 0)
-    contest_office3_order = request.POST.get('contest_office3_order', 0)
     contest_measure1_id = request.POST.get('contest_measure1_id', 0)
 
     election_local_id = 0
@@ -184,8 +188,11 @@ def ballot_item_list_edit_process_view(request):
                 messages.add_message(request, messages.ERROR, 'Could not find election -- '
                                                               'required to save ballot_returned.')
                 return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
-                                            "?google_civic_election_id=" + google_civic_election_id +
-                                            "&polling_location_id=" + polling_location_id)
+                                            "?google_civic_election_id=" + str(google_civic_election_id) +
+                                            "&polling_location_id=" + str(polling_location_id) +
+                                            "&polling_location_city=" + polling_location_city +
+                                            "&polling_location_zip=" + str(polling_location_zip)
+                                            )
 
             # polling_location must be found
             if positive_value_exists(polling_location_id):
@@ -198,8 +205,11 @@ def ballot_item_list_edit_process_view(request):
                 messages.add_message(request, messages.ERROR, 'Could not find polling_location -- '
                                                               'required to save ballot_returned.')
                 return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
-                                            "?google_civic_election_id=" + google_civic_election_id +
-                                            "&polling_location_id=" + polling_location_id)
+                                            "?google_civic_election_id=" + str(google_civic_election_id) +
+                                            "&polling_location_id=" + str(polling_location_id) +
+                                            "&polling_location_city=" + polling_location_city +
+                                            "&polling_location_zip=" + str(polling_location_zip)
+                                            )
 
             ballot_returned = BallotReturned(
                 election_date=election.election_day_text,
@@ -264,4 +274,7 @@ def ballot_item_list_edit_process_view(request):
 
     return HttpResponseRedirect(reverse('ballot:ballot_item_list_edit', args=(ballot_returned_id,)) +
                                 "?google_civic_election_id=" + str(google_civic_election_id) +
-                                "&polling_location_id=" + str(polling_location_id))
+                                "&polling_location_id=" + str(polling_location_id) +
+                                "&polling_location_city=" + polling_location_city +
+                                "&polling_location_zip=" + str(polling_location_zip)
+                                )
