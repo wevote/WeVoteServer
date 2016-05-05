@@ -77,4 +77,28 @@
 <input type="submit" value="{% if office %}Update Office{% else %}Create New Office{% endif %}" /></p>
 
 </form>
+
+
+
+{% if office_list %}
+    <br />
+    <h4>Existing Offices</h4>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>ID</td>
+            <td>We Vote ID</td>
+            <td>Office Name</td>
+            <td>State</td>
+        </tr>
+    {% for office in office_list %}
+        <tr>
+            <td>{{ office.id }}</td>
+            <td>{{ office.we_vote_id }}</td>
+            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
+            <td>{{ office.state_code }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
 {% endblock %}

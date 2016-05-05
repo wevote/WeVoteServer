@@ -289,6 +289,7 @@ class ContestOfficeList(models.Model):
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
+
             office_list_objects = office_queryset
 
             if len(office_list_objects):

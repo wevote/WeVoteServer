@@ -15,6 +15,7 @@ from django.shortcuts import render
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
+from office.models import ContestOfficeList
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter.models import voter_has_authority
@@ -43,13 +44,10 @@ def office_list_view(request):
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
-    try:
-        office_list = ContestOffice.objects.order_by('office_name')
-        if positive_value_exists(google_civic_election_id):
-            office_list = office_list.filter(google_civic_election_id=google_civic_election_id)
-    except ContestOffice.DoesNotExist:
-        # This is fine
-        pass
+    office_list_manager = ContestOfficeList()
+    results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, True)
+    if results['office_list_found']:
+        office_list = results['office_list_objects']
 
     election_list = Election.objects.order_by('-election_day_text')
 
@@ -70,10 +68,16 @@ def office_new_view(request):
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
+    office_list_manager = ContestOfficeList()
+    results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, True)
+    if results['office_list_found']:
+        office_list = results['office_list_objects']
+
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'google_civic_election_id': google_civic_election_id,
+        'office_list':              office_list,
     }
     return render(request, 'office/office_edit.html', template_values)
 
