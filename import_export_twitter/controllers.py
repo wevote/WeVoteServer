@@ -255,11 +255,9 @@ def scrape_social_media_from_one_site(site_url):
     return results
 
 
-def scrape_and_save_social_media_from_all_organizations(state_code=''):
+def scrape_and_save_social_media_from_all_organizations(state_code='', force_retrieve=False):
     facebook_pages_found = 0
     twitter_handles_found = 0
-    force_retrieve = False
-    temp_count = 0
 
     organization_manager = OrganizationManager()
     organization_list_query = Organization.objects.order_by('organization_name')
@@ -287,31 +285,60 @@ def scrape_and_save_social_media_from_all_organizations(state_code=''):
             save_results = organization_manager.update_organization_social_media(organization, twitter_handle,
                                                                                  facebook_page)
 
-        if save_results['success']:
-            organization = save_results['organization']
-
         # ######################################
-        # If we have a Twitter handle for this org, refresh the data
-        if organization.organization_twitter_handle:
-            results = retrieve_twitter_user_info(organization.organization_twitter_handle)
+        # We refresh the Twitter information in another function
 
-            if results['success']:
-                save_results = organization_manager.update_organization_twitter_details(
-                    organization, results['twitter_json'])
-
-                if save_results['success']:
-                    results = update_social_media_statistics_in_other_tables(organization)
-        # ######################################
-        # temp_count += 1
-        # if temp_count > 10:
-        #     break
-
-    status = "ORGANIZATION_SOCIAL_MEDIA_RETRIEVED"
+    status = "ORGANIZATION_SOCIAL_MEDIA_SCRAPED"
     results = {
         'success':                  True,
         'status':                   status,
         'twitter_handles_found':    twitter_handles_found,
         'facebook_pages_found':     facebook_pages_found,
+    }
+    return results
+
+
+def retrieve_twitter_data_for_all_organizations(state_code='', google_civic_election_id=0, first_retrieve_only=False):
+    number_of_twitter_accounts_queried = 0
+    number_of_organizations_updated = 0
+
+    organization_manager = OrganizationManager()
+    organization_list_query = Organization.objects.order_by('organization_name')
+    if positive_value_exists(state_code):
+        organization_list_query = organization_list_query.filter(state_served_code=state_code)
+
+    # TODO DALE limit this to organizations that have a voter guide in a particular election
+
+    organization_list = organization_list_query
+    for organization in organization_list:
+        # ######################################
+        # If we have a Twitter handle for this org, refresh the data
+        if organization.organization_twitter_handle:
+            retrieved_twitter_data = False
+            if first_retrieve_only:
+                if not positive_value_exists(organization.twitter_followers_count):
+                    results = retrieve_twitter_user_info(organization.organization_twitter_handle)
+                    retrieved_twitter_data = results['success']
+                    number_of_twitter_accounts_queried += 1
+            else:
+                results = retrieve_twitter_user_info(organization.organization_twitter_handle)
+                retrieved_twitter_data = results['success']
+                number_of_twitter_accounts_queried += 1
+
+            if retrieved_twitter_data:
+                number_of_organizations_updated += 1
+                save_results = organization_manager.update_organization_twitter_details(
+                    organization, results['twitter_json'])
+
+                if save_results['success']:
+                    results = update_social_media_statistics_in_other_tables(organization)
+
+    status = "ALL_ORGANIZATION_TWITTER_DATA_RETRIEVED"
+    results = {
+        'success':                              True,
+        'status':                               status,
+        'number_of_twitter_accounts_queried':   number_of_twitter_accounts_queried,
+        'number_of_organizations_updated':      number_of_organizations_updated,
     }
     return results
 
@@ -327,7 +354,7 @@ def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_ele
     candidate_list_manager = CandidateCampaignList()
     return_list_of_objects = True
     results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
-                                                                                  return_list_of_objects)
+                                                                                   return_list_of_objects)
     status += results['status']
     if results['success']:
         candidate_list = results['candidate_list_objects']

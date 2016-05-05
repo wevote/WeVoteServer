@@ -65,10 +65,13 @@ def organization_list_view(request):
 
     organization_list = organization_list_query
 
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'organization_list':        organization_list,
-        'state_list':               STATE_CODE_MAP,
+        'state_list':               sorted_state_list,
         'organization_state':       organization_state_code,
         'google_civic_election_id': google_civic_election_id,
         'candidate_we_vote_id':     candidate_we_vote_id,
@@ -91,11 +94,15 @@ def organization_new_view(request):
     if results['success']:
         upcoming_election_list = results['election_list']
 
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'upcoming_election_list':   upcoming_election_list,
         'google_civic_election_id': google_civic_election_id,
+        'state_list':               sorted_state_list,
     }
     return render(request, 'organization/organization_edit.html', template_values)
 
@@ -113,9 +120,12 @@ def organization_edit_view(request, organization_id):
     organization_id = convert_to_int(organization_id)
     organization_on_stage_found = False
     organization_manager = OrganizationManager()
+    organization_on_stage = Organization()
+    state_served_code = ''
     results = organization_manager.retrieve_organization(organization_id)
     if results['organization_found']:
         organization_on_stage = results['organization']
+        state_served_code = organization_on_stage.state_served_code
         organization_on_stage_found = True
 
     election_manager = ElectionManager()
@@ -124,18 +134,24 @@ def organization_edit_view(request, organization_id):
     if results['success']:
         upcoming_election_list = results['election_list']
 
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
     if organization_on_stage_found:
         template_values = {
             'messages_on_stage':        messages_on_stage,
             'organization':             organization_on_stage,
             'upcoming_election_list':   upcoming_election_list,
             'google_civic_election_id': google_civic_election_id,
+            'state_list':               sorted_state_list,
+            'state_served_code':        state_served_code,
         }
     else:
         template_values = {
             'messages_on_stage': messages_on_stage,
             'upcoming_election_list':   upcoming_election_list,
             'google_civic_election_id': google_civic_election_id,
+            'state_list':               sorted_state_list,
         }
     return render(request, 'organization/organization_edit.html', template_values)
 
@@ -158,6 +174,7 @@ def organization_edit_process_view(request):
     organization_website = request.POST.get('organization_website', False)
     wikipedia_page_title = request.POST.get('wikipedia_page_title', False)
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
+    state_served_code = request.POST.get('state_served_code', False)
 
     # A positive value in google_civic_election_id means we want to create a voter guide for this org for this election
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
@@ -190,6 +207,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.wikipedia_page_title = wikipedia_page_title
             if wikipedia_photo_url is not False:
                 organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
+            if state_served_code is not False:
+                organization_on_stage.state_served_code = state_served_code
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
@@ -235,6 +254,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.wikipedia_page_title = wikipedia_page_title
             if wikipedia_photo_url is not False:
                 organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
+            if state_served_code is not False:
+                organization_on_stage.state_served_code = state_served_code
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id

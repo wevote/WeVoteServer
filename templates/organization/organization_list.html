@@ -12,9 +12,13 @@
     <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.</p>
 
 <p>
-    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ organization_state }}">Retrieve photos from Wikipedia</a>,
     <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ organization_state }}">
-        Scrape social media for these orgs</a>
+        Scrape org website for social media handles (only when data missing)</a>,
+
+    <a href="{% url 'import_export_twitter:retrieve_twitter_data_for_all_organizations' %}?organization_state={{ organization_state }}&first_retrieve_only=1">
+        Retrieve all twitter data (only when data missing)</a>,
+
+    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ organization_state }}">Retrieve photos from Wikipedia</a>
 </p>
 
 {% if state_list %}
@@ -24,9 +28,9 @@
     <select id="organization_state_id" name="organization_state">
         <option value="" {% if '' == organization_state %} selected="selected"{% endif %}>
             -- Filter by State Served --</option>
-    {% for key, state in state_list.items %}
+    {% for key, state in state_list %}
         <option value="{{ key }}"
-                {% if key == organization_state %} selected="selected"{% endif %}>
+                {% if key|lower == polling_location_state|lower %} selected="selected"{% endif %}>
             {{ state }}</option>
     {% endfor %}
     </select>

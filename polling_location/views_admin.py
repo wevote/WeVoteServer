@@ -213,10 +213,9 @@ def polling_location_list_view(request):
     polling_location_list = polling_location_query
 
     state_list = STATE_LIST_IMPORT
+    sorted_state_list = sorted(state_list.items())
 
     messages_on_stage = get_messages(request)
-
-    sorted_state_list = sorted(state_list.items())
 
     template_values = {
         'messages_on_stage':        messages_on_stage,

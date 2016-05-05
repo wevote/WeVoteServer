@@ -12,7 +12,7 @@
         Import Polling Locations File{% if polling_location_state %} (for "{{ polling_location_state }}"){% endif %}</a>
         (this can take 60-90 seconds)</p>
 
-    {% if state_list %}
+{% if state_list %}
     <form name="polling_location_state_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
         {% csrf_token %}
 
@@ -26,7 +26,7 @@
     {% endfor %}
     </select>
     </form>
-    {% endif %}{# End of if state_list #}
+{% endif %}{# End of if state_list #}
 
 
 {% if polling_location_list %}
