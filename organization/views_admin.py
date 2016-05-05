@@ -294,6 +294,7 @@ def organization_position_list_view(request, organization_id):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
 
+    organization_on_stage = Organization()
     organization_on_stage_found = False
     try:
         organization_query = Organization.objects.filter(id=organization_id)
@@ -316,10 +317,12 @@ def organization_position_list_view(request, organization_id):
             if positive_value_exists(google_civic_election_id):
                 organization_position_list = organization_position_list.filter(
                     google_civic_election_id=google_civic_election_id)
+            organization_position_list = organization_position_list.order_by(
+                'google_civic_election_id', '-vote_smart_time_span')
             if len(organization_position_list):
                 organization_position_list_found = True
         except Exception as e:
-            handle_record_not_found_exception(e, logger=logger)
+            organization_position_list = []
 
         election_list = Election.objects.order_by('-election_day_text')
 
@@ -344,7 +347,7 @@ def organization_position_list_view(request, organization_id):
 
 
 @login_required
-def organization_add_new_position_form_view(request, organization_id):
+def organization_position_new_view(request, organization_id):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -365,6 +368,7 @@ def organization_add_new_position_form_view(request, organization_id):
     organization_id = convert_to_int(organization_id)
     all_is_well = True
     organization_on_stage_found = False
+    organization_on_stage = Organization()
     try:
         organization_on_stage = Organization.objects.get(id=organization_id)
         organization_on_stage_found = True
@@ -381,6 +385,7 @@ def organization_add_new_position_form_view(request, organization_id):
 
     # Prepare a drop down of candidates competing in this election
     candidate_campaign_list = CandidateCampaignList()
+    candidate_campaigns_for_this_election_list = []
     if positive_value_exists(google_civic_election_id):
         results = candidate_campaign_list.retrieve_all_candidates_for_upcoming_election(google_civic_election_id, True)
         if results['candidate_list_found']:
@@ -389,8 +394,21 @@ def organization_add_new_position_form_view(request, organization_id):
         candidate_campaigns_for_this_election_list \
             = candidate_campaign_list.retrieve_candidate_campaigns_from_all_elections_list()
 
+    try:
+        organization_position_list = PositionEntered.objects.order_by('stance')
+        organization_position_list = organization_position_list.filter(organization_id=organization_id)
+        if positive_value_exists(google_civic_election_id):
+            organization_position_list = organization_position_list.filter(
+                google_civic_election_id=google_civic_election_id)
+        organization_position_list = organization_position_list.order_by(
+            'google_civic_election_id', '-vote_smart_time_span')
+        if len(organization_position_list):
+            organization_position_list_found = True
+    except Exception as e:
+        organization_position_list = []
+
     if all_is_well:
-        election_list = Election.objects.all()
+        election_list = Election.objects.order_by('-election_day_text')
         template_values = {
             'candidate_campaigns_for_this_election_list':   candidate_campaigns_for_this_election_list,
             'candidate_campaign_id':                        candidate_campaign_id,
@@ -401,6 +419,7 @@ def organization_add_new_position_form_view(request, organization_id):
             'stance_selected':                              SUPPORT,  # Default stance
             'election_list':                                election_list,
             'google_civic_election_id':                     google_civic_election_id,
+            'organization_position_list':                   organization_position_list,
         }
     return render(request, 'organization/organization_position_edit.html', template_values)
 
@@ -451,7 +470,7 @@ def organization_delete_existing_position_process_form_view(request, organizatio
 
 
 @login_required
-def organization_edit_existing_position_form_view(request, organization_id, position_id):
+def organization_position_edit_view(request, organization_id, position_id):
     """
     In edit, you can only change your stance and comments, not who or what the position is about
     :param request:
@@ -515,7 +534,7 @@ def organization_edit_existing_position_form_view(request, organization_id, posi
 
 
 @login_required
-def organization_save_new_or_edit_existing_position_process_form_view(request):
+def organization_position_edit_process_view(request):
     """
 
     :param request:
@@ -525,14 +544,16 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id'))
-    organization_id = convert_to_int(request.POST.get('organization_id'))
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    organization_id = convert_to_int(request.POST.get('organization_id', 0))
     position_id = convert_to_int(request.POST.get('position_id', 0))
     candidate_campaign_id = convert_to_int(request.POST.get('candidate_campaign_id', 0))
     contest_measure_id = convert_to_int(request.POST.get('contest_measure_id', 0))
     stance = request.POST.get('stance', SUPPORT)  # Set a default if stance comes in empty
     statement_text = request.POST.get('statement_text', '')  # Set a default if stance comes in empty
     more_info_url = request.POST.get('more_info_url', '')
+
+    go_back_to_add_new = False
 
     # Make sure this is a valid organization before we try to save a position
     organization_on_stage_found = False
@@ -583,7 +604,8 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             request, messages.ERROR,
             "Unable to find either Candidate or Measure.")
         return HttpResponseRedirect(
-            reverse('organization:organization_position_list', args=([organization_id]))
+            reverse('organization:organization_position_new', args=([organization_id])) +
+            "?google_civic_election_id=" + str(google_civic_election_id)
         )
 
     organization_position_on_stage_found = False
@@ -597,13 +619,13 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             organization_position_on_stage_found = True
             organization_position_on_stage = results['position']
 
-    if not organization_position_on_stage_found:
+    organization_position_found_from_new_form = False
+    if not organization_position_on_stage_found:  # If not found from position_id
         # If a position_id hasn't been passed in, then we are trying to create a new position.
-        # Check to make sure a position for this org and candidate doesn't already exist
-
+        # Check to make sure a position for this org, candidate and election doesn't already exist
         position_entered_manager = PositionEnteredManager()
         results = position_entered_manager.retrieve_organization_candidate_campaign_position(
-            organization_id, candidate_campaign_id)
+            organization_id, candidate_campaign_id, google_civic_election_id)
 
         if results['MultipleObjectsReturned']:
             messages.add_message(
@@ -615,6 +637,7 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
         elif results['position_found']:
             organization_position_on_stage_found = True
             organization_position_on_stage = results['position']
+            organization_position_found_from_new_form = True
 
     # Now save existing, or create new
     success = False
@@ -623,8 +646,12 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             # Update the position
             organization_position_on_stage.stance = stance
             organization_position_on_stage.google_civic_election_id = google_civic_election_id
-            organization_position_on_stage.more_info_url = more_info_url
-            organization_position_on_stage.statement_text = statement_text
+            if not organization_position_found_from_new_form or positive_value_exists(more_info_url):
+                # Only update this if we came from update form, or there is a value in the incoming variable
+                organization_position_on_stage.more_info_url = more_info_url
+            if not organization_position_found_from_new_form or positive_value_exists(statement_text):
+                # Only update this if we came from update form, or there is a value in the incoming variable
+                organization_position_on_stage.statement_text = statement_text
             if not positive_value_exists(organization_position_on_stage.organization_we_vote_id):
                 organization_position_on_stage.organization_we_vote_id = organization_on_stage.we_vote_id
             if not positive_value_exists(organization_position_on_stage.candidate_campaign_we_vote_id):
@@ -658,6 +685,7 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
                 request, messages.INFO,
                 "New position on {candidate_name} saved.".format(
                     candidate_name=candidate_campaign_on_stage.candidate_name))
+            go_back_to_add_new = True
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         logger.error("Problem saving PositionEntered for CandidateCampaign")
@@ -669,7 +697,13 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
             organization_on_stage.we_vote_id, google_civic_election_id)
         # if results['success']:
 
-    return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_on_stage.id,)))
+    if go_back_to_add_new:
+        return HttpResponseRedirect(
+            reverse('organization:organization_position_new', args=(organization_on_stage.id,)) +
+            "?google_civic_election_id=" + str(google_civic_election_id))
+    else:
+        return HttpResponseRedirect(
+            reverse('organization:organization_position_list', args=(organization_on_stage.id,)))
 
 
 # def retrieve_organization_logos_from_wikipedia_view(request, organization_id):

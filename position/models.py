@@ -1015,7 +1015,8 @@ class PositionEnteredManager(models.Model):
         else:
             return None
 
-    def retrieve_organization_candidate_campaign_position(self, organization_id, candidate_campaign_id):
+    def retrieve_organization_candidate_campaign_position(self, organization_id, candidate_campaign_id,
+                                                          google_civic_election_id=False):
         """
         Find a position based on the organization_id & candidate_campaign_id
         :param organization_id:
@@ -1027,10 +1028,15 @@ class PositionEnteredManager(models.Model):
         voter_id = 0
         contest_office_id = 0
         contest_measure_id = 0
+        contest_office_we_vote_id = ''
+        candidate_campaign_we_vote_id = ''
+        contest_measure_we_vote_id = ''
         position_entered_manager = PositionEnteredManager()
         return position_entered_manager.retrieve_position(
             position_id, position_we_vote_id, organization_id, voter_id,
-            contest_office_id, candidate_campaign_id, contest_measure_id)
+            contest_office_id, candidate_campaign_id, contest_measure_id,
+            contest_office_we_vote_id, candidate_campaign_we_vote_id, contest_measure_we_vote_id,
+            google_civic_election_id)
 
     def retrieve_voter_contest_office_position(self, voter_id, contest_office_id):
         organization_id = 0
@@ -1140,7 +1146,7 @@ class PositionEnteredManager(models.Model):
     def retrieve_position(self, position_id, position_we_vote_id, organization_id, voter_id,
                           contest_office_id, candidate_campaign_id, contest_measure_id,
                           contest_office_we_vote_id='', candidate_campaign_we_vote_id='',
-                          contest_measure_we_vote_id=''):
+                          contest_measure_we_vote_id='', google_civic_election_id=False):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -1159,19 +1165,37 @@ class PositionEnteredManager(models.Model):
                 position_id = position_on_stage.id
                 success = True
             elif positive_value_exists(organization_id) and positive_value_exists(contest_office_id):
-                status = "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_OFFICE"
-                position_on_stage = PositionEntered.objects.get(
-                    organization_id=organization_id, contest_office_id=contest_office_id)
-                # If still here, we found an existing position
-                position_id = position_on_stage.id
-                success = True
+                if positive_value_exists(google_civic_election_id):
+                    status = "RETRIEVE_POSITION_FOUND_WITH_ORG_OFFICE_AND_ELECTION"
+                    position_on_stage = PositionEntered.objects.get(
+                        organization_id=organization_id, contest_office_id=contest_office_id,
+                        google_civic_election_id=google_civic_election_id)
+                    # If still here, we found an existing position
+                    position_id = position_on_stage.id
+                    success = True
+                else:
+                    status = "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_OFFICE"
+                    position_on_stage = PositionEntered.objects.get(
+                        organization_id=organization_id, contest_office_id=contest_office_id)
+                    # If still here, we found an existing position
+                    position_id = position_on_stage.id
+                    success = True
             elif positive_value_exists(organization_id) and positive_value_exists(candidate_campaign_id):
-                status = "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_CANDIDATE"
-                position_on_stage = PositionEntered.objects.get(
-                    organization_id=organization_id, candidate_campaign_id=candidate_campaign_id)
-                # If still here, we found an existing position
-                position_id = position_on_stage.id
-                success = True
+                if positive_value_exists(google_civic_election_id):
+                    status = "RETRIEVE_POSITION_FOUND_WITH_ORG_CANDIDATE_AND_ELECTION"
+                    position_on_stage = PositionEntered.objects.get(
+                        organization_id=organization_id, candidate_campaign_id=candidate_campaign_id,
+                        google_civic_election_id=google_civic_election_id)
+                    # If still here, we found an existing position
+                    position_id = position_on_stage.id
+                    success = True
+                else:
+                    status = "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_CANDIDATE"
+                    position_on_stage = PositionEntered.objects.get(
+                        organization_id=organization_id, candidate_campaign_id=candidate_campaign_id)
+                    # If still here, we found an existing position
+                    position_id = position_on_stage.id
+                    success = True
             elif positive_value_exists(organization_id) and positive_value_exists(contest_measure_id):
                 status = "RETRIEVE_POSITION_FOUND_WITH_ORG_AND_MEASURE"
                 position_on_stage = PositionEntered.objects.get(
@@ -1244,6 +1268,7 @@ class PositionEnteredManager(models.Model):
             'is_still_deciding':        position_on_stage.is_still_deciding(),
             'date_last_changed':        position_on_stage.date_last_changed,
             'date_entered':             position_on_stage.date_entered,
+            'google_civic_election_id': google_civic_election_id,
         }
         return results
 

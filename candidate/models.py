@@ -82,6 +82,7 @@ class CandidateCampaignList(models.Model):
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
+            candidate_queryset = candidate_queryset.order_by("candidate_name")
             candidate_list_objects = candidate_queryset
 
             if len(candidate_list_objects):

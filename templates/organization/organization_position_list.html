@@ -60,8 +60,9 @@
     <tr>
         <td>Candidate/Measure</td>
         <td>Stance</td>
-        <td>Election</td>
-        <td>Time Span</td>
+        <td>Election ID</td>
+        <td>Election Date</td>
+        <td>Rating Time Span</td>
     </tr>
 
     {% for organization_position in organization_position_list %}
@@ -70,8 +71,9 @@
             {{ organization_position.candidate_campaign.candidate_name }}</a></td>
         <td>{{ organization_position.get_stance_display }}
             {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
+        <td>{{ organization_position.election.google_civic_election_id }}</td>
         <td>{{ organization_position.election.election_day_text }}</td>
-        <td>{{ organization_position.vote_smart_time_span }}</td>
+        <td>{{ organization_position.vote_smart_time_span|default_if_none:"" }}</td>
     </tr>
     {% endfor %}
 
