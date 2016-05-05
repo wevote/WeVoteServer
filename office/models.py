@@ -2,7 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-# from django.contrib import messages
 from django.db import models
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_office_integer, fetch_site_unique_id_prefix

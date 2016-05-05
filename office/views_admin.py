@@ -5,7 +5,7 @@
 from .models import ContestOffice
 from .serializers import ContestOfficeSerializer
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaign
+from candidate.models import CandidateCampaign, fetch_candidate_count_for_office
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -45,15 +45,19 @@ def office_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     office_list_manager = ContestOfficeList()
+    updated_office_list = []
     results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, True)
     if results['office_list_found']:
         office_list = results['office_list_objects']
+        for office in office_list:
+            office.candidate_count = fetch_candidate_count_for_office(office.id)
+            updated_office_list.append(office)
 
     election_list = Election.objects.order_by('-election_day_text')
 
     template_values = {
         'messages_on_stage': messages_on_stage,
-        'office_list': office_list,
+        'office_list': updated_office_list,
         'election_list': election_list,
         'google_civic_election_id': google_civic_election_id,
     }
@@ -69,15 +73,19 @@ def office_new_view(request):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
     office_list_manager = ContestOfficeList()
+    updated_office_list = []
     results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, True)
     if results['office_list_found']:
         office_list = results['office_list_objects']
+        for office in office_list:
+            office.candidate_count = fetch_candidate_count_for_office(office.id)
+            updated_office_list.append(office)
 
     messages_on_stage = get_messages(request)
     template_values = {
         'messages_on_stage':        messages_on_stage,
         'google_civic_election_id': google_civic_election_id,
-        'office_list':              office_list,
+        'office_list':              updated_office_list,
     }
     return render(request, 'office/office_edit.html', template_values)
 
@@ -162,6 +170,9 @@ def office_edit_process_view(request):
             office_on_stage.save()
             messages.add_message(request, messages.INFO, 'Office updated.')
             google_civic_election_id = office_on_stage.google_civic_election_id
+
+            return HttpResponseRedirect(reverse('office:office_list', args=()) +
+                                        "?google_civic_election_id=" + google_civic_election_id)
         else:
             # Create new
             office_on_stage = ContestOffice(
@@ -173,6 +184,11 @@ def office_edit_process_view(request):
                 office_on_stage.primary_party = primary_party
             office_on_stage.save()
             messages.add_message(request, messages.INFO, 'New office saved.')
+
+            # Come back to the "Create New Office" page
+            new_office_id = 0
+            return HttpResponseRedirect(reverse('office:office_new', args=()) +
+                                        "?google_civic_election_id=" + google_civic_election_id)
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save office.')

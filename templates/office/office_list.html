@@ -32,6 +32,7 @@
             <td>We Vote ID</td>
             <td>Office Name</td>
             <td>State</td>
+            <td># of Candidates</td>
         </tr>
     {% for office in office_list %}
         <tr>
@@ -39,6 +40,7 @@
             <td>{{ office.we_vote_id }}</td>
             <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
             <td>{{ office.state_code }}</td>
+            <td>{{ office.candidate_count }}</td>
         </tr>
     {% endfor %}
     </table>
@@ -46,7 +48,6 @@
     <p></p>
     <p>
         <a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Offices</a>
-{#        <a href="{% url 'office:offices_import' %}" >Import Offices</a>#}
     </p>
 {% else %}
     <p>(no offices found)</p>
