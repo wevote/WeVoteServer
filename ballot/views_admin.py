@@ -224,6 +224,7 @@ def ballot_item_list_edit_process_view(request):
                 text_for_map_search=polling_location.get_text_for_map_search(),
             )
             ballot_returned.save()
+            ballot_returned_id = ballot_returned.id
             messages.add_message(request, messages.INFO, 'New ballot_returned saved.')
 
         # #######################################

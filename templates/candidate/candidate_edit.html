@@ -45,7 +45,8 @@ Office:
 </p>
 
 <p>Vote Smart ID: {{ candidate.vote_smart_id }}</p>
-<p>Website: <input type="text" name="candidate_url" id="candidate_url_id" value="{% if candidate %}{{ candidate.candidate_url}}{% endif %}" /></p>
+    Website: <input type="text" name="candidate_url" id="candidate_url_id" value="{% if candidate %}{{ candidate.candidate_url}}{% endif %}" /><br />
+    Party: <input type="text" name="party" id="party_id" value="{% if candidate %}{{ candidate.party}}{% endif %}" /><br />
     Twitter URL: {{ candidate.twitter_url }} (from Google Civic)<br />
     Twitter Handle:
     {% if candidate.generate_twitter_link %}
@@ -92,6 +93,9 @@ Office:
 
     <label for="candidate_url_id">Candidate Website</label>
     <input type="text" name="candidate_url" id="candidate_url_id" value="{% if candidate %}{{ candidate.candidate_url }}{% endif %}" /><br />
+
+    <label for="party_id">Party</label>
+    <input type="text" name="party" id="party_id" value="{% if candidate %}{{ candidate.party }}{% endif %}" /><br />
 
     <label for="google_civic_election_id_id">Google Civic Election Id</label>
     <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" value="{{ google_civic_election_id }}" /><br />

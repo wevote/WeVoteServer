@@ -151,13 +151,13 @@ def organization_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    organization_id = convert_to_int(request.POST['organization_id'])
-    organization_name = request.POST['organization_name']
-    organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
-    organization_facebook = request.POST.get('organization_facebook', '')
-    organization_website = request.POST['organization_website']
-    wikipedia_page_title = request.POST.get('wikipedia_page_title', '')
-    wikipedia_photo_url = request.POST.get('wikipedia_photo_url', '')
+    organization_id = convert_to_int(request.POST.get('organization_id', 0))
+    organization_name = request.POST.get('organization_name', '')
+    organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
+    organization_facebook = request.POST.get('organization_facebook', False)
+    organization_website = request.POST.get('organization_website', False)
+    wikipedia_page_title = request.POST.get('wikipedia_page_title', False)
+    wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
 
     # A positive value in google_civic_election_id means we want to create a voter guide for this org for this election
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
@@ -178,12 +178,18 @@ def organization_edit_process_view(request):
     try:
         if organization_on_stage_found:
             # Update
-            organization_on_stage.organization_name = organization_name
-            organization_on_stage.organization_twitter_handle = organization_twitter_handle
-            organization_on_stage.organization_facebook = organization_facebook
-            organization_on_stage.organization_website = organization_website
-            organization_on_stage.wikipedia_page_title = wikipedia_page_title
-            organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
+            if organization_name is not False:
+                organization_on_stage.organization_name = organization_name
+            if organization_twitter_handle is not False:
+                organization_on_stage.organization_twitter_handle = organization_twitter_handle
+            if organization_facebook is not False:
+                organization_on_stage.organization_facebook = organization_facebook
+            if organization_website is not False:
+                organization_on_stage.organization_website = organization_website
+            if wikipedia_page_title is not False:
+                organization_on_stage.wikipedia_page_title = wikipedia_page_title
+            if wikipedia_photo_url is not False:
+                organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
@@ -218,12 +224,17 @@ def organization_edit_process_view(request):
 
             organization_on_stage = Organization(
                 organization_name=organization_name,
-                organization_twitter_handle=organization_twitter_handle,
-                organization_facebook=organization_facebook,
-                organization_website=organization_website,
-                wikipedia_page_title=wikipedia_page_title,
-                wikipedia_photo_url=wikipedia_photo_url,
             )
+            if organization_twitter_handle is not False:
+                organization_on_stage.organization_twitter_handle = organization_twitter_handle
+            if organization_facebook is not False:
+                organization_on_stage.organization_facebook = organization_facebook
+            if organization_website is not False:
+                organization_on_stage.organization_website = organization_website
+            if wikipedia_page_title is not False:
+                organization_on_stage.wikipedia_page_title = wikipedia_page_title
+            if wikipedia_photo_url is not False:
+                organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
             organization_on_stage.save()
             organization_id = organization_on_stage.id
             organization_we_vote_id = organization_on_stage.we_vote_id
@@ -493,11 +504,11 @@ def organization_save_new_or_edit_existing_position_process_form_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    google_civic_election_id = convert_to_int(request.POST['google_civic_election_id'])
-    organization_id = convert_to_int(request.POST['organization_id'])
-    position_id = convert_to_int(request.POST['position_id'])
-    candidate_campaign_id = convert_to_int(request.POST['candidate_campaign_id'])
-    contest_measure_id = convert_to_int(request.POST['contest_measure_id'])
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id'))
+    organization_id = convert_to_int(request.POST.get('organization_id'))
+    position_id = convert_to_int(request.POST.get('position_id', 0))
+    candidate_campaign_id = convert_to_int(request.POST.get('candidate_campaign_id', 0))
+    contest_measure_id = convert_to_int(request.POST.get('contest_measure_id', 0))
     stance = request.POST.get('stance', SUPPORT)  # Set a default if stance comes in empty
     statement_text = request.POST.get('statement_text', '')  # Set a default if stance comes in empty
     more_info_url = request.POST.get('more_info_url', '')

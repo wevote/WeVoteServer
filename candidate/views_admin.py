@@ -6,7 +6,7 @@ from .controllers import candidates_import_from_sample_file, retrieve_candidate_
 from .models import CandidateCampaign, CandidateCampaignList, CandidateCampaignManager
 from .serializers import CandidateCampaignSerializer
 from admin_tools.views import redirect_to_sign_in_page
-from office.models import ContestOffice
+from office.models import ContestOffice, ContestOfficeManager
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -221,6 +221,7 @@ def candidate_edit_process_view(request):
     candidate_url = request.POST.get('candidate_url', False)
     contest_office_id = request.POST.get('contest_office_id', False)
     ballot_guide_official_statement = request.POST.get('ballot_guide_official_statement', False)
+    party = request.POST.get('party', False)
 
     remove_duplicate_process = request.POST.get('remove_duplicate_process', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
@@ -237,6 +238,14 @@ def candidate_edit_process_view(request):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
+    contest_office_we_vote_id = ''
+    if positive_value_exists(contest_office_id):
+        contest_office_manager = ContestOfficeManager()
+        results = contest_office_manager.retrieve_contest_office_from_id(contest_office_id)
+        if results['contest_office_found']:
+            contest_office = results['contest_office']
+            contest_office_we_vote_id = contest_office.we_vote_id
+
     try:
         if candidate_on_stage_found:
             # Update
@@ -246,14 +255,18 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.candidate_url = candidate_url
             if ballot_guide_official_statement is not False:
                 candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
+            if party is not False:
+                candidate_on_stage.party = party
 
             # Check to see if this is a We Vote-created election
-            is_we_vote_google_civic_election_id = True \
-                if convert_to_int(candidate_on_stage.google_civic_election_id) >= 1000000 \
-                else False
+            # is_we_vote_google_civic_election_id = True \
+            #     if convert_to_int(candidate_on_stage.google_civic_election_id) >= 1000000 \
+            #     else False
 
-            if contest_office_id is not False and is_we_vote_google_civic_election_id:
+            if contest_office_id is not False:
+                # We only allow updating of candidates within the We Vote Admin in
                 candidate_on_stage.contest_office_id = contest_office_id
+                candidate_on_stage.contest_office_we_vote_id = contest_office_we_vote_id
             candidate_on_stage.save()
             messages.add_message(request, messages.INFO, 'Candidate Campaign updated.')
         else:
@@ -268,12 +281,15 @@ def candidate_edit_process_view(request):
                 messages.add_message(request, messages.ERROR, 'Could not find election -- required to save candidate.')
                 return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
-            required_candidate_variables = True if positive_value_exists(candidate_name) and positive_value_exists(contest_office_id) else False
+            required_candidate_variables = True \
+                if positive_value_exists(candidate_name) and positive_value_exists(contest_office_id) \
+                else False
             if required_candidate_variables:
                 candidate_on_stage = CandidateCampaign(
                     candidate_name=candidate_name,
                     google_civic_election_id=google_civic_election_id,
                     contest_office_id=contest_office_id,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
                     state_code=state_code,
                 )
                 if candidate_twitter_handle is not False:
@@ -282,6 +298,8 @@ def candidate_edit_process_view(request):
                     candidate_on_stage.candidate_url = candidate_url
                 if ballot_guide_official_statement is not False:
                     candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
+                if party is not False:
+                    candidate_on_stage.party = party
                 candidate_on_stage.save()
                 candidate_id = candidate_on_stage.id
                 messages.add_message(request, messages.INFO, 'New candidate saved.')
