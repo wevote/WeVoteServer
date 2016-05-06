@@ -113,6 +113,8 @@ def candidate_new_view(request):
         candidate_list = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(contest_office_id):
+            candidate_list = candidate_list.filter(contest_office_id=contest_office_id)
         candidate_list = candidate_list.order_by('candidate_name')[:500]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
@@ -305,6 +307,17 @@ def candidate_edit_process_view(request):
                 messages.add_message(request, messages.INFO, 'New candidate saved.')
             else:
                 messages.add_message(request, messages.INFO, 'Could not save -- missing required variables.')
+                if positive_value_exists(candidate_id):
+                    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                                "&contest_office_id=" + str(contest_office_id)
+                                                )
+                else:
+                    return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) +
+                                                "?google_civic_election_id=" + str(google_civic_election_id) +
+                                                "&contest_office_id=" + str(contest_office_id)
+                                                )
+
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save candidate.')
