@@ -13,6 +13,9 @@
     <p>
         Office Website: <strong>{{ office.office_url }}</strong><br />
         Google Civic Election ID: <strong>{{ office.google_civic_election_id }}</strong><br />
+        Office We Vote ID: <strong>{{ office.we_vote_id }}</strong>
+            (<a href="{% url 'office:office_delete_process' %}?office_id={{ office.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
+        <br />
         <a href="{% url 'office:office_edit' office.id %}">edit</a><br />
         <br />
         <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}&contest_office_id={{ office.id }}">

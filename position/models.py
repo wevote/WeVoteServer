@@ -513,8 +513,8 @@ class PositionListManager(models.Model):
 
         return positions_ignored_by_voter
 
-    def retrieve_all_positions_for_candidate_campaign(self, candidate_campaign_id, candidate_campaign_we_vote_id,
-                                                      stance_we_are_looking_for, most_recent_only=True):
+    def retrieve_all_positions_for_candidate_campaign(self, candidate_campaign_id, candidate_campaign_we_vote_id='',
+                                                      stance_we_are_looking_for=ANY_STANCE, most_recent_only=True):
         if stance_we_are_looking_for not \
                 in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
@@ -2073,25 +2073,3 @@ class PositionEnteredManager(models.Model):
             position_object.save()
 
         return position_object
-
-    def delete_position(self, position_id):
-        position_id = convert_to_int(position_id)
-        position_deleted = False
-
-        try:
-            if position_id:
-                results = self.retrieve_position(position_id)  # TODO This is not correct -- doesn't include all vars
-                if results['position_found']:
-                    position = results['position']
-                    position_id = position.id
-                    position.delete()
-                    position_deleted = True
-        except Exception as e:
-            handle_exception(e, logger=logger)
-
-        results = {
-            'success':              position_deleted,
-            'position_deleted': position_deleted,
-            'position_id':      position_id,
-        }
-        return results

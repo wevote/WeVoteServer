@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^$', views_admin.candidate_list_view, name='candidate_list',),
     url(r'^edit_process/$', views_admin.candidate_edit_process_view, name='candidate_edit_process'),
     url(r'^export/', views_admin.ExportCandidateCampaignDataView.as_view(), name='candidates_export'),
+    url(r'^delete/', views_admin.candidate_delete_process_view, name='candidate_delete_process'),
     url(r'^new/$', views_admin.candidate_new_view, name='candidate_new'),
     url(r'^(?P<candidate_id>[0-9]+)/edit/$', views_admin.candidate_edit_view, name='candidate_edit'),
     url(r'^(?P<candidate_id>[0-9]+)/retrieve_photos/$',

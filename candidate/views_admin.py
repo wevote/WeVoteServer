@@ -18,7 +18,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
-from position.models import PositionEntered
+from position.models import PositionEntered, PositionListManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter.models import voter_has_authority
@@ -446,6 +446,12 @@ def find_and_remove_duplicate_candidates_view(request):
 
 @login_required
 def remove_duplicate_candidate_view(request):
+    """
+    We use this view to semi-automate the process of finding candidate duplicates. Exact
+    copies can be deleted automatically, and similar entries can be manually reviewed and deleted.
+    :param request:
+    :return:
+    """
     authority_required = {'admin'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -587,3 +593,60 @@ def candidate_summary_view(request, candidate_id):
             'messages_on_stage': messages_on_stage,
         }
     return render(request, 'candidate/candidate_summary.html', template_values)
+
+
+@login_required
+def candidate_delete_process_view(request):
+    """
+    Delete this candidate
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    candidate_id = convert_to_int(request.GET.get('candidate_id', 0))
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    # Retrieve this candidate
+    candidate_on_stage_found = False
+    candidate_on_stage = CandidateCampaign()
+    if positive_value_exists(candidate_id):
+        try:
+            candidate_query = CandidateCampaign.objects.filter(id=candidate_id)
+            if len(candidate_query):
+                candidate_on_stage = candidate_query[0]
+                candidate_on_stage_found = True
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, 'Could not find candidate -- exception.')
+
+    if not candidate_on_stage_found:
+        messages.add_message(request, messages.ERROR, 'Could not find candidate.')
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    # Are there any positions attached to this candidate that should be moved to another
+    # instance of this candidate?
+    position_list_manager = PositionListManager()
+    position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(candidate_id)
+    if positive_value_exists(len(position_list)):
+        positions_found_for_this_candidate = True
+    else:
+        positions_found_for_this_candidate = False
+
+    try:
+        if not positions_found_for_this_candidate:
+            # Delete the candidate
+            candidate_on_stage.delete()
+            messages.add_message(request, messages.INFO, 'Candidate Campaign deleted.')
+        else:
+            messages.add_message(request, messages.ERROR, 'Could not delete -- '
+                                                          'positions still attached to this candidate.')
+            return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'Could not delete candidate -- exception.')
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))

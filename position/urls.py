@@ -8,6 +8,7 @@ from . import views, views_admin
 urlpatterns = [
     # admin_views.py
     url(r'^$', views_admin.position_list_view, name='position_list',),
+    url(r'^delete/$', views_admin.position_delete_process_view, name='position_delete_process',),
     url(r'^edit_process/$', views_admin.position_edit_process_view, name='position_edit_process'),
     url(r'^export/', views_admin.ExportPositionDataView.as_view(), name='positions_export'),
     url(r'^new/$', views_admin.position_new_view, name='position_new',),

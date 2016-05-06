@@ -49,7 +49,7 @@
             <td>{{ position.we_vote_id }}</td>
             <td>{% if position.organization %}{{ position.organization.organization_name }}{% endif %}</td>
             <td>{% if position.organization %}
-                <a href="{% url 'organization:organization_position_edit' position.organization.id position.id %}">
+                <a href="{% url 'organization:organization_position_edit' position.organization.id position.id %}?google_civic_election_id={{ google_civic_election_id }}">
             {% endif %}
                 {{ position.get_stance_display }}</a></td>
             <td>{{ position.candidate_campaign.candidate_name }}</td>

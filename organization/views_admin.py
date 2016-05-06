@@ -482,6 +482,8 @@ def organization_position_edit_view(request, organization_id, position_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
     messages_on_stage = get_messages(request)
     organization_id = convert_to_int(organization_id)
     position_id = convert_to_int(position_id)
@@ -527,7 +529,7 @@ def organization_position_edit_view(request, organization_id, position_id):
             'possible_stances_list':                        ORGANIZATION_STANCE_CHOICES,
             'stance_selected':                              organization_position_on_stage.stance,
             'election_list':                                election_list,
-            # 'candidate_campaign_id':                        candidate_campaign_id,
+            'google_civic_election_id':                     google_civic_election_id,
         }
 
     return render(request, 'organization/organization_position_edit.html', template_values)

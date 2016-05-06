@@ -108,7 +108,7 @@ def position_edit_view(request, position_id):
 
 
 @login_required
-def position_edit_process_view(request):
+def position_edit_process_view(request):  # TODO DALE I don't think this is correct
     """
     Process the new or edit position forms
     :param request:
@@ -166,12 +166,13 @@ def position_summary_view(request, position_id):
     messages_on_stage = get_messages(request)
     position_id = convert_to_int(position_id)
     position_on_stage_found = False
+    position_on_stage = PositionEntered()
     try:
-        position_on_stage = CandidateCampaign.objects.get(id=position_id)
+        position_on_stage = PositionEntered.objects.get(id=position_id)
         position_on_stage_found = True
-    except CandidateCampaign.MultipleObjectsReturned as e:
+    except PositionEntered.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
-    except CandidateCampaign.DoesNotExist:
+    except PositionEntered.DoesNotExist:
         # This is fine, create new
         pass
 
@@ -195,6 +196,51 @@ def relink_candidates_measures_view(request):
 
     messages.add_message(request, messages.INFO, 'TO BE BUILT: relink_candidates_measures_view')
     return HttpResponseRedirect(reverse('position:position_list', args=()))
+
+
+@login_required
+def position_delete_process_view(request):
+    """
+    Delete a position
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    position_id = convert_to_int(request.GET.get('position_id', 0))
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    # Retrieve this position
+    position_on_stage_found = False
+    position_on_stage = PositionEntered()
+    try:
+        position_query = PositionEntered.objects.filter(id=position_id)
+        if len(position_query):
+            position_on_stage = position_query[0]
+            position_on_stage_found = True
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'Could not find position -- exception.')
+
+    if not position_on_stage_found:
+        messages.add_message(request, messages.ERROR, 'Could not find position.')
+        return HttpResponseRedirect(reverse('position:position_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    try:
+        if position_on_stage_found:
+            # Delete
+            position_on_stage.delete()
+            messages.add_message(request, messages.INFO, 'Position deleted.')
+        else:
+            messages.add_message(request, messages.ERROR, 'Could not find position.')
+    except Exception as e:
+        handle_record_not_saved_exception(e, logger=logger)
+        messages.add_message(request, messages.ERROR, 'Could not save position.')
+
+    return HttpResponseRedirect(reverse('position:position_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))
 
 # @login_required
 # def positions_display_list_related_to_candidate_campaign_any_position_view(request, candidate_campaign_id):

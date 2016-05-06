@@ -19,7 +19,8 @@
 {% if candidate %}
 <p><strong>Values from Google Civic API (do not edit)</strong></p>
 <p>Candidate Name: {{ candidate.candidate_name }}</p>
-<p>Candidate We Vote ID: {{ candidate.we_vote_id }}<br />
+<p>Candidate We Vote ID: {{ candidate.we_vote_id }}
+    (<a href="{% url 'candidate:candidate_delete_process' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">delete candidate</a>)<br />
 Election: {{ candidate.google_civic_election_id }}{% if candidate.election %} ({{ candidate.election.election_name }}){% endif %}<br />
 
 Office:

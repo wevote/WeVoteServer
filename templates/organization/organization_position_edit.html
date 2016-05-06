@@ -55,6 +55,7 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
     <option value="0">-- no candidates found --</option>
     {% endif %}
     </select>
+    <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">Add new candidate</a> (open in new window)
     <br />
 {% endif %}
 
@@ -88,6 +89,7 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
     <option value="0">-- no stance choices found --</option>
     {% endif %}
     </select>
+    (<a href="{% url 'position:position_delete_process' %}?position_id={{ organization_position.id }}&google_civic_election_id={{ google_civic_election_id }}">delete position</a>)
     <br />
 
 {# Stance Text #}

@@ -241,3 +241,52 @@ def office_summary_view(request, office_id):
             'messages_on_stage': messages_on_stage,
         }
     return render(request, 'office/office_summary.html', template_values)
+
+
+@login_required
+def office_delete_process_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    office_id = convert_to_int(request.GET.get('office_id', 0))
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    office_on_stage_found = False
+    office_on_stage = ContestOffice()
+    try:
+        office_on_stage = ContestOffice.objects.get(id=office_id)
+        office_on_stage_found = True
+        google_civic_election_id = office_on_stage.google_civic_election_id
+    except ContestOffice.MultipleObjectsReturned as e:
+        pass
+    except ContestOffice.DoesNotExist:
+        pass
+
+    candidates_found_for_this_office = False
+    if office_on_stage_found:
+        try:
+            candidate_list = CandidateCampaign.objects.filter(contest_office_id=office_id)
+            # if positive_value_exists(google_civic_election_id):
+            #     candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+            candidate_list = candidate_list.order_by('candidate_name')
+            if len(candidate_list):
+                candidates_found_for_this_office = True
+        except CandidateCampaign.DoesNotExist:
+            pass
+
+    try:
+        if not candidates_found_for_this_office:
+            # Delete the office
+            office_on_stage.delete()
+            messages.add_message(request, messages.INFO, 'Office deleted.')
+        else:
+            messages.add_message(request, messages.ERROR, 'Could not delete -- '
+                                                          'candidates still attached to this office.')
+            return HttpResponseRedirect(reverse('office:office_summary', args=(office_id,)))
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'Could not delete office -- exception.')
+        return HttpResponseRedirect(reverse('office:office_summary', args=(office_id,)))
+
+    return HttpResponseRedirect(reverse('office:office_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))
