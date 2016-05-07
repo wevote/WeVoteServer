@@ -13,6 +13,8 @@ urlpatterns = [
     url(r'^refresh/', views_admin.refresh_existing_voter_guides_view, name='refresh_existing_voter_guides'),
     url(r'^generate_one_election/',
         views_admin.generate_voter_guides_for_one_election_view, name='generate_voter_guides_one_election'),
+    url(r'^search/', views_admin.voter_guide_search_view, name='voter_guide_search'),
+    url(r'^search_process/', views_admin.voter_guide_search_process_view, name='voter_guide_search_process'),
 
     # views
 ]

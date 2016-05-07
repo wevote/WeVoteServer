@@ -6,7 +6,8 @@
 {%  block content %}
 {% load template_filters %}
 
-<p><a href="{% url 'organization:organization_list' %}">< Back to Organizations</a></p>
+<p><a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Organizations</a></p>
+<p><a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Voter Guides</a></p>
 
 {% if organization %}
 <h1>{{ organization.organization_name  }}</h1>
@@ -14,7 +15,7 @@
     <p>
     We Vote ID: {{ organization.we_vote_id }}<br />
     Vote Smart ID: {{ organization.vote_smart_id }}<br />
-    Website: <a href={{ organization.organization_website }} target="_blank">{{ organization.organization_website }}</a><br />
+    Website: <a href={{ organization.organization_website }} target="_blank">{{ organization.organization_website }}</a> (open in new window)<br />
     Twitter: {% if organization.generate_twitter_link %}
         <a href="{{ organization.generate_twitter_link }}" target="_blank">{{ organization.organization_twitter_handle }}</a>
         ({{ organization.twitter_followers_count }} Followers)

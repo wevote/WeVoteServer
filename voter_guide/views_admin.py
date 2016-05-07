@@ -10,11 +10,13 @@ from django.core.urlresolvers import reverse
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from election.models import Election, TIME_SPAN_LIST
-from organization.models import Organization, OrganizationManager
+from election.models import Election, ElectionManager, TIME_SPAN_LIST
+from organization.models import Organization, OrganizationListManager
+from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered
 from voter.models import voter_has_authority
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
+    STATE_CODE_MAP
 
 
 @login_required
@@ -220,7 +222,8 @@ def voter_guide_list_view(request):
         if results['success']:
             voter_guide_list = results['voter_guide_list']
     else:
-        results = voter_guide_list_object.retrieve_all_voter_guides()
+        order_by = "google_civic_election_id"
+        results = voter_guide_list_object.retrieve_all_voter_guides(order_by)
 
         if results['success']:
             voter_guide_list = results['voter_guide_list']
@@ -235,3 +238,102 @@ def voter_guide_list_view(request):
         'voter_guide_list': voter_guide_list,
     }
     return render(request, 'voter_guide/voter_guide_list.html', template_values)
+
+
+@login_required
+def voter_guide_search_view(request):
+    """
+    Before creating a voter guide, search for an existing organization
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    # A positive value in google_civic_election_id means we want to create a voter guide for this org for this election
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    messages_on_stage = get_messages(request)
+
+    election_manager = ElectionManager()
+    upcoming_election_list = []
+    results = election_manager.retrieve_upcoming_elections()
+    if results['success']:
+        upcoming_election_list = results['election_list']
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    template_values = {
+        'messages_on_stage': messages_on_stage,
+        'upcoming_election_list':   upcoming_election_list,
+        'google_civic_election_id': google_civic_election_id,
+        'state_list':               sorted_state_list,
+    }
+    return render(request, 'voter_guide/voter_guide_search.html', template_values)
+
+
+@login_required
+def voter_guide_search_process_view(request):
+    """
+    Process the new or edit organization forms
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    add_organization_button = request.POST.get('add_organization_button', False)
+    if add_organization_button:
+        return organization_edit_process_view(request)
+
+    organization_name = request.POST.get('organization_name', '')
+    organization_twitter_handle = request.POST.get('organization_twitter_handle', '')
+    organization_facebook = request.POST.get('organization_facebook', '')
+    organization_website = request.POST.get('organization_website', '')
+    # state_served_code = request.POST.get('state_served_code', False)
+
+    # Save this variable so we have it on the "Add New Position" page
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+
+    # Filter incoming data
+    organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
+
+    # Search for organizations that match
+    organization_email = ''
+    organization_list_manager = OrganizationListManager()
+    results = organization_list_manager.organization_search_find_any_possibilities(
+        organization_name, organization_twitter_handle, organization_website, organization_email,
+        organization_facebook)
+
+    if results['organizations_found']:
+        organizations_list = results['organizations_list']
+        organizations_count = len(organizations_list)
+
+        messages.add_message(request, messages.INFO, 'We found {count} existing organization(s) '
+                                                     'that might match.'.format(count=organizations_count))
+    else:
+        organizations_list = []
+        messages.add_message(request, messages.INFO, 'No voter guides found with those search terms. '
+                                                     'Please try again. ')
+
+    election_manager = ElectionManager()
+    upcoming_election_list = []
+    results = election_manager.retrieve_upcoming_elections()
+    if results['success']:
+        upcoming_election_list = results['election_list']
+
+    messages_on_stage = get_messages(request)
+    template_values = {
+        'messages_on_stage':            messages_on_stage,
+        'organizations_list':           organizations_list,
+        'organization_name':            organization_name,
+        'organization_twitter_handle':  organization_twitter_handle,
+        'organization_facebook':        organization_facebook,
+        'organization_website':         organization_website,
+        'upcoming_election_list':       upcoming_election_list,
+        'google_civic_election_id':     google_civic_election_id,
+    }
+    return render(request, 'voter_guide/voter_guide_search.html', template_values)

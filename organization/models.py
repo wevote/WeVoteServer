@@ -455,14 +455,16 @@ class OrganizationListManager(models.Manager):
     A class for working with lists of Organizations
     """
 
-    def organization_search_find_any_possibilities(self, organization_name, organization_twitter_handle,
-                                                   organization_website, organization_email):
+    def organization_search_find_any_possibilities(self, organization_name, organization_twitter_handle='',
+                                                   organization_website='', organization_email='',
+                                                   organization_facebook=''):
         """
         We want to find *any* possible organization that includes any of the search terms
         :param organization_name:
         :param organization_twitter_handle:
         :param organization_website:
         :param organization_email:
+        :param organization_facebook:
         :return:
         """
         organization_list_for_json = {}
@@ -472,6 +474,11 @@ class OrganizationListManager(models.Manager):
             organization_objects_list = []
             if positive_value_exists(organization_name):
                 new_filter = Q(organization_name__icontains=organization_name)
+                # # Find entries with any word in the string - DALE 2016-05-06 This didn't feel right
+                # from functools import reduce
+                # organization_name_list = organization_name.split(" ")
+                # new_filter = reduce(lambda x, y: x | y,
+                #                     [Q(organization_name__icontains=word) for word in organization_name_list])
                 filters.append(new_filter)
 
             if positive_value_exists(organization_twitter_handle):
@@ -484,6 +491,10 @@ class OrganizationListManager(models.Manager):
 
             if positive_value_exists(organization_email):
                 new_filter = Q(organization_email__icontains=organization_email)
+                filters.append(new_filter)
+
+            if positive_value_exists(organization_facebook):
+                new_filter = Q(organization_facebook__icontains=organization_facebook)
                 filters.append(new_filter)
 
             # Add the first query

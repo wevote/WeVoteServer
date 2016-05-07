@@ -7,7 +7,8 @@
 <a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 
 <h1>Organizations</h1>
-<p><a href="{% url 'organization:organization_new' %}">Add New Organization</a>.
+<p><a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">
+    Add New Organization / Voter Guide</a>.
     Vote Smart special interest groups
     <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.</p>
 

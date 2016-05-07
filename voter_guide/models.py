@@ -921,11 +921,16 @@ class VoterGuideList(models.Model):
 
         return voter_guide_list_filtered
 
-    def retrieve_all_voter_guides(self):
+    def retrieve_all_voter_guides(self, order_by):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
-            voter_guide_queryset = VoterGuide.objects.order_by('-twitter_followers_count')
+            voter_guide_queryset = VoterGuide.objects.all()
+            if order_by == 'google_civic_election_id':
+                voter_guide_queryset = voter_guide_queryset.order_by(
+                    '-vote_smart_time_span', '-google_civic_election_id')
+            else:
+                voter_guide_queryset = voter_guide_queryset.order_by('-twitter_followers_count')
             voter_guide_list = voter_guide_queryset
 
             if len(voter_guide_list):
@@ -937,7 +942,7 @@ class VoterGuideList(models.Model):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {

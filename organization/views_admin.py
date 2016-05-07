@@ -176,8 +176,10 @@ def organization_edit_process_view(request):
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
     state_served_code = request.POST.get('state_served_code', False)
 
-    # A positive value in google_civic_election_id means we want to create a voter guide for this org for this election
+    # A positive value in google_civic_election_id or add_organization_button means we want to create a voter guide
+    # for this org for this election
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    # add_organization_button = request.POST.get('add_organization_button', False)
 
     # Filter incoming data
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
@@ -240,6 +242,21 @@ def organization_edit_process_view(request):
                     'wikipedia_photo_url':          wikipedia_photo_url,
                 }
                 return render(request, 'organization/organization_edit.html', template_values)
+
+            minimum_required_variables_exist = positive_value_exists(organization_name)
+            if not minimum_required_variables_exist:
+                messages.add_message(request, messages.INFO, 'Missing name, which is required.')
+                messages_on_stage = get_messages(request)
+                template_values = {
+                    'messages_on_stage':            messages_on_stage,
+                    'organization_name':            organization_name,
+                    'organization_twitter_handle':  organization_twitter_handle,
+                    'organization_facebook':        organization_facebook,
+                    'organization_website':         organization_website,
+                    'wikipedia_page_title':         wikipedia_page_title,
+                    'wikipedia_photo_url':          wikipedia_photo_url,
+                }
+                return render(request, 'voter_guide/voter_guide_search.html', template_values)
 
             organization_on_stage = Organization(
                 organization_name=organization_name,
