@@ -9,6 +9,12 @@ This is called from config/urls.py like this:
 from django.conf.urls import url
 from . import views
 from . import views_docs
+from candidate.views_admin import CandidatesSyncOutView
+from election.views_admin import ElectionsSyncOutView
+from measure.views_admin import MeasuresSyncOutView
+from office.views_admin import OfficesSyncOutView
+from organization.views_admin import OrganizationsSyncOutView
+from position.views_admin import PositionsSyncOutView
 
 urlpatterns = [
     # Actual API Calls
@@ -16,18 +22,22 @@ urlpatterns = [
     url(r'^ballotItemRetrieve/', views.ballot_item_retrieve_view, name='ballotItemRetrieveView'),
     url(r'^candidateRetrieve/', views.candidate_retrieve_view, name='candidateRetrieveView'),
     url(r'^candidatesRetrieve/', views.candidates_retrieve_view, name='candidatesRetrieveView'),
+    url(r'^candidatesSyncOutView/', CandidatesSyncOutView.as_view(), name='candidatesSyncOutView'),
     url(r'^deviceIdGenerate/$', views.device_id_generate_view, name='deviceIdGenerateView'),
-    url(r'^electionsRetrieve/', views.ElectionsRetrieveView.as_view(), name='electionsRetrieveView'),
+    url(r'^electionsSyncOut/', ElectionsSyncOutView.as_view(), name='electionsSyncOutView'),
     url(r'^facebookDisconnect/', views.facebook_disconnect_view, name='facebookDisconnectView'),
     url(r'^facebookSignIn/', views.facebook_sign_in_view, name='facebookSignInView'),
     url(r'^measureRetrieve/', views.measure_retrieve_view, name='measureRetrieveView'),
+    url(r'^measuresSyncOutView/', MeasuresSyncOutView.as_view(), name='measuresSyncOutView'),
     url(r'^officeRetrieve/', views.office_retrieve_view, name='officeRetrieveView'),
+    url(r'^officesSyncOut/', OfficesSyncOutView.as_view(), name='officesSyncOutView'),
     url(r'^organizationCount/', views.organization_count_view, name='organizationCountView'),
     url(r'^organizationFollow/', views.organization_follow_api_view, name='organizationFollowView'),
     url(r'^organizationFollowIgnore/', views.organization_follow_ignore_api_view, name='organizationFollowIgnoreView'),
     url(r'^organizationRetrieve/', views.organization_retrieve_view, name='organizationRetrieveView'),
     url(r'^organizationSave/', views.organization_save_view, name='organizationSaveView'),
     url(r'^organizationSearch/', views.organization_search_view, name='organizationSearchView'),
+    url(r'^organizationsSyncOut/', OrganizationsSyncOutView.as_view(), name='organizationsSyncOutView'),
     url(r'^organizationStopFollowing/',
         views.organization_stop_following_api_view, name='organizationStopFollowingView'),
     url(r'^organizationsFollowedRetrieve/',
@@ -46,6 +56,7 @@ urlpatterns = [
         views.position_public_support_count_for_ballot_item_view, name='positionPublicSupportCountForBallotItemView'),
     url(r'^positionRetrieve/', views.position_retrieve_view, name='positionRetrieveView'),
     url(r'^positionSave/', views.position_save_view, name='positionSaveView'),
+    url(r'^positionsSyncOutView/', PositionsSyncOutView.as_view(), name='positionsSyncOutView'),
     url(r'^positionSupportCountForBallotItem/',
         views.position_support_count_for_ballot_item_view, name='positionSupportCountForBallotItemView'),
     url(r'^quickInfoRetrieve/', views.quick_info_retrieve_view, name='quickInfoRetrieveView'),
@@ -94,14 +105,20 @@ urlpatterns = [
     url(r'^docs/ballotItemOptionsRetrieve/$',
         views_docs.ballot_item_options_retrieve_doc_view, name='ballotItemOptionsRetrieveDocs'),
     url(r'^docs/ballotItemRetrieve/$', views_docs.ballot_item_retrieve_doc_view, name='ballotItemRetrieveDocs'),
+    # url(r'^docs/ballotItemsSyncOut/$', views_docs.ballot_items_sync_out_doc_view, name='ballotItemsSyncOutDocs'),
+    # url(r'^docs/ballotReturnedSyncOut/$',
+    # views_docs.ballot_returned_sync_out_doc_view, name='ballotReturnedSyncOutDocs'),
     url(r'^docs/candidateRetrieve/$', views_docs.candidate_retrieve_doc_view, name='candidateRetrieveDocs'),
     url(r'^docs/candidatesRetrieve/$', views_docs.candidates_retrieve_doc_view, name='candidatesRetrieveDocs'),
+    url(r'^docs/candidatesSyncOut/$', views_docs.candidates_sync_out_doc_view, name='candidatesSyncOutDocs'),
     url(r'^docs/deviceIdGenerate/$', views_docs.device_id_generate_doc_view, name='deviceIdGenerateDocs'),
-    url(r'^docs/electionsRetrieve/$', views_docs.elections_retrieve_doc_view, name='electionsRetrieveDocs'),
+    url(r'^docs/electionsSyncOut/$', views_docs.elections_sync_out_doc_view, name='electionsSyncOutDocs'),
     url(r'^docs/facebookDisconnect/$', views_docs.facebook_disconnect_doc_view, name='facebookDisconnectDocs'),
     url(r'^docs/facebookSignIn/$', views_docs.facebook_sign_in_doc_view, name='facebookSignInDocs'),
     url(r'^docs/measureRetrieve/$', views_docs.measure_retrieve_doc_view, name='measureRetrieveDocs'),
+    url(r'^docs/measuresSyncOut/$', views_docs.measures_sync_out_doc_view, name='measuresSyncOutDocs'),
     url(r'^docs/officeRetrieve/$', views_docs.office_retrieve_doc_view, name='officeRetrieveDocs'),
+    url(r'^docs/officeSyncOut/$', views_docs.offices_sync_out_doc_view, name='officesSyncOutDocs'),
     url(r'^docs/organizationCount/$', views_docs.organization_count_doc_view, name='organizationCountDocs'),
     url(r'^docs/organizationFollow/', views_docs.organization_follow_doc_view, name='organizationFollowDocs'),
     url(r'^docs/organizationFollowIgnore/',
@@ -109,10 +126,13 @@ urlpatterns = [
     url(r'^docs/organizationRetrieve/$', views_docs.organization_retrieve_doc_view, name='organizationRetrieveDocs'),
     url(r'^docs/organizationSave/$', views_docs.organization_save_doc_view, name='organizationSaveDocs'),
     url(r'^docs/organizationSearch/$', views_docs.organization_search_doc_view, name='organizationSearchDocs'),
+    url(r'^docs/organizationsSyncOut/$', views_docs.organizations_sync_out_doc_view, name='organizationsSyncOutDocs'),
     url(r'^docs/organizationStopFollowing/',
         views_docs.organization_stop_following_doc_view, name='organizationStopFollowingDocs'),
     url(r'^docs/organizationsFollowedRetrieve/',
         views_docs.organizations_followed_retrieve_doc_view, name='organizationsFollowedRetrieveDocs'),
+    # url(r'^docs/pollingLocationsSyncOut/$',
+    # views_docs.polling_locations_sync_out_doc_view, name='pollingLocationsSyncOutDocs'),
     url(r'^docs/positionLikeCount/$', views_docs.position_like_count_doc_view, name='positionLikeCountDocs'),
     url(r'^docs/positionListForBallotItem/',
         views_docs.position_list_for_ballot_item_doc_view, name='positionListForBallotItemDocs'),
@@ -130,6 +150,7 @@ urlpatterns = [
     url(r'^docs/positionSave/$', views_docs.position_save_doc_view, name='positionSaveDocs'),
     url(r'^docs/positionsCountForAllBallotItemsDocs/$',
         views_docs.positions_count_for_all_ballot_items_doc_view, name='positionsCountForAllBallotItemsDocs'),
+    url(r'^docs/positionsSyncOut/$', views_docs.positions_sync_out_doc_view, name='positionsSyncOutDocs'),
     url(r'^docs/positionSupportCountForBallotItem/',
         views_docs.position_support_count_for_ballot_item_doc_view, name='positionSupportCountForBallotItemDocs'),
     url(r'^docs/quickInfoRetrieve/$', views_docs.quick_info_retrieve_doc_view, name='quickInfoRetrieveDocs'),
@@ -155,6 +176,7 @@ urlpatterns = [
         views_docs.voter_guides_to_follow_retrieve_doc_view, name='voterGuidesToFollowRetrieveDocs'),
     url(r'^docs/voterGuidesFollowedRetrieve/$',
         views_docs.voter_guides_followed_retrieve_doc_view, name='voterGuidesFollowedRetrieveDocs'),
+    # url(r'^docs/voterGuidesSyncOut/$', views_docs.voter_guides_sync_out_doc_view, name='voterGuidesSyncOutDocs'),
     url(r'^docs/voterLocationRetrieveFromIP/$',
         views_docs.voter_location_retrieve_from_ip_doc_view, name='voterLocationRetrieveFromIPDocs'),
     url(r'^docs/voterPhotoSave/$', views_docs.voter_photo_save_doc_view, name='voterPhotoSaveDocs'),

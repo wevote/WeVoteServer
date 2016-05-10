@@ -66,7 +66,7 @@ class Election(models.Model):
 class ElectionManager(models.Model):
 
     def update_or_create_election(self, google_civic_election_id, election_name, election_day_text,
-                                  ocd_division_id):
+                                  ocd_division_id, state_code=''):
         """
         Either update or create an election entry.
         """
@@ -88,6 +88,7 @@ class ElectionManager(models.Model):
                     'election_name': election_name,
                     'election_day_text': election_day_text,
                     'ocd_division_id': ocd_division_id,
+                    'state_code': state_code,
                 }
                 election_on_stage, new_election_created = Election.objects.update_or_create(
                     google_civic_election_id=google_civic_election_id, defaults=updated_values)

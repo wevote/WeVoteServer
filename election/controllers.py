@@ -7,10 +7,14 @@ from config.base import get_environment_variable
 from import_export_google_civic.controllers import retrieve_from_google_civic_api_election_query, \
     store_results_from_google_civic_api_election_query
 import json
+import requests
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
+ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")
 
 
 def election_remote_retrieve():
@@ -40,6 +44,26 @@ def elections_import_from_sample_file():
     with open('election/import_data/elections_sample.json') as json_data:
         structured_json = json.load(json_data)
 
+    return elections_import_from_structured_json(structured_json)
+
+
+def elections_import_from_master_server(request=None):  # TODO DALE Needs to be updated and tested
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    # Request json file from We Vote servers
+    logger.info("Loading Election from We Vote Master servers")
+    request = requests.get(ELECTIONS_SYNC_URL, params={
+        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+    })
+    structured_json = json.loads(request.text)
+
+    return elections_import_from_structured_json(structured_json)
+
+
+def elections_import_from_structured_json(structured_json):
+
     election_manager = ElectionManager()
     elections_saved = 0
     elections_updated = 0
@@ -59,7 +83,8 @@ def elections_import_from_sample_file():
                 one_election["google_civic_election_id"],
                 one_election["election_name"],
                 one_election["election_day_text"],
-                one_election["ocd_division_id"])
+                one_election["ocd_division_id"],
+                one_election["state_code"])
         if results['success']:
             if results['new_election_created']:
                 elections_saved += 1
@@ -76,7 +101,7 @@ def elections_import_from_sample_file():
     return elections_results
 
 
-def elections_retrieve_list_for_api(voter_device_id):
+def elections_sync_out_list_for_api(voter_device_id):
     # # We care about who the voter is, because we *might* want to limit which elections we show?
     # results = is_voter_device_id_valid(voter_device_id)
     # if not results['success']:

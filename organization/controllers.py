@@ -6,11 +6,11 @@ from .models import OrganizationListManager, OrganizationManager
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
-from exception.models import handle_record_not_found_exception, \
-    handle_record_not_saved_exception
+from exception.models import handle_record_not_found_exception
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 import json
 from organization.models import Organization
+import requests
 from voter.models import fetch_voter_id_from_voter_device_link
 from voter_guide.models import VoterGuide, VoterGuideManager
 import wevote_functions.admin
@@ -19,7 +19,7 @@ from wevote_functions.functions import convert_to_int, positive_value_exists
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-ORGANIZATIONS_URL = get_environment_variable("ORGANIZATIONS_URL")
+ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
 
 
 def organization_follow_all(voter_device_id, organization_id, organization_we_vote_id, follow_kind=FOLLOWING):
@@ -184,25 +184,36 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organizations_import_from_sample_file(request=None, load_from_uri=False):  # TODO FINISH BUILDING/TESTING THIS
+def organizations_import_from_sample_file():  # TODO FINISH BUILDING/TESTING THIS
     """
     Get the json data, and either create new entries or update existing
     :return:
     """
-    # if load_from_uri:
-    #     # Request json file from We Vote servers
-    #     logger.info("Loading Organizations from We Vote Master servers")
-    #     request = requests.get(ORGANIZATIONS_URL, params={
-    #         "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-    #     })
-    #     structured_json = json.loads(request.text)
-    # else:
-    # Load saved json from local file
     logger.info("Loading organizations from local file")
 
     with open('organization/import_data/organizations_sample.json') as json_data:
         structured_json = json.load(json_data)
 
+    request = None
+    return organizations_import_from_structured_json(request, structured_json)
+
+
+def organizations_import_from_master_server():
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    # Request json file from We Vote servers
+    logger.info("Loading Organizations from We Vote Master servers")
+    request = requests.get(ORGANIZATIONS_SYNC_URL, params={
+        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+    })
+    structured_json = json.loads(request.text)
+
+    return organizations_import_from_structured_json(request, structured_json)
+
+
+def organizations_import_from_structured_json(request, structured_json):
     organizations_saved = 0
     organizations_updated = 0
     organizations_not_processed = 0
@@ -237,54 +248,63 @@ def organizations_import_from_sample_file(request=None, load_from_uri=False):  #
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
-        try:
-            if organization_on_stage_found:
-                # Update
-                organization_on_stage.we_vote_id = one_organization["we_vote_id"]
-                organization_on_stage.organization_name = one_organization["organization_name"]
-                organization_on_stage.organization_website = one_organization["organization_website"]
-                organization_on_stage.organization_twitter_handle = one_organization["organization_twitter_handle"]
-                organization_on_stage.save()
-                # messages.add_message(request, messages.INFO, u"Organization updated: {organization_name}".format(
-                #     organization_name=one_organization["organization_name"]))
-                organizations_updated += 1
-            else:
-                # Create new
-                organization_on_stage = Organization(
-                    we_vote_id=one_organization["we_vote_id"],
-                    organization_name=one_organization["organization_name"],
-                    organization_twitter_handle=one_organization["organization_twitter_handle"],
-                    organization_website=one_organization["organization_website"],
-                    organization_email=one_organization["organization_email"] if 'organization_email' in
-                                                                                 one_organization else '',
-                    organization_facebook=one_organization["organization_facebook"] if 'organization_facebook' in
-                                                                                       one_organization else '',
-                    organization_image=one_organization["organization_image"] if 'organization_image' in
-                                                                                 one_organization else '',
-                )
-                organization_on_stage.save()
-                organizations_saved += 1
-                # messages.add_message(request, messages.INFO, u"New organization imported: {organization_name}".format(
-                #     organization_name=one_organization["organization_name"]))
-        except Exception as e:
-            handle_record_not_saved_exception(e, logger=logger)
-            if request is not None:
-                messages.add_message(request, messages.ERROR,
-                                     "Could not save Organization, we_vote_id: {we_vote_id}, "
-                                     "organization_name: {organization_name}, "
-                                     "organization_website: {organization_website}".format(
-                                         we_vote_id=one_organization["we_vote_id"],
-                                         organization_name=one_organization["organization_name"],
-                                         organization_website=one_organization["organization_website"],
-                                     ))
-            organizations_not_processed += 1
+        # TEMPORARY STOP
+        organizations_results = {
+            'status':           "STOPPING_FOR_NOW",
+            'saved':            organizations_saved,
+            'updated':          organizations_updated,
+            'not_processed':    organizations_not_processed,
+        }
+        return organizations_results
 
-    organizations_results = {
-        'saved': organizations_saved,
-        'updated': organizations_updated,
-        'not_processed': organizations_not_processed,
-    }
-    return organizations_results
+    #     try:
+    #         if organization_on_stage_found:
+    #             # Update
+    #             organization_on_stage.we_vote_id = one_organization["we_vote_id"]
+    #             organization_on_stage.organization_name = one_organization["organization_name"]
+    #             organization_on_stage.organization_website = one_organization["organization_website"]
+    #             organization_on_stage.organization_twitter_handle = one_organization["organization_twitter_handle"]
+    #             organization_on_stage.save()
+    #             # messages.add_message(request, messages.INFO, u"Organization updated: {organization_name}".format(
+    #             #     organization_name=one_organization["organization_name"]))
+    #             organizations_updated += 1
+    #         else:
+    #             # Create new
+    #             organization_on_stage = Organization(
+    #                 we_vote_id=one_organization["we_vote_id"],
+    #                 organization_name=one_organization["organization_name"],
+    #                 organization_twitter_handle=one_organization["organization_twitter_handle"],
+    #                 organization_website=one_organization["organization_website"],
+    #                 organization_email=one_organization["organization_email"] if 'organization_email' in
+    #                                                                              one_organization else '',
+    #                 organization_facebook=one_organization["organization_facebook"] if 'organization_facebook' in
+    #                                                                                    one_organization else '',
+    #                 organization_image=one_organization["organization_image"] if 'organization_image' in
+    #                                                                              one_organization else '',
+    #             )
+    #             organization_on_stage.save()
+    #             organizations_saved += 1
+    #             # messages.add_message(request, messages.INFO, u"New organization imported: {organization_name}".format(
+    #             #     organization_name=one_organization["organization_name"]))
+    #     except Exception as e:
+    #         handle_record_not_saved_exception(e, logger=logger)
+    #         if request is not None:
+    #             messages.add_message(request, messages.ERROR,
+    #                                  "Could not save Organization, we_vote_id: {we_vote_id}, "
+    #                                  "organization_name: {organization_name}, "
+    #                                  "organization_website: {organization_website}".format(
+    #                                      we_vote_id=one_organization["we_vote_id"],
+    #                                      organization_name=one_organization["organization_name"],
+    #                                      organization_website=one_organization["organization_website"],
+    #                                  ))
+    #         organizations_not_processed += 1
+    #
+    # organizations_results = {
+    #     'saved': organizations_saved,
+    #     'updated': organizations_updated,
+    #     'not_processed': organizations_not_processed,
+    # }
+    # return organizations_results
 
 
 # We retrieve from only one of the two possible variables

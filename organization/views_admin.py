@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import organizations_import_from_sample_file
+from .controllers import organizations_import_from_master_server
 from .models import Organization
 from .serializers import OrganizationSerializer
 from admin_tools.views import redirect_to_sign_in_page
@@ -17,11 +17,11 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_deleted_exception, handle_record_not_found_exception, handle_record_not_saved_exception
 from election.models import Election, ElectionManager
 from organization.models import OrganizationListManager, OrganizationManager
-from position.models import PositionEntered, PositionEnteredManager, ANY_STANCE, INFORMATION_ONLY, OPPOSE, \
+from position.models import PositionEntered, PositionEnteredManager, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from voter.models import voter_has_authority
+from voter.models import retrieve_voter_authority, voter_has_authority
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
@@ -39,12 +39,15 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-# NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.
-class ExportOrganizationDataView(APIView):
+class OrganizationsSyncOutView(APIView):
     def get(self, request, format=None):
         organization_list = Organization.objects.all()
         serializer = OrganizationSerializer(organization_list, many=True)
         return Response(serializer.data)
+
+
+def organizations_import_from_master_server_view(request):
+    return organizations_import_from_master_server()
 
 
 @login_required
@@ -366,7 +369,8 @@ def organization_position_list_view(request, organization_id):
 @login_required
 def organization_position_new_view(request, organization_id):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
-    if not voter_has_authority(request, authority_required):
+    authority_results = retrieve_voter_authority(request)
+    if not voter_has_authority(request, authority_required, authority_results):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
@@ -437,6 +441,7 @@ def organization_position_new_view(request, organization_id):
             'election_list':                                election_list,
             'google_civic_election_id':                     google_civic_election_id,
             'organization_position_list':                   organization_position_list,
+            'voter_authority':                              authority_results,
         }
     return render(request, 'organization/organization_position_edit.html', template_values)
 
@@ -483,7 +488,7 @@ def organization_delete_existing_position_process_form_view(request, organizatio
 
     messages.add_message(request, messages.INFO,
                          'Position deleted.')
-    return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
+    return HttpResponseRedirect(reverse('organization:organization_position_edit', args=([organization_id])))
 
 
 @login_required

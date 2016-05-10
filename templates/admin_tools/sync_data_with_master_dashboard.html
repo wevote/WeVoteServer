@@ -1,0 +1,55 @@
+{# templates/admin_tools/statistics_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Sync Data With Master We Vote Servers{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Sync Data With Master We Vote Servers</h1>
+
+<p>These imports are best run in order from top-to-bottom.</p>
+
+
+{# ################################### #}
+<h4>Elections</h4>
+<p>ELECTIONS_SYNC_URL: {{ elections_sync_url }}</p>
+
+<p><a href="{% url 'election:elections_import_from_master_server' %}">Retrieve Elections</a></p>
+
+
+{# ################################### #}
+<h4>Offices</h4>
+<p>OFFICES_SYNC_URL: {{ offices_sync_url }}</p>
+
+<p><a href="{% url 'office:offices_import_from_master_server' %}">Retrieve Offices</a></p>
+
+
+{# ################################### #}
+<h4>Candidates</h4>
+<p>CANDIDATES_SYNC_URL: {{ candidates_sync_url }}</p>
+
+<p><a href="{% url 'candidate:candidates_import_from_master_server' %}">Retrieve Candidates</a></p>
+
+
+{# ################################### #}
+<h4>Measures</h4>
+<p>MEASURES_SYNC_URL: {{ measures_sync_url }}</p>
+
+<p><a href="{% url 'measure:measures_import_from_master_server' %}">Retrieve Measures</a></p>
+
+
+{# ################################### #}
+<h4>Organizations</h4>
+<p>ORGANIZATIONS_SYNC_URL: {{ organizations_sync_url }}</p>
+
+<p><a href="{% url 'organization:organizations_import_from_master_server' %}">Retrieve Organizations</a></p>
+
+
+{# ################################### #}
+<h4>Positions</h4>
+<p>POSITIONS_SYNC_URL: {{ positions_sync_url }}</p>
+
+<p><a href="{% url 'position:positions_import_from_master_server' %}">Retrieve Positions</a></p>
+
+{%  endblock %}

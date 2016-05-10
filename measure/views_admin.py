@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 
+from .controllers import measures_import_from_master_server
 from .models import ContestMeasure
 from .serializers import ContestMeasureSerializer
 from admin_tools.views import redirect_to_sign_in_page
@@ -26,11 +27,15 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # This page does not need to be protected.
 # NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
-class ExportContestMeasureDataView(APIView):
+class MeasuresSyncOutView(APIView):
     def get(self, request, format=None):
         contest_measure_list = ContestMeasure.objects.all()
         serializer = ContestMeasureSerializer(contest_measure_list, many=True)
         return Response(serializer.data)
+
+
+def measures_import_from_master_server_view(request):
+    return measures_import_from_master_server()
 
 
 @login_required

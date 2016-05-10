@@ -10,38 +10,49 @@ from django.http import HttpResponse
 from exception.models import handle_exception
 from import_export_vote_smart.controllers import retrieve_and_match_candidate_from_vote_smart, \
     retrieve_candidate_photo_from_vote_smart
-from import_export_vote_smart.models import VoteSmartCandidateManager
 import json
 from office.models import ContestOfficeManager
+import requests
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-CANDIDATE_CAMPAIGNS_URL = get_environment_variable("CANDIDATE_CAMPAIGNS_URL")
+CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")
 
 
-def candidates_import_from_sample_file(request=None, load_from_uri=False):
+def candidates_import_from_sample_file():
     """
     Get the json data, and either create new entries or update existing
     :return:
     """
-    # if load_from_uri:
-    #     # Request json file from We Vote servers
-    #     messages.add_message(request, messages.INFO, "Loading CandidateCampaign IDs from We Vote Master servers")
-    #     request = requests.get(CANDIDATE_CAMPAIGNS_URL, params={
-    #         "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-    #     })
-    #     structured_json = json.loads(request.text)
-    # else:
     # Load saved json from local file
-
-    # messages.add_message(request, messages.INFO, "Loading CandidateCampaigns from local file")
+    logger.info("Loading CandidateCampaigns from local file")
 
     with open("candidate/import_data/candidate_campaigns_sample.json") as json_data:
         structured_json = json.load(json_data)
 
+    request = None
+    return candidates_import_from_structured_json(request, structured_json)
+
+
+def candidates_import_from_master_server():
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    # Request json file from We Vote servers
+    logger.info("Loading Candidates from We Vote Master servers")
+    request = requests.get(CANDIDATES_SYNC_URL, params={
+        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+    })
+    structured_json = json.loads(request.text)
+
+    return candidates_import_from_structured_json(request, structured_json)
+
+
+def candidates_import_from_structured_json(request, structured_json):
     candidate_campaign_manager = CandidateCampaignManager()
     candidates_saved = 0
     candidates_updated = 0

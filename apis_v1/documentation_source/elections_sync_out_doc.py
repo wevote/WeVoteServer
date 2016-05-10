@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/elections_retrieve_doc.py
+# apis_v1/documentation_source/elections_sync_out_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def elections_retrieve_doc_template_values(url_root):
+def elections_sync_out_doc_template_values(url_root):
     """
-    Show documentation about electionsRetrieve
+    Show documentation about electionsSyncOut
     """
     required_query_parameter_list = [
         {
@@ -61,13 +61,13 @@ def elections_retrieve_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'electionsRetrieve',
-        'api_slug': 'electionsRetrieve/?format=json',
+        'api_name': 'electionsSyncOut',
+        'api_slug': 'electionsSyncOut/?format=json',
         'api_introduction':
             "Export the raw elections data stored in the database to JSON format. "
             "This API call does not reach out to the Google Civic API, but simply returns data that was retrieved "
             "earlier.",
-        'try_now_link': 'apis_v1:electionsRetrieveView',
+        'try_now_link': 'apis_v1:electionsSyncOutView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

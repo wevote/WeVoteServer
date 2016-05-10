@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .controllers import positions_import_from_master_server
 from .models import ANY_STANCE, PositionEntered
 from .serializers import PositionSerializer
 from admin_tools.views import redirect_to_sign_in_page
@@ -28,11 +29,20 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # This page does not need to be protected.
 # NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.
-class ExportPositionDataView(APIView):
+class PositionsSyncOutView(APIView):
     def get(self, request, format=None):
-        position_list = PositionEntered.objects.all()
+        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+        position_list_manager = PositionListManager()
+        public_only = True
+        position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
+                                                                                  public_only)
         serializer = PositionSerializer(position_list, many=True)
         return Response(serializer.data)
+
+
+def positions_import_from_master_server_view(request):
+    return positions_import_from_master_server()
 
 
 @login_required
@@ -215,10 +225,12 @@ def position_delete_process_view(request):
     # Retrieve this position
     position_on_stage_found = False
     position_on_stage = PositionEntered()
+    organization_id = 0
     try:
         position_query = PositionEntered.objects.filter(id=position_id)
         if len(position_query):
             position_on_stage = position_query[0]
+            organization_id = position_on_stage.organization_id
             position_on_stage_found = True
     except Exception as e:
         messages.add_message(request, messages.ERROR, 'Could not find position -- exception.')
@@ -233,6 +245,10 @@ def position_delete_process_view(request):
             # Delete
             position_on_stage.delete()
             messages.add_message(request, messages.INFO, 'Position deleted.')
+            if positive_value_exists(organization_id):
+                return HttpResponseRedirect(reverse('organization:organization_position_list',
+                                                    args=([organization_id])) +
+                                            "?google_civic_election_id=" + str(google_civic_election_id))
         else:
             messages.add_message(request, messages.ERROR, 'Could not find position.')
     except Exception as e:

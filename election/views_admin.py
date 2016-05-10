@@ -2,12 +2,12 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .controllers import election_remote_retrieve
+from .controllers import election_remote_retrieve, elections_import_from_master_server, elections_sync_out_list_for_api
 from .models import Election
 from .serializers import ElectionSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -17,12 +17,13 @@ from exception.models import handle_record_found_more_than_one_exception, handle
     handle_record_not_saved_exception
 from import_export_google_civic.controllers import retrieve_one_ballot_from_google_civic_api, \
     store_one_ballot_from_google_civic_api
+import json
 from polling_location.models import PollingLocation
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, get_voter_device_id, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_election_id_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -337,9 +338,34 @@ def election_summary_view(request, election_local_id):
     return render(request, 'election/election_summary.html', template_values)
 
 
+# TODO Which of these two do we standardize on?
+class ElectionsSyncOutView(APIView):
+    """
+    Export raw voter data to JSON format
+    """
+    def get(self, request):  # Removed: , format=None
+        voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+        results = elections_sync_out_list_for_api(voter_device_id)
+
+        if 'success' not in results:
+            json_data = results['json_data']
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
+        elif not results['success']:
+            json_data = results['json_data']
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
+        else:
+            election_list = results['election_list']
+            serializer = ElectionSerializer(election_list, many=True)
+            return Response(serializer.data)
+
+
 # This page does not need to be protected.
 class ExportElectionDataView(APIView):
     def get(self, request, format=None):
         election_list = Election.objects.all()
         serializer = ElectionSerializer(election_list, many=True)
         return Response(serializer.data)
+
+
+def elections_import_from_master_server_view(request):
+    return elections_import_from_master_server()

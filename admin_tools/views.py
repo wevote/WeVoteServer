@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from candidate.controllers import candidates_import_from_sample_file
-from config.base import LOGIN_URL
+from config.base import get_environment_variable, LOGIN_URL
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -21,6 +21,13 @@ from position.controllers import positions_import_from_sample_file
 from voter.models import Voter, VoterDeviceLinkManager, VoterManager, voter_has_authority, voter_setup
 from wevote_functions.functions import delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id
+
+ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")
+ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
+OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")
+CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")
+MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")
+POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
 
 
 @login_required
@@ -306,5 +313,24 @@ def statistics_summary_view(request):
         'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
     }
     response = render(request, 'admin_tools/statistics_summary.html', template_values)
+
+    return response
+
+
+@login_required
+def sync_data_with_master_servers_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    template_values = {
+        'candidates_sync_url':      CANDIDATES_SYNC_URL,
+        'elections_sync_url':       ELECTIONS_SYNC_URL,
+        'measures_sync_url':        MEASURES_SYNC_URL,
+        'offices_sync_url':         OFFICES_SYNC_URL,
+        'organizations_sync_url':   ORGANIZATIONS_SYNC_URL,
+        'positions_sync_url':       POSITIONS_SYNC_URL,
+    }
+    response = render(request, 'admin_tools/sync_data_with_master_dashboard.html', template_values)
 
     return response

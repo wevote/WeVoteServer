@@ -74,24 +74,6 @@ body { font-family: 'Open Sans', sans-serif; }
 
 }
 
-.organization_position_label_title {
-    font-weight: bold;
-}
-
-.organization_position_label_modifier {
-    color: #555555;
-}
-
-.organization_position_statement_text {
-    flex-direction: column;
-    cursor: auto;
-    height: 210px;
-    padding: 2px;
-    white-space: pre-wrap;
-    width: 95%;
-    word-wrap: break-word;
-}
-
 .organization_position_more_info_url {
     width: 95%;
 }

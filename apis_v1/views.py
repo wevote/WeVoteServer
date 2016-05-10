@@ -8,8 +8,6 @@ from ballot.controllers import ballot_item_options_retrieve_for_api, choose_elec
     voter_ballot_items_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from django.http import HttpResponse
-from election.controllers import elections_retrieve_list_for_api
-from election.serializers import ElectionSerializer
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_facebook.controllers import facebook_disconnect_for_api, facebook_sign_in_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
@@ -132,26 +130,6 @@ def device_id_generate_view(request):  # deviceIdGenerate
         'status': status,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
-
-
-class ElectionsRetrieveView(APIView):
-    """
-    Export raw voter data to JSON format
-    """
-    def get(self, request):  # Removed: , format=None
-        voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-        results = elections_retrieve_list_for_api(voter_device_id)
-
-        if 'success' not in results:
-            json_data = results['json_data']
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
-        elif not results['success']:
-            json_data = results['json_data']
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
-        else:
-            election_list = results['election_list']
-            serializer = ElectionSerializer(election_list, many=True)
-            return Response(serializer.data)
 
 
 def facebook_disconnect_view(request):

@@ -14,10 +14,10 @@
     <table cellpadding="5" cellspacing="5" border="1">
         <tr>
             <td></td>
-            <td>Organization (view in new window)</td>
+            <td>Organization Management (open in new window)</td>
             <td>Twitter</td>
             <td>Facebook</td>
-            <td>Website</td>
+            <td>Website (open in new window)</td>
             <td></td>
         </tr>
     {% for possible_organization in organizations_list %}
@@ -26,7 +26,9 @@
             <td><a href="{% url 'organization:organization_position_list' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ possible_organization.organization_name }}</a></td>
             <td>{% if possible_organization.organization_twitter_handle %}{{ possible_organization.organization_twitter_handle }}{% endif %}</td>
             <td>{% if possible_organization.organization_facebook %}{{ possible_organization.organization_facebook }}{% endif %}</td>
-            <td>{% if possible_organization.organization_website %}{{ possible_organization.organization_website }}{% endif %}</td>
+            <td>{% if possible_organization.organization_website %}
+                <a href="{{ possible_organization.organization_website }}" target="_blank">{{ possible_organization.organization_website }}</a>
+            {% endif %}</td>
             <td><a href="{% url 'organization:organization_position_new' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}">
                 Enter Position</a></td>
         </tr>

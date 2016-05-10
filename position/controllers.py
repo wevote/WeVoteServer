@@ -15,6 +15,7 @@ from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from organization.models import OrganizationManager
 import json
+import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE
 import wevote_functions.admin
@@ -23,7 +24,7 @@ from wevote_functions.functions import convert_to_int, is_voter_device_id_valid,
 logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
-POSITIONS_URL = get_environment_variable("POSITIONS_URL")
+POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
 
 
 # We retrieve from only one of the two possible variables
@@ -782,18 +783,30 @@ def positions_import_from_sample_file(request=None):  # , load_from_uri=False
     Get the json data, and either create new entries or update existing
     :return:
     """
-    # if load_from_uri:
-    #     # Request json file from We Vote servers
-    #     messages.add_message(request, messages.INFO, "Loading positions from We Vote Master servers")
-    #     request = requests.get(POSITIONS_URL, params={
-    #         "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-    #     })
-    #     structured_json = json.loads(request.text)
-    # else:
     # Load saved json from local file
     with open("position/import_data/positions_sample.json") as json_data:
         structured_json = json.load(json_data)
 
+    request = None
+    return positions_import_from_structured_json(request, structured_json)
+
+
+def positions_import_from_master_server():
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    # Request json file from We Vote servers
+    logger.info("Loading Candidates from We Vote Master servers")
+    request = requests.get(POSITIONS_SYNC_URL, params={
+        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+    })
+    structured_json = json.loads(request.text)
+
+    return positions_import_from_structured_json(request, structured_json)
+
+
+def positions_import_from_structured_json(request, structured_json):
     positions_saved = 0
     positions_updated = 0
     positions_not_processed = 0

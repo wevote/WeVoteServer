@@ -70,7 +70,7 @@
     </table>
     <p></p>
     <p>
-        <a href="{% url 'organization:organizations_export' %}?format=json" target="_blank" >Export Organizations</a>
+        <a href="{% url 'apis_v1:organizationsSyncOutView' %}?format=json" target="_blank" >Export Organizations</a>
     </p>
 {% else %}
     <p>(no organizations found)</p>
@@ -78,7 +78,7 @@
 
     <p></p>
 {#    <p>#}
-{#        <a href="{% url 'organization:organizations_import' %}" >Import Organizations</a>#}
+{#        <a href="{% url 'organization:organizations_import' %}" >Import Organizations From Master Server</a>#}
 {#    </p>#}
 
     <script>

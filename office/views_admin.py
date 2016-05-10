@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .controllers import offices_import_from_master_server
 from .models import ContestOffice
 from .serializers import ContestOfficeSerializer
 from admin_tools.views import redirect_to_sign_in_page
@@ -28,11 +29,19 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # This page does not need to be protected.
 # NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
-class ExportContestOfficeDataView(APIView):
+class OfficesSyncOutView(APIView):
     def get(self, request, format=None):
+        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
         contest_office_list = ContestOffice.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            contest_office_list = contest_office_list.filter(google_civic_election_id=google_civic_election_id)
         serializer = ContestOfficeSerializer(contest_office_list, many=True)
         return Response(serializer.data)
+
+
+def offices_import_from_master_server_view(request):
+    return offices_import_from_master_server()
 
 
 @login_required

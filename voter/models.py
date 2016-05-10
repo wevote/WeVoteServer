@@ -856,8 +856,9 @@ def retrieve_voter_authority(request):
     return authority_results
 
 
-def voter_has_authority(request, authority_required):
-    authority_results = retrieve_voter_authority(request)
+def voter_has_authority(request, authority_required, authority_results=None):
+    if not authority_results:
+        authority_results = retrieve_voter_authority(request)
     if not positive_value_exists(authority_results['is_active']):
         return False
     if 'admin' in authority_required:

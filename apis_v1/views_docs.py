@@ -3,14 +3,17 @@
 # -*- coding: UTF-8 -*-
 
 from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_retrieve_doc, candidate_retrieve_doc, \
-    candidates_retrieve_doc, device_id_generate_doc, \
-    elections_retrieve_doc, facebook_disconnect_doc, facebook_sign_in_doc, measure_retrieve_doc, office_retrieve_doc, \
+    candidates_retrieve_doc, candidates_sync_out_doc, device_id_generate_doc, \
+    elections_sync_out_doc, facebook_disconnect_doc, facebook_sign_in_doc, \
+    measure_retrieve_doc, measures_sync_out_doc, \
+    office_retrieve_doc, offices_sync_out_doc, \
     organization_count_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
-    organization_retrieve_doc, organization_save_doc, organization_search_doc, \
+    organization_retrieve_doc, organization_save_doc, organization_search_doc, organizations_sync_out_doc, \
     position_like_count_doc, position_list_for_ballot_item_doc, position_list_for_opinion_maker_doc, \
     position_oppose_count_for_ballot_item_doc, \
     position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
+    positions_sync_out_doc, \
     position_public_support_count_for_ballot_item_doc, position_support_count_for_ballot_item_doc, \
     positions_count_for_all_ballot_items_doc, \
     quick_info_retrieve_doc, twitter_sign_in_start_doc, voter_address_retrieve_doc, \
@@ -94,6 +97,16 @@ def candidates_retrieve_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def candidates_sync_out_doc_view(request):
+    """
+    Show documentation about candidatesSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = candidates_sync_out_doc.candidates_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def device_id_generate_doc_view(request):
     """
     Show documentation about deviceIdGenerate
@@ -103,12 +116,12 @@ def device_id_generate_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
-def elections_retrieve_doc_view(request):
+def elections_sync_out_doc_view(request):
     """
-    Show documentation about electionsRetrieve
+    Show documentation about electionsSyncOut
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
-    template_values = elections_retrieve_doc.elections_retrieve_doc_template_values(url_root)
+    template_values = elections_sync_out_doc.elections_sync_out_doc_template_values(url_root)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -141,12 +154,32 @@ def measure_retrieve_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def measures_sync_out_doc_view(request):
+    """
+    Show documentation about measuresSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = measures_sync_out_doc.measures_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def office_retrieve_doc_view(request):
     """
     Show documentation about candidatesRetrieve
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = office_retrieve_doc.office_retrieve_doc_template_values(url_root)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def offices_sync_out_doc_view(request):
+    """
+    Show documentation about officesSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = offices_sync_out_doc.offices_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
@@ -225,6 +258,16 @@ def organization_search_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organization_search_doc.organization_search_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organizations_sync_out_doc_view(request):
+    """
+    Show documentation about organizationsSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = organizations_sync_out_doc.organizations_sync_out_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
@@ -319,6 +362,16 @@ def positions_count_for_all_ballot_items_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = positions_count_for_all_ballot_items_doc.positions_count_for_all_ballot_items_doc_template_values(
         url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def positions_sync_out_doc_view(request):
+    """
+    Show documentation about positionsSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = positions_sync_out_doc.positions_sync_out_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

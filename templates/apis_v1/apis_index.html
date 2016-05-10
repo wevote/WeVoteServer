@@ -118,11 +118,6 @@
         </td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:electionsRetrieveDocs' %}">electionsRetrieve</a></td>
-        <td>static c3</td>
-        <td>Export the raw elections data stored in the database to JSON format.</td>
-    </tr>
-    <tr>
         <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveDocs' %}">voterBallotItemsRetrieve</a></td>
         <td>c3</td>
         <td>Retrieve a list of ballot items to display for the current voter from the We Vote database. These entries
@@ -136,6 +131,11 @@
             for the current voter (based on the address saved with voterAddressSave), and store them in
             the We Vote database so we can display them
             with voterBallotItemsRetrieve, and other API calls.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:electionsSyncOutDocs' %}">electionsSyncOut</a></td>
+        <td>static c3</td>
+        <td>Provide another We Vote Server a complete listing of all public elections information.</td>
     </tr>
 
     {###  ###}
@@ -172,6 +172,21 @@
         <td><a href="{% url 'apis_v1:quickInfoRetrieveDocs' %}">quickInfoRetrieve</a></td>
         <td>static c3</td>
         <td>Information necessary to populate a bubble next to a ballot item.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:officesSyncOutDocs' %}">officesSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public office information.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:candidatesSyncOutDocs' %}">candidatesSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public candidates information.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:measuresSyncOutDocs' %}">measuresSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public measures information.</td>
     </tr>
 
     {###  ###}
@@ -309,6 +324,11 @@
         <td></td>
         <td>Has the voter starred this measure, office or candidate?</td>
     </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionsSyncOutDocs' %}">positionsSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public positions information.</td>
+    </tr>
 
     {###  ###}
     <tr>
@@ -375,6 +395,11 @@
         <td></td>
         <td>Retrieve a list of the most recent voter guide from each organization the voter follows.
             See also organizationsFollowedRetrieve, which returns a list of organizations the voter follows.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:organizationsSyncOutDocs' %}">organizationsSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public organization information.</td>
     </tr>
 
     {###  ###}
