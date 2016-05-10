@@ -368,4 +368,15 @@ class ExportElectionDataView(APIView):
 
 
 def elections_import_from_master_server_view(request):
-    return elections_import_from_master_server()
+    results = elections_import_from_master_server()
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Elections import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               not_processed=results['not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()))

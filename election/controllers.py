@@ -47,7 +47,7 @@ def elections_import_from_sample_file():
     return elections_import_from_structured_json(structured_json)
 
 
-def elections_import_from_master_server(request=None):  # TODO DALE Needs to be updated and tested
+def elections_import_from_master_server(request=None):
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -55,7 +55,8 @@ def elections_import_from_master_server(request=None):  # TODO DALE Needs to be 
     # Request json file from We Vote servers
     logger.info("Loading Election from We Vote Master servers")
     request = requests.get(ELECTIONS_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+        "key":      WE_VOTE_API_KEY,  # This comes from an environment variable
+        "format":   'json',
     })
     structured_json = json.loads(request.text)
 
@@ -73,18 +74,25 @@ def elections_import_from_structured_json(structured_json):
             u"google_civic_election_id: {google_civic_election_id}, election_name: {election_name}, "
             u"election_day_text: {election_day_text}".format(**one_election)
         )
+
+        google_civic_election_id = one_election["google_civic_election_id"] \
+            if "google_civic_election_id" in one_election else ''
+        election_name = one_election["election_name"] if "election_name" in one_election else ''
+        election_day_text = one_election["election_day_text"] if "election_day_text" in one_election else ''
+        ocd_division_id = one_election["ocd_division_id"] if "ocd_division_id" in one_election else ''
+        state_code = one_election["state_code"] if "state_code" in one_election else ''
+
         # Make sure we have the minimum required variables
-        if not positive_value_exists(one_election["google_civic_election_id"]) or \
-                not positive_value_exists(one_election["election_name"]):
+        if not positive_value_exists(google_civic_election_id) or not positive_value_exists(election_name):
             elections_not_processed += 1
             continue
 
         results = election_manager.update_or_create_election(
-                one_election["google_civic_election_id"],
-                one_election["election_name"],
-                one_election["election_day_text"],
-                one_election["ocd_division_id"],
-                one_election["state_code"])
+                google_civic_election_id,
+                election_name,
+                election_day_text,
+                ocd_division_id,
+                state_code)
         if results['success']:
             if results['new_election_created']:
                 elections_saved += 1
@@ -94,9 +102,11 @@ def elections_import_from_structured_json(structured_json):
             elections_not_processed += 1
 
     elections_results = {
-        'saved': elections_saved,
-        'updated': elections_updated,
-        'not_processed': elections_not_processed,
+        'success':          True,
+        'status':           "ELECTION_IMPORT_PROCESS_COMPLETE",
+        'saved':            elections_saved,
+        'updated':          elections_updated,
+        'not_processed':    elections_not_processed,
     }
     return elections_results
 

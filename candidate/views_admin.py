@@ -35,13 +35,34 @@ logger = wevote_functions.admin.get_logger(__name__)
 # NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.
 class CandidatesSyncOutView(APIView):
     def get(self, request, format=None):
-        candidate_campaign_list = CandidateCampaign.objects.all()
-        serializer = CandidateCampaignSerializer(candidate_campaign_list, many=True)
+        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+        candidate_list = CandidateCampaign.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+
+        serializer = CandidateCampaignSerializer(candidate_list, many=True)
         return Response(serializer.data)
 
 
 def candidates_import_from_master_server_view(request):
-    return candidates_import_from_master_server()
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    results = candidates_import_from_master_server(request, google_civic_election_id)
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Candidates import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Master data not imported (local duplicates found): '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()))
 
 
 @login_required

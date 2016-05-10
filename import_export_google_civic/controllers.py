@@ -126,7 +126,8 @@ def process_candidates_from_structured_json(
             }
             candidate_campaign_manager = CandidateCampaignManager()
             results = candidate_campaign_manager.update_or_create_candidate_campaign(
-                we_vote_id, google_civic_election_id, ocd_division_id, contest_office_id, contest_office_we_vote_id,
+                we_vote_id, google_civic_election_id,
+                ocd_division_id, contest_office_id, contest_office_we_vote_id,
                 google_civic_candidate_name, updated_candidate_campaign_values)
 
     return results
@@ -243,6 +244,7 @@ def process_contest_office_from_structured_json(
         one_contest_office_structured_json['candidates'] if 'candidates' in one_contest_office_structured_json else ''
 
     we_vote_id = ''
+    maplight_id = 0
     # Note that all of the information saved here is independent of a particular voter
     if google_civic_election_id and (district_id or district_name) and office_name:
         updated_contest_office_values = {
@@ -266,7 +268,7 @@ def process_contest_office_from_structured_json(
         }
         contest_office_manager = ContestOfficeManager()
         update_or_create_contest_office_results = contest_office_manager.update_or_create_contest_office(
-            we_vote_id, google_civic_election_id, district_id, district_name, office_name, state_code,
+            we_vote_id, maplight_id, google_civic_election_id, district_id, district_name, office_name, state_code,
             updated_contest_office_values)
     else:
         update_or_create_contest_office_results = {

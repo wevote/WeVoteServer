@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_office_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
@@ -147,7 +148,8 @@ class ContestOfficeManager(models.Model):
             return results['contest_office_we_vote_id']
         return 0
 
-    def update_or_create_contest_office(self, we_vote_id, google_civic_election_id, district_id, district_name,
+    def update_or_create_contest_office(self, we_vote_id, maplight_id, google_civic_election_id,
+                                        district_id, district_name,
                                         office_name, state_code, updated_contest_office_values):
         """
         Either update or create an office entry.
@@ -170,7 +172,12 @@ class ContestOfficeManager(models.Model):
                 if positive_value_exists(we_vote_id):
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        we_vote_id__exact=we_vote_id,
+                        we_vote_id__iexact=we_vote_id,
+                        defaults=updated_contest_office_values)
+                elif positive_value_exists(maplight_id):
+                    contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        maplight_id__exact=we_vote_id,
                         defaults=updated_contest_office_values)
                 else:
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
@@ -326,5 +333,56 @@ class ContestOfficeList(models.Model):
             'office_list_found':        office_list_found,
             'office_list_objects':      office_list_objects if return_list_of_objects else [],
             'office_list_light':        office_list_light,
+        }
+        return results
+
+    def retrieve_possible_duplicate_offices(self, google_civic_election_id, office_name,
+                                            state_code, we_vote_id_from_master=''):
+        """
+        Find offices that match another office in all critical fields other than we_vote_id_from_master
+        :param google_civic_election_id:
+        :return:
+        """
+        office_list_objects = []
+        office_list_found = False
+
+        try:
+            office_queryset = ContestOffice.objects.all()
+            office_queryset = office_queryset.filter(google_civic_election_id=google_civic_election_id)
+            office_queryset = office_queryset.filter(office_name__iexact=office_name)  # Case doesn't matter
+            office_queryset = office_queryset.filter(state_code__iexact=state_code)  # Case doesn't matter
+            # office_queryset = office_queryset.filter(district_id__exact=district_id)
+            # office_queryset = office_queryset.filter(district_name__iexact=district_name)  # Case doesn't matter
+
+            # Ignore we_vote_id coming in from master server
+            if positive_value_exists(we_vote_id_from_master):
+                office_queryset = office_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+
+            office_list_objects = office_queryset
+
+            if len(office_list_objects):
+                office_list_found = True
+                status = 'OFFICES_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_OFFICES_RETRIEVED'
+                success = True
+        except ContestOffice.DoesNotExist:
+            # No offices found. Not a problem.
+            status = 'NO_OFFICES_FOUND_DoesNotExist'
+            office_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_possible_duplicate_offices ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'office_list_found':        office_list_found,
+            'office_list':              office_list_objects,
         }
         return results

@@ -15,11 +15,11 @@ def candidates_sync_out_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
+        {
+            'name':         'google_civic_election_id',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Limit the candidates retrieved to those for this google_civic_election_id.',
+        },
     ]
 
     potential_status_codes_list = [

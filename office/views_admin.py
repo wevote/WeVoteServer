@@ -41,7 +41,21 @@ class OfficesSyncOutView(APIView):
 
 
 def offices_import_from_master_server_view(request):
-    return offices_import_from_master_server()
+    results = offices_import_from_master_server(request)
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Offices import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Master data not imported (local duplicates found): '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()))
 
 
 @login_required
