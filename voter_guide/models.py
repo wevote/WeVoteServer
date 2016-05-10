@@ -750,15 +750,17 @@ class VoterGuideList(models.Model):
                 voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
                                                                    Q(twitter_handle__icontains=search_string))
 
+            voter_guide_queryset = voter_guide_queryset.filter(
+                Q(google_civic_election_id=google_civic_election_id) &
+                Q(organization_we_vote_id__in=organization_we_vote_id_list)
+            )
+
             if sort_order == 'desc':
                 voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
             else:
                 voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
 
-            voter_guide_list = voter_guide_queryset.filter(
-                google_civic_election_id=google_civic_election_id &
-                Q(organization_we_vote_id__in=organization_we_vote_id_list)
-            )
+            voter_guide_list = voter_guide_queryset
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
@@ -769,7 +771,7 @@ class VoterGuideList(models.Model):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {
