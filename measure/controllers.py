@@ -164,7 +164,7 @@ def measures_import_from_structured_json(request, structured_json):
                 'candidate_email': candidate['candidate_email'] if 'candidate_email' in candidate else '',
                 'candidate_phone': candidate['candidate_phone'] if 'candidate_phone' in candidate else '',
             }
-            results = candidate_campaign_manager.update_or_create_candidate_campaign(
+            results = candidate_campaign_manager.update_or_create_candidate_campaign(  # TO DO: UPDATE THIS TO MEASURE
                 we_vote_id, google_civic_election_id, ocd_division_id,
                 contest_office_id, contest_office_we_vote_id,
                 candidate_name, updated_candidate_campaign_values)

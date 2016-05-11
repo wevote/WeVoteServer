@@ -42,7 +42,8 @@ Office:
 {% else %}
     {{ candidate.contest_office_we_vote_id }}{% if candidate.office %} ({{ candidate.office.office_name }}){% endif %}
 {% endif %}
-
+<br />
+    Office We Vote ID: {{ candidate.contest_office_we_vote_id }}
 </p>
 
 <p>Vote Smart ID: {{ candidate.vote_smart_id }}</p>

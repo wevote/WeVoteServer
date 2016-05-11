@@ -62,7 +62,8 @@ def candidates_import_from_master_server_view(request):
                                                                updated=results['updated'],
                                                                duplicates_removed=results['duplicates_removed'],
                                                                not_processed=results['not_processed']))
-    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id))
 
 
 @login_required

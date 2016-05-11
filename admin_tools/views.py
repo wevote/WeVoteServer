@@ -11,6 +11,7 @@ from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from election.models import Election
 from election.controllers import elections_import_from_sample_file
 from import_export_google_civic.models import GoogleCivicApiCounterManager
 from import_export_vote_smart.models import VoteSmartApiCounterManager
@@ -323,7 +324,14 @@ def sync_data_with_master_servers_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+
+    election_list = Election.objects.order_by('-election_day_text')
+
     template_values = {
+        'election_list':            election_list,
+        'google_civic_election_id': google_civic_election_id,
+
         'candidates_sync_url':      CANDIDATES_SYNC_URL,
         'elections_sync_url':       ELECTIONS_SYNC_URL,
         'measures_sync_url':        MEASURES_SYNC_URL,

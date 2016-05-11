@@ -158,8 +158,8 @@ def offices_import_from_structured_json(structured_json):
                 'wikipedia_id': wikipedia_id,
             }
             results = office_manager.update_or_create_contest_office(
-                we_vote_id, maplight_id, google_civic_election_id, district_id, district_name, office_name,
-                state_code, updated_contest_office_values)
+                we_vote_id, maplight_id, google_civic_election_id, office_name,
+                updated_contest_office_values)
         else:
             offices_not_processed += 1
             results = {

@@ -101,13 +101,13 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
         else:
             filtered_structured_json.append(one_candidate)
 
-    offices_results = {
+    candidates_results = {
         'success':              True,
-        'status':               "FILTER_OFFICES_PROCESS_COMPLETE",
+        'status':               "FILTER_CANDIDATES_FOR_DUPLICATES_PROCESS_COMPLETE",
         'duplicates_removed':   duplicates_removed,
         'structured_json':      filtered_structured_json,
     }
-    return offices_results
+    return candidates_results
 
 
 def candidates_import_from_structured_json(structured_json):
@@ -147,7 +147,7 @@ def candidates_import_from_structured_json(structured_json):
                 'we_vote_id': we_vote_id,
                 'maplight_id': one_candidate['maplight_id'] if 'maplight_id' in one_candidate else None,
                 'vote_smart_id': one_candidate['vote_smart_id'] if 'vote_smart_id' in one_candidate else None,
-                'contest_office_id': contest_office_id,
+                'contest_office_id': contest_office_id,  # Retrieved from above
                 'politician_we_vote_id':
                     one_candidate['politician_we_vote_id'] if 'politician_we_vote_id' in one_candidate else '',
                 'state_code': one_candidate['state_code'] if 'state_code' in one_candidate else '',
@@ -157,14 +157,40 @@ def candidates_import_from_structured_json(structured_json):
                 'photo_url': one_candidate['photo_url'] if 'photo_url' in one_candidate else '',
                 'photo_url_from_maplight':
                     one_candidate['photo_url_from_maplight'] if 'photo_url_from_maplight' in one_candidate else '',
+                'photo_url_from_vote_smart':
+                    one_candidate['photo_url_from_vote_smart'] if 'photo_url_from_vote_smart' in one_candidate else '',
                 'facebook_url': one_candidate['facebook_url'] if 'facebook_url' in one_candidate else '',
                 'twitter_url': one_candidate['twitter_url'] if 'twitter_url' in one_candidate else '',
                 'google_plus_url': one_candidate['google_plus_url'] if 'google_plus_url' in one_candidate else '',
                 'youtube_url': one_candidate['youtube_url'] if 'youtube_url' in one_candidate else '',
                 'google_civic_candidate_name':
-                    one_candidate['google_civic_candidate_name'] if 'google_civic_candidate_name' in one_candidate else '',
+                    one_candidate['google_civic_candidate_name']
+                    if 'google_civic_candidate_name' in one_candidate else '',
                 'candidate_email': one_candidate['candidate_email'] if 'candidate_email' in one_candidate else '',
                 'candidate_phone': one_candidate['candidate_phone'] if 'candidate_phone' in one_candidate else '',
+                'twitter_user_id': one_candidate['twitter_user_id'] if 'twitter_user_id' in one_candidate else '',
+                'candidate_twitter_handle': one_candidate['candidate_twitter_handle']
+                    if 'candidate_twitter_handle' in one_candidate else '',
+                'twitter_name': one_candidate['twitter_name'] if 'twitter_name' in one_candidate else '',
+                'twitter_location': one_candidate['twitter_location'] if 'twitter_location' in one_candidate else '',
+                'twitter_followers_count': one_candidate['twitter_followers_count']
+                    if 'twitter_followers_count' in one_candidate else '',
+                'twitter_profile_image_url_https': one_candidate['twitter_profile_image_url_https']
+                    if 'twitter_profile_image_url_https' in one_candidate else '',
+                'twitter_description': one_candidate['twitter_description']
+                    if 'twitter_description' in one_candidate else '',
+                'wikipedia_page_id': one_candidate['wikipedia_page_id']
+                    if 'wikipedia_page_id' in one_candidate else '',
+                'wikipedia_page_title': one_candidate['wikipedia_page_title']
+                    if 'wikipedia_page_title' in one_candidate else '',
+                'wikipedia_photo_url': one_candidate['wikipedia_photo_url']
+                    if 'wikipedia_photo_url' in one_candidate else '',
+                'ballotpedia_page_title': one_candidate['ballotpedia_page_title']
+                    if 'ballotpedia_page_title' in one_candidate else '',
+                'ballotpedia_photo_url': one_candidate['ballotpedia_photo_url']
+                    if 'ballotpedia_photo_url' in one_candidate else '',
+                'ballot_guide_official_statement': one_candidate['ballot_guide_official_statement']
+                    if 'ballot_guide_official_statement' in one_candidate else '',
             }
             results = candidate_campaign_manager.update_or_create_candidate_campaign(
                 we_vote_id, google_civic_election_id, ocd_division_id,
@@ -182,12 +208,10 @@ def candidates_import_from_structured_json(structured_json):
                 candidates_saved += 1
             else:
                 candidates_updated += 1
-        else:
-            candidates_not_processed += 1
 
     candidates_results = {
         'success':          True,
-        'status':           "OFFICE_IMPORT_PROCESS_COMPLETE",
+        'status':           "CANDIDATES_IMPORT_PROCESS_COMPLETE",
         'saved':            candidates_saved,
         'updated':          candidates_updated,
         'not_processed':    candidates_not_processed,

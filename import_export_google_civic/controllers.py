@@ -268,7 +268,7 @@ def process_contest_office_from_structured_json(
         }
         contest_office_manager = ContestOfficeManager()
         update_or_create_contest_office_results = contest_office_manager.update_or_create_contest_office(
-            we_vote_id, maplight_id, google_civic_election_id, district_id, district_name, office_name, state_code,
+            we_vote_id, maplight_id, google_civic_election_id, office_name,
             updated_contest_office_values)
     else:
         update_or_create_contest_office_results = {

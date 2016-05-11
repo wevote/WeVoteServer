@@ -4,6 +4,7 @@
 {% block title %}Sync Data With Master We Vote Servers{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
 <a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 
 <h1>Sync Data With Master We Vote Servers</h1>
@@ -13,43 +14,86 @@
 
 {# ################################### #}
 <h4>Elections</h4>
-<p>ELECTIONS_SYNC_URL: {{ elections_sync_url }}</p>
 
 <p><a href="{% url 'election:elections_import_from_master_server' %}">Retrieve Elections</a></p>
+<br />
+
+{% if election_list %}
+    <form name="candidate_choose_election" method="get" action="{% url 'admin_tools:sync_dashboard' %}">
+        {% csrf_token %}
+
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    </form>
+{% endif %}{# End of if election_list #}
 
 
 {# ################################### #}
 <h4>Offices</h4>
-<p>OFFICES_SYNC_URL: {{ offices_sync_url }}</p>
 
-<p><a href="{% url 'office:offices_import_from_master_server' %}">Retrieve Offices</a></p>
+<p><a href="{% url 'office:offices_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}">
+    Retrieve Offices</a></p>
+<br />
 
 
 {# ################################### #}
 <h4>Candidates</h4>
-<p>CANDIDATES_SYNC_URL: {{ candidates_sync_url }}</p>
 
-<p><a href="{% url 'candidate:candidates_import_from_master_server' %}">Retrieve Candidates</a></p>
+<p><a href="{% url 'candidate:candidates_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}">
+    Retrieve Candidates</a></p>
+<br />
 
 
 {# ################################### #}
 <h4>Measures</h4>
-<p>MEASURES_SYNC_URL: {{ measures_sync_url }}</p>
 
-<p><a href="{% url 'measure:measures_import_from_master_server' %}">Retrieve Measures</a></p>
+<p><a href="{% url 'measure:measures_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}"></a>
+    Retrieve Measures (coming soon)</p>
+<br />
 
 
 {# ################################### #}
 <h4>Organizations</h4>
-<p>ORGANIZATIONS_SYNC_URL: {{ organizations_sync_url }}</p>
 
-<p><a href="{% url 'organization:organizations_import_from_master_server' %}">Retrieve Organizations</a></p>
+<p><a href="{% url 'organization:organizations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}"></a>
+    Retrieve Organizations (coming soon)</p>
+<br />
 
 
 {# ################################### #}
 <h4>Positions</h4>
+
+<p><a href="{% url 'position:positions_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}"></a>
+    Retrieve Positions (coming soon)</p>
+<br />
+
+
+{# ################################### #}
+    <br />
+    <br />
+    <br />
+<h4>Settings</h4>
+<p>ELECTIONS_SYNC_URL: {{ elections_sync_url }}</p>
+<p>OFFICES_SYNC_URL: {{ offices_sync_url }}</p>
+<p>CANDIDATES_SYNC_URL: {{ candidates_sync_url }}</p>
+<p>MEASURES_SYNC_URL: {{ measures_sync_url }}</p>
+<p>ORGANIZATIONS_SYNC_URL: {{ organizations_sync_url }}</p>
 <p>POSITIONS_SYNC_URL: {{ positions_sync_url }}</p>
 
-<p><a href="{% url 'position:positions_import_from_master_server' %}">Retrieve Positions</a></p>
+
+<script>
+    $(function() {
+        $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+</script>
 
 {%  endblock %}

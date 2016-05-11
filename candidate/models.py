@@ -246,7 +246,9 @@ class CandidateCampaignList(models.Model):
         try:
             candidate_queryset = CandidateCampaign.objects.all()
             candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
-            candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+            # We don't look for office_we_vote_id because of the chance that locally we are using a
+            # different we_vote_id
+            # candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
@@ -256,8 +258,7 @@ class CandidateCampaignList(models.Model):
             if positive_value_exists(google_civic_candidate_name):
                 new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
                 filters.append(new_filter)
-
-            if positive_value_exists(candidate_name):
+            elif positive_value_exists(candidate_name):
                 new_filter = Q(candidate_name__iexact=candidate_name)
                 filters.append(new_filter)
 

@@ -41,7 +41,9 @@ class OfficesSyncOutView(APIView):
 
 
 def offices_import_from_master_server_view(request):
-    results = offices_import_from_master_server(request)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    results = offices_import_from_master_server(request, google_civic_election_id)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
@@ -55,7 +57,8 @@ def offices_import_from_master_server_view(request):
                                                                updated=results['updated'],
                                                                duplicates_removed=results['duplicates_removed'],
                                                                not_processed=results['not_processed']))
-    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id))
 
 
 @login_required

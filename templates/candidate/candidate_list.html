@@ -4,6 +4,7 @@
 {% block title %}Candidates{% endblock %}
 
 {%  block content %}
+{% load template_filters %}
 <a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
 
 <h1>Candidates</h1>
@@ -13,7 +14,7 @@
         {% csrf_token %}
 
     <select id="google_civic_election_id" name="google_civic_election_id">
-        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
             -- Filter by Election --</option>
     {% for election in election_list %}
         <option value="{{ election.google_civic_election_id }}"
