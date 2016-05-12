@@ -8,7 +8,7 @@ from django.db.models import Q
 from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
 
 
@@ -606,6 +606,110 @@ class OrganizationListManager(models.Manager):
         }
         return results
 
+    def retrieve_organizations_from_non_unique_identifiers(self, twitter_handle):
+        organization_list_objects = []
+        organization_list_found = False
+        twitter_handle_filtered = extract_twitter_handle_from_text_string(twitter_handle)
+
+        try:
+            organization_queryset = Organization.objects.all()
+            organization_queryset = organization_queryset.filter(
+                organization_twitter_handle__iexact=twitter_handle_filtered)
+            # If multiple organizations claim the same Twitter handle, select the one with... ??
+            # organization_queryset = organization_queryset.order_by('-twitter_followers_count')
+
+            organization_list_objects = organization_queryset
+
+            if len(organization_list_objects):
+                organization_list_found = True
+                status = 'ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE'
+                success = True
+            else:
+                status = 'NO_ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE'
+                success = True
+        except Organization.DoesNotExist:
+            # No organizations found. Not a problem.
+            status = 'NO_ORGANIZATIONS_FOUND_FROM_TWITTER_HANDLE_DoesNotExist'
+            organization_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_organizations_from_non_unique_identifiers ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'organization_list_found':  organization_list_found,
+            'organization_list':        organization_list_objects,
+        }
+        return results
+
+    def retrieve_possible_duplicate_organizations(self, organization_name, organization_twitter_handle, vote_smart_id,
+                                                  we_vote_id_from_master=''):
+        organization_list_objects = []
+        filters = []
+        organization_list_found = False
+
+        try:
+            organization_queryset = Organization.objects.all()
+
+            # Ignore entries with we_vote_id coming in from master server
+            if positive_value_exists(we_vote_id_from_master):
+                organization_queryset = organization_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+
+            # We want to find organizations with *any* of these values
+            if positive_value_exists(organization_name):
+                new_filter = Q(organization_name__iexact=organization_name)
+                filters.append(new_filter)
+
+            if positive_value_exists(organization_twitter_handle):
+                new_filter = Q(organization_twitter_handle__iexact=organization_twitter_handle)
+                filters.append(new_filter)
+
+            if positive_value_exists(vote_smart_id):
+                new_filter = Q(vote_smart_id=vote_smart_id)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                organization_queryset = organization_queryset.filter(final_filters)
+
+            organization_list_objects = organization_queryset
+
+            if len(organization_list_objects):
+                organization_list_found = True
+                status = 'DUPLICATE_ORGANIZATIONS_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_DUPLICATE_ORGANIZATIONS_RETRIEVED'
+                success = True
+        except Organization.DoesNotExist:
+            # No organizations found. Not a problem.
+            status = 'NO_DUPLICATE_ORGANIZATIONS_FOUND_DoesNotExist'
+            organization_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_possible_duplicate_organizations ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'organization_list_found':      organization_list_found,
+            'organization_list':            organization_list_objects,
+        }
+        return results
+
 
 class Organization(models.Model):
     # We are relying on built-in Python id field
@@ -625,7 +729,8 @@ class Organization(models.Model):
     organization_contact_name = models.CharField(max_length=255, null=True, unique=False)
     organization_facebook = models.URLField(verbose_name='url of facebook page', blank=True, null=True)
     organization_image = models.CharField(verbose_name='organization image', max_length=255, null=True, unique=False)
-    state_served_code = models.CharField(verbose_name="state this organization serves", max_length=2, null=True, blank=True)
+    state_served_code = models.CharField(verbose_name="state this organization serves", max_length=2,
+                                         null=True, blank=True)
     # The vote_smart special interest group sigId for this organization
     vote_smart_id = models.BigIntegerField(
         verbose_name="vote smart special interest group id", null=True, blank=True, unique=True)

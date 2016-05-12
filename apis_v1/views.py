@@ -34,6 +34,7 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
     position_public_oppose_count_for_ballot_item_for_api, \
     position_public_support_count_for_ballot_item_for_api, positions_count_for_all_ballot_items_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
+from twitter.controllers import twitter_identity_retrieve_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, \
     voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
@@ -592,13 +593,53 @@ def quick_info_retrieve_view(request):
                                        ballot_item_we_vote_id=ballot_item_we_vote_id)
 
 
-def twitter_sign_in_start_view(request):
+def twitter_identity_retrieve_view(request):
     """
-    Start off the process of signing in with Twitter
+    Find the kind of owner and unique id of this twitter handle. We use this to take an incoming URI like
+    https://wevote.guide/RepBarbaraLee and return the owner of 'RepBarbaraLee'. (twitterIdentityRetrieve)
     :param request:
     :return:
     """
+    twitter_handle = request.GET.get('twitter_handle', '')
+
+    if not positive_value_exists(twitter_handle):
+        status = 'VALID_TWITTER_HANDLE_MISSING'
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'twitter_handle':           twitter_handle,
+            'owner_found':              False,
+            'kind_of_owner':            '',
+            'owner_we_vote_id':         '',
+            'owner_id':                 0,
+            'google_civic_election_id': 0,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = twitter_identity_retrieve_for_api(twitter_handle, voter_device_id)
+    json_data = {
+        'status':                   results['status'],
+        'success':                  results['success'],
+        'twitter_handle':           results['twitter_handle'],
+        'owner_found':              results['owner_found'],
+        'kind_of_owner':            results['kind_of_owner'],
+        'owner_we_vote_id':         results['owner_we_vote_id'],
+        'owner_id':                 results['owner_id'],
+        'google_civic_election_id': results['google_civic_election_id'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def twitter_sign_in_start_view(request):
+    """
+    Start off the process of signing in with Twitter (twitterSignInStart)
+    :param request:
+    :return:
+    """
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
     results = twitter_sign_in_start_for_api(voter_device_id)
     json_data = {
         'status': results['status'],

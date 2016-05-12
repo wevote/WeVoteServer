@@ -11,7 +11,8 @@ import re
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_first_name_from_full_name, \
-    extract_last_name_from_full_name, extract_state_from_ocd_division_id, positive_value_exists
+    extract_last_name_from_full_name, extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
+    positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -292,14 +293,14 @@ class CandidateCampaignList(models.Model):
 
             if len(candidate_list_objects):
                 candidate_list_found = True
-                status = 'CANDIDATES_RETRIEVED'
+                status = 'DUPLICATE_CANDIDATES_RETRIEVED'
                 success = True
             else:
-                status = 'NO_CANDIDATES_RETRIEVED'
+                status = 'NO_DUPLICATE_CANDIDATES_RETRIEVED'
                 success = True
         except CandidateCampaign.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_CANDIDATES_FOUND_DoesNotExist'
+            status = 'NO_DUPLICATE_CANDIDATES_FOUND_DoesNotExist'
             candidate_list_objects = []
             success = True
         except Exception as e:
@@ -313,7 +314,48 @@ class CandidateCampaignList(models.Model):
             'status':                   status,
             'google_civic_election_id': google_civic_election_id,
             'candidate_list_found':     candidate_list_found,
-            'candidate_list_objects':   candidate_list_objects,
+            'candidate_list':           candidate_list_objects,
+        }
+        return results
+
+    def retrieve_candidates_from_non_unique_identifiers(self, twitter_handle, google_civic_election_id=0):
+        candidate_list_objects = []
+        candidate_list_found = False
+        twitter_handle_filtered = extract_twitter_handle_from_text_string(twitter_handle)
+
+        try:
+            candidate_queryset = CandidateCampaign.objects.all()
+            candidate_queryset = candidate_queryset.filter(candidate_twitter_handle__iexact=twitter_handle_filtered)
+            if positive_value_exists(google_civic_election_id):
+                candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            candidate_queryset = candidate_queryset.order_by('-id')
+
+            candidate_list_objects = candidate_queryset
+
+            if len(candidate_list_objects):
+                candidate_list_found = True
+                status = 'CANDIDATES_RETRIEVED_FROM_TWITTER_HANDLE'
+                success = True
+            else:
+                status = 'NO_CANDIDATES_RETRIEVED_FROM_TWITTER_HANDLE'
+                success = True
+        except CandidateCampaign.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_CANDIDATES_FOUND_FROM_TWITTER_HANDLE_DoesNotExist'
+            candidate_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_candidates_from_non_unique_identifiers ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'candidate_list_found':     candidate_list_found,
+            'candidate_list':           candidate_list_objects,
         }
         return results
 

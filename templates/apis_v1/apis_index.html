@@ -81,6 +81,14 @@
         </td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:twitterIdentityRetrieveDocs' %}">twitterIdentityRetrieve</a></td>
+        <td></td>
+        <td>Find the kind of owner and unique id of this twitter handle, whether it be a candidate, organization, or
+            individual voter. We use this to take an incoming URI like
+            https://wevote.guide/RepBarbaraLee and return the owner of 'RepBarbaraLee'.
+        </td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:twitterSignInStartDocs' %}">twitterSignInStart</a></td>
         <td></td>
         <td>Start the process of signing in with Twitter.
