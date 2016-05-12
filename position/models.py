@@ -41,6 +41,9 @@ POSITION_CHOICES = (
 logger = wevote_functions.admin.get_logger(__name__)
 
 
+# TODO DALE Consider adding vote_smart_sig_id and vote_smart_candidate_id fields so we can export them and to prevent
+# duplicate position entries from Vote Smart
+
 class PositionEntered(models.Model):
     """
     Any position entered by any person gets its own PositionEntered entry. We then
@@ -997,6 +1000,75 @@ class PositionListManager(models.Model):
             handle_record_not_found_exception(e, logger=logger)
 
         return position_count
+
+    def retrieve_possible_duplicate_positions(self, google_civic_election_id, organization_we_vote_id,
+                                              candidate_we_vote_id, measure_we_vote_id,
+                                              we_vote_id_from_master=''):
+        position_list_objects = []
+        filters = []
+        position_list_found = False
+
+        try:
+            position_queryset = PositionEntered.objects.all()
+            position_queryset = position_queryset.filter(google_civic_election_id=google_civic_election_id)
+            # We don't look for office_we_vote_id because of the chance that locally we are using a
+            # different we_vote_id
+            # position_queryset = position_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+
+            # Ignore entries with we_vote_id coming in from master server
+            if positive_value_exists(we_vote_id_from_master):
+                position_queryset = position_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+
+            # Situation 1 organization_we_vote_id + candidate_we_vote_id matches an entry already in the db
+            if positive_value_exists(organization_we_vote_id) and positive_value_exists(candidate_we_vote_id):
+                new_filter = (Q(organization_we_vote_id__iexact=organization_we_vote_id) &
+                              Q(candidate_campaign_we_vote_id__iexact=candidate_we_vote_id))
+                filters.append(new_filter)
+
+            # Situation 2 organization_we_vote_id + measure_we_vote_id matches an entry already in the db
+            if positive_value_exists(organization_we_vote_id) and positive_value_exists(measure_we_vote_id):
+                new_filter = (Q(organization_we_vote_id__iexact=organization_we_vote_id) &
+                              Q(contest_measure_we_vote_id__iexact=measure_we_vote_id))
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                position_queryset = position_queryset.filter(final_filters)
+
+            position_list_objects = position_queryset
+
+            if len(position_list_objects):
+                position_list_found = True
+                status = 'DUPLICATE_POSITIONS_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_DUPLICATE_POSITIONS_RETRIEVED'
+                success = True
+        except PositionEntered.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_DUPLICATE_POSITIONS_FOUND_DoesNotExist'
+            position_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_possible_duplicate_positions ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'position_list_found':      position_list_found,
+            'position_list':            position_list_objects,
+        }
+        return results
 
 
 class PositionEnteredManager(models.Model):
@@ -2062,7 +2134,7 @@ class PositionEnteredManager(models.Model):
             # Measure
             elif positive_value_exists(position_object.contest_measure_id) or \
                     positive_value_exists(position_object.contest_measure_we_vote_id):
-                # TODO DALE Build this out
+                # TODO DALE Build out refresh_cached_position_info for measures
                 pass
             # Office
             elif positive_value_exists(position_object.contest_office_id) or \

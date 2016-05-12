@@ -15,18 +15,14 @@ def organizations_sync_out_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
+        {
+            'name':         'state_served_code',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Limit the results to just the state requested.',
+        },
     ]
 
     potential_status_codes_list = [
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
@@ -36,7 +32,6 @@ def organizations_sync_out_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
                    '}'
 
     template_values = {

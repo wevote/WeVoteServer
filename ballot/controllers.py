@@ -280,9 +280,6 @@ def generate_ballot_data(voter_device_link, voter_address):
         }
         return results
 
-    # NOTE: If there is a ballot_returned entry for a We Vote generated election (google_civic_election_id > 1000000,
-    # we don't need to add a special case here. TODO DALE
-
     # 3) Get test ballot data from Google Civic
     use_test_election = True
     results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,

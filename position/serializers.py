@@ -18,4 +18,6 @@ class PositionSerializer(serializers.ModelSerializer):
                   'google_civic_candidate_name',
                   'politician_we_vote_id', 'contest_measure_we_vote_id',
                   'stance', 'statement_text', 'statement_html', 'more_info_url',
-                  'from_scraper', 'organization_certified', 'volunteer_certified')
+                  'from_scraper', 'organization_certified', 'volunteer_certified',
+                  'voter_entering_position',
+                  'tweet_source_id', 'twitter_user_entered_position')

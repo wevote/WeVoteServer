@@ -791,34 +791,99 @@ def positions_import_from_sample_file(request=None):  # , load_from_uri=False
     return positions_import_from_structured_json(request, structured_json)
 
 
-def positions_import_from_master_server():
+def positions_import_from_master_server(request, google_civic_election_id=''):
     """
     Get the json data, and either create new entries or update existing
     :return:
     """
+    messages.add_message(request, messages.INFO, "Loading Positions from We Vote Master servers")
+    logger.info("Loading Positions from We Vote Master servers")
     # Request json file from We Vote servers
-    logger.info("Loading Candidates from We Vote Master servers")
     request = requests.get(POSITIONS_SYNC_URL, params={
         "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+        "format":   'json',
+        "google_civic_election_id": google_civic_election_id,
     })
     structured_json = json.loads(request.text)
 
-    return positions_import_from_structured_json(request, structured_json)
+    results = filter_positions_structured_json_for_local_duplicates(structured_json)
+    filtered_structured_json = results['structured_json']
+    duplicates_removed = results['duplicates_removed']
+
+    import_results = positions_import_from_structured_json(filtered_structured_json)
+    import_results['duplicates_removed'] = duplicates_removed
+
+    return import_results
 
 
-def positions_import_from_structured_json(request, structured_json):
+def filter_positions_structured_json_for_local_duplicates(structured_json):
+    """
+    With this function, we remove positions that seem to be duplicates, but have different we_vote_id's.
+    We do not check to see if we have a matching office this routine -- that is done elsewhere.
+    :param structured_json:
+    :return:
+    """
+    duplicates_removed = 0
+    filtered_structured_json = []
+    position_list_manager = PositionListManager()
+    for one_position in structured_json:
+        we_vote_id = one_position['we_vote_id'] if 'we_vote_id' in one_position else ''
+        google_civic_election_id = \
+            one_position['google_civic_election_id'] if 'google_civic_election_id' in one_position else ''
+        organization_we_vote_id = \
+            one_position['organization_we_vote_id'] if 'organization_we_vote_id' in one_position else ''
+        candidate_campaign_we_vote_id = one_position['candidate_campaign_we_vote_id'] \
+            if 'candidate_campaign_we_vote_id' in one_position else ''
+        contest_measure_we_vote_id = one_position['contest_measure_we_vote_id'] \
+            if 'contest_measure_we_vote_id' in one_position else ''
+
+        # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
+        we_vote_id_from_master = we_vote_id
+
+        results = position_list_manager.retrieve_possible_duplicate_positions(
+            google_civic_election_id, organization_we_vote_id,
+            candidate_campaign_we_vote_id, contest_measure_we_vote_id,
+            we_vote_id_from_master)
+
+        if results['position_list_found']:
+            # There seems to be a duplicate already in this database using a different we_vote_id
+            duplicates_removed += 1
+        else:
+            filtered_structured_json.append(one_position)
+
+    positions_results = {
+        'success':              True,
+        'status':               "FILTER_POSITIONS_FOR_DUPLICATES_PROCESS_COMPLETE",
+        'duplicates_removed':   duplicates_removed,
+        'structured_json':      filtered_structured_json,
+    }
+    return positions_results
+
+
+def positions_import_from_structured_json(structured_json):
     positions_saved = 0
     positions_updated = 0
     positions_not_processed = 0
     for one_position in structured_json:
         # Make sure we have the minimum required variables
-        if not positive_value_exists(one_position["we_vote_id"]) \
-                or not positive_value_exists(one_position["organization_we_vote_id"])\
-                or not positive_value_exists(one_position["candidate_campaign_we_vote_id"]):
+        if positive_value_exists(one_position["we_vote_id"]) \
+                and (positive_value_exists(one_position["organization_we_vote_id"]) or positive_value_exists(
+                        one_position["public_figure_we_vote_id"])) \
+                and positive_value_exists(one_position["candidate_campaign_we_vote_id"]):
+            # organization position on candidate
+            pass
+        elif positive_value_exists(one_position["we_vote_id"]) \
+                and (positive_value_exists(one_position["organization_we_vote_id"]) or positive_value_exists(
+                    one_position["public_figure_we_vote_id"])) \
+                and positive_value_exists(one_position["contest_measure_we_vote_id"]):
+            # organization position on measure
+            pass
+        else:
+            # Note that we do not import voter_we_vote_id positions at this point because they are considered private
             positions_not_processed += 1
             continue
 
-        # Check to see if this position is already being used anywhere
+        # Check to see if this position had been imported previously
         position_on_stage_found = False
         try:
             if len(one_position["we_vote_id"]) > 0:
@@ -827,19 +892,57 @@ def positions_import_from_structured_json(request, structured_json):
                     position_on_stage = position_query[0]
                     position_on_stage_found = True
         except PositionEntered.DoesNotExist as e:
-            handle_record_not_found_exception(e, logger=logger)
             pass
         except Exception as e:
-            handle_record_not_found_exception(e, logger=logger)
+            pass
 
-        # We need to look up the local organization_id based on the newly saved we_vote_id
-        organization_manager = OrganizationManager()
-        organization_id = organization_manager.fetch_organization_id(one_position["organization_we_vote_id"])
+        # We need to look up the local organization_id and store for internal use
+        organization_id = 0
+        if positive_value_exists(one_position["organization_we_vote_id"]):
+            organization_manager = OrganizationManager()
+            organization_id = organization_manager.fetch_organization_id(one_position["organization_we_vote_id"])
+            if not positive_value_exists(organization_id):
+                # If an id does not exist, then we don't have this organization locally
+                positions_not_processed += 1
+                continue
+        elif positive_value_exists(one_position["public_figure_we_vote_id"]):
+            # TODO Build this for public_figure - skip for now
+            continue
 
-        # We need to look up the local candidate_campaign_id
         candidate_campaign_manager = CandidateCampaignManager()
-        candidate_campaign_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(
-            one_position["candidate_campaign_we_vote_id"])
+        candidate_campaign_id = 0
+        contest_measure_id = 0
+        if positive_value_exists(one_position["candidate_campaign_we_vote_id"]):
+            # We need to look up the local candidate_campaign_id and store for internal use
+            candidate_campaign_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(
+                one_position["candidate_campaign_we_vote_id"])
+            if not positive_value_exists(candidate_campaign_id):
+                # If an id does not exist, then we don't have this candidate locally
+                positions_not_processed += 1
+                continue
+        elif positive_value_exists(one_position["contest_measure_we_vote_id"]):
+            contest_measure_manager = ContestMeasureManager()
+            contest_measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(
+                one_position["contest_measure_we_vote_id"])
+            if not positive_value_exists(contest_measure_id):
+                # If an id does not exist, then we don't have this measure locally
+                positions_not_processed += 1
+                continue
+
+        contest_office_id = 0
+        if positive_value_exists(one_position['contest_office_we_vote_id']):
+            # TODO
+            pass
+
+        politician_id = 0
+        if positive_value_exists(one_position['politician_we_vote_id']):
+            # TODO
+            pass
+
+        voter_id = 0
+        if positive_value_exists(one_position['voter_we_vote_id']):
+            # TODO
+            pass
 
         # Find the google_civic_candidate_name so we have a backup way to link position if the we_vote_id is lost
         google_civic_candidate_name = one_position["google_civic_candidate_name"] if \
@@ -848,64 +951,76 @@ def positions_import_from_structured_json(request, structured_json):
             google_civic_candidate_name = candidate_campaign_manager.fetch_google_civic_candidate_name_from_we_vote_id(
                 one_position["candidate_campaign_we_vote_id"])
 
-        # TODO We need to look up contest_measure_id
-        contest_measure_id = 0
-
         try:
             if position_on_stage_found:
                 # Update
                 position_on_stage.we_vote_id = one_position["we_vote_id"]
-                position_on_stage.organization_id = organization_id
-                position_on_stage.organization_we_vote_id = one_position["organization_we_vote_id"]
                 position_on_stage.candidate_campaign_id = candidate_campaign_id
                 position_on_stage.candidate_campaign_we_vote_id = one_position["candidate_campaign_we_vote_id"]
-                position_on_stage.google_civic_candidate_name = google_civic_candidate_name
                 position_on_stage.contest_measure_id = contest_measure_id
+                position_on_stage.contest_measure_we_vote_id = one_position["contest_measure_we_vote_id"]
+                position_on_stage.contest_office_id = contest_office_id
+                position_on_stage.contest_office_we_vote_id = one_position["contest_office_we_vote_id"]
                 position_on_stage.date_entered = one_position["date_entered"]
+                position_on_stage.google_civic_candidate_name = google_civic_candidate_name
                 position_on_stage.google_civic_election_id = one_position["google_civic_election_id"]
-                position_on_stage.stance = one_position["stance"]
                 position_on_stage.more_info_url = one_position["more_info_url"]
+                position_on_stage.organization_id = organization_id
+                position_on_stage.organization_we_vote_id = one_position["organization_we_vote_id"]
+                position_on_stage.stance = one_position["stance"]
                 position_on_stage.statement_text = one_position["statement_text"]
                 position_on_stage.statement_html = one_position["statement_html"]
-                position_on_stage.save()
-                positions_updated += 1
-                # messages.add_message(request, messages.INFO, u"Position updated: {we_vote_id}".format(
-                #     we_vote_id=one_position["we_vote_id"]))
             else:
                 # Create new
                 position_on_stage = PositionEntered(
                     we_vote_id=one_position["we_vote_id"],
-                    organization_id=organization_id,
-                    organization_we_vote_id=one_position["organization_we_vote_id"],
                     candidate_campaign_id=candidate_campaign_id,
                     candidate_campaign_we_vote_id=one_position["candidate_campaign_we_vote_id"],
-                    google_civic_candidate_name=google_civic_candidate_name,
                     contest_measure_id=contest_measure_id,
+                    contest_measure_we_vote_id=one_position["contest_measure_we_vote_id"],
+                    contest_office_id=contest_office_id,
+                    contest_office_we_vote_id=one_position["contest_office_we_vote_id"],
                     date_entered=one_position["date_entered"],
+                    google_civic_candidate_name=google_civic_candidate_name,
                     google_civic_election_id=one_position["google_civic_election_id"],
-                    stance=one_position["stance"],
                     more_info_url=one_position["more_info_url"],
-                    statement_text=one_position["statement_text"],
+                    organization_id=organization_id,
+                    organization_we_vote_id=one_position["organization_we_vote_id"],
+                    stance=one_position["stance"],
                     statement_html=one_position["statement_html"],
+                    statement_text=one_position["statement_text"],
                 )
-                position_on_stage.save()
+
+            position_on_stage.ballot_item_display_name = one_position["ballot_item_display_name"]
+            position_on_stage.ballot_item_image_url_https = one_position["ballot_item_image_url_https"]
+            position_on_stage.from_scraper = one_position["from_scraper"]
+            position_on_stage.date_last_changed = one_position["date_last_changed"]
+            position_on_stage.organization_certified = one_position["organization_certified"]
+            position_on_stage.politician_id = politician_id
+            position_on_stage.politician_we_vote_id = one_position["politician_we_vote_id"]
+            position_on_stage.public_figure_we_vote_id = one_position["public_figure_we_vote_id"]
+            position_on_stage.speaker_display_name = one_position["speaker_display_name"]
+            position_on_stage.speaker_image_url_https = one_position["speaker_image_url_https"]
+            position_on_stage.tweet_source_id = one_position["tweet_source_id"]
+            position_on_stage.twitter_user_entered_position = one_position["twitter_user_entered_position"]
+            position_on_stage.volunteer_certified = one_position["volunteer_certified"]
+            position_on_stage.vote_smart_rating = one_position["vote_smart_rating"]
+            position_on_stage.vote_smart_rating_id = one_position["vote_smart_rating_id"]
+            position_on_stage.vote_smart_rating_name = one_position["vote_smart_rating_name"]
+            position_on_stage.vote_smart_time_span = one_position["vote_smart_time_span"]
+            position_on_stage.voter_entering_position = one_position["voter_entering_position"]
+            position_on_stage.voter_id = voter_id
+            position_on_stage.voter_we_vote_id = one_position["voter_we_vote_id"]
+
+            position_on_stage.save()
+            if position_on_stage_found:
+                # Update
+                positions_updated += 1
+            else:
+                # New
                 positions_saved += 1
-                # messages.add_message(request, messages.INFO, u"New position imported: {we_vote_id}".format(
-                #     we_vote_id=one_position["we_vote_id"]))
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
-            if request is not None:
-                messages.add_message(request, messages.ERROR,
-                                     u"Could not save/update position, "
-                                     u"position_on_stage_found: {position_on_stage_found}, "
-                                     u"we_vote_id: {we_vote_id}, "
-                                     u"organization_we_vote_id: {organization_we_vote_id}, "
-                                     u"candidate_campaign_we_vote_id: {candidate_campaign_we_vote_id}".format(
-                                         position_on_stage_found=position_on_stage_found,
-                                         we_vote_id=one_position["we_vote_id"],
-                                         organization_we_vote_id=one_position["organization_we_vote_id"],
-                                         candidate_campaign_we_vote_id=one_position["candidate_campaign_we_vote_id"],
-                                     ))
             positions_not_processed += 1
 
     positions_results = {

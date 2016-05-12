@@ -41,13 +41,34 @@ logger = wevote_functions.admin.get_logger(__name__)
 # This page does not need to be protected.
 class OrganizationsSyncOutView(APIView):
     def get(self, request, format=None):
+        state_served_code = request.GET.get('state_served_code', '')
+
         organization_list = Organization.objects.all()
+        if positive_value_exists(state_served_code):
+            organization_list = organization_list.filter(state_served_code__iexact=state_served_code)
         serializer = OrganizationSerializer(organization_list, many=True)
         return Response(serializer.data)
 
 
 def organizations_import_from_master_server_view(request):
-    return organizations_import_from_master_server()
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    results = organizations_import_from_master_server(request, google_civic_election_id)
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Organizations import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Master data not imported (local duplicates found): '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id))
 
 
 @login_required

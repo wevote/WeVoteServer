@@ -42,8 +42,8 @@ def candidates_import_from_master_server(request, google_civic_election_id=''):
     :return:
     """
     messages.add_message(request, messages.INFO, "Loading Contest Offices from We Vote Master servers")
-    # Request json file from We Vote servers
     logger.info("Loading Candidates from We Vote Master servers")
+    # Request json file from We Vote servers
     request = requests.get(CANDIDATES_SYNC_URL, params={
         "key": WE_VOTE_API_KEY,  # This comes from an environment variable
         "format":   'json',

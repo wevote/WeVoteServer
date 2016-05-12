@@ -195,33 +195,79 @@ def organizations_import_from_sample_file():  # TODO FINISH BUILDING/TESTING THI
         structured_json = json.load(json_data)
 
     request = None
-    return organizations_import_from_structured_json(request, structured_json)
+    return organizations_import_from_structured_json(structured_json)
 
 
-def organizations_import_from_master_server():
+def organizations_import_from_master_server(request, google_civic_election_id=''):
     """
     Get the json data, and either create new entries or update existing
     :return:
     """
-    # Request json file from We Vote servers
+    messages.add_message(request, messages.INFO, "Loading Organizations from We Vote Master servers")
     logger.info("Loading Organizations from We Vote Master servers")
+    # Request json file from We Vote servers
     request = requests.get(ORGANIZATIONS_SYNC_URL, params={
         "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+        "format":   'json',
+        # "state_served_code": "ca",
     })
     structured_json = json.loads(request.text)
 
-    return organizations_import_from_structured_json(request, structured_json)
+    results = filter_organizations_structured_json_for_local_duplicates(structured_json)
+    filtered_structured_json = results['structured_json']
+    duplicates_removed = results['duplicates_removed']
+
+    import_results = organizations_import_from_structured_json(filtered_structured_json)
+    import_results['duplicates_removed'] = duplicates_removed
+
+    return import_results
 
 
-def organizations_import_from_structured_json(request, structured_json):
+def filter_organizations_structured_json_for_local_duplicates(structured_json):
+    """
+    With this function, we remove candidates that seem to be duplicates, but have different we_vote_id's.
+    We do not check to see if we have a matching office this routine -- that is done elsewhere.
+    :param structured_json:
+    :return:
+    """
+    duplicates_removed = 0
+    filtered_structured_json = []
+    organization_list_manager = OrganizationListManager()
+    for one_organization in structured_json:
+        organization_name = one_organization['organization_name'] if 'organization_name' in one_organization else ''
+        we_vote_id = one_organization['we_vote_id'] if 'we_vote_id' in one_organization else ''
+        organization_twitter_handle = one_organization['organization_twitter_handle'] \
+            if 'organization_twitter_handle' in one_organization else ''
+        vote_smart_id = one_organization['vote_smart_id'] if 'vote_smart_id' in one_organization else ''
+
+        # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
+        we_vote_id_from_master = we_vote_id
+
+        results = organization_list_manager.retrieve_possible_duplicate_organizations(
+            organization_name, organization_twitter_handle, vote_smart_id, we_vote_id_from_master)
+
+        if results['organization_list_found']:
+            # There seems to be a duplicate already in this database using a different we_vote_id
+            duplicates_removed += 1
+        else:
+            filtered_structured_json.append(one_organization)
+
+    organizations_results = {
+        'success':              True,
+        'status':               "FILTER_ORGANIZATIONS_FOR_DUPLICATES_PROCESS_COMPLETE",
+        'duplicates_removed':   duplicates_removed,
+        'structured_json':      filtered_structured_json,
+    }
+    return organizations_results
+
+
+def organizations_import_from_structured_json(structured_json):
     organizations_saved = 0
     organizations_updated = 0
     organizations_not_processed = 0
     for one_organization in structured_json:
-        logger.debug(
-            u"we_vote_id: {we_vote_id}, organization_name: {organization_name}, "
-            u"organization_website: {organization_website}".format(**one_organization)
-        )
+        # We have already removed duplicate organizations
+
         # Make sure we have the minimum required variables
         if not positive_value_exists(one_organization["we_vote_id"]) or \
                 not positive_value_exists(one_organization["organization_name"]):
@@ -236,75 +282,182 @@ def organizations_import_from_structured_json(request, structured_json):
                 if len(organization_query):
                     organization_on_stage = organization_query[0]
                     organization_on_stage_found = True
-            elif positive_value_exists(one_organization["organization_name"]):
-                organization_query = Organization.objects.filter(
-                    organization_name=one_organization["organization_name"])
-                if len(organization_query):
-                    organization_on_stage = organization_query[0]
-                    organization_on_stage_found = True
         except Organization.DoesNotExist:
             # No problem that we aren't finding existing organization
             pass
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
+            # We want to skip to the next org
+            continue
 
-        # TEMPORARY STOP
-        organizations_results = {
-            'status':           "STOPPING_FOR_NOW",
-            'saved':            organizations_saved,
-            'updated':          organizations_updated,
-            'not_processed':    organizations_not_processed,
-        }
-        return organizations_results
+        try:
+            we_vote_id = one_organization["we_vote_id"]
+            organization_name = one_organization["organization_name"] \
+                if 'organization_name' in one_organization else False
+            organization_website = one_organization["organization_website"] \
+                if 'organization_website' in one_organization else False
+            organization_email = one_organization["organization_email"] \
+                if 'organization_email' in one_organization else False
+            organization_contact_name = one_organization["organization_contact_name"] \
+                if 'organization_contact_name' in one_organization else False
+            organization_facebook = one_organization["organization_facebook"] \
+                if 'organization_facebook' in one_organization else False
+            organization_image = one_organization["organization_image"] \
+                if 'organization_image' in one_organization else False
+            state_served_code = one_organization["state_served_code"] \
+                if 'state_served_code' in one_organization else False
+            vote_smart_id = one_organization["vote_smart_id"] \
+                if 'vote_smart_id' in one_organization else False
+            organization_description = one_organization["organization_description"] \
+                if 'organization_description' in one_organization else False
+            organization_address = one_organization["organization_address"] \
+                if 'organization_address' in one_organization else False
+            organization_city = one_organization["organization_city"] \
+                if 'organization_city' in one_organization else False
+            organization_state = one_organization["organization_state"] \
+                if 'organization_state' in one_organization else False
+            organization_zip = one_organization["organization_zip"] \
+                if 'organization_zip' in one_organization else False
+            organization_phone1 = one_organization["organization_phone1"] \
+                if 'organization_phone1' in one_organization else False
+            organization_phone2 = one_organization["organization_phone2"] \
+                if 'organization_phone2' in one_organization else False
+            organization_fax = one_organization["organization_fax"] \
+                if 'organization_fax' in one_organization else False
+            twitter_user_id = one_organization["twitter_user_id"] \
+                if 'twitter_user_id' in one_organization else False
+            organization_twitter_handle = one_organization["organization_twitter_handle"] \
+                if 'organization_twitter_handle' in one_organization else False
+            twitter_name = one_organization["twitter_name"] \
+                if 'twitter_name' in one_organization else False
+            twitter_location = one_organization["twitter_location"] \
+                if 'twitter_location' in one_organization else False
+            twitter_followers_count = one_organization["twitter_followers_count"] \
+                if 'twitter_followers_count' in one_organization else False
+            twitter_profile_image_url_https = one_organization["twitter_profile_image_url_https"] \
+                if 'twitter_profile_image_url_https' in one_organization else False
+            twitter_profile_background_image_url_https = \
+                one_organization["twitter_profile_background_image_url_https"] \
+                if 'twitter_profile_background_image_url_https' in one_organization else False
+            twitter_profile_banner_url_https = one_organization["twitter_profile_banner_url_https"] \
+                if 'twitter_profile_banner_url_https' in one_organization else False
+            twitter_description = one_organization["twitter_description"] \
+                if 'twitter_description' in one_organization else False
+            wikipedia_page_id = one_organization["wikipedia_page_id"] \
+                if 'wikipedia_page_id' in one_organization else False
+            wikipedia_page_title = one_organization["wikipedia_page_title"] \
+                if 'wikipedia_page_title' in one_organization else False
+            wikipedia_thumbnail_url = one_organization["wikipedia_thumbnail_url"] \
+                if 'wikipedia_thumbnail_url' in one_organization else False
+            wikipedia_thumbnail_width = one_organization["wikipedia_thumbnail_width"] \
+                if 'wikipedia_thumbnail_width' in one_organization else False
+            wikipedia_thumbnail_height = one_organization["wikipedia_thumbnail_height"] \
+                if 'wikipedia_thumbnail_height' in one_organization else False
+            wikipedia_photo_url = one_organization["wikipedia_photo_url"] \
+                if 'wikipedia_photo_url' in one_organization else False
+            ballotpedia_page_title = one_organization["ballotpedia_page_title"] \
+                if 'ballotpedia_page_title' in one_organization else False
+            ballotpedia_photo_url = one_organization["ballotpedia_photo_url"] \
+                if 'ballotpedia_photo_url' in one_organization else False
+            organization_type = one_organization["organization_type"] \
+                if 'organization_type' in one_organization else False
 
-    #     try:
-    #         if organization_on_stage_found:
-    #             # Update
-    #             organization_on_stage.we_vote_id = one_organization["we_vote_id"]
-    #             organization_on_stage.organization_name = one_organization["organization_name"]
-    #             organization_on_stage.organization_website = one_organization["organization_website"]
-    #             organization_on_stage.organization_twitter_handle = one_organization["organization_twitter_handle"]
-    #             organization_on_stage.save()
-    #             # messages.add_message(request, messages.INFO, u"Organization updated: {organization_name}".format(
-    #             #     organization_name=one_organization["organization_name"]))
-    #             organizations_updated += 1
-    #         else:
-    #             # Create new
-    #             organization_on_stage = Organization(
-    #                 we_vote_id=one_organization["we_vote_id"],
-    #                 organization_name=one_organization["organization_name"],
-    #                 organization_twitter_handle=one_organization["organization_twitter_handle"],
-    #                 organization_website=one_organization["organization_website"],
-    #                 organization_email=one_organization["organization_email"] if 'organization_email' in
-    #                                                                              one_organization else '',
-    #                 organization_facebook=one_organization["organization_facebook"] if 'organization_facebook' in
-    #                                                                                    one_organization else '',
-    #                 organization_image=one_organization["organization_image"] if 'organization_image' in
-    #                                                                              one_organization else '',
-    #             )
-    #             organization_on_stage.save()
-    #             organizations_saved += 1
-    #             # messages.add_message(request, messages.INFO, u"New organization imported: {organization_name}".format(
-    #             #     organization_name=one_organization["organization_name"]))
-    #     except Exception as e:
-    #         handle_record_not_saved_exception(e, logger=logger)
-    #         if request is not None:
-    #             messages.add_message(request, messages.ERROR,
-    #                                  "Could not save Organization, we_vote_id: {we_vote_id}, "
-    #                                  "organization_name: {organization_name}, "
-    #                                  "organization_website: {organization_website}".format(
-    #                                      we_vote_id=one_organization["we_vote_id"],
-    #                                      organization_name=one_organization["organization_name"],
-    #                                      organization_website=one_organization["organization_website"],
-    #                                  ))
-    #         organizations_not_processed += 1
-    #
-    # organizations_results = {
-    #     'saved': organizations_saved,
-    #     'updated': organizations_updated,
-    #     'not_processed': organizations_not_processed,
-    # }
-    # return organizations_results
+            if organization_on_stage_found:
+                # Update existing organization in the database
+                if we_vote_id is not False:
+                    organization_on_stage.we_vote_id = we_vote_id
+                if organization_name is not False:
+                    organization_on_stage.organization_name = organization_name
+            else:
+                # Create new
+                organization_on_stage = Organization(
+                    we_vote_id=one_organization["we_vote_id"],
+                    organization_name=one_organization["organization_name"],
+                )
+
+            # Now save all of the fields in common to updating an existing entry vs. creating a new entry
+            if organization_website is not False:
+                organization_on_stage.organization_website = organization_website
+            if organization_email is not False:
+                organization_on_stage.organization_email = organization_email
+            if organization_contact_name is not False:
+                organization_on_stage.organization_contact_name = organization_contact_name
+            if organization_facebook is not False:
+                organization_on_stage.organization_facebook = organization_facebook
+            if organization_image is not False:
+                organization_on_stage.organization_image = organization_image
+            if state_served_code is not False:
+                organization_on_stage.state_served_code = state_served_code
+            if vote_smart_id is not False:
+                organization_on_stage.vote_smart_id = vote_smart_id
+            if organization_description is not False:
+                organization_on_stage.organization_description = organization_description
+            if organization_address is not False:
+                organization_on_stage.organization_address = organization_address
+            if organization_city is not False:
+                organization_on_stage.organization_city = organization_city
+            if organization_state is not False:
+                organization_on_stage.organization_state = organization_state
+            if organization_zip is not False:
+                organization_on_stage.organization_zip = organization_zip
+            if organization_phone1 is not False:
+                organization_on_stage.organization_phone1 = organization_phone1
+            if organization_phone2 is not False:
+                organization_on_stage.organization_phone2 = organization_phone2
+            if organization_fax is not False:
+                organization_on_stage.organization_fax = organization_fax
+            if twitter_user_id is not False:
+                organization_on_stage.twitter_user_id = twitter_user_id
+            if organization_twitter_handle is not False:
+                organization_on_stage.organization_twitter_handle = organization_twitter_handle
+            if twitter_name is not False:
+                organization_on_stage.twitter_name = twitter_name
+            if twitter_location is not False:
+                organization_on_stage.twitter_location = twitter_location
+            if twitter_followers_count is not False:
+                organization_on_stage.twitter_followers_count = twitter_followers_count
+            if twitter_profile_image_url_https is not False:
+                organization_on_stage.twitter_profile_image_url_https = twitter_profile_image_url_https
+            if twitter_profile_background_image_url_https is not False:
+                organization_on_stage.twitter_profile_background_image_url_https = \
+                    twitter_profile_background_image_url_https
+            if twitter_profile_banner_url_https is not False:
+                organization_on_stage.twitter_profile_banner_url_https = twitter_profile_banner_url_https
+            if twitter_description is not False:
+                organization_on_stage.twitter_description = twitter_description
+            if wikipedia_page_id is not False:
+                organization_on_stage.wikipedia_page_id = wikipedia_page_id
+            if wikipedia_page_title is not False:
+                organization_on_stage.wikipedia_page_title = wikipedia_page_title
+            if wikipedia_thumbnail_url is not False:
+                organization_on_stage.wikipedia_thumbnail_url = wikipedia_thumbnail_url
+            if wikipedia_thumbnail_width is not False:
+                organization_on_stage.wikipedia_thumbnail_width = wikipedia_thumbnail_width
+            if wikipedia_thumbnail_height is not False:
+                organization_on_stage.wikipedia_thumbnail_height = wikipedia_thumbnail_height
+            if wikipedia_photo_url is not False:
+                organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
+            if ballotpedia_page_title is not False:
+                organization_on_stage.ballotpedia_page_title = ballotpedia_page_title
+            if ballotpedia_photo_url is not False:
+                organization_on_stage.ballotpedia_photo_url = ballotpedia_photo_url
+            if organization_type is not False:
+                organization_on_stage.organization_type = organization_type
+
+            organization_on_stage.save()
+            if organization_on_stage_found:
+                organizations_updated += 1
+            else:
+                organizations_saved += 1
+        except Exception as e:
+            organizations_not_processed += 1
+
+    organizations_results = {
+        'saved': organizations_saved,
+        'updated': organizations_updated,
+        'not_processed': organizations_not_processed,
+    }
+    return organizations_results
 
 
 # We retrieve from only one of the two possible variables
