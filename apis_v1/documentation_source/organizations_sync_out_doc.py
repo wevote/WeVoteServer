@@ -29,10 +29,43 @@ def organizations_sync_out_doc_template_values(url_root):
         'format': 'json',
     }
 
-    api_response = '{\n' \
-                   '  "status": string,\n' \
-                   '  "success": boolean,\n' \
-                   '}'
+    api_response = '[{\n' \
+                   '  "we_vote_id": string,\n' \
+                   '  "vote_smart_id": integer,\n' \
+                   '  "ballotpedia_page_title": string,\n' \
+                   '  "ballotpedia_photo_url": string,\n' \
+                   '  "organization_address": string,\n' \
+                   '  "organization_city": string,\n' \
+                   '  "organization_contact_name": string,\n' \
+                   '  "organization_description": string,\n' \
+                   '  "organization_email": string,\n' \
+                   '  "organization_facebook": string,\n' \
+                   '  "organization_name": string,\n' \
+                   '  "organization_image": string,\n' \
+                   '  "organization_phone1": string,\n' \
+                   '  "organization_phone2": string,\n' \
+                   '  "organization_fax": string,\n' \
+                   '  "organization_state": string,\n' \
+                   '  "organization_type": string,\n' \
+                   '  "organization_twitter_handle": string,\n' \
+                   '  "organization_website": string,\n' \
+                   '  "organization_zip": string,\n' \
+                   '  "state_served_code": string,\n' \
+                   '  "twitter_description": string,\n' \
+                   '  "twitter_followers_count": integer,\n' \
+                   '  "twitter_location": string,\n' \
+                   '  "twitter_name": string,\n' \
+                   '  "twitter_profile_background_image_url_https": string,\n' \
+                   '  "twitter_profile_banner_url_https": string,\n' \
+                   '  "twitter_profile_image_url_https": string,\n' \
+                   '  "twitter_user_id": integer,\n' \
+                   '  "wikipedia_page_id": string,\n' \
+                   '  "wikipedia_page_title": string,\n' \
+                   '  "wikipedia_photo_url": string,\n' \
+                   '  "wikipedia_thumbnail_height": string,\n' \
+                   '  "wikipedia_thumbnail_url": string,\n' \
+                   '  "wikipedia_thumbnail_width": string,\n' \
+                   '}]'
 
     template_values = {
         'api_name': 'organizationsSyncOut',

@@ -794,8 +794,8 @@ class CandidateCampaignManager(models.Model):
                     candidate_campaign_on_stage, new_candidate_created = \
                         CandidateCampaign.objects.update_or_create(
                             google_civic_election_id__exact=google_civic_election_id,
-                            we_vote_id__exact=we_vote_id,
-                            contest_office_we_vote_id__exact=contest_office_we_vote_id,
+                            we_vote_id__iexact=we_vote_id,
+                            contest_office_we_vote_id__iexact=contest_office_we_vote_id,
                             defaults=updated_candidate_campaign_values)
                 # If coming (most likely) from a Google Civic import, or internal bulk update
                 else:
@@ -805,7 +805,7 @@ class CandidateCampaignManager(models.Model):
                             google_civic_election_id__exact=google_civic_election_id,
                             # ocd_division_id__exact=ocd_division_id,
                             # 2016-02-20 We want to allow contest_office ids to change
-                            # contest_office_we_vote_id__exact=contest_office_we_vote_id,
+                            # contest_office_we_vote_id__iexact=contest_office_we_vote_id,
                             google_civic_candidate_name__exact=google_civic_candidate_name,
                             defaults=updated_candidate_campaign_values)
 

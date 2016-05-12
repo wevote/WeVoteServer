@@ -28,7 +28,7 @@
     {% for election in election_list %}
         <option value="{{ election.google_civic_election_id }}"
                 {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {{ election.election_name }} - {{ election.election_day_text }}</option>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
     {% endfor %}
     </select>
     </form>
@@ -54,8 +54,8 @@
 {# ################################### #}
 <h4>Measures</h4>
 
-<p><a href="{% url 'measure:measures_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}"></a>
-    Retrieve Measures (coming soon)</p>
+<p><a href="{% url 'measure:measures_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}">
+    Retrieve Measures</a></p>
 <br />
 
 

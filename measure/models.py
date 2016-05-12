@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_measure_integer, \
     fetch_next_we_vote_id_last_measure_campaign_integer, fetch_site_unique_id_prefix
@@ -197,29 +198,43 @@ class ContestMeasureManager(models.Model):
             return results['contest_measure_we_vote_id']
         return 0
 
-    def update_or_create_contest_measure(self, we_vote_id, google_civic_election_id, district_id, district_name,
-                                         measure_title, state_code,
-                                         update_contest_measure_values):  # , create_contest_measure_values
+    def update_or_create_contest_measure(self, we_vote_id, google_civic_election_id, measure_title,
+                                         district_id, district_name, state_code,
+                                         update_contest_measure_values):
         """
         Either update or create an office entry.
         """
         exception_multiple_object_returned = False
         new_measure_created = False
+        proceed_to_update_or_save = True
+        success = False
+        status = 'ENTERING update_or_create_contest_measure'
+
         contest_measure_on_stage = ContestMeasure()
+        if positive_value_exists(we_vote_id):
+            # If here we are dealing with an existing measure
+            pass
+        else:
+            # If here, we are dealing with a measure that is new to We Vote
+            if not (district_id or district_name):
+                success = False
+                status = 'MISSING_DISTRICT_ID-MEASURE_UPDATE_OR_CREATE'
+                proceed_to_update_or_save = False
+            elif not state_code:
+                success = False
+                status = 'MISSING_STATE_CODE-MEASURE_UPDATE_OR_CREATE'
+                proceed_to_update_or_save = False
+            elif not measure_title:
+                success = False
+                status = 'MISSING_MEASURE_TITLE-MEASURE_UPDATE_OR_CREATE'
+                proceed_to_update_or_save = False
 
         if not google_civic_election_id:
             success = False
-            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
-        elif not (district_id or district_name):
-            success = False
-            status = 'MISSING_DISTRICT_ID'
-        elif not state_code:
-            success = False
-            status = 'MISSING_STATE_CODE'
-        elif not measure_title:
-            success = False
-            status = 'MISSING_MEASURE_TITLE'
-        else:
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID-MEASURE_UPDATE_OR_CREATE'
+            proceed_to_update_or_save = False
+
+        if proceed_to_update_or_save:
             # We need to use one set of values when we are creating an entry, and another set of values when we
             #  are updating an entry
             try:
@@ -231,7 +246,7 @@ class ContestMeasureManager(models.Model):
                 if positive_value_exists(we_vote_id):
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        we_vote_id__exact=we_vote_id,
+                        we_vote_id__iexact=we_vote_id,
                         defaults=update_contest_measure_values)
                 else:
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
@@ -241,6 +256,7 @@ class ContestMeasureManager(models.Model):
                         measure_title__iexact=measure_title,  # Case doesn't matter
                         state_code__iexact=state_code,  # Case doesn't matter
                         defaults=update_contest_measure_values)
+
                 success = True
                 status = 'CONTEST_MEASURE_SAVED'
             except ContestMeasure.MultipleObjectsReturned as e:
@@ -389,44 +405,30 @@ class ContestMeasureList(models.Model):
         }
         return results
 
-    def retrieve_possible_duplicate_measures(self, candidate_name, google_civic_candidate_name,
-                                               google_civic_election_id, office_we_vote_id,
-                                               politician_we_vote_id,
-                                               candidate_twitter_handle, vote_smart_id, maplight_id,
-                                               we_vote_id_from_master=''):
-        candidate_list_objects = []
+    def retrieve_possible_duplicate_measures(self, measure_title, google_civic_election_id, measure_url, maplight_id,
+                                             we_vote_id_from_master=''):
+        measure_list_objects = []
         filters = []
-        candidate_list_found = False
+        measure_list_found = False
 
         try:
-            candidate_queryset = CandidateCampaign.objects.all()
-            candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            measure_queryset = ContestMeasure.objects.all()
+            measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
             # We don't look for office_we_vote_id because of the chance that locally we are using a
             # different we_vote_id
-            # candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+            # measure_queryset = measure_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                candidate_queryset = candidate_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                measure_queryset = measure_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
 
             # We want to find candidates with *any* of these values
-            if positive_value_exists(google_civic_candidate_name):
-                new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
-                filters.append(new_filter)
-            elif positive_value_exists(candidate_name):
-                new_filter = Q(candidate_name__iexact=candidate_name)
+            if positive_value_exists(measure_title):
+                new_filter = Q(measure_title__iexact=measure_title)
                 filters.append(new_filter)
 
-            if positive_value_exists(politician_we_vote_id):
-                new_filter = Q(politician_we_vote_id__iexact=politician_we_vote_id)
-                filters.append(new_filter)
-
-            if positive_value_exists(candidate_twitter_handle):
-                new_filter = Q(candidate_twitter_handle__iexact=candidate_twitter_handle)
-                filters.append(new_filter)
-
-            if positive_value_exists(vote_smart_id):
-                new_filter = Q(vote_smart_id=vote_smart_id)
+            if positive_value_exists(measure_url):
+                new_filter = Q(measure_url__iexact=measure_url)
                 filters.append(new_filter)
 
             if positive_value_exists(maplight_id):
@@ -441,25 +443,25 @@ class ContestMeasureList(models.Model):
                 for item in filters:
                     final_filters |= item
 
-                candidate_queryset = candidate_queryset.filter(final_filters)
+                measure_queryset = measure_queryset.filter(final_filters)
 
-            candidate_list_objects = candidate_queryset
+            measure_list_objects = measure_queryset
 
-            if len(candidate_list_objects):
-                candidate_list_found = True
-                status = 'DUPLICATE_CANDIDATES_RETRIEVED'
+            if len(measure_list_objects):
+                measure_list_found = True
+                status = 'DUPLICATE_MEASURES_RETRIEVED'
                 success = True
             else:
-                status = 'NO_DUPLICATE_CANDIDATES_RETRIEVED'
+                status = 'NO_DUPLICATE_MEASURES_RETRIEVED'
                 success = True
-        except CandidateCampaign.DoesNotExist:
+        except ContestMeasure.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_DUPLICATE_CANDIDATES_FOUND_DoesNotExist'
-            candidate_list_objects = []
+            status = 'NO_DUPLICATE_MEASURES_FOUND_DoesNotExist'
+            measure_list_objects = []
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_possible_duplicate_candidates ' \
+            status = 'FAILED retrieve_possible_duplicate_measures ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
@@ -467,7 +469,7 @@ class ContestMeasureList(models.Model):
             'success':                  success,
             'status':                   status,
             'google_civic_election_id': google_civic_election_id,
-            'candidate_list_found':     candidate_list_found,
-            'candidate_list_objects':   candidate_list_objects,
+            'measure_list_found':       measure_list_found,
+            'measure_list':             measure_list_objects,
         }
         return results

@@ -15,29 +15,40 @@ def measures_sync_out_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
+        {
+            'name':         'google_civic_election_id',
+            'value':        'integer',  # boolean, integer, long, string
+            'description':  'Limit the measures retrieved to those for this google_civic_election_id.',
+        },
     ]
 
     potential_status_codes_list = [
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
         'format': 'json',
     }
 
-    api_response = '{\n' \
-                   '  "status": string,\n' \
-                   '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '}'
+    api_response = '[{\n' \
+                   '  "we_vote_id": string,\n' \
+                   '  "maplight_id": integer,\n' \
+                   '  "ballotpedia_page_title": string,\n' \
+                   '  "ballotpedia_photo_url": string,\n' \
+                   '  "district_id": string,\n' \
+                   '  "district_name": string,\n' \
+                   '  "district_scope": string,\n' \
+                   '  "google_civic_election_id": string,\n' \
+                   '  "measure_title": string,\n' \
+                   '  "measure_subtitle": string,\n' \
+                   '  "measure_text": string,\n' \
+                   '  "measure_url": string,\n' \
+                   '  "ocd_division_id": string,\n' \
+                   '  "primary_party": string,\n' \
+                   '  "state_code": string,\n' \
+                   '  "wikipedia_page_id": string,\n' \
+                   '  "wikipedia_page_title": string,\n' \
+                   '  "wikipedia_photo_url": string,\n' \
+                   '}]'
 
     template_values = {
         'api_name': 'measuresSyncOut',

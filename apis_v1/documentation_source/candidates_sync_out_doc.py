@@ -23,21 +23,49 @@ def candidates_sync_out_doc_template_values(url_root):
     ]
 
     potential_status_codes_list = [
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
         'format': 'json',
     }
 
-    api_response = '{\n' \
-                   '  "status": string,\n' \
-                   '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '}'
+    api_response = '[{\n' \
+                   '  "we_vote_id": string,\n' \
+                   '  "maplight_id": integer,\n' \
+                   '  "vote_smart_id": integer,\n' \
+                   '  "ballot_guide_official_statement": string,\n' \
+                   '  "ballotpedia_page_title": string,\n' \
+                   '  "ballotpedia_photo_url": string,\n' \
+                   '  "candidate_email": string,\n' \
+                   '  "candidate_name": string,\n' \
+                   '  "candidate_phone": string,\n' \
+                   '  "candidate_twitter_handle": string,\n' \
+                   '  "candidate_url": string,\n' \
+                   '  "contest_office_we_vote_id": string,\n' \
+                   '  "facebook_url": string,\n' \
+                   '  "google_civic_candidate_name": string,\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "google_plus_url": string,\n' \
+                   '  "ocd_division_id": string,\n' \
+                   '  "order_on_ballot": string,\n' \
+                   '  "party": string,\n' \
+                   '  "photo_url": string,\n' \
+                   '  "photo_url_from_maplight": string,\n' \
+                   '  "photo_url_from_vote_smart": string,\n' \
+                   '  "politician_we_vote_id": string,\n' \
+                   '  "state_code": string,\n' \
+                   '  "twitter_url": string,\n' \
+                   '  "twitter_user_id": string,\n' \
+                   '  "twitter_name": string,\n' \
+                   '  "twitter_location": string,\n' \
+                   '  "twitter_followers_count": integer,\n' \
+                   '  "twitter_profile_image_url_https": string,\n' \
+                   '  "twitter_description": string,\n' \
+                   '  "wikipedia_page_id": string,\n' \
+                   '  "wikipedia_page_title": string,\n' \
+                   '  "wikipedia_photo_url": string,\n' \
+                   '  "youtube_url": string,\n' \
+                   '}]'
 
     template_values = {
         'api_name': 'candidatesSyncOut',

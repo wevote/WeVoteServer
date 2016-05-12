@@ -30,12 +30,14 @@
         <tr>
             <td>Measure Title</td>
             <td>State</td>
+            <td>We Vote ID</td>
             <td>&nbsp;</td>
         </tr>
     {% for measure in measure_list %}
         <tr>
             <td><a href="{% url 'measure:measure_summary' measure.id %}">{{ measure.measure_title }}</a></td>
             <td>{{ measure.state_code }}</td>
+            <td>{{ measure.we_vote_id }}</td>
             <td><a href="{% url 'measure:measure_edit' measure.id %}" style="font-size: .65em">edit</a></td>
         </tr>
     {% endfor %}

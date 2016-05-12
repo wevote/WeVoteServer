@@ -367,6 +367,7 @@ class ExportElectionDataView(APIView):
         return Response(serializer.data)
 
 
+@login_required
 def elections_import_from_master_server_view(request):
     results = elections_import_from_master_server()
 

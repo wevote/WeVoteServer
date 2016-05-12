@@ -41,6 +41,7 @@ class PositionsSyncOutView(APIView):
         return Response(serializer.data)
 
 
+@login_required
 def positions_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 

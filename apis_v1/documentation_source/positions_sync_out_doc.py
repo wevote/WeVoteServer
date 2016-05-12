@@ -30,11 +30,39 @@ def positions_sync_out_doc_template_values(url_root):
         'google_civic_election_id': '1000000',
     }
 
-    api_response = '{\n' \
-                   '  "status": string,\n' \
-                   '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
-                   '}'
+    api_response = '[{\n' \
+                   '  "we_vote_id": string,\n' \
+                   '  "ballot_item_display_name": string,\n' \
+                   '  "ballot_item_image_url_https": string,\n' \
+                   '  "candidate_campaign_we_vote_id": string,\n' \
+                   '  "contest_measure_we_vote_id": string,\n' \
+                   '  "contest_office_we_vote_id": string,\n' \
+                   '  "date_entered": string,\n' \
+                   '  "date_last_changed": string,\n' \
+                   '  "from_scraper": string,\n' \
+                   '  "google_civic_candidate_name": string,\n' \
+                   '  "google_civic_election_id": string,\n' \
+                   '  "more_info_url": string,\n' \
+                   '  "organization_certified": string,\n' \
+                   '  "organization_we_vote_id": string,\n' \
+                   '  "politician_we_vote_id": string,\n' \
+                   '  "public_figure_we_vote_id": string,\n' \
+                   '  "speaker_display_name": string,\n' \
+                   '  "speaker_image_url_https": string,\n' \
+                   '  "stance": string,\n' \
+                   '  "state_code": string,\n' \
+                   '  "statement_text": string,\n' \
+                   '  "statement_html": string,\n' \
+                   '  "tweet_source_id": string,\n' \
+                   '  "twitter_user_entered_position": string,\n' \
+                   '  "volunteer_certified": string,\n' \
+                   '  "vote_smart_rating": string,\n' \
+                   '  "vote_smart_rating_id": string,\n' \
+                   '  "vote_smart_rating_name": string,\n' \
+                   '  "vote_smart_time_span": string,\n' \
+                   '  "voter_entering_position": string,\n' \
+                   '  "voter_we_vote_id": string,\n' \
+                   '}]'
 
     template_values = {
         'api_name': 'positionsSyncOut',

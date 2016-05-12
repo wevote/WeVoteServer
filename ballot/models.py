@@ -226,7 +226,7 @@ class BallotItemManager(models.Model):
                     contest_measure_id__exact=contest_measure_id,
                     contest_office_id__exact=contest_office_id,
                     google_civic_election_id__exact=google_civic_election_id,
-                    polling_location_we_vote_id__exact=polling_location_we_vote_id,
+                    polling_location_we_vote_id__iexact=polling_location_we_vote_id,
                     defaults=create_values)
 
                 # if a ballot_item is found (instead of just created), *then* update it

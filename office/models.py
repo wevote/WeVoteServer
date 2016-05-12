@@ -178,7 +178,7 @@ class ContestOfficeManager(models.Model):
                 elif positive_value_exists(maplight_id):
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        maplight_id__exact=we_vote_id,
+                        maplight_id__exact=maplight_id,
                         defaults=updated_contest_office_values)
                 else:
                     contest_office_on_stage, new_office_created = ContestOffice.objects.update_or_create(

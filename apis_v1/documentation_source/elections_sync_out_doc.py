@@ -28,18 +28,6 @@ def elections_sync_out_doc_template_values(url_root):
     ]
 
     potential_status_codes_list = [
-        # {
-        #     'code':         'VALID_VOTER_DEVICE_ID_MISSING',
-        #     'description':  'A valid voter_device_id parameter was not included. Cannot proceed.',
-        # },
-        # {
-        #     'code':         'VOTER_NOT_FOUND_FROM_DEVICE_ID',
-        #     'description':  'There is no voter_id attached to that voter_device_id',
-        # },
-        # {
-        #     'code':         'VOTER_ID_COULD_NOT_BE_RETRIEVED',
-        #     'description':  'Unable to retrieve voter_id, although voter_id was found linked to voter_device_id',
-        # },
     ]
 
     try_now_link_variables_dict = {
@@ -51,8 +39,8 @@ def elections_sync_out_doc_template_values(url_root):
                    '  "google_civic_election_id": integer,\n' \
                    '  "election_name": string,\n' \
                    '  "election_day_text": string,\n' \
-                   '  "ocd_division_id": string,\n' \
                    '  "get_election_state": string,\n' \
+                   '  "ocd_division_id": string,\n' \
                    '}]\n'\
                    'FAILURE:\n'\
                    '{\n' \

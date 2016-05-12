@@ -453,6 +453,8 @@ def organizations_import_from_structured_json(structured_json):
             organizations_not_processed += 1
 
     organizations_results = {
+        'success': True,
+        'status': "ORGANIZATION_IMPORT_PROCESS_COMPLETE",
         'saved': organizations_saved,
         'updated': organizations_updated,
         'not_processed': organizations_not_processed,

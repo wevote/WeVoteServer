@@ -1024,6 +1024,8 @@ def positions_import_from_structured_json(structured_json):
             positions_not_processed += 1
 
     positions_results = {
+        'success': True,
+        'status': "POSITIONS_IMPORT_PROCESS_COMPLETE",
         'saved': positions_saved,
         'updated': positions_updated,
         'not_processed': positions_not_processed,

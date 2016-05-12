@@ -76,7 +76,7 @@ class VoterGuideManager(models.Manager):
                     }
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
-                    organization_we_vote_id__exact=organization_we_vote_id,
+                    organization_we_vote_id__iexact=organization_we_vote_id,
                     defaults=updated_values)
                 success = True
                 if new_voter_guide_created:
@@ -143,7 +143,7 @@ class VoterGuideManager(models.Manager):
                     }
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     vote_smart_time_span__exact=vote_smart_time_span,
-                    organization_we_vote_id__exact=organization_we_vote_id,
+                    organization_we_vote_id__iexact=organization_we_vote_id,
                     defaults=updated_values)
                 success = True
                 if new_voter_guide_created:
@@ -185,8 +185,8 @@ class VoterGuideManager(models.Manager):
                 }
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
-                    voter_guide_owner_type__exact=voter_guide_owner_type,
-                    public_figure_we_vote_id__exact=public_figure_we_vote_id,
+                    voter_guide_owner_type__iexact=voter_guide_owner_type,
+                    public_figure_we_vote_id__iexact=public_figure_we_vote_id,
                     defaults=updated_values)
                 success = True
                 if new_voter_guide_created:
@@ -229,7 +229,7 @@ class VoterGuideManager(models.Manager):
                 }
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
-                    voter_guide_owner_type__exact=voter_guide_owner_type,
+                    voter_guide_owner_type__iexact=voter_guide_owner_type,
                     owner_voter_id__exact=owner_voter_id,
                     defaults=updated_values)
                 success = True
@@ -995,7 +995,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_possibility_on_stage, new_voter_guide_possibility_created = \
                     VoterGuidePossibility.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        voter_guide_possibility_url__exact=voter_guide_possibility_url,
+                        voter_guide_possibility_url__iexact=voter_guide_possibility_url,
                         defaults=updated_values)
                 success = True
                 if new_voter_guide_possibility_created:
