@@ -3,11 +3,14 @@
 # -*- coding: UTF-8 -*-
 
 from ballot.models import OFFICE, CANDIDATE, MEASURE
+from config.base import get_environment_variable
+from django.contrib import messages
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList
 from itertools import chain
 import json
 from position.models import ANY_STANCE, PositionListManager
+import requests
 from voter.models import fetch_voter_id_from_voter_device_link
 from voter_guide.models import VoterGuideList, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin

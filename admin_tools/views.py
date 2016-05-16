@@ -23,12 +23,16 @@ from voter.models import Voter, VoterDeviceLinkManager, VoterManager, voter_has_
 from wevote_functions.functions import delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id
 
+BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
+BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")
 ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")
 ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
 OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")
 CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")
 MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")
+POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_URL")
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
+VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")
 
 
 @login_required
@@ -332,12 +336,16 @@ def sync_data_with_master_servers_view(request):
         'election_list':            election_list,
         'google_civic_election_id': google_civic_election_id,
 
-        'candidates_sync_url':      CANDIDATES_SYNC_URL,
-        'elections_sync_url':       ELECTIONS_SYNC_URL,
-        'measures_sync_url':        MEASURES_SYNC_URL,
-        'offices_sync_url':         OFFICES_SYNC_URL,
-        'organizations_sync_url':   ORGANIZATIONS_SYNC_URL,
-        'positions_sync_url':       POSITIONS_SYNC_URL,
+        'ballot_items_sync_url':        BALLOT_ITEMS_SYNC_URL,
+        'ballot_returned_sync_url':     BALLOT_RETURNED_SYNC_URL,
+        'candidates_sync_url':          CANDIDATES_SYNC_URL,
+        'elections_sync_url':           ELECTIONS_SYNC_URL,
+        'measures_sync_url':            MEASURES_SYNC_URL,
+        'offices_sync_url':             OFFICES_SYNC_URL,
+        'organizations_sync_url':       ORGANIZATIONS_SYNC_URL,
+        'polling_locations_sync_url':   POLLING_LOCATIONS_SYNC_URL,
+        'positions_sync_url':           POSITIONS_SYNC_URL,
+        'voter_guides_sync_url':        VOTER_GUIDES_SYNC_URL,
     }
     response = render(request, 'admin_tools/sync_data_with_master_dashboard.html', template_values)
 

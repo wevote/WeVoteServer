@@ -2,14 +2,18 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BallotItemListManager, CANDIDATE, copy_existing_ballot_items_from_stored_ballot, OFFICE, MEASURE, \
+from .models import BallotItemListManager, BallotItemManager, BallotReturnedListManager, BallotReturnedManager, \
+    CANDIDATE, copy_existing_ballot_items_from_stored_ballot, OFFICE, MEASURE, \
     VoterBallotSaved, VoterBallotSavedManager
 from candidate.models import CandidateCampaignList
 from config.base import get_environment_variable
+from django.contrib import messages
 from exception.models import handle_exception
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
+import json
 from measure.models import ContestMeasureList
 from office.models import ContestOfficeList
+import requests
 from voter.models import BALLOT_ADDRESS, VoterAddressManager, \
     VoterDeviceLinkManager
 import wevote_functions.admin
@@ -18,6 +22,281 @@ from wevote_functions.functions import convert_to_int, positive_value_exists
 logger = wevote_functions.admin.get_logger(__name__)
 
 GOOGLE_CIVIC_API_KEY = get_environment_variable("GOOGLE_CIVIC_API_KEY")
+WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
+BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
+BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")
+
+
+def ballot_items_import_from_master_server(request, state_code):
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    # Request json file from We Vote servers
+    messages.add_message(request, messages.INFO, "Loading Ballot Items from We Vote Master servers")
+    logger.info("Loading Ballot Items from We Vote Master servers")
+    request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
+        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+        "format":   'json',
+        "state": state_code,
+    })
+    structured_json = json.loads(request.text)
+    results = filter_ballot_items_structured_json_for_local_duplicates(structured_json)
+    filtered_structured_json = results['structured_json']
+    duplicates_removed = results['duplicates_removed']
+
+    import_results = ballot_items_import_from_structured_json(filtered_structured_json)
+    import_results['duplicates_removed'] = duplicates_removed
+
+    return import_results
+
+
+def ballot_returned_import_from_master_server(request, google_civic_election_id):
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    # Request json file from We Vote servers
+    messages.add_message(request, messages.INFO, "Loading Ballot Returned entries from We Vote Master servers")
+    logger.info("Loading Measures from We Vote Master servers")
+    request = requests.get(BALLOT_RETURNED_SYNC_URL, params={
+        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+        "format":   'json',
+        "google_civic_election_id": google_civic_election_id,
+    })
+    structured_json = json.loads(request.text)
+    results = filter_ballot_returned_structured_json_for_local_duplicates(structured_json)
+    filtered_structured_json = results['structured_json']
+    duplicates_removed = results['duplicates_removed']
+
+    import_results = ballot_returned_import_from_structured_json(filtered_structured_json)
+    import_results['duplicates_removed'] = duplicates_removed
+
+    return import_results
+
+
+def filter_ballot_items_structured_json_for_local_duplicates(structured_json):
+    """
+    With this function, we remove ballot_items that seem to be duplicates, but have different we_vote_id's.
+    We do not check to see if we have a matching office or measure in the database this routine --
+    that is done elsewhere.
+    :param structured_json:
+    :return:
+    """
+    duplicates_removed = 0
+    filtered_structured_json = []
+    ballot_item_list_manager = BallotItemListManager()
+    for one_ballot_item in structured_json:
+        ballot_item_display_name = one_ballot_item['ballot_item_display_name'] \
+            if 'ballot_item_display_name' in one_ballot_item else ''
+        google_civic_election_id = one_ballot_item['google_civic_election_id'] \
+            if 'google_civic_election_id' in one_ballot_item else ''
+        polling_location_we_vote_id = one_ballot_item['polling_location_we_vote_id'] \
+            if 'polling_location_we_vote_id' in one_ballot_item else ''
+        contest_office_we_vote_id = one_ballot_item['contest_office_we_vote_id'] \
+            if 'contest_office_we_vote_id' in one_ballot_item else ''
+        contest_measure_we_vote_id = one_ballot_item['contest_measure_we_vote_id'] \
+            if 'contest_measure_we_vote_id' in one_ballot_item else ''
+
+        # Check to see if there is an entry that matches in all critical ways, minus the
+        # contest_office_we_vote_id or contest_measure_we_vote_id. That is, an entry for a
+        # google_civic_election_id + polling_location_we_vote_id that has the same ballot_item_display_name,
+        # but different contest_office_we_vote_id or contest_measure_we_vote_id
+        results = ballot_item_list_manager.retrieve_possible_duplicate_ballot_items(
+            ballot_item_display_name, google_civic_election_id, polling_location_we_vote_id, contest_office_we_vote_id,
+            contest_measure_we_vote_id)
+
+        if results['ballot_item_list_found']:
+            # There seems to be a duplicate already in this database using a different we_vote_id
+            duplicates_removed += 1
+        else:
+            filtered_structured_json.append(one_ballot_item)
+
+    ballot_items_results = {
+        'success':              True,
+        'status':               "FILTER_BALLOT_ITEMS_FOR_DUPLICATES_PROCESS_COMPLETE",
+        'duplicates_removed':   duplicates_removed,
+        'structured_json':      filtered_structured_json,
+    }
+    return ballot_items_results
+
+
+def filter_ballot_returned_structured_json_for_local_duplicates(structured_json):
+    """
+    With this function, we remove ballot_returned entries that seem to be duplicates,
+    but have different polling_location_we_vote_id's.
+    We do not check to see if we have a local entry for polling_location_we_vote_id -- that is done elsewhere.
+    :param structured_json:
+    :return:
+    """
+    duplicates_removed = 0
+    filtered_structured_json = []
+    ballot_returned_list_manager = BallotReturnedListManager()
+    for one_ballot_returned in structured_json:
+        polling_location_we_vote_id = one_ballot_returned['polling_location_we_vote_id'] \
+            if 'polling_location_we_vote_id' in one_ballot_returned else ''
+        google_civic_election_id = \
+            one_ballot_returned['google_civic_election_id'] if 'google_civic_election_id' in one_ballot_returned else ''
+        normalized_line1 = one_ballot_returned['normalized_line1'] if 'normalized_line1' in one_ballot_returned else ''
+        normalized_zip = one_ballot_returned['normalized_zip'] if 'normalized_zip' in one_ballot_returned else ''
+
+        # Check to see if there is an entry that matches in all critical ways, minus the polling_location_we_vote_id
+        results = ballot_returned_list_manager.retrieve_possible_duplicate_ballot_returned(
+            google_civic_election_id, normalized_line1, normalized_zip, polling_location_we_vote_id)
+
+        if results['ballot_returned_list_found']:
+            # There seems to be a duplicate already in this database using a different we_vote_id
+            duplicates_removed += 1
+        else:
+            filtered_structured_json.append(one_ballot_returned)
+
+    ballot_returned_results = {
+        'success':              True,
+        'status':               "FILTER_BALLOT_RETURNED_ITEMS_FOR_DUPLICATES_PROCESS_COMPLETE",
+        'duplicates_removed':   duplicates_removed,
+        'structured_json':      filtered_structured_json,
+    }
+    return ballot_returned_results
+
+
+def ballot_items_import_from_structured_json(structured_json):
+    """
+    This pathway in requires a we_vote_id, and is not used when we import from Google Civic
+    :param structured_json:
+    :return:
+    """
+    ballot_item_manager = BallotItemManager()
+    ballot_items_saved = 0
+    ballot_items_updated = 0
+    ballot_items_not_processed = 0
+    for one_ballot_item in structured_json:
+        polling_location_we_vote_id = one_ballot_item['polling_location_we_vote_id'] \
+            if 'polling_location_we_vote_id' in one_ballot_item else ''
+        google_civic_election_id = \
+            one_ballot_item['google_civic_election_id'] if 'google_civic_election_id' in one_ballot_item else ''
+        contest_office_we_vote_id = one_ballot_item['contest_office_we_vote_id'] \
+            if 'contest_office_we_vote_id' in one_ballot_item else ''
+        contest_measure_we_vote_id = one_ballot_item['contest_measure_we_vote_id'] \
+            if 'contest_measure_we_vote_id' in one_ballot_item else ''
+
+        if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id) \
+                and (positive_value_exists(contest_office_we_vote_id) or
+                     positive_value_exists(contest_measure_we_vote_id)):
+            proceed_to_update_or_create = True
+        else:
+            proceed_to_update_or_create = False
+
+        if proceed_to_update_or_create:
+            ballot_item_display_name = one_ballot_item['ballot_item_display_name'] \
+                if 'ballot_item_display_name' in one_ballot_item else ''
+            measure_subtitle = one_ballot_item['measure_subtitle'] if 'measure_subtitle' in one_ballot_item else 0
+            google_ballot_placement = one_ballot_item['google_ballot_placement'] \
+                if 'google_ballot_placement' in one_ballot_item else 0
+            local_ballot_order = one_ballot_item['local_ballot_order'] \
+                if 'local_ballot_order' in one_ballot_item else ''
+
+            contest_office_id = 0
+            contest_measure_id = 0
+
+            results = ballot_item_manager.update_or_create_ballot_item_for_polling_location(
+                polling_location_we_vote_id, google_civic_election_id, google_ballot_placement,
+                ballot_item_display_name, measure_subtitle, local_ballot_order,
+                contest_office_id, contest_office_we_vote_id,
+                contest_measure_id, contest_measure_we_vote_id)
+
+        else:
+            ballot_items_not_processed += 1
+            results = {
+                'success': False,
+                'status': 'Required value missing, cannot update or create'
+            }
+
+        if results['success']:
+            if results['new_ballot_item_created']:
+                ballot_items_saved += 1
+            else:
+                ballot_items_updated += 1
+        else:
+            ballot_items_not_processed += 1
+    ballot_items_results = {
+        'success': True,
+        'status': "ballot_items_IMPORT_PROCESS_COMPLETE",
+        'saved': ballot_items_saved,
+        'updated': ballot_items_updated,
+        'not_processed': ballot_items_not_processed,
+    }
+    return ballot_items_results
+
+
+def ballot_returned_import_from_structured_json(structured_json):
+    """
+    This pathway in requires a we_vote_id, and is not used when we import from Google Civic
+    :param structured_json:
+    :return:
+    """
+    ballot_returned_manager = BallotReturnedManager()
+    ballot_returned_saved = 0
+    ballot_returned_updated = 0
+    ballot_returned_not_processed = 0
+    for one_ballot_returned in structured_json:
+        google_civic_election_id = \
+            one_ballot_returned['google_civic_election_id'] if 'google_civic_election_id' in one_ballot_returned else 0
+        polling_location_we_vote_id = one_ballot_returned['polling_location_we_vote_id'] \
+            if 'polling_location_we_vote_id' in one_ballot_returned else ''
+        voter_id = one_ballot_returned['voter_id'] if 'voter_id' in one_ballot_returned else 0
+
+        if positive_value_exists(google_civic_election_id) and (positive_value_exists(polling_location_we_vote_id) or
+                                                                positive_value_exists(voter_id)):
+            proceed_to_update_or_create = True
+        else:
+            proceed_to_update_or_create = False
+
+        if proceed_to_update_or_create:
+            election_date = one_ballot_returned['election_date'] if 'election_date' in one_ballot_returned else False
+            election_description_text = one_ballot_returned['election_description_text'] \
+                if 'election_description_text' in one_ballot_returned else False
+            latitude = one_ballot_returned['latitude'] if 'latitude' in one_ballot_returned else False
+            longitude = one_ballot_returned['longitude'] if 'longitude' in one_ballot_returned else False
+            normalized_city = one_ballot_returned['normalized_city'] \
+                if 'normalized_city' in one_ballot_returned else False
+            normalized_line1 = one_ballot_returned['normalized_line1'] \
+                if 'normalized_line1' in one_ballot_returned else False
+            normalized_line2 = one_ballot_returned['normalized_line2'] \
+                if 'normalized_line2' in one_ballot_returned else False
+            normalized_state = one_ballot_returned['normalized_state'] \
+                if 'normalized_state' in one_ballot_returned else False
+            normalized_zip = one_ballot_returned['normalized_zip'] \
+                if 'normalized_zip' in one_ballot_returned else False
+            text_for_map_search = one_ballot_returned['text_for_map_search'] \
+                if 'text_for_map_search' in one_ballot_returned else False
+
+            results = ballot_returned_manager.update_or_create_ballot_returned(
+                polling_location_we_vote_id, voter_id, google_civic_election_id, election_date,
+                election_description_text, latitude, longitude,
+                normalized_city, normalized_line1, normalized_line2, normalized_state,
+                normalized_zip, text_for_map_search)
+        else:
+            ballot_returned_not_processed += 1
+            results = {
+                'success': False,
+                'status': 'Required value missing, cannot update or create'
+            }
+
+        if results['success']:
+            if results['new_ballot_returned_created']:
+                ballot_returned_saved += 1
+            else:
+                ballot_returned_updated += 1
+        else:
+            ballot_returned_not_processed += 1
+    ballot_returned_results = {
+        'success':          True,
+        'status':           "BALLOT_RETURNED_IMPORT_PROCESS_COMPLETE",
+        'saved':            ballot_returned_saved,
+        'updated':          ballot_returned_updated,
+        'not_processed':    ballot_returned_not_processed,
+    }
+    return ballot_returned_results
 
 
 def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id):

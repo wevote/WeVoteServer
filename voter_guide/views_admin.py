@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import VoterGuide, VoterGuideList, VoterGuideManager
+from .serializers import VoterGuideSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -14,9 +15,46 @@ from election.models import Election, ElectionManager, TIME_SPAN_LIST
 from organization.models import Organization, OrganizationListManager
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
     STATE_CODE_MAP
+
+
+# This page does not need to be protected.
+class VoterGuidesSyncOutView(APIView):
+    def get(self, request, format=None):
+        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+        voter_guide_list = VoterGuide.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            voter_guide_list = voter_guide_list.filter(google_civic_election_id=google_civic_election_id)
+
+        serializer = VoterGuideSerializer(voter_guide_list, many=True)
+        return Response(serializer.data)
+
+
+@login_required
+def voter_guides_import_from_master_server_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    results = candidates_import_from_master_server(request, google_civic_election_id)
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Candidates import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Master data not imported (local duplicates found): '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id))
 
 
 @login_required

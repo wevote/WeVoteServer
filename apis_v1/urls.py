@@ -9,17 +9,22 @@ This is called from config/urls.py like this:
 from django.conf.urls import url
 from . import views
 from . import views_docs
+from ballot.views_admin import BallotItemsSyncOutView, BallotReturnedSyncOutView
 from candidate.views_admin import CandidatesSyncOutView
 from election.views_admin import ElectionsSyncOutView
 from measure.views_admin import MeasuresSyncOutView
 from office.views_admin import OfficesSyncOutView
 from organization.views_admin import OrganizationsSyncOutView
+from polling_location.views_admin import PollingLocationsSyncOutView
 from position.views_admin import PositionsSyncOutView
+from voter_guide.views_admin import VoterGuidesSyncOutView
 
 urlpatterns = [
     # Actual API Calls
     url(r'^ballotItemOptionsRetrieve/', views.ballot_item_options_retrieve_view, name='ballotItemOptionsRetrieveView'),
     url(r'^ballotItemRetrieve/', views.ballot_item_retrieve_view, name='ballotItemRetrieveView'),
+    url(r'^ballotItemsSyncOut/', BallotItemsSyncOutView.as_view(), name='ballotItemsSyncOutView'),
+    url(r'^ballotReturnedSyncOut/', BallotReturnedSyncOutView.as_view(), name='ballotReturnedSyncOutView'),
     url(r'^candidateRetrieve/', views.candidate_retrieve_view, name='candidateRetrieveView'),
     url(r'^candidatesRetrieve/', views.candidates_retrieve_view, name='candidatesRetrieveView'),
     url(r'^candidatesSyncOut/', CandidatesSyncOutView.as_view(), name='candidatesSyncOutView'),
@@ -42,6 +47,7 @@ urlpatterns = [
         views.organization_stop_following_api_view, name='organizationStopFollowingView'),
     url(r'^organizationsFollowedRetrieve/',
         views.organizations_followed_retrieve_api_view, name='organizationsFollowedRetrieveView'),
+    url(r'^pollingLocationsSyncOut/', PollingLocationsSyncOutView.as_view(), name='pollingLocationsSyncOutView'),
     url(r'^positionsCountForAllBallotItems/',
         views.positions_count_for_all_ballot_items_view, name='positionsCountForAllBallotItemsView'),
     url(r'^positionLikeCount/', views.position_like_count_view, name='positionLikeCountView'),
@@ -78,6 +84,7 @@ urlpatterns = [
     url(r'^voterGuidePossibilitySave/', views.voter_guide_possibility_save_view, name='voterGuidePossibilitySaveView'),
     url(r'^voterGuidesFollowedRetrieve/',
         views.voter_guides_followed_retrieve_view, name='voterGuidesFollowedRetrieveView'),
+    url(r'^voterGuidesSyncOut/', VoterGuidesSyncOutView.as_view(), name='voterGuidesSyncOutView'),
     url(r'^voterGuidesToFollowRetrieve/',
         views.voter_guides_to_follow_retrieve_view, name='voterGuidesToFollowRetrieveView'),
     url(r'^voterLocationRetrieveFromIP/',
@@ -106,9 +113,9 @@ urlpatterns = [
     url(r'^docs/ballotItemOptionsRetrieve/$',
         views_docs.ballot_item_options_retrieve_doc_view, name='ballotItemOptionsRetrieveDocs'),
     url(r'^docs/ballotItemRetrieve/$', views_docs.ballot_item_retrieve_doc_view, name='ballotItemRetrieveDocs'),
-    # url(r'^docs/ballotItemsSyncOut/$', views_docs.ballot_items_sync_out_doc_view, name='ballotItemsSyncOutDocs'),
-    # url(r'^docs/ballotReturnedSyncOut/$',
-    # views_docs.ballot_returned_sync_out_doc_view, name='ballotReturnedSyncOutDocs'),
+    url(r'^docs/ballotItemsSyncOut/$', views_docs.ballot_items_sync_out_doc_view, name='ballotItemsSyncOutDocs'),
+    url(r'^docs/ballotReturnedSyncOut/$',
+        views_docs.ballot_returned_sync_out_doc_view, name='ballotReturnedSyncOutDocs'),
     url(r'^docs/candidateRetrieve/$', views_docs.candidate_retrieve_doc_view, name='candidateRetrieveDocs'),
     url(r'^docs/candidatesRetrieve/$', views_docs.candidates_retrieve_doc_view, name='candidatesRetrieveDocs'),
     url(r'^docs/candidatesSyncOut/$', views_docs.candidates_sync_out_doc_view, name='candidatesSyncOutDocs'),
@@ -132,8 +139,8 @@ urlpatterns = [
         views_docs.organization_stop_following_doc_view, name='organizationStopFollowingDocs'),
     url(r'^docs/organizationsFollowedRetrieve/',
         views_docs.organizations_followed_retrieve_doc_view, name='organizationsFollowedRetrieveDocs'),
-    # url(r'^docs/pollingLocationsSyncOut/$',
-    # views_docs.polling_locations_sync_out_doc_view, name='pollingLocationsSyncOutDocs'),
+    url(r'^docs/pollingLocationsSyncOut/$',
+        views_docs.polling_locations_sync_out_doc_view, name='pollingLocationsSyncOutDocs'),
     url(r'^docs/positionLikeCount/$', views_docs.position_like_count_doc_view, name='positionLikeCountDocs'),
     url(r'^docs/positionListForBallotItem/',
         views_docs.position_list_for_ballot_item_doc_view, name='positionListForBallotItemDocs'),
@@ -179,7 +186,7 @@ urlpatterns = [
         views_docs.voter_guides_to_follow_retrieve_doc_view, name='voterGuidesToFollowRetrieveDocs'),
     url(r'^docs/voterGuidesFollowedRetrieve/$',
         views_docs.voter_guides_followed_retrieve_doc_view, name='voterGuidesFollowedRetrieveDocs'),
-    # url(r'^docs/voterGuidesSyncOut/$', views_docs.voter_guides_sync_out_doc_view, name='voterGuidesSyncOutDocs'),
+    url(r'^docs/voterGuidesSyncOut/$', views_docs.voter_guides_sync_out_doc_view, name='voterGuidesSyncOutDocs'),
     url(r'^docs/voterLocationRetrieveFromIP/$',
         views_docs.voter_location_retrieve_from_ip_doc_view, name='voterLocationRetrieveFromIPDocs'),
     url(r'^docs/voterPhotoSave/$', views_docs.voter_photo_save_doc_view, name='voterPhotoSaveDocs'),

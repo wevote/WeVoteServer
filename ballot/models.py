@@ -4,11 +4,13 @@
 
 from candidate.models import CandidateCampaign
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Q
 from geopy.geocoders import get_geocoder_for_service
 
 from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
+from measure.models import ContestMeasureManager
+from office.models import ContestOfficeManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
@@ -185,6 +187,18 @@ class BallotItemManager(models.Model):
             contest_measure_id=0, contest_measure_we_vote_id=''):
         exception_multiple_object_returned = False
         new_ballot_item_created = False
+
+        if positive_value_exists(contest_office_we_vote_id) and not positive_value_exists(contest_office_id):
+            # Look up contest_office_id
+            contest_office_manager = ContestOfficeManager()
+            contest_office_id = contest_office_manager.fetch_contest_office_id_from_we_vote_id(
+                contest_office_we_vote_id)
+
+        if positive_value_exists(contest_measure_we_vote_id) and not positive_value_exists(contest_measure_id):
+            # Look up contest_measure_id
+            contest_measure_manager = ContestMeasureManager()
+            contest_measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(
+                contest_measure_we_vote_id)
 
         # We require both contest_office_id and contest_office_we_vote_id
         #  OR both contest_measure_id and contest_measure_we_vote_id
@@ -470,6 +484,82 @@ class BallotItemListManager(models.Model):
 
         results = {
             'ballot_returned_copied': True,
+        }
+        return results
+
+    def retrieve_possible_duplicate_ballot_items(self, ballot_item_display_name, google_civic_election_id,
+                                                 polling_location_we_vote_id,
+                                                 contest_office_we_vote_id, contest_measure_we_vote_id):
+        ballot_item_list_objects = []
+        filters = []
+        ballot_item_list_found = False
+
+        if not positive_value_exists(contest_office_we_vote_id) \
+                and not positive_value_exists(contest_measure_we_vote_id):
+            results = {
+                'success':                  False,
+                'status':                   "MISSING_MEASURE_AND_OFFICE_WE_VOTE_ID",
+                'google_civic_election_id': google_civic_election_id,
+                'ballot_item_list_found':   ballot_item_list_found,
+                'ballot_item_list':         ballot_item_list_objects,
+            }
+            return results
+
+        try:
+            ballot_item_queryset = BallotItem.objects.all()
+            ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
+            ballot_item_queryset = ballot_item_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
+
+            if positive_value_exists(contest_office_we_vote_id):
+                # Ignore entries with contest_office_we_vote_id coming in from master server
+                ballot_item_queryset = ballot_item_queryset.filter(~Q(
+                    contest_office_we_vote_id__iexact=contest_office_we_vote_id))
+            elif positive_value_exists(contest_measure_we_vote_id):
+                # Ignore entries with contest_office_we_vote_id coming in from master server
+                ballot_item_queryset = ballot_item_queryset.filter(~Q(
+                    contest_measure_we_vote_id__iexact=contest_measure_we_vote_id))
+
+            # We want to find candidates with *any* of these values
+            if positive_value_exists(ballot_item_display_name):
+                new_filter = Q(ballot_item_display_name__exact=ballot_item_display_name)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                ballot_item_queryset = ballot_item_queryset.filter(final_filters)
+
+            ballot_item_list_objects = ballot_item_queryset
+
+            if len(ballot_item_list_objects):
+                ballot_item_list_found = True
+                status = 'DUPLICATE_BALLOT_ITEMS_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_DUPLICATE_BALLOT_ITEMS_RETRIEVED'
+                success = True
+        except BallotItem.DoesNotExist:
+            # No ballot_items found. Not a problem.
+            status = 'NO_DUPLICATE_BALLOT_ITEMS_FOUND_DoesNotExist'
+            ballot_item_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_possible_duplicate_ballot_items ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'ballot_item_list_found':   ballot_item_list_found,
+            'ballot_item_list':         ballot_item_list_objects,
         }
         return results
 
@@ -785,6 +875,71 @@ class BallotReturnedManager(models.Model):
             'ballot_returned': ballot_returned,
         }
 
+    def update_or_create_ballot_returned(
+            self, polling_location_we_vote_id, voter_id, google_civic_election_id, election_date=False,
+            election_description_text=False, latitude=False, longitude=False,
+            normalized_city=False, normalized_line1=False, normalized_line2=False, normalized_state=False,
+            normalized_zip=False, text_for_map_search=False):
+        exception_multiple_object_returned = False
+        new_ballot_returned_created = False
+
+        if not google_civic_election_id:
+            success = False
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID-update_or_create_ballot_returned'
+        elif (not polling_location_we_vote_id) and (not voter_id):
+            success = False
+            status = 'MISSING_BALLOT_RETURNED_POLLING_LOCATION_AND_VOTER_ID-update_or_create_ballot_returned'
+        else:
+            try:
+                ballot_returned, new_ballot_returned_created = BallotReturned.objects.get_or_create(
+                    google_civic_election_id__exact=google_civic_election_id,
+                    polling_location_we_vote_id__iexact=polling_location_we_vote_id,
+                    voter_id__iexact=voter_id
+                )
+
+                if election_date is not False:
+                    ballot_returned.election_date = election_date
+                if election_description_text is not False:
+                    ballot_returned.election_description_text = election_description_text
+                if latitude is not False:
+                    ballot_returned.latitude = latitude
+                if longitude is not False:
+                    ballot_returned.longitude = longitude
+                if normalized_city is not False:
+                    ballot_returned.normalized_city = normalized_city
+                if normalized_line1 is not False:
+                    ballot_returned.normalized_line1 = normalized_line1
+                if normalized_line2 is not False:
+                    ballot_returned.normalized_line2 = normalized_line2
+                if normalized_state is not False:
+                    ballot_returned.normalized_state = normalized_state
+                if normalized_zip is not False:
+                    ballot_returned.normalized_zip = normalized_zip
+                if text_for_map_search is not False:
+                    ballot_returned.text_for_map_search = text_for_map_search
+                ballot_returned.save()
+
+                if new_ballot_returned_created:
+                    success = True
+                    status = 'BALLOT_RETURNED_CREATED'
+                else:
+                    success = True
+                    status = 'BALLOT_RETURNED_UPDATED'
+
+            except BallotReturned.MultipleObjectsReturned as e:
+                handle_record_found_more_than_one_exception(e, logger=logger)
+                success = False
+                status = 'MULTIPLE_MATCHING_BALLOT_RETURNED_FOUND'
+                exception_multiple_object_returned = True
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'MultipleObjectsReturned':      exception_multiple_object_returned,
+            'new_ballot_returned_created':  new_ballot_returned_created,
+        }
+        return results
+
 
 class BallotReturnedListManager(models.Model):
     """
@@ -819,6 +974,62 @@ class BallotReturnedListManager(models.Model):
             'status':                       status,
             'ballot_returned_list_found':   ballot_returned_list_found,
             'ballot_returned_list':         ballot_returned_list,
+        }
+        return results
+
+    def retrieve_possible_duplicate_ballot_returned(self, google_civic_election_id, normalized_line1, normalized_zip,
+                                                    polling_location_we_vote_id):
+        ballot_returned_list_objects = []
+        ballot_returned_list_found = False
+
+        if not positive_value_exists(normalized_line1) \
+                and not positive_value_exists(normalized_zip):
+            results = {
+                'success':                      False,
+                'status':                       "MISSING_LINE1_AND_ZIP",
+                'google_civic_election_id':     google_civic_election_id,
+                'ballot_returned_list_found':   ballot_returned_list_found,
+                'ballot_returned_list':         ballot_returned_list_objects,
+            }
+            return results
+
+        try:
+            ballot_returned_queryset = BallotReturned.objects.all()
+            ballot_returned_queryset = ballot_returned_queryset.filter(
+                google_civic_election_id=google_civic_election_id)
+            ballot_returned_queryset = ballot_returned_queryset.filter(normalized_line1__iexact=normalized_line1)
+            ballot_returned_queryset = ballot_returned_queryset.filter(normalized_zip__iexact=normalized_zip)
+
+            # Ignore entries with polling_location_we_vote_id coming in from master server
+            ballot_returned_queryset = ballot_returned_queryset.filter(~Q(
+                polling_location_we_vote_id__iexact=polling_location_we_vote_id))
+
+            ballot_returned_list_objects = ballot_returned_queryset
+
+            if len(ballot_returned_list_objects):
+                ballot_returned_list_found = True
+                status = 'DUPLICATE_BALLOT_RETURNED_ITEMS_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_DUPLICATE_BALLOT_RETURNED_ITEMS_RETRIEVED'
+                success = True
+        except BallotReturned.DoesNotExist:
+            # No ballot_returned found. Not a problem.
+            status = 'NO_DUPLICATE_BALLOT_RETURNED_ITEMS_FOUND_DoesNotExist'
+            ballot_returned_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_possible_duplicate_ballot_returned ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'ballot_returned_list_found':   ballot_returned_list_found,
+            'ballot_returned_list':         ballot_returned_list_objects,
         }
         return results
 

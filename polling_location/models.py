@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.functions import extract_zip_formatted_from_zip9, positive_value_exists
@@ -76,7 +77,7 @@ class PollingLocation(models.Model):
 
 class PollingLocationManager(models.Model):
 
-    def update_or_create_polling_location(self,
+    def update_or_create_polling_location(self, we_vote_id,
                                           polling_location_id, location_name, polling_hours_text, directions_text,
                                           line1, line2, city, state, zip_long):
         """
@@ -85,42 +86,74 @@ class PollingLocationManager(models.Model):
         exception_multiple_object_returned = False
         new_polling_location_created = False
         new_polling_location = PollingLocation()
+        proceed_to_update_or_save = True
+        success = False
+        status = 'ENTERING update_or_create_polling_location'
 
-        if not polling_location_id:
-            success = False
-            status = 'MISSING_POLLING_LOCATION_ID'
-        elif not line1:
-            success = False
-            status = 'MISSING_POLLING_LOCATION_LINE1'
-        elif not city:
-            success = False
-            status = 'MISSING_POLLING_LOCATION_CITY'
-        elif not state:
-            success = False
-            status = 'MISSING_POLLING_LOCATION_STATE'
-        # Note: It turns out that some states, like Alaska, do not provide ZIP codes
-        # elif not zip_long:
-        #     success = False
-        #     status = 'MISSING_POLLING_LOCATION_ZIP'
+        if positive_value_exists(we_vote_id):
+            # If here we are dealing with an existing polling_location
+            pass
         else:
+            if not polling_location_id:
+                success = False
+                status = 'MISSING_POLLING_LOCATION_ID'
+                proceed_to_update_or_save = False
+            elif not line1:
+                success = False
+                status = 'MISSING_POLLING_LOCATION_LINE1'
+                proceed_to_update_or_save = False
+            elif not city:
+                success = False
+                status = 'MISSING_POLLING_LOCATION_CITY'
+                proceed_to_update_or_save = False
+            elif not state:
+                success = False
+                status = 'MISSING_POLLING_LOCATION_STATE'
+                proceed_to_update_or_save = False
+            # Note: It turns out that some states, like Alaska, do not provide ZIP codes
+            # elif not zip_long:
+            #     success = False
+            #     status = 'MISSING_POLLING_LOCATION_ZIP'
+
+        if proceed_to_update_or_save:
             try:
-                updated_values = {
-                    # Values we search against
-                    'polling_location_id': polling_location_id,
-                    'state': state,
-                    # The rest of the values
-                    'location_name': location_name.strip() if location_name else '',
-                    'polling_hours_text': polling_hours_text.strip() if polling_hours_text else '',
-                    'directions_text': directions_text.strip() if directions_text else '',
-                    'line1': line1.strip() if line1 else '',
-                    'line2': line2,
-                    'city': city.strip() if city else '',
-                    'zip_long': zip_long,
-                }
-                # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's
-                #  are unique from state-to-state
-                new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
-                    polling_location_id__exact=polling_location_id, state=state, defaults=updated_values)
+                if positive_value_exists(we_vote_id):
+                    updated_values = {
+                        # Values we search against
+                        # No need to include we_vote_id here
+                        # The rest of the values
+                        'polling_location_id': polling_location_id,
+                        'state': state,
+                        'location_name': location_name.strip() if location_name else '',
+                        'polling_hours_text': polling_hours_text.strip() if polling_hours_text else '',
+                        'directions_text': directions_text.strip() if directions_text else '',
+                        'line1': line1.strip() if line1 else '',
+                        'line2': line2,
+                        'city': city.strip() if city else '',
+                        'zip_long': zip_long,
+                    }
+                    # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's
+                    #  are unique from state-to-state
+                    new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
+                        we_vote_id__iexact=we_vote_id, defaults=updated_values)
+                else:
+                    updated_values = {
+                        # Values we search against
+                        'polling_location_id': polling_location_id,
+                        'state': state,
+                        # The rest of the values
+                        'location_name': location_name.strip() if location_name else '',
+                        'polling_hours_text': polling_hours_text.strip() if polling_hours_text else '',
+                        'directions_text': directions_text.strip() if directions_text else '',
+                        'line1': line1.strip() if line1 else '',
+                        'line2': line2,
+                        'city': city.strip() if city else '',
+                        'zip_long': zip_long,
+                    }
+                    # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's
+                    #  are unique from state-to-state
+                    new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
+                        polling_location_id__exact=polling_location_id, state=state, defaults=updated_values)
                 success = True
                 status = 'POLLING_LOCATION_SAVED'
             except PollingLocation.MultipleObjectsReturned as e:
@@ -212,3 +245,90 @@ class PollingLocationManager(models.Model):
                 'polling_location_list':        [],
             }
             return results
+
+
+class PollingLocationListManager(models.Model):
+
+    def retrieve_possible_duplicate_polling_locations(self, candidate_name, google_civic_candidate_name,
+                                               google_civic_election_id, office_we_vote_id,
+                                               politician_we_vote_id,
+                                               candidate_twitter_handle, vote_smart_id, maplight_id,
+                                               we_vote_id_from_master=''):
+        candidate_list_objects = []
+        filters = []
+        candidate_list_found = False
+
+        try:
+            candidate_queryset = CandidateCampaign.objects.all()
+            candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            # We don't look for office_we_vote_id because of the chance that locally we are using a
+            # different we_vote_id
+            # candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+
+            # Ignore entries with we_vote_id coming in from master server
+            if positive_value_exists(we_vote_id_from_master):
+                candidate_queryset = candidate_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+
+            # We want to find candidates with *any* of these values
+            if positive_value_exists(google_civic_candidate_name):
+                new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
+                filters.append(new_filter)
+            elif positive_value_exists(candidate_name):
+                new_filter = Q(candidate_name__iexact=candidate_name)
+                filters.append(new_filter)
+
+            if positive_value_exists(politician_we_vote_id):
+                new_filter = Q(politician_we_vote_id__iexact=politician_we_vote_id)
+                filters.append(new_filter)
+
+            if positive_value_exists(candidate_twitter_handle):
+                new_filter = Q(candidate_twitter_handle__iexact=candidate_twitter_handle)
+                filters.append(new_filter)
+
+            if positive_value_exists(vote_smart_id):
+                new_filter = Q(vote_smart_id=vote_smart_id)
+                filters.append(new_filter)
+
+            if positive_value_exists(maplight_id):
+                new_filter = Q(maplight_id=maplight_id)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                candidate_queryset = candidate_queryset.filter(final_filters)
+
+            candidate_list_objects = candidate_queryset
+
+            if len(candidate_list_objects):
+                candidate_list_found = True
+                status = 'DUPLICATE_CANDIDATES_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_DUPLICATE_CANDIDATES_RETRIEVED'
+                success = True
+        except CandidateCampaign.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_DUPLICATE_CANDIDATES_FOUND_DoesNotExist'
+            candidate_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_possible_duplicate_candidates ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'candidate_list_found':     candidate_list_found,
+            'candidate_list':           candidate_list_objects,
+        }
+        return results
+

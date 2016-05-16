@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .models import PollingLocation
-from .controllers import import_and_save_all_polling_locations_data
+from .controllers import import_and_save_all_polling_locations_data, polling_locations_import_from_master_server
+from .serializers import PollingLocationSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -13,6 +14,8 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, positive_value_exists
 import wevote_functions.admin
@@ -81,16 +84,40 @@ STATE_LIST_IMPORT = {
 }
 
 
-@login_required
-def import_polling_locations_view(request):
-    authority_required = {'admin'}  # admin, verified_volunteer
-    if not voter_has_authority(request, authority_required):
-        return redirect_to_sign_in_page(request, authority_required)
+# This page does not need to be protected.
+class PollingLocationsSyncOutView(APIView):
+    def get(self, request, format=None):
+        state = request.GET.get('state', '')
 
-    # This should be updated to be a view with some import options
-    messages.add_message(request, messages.INFO, 'TODO We need to create interface where we can control which '
-                                                 'polling_locations import file to use.')
-    return HttpResponseRedirect(reverse('polling_location:polling_location_list', args=()))
+        polling_location_list = PollingLocation.objects.all()
+        if positive_value_exists(state):
+            polling_location_list = polling_location_list.filter(state__iexact=state)
+
+        serializer = PollingLocationSerializer(polling_location_list, many=True)
+        return Response(serializer.data)
+
+
+@login_required
+def polling_locations_import_from_master_server_view(request):
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', '')
+
+    results = polling_locations_import_from_master_server(request, state_code)
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Polling Locations import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Master data not imported (local duplicates found): '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id) + "&state_code=" + str(state_code))
 
 
 @login_required

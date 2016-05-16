@@ -76,6 +76,38 @@
 
 
 {# ################################### #}
+<h4>Polling Locations</h4>
+
+<p><a href="{% url 'polling_location:polling_locations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}">
+    Retrieve Polling Locations</a></p>
+<br />
+
+
+{# ################################### #}
+<h4>Ballot Items</h4>
+
+<p><a href="{% url 'ballot:ballot_items_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}">
+    Retrieve Saved Ballot Items</a></p>
+<br />
+
+
+{# ################################### #}
+<h4>Ballot Returned</h4>
+
+<p><a href="{% url 'ballot:ballot_returned_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}">
+    Retrieve Saved Ballots</a></p>
+<br />
+
+
+{# ################################### #}
+<h4>Voter Guides</h4>
+
+<p><a href="{% url 'voter_guide:voter_guides_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}">
+    Retrieve Voter Guides</a></p>
+<br />
+
+
+{# ################################### #}
     <br />
     <br />
     <br />
@@ -86,6 +118,10 @@
 <p>MEASURES_SYNC_URL: {{ measures_sync_url }}</p>
 <p>ORGANIZATIONS_SYNC_URL: {{ organizations_sync_url }}</p>
 <p>POSITIONS_SYNC_URL: {{ positions_sync_url }}</p>
+<p>POLLING_LOCATIONS_SYNC_URL: {{ polling_locations_sync_url }}</p>
+<p>BALLOT_ITEMS_SYNC_URL: {{ ballot_items_sync_url }}</p>
+<p>BALLOT_RETURNED_SYNC_URL: {{ ballot_returned_sync_url }}</p>
+<p>VOTER_GUIDES_SYNC_URL: {{ voter_guides_sync_url }}</p>
 
 
 <script>

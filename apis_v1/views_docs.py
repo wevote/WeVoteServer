@@ -2,7 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_retrieve_doc, candidate_retrieve_doc, \
+from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_retrieve_doc, \
+    ballot_items_sync_out_doc, ballot_returned_sync_out_doc, \
+    candidate_retrieve_doc, \
     candidates_retrieve_doc, candidates_sync_out_doc, device_id_generate_doc, \
     elections_sync_out_doc, facebook_disconnect_doc, facebook_sign_in_doc, \
     measure_retrieve_doc, measures_sync_out_doc, \
@@ -10,6 +12,7 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     organization_count_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, organizations_sync_out_doc, \
+    polling_locations_sync_out_doc, \
     position_like_count_doc, position_list_for_ballot_item_doc, position_list_for_opinion_maker_doc, \
     position_oppose_count_for_ballot_item_doc, \
     position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
@@ -20,8 +23,8 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     voter_address_save_doc, voter_all_positions_retrieve_doc, voter_all_stars_status_retrieve_doc, \
     voter_ballot_items_retrieve_doc, voter_ballot_items_retrieve_from_google_civic_doc, voter_count_doc, \
     voter_create_doc, voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
-    voter_guides_followed_retrieve_doc, \
-    voter_guides_to_follow_retrieve_doc, voter_location_retrieve_from_ip_doc, voter_photo_save_doc, \
+    voter_guides_followed_retrieve_doc, voter_guides_sync_out_doc, voter_guides_to_follow_retrieve_doc, \
+    voter_location_retrieve_from_ip_doc, voter_photo_save_doc, \
     voter_position_like_off_save_doc, voter_position_like_on_save_doc, voter_position_like_status_retrieve_doc, \
     voter_position_comment_save_doc, voter_position_retrieve_doc, \
     voter_opposing_save_doc, voter_retrieve_doc, voter_sign_out_doc, voter_star_off_save_doc, voter_star_on_save_doc, \
@@ -75,6 +78,26 @@ def ballot_item_retrieve_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = ballot_item_retrieve_doc.ballot_item_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def ballot_items_sync_out_doc_view(request):
+    """
+    Show documentation about ballotItemsSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = ballot_items_sync_out_doc.ballot_items_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def ballot_returned_sync_out_doc_view(request):
+    """
+    Show documentation about ballotReturnedSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = ballot_returned_sync_out_doc.ballot_returned_sync_out_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
@@ -497,6 +520,16 @@ def voter_guides_followed_retrieve_doc_view(request):
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
 
+def voter_guides_sync_out_doc_view(request):
+    """
+    Show documentation about voterGuidesSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_guides_sync_out_doc.voter_guides_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
 def voter_guides_to_follow_retrieve_doc_view(request):
     """
     Show documentation about voterGuidesToFollowRetrieve
@@ -554,6 +587,16 @@ def voter_position_like_status_retrieve_doc_view(request):
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_position_like_status_retrieve_doc.voter_position_like_status_retrieve_doc_template_values(
         url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def polling_locations_sync_out_doc_view(request):
+    """
+    Show documentation about pollingLocationsSyncOut
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = polling_locations_sync_out_doc.polling_locations_sync_out_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

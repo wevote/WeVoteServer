@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager
+from .models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager
+from .serializers import BallotItemSerializer, BallotReturnedSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from office.models import ContestOffice, ContestOfficeManager
 from django.http import HttpResponseRedirect
@@ -14,11 +15,89 @@ from django.shortcuts import render
 from election.models import Election, ElectionManager
 from measure.models import ContestMeasureManager
 from polling_location.models import PollingLocation, PollingLocationManager
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+# This page does not need to be protected.
+class BallotItemsSyncOutView(APIView):
+    def get(self, request, format=None):
+        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+        ballot_item_list = BallotItem.objects.all()
+        # We only want BallotItem values associated with polling locations
+        ballot_item_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
+            polling_location_we_vote_id__exact='')
+        if positive_value_exists(google_civic_election_id):
+            ballot_item_list = ballot_item_list.filter(google_civic_election_id=google_civic_election_id)
+
+        serializer = BallotItemSerializer(ballot_item_list, many=True)
+        return Response(serializer.data)
+
+
+# This page does not need to be protected.
+class BallotReturnedSyncOutView(APIView):
+    def get(self, request, format=None):
+        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+        ballot_returned_list = BallotReturned.objects.all()
+        # We only want BallotReturned values associated with polling locations
+        ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
+            polling_location_we_vote_id__exact='')
+        if positive_value_exists(google_civic_election_id):
+            ballot_returned_list = ballot_returned_list.filter(google_civic_election_id=google_civic_election_id)
+
+        serializer = BallotReturnedSerializer(ballot_returned_list, many=True)
+        return Response(serializer.data)
+
+
+@login_required
+def ballot_items_import_from_master_server_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    results = candidates_import_from_master_server(request, google_civic_election_id)
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Candidates import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Master data not imported (local duplicates found): '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id))
+
+
+@login_required
+def ballot_returned_import_from_master_server_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+    results = candidates_import_from_master_server(request, google_civic_election_id)
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Candidates import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Master data not imported (local duplicates found): '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id))
 
 
 @login_required

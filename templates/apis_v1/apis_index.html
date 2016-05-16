@@ -145,6 +145,11 @@
         <td>static c3</td>
         <td>Provide another We Vote Server a complete listing of all public elections information.</td>
     </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:pollingLocationsSyncOutDocs' %}">pollingLocationsSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all polling locations.</td>
+    </tr>
 
     {###  ###}
     <tr>
@@ -155,6 +160,16 @@
         <td>static c3</td>
         <td>Retrieve details about one office, candidate or measure. This is a wrapper for officeRetrieve,
         candidateRetrieve and measureRetrieve.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:ballotItemsSyncOutDocs' %}">ballotItemsSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all ballot items information.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:ballotReturnedSyncOutDocs' %}">ballotReturnedSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all ballot_returned items.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:officeRetrieveDocs' %}">officeRetrieve</a></td>
@@ -392,6 +407,11 @@
         <td><a href="{% url 'apis_v1:voterGuidePossibilitySaveDocs' %}">voterGuidePossibilitySave</a></td>
         <td></td>
         <td>Mark this URL as a voter guide.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterGuidesSyncOutDocs' %}">voterGuidesSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all voter guides.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterGuidesToFollowRetrieveDocs' %}">voterGuidesToFollowRetrieve</a></td>

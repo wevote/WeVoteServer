@@ -973,6 +973,89 @@ class VoterGuideList(models.Model):
 
         return voter_guide_list_sorted
 
+    def retrieve_possible_duplicate_voter_guides(self, candidate_name, google_civic_candidate_name,
+                                               google_civic_election_id, office_we_vote_id,
+                                               politician_we_vote_id,
+                                               candidate_twitter_handle, vote_smart_id, maplight_id,
+                                               we_vote_id_from_master=''):
+        candidate_list_objects = []
+        filters = []
+        candidate_list_found = False
+
+        try:
+            candidate_queryset = CandidateCampaign.objects.all()
+            candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
+            # We don't look for office_we_vote_id because of the chance that locally we are using a
+            # different we_vote_id
+            # candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+
+            # Ignore entries with we_vote_id coming in from master server
+            if positive_value_exists(we_vote_id_from_master):
+                candidate_queryset = candidate_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+
+            # We want to find candidates with *any* of these values
+            if positive_value_exists(google_civic_candidate_name):
+                new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
+                filters.append(new_filter)
+            elif positive_value_exists(candidate_name):
+                new_filter = Q(candidate_name__iexact=candidate_name)
+                filters.append(new_filter)
+
+            if positive_value_exists(politician_we_vote_id):
+                new_filter = Q(politician_we_vote_id__iexact=politician_we_vote_id)
+                filters.append(new_filter)
+
+            if positive_value_exists(candidate_twitter_handle):
+                new_filter = Q(candidate_twitter_handle__iexact=candidate_twitter_handle)
+                filters.append(new_filter)
+
+            if positive_value_exists(vote_smart_id):
+                new_filter = Q(vote_smart_id=vote_smart_id)
+                filters.append(new_filter)
+
+            if positive_value_exists(maplight_id):
+                new_filter = Q(maplight_id=maplight_id)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                candidate_queryset = candidate_queryset.filter(final_filters)
+
+            candidate_list_objects = candidate_queryset
+
+            if len(candidate_list_objects):
+                candidate_list_found = True
+                status = 'DUPLICATE_CANDIDATES_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_DUPLICATE_CANDIDATES_RETRIEVED'
+                success = True
+        except CandidateCampaign.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_DUPLICATE_CANDIDATES_FOUND_DoesNotExist'
+            candidate_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_possible_duplicate_candidates ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'candidate_list_found':     candidate_list_found,
+            'candidate_list':           candidate_list_objects,
+        }
+        return results
+
 
 class VoterGuidePossibilityManager(models.Manager):
     """

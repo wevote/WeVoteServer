@@ -8,8 +8,9 @@ from . import views_admin
 
 urlpatterns = [
     url(r'^$', views_admin.polling_location_list_view, name='polling_location_list',),
-    # Interface for bringing in polling locations
-    url(r'^import_polling_locations/$', views_admin.import_polling_locations_view, name='import_polling_locations'),
+    url(r'^import/$',
+        views_admin.polling_locations_import_from_master_server_view,
+        name='polling_locations_import_from_master_server'),
     # Processing incoming file with polling locations
     url(r'^import_polling_locations_process/$', views_admin.import_polling_locations_process_view,
         name='import_polling_locations_process'),
