@@ -2,11 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-import glob
-
-from .models import PollingLocationManager
+from .models import PollingLocationListManager, PollingLocationManager
 from config.base import get_environment_variable
 from django.contrib import messages
+import glob
 import json
 import requests
 import wevote_functions.admin
@@ -45,42 +44,42 @@ def polling_locations_import_from_master_server(request, state_code):
 
 def filter_polling_locations_structured_json_for_local_duplicates(structured_json):
     """
-    With this function, we remove candidates that seem to be duplicates, but have different we_vote_id's.
-    We do not check to see if we have a matching office this routine -- that is done elsewhere.
+    With this function, we remove polling_locations that seem to be duplicates, but have different we_vote_id's.
     :param structured_json:
     :return:
     """
     duplicates_removed = 0
     filtered_structured_json = []
-    measure_list_manager = ContestMeasureList()
-    for one_measure in structured_json:
-        measure_title = one_measure['measure_title'] if 'measure_title' in one_measure else ''
-        we_vote_id = one_measure['we_vote_id'] if 'we_vote_id' in one_measure else ''
-        google_civic_election_id = \
-            one_measure['google_civic_election_id'] if 'google_civic_election_id' in one_measure else ''
-        measure_url = one_measure['measure_url'] if 'measure_url' in one_measure else ''
-        maplight_id = one_measure['maplight_id'] if 'maplight_id' in one_measure else ''
+    polling_location_list_manager = PollingLocationListManager()
+    for one_polling_location in structured_json:
+        polling_location_id = one_polling_location['polling_location_id'] \
+            if 'polling_location_id' in one_polling_location else ''
+        we_vote_id = one_polling_location['we_vote_id'] if 'we_vote_id' in one_polling_location else ''
+        state = one_polling_location['state'] if 'state' in one_polling_location else ''
+        location_name = one_polling_location['location_name'] if 'location_name' in one_polling_location else ''
+        line1 = one_polling_location['line1'] if 'line1' in one_polling_location else ''
+        zip_long = one_polling_location['zip_long'] if 'zip_long' in one_polling_location else ''
 
         # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
         we_vote_id_from_master = we_vote_id
 
-        results = measure_list_manager.retrieve_possible_duplicate_measures(
-            measure_title, google_civic_election_id, measure_url, maplight_id,
+        results = polling_location_list_manager.retrieve_possible_duplicate_polling_locations(
+            polling_location_id, state, location_name, line1, zip_long,
             we_vote_id_from_master)
 
-        if results['measure_list_found']:
+        if results['polling_location_list_found']:
             # There seems to be a duplicate already in this database using a different we_vote_id
             duplicates_removed += 1
         else:
-            filtered_structured_json.append(one_measure)
+            filtered_structured_json.append(one_polling_location)
 
-    candidates_results = {
+    polling_locations_results = {
         'success':              True,
-        'status':               "FILTER_MEASURES_FOR_DUPLICATES_PROCESS_COMPLETE",
+        'status':               "FILTER_POLLING_LOCATIONS_FOR_DUPLICATES_PROCESS_COMPLETE",
         'duplicates_removed':   duplicates_removed,
         'structured_json':      filtered_structured_json,
     }
-    return candidates_results
+    return polling_locations_results
 
 
 def polling_locations_import_from_structured_json(structured_json):
@@ -89,78 +88,59 @@ def polling_locations_import_from_structured_json(structured_json):
     :param structured_json:
     :return:
     """
-    contest_measure_manager = ContestMeasureManager()
-    measures_saved = 0
-    measures_updated = 0
-    measures_not_processed = 0
-    for one_measure in structured_json:
-        we_vote_id = one_measure['we_vote_id'] if 'we_vote_id' in one_measure else ''
-        google_civic_election_id = \
-            one_measure['google_civic_election_id'] if 'google_civic_election_id' in one_measure else ''
+    polling_location_manager = PollingLocationManager()
+    polling_locations_saved = 0
+    polling_locations_updated = 0
+    polling_locations_not_processed = 0
+    for one_polling_location in structured_json:
+        we_vote_id = one_polling_location['we_vote_id'] if 'we_vote_id' in one_polling_location else ''
+        line1 = one_polling_location['line1'] if 'line1' in one_polling_location else ''
+        city = one_polling_location['city'] if 'city' in one_polling_location else ''
+        state = one_polling_location['state'] if 'state' in one_polling_location else ''
 
-        if positive_value_exists(we_vote_id) and positive_value_exists(google_civic_election_id):
+        if positive_value_exists(we_vote_id) and positive_value_exists(line1) and positive_value_exists(city) and \
+                positive_value_exists(state):
             proceed_to_update_or_create = True
         else:
             proceed_to_update_or_create = False
 
         if proceed_to_update_or_create:
-            measure_title = one_measure['measure_title'] if 'measure_title' in one_measure else ''
-            district_id = one_measure['district_id'] if 'district_id' in one_measure else 0
-            district_name = one_measure['district_name'] if 'district_name' in one_measure else 0
-            state_code = one_measure['state_code'] if 'state_code' in one_measure else ''
+            # Values that are not required
+            polling_location_id = one_polling_location['polling_location_id'] \
+                if 'polling_location_id' in one_polling_location else ''
+            location_name = one_polling_location['location_name'] if 'location_name' in one_polling_location else ''
+            polling_hours_text = one_polling_location['polling_hours_text'] \
+                if 'polling_hours_text' in one_polling_location else ''
+            directions_text = one_polling_location['directions_text'] \
+                if 'directions_text' in one_polling_location else ''
+            line2 = one_polling_location['line2'] if 'line2' in one_polling_location else ''
+            zip_long = one_polling_location['zip_long'] if 'zip_long' in one_polling_location else ''
 
-            updated_contest_measure_values = {
-                # Values we search against
-                'we_vote_id': we_vote_id,
-                'google_civic_election_id': google_civic_election_id,
-                # The rest of the values
-                'ballotpedia_page_title': one_measure['ballotpedia_page_title'] if 'ballotpedia_page_title' in
-                                                                                   one_measure else '',
-                'ballotpedia_photo_url': one_measure['ballotpedia_photo_url'] if 'ballotpedia_photo_url' in
-                                                                                 one_measure else '',
-                'district_id': district_id,
-                'district_name': district_name,
-                'district_scope': one_measure['district_scope'] if 'district_scope' in one_measure else '',
-                'maplight_id': one_measure['maplight_id'] if 'maplight_id' in one_measure else None,
-                'measure_subtitle': one_measure['measure_subtitle'] if 'measure_subtitle' in one_measure else '',
-                'measure_text': one_measure['measure_text'] if 'measure_text' in one_measure else '',
-                'measure_url': one_measure['measure_url'] if 'measure_url' in one_measure else '',
-                'measure_title': measure_title,
-                'ocd_division_id': one_measure['ocd_division_id'] if 'ocd_division_id' in one_measure else '',
-                'primary_party': one_measure['primary_party'] if 'primary_party' in one_measure else '',
-                'state_code': state_code,
-                'wikipedia_page_id': one_measure['wikipedia_page_id'] if 'wikipedia_page_id' in one_measure else '',
-                'wikipedia_page_title': one_measure['wikipedia_page_title'] if 'wikipedia_page_title' in
-                                                                               one_measure else '',
-                'wikipedia_photo_url': one_measure['wikipedia_photo_url'] if 'wikipedia_photo_url' in
-                                                                             one_measure else '',
-            }
-
-            results = contest_measure_manager.update_or_create_contest_measure(
-                we_vote_id, google_civic_election_id, measure_title,
-                district_id, district_name, state_code, updated_contest_measure_values)
+            results = polling_location_manager.update_or_create_polling_location(
+                we_vote_id, polling_location_id, location_name, polling_hours_text, directions_text,
+                line1, line2, city, state, zip_long)
         else:
-            measures_not_processed += 1
+            polling_locations_not_processed += 1
             results = {
                 'success': False,
                 'status': 'Required value missing, cannot update or create'
             }
 
         if results['success']:
-            if results['new_measure_created']:
-                measures_saved += 1
+            if results['new_polling_location_created']:
+                polling_locations_saved += 1
             else:
-                measures_updated += 1
+                polling_locations_updated += 1
         else:
-            measures_not_processed += 1
-    measures_results = {
-        'success': True,
-        'status': "MEASURES_IMPORT_PROCESS_COMPLETE",
-        'saved': measures_saved,
-        'updated': measures_updated,
-        'not_processed': measures_not_processed,
+            polling_locations_not_processed += 1
+    polling_locations_results = {
+        'success':          True,
+        'status':           "POLLING_LOCATIONS_IMPORT_PROCESS_COMPLETE",
+        'saved':            polling_locations_saved,
+        'updated':          polling_locations_updated,
+        'not_processed':    polling_locations_not_processed,
     }
-    return measures_results
+    return polling_locations_results
 
 
 def import_and_save_all_polling_locations_data(state_code=''):

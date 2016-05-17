@@ -21,7 +21,7 @@ from polling_location.controllers import import_and_save_all_polling_locations_d
 from position.controllers import positions_import_from_sample_file
 from voter.models import Voter, VoterDeviceLinkManager, VoterManager, voter_has_authority, voter_setup
 from wevote_functions.functions import delete_voter_api_device_id_cookie, generate_voter_device_id, \
-    get_voter_api_device_id, positive_value_exists, set_voter_api_device_id
+    get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
 
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")
@@ -329,12 +329,18 @@ def sync_data_with_master_servers_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    state_code = request.GET.get('state_code', '')
 
     election_list = Election.objects.order_by('-election_day_text')
 
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
     template_values = {
-        'election_list':            election_list,
-        'google_civic_election_id': google_civic_election_id,
+        'election_list':                election_list,
+        'google_civic_election_id':     google_civic_election_id,
+        'state_list':                   sorted_state_list,
+        'state_code':                   state_code,
 
         'ballot_items_sync_url':        BALLOT_ITEMS_SYNC_URL,
         'ballot_returned_sync_url':     BALLOT_RETURNED_SYNC_URL,

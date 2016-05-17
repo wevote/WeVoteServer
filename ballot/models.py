@@ -5,12 +5,12 @@
 from candidate.models import CandidateCampaign
 from django.db import models
 from django.db.models import F, Q
-from geopy.geocoders import get_geocoder_for_service
-
 from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
+from geopy.geocoders import get_geocoder_for_service
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
+from polling_location.models import PollingLocationManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 
@@ -188,6 +188,14 @@ class BallotItemManager(models.Model):
         exception_multiple_object_returned = False
         new_ballot_item_created = False
 
+        # Make sure we have this polling_location
+        polling_location_manager = PollingLocationManager()
+        results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+        if results['polling_location_found']:
+            polling_location_found = True
+        else:
+            polling_location_found = False
+
         if positive_value_exists(contest_office_we_vote_id) and not positive_value_exists(contest_office_id):
             # Look up contest_office_id
             contest_office_manager = ContestOfficeManager()
@@ -217,6 +225,9 @@ class BallotItemManager(models.Model):
         elif not polling_location_we_vote_id:
             success = False
             status = 'MISSING_POLLING_LOCATION_WE_VOTE_ID'
+        elif not polling_location_found:
+            success = False
+            status = 'MISSING_POLLING_LOCATION_LOCALLY'
         else:
             try:
                 # Use get_or_create to see if a ballot item exists
@@ -494,7 +505,37 @@ class BallotItemListManager(models.Model):
         filters = []
         ballot_item_list_found = False
 
-        if not positive_value_exists(contest_office_we_vote_id) \
+        if not positive_value_exists(google_civic_election_id):
+            # We must have a google_civic_election_id
+            results = {
+                'success':                  False,
+                'status':                   "MISSING_GOOGLE_CIVIC_ELECTION_ID",
+                'google_civic_election_id': google_civic_election_id,
+                'ballot_item_list_found':   ballot_item_list_found,
+                'ballot_item_list':         ballot_item_list_objects,
+            }
+            return results
+        elif not positive_value_exists(polling_location_we_vote_id):
+            # We must have a polling_location_we_vote_id to look up
+            results = {
+                'success':                  False,
+                'status':                   "MISSING_POLLING_LOCATION_WE_VOTE_ID",
+                'google_civic_election_id': google_civic_election_id,
+                'ballot_item_list_found':   ballot_item_list_found,
+                'ballot_item_list':         ballot_item_list_objects,
+            }
+            return results
+        elif not positive_value_exists(ballot_item_display_name):
+            # We must have a ballot_item_display_name to look up
+            results = {
+                'success':                  False,
+                'status':                   "MISSING_BALLOT_ITEM_DISPLAY_NAME",
+                'google_civic_election_id': google_civic_election_id,
+                'ballot_item_list_found':   ballot_item_list_found,
+                'ballot_item_list':         ballot_item_list_objects,
+            }
+            return results
+        elif not positive_value_exists(contest_office_we_vote_id) \
                 and not positive_value_exists(contest_measure_we_vote_id):
             results = {
                 'success':                  False,
@@ -508,7 +549,8 @@ class BallotItemListManager(models.Model):
         try:
             ballot_item_queryset = BallotItem.objects.all()
             ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
-            ballot_item_queryset = ballot_item_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
+            ballot_item_queryset = ballot_item_queryset.filter(
+                polling_location_we_vote_id__iexact=polling_location_we_vote_id)
 
             if positive_value_exists(contest_office_we_vote_id):
                 # Ignore entries with contest_office_we_vote_id coming in from master server
@@ -1025,9 +1067,9 @@ class BallotReturnedListManager(models.Model):
             success = False
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'google_civic_election_id': google_civic_election_id,
+            'success':                      success,
+            'status':                       status,
+            'google_civic_election_id':     google_civic_election_id,
             'ballot_returned_list_found':   ballot_returned_list_found,
             'ballot_returned_list':         ballot_returned_list_objects,
         }

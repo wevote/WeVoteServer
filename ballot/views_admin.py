@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .controllers import ballot_items_import_from_master_server, ballot_returned_import_from_master_server
 from .models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager
 from .serializers import BallotItemSerializer, BallotReturnedSerializer
 from admin_tools.views import redirect_to_sign_in_page
@@ -31,7 +32,7 @@ class BallotItemsSyncOutView(APIView):
 
         ballot_item_list = BallotItem.objects.all()
         # We only want BallotItem values associated with polling locations
-        ballot_item_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
+        ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
             polling_location_we_vote_id__exact='')
         if positive_value_exists(google_civic_election_id):
             ballot_item_list = ballot_item_list.filter(google_civic_election_id=google_civic_election_id)
@@ -47,7 +48,7 @@ class BallotReturnedSyncOutView(APIView):
 
         ballot_returned_list = BallotReturned.objects.all()
         # We only want BallotReturned values associated with polling locations
-        ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
+        ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
             polling_location_we_vote_id__exact='')
         if positive_value_exists(google_civic_election_id):
             ballot_returned_list = ballot_returned_list.filter(google_civic_election_id=google_civic_election_id)
@@ -60,12 +61,12 @@ class BallotReturnedSyncOutView(APIView):
 def ballot_items_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
-    results = candidates_import_from_master_server(request, google_civic_election_id)
+    results = ballot_items_import_from_master_server(request, google_civic_election_id)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
     else:
-        messages.add_message(request, messages.INFO, 'Candidates import completed. '
+        messages.add_message(request, messages.INFO, 'Ballot Items import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Master data not imported (local duplicates found): '
                                                      '{duplicates_removed}, '
@@ -82,12 +83,12 @@ def ballot_items_import_from_master_server_view(request):
 def ballot_returned_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
-    results = candidates_import_from_master_server(request, google_civic_election_id)
+    results = ballot_returned_import_from_master_server(request, google_civic_election_id)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
     else:
-        messages.add_message(request, messages.INFO, 'Candidates import completed. '
+        messages.add_message(request, messages.INFO, 'Ballot Returned import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Master data not imported (local duplicates found): '
                                                      '{duplicates_removed}, '

@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import CandidateCampaignList, CandidateCampaignManager
+from .models import CandidateCampaignListManager, CandidateCampaignManager
 from ballot.models import CANDIDATE
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -70,7 +70,7 @@ def filter_candidates_structured_json_for_local_duplicates(structured_json):
     """
     duplicates_removed = 0
     filtered_structured_json = []
-    candidate_list_manager = CandidateCampaignList()
+    candidate_list_manager = CandidateCampaignListManager()
     for one_candidate in structured_json:
         candidate_name = one_candidate['candidate_name'] if 'candidate_name' in one_candidate else ''
         google_civic_candidate_name = one_candidate['google_civic_candidate_name'] \
@@ -334,7 +334,7 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
     candidates_to_display = []
     google_civic_election_id = 0
     try:
-        candidate_list_object = CandidateCampaignList()
+        candidate_list_object = CandidateCampaignListManager()
         results = candidate_list_object.retrieve_all_candidates_for_office(office_id, office_we_vote_id)
         success = results['success']
         status = results['status']

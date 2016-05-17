@@ -16,6 +16,7 @@ class PollingLocationSerializer(serializers.ModelSerializer):
                   'line2',
                   'location_name',
                   'polling_hours_text',
+                  'polling_location_id',
                   'state',
                   'zip_long',
                   )

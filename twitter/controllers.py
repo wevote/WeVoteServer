@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 # See also WeVoteServer/import_export_twitter/controllers.py for routines that manage incoming twitter data
-from candidate.models import CandidateCampaignList
+from candidate.models import CandidateCampaignListManager
 from organization.models import OrganizationListManager
 from wevote_functions.functions import positive_value_exists
 
@@ -24,7 +24,7 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
 
     # Check Candidate table
     if not positive_value_exists(owner_found):
-        candidate_list_manager = CandidateCampaignList()
+        candidate_list_manager = CandidateCampaignListManager()
         candidate_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(twitter_handle)
         if candidate_results['candidate_list_found']:
             candidate_list = candidate_results['candidate_list']

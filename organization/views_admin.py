@@ -6,7 +6,7 @@ from .controllers import organizations_import_from_master_server
 from .models import Organization
 from .serializers import OrganizationSerializer
 from admin_tools.views import redirect_to_sign_in_page
-from candidate.models import CandidateCampaign, CandidateCampaignList, CandidateCampaignManager
+from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -427,7 +427,7 @@ def organization_position_new_view(request, organization_id):
         return HttpResponseRedirect(reverse('organization:organization_position_list', args=([organization_id])))
 
     # Prepare a drop down of candidates competing in this election
-    candidate_campaign_list = CandidateCampaignList()
+    candidate_campaign_list = CandidateCampaignListManager()
     candidate_campaigns_for_this_election_list = []
     if positive_value_exists(google_civic_election_id):
         results = candidate_campaign_list.retrieve_all_candidates_for_upcoming_election(google_civic_election_id, True)

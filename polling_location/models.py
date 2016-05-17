@@ -132,8 +132,6 @@ class PollingLocationManager(models.Model):
                         'city': city.strip() if city else '',
                         'zip_long': zip_long,
                     }
-                    # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's
-                    #  are unique from state-to-state
                     new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
                         we_vote_id__iexact=we_vote_id, defaults=updated_values)
                 else:
@@ -249,48 +247,31 @@ class PollingLocationManager(models.Model):
 
 class PollingLocationListManager(models.Model):
 
-    def retrieve_possible_duplicate_polling_locations(self, candidate_name, google_civic_candidate_name,
-                                               google_civic_election_id, office_we_vote_id,
-                                               politician_we_vote_id,
-                                               candidate_twitter_handle, vote_smart_id, maplight_id,
-                                               we_vote_id_from_master=''):
-        candidate_list_objects = []
+    def retrieve_possible_duplicate_polling_locations(self, polling_location_id, state, location_name, line1, zip_long,
+                                                      we_vote_id_from_master=''):
+        polling_location_list_objects = []
         filters = []
-        candidate_list_found = False
+        polling_location_list_found = False
 
         try:
-            candidate_queryset = CandidateCampaign.objects.all()
-            candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
-            # We don't look for office_we_vote_id because of the chance that locally we are using a
-            # different we_vote_id
-            # candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+            polling_location_queryset = PollingLocation.objects.all()
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                candidate_queryset = candidate_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                polling_location_queryset = polling_location_queryset.filter(~Q(we_vote_id__iexact=
+                                                                                we_vote_id_from_master))
 
             # We want to find candidates with *any* of these values
-            if positive_value_exists(google_civic_candidate_name):
-                new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
-                filters.append(new_filter)
-            elif positive_value_exists(candidate_name):
-                new_filter = Q(candidate_name__iexact=candidate_name)
+            if positive_value_exists(polling_location_id) and positive_value_exists(state):
+                new_filter = Q(polling_location_id__iexact=polling_location_id) & Q(state__iexact=state)
                 filters.append(new_filter)
 
-            if positive_value_exists(politician_we_vote_id):
-                new_filter = Q(politician_we_vote_id__iexact=politician_we_vote_id)
+            if positive_value_exists(location_name) and positive_value_exists(state):
+                new_filter = Q(location_name__iexact=location_name) & Q(state__iexact=state)
                 filters.append(new_filter)
 
-            if positive_value_exists(candidate_twitter_handle):
-                new_filter = Q(candidate_twitter_handle__iexact=candidate_twitter_handle)
-                filters.append(new_filter)
-
-            if positive_value_exists(vote_smart_id):
-                new_filter = Q(vote_smart_id=vote_smart_id)
-                filters.append(new_filter)
-
-            if positive_value_exists(maplight_id):
-                new_filter = Q(maplight_id=maplight_id)
+            if positive_value_exists(line1) and positive_value_exists(zip_long):
+                new_filter = Q(line1__iexact=line1) & Q(zip_long__iexact=zip_long)
                 filters.append(new_filter)
 
             # Add the first query
@@ -301,34 +282,32 @@ class PollingLocationListManager(models.Model):
                 for item in filters:
                     final_filters |= item
 
-                candidate_queryset = candidate_queryset.filter(final_filters)
+                polling_location_queryset = polling_location_queryset.filter(final_filters)
 
-            candidate_list_objects = candidate_queryset
+            polling_location_list_objects = polling_location_queryset
 
-            if len(candidate_list_objects):
-                candidate_list_found = True
-                status = 'DUPLICATE_CANDIDATES_RETRIEVED'
+            if len(polling_location_list_objects):
+                polling_location_list_found = True
+                status = 'DUPLICATE_POLLING_LOCATIONS_RETRIEVED'
                 success = True
             else:
-                status = 'NO_DUPLICATE_CANDIDATES_RETRIEVED'
+                status = 'NO_DUPLICATE_POLLING_LOCATIONS_RETRIEVED'
                 success = True
-        except CandidateCampaign.DoesNotExist:
+        except PollingLocation.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_DUPLICATE_CANDIDATES_FOUND_DoesNotExist'
-            candidate_list_objects = []
+            status = 'NO_DUPLICATE_POLLING_LOCATIONS_FOUND_DoesNotExist'
+            polling_location_list_objects = []
             success = True
         except Exception as e:
-            handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_possible_duplicate_candidates ' \
+            status = 'FAILED retrieve_possible_duplicate_polling_locations ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {
-            'success':                  success,
-            'status':                   status,
-            'google_civic_election_id': google_civic_election_id,
-            'candidate_list_found':     candidate_list_found,
-            'candidate_list':           candidate_list_objects,
+            'success':                      success,
+            'status':                       status,
+            'polling_location_list_found':  polling_location_list_found,
+            'polling_location_list':        polling_location_list_objects,
         }
         return results
 

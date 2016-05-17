@@ -16,7 +16,7 @@ from django.shortcuts import render
 from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
-from office.models import ContestOfficeList
+from office.models import ContestOfficeListManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter.models import voter_has_authority
@@ -71,7 +71,7 @@ def office_list_view(request):
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
-    office_list_manager = ContestOfficeList()
+    office_list_manager = ContestOfficeListManager()
     updated_office_list = []
     results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, True)
     if results['office_list_found']:
@@ -99,7 +99,7 @@ def office_new_view(request):
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
-    office_list_manager = ContestOfficeList()
+    office_list_manager = ContestOfficeListManager()
     updated_office_list = []
     results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, True)
     if results['office_list_found']:

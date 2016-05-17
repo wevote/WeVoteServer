@@ -5,14 +5,15 @@
 from .models import BallotItemListManager, BallotItemManager, BallotReturnedListManager, BallotReturnedManager, \
     CANDIDATE, copy_existing_ballot_items_from_stored_ballot, OFFICE, MEASURE, \
     VoterBallotSaved, VoterBallotSavedManager
-from candidate.models import CandidateCampaignList
+from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
 from django.contrib import messages
 from exception.models import handle_exception
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 import json
 from measure.models import ContestMeasureList
-from office.models import ContestOfficeList
+from office.models import ContestOfficeListManager
+from polling_location.models import PollingLocationManager
 import requests
 from voter.models import BALLOT_ADDRESS, VoterAddressManager, \
     VoterDeviceLinkManager
@@ -182,6 +183,8 @@ def ballot_items_import_from_structured_json(structured_json):
         if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id) \
                 and (positive_value_exists(contest_office_we_vote_id) or
                      positive_value_exists(contest_measure_we_vote_id)):
+            # We check to make sure we have a local copy of this polling_location, contest_office or contest_measure
+            #  in ballot_item_manager.update_or_create_ballot_item_for_polling_location
             proceed_to_update_or_create = True
         else:
             proceed_to_update_or_create = False
@@ -235,6 +238,7 @@ def ballot_returned_import_from_structured_json(structured_json):
     :return:
     """
     ballot_returned_manager = BallotReturnedManager()
+    polling_location_manager = PollingLocationManager()
     ballot_returned_saved = 0
     ballot_returned_updated = 0
     ballot_returned_not_processed = 0
@@ -243,11 +247,19 @@ def ballot_returned_import_from_structured_json(structured_json):
             one_ballot_returned['google_civic_election_id'] if 'google_civic_election_id' in one_ballot_returned else 0
         polling_location_we_vote_id = one_ballot_returned['polling_location_we_vote_id'] \
             if 'polling_location_we_vote_id' in one_ballot_returned else ''
+        # I don't think we expect voter_id to be other than 0 since we only import ballot_returned entries from
+        # polling_locations
         voter_id = one_ballot_returned['voter_id'] if 'voter_id' in one_ballot_returned else 0
 
         if positive_value_exists(google_civic_election_id) and (positive_value_exists(polling_location_we_vote_id) or
                                                                 positive_value_exists(voter_id)):
-            proceed_to_update_or_create = True
+            # Make sure we have a local polling_location
+            results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+            if results['polling_location_found']:
+                proceed_to_update_or_create = True
+            else:
+                # We don't want to save a ballot_returned entry if the polling location wasn't stored locally
+                proceed_to_update_or_create = False
         else:
             proceed_to_update_or_create = False
 
@@ -279,7 +291,6 @@ def ballot_returned_import_from_structured_json(structured_json):
             ballot_returned_not_processed += 1
             results = {
                 'success': False,
-                'status': 'Required value missing, cannot update or create'
             }
 
         if results['success']:
@@ -289,9 +300,12 @@ def ballot_returned_import_from_structured_json(structured_json):
                 ballot_returned_updated += 1
         else:
             ballot_returned_not_processed += 1
+
+    status = "BALLOT_RETURNED_IMPORT_PROCESS_COMPLETED"
+
     ballot_returned_results = {
         'success':          True,
-        'status':           "BALLOT_RETURNED_IMPORT_PROCESS_COMPLETE",
+        'status':           status,
         'saved':            ballot_returned_saved,
         'updated':          ballot_returned_updated,
         'not_processed':    ballot_returned_not_processed,
@@ -702,7 +716,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                 ballot_item_id = ballot_item.contest_office_id
                 we_vote_id = ballot_item.contest_office_we_vote_id
                 try:
-                    candidate_list_object = CandidateCampaignList()
+                    candidate_list_object = CandidateCampaignListManager()
                     results = candidate_list_object.retrieve_all_candidates_for_office(ballot_item_id, we_vote_id)
                     candidates_to_display = []
                     if results['candidate_list_found']:
@@ -780,7 +794,7 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id=0):
 
     status = ""
     try:
-        candidate_list_object = CandidateCampaignList()
+        candidate_list_object = CandidateCampaignListManager()
         results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(google_civic_election_id)
         candidate_success = results['success']
         status += results['status']
@@ -793,7 +807,7 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id=0):
         candidate_success = False
 
     try:
-        office_list_object = ContestOfficeList()
+        office_list_object = ContestOfficeListManager()
         results = office_list_object.retrieve_all_offices_for_upcoming_election(google_civic_election_id)
         office_success = results['success']
         status += ' ' + results['status']

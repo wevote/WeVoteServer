@@ -17,7 +17,7 @@ from wevote_functions.functions import convert_to_int, extract_first_name_from_f
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-class CandidateCampaignList(models.Model):
+class CandidateCampaignListManager(models.Model):
     """
     This is a class to make it easy to retrieve lists of Candidates
     """
@@ -568,7 +568,7 @@ class CandidateCampaign(models.Model):
 
 
 def fetch_candidate_count_for_office(office_id=0, office_we_vote_id=''):
-    candidate_campaign_list = CandidateCampaignList()
+    candidate_campaign_list = CandidateCampaignListManager()
     results = candidate_campaign_list.retrieve_candidate_count_for_office(office_id, office_we_vote_id)
     return results['candidate_count']
 

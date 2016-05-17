@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import VoterGuide, VoterGuideList, VoterGuideManager
+from .controllers import voter_guides_import_from_master_server
+from .models import VoterGuide, VoterGuideListManager, VoterGuideManager
 from .serializers import VoterGuideSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
@@ -39,12 +40,12 @@ class VoterGuidesSyncOutView(APIView):
 def voter_guides_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
-    results = candidates_import_from_master_server(request, google_civic_election_id)
+    results = voter_guides_import_from_master_server(request, google_civic_election_id)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
     else:
-        messages.add_message(request, messages.INFO, 'Candidates import completed. '
+        messages.add_message(request, messages.INFO, 'Voter Guides import completed. '
                                                      'Saved: {saved}, Updated: {updated}, '
                                                      'Master data not imported (local duplicates found): '
                                                      '{duplicates_removed}, '
@@ -218,7 +219,7 @@ def refresh_existing_voter_guides_view(request):
     voter_guide_updated_count = 0
 
     # Cycle through existing voter_guides
-    voter_guide_list_manager = VoterGuideList()
+    voter_guide_list_manager = VoterGuideListManager()
     voter_guide_manager = VoterGuideManager()
     results = voter_guide_list_manager.retrieve_all_voter_guides()
     if results['voter_guide_list_found']:
@@ -252,7 +253,7 @@ def voter_guide_list_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     voter_guide_list = []
-    voter_guide_list_object = VoterGuideList()
+    voter_guide_list_object = VoterGuideListManager()
     if positive_value_exists(google_civic_election_id):
         results = voter_guide_list_object.retrieve_voter_guides_for_election(
             google_civic_election_id=google_civic_election_id)

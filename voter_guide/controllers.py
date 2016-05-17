@@ -12,11 +12,152 @@ import json
 from position.models import ANY_STANCE, PositionListManager
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link
-from voter_guide.models import VoterGuideList, VoterGuideManager, VoterGuidePossibilityManager
+from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
+VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")
+
+
+def voter_guides_import_from_master_server(request, google_civic_election_id):
+    """
+    Get the json data, and either create new entries or update existing
+    :return:
+    """
+    # Request json file from We Vote servers
+    messages.add_message(request, messages.INFO, "Loading Voter Guides from We Vote Master servers")
+    logger.info("Loading Voter Guides from We Vote Master servers")
+    request = requests.get(VOTER_GUIDES_SYNC_URL, params={
+        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
+        "format":   'json',
+        "google_civic_election_id": google_civic_election_id,
+    })
+    structured_json = json.loads(request.text)
+    results = filter_voter_guides_structured_json_for_local_duplicates(structured_json)
+    filtered_structured_json = results['structured_json']
+    duplicates_removed = results['duplicates_removed']
+
+    import_results = voter_guides_import_from_structured_json(filtered_structured_json)
+    import_results['duplicates_removed'] = duplicates_removed
+
+    return import_results
+
+
+def filter_voter_guides_structured_json_for_local_duplicates(structured_json):
+    """
+    With this function, we remove voter_guides that seem to be duplicates, but have different we_vote_id's.
+    :param structured_json:
+    :return:
+    """
+    duplicates_removed = 0
+    filtered_structured_json = []
+    voter_guide_list_manager = VoterGuideListManager()
+    for one_voter_guide in structured_json:
+        we_vote_id = one_voter_guide['we_vote_id'] if 'we_vote_id' in one_voter_guide else ''
+        google_civic_election_id = one_voter_guide['google_civic_election_id'] \
+            if 'google_civic_election_id' in one_voter_guide else ''
+        vote_smart_time_span = one_voter_guide['vote_smart_time_span'] \
+            if 'vote_smart_time_span' in one_voter_guide else ''
+        organization_we_vote_id = one_voter_guide['organization_we_vote_id'] \
+            if 'organization_we_vote_id' in one_voter_guide else ''
+        public_figure_we_vote_id = one_voter_guide['public_figure_we_vote_id'] \
+            if 'public_figure_we_vote_id' in one_voter_guide else ''
+        twitter_handle = one_voter_guide['twitter_handle'] if 'twitter_handle' in one_voter_guide else ''
+
+        # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
+        we_vote_id_from_master = we_vote_id
+
+        results = voter_guide_list_manager.retrieve_possible_duplicate_voter_guides(
+            google_civic_election_id, vote_smart_time_span,
+            organization_we_vote_id, public_figure_we_vote_id,
+            twitter_handle,
+            we_vote_id_from_master)
+
+        if results['voter_guide_list_found']:
+            # There seems to be a duplicate already in this database using a different we_vote_id
+            duplicates_removed += 1
+        else:
+            filtered_structured_json.append(one_voter_guide)
+
+    voter_guides_results = {
+        'success':              True,
+        'status':               "FILTER_VOTER_GUIDES_FOR_DUPLICATES_PROCESS_COMPLETE",
+        'duplicates_removed':   duplicates_removed,
+        'structured_json':      filtered_structured_json,
+    }
+    return voter_guides_results
+
+
+def voter_guides_import_from_structured_json(structured_json):
+    """
+    This pathway in requires a we_vote_id, and is not used when we import from Google Civic
+    :param structured_json:
+    :return:
+    """
+    voter_guide_manager = VoterGuideManager()
+    voter_guides_saved = 0
+    voter_guides_updated = 0
+    voter_guides_not_processed = 0
+    for one_voter_guide in structured_json:
+        we_vote_id = one_voter_guide['we_vote_id'] if 'we_vote_id' in one_voter_guide else ''
+        google_civic_election_id = one_voter_guide['google_civic_election_id'] \
+            if 'google_civic_election_id' in one_voter_guide else ''
+        vote_smart_time_span = one_voter_guide['vote_smart_time_span'] \
+            if 'vote_smart_time_span' in one_voter_guide else ''
+        organization_we_vote_id = one_voter_guide['organization_we_vote_id'] \
+            if 'organization_we_vote_id' in one_voter_guide else ''
+        public_figure_we_vote_id = one_voter_guide['public_figure_we_vote_id'] \
+            if 'public_figure_we_vote_id' in one_voter_guide else ''
+
+        if positive_value_exists(we_vote_id) and \
+                (positive_value_exists(organization_we_vote_id) or
+                 positive_value_exists(public_figure_we_vote_id)) and \
+                (positive_value_exists(google_civic_election_id) or
+                 positive_value_exists(vote_smart_time_span)):
+            proceed_to_update_or_create = True
+        else:
+            proceed_to_update_or_create = False
+
+        if proceed_to_update_or_create:
+            if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
+                results = voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                    organization_we_vote_id, google_civic_election_id)
+            elif positive_value_exists(organization_we_vote_id) and positive_value_exists(vote_smart_time_span):
+                results = voter_guide_manager.update_or_create_organization_voter_guide_by_time_span(
+                    organization_we_vote_id, vote_smart_time_span)
+            elif positive_value_exists(public_figure_we_vote_id) and positive_value_exists(google_civic_election_id):
+                results = voter_guide_manager.update_or_create_public_figure_voter_guide(
+                    google_civic_election_id, public_figure_we_vote_id)
+            else:
+                results = {
+                    'success': False,
+                    'status': 'Required value missing, cannot update or create'
+                }
+        else:
+            voter_guides_not_processed += 1
+            results = {
+                'success': False,
+                'status': 'Required value missing, cannot update or create'
+            }
+
+        if results['success']:
+            if results['new_voter_guide_created']:
+                voter_guides_saved += 1
+            else:
+                voter_guides_updated += 1
+        else:
+            voter_guides_not_processed += 1
+    voter_guides_results = {
+        'success':          True,
+        'status':           "VOTER_GUIDES_IMPORT_PROCESS_COMPLETE",
+        'saved':            voter_guides_saved,
+        'updated':          voter_guides_updated,
+        'not_processed':    voter_guides_not_processed,
+    }
+    return voter_guides_results
 
 
 def voter_guide_possibility_retrieve_for_api(voter_device_id, voter_guide_possibility_url):
@@ -387,7 +528,7 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
 
     # We want to retrieve an ordered list of organization_we_vote_id's (not followed or ignored) that have a position
     # in this election. For speed we only retrieve full voter_guide data for the limited list that we need
-    voter_guide_list_manager = VoterGuideList()
+    voter_guide_list_manager = VoterGuideListManager()
     # This is a list of orgs that the voter isn't following or ignoring
     org_list_found_by_google_civic_election_id = []
     for one_position in positions_list_minus_ignored_and_followed:
@@ -500,7 +641,7 @@ def retrieve_voter_guides_to_follow_generic(voter_id, search_string,
     organization_we_vote_ids_followed_or_ignored_by_voter = list(chain(organizations_followed_by_voter,
                                                                        organizations_ignored_by_voter))
 
-    voter_guide_list_manager = VoterGuideList()
+    voter_guide_list_manager = VoterGuideListManager()
 
     # First, retrieve the voter_guides stored by org and google_civic_election_id
     voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_generic(
@@ -610,7 +751,7 @@ def retrieve_voter_guides_followed(voter_id):  # voterGuidesFollowedRetrieve
     organization_we_vote_ids_followed_by_voter = \
         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_we_vote_id_array(voter_id)
 
-    voter_guide_list_object = VoterGuideList()
+    voter_guide_list_object = VoterGuideListManager()
     results = voter_guide_list_object.retrieve_voter_guides_by_organization_list(
         organization_we_vote_ids_followed_by_voter)
 

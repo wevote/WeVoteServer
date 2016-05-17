@@ -4,7 +4,7 @@
 
 from ballot.controllers import voter_ballot_items_retrieve_for_one_election_for_api
 from ballot.models import CANDIDATE, MEASURE, OFFICE
-from candidate.models import CandidateCampaignManager, CandidateCampaignList
+from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from measure.models import ContestMeasureManager
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList
@@ -285,7 +285,7 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
         return json_data
 
     position_list_manager = PositionListManager()
-    candidate_list_object = CandidateCampaignList()
+    candidate_list_object = CandidateCampaignListManager()
 
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \

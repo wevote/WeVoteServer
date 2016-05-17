@@ -4,7 +4,7 @@
 
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
     retrieve_candidate_photos
-from .models import CandidateCampaign, CandidateCampaignList, CandidateCampaignManager
+from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from .serializers import CandidateCampaignSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from office.models import ContestOffice, ContestOfficeManager
@@ -413,7 +413,7 @@ def find_and_remove_duplicate_candidates_view(request):
         pass
 
     # Loop through all of the candidates in this election
-    candidate_campaign_list_manager = CandidateCampaignList()
+    candidate_campaign_list_manager = CandidateCampaignListManager()
     for we_vote_candidate in candidate_list:
         # Search for other candidates within this election that match name and election
         try:
@@ -515,7 +515,7 @@ def remove_duplicate_candidate_view(request):
                                                                                    "".format(
             var=google_civic_election_id))
 
-    candidate_campaign_list_manager = CandidateCampaignList()
+    candidate_campaign_list_manager = CandidateCampaignListManager()
     results = candidate_campaign_list_manager.remove_duplicate_candidate(candidate_id, google_civic_election_id)
     if results['success']:
         if remove_duplicate_process:

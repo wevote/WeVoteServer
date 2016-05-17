@@ -100,6 +100,7 @@ class VoterGuideManager(models.Manager):
         return results
 
     def update_or_create_organization_voter_guide_by_time_span(self, organization_we_vote_id, vote_smart_time_span):
+        organization_found = False
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
         if not vote_smart_time_span or not organization_we_vote_id:
@@ -640,7 +641,7 @@ class VoterGuide(models.Model):
 
 # This is the class that we use to rapidly show lists of voter guides, regardless of whether they are from an
 # organization, public figure, or voter
-class VoterGuideList(models.Model):
+class VoterGuideListManager(models.Model):
     """
     A set of methods to retrieve a list of voter_guides
     """
@@ -666,7 +667,7 @@ class VoterGuideList(models.Model):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {
@@ -923,7 +924,7 @@ class VoterGuideList(models.Model):
 
         return voter_guide_list_filtered
 
-    def retrieve_all_voter_guides(self, order_by):
+    def retrieve_all_voter_guides(self, order_by=''):
         voter_guide_list = []
         voter_guide_list_found = False
         try:
@@ -973,48 +974,36 @@ class VoterGuideList(models.Model):
 
         return voter_guide_list_sorted
 
-    def retrieve_possible_duplicate_voter_guides(self, candidate_name, google_civic_candidate_name,
-                                               google_civic_election_id, office_we_vote_id,
-                                               politician_we_vote_id,
-                                               candidate_twitter_handle, vote_smart_id, maplight_id,
-                                               we_vote_id_from_master=''):
-        candidate_list_objects = []
+    def retrieve_possible_duplicate_voter_guides(self, google_civic_election_id, vote_smart_time_span,
+                                                 organization_we_vote_id, public_figure_we_vote_id,
+                                                 twitter_handle,
+                                                 we_vote_id_from_master=''):
+        voter_guide_list_objects = []
         filters = []
-        candidate_list_found = False
+        voter_guide_list_found = False
 
         try:
-            candidate_queryset = CandidateCampaign.objects.all()
-            candidate_queryset = candidate_queryset.filter(google_civic_election_id=google_civic_election_id)
-            # We don't look for office_we_vote_id because of the chance that locally we are using a
-            # different we_vote_id
-            # candidate_queryset = candidate_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+            voter_guide_queryset = VoterGuide.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                voter_guide_queryset = voter_guide_queryset.filter(google_civic_election_id=google_civic_election_id)
+            elif positive_value_exists(vote_smart_time_span):
+                voter_guide_queryset = voter_guide_queryset.filter(vote_smart_time_span__iexact=vote_smart_time_span)
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
-                candidate_queryset = candidate_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+                voter_guide_queryset = voter_guide_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
 
             # We want to find candidates with *any* of these values
-            if positive_value_exists(google_civic_candidate_name):
-                new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
-                filters.append(new_filter)
-            elif positive_value_exists(candidate_name):
-                new_filter = Q(candidate_name__iexact=candidate_name)
+            if positive_value_exists(organization_we_vote_id):
+                new_filter = Q(organization_we_vote_id__iexact=organization_we_vote_id)
                 filters.append(new_filter)
 
-            if positive_value_exists(politician_we_vote_id):
-                new_filter = Q(politician_we_vote_id__iexact=politician_we_vote_id)
+            if positive_value_exists(public_figure_we_vote_id):
+                new_filter = Q(public_figure_we_vote_id__iexact=public_figure_we_vote_id)
                 filters.append(new_filter)
 
-            if positive_value_exists(candidate_twitter_handle):
-                new_filter = Q(candidate_twitter_handle__iexact=candidate_twitter_handle)
-                filters.append(new_filter)
-
-            if positive_value_exists(vote_smart_id):
-                new_filter = Q(vote_smart_id=vote_smart_id)
-                filters.append(new_filter)
-
-            if positive_value_exists(maplight_id):
-                new_filter = Q(maplight_id=maplight_id)
+            if positive_value_exists(twitter_handle):
+                new_filter = Q(twitter_handle__iexact=twitter_handle)
                 filters.append(new_filter)
 
             # Add the first query
@@ -1025,25 +1014,25 @@ class VoterGuideList(models.Model):
                 for item in filters:
                     final_filters |= item
 
-                candidate_queryset = candidate_queryset.filter(final_filters)
+                voter_guide_queryset = voter_guide_queryset.filter(final_filters)
 
-            candidate_list_objects = candidate_queryset
+            voter_guide_list_objects = voter_guide_queryset
 
-            if len(candidate_list_objects):
-                candidate_list_found = True
-                status = 'DUPLICATE_CANDIDATES_RETRIEVED'
+            if len(voter_guide_list_objects):
+                voter_guide_list_found = True
+                status = 'DUPLICATE_VOTER_GUIDES_RETRIEVED'
                 success = True
             else:
-                status = 'NO_DUPLICATE_CANDIDATES_RETRIEVED'
+                status = 'NO_DUPLICATE_VOTER_GUIDES_RETRIEVED'
                 success = True
-        except CandidateCampaign.DoesNotExist:
+        except VoterGuide.DoesNotExist:
             # No candidates found. Not a problem.
-            status = 'NO_DUPLICATE_CANDIDATES_FOUND_DoesNotExist'
-            candidate_list_objects = []
+            status = 'NO_DUPLICATE_VOTER_GUIDES_FOUND_DoesNotExist'
+            voter_guide_list_objects = []
             success = True
         except Exception as e:
             handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_possible_duplicate_candidates ' \
+            status = 'FAILED retrieve_possible_duplicate_voter_guides ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
@@ -1051,8 +1040,8 @@ class VoterGuideList(models.Model):
             'success':                  success,
             'status':                   status,
             'google_civic_election_id': google_civic_election_id,
-            'candidate_list_found':     candidate_list_found,
-            'candidate_list':           candidate_list_objects,
+            'voter_guide_list_found':   voter_guide_list_found,
+            'voter_guide_list':         voter_guide_list_objects,
         }
         return results
 

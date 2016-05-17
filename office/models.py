@@ -275,13 +275,13 @@ class ContestOfficeManager(models.Model):
         return contest_office_id
 
 
-class ContestOfficeList(models.Model):
+class ContestOfficeListManager(models.Model):
     """
     This is a class to make it easy to retrieve lists of Offices
     """
 
     def __unicode__(self):
-        return "ContestOfficeList"
+        return "ContestOfficeListManager"
 
     def retrieve_all_offices_for_upcoming_election(self, google_civic_election_id=0,
                                                    return_list_of_objects=False):

@@ -4,7 +4,7 @@
 
 # See also WeVoteServer/twitter/controllers.py for routines that manage internal twitter data
 
-from candidate.models import CandidateCampaignManager, CandidateCampaignList
+from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
 from organization.controllers import update_social_media_statistics_in_other_tables
 from organization.models import Organization, OrganizationManager
@@ -351,7 +351,7 @@ def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_ele
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
     candidate_manager = CandidateCampaignManager()
-    candidate_list_manager = CandidateCampaignList()
+    candidate_list_manager = CandidateCampaignListManager()
     return_list_of_objects = True
     results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
                                                                                    return_list_of_objects)
@@ -399,7 +399,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id):
 
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
-    candidate_list_manager = CandidateCampaignList()
+    candidate_list_manager = CandidateCampaignListManager()
     return_list_of_objects = True
     candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
         google_civic_election_id, return_list_of_objects)
@@ -433,7 +433,7 @@ def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_i
     status = ""
     google_civic_election_id = convert_to_int(google_civic_election_id)
 
-    candidate_list_object = CandidateCampaignList()
+    candidate_list_object = CandidateCampaignListManager()
     return_list_of_objects = True
     results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
                                                                                   return_list_of_objects)

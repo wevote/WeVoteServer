@@ -11,6 +11,8 @@
 
 <p>These imports are best run in order from top-to-bottom.</p>
 
+<form name="candidate_choose_election" method="get" action="{% url 'admin_tools:sync_dashboard' %}">
+    {% csrf_token %}
 
 {# ################################### #}
 <h4>Elections</h4>
@@ -19,8 +21,6 @@
 <br />
 
 {% if election_list %}
-    <form name="candidate_choose_election" method="get" action="{% url 'admin_tools:sync_dashboard' %}">
-        {% csrf_token %}
 
     <select id="google_civic_election_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
@@ -31,7 +31,6 @@
             {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
     {% endfor %}
     </select>
-    </form>
 {% endif %}{# End of if election_list #}
 
 
@@ -78,8 +77,23 @@
 {# ################################### #}
 <h4>Polling Locations</h4>
 
-<p><a href="{% url 'polling_location:polling_locations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}">
-    Retrieve Polling Locations</a></p>
+<p><a href="{% url 'polling_location:polling_locations_import_from_master_server' %}?state_code={{ state_code }}">
+    Retrieve Polling Locations</a> in
+
+{% if state_list %}
+
+    <select id="state_code" name="state_code">
+        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+            -- All States --</option>
+    {% for key, state in state_list %}
+        <option value="{{ key }}"
+                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+            {{ state }}</option>
+    {% endfor %}
+    </select>
+{% endif %}{# End of if state_list #}
+
+</p>
 <br />
 
 
@@ -106,6 +120,7 @@
     Retrieve Voter Guides</a></p>
 <br />
 
+</form>
 
 {# ################################### #}
     <br />
@@ -127,6 +142,11 @@
 <script>
     $(function() {
         $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#state_code').change(function() {
             this.form.submit();
         });
     });

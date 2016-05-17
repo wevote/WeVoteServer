@@ -3,15 +3,15 @@
 # -*- coding: UTF-8 -*-
 # Diagrams here: https://docs.google.com/drawings/d/1DsPnl97GKe9f14h41RPeZDssDUztRETGkXGaolXCeyo/edit
 
-from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignList
+from candidate.models import CandidateCampaign, CandidateCampaignManager, CandidateCampaignListManager
 from ballot.controllers import choose_election_from_existing_data
 from django.db import models
 from django.db.models import Q
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
-from measure.models import ContestMeasure, ContestMeasureManager, ContestMeasureList
-from office.models import ContestOffice, ContestOfficeManager
+from measure.models import ContestMeasure, ContestMeasureList
+from office.models import ContestOffice
 from organization.models import Organization, OrganizationManager
 from twitter.models import TwitterUser
 from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager
@@ -837,7 +837,7 @@ class PositionListManager(models.Model):
 
         # Candidate related positions
         candidate_campaign_we_vote_ids = []
-        candidate_campaign_list_manager = CandidateCampaignList()
+        candidate_campaign_list_manager = CandidateCampaignListManager()
         candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_upcoming_election(
             google_civic_election_id)
         if candidate_results['candidate_list_found']:

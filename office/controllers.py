@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import ContestOfficeList, ContestOfficeManager
+from .models import ContestOfficeListManager, ContestOfficeManager
 from ballot.models import OFFICE
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -59,7 +59,7 @@ def filter_offices_structured_json_for_local_duplicates(structured_json):
     :param structured_json:
     :return:
     """
-    office_manager_list = ContestOfficeList()
+    office_manager_list = ContestOfficeListManager()
     duplicates_removed = 0
     filtered_structured_json = []
     for one_office in structured_json:
