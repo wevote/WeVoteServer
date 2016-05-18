@@ -369,6 +369,9 @@ class ExportElectionDataView(APIView):
 
 @login_required
 def elections_import_from_master_server_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
     results = elections_import_from_master_server()
 
     if not results['success']:
@@ -380,4 +383,5 @@ def elections_import_from_master_server_view(request):
                                                      ''.format(saved=results['saved'],
                                                                updated=results['updated'],
                                                                not_processed=results['not_processed']))
-    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id) + "&state_code=" + str(state_code))

@@ -800,8 +800,8 @@ def positions_import_from_master_server(request, google_civic_election_id=''):
     logger.info("Loading Positions from We Vote Master servers")
     # Request json file from We Vote servers
     request = requests.get(POSITIONS_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":   'json',
+        "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
+        "format":                   'json',
         "google_civic_election_id": google_civic_election_id,
     })
     structured_json = json.loads(request.text)

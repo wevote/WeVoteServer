@@ -53,8 +53,9 @@ class OrganizationsSyncOutView(APIView):
 @login_required
 def organizations_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
 
-    results = organizations_import_from_master_server(request, google_civic_election_id)
+    results = organizations_import_from_master_server(request, state_code)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
@@ -69,7 +70,7 @@ def organizations_import_from_master_server_view(request):
                                                                duplicates_removed=results['duplicates_removed'],
                                                                not_processed=results['not_processed']))
     return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
-                                str(google_civic_election_id))
+                                str(google_civic_election_id) + "&state_code=" + str(state_code))
 
 
 @login_required

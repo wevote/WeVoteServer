@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from follow.models import FollowOrganizationList
 from itertools import chain
 import json
+from organization.models import OrganizationManager
 from position.models import ANY_STANCE, PositionListManager
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link
@@ -31,8 +32,8 @@ def voter_guides_import_from_master_server(request, google_civic_election_id):
     messages.add_message(request, messages.INFO, "Loading Voter Guides from We Vote Master servers")
     logger.info("Loading Voter Guides from We Vote Master servers")
     request = requests.get(VOTER_GUIDES_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":   'json',
+        "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
+        "format":                   'json',
         "google_civic_election_id": google_civic_election_id,
     })
     structured_json = json.loads(request.text)
@@ -98,6 +99,8 @@ def voter_guides_import_from_structured_json(structured_json):
     :return:
     """
     voter_guide_manager = VoterGuideManager()
+    organization_manager = OrganizationManager()
+    organization_id = 0
     voter_guides_saved = 0
     voter_guides_updated = 0
     voter_guides_not_processed = 0
@@ -117,7 +120,24 @@ def voter_guides_import_from_structured_json(structured_json):
                  positive_value_exists(public_figure_we_vote_id)) and \
                 (positive_value_exists(google_civic_election_id) or
                  positive_value_exists(vote_smart_time_span)):
-            proceed_to_update_or_create = True
+            # Make sure we have the organization (or public figure) in this database before we import the voter guide
+            if positive_value_exists(organization_we_vote_id):
+                results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+                if results['organization_found']:
+                    organization_id = results['organization_id']
+                if positive_value_exists(organization_id):
+                    proceed_to_update_or_create = True
+                else:
+                    proceed_to_update_or_create = False
+            elif positive_value_exists(public_figure_we_vote_id):
+                # TODO DALE Update this to work with public_figure
+                public_figure_id = organization_manager.retrieve_organization_from_we_vote_id(public_figure_we_vote_id)
+                if positive_value_exists(public_figure_id):
+                    proceed_to_update_or_create = True
+                else:
+                    proceed_to_update_or_create = False
+            else:
+                proceed_to_update_or_create = False
         else:
             proceed_to_update_or_create = False
 
@@ -134,13 +154,13 @@ def voter_guides_import_from_structured_json(structured_json):
             else:
                 results = {
                     'success': False,
-                    'status': 'Required value missing, cannot update or create'
+                    'status': 'Required value missing, cannot update or create (1)'
                 }
         else:
             voter_guides_not_processed += 1
             results = {
                 'success': False,
-                'status': 'Required value missing, cannot update or create'
+                'status': 'Required value missing, cannot update or create (2)'
             }
 
         if results['success']:

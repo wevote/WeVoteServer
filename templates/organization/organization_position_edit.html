@@ -39,7 +39,7 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
     {% for election in election_list %}
     <option value="{{ election.google_civic_election_id }}"
             {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-        {{ election.election_name }} - {{ election.election_day_text }}</option>
+        {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
     {% endfor %}
     </select>
     </div>

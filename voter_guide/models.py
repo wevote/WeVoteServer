@@ -38,13 +38,16 @@ class VoterGuideManager(models.Manager):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
+        organization = Organization()
         organization_found = False
+        new_voter_guide_created = False
         if not google_civic_election_id or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE'
             success = False
             new_voter_guide_created = False
         else:
             # Retrieve the organization object so we can bring over values
+            # NOTE: If we don't have this organization in the local database, we won't create a voter guide
             organization_manager = OrganizationManager()
             results = organization_manager.retrieve_organization(0, organization_we_vote_id)
             if results['organization_found']:
@@ -66,23 +69,26 @@ class VoterGuideManager(models.Manager):
                         'twitter_followers_count':  organization.twitter_followers_count,
                         'display_name':             organization.organization_name,
                     }
+                # else:
+                #     updated_values = {
+                #         # Values we search against below
+                #         'google_civic_election_id': google_civic_election_id,
+                #         'organization_we_vote_id':  organization_we_vote_id,
+                #         # The rest of the values
+                #         'voter_guide_owner_type':   voter_guide_owner_type,
+                #     }
+                    voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        defaults=updated_values)
+                    success = True
+                    if new_voter_guide_created:
+                        status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION'
+                    else:
+                        status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION'
                 else:
-                    updated_values = {
-                        # Values we search against below
-                        'google_civic_election_id': google_civic_election_id,
-                        'organization_we_vote_id':  organization_we_vote_id,
-                        # The rest of the values
-                        'voter_guide_owner_type':   voter_guide_owner_type,
-                    }
-                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    organization_we_vote_id__iexact=organization_we_vote_id,
-                    defaults=updated_values)
-                success = True
-                if new_voter_guide_created:
-                    status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION'
-                else:
-                    status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION'
+                    success = False
+                    status = 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
             except VoterGuide.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
@@ -134,23 +140,26 @@ class VoterGuideManager(models.Manager):
                         'twitter_description':      organization.twitter_description,
                         'twitter_followers_count':  twitter_followers_count,
                     }
+                # else:
+                #     updated_values = {
+                #         # Values we search against below
+                #         'vote_smart_time_span':     vote_smart_time_span,
+                #         'organization_we_vote_id':  organization_we_vote_id,
+                #         # The rest of the values
+                #         'voter_guide_owner_type':   voter_guide_owner_type,
+                #     }
+                    voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
+                        vote_smart_time_span__exact=vote_smart_time_span,
+                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        defaults=updated_values)
+                    success = True
+                    if new_voter_guide_created:
+                        status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION_BY_TIME_SPAN'
+                    else:
+                        status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION_BY_TIME_SPAN'
                 else:
-                    updated_values = {
-                        # Values we search against below
-                        'vote_smart_time_span':     vote_smart_time_span,
-                        'organization_we_vote_id':  organization_we_vote_id,
-                        # The rest of the values
-                        'voter_guide_owner_type':   voter_guide_owner_type,
-                    }
-                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
-                    vote_smart_time_span__exact=vote_smart_time_span,
-                    organization_we_vote_id__iexact=organization_we_vote_id,
-                    defaults=updated_values)
-                success = True
-                if new_voter_guide_created:
-                    status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION_BY_TIME_SPAN'
-                else:
-                    status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION_BY_TIME_SPAN'
+                    success = False
+                    status = 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
             except VoterGuide.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False

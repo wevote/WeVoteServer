@@ -99,6 +99,11 @@ class PollingLocationsSyncOutView(APIView):
 
 @login_required
 def polling_locations_import_from_master_server_view(request):
+    """
+    This view reaches out to the master servers configured in WeVoteServer/config/environment_variables.json
+    :param request:
+    :return:
+    """
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', '')
 
@@ -122,6 +127,11 @@ def polling_locations_import_from_master_server_view(request):
 
 @login_required
 def import_polling_locations_process_view(request):
+    """
+    This view imports the polling location data from xml files from VIP (http://data.votinginfoproject.org)
+    :param request:
+    :return:
+    """
     authority_required = {'admin'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)

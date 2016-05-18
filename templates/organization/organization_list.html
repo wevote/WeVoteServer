@@ -64,7 +64,7 @@
             <td>{{ organization.state_served_code }}</td>
             <td>{% if organization.wikipedia_page_id %}
                 <a href="{{ organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
-            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">edit</a></td>
+            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>
         </tr>
     {% endfor %}
     </table>

@@ -198,7 +198,7 @@ def organizations_import_from_sample_file():  # TODO FINISH BUILDING/TESTING THI
     return organizations_import_from_structured_json(structured_json)
 
 
-def organizations_import_from_master_server(request, google_civic_election_id=''):
+def organizations_import_from_master_server(request, state_code=''):
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -207,9 +207,9 @@ def organizations_import_from_master_server(request, google_civic_election_id=''
     logger.info("Loading Organizations from We Vote Master servers")
     # Request json file from We Vote servers
     request = requests.get(ORGANIZATIONS_SYNC_URL, params={
-        "key": WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":   'json',
-        # "state_served_code": "ca",
+        "key":              WE_VOTE_API_KEY,  # This comes from an environment variable
+        "format":           'json',
+        "state_served_code": state_code,
     })
     structured_json = json.loads(request.text)
 

@@ -249,12 +249,40 @@ class PollingLocationListManager(models.Model):
 
     def retrieve_possible_duplicate_polling_locations(self, polling_location_id, state, location_name, line1, zip_long,
                                                       we_vote_id_from_master=''):
+        """
+        Note that we bring in multiple polling_locations with the same street address line1 and zip.
+         This is because the source data seems to have multiple entries per physical address, perhaps due to assigning
+         the same physical address a new state-specific unique identifier and name from election-to-election?
+        :param polling_location_id:
+        :param state:
+        :param location_name:
+        :param line1:
+        :param zip_long:
+        :param we_vote_id_from_master:
+        :return:
+        """
         polling_location_list_objects = []
         filters = []
         polling_location_list_found = False
 
+        # If we don't have the right variables required for the filters below, exit
+        if not (positive_value_exists(polling_location_id) or positive_value_exists(location_name)) \
+                and not positive_value_exists(state) \
+                and not positive_value_exists(line1) \
+                and not positive_value_exists(zip_long):
+
+            results = {
+                'success':                      False,
+                'status':                       "MISSING_REQUIRED_VARIABLES_TO_LOOK_FOR_POLLING_LOCATIONS_DUPLICATES",
+                'polling_location_list_found':  polling_location_list_found,
+                'polling_location_list':        polling_location_list_objects,
+            }
+            return results
+
         try:
             polling_location_queryset = PollingLocation.objects.all()
+            location_id_and_state_used = False
+            location_name_and_state_used = False
 
             # Ignore entries with we_vote_id coming in from master server
             if positive_value_exists(we_vote_id_from_master):
@@ -263,16 +291,22 @@ class PollingLocationListManager(models.Model):
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(polling_location_id) and positive_value_exists(state):
+                location_id_and_state_used = True
                 new_filter = Q(polling_location_id__iexact=polling_location_id) & Q(state__iexact=state)
                 filters.append(new_filter)
 
             if positive_value_exists(location_name) and positive_value_exists(state):
+                location_name_and_state_used = True
                 new_filter = Q(location_name__iexact=location_name) & Q(state__iexact=state)
                 filters.append(new_filter)
 
-            if positive_value_exists(line1) and positive_value_exists(zip_long):
-                new_filter = Q(line1__iexact=line1) & Q(zip_long__iexact=zip_long)
-                filters.append(new_filter)
+            # 2016-05-17 This portion of the query restricts us from retrieving all polling locations from master.
+            #  That is why we only using this filter when neither of the above filters are used
+            if not positive_value_exists(location_id_and_state_used) and \
+                    not positive_value_exists(location_name_and_state_used):
+                if positive_value_exists(line1) and positive_value_exists(zip_long):
+                    new_filter = Q(line1__iexact=line1) & Q(zip_long__iexact=zip_long)
+                    filters.append(new_filter)
 
             # Add the first query
             if len(filters):

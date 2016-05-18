@@ -557,13 +557,13 @@ class BallotItemListManager(models.Model):
                 ballot_item_queryset = ballot_item_queryset.filter(~Q(
                     contest_office_we_vote_id__iexact=contest_office_we_vote_id))
             elif positive_value_exists(contest_measure_we_vote_id):
-                # Ignore entries with contest_office_we_vote_id coming in from master server
+                # Ignore entries with contest_measure_we_vote_id coming in from master server
                 ballot_item_queryset = ballot_item_queryset.filter(~Q(
                     contest_measure_we_vote_id__iexact=contest_measure_we_vote_id))
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(ballot_item_display_name):
-                new_filter = Q(ballot_item_display_name__exact=ballot_item_display_name)
+                new_filter = Q(ballot_item_display_name__iexact=ballot_item_display_name)
                 filters.append(new_filter)
 
             # Add the first query

@@ -41,7 +41,7 @@ def candidates_import_from_master_server(request, google_civic_election_id=''):
     Get the json data, and either create new entries or update existing
     :return:
     """
-    messages.add_message(request, messages.INFO, "Loading Contest Offices from We Vote Master servers")
+    messages.add_message(request, messages.INFO, "Loading Candidates from We Vote Master servers")
     logger.info("Loading Candidates from We Vote Master servers")
     # Request json file from We Vote servers
     request = requests.get(CANDIDATES_SYNC_URL, params={
