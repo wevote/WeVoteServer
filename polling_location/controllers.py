@@ -24,8 +24,8 @@ def polling_locations_import_from_master_server(request, state_code):
     :return:
     """
     # Request json file from We Vote servers
-    messages.add_message(request, messages.INFO, "Loading Measures from We Vote Master servers")
-    logger.info("Loading Measures from We Vote Master servers")
+    messages.add_message(request, messages.INFO, "Loading Polling Locations from We Vote Master servers")
+    logger.info("Loading Polling Locations from We Vote Master servers")
     request = requests.get(POLLING_LOCATIONS_SYNC_URL, params={
         "key": WE_VOTE_API_KEY,  # This comes from an environment variable
         "format":   'json',
