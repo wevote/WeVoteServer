@@ -85,8 +85,13 @@ def position_retrieve_doc_template_values(url_root):
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "speaker_display_name": string,\n' \
                    '  "speaker_image_url_https": string,\n' \
+                   '  "speaker_twitter_handle": string,\n' \
                    '  "is_support": boolean,\n' \
+                   '  "is_positive_rating": boolean,\n' \
+                   '  "is_support_or_positive_rating": boolean,\n' \
                    '  "is_oppose": boolean,\n' \
+                   '  "is_negative_rating": boolean,\n' \
+                   '  "is_oppose_or_negative_rating": boolean,\n' \
                    '  "is_information_only": boolean,\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
                    '  "google_civic_election_id": integer,\n' \

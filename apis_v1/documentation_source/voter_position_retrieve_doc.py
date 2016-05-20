@@ -43,6 +43,7 @@ def voter_position_retrieve_doc_template_values(url_root):
         'ballot_item_we_vote_id': 'wv01cand1755',
     }
 
+    # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating or is_oppose_or_negative_rating
     api_response = '{\n' \
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \

@@ -69,14 +69,6 @@ class VoterGuideManager(models.Manager):
                         'twitter_followers_count':  organization.twitter_followers_count,
                         'display_name':             organization.organization_name,
                     }
-                # else:
-                #     updated_values = {
-                #         # Values we search against below
-                #         'google_civic_election_id': google_civic_election_id,
-                #         'organization_we_vote_id':  organization_we_vote_id,
-                #         # The rest of the values
-                #         'voter_guide_owner_type':   voter_guide_owner_type,
-                #     }
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         organization_we_vote_id__iexact=organization_we_vote_id,
@@ -140,14 +132,6 @@ class VoterGuideManager(models.Manager):
                         'twitter_description':      organization.twitter_description,
                         'twitter_followers_count':  twitter_followers_count,
                     }
-                # else:
-                #     updated_values = {
-                #         # Values we search against below
-                #         'vote_smart_time_span':     vote_smart_time_span,
-                #         'organization_we_vote_id':  organization_we_vote_id,
-                #         # The rest of the values
-                #         'voter_guide_owner_type':   voter_guide_owner_type,
-                #     }
                     voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                         vote_smart_time_span__exact=vote_smart_time_span,
                         organization_we_vote_id__iexact=organization_we_vote_id,
@@ -464,13 +448,21 @@ class VoterGuideManager(models.Manager):
                                                                          voter_guide.organization_we_vote_id)
                     if results['organization_found']:
                         organization = results['organization']
-                        if not positive_value_exists(voter_guide.speaker_display_name):
+                        if not positive_value_exists(voter_guide.display_name):
                             # speaker_display_name is missing so look it up from source
-                            voter_guide.speaker_display_name = organization.organization_name
+                            voter_guide.display_name = organization.organization_name
                             voter_guide_change = True
-                        if not positive_value_exists(voter_guide.speaker_image_url_https):
-                            # speaker_image_url_https is missing so look it up from source
-                            voter_guide.speaker_image_url_https = organization.organization_photo_url()
+                        if not positive_value_exists(voter_guide.image_url):
+                            # image_url is missing so look it up from source
+                            voter_guide.image_url = organization.organization_photo_url()
+                            voter_guide_change = True
+                        if not positive_value_exists(voter_guide.twitter_handle):
+                            # twitter_url is missing so look it up from source
+                            voter_guide.twitter_handle = organization.organization_twitter_handle
+                            voter_guide_change = True
+                        if not positive_value_exists(voter_guide.twitter_description):
+                            # twitter_description is missing so look it up from source
+                            voter_guide.twitter_description = organization.twitter_description
                             voter_guide_change = True
                 except Exception as e:
                     pass

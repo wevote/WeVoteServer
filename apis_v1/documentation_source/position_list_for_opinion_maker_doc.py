@@ -114,14 +114,19 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "position_id": integer,\n' \
                    '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
-                   '     "office_display_name": string (The name of the office if kind_of_ballot_item is CANDIDATE),\n' \
+                   '     "ballot_item_id": integer,\n' \
                    '     "ballot_item_image_url_https": string,\n' \
+                   '     "ballot_item_twitter_handle": string,\n' \
+                   '     "ballot_item_we_vote_id": string,\n' \
+                   '     "office_display_name": string (The name of the office if kind_of_ballot_item is CANDIDATE),\n' \
                    '     "kind_of_ballot_item": string, ' \
                    '      (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\')\n' \
-                   '     "ballot_item_id": integer,\n' \
-                   '     "ballot_item_we_vote_id": string,\n' \
                    '     "is_support": boolean,\n' \
+                   '     "is_positive_rating": boolean,\n' \
+                   '     "is_support_or_positive_rating": boolean,\n' \
                    '     "is_oppose": boolean,\n' \
+                   '     "is_negative_rating": boolean,\n' \
+                   '     "is_oppose_or_negative_rating": boolean,\n' \
                    '     "statement_text": string,\n' \
                    '     "statement_html": string,\n' \
                    '     "google_civic_election_id": integer,\n' \

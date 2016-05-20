@@ -67,6 +67,8 @@ class PositionEntered(models.Model):
     # We cache the url to an image for the candidate, measure or office for rapid display
     ballot_item_image_url_https = models.URLField(verbose_name='url of https image for candidate, measure or office',
                                                   blank=True, null=True)
+    ballot_item_twitter_handle = models.CharField(verbose_name='twitter screen_name for candidate, measure, or office',
+                                                  max_length=255, null=True, unique=False)
 
     # What is the organization name, voter name, or public figure name? We cache this here for rapid display
     speaker_display_name = models.CharField(
@@ -74,6 +76,8 @@ class PositionEntered(models.Model):
     # We cache the url to an image for the org, voter, or public_figure for rapid display
     speaker_image_url_https = models.URLField(verbose_name='url of https image for org or person with position',
                                               blank=True, null=True)
+    speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
+                                              max_length=255, null=True, unique=False)
 
     date_entered = models.DateTimeField(verbose_name='date entered', null=True, auto_now=True)
     # The date the this position last changed
@@ -207,22 +211,48 @@ class PositionEntered(models.Model):
             )
         super(PositionEntered, self).save(*args, **kwargs)
 
+    # Is the position is an actual endorsement?
     def is_support(self):
         if self.stance == SUPPORT:
             return True
-        elif self.stance == PERCENT_RATING:
+        return False
+
+    # Is the position a rating that is 66% or greater?
+    def is_positive_rating(self):
+        if self.stance == PERCENT_RATING:
             rating_percentage = convert_to_int(self.vote_smart_rating)
             if rating_percentage >= 66:
                 return True
         return False
 
+    # Is the position is an actual endorsement or a rating that is 66% or greater?
+    def is_support_or_positive_rating(self):
+        if self.is_support():
+            return True
+        elif self.is_positive_rating():
+            return True
+        return False
+
+    # Is the position an anti-endorsement?
     def is_oppose(self):
         if self.stance == OPPOSE:
             return True
-        elif self.stance == PERCENT_RATING:
+        return False
+
+    # Is the position a rating that is 33% or less?
+    def is_negative_rating(self):
+        if self.stance == PERCENT_RATING:
             rating_percentage = convert_to_int(self.vote_smart_rating)
             if rating_percentage <= 33:
                 return True
+        return False
+
+    # Is the position is an actual endorsement or a rating that is 66% or greater?
+    def is_oppose_or_negative_rating(self):
+        if self.is_oppose():
+            return True
+        elif self.is_negative_rating():
+            return True
         return False
 
     def is_no_stance(self):
@@ -557,13 +587,13 @@ class PositionListManager(models.Model):
                 for one_position in position_list:
                     if stance_we_are_looking_for == SUPPORT:
                         if one_position.stance == PERCENT_RATING:
-                            if one_position.is_support():
+                            if one_position.is_positive_rating():  # This was "is_support"
                                 revised_position_list.append(one_position)
                         else:
                             revised_position_list.append(one_position)
                     elif stance_we_are_looking_for == OPPOSE:
                         if one_position.stance == PERCENT_RATING:
-                            if one_position.is_oppose():
+                            if one_position.is_negative_rating():  # This was "is_oppose"
                                 revised_position_list.append(one_position)
                         else:
                             revised_position_list.append(one_position)
@@ -948,13 +978,13 @@ class PositionListManager(models.Model):
                 # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
                 if stance_we_are_looking_for == SUPPORT:
                     position_list = position_list.filter(
-                        Q(stance=stance_we_are_looking_for) |
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__gte=66))  # Matches "is_support"
+                        Q(stance=stance_we_are_looking_for) |  # Matches "is_support"
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__gte=66))  # Matches "is_positive_rating"
                     )  # | Q(stance=GRADE_RATING))
                 elif stance_we_are_looking_for == OPPOSE:
                     position_list = position_list.filter(
-                        Q(stance=stance_we_are_looking_for) |
-                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__lte=33))  # Matches "is_oppose"
+                        Q(stance=stance_we_are_looking_for) |  # Matches "is_oppose"
+                        (Q(stance=PERCENT_RATING) & Q(vote_smart_rating__lte=33))  # Matches "is_negative_rating"
                     )  # | Q(stance=GRADE_RATING))
                 else:
                     position_list = position_list.filter(stance=stance_we_are_looking_for)
@@ -1333,8 +1363,12 @@ class PositionEnteredManager(models.Model):
             'position_found':           True if position_id > 0 else False,
             'position_id':              position_id,
             'position':                 position_on_stage,
-            'is_support':               position_on_stage.is_support(),
-            'is_oppose':                position_on_stage.is_oppose(),
+            'is_support':                       position_on_stage.is_support(),
+            'is_positive_rating':               position_on_stage.is_positive_rating(),
+            'is_support_or_positive_rating':    position_on_stage.is_support_or_positive_rating(),
+            'is_oppose':                        position_on_stage.is_oppose(),
+            'is_negative_rating':               position_on_stage.is_negative_rating(),
+            'is_oppose_or_negative_rating':     position_on_stage.is_oppose_or_negative_rating(),
             'is_no_stance':             position_on_stage.is_no_stance(),
             'is_information_only':      position_on_stage.is_information_only(),
             'is_still_deciding':        position_on_stage.is_still_deciding(),
@@ -2056,7 +2090,8 @@ class PositionEnteredManager(models.Model):
         # Start with "speaker" information (Organization, Voter, or Public Figure)
         if positive_value_exists(position_object.organization_we_vote_id):
             if not positive_value_exists(position_object.speaker_display_name) \
-                    or not positive_value_exists(position_object.speaker_image_url_https):
+                    or not positive_value_exists(position_object.speaker_image_url_https) \
+                    or not positive_value_exists(position_object.speaker_twitter_handle):
                 try:
                     # We need to look in the organization table for speaker_display_name & speaker_image_url_https
                     organization_manager = OrganizationManager()
@@ -2073,12 +2108,17 @@ class PositionEnteredManager(models.Model):
                             # speaker_image_url_https is missing so look it up from source
                             position_object.speaker_image_url_https = organization.organization_photo_url()
                             position_change = True
+                        if not positive_value_exists(position_object.speaker_twitter_handle):
+                            # speaker_twitter_handle is missing so look it up from source
+                            position_object.speaker_twitter_handle = organization.organization_twitter_handle
+                            position_change = True
                 except Exception as e:
                     pass
         elif positive_value_exists(position_object.voter_id):
             if not positive_value_exists(position_object.speaker_display_name) or \
                     not positive_value_exists(position_object.voter_we_vote_id) or \
-                    not positive_value_exists(position_object.speaker_image_url_https):
+                    not positive_value_exists(position_object.speaker_image_url_https) or \
+                    not positive_value_exists(position_object.speaker_twitter_handle):
                 try:
                     # We need to look in the voter table for speaker_display_name
                     voter_manager = VoterManager()
@@ -2097,6 +2137,10 @@ class PositionEnteredManager(models.Model):
                             # speaker_image_url_https is missing so look it up from source
                             position_object.speaker_image_url_https = voter.voter_photo_url()
                             position_change = True
+                        if not positive_value_exists(position_object.speaker_twitter_handle):
+                            # speaker_twitter_handle is missing so look it up from source
+                            position_object.speaker_twitter_handle = voter.twitter_screen_name
+                            position_change = True
                 except Exception as e:
                     pass
 
@@ -2106,6 +2150,7 @@ class PositionEnteredManager(models.Model):
         # Now move onto "ballot_item" information
         if not positive_value_exists(position_object.ballot_item_display_name) \
                 or not positive_value_exists(position_object.ballot_item_image_url_https) \
+                or not positive_value_exists(position_object.ballot_item_twitter_handle) \
                 or not positive_value_exists(position_object.state_code):
             # Candidate
             if positive_value_exists(position_object.candidate_campaign_id) or \
@@ -2125,8 +2170,12 @@ class PositionEnteredManager(models.Model):
                             # ballot_item_image_url_https is missing so look it up from source
                             position_object.ballot_item_image_url_https = candidate.candidate_photo_url()
                             position_change = True
+                        if not positive_value_exists(position_object.ballot_item_twitter_handle):
+                            # ballot_item_image_twitter_handle is missing so look it up from source
+                            position_object.ballot_item_twitter_handle = candidate.candidate_twitter_handle
+                            position_change = True
                         if not positive_value_exists(position_object.state_code):
-                            # ballot_item_image_url_https is missing so look it up from source
+                            # state_code is missing so look it up from source
                             position_object.state_code = candidate.get_candidate_state()
                             position_change = True
                 except Exception as e:

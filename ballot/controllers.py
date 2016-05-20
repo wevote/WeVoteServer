@@ -732,6 +732,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                                 'party':                        candidate.party_display(),
                                 'order_on_ballot':              candidate.order_on_ballot,
                                 'kind_of_ballot_item':          CANDIDATE,
+                                'twitter_handle':               candidate.candidate_twitter_handle,
                                 'twitter_description':          candidate.twitter_description,
                                 'twitter_followers_count':      candidate.twitter_followers_count,
                             }

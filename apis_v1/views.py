@@ -382,7 +382,7 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
 
 def position_retrieve_view(request):
     """
-    Retrieve all of the details about a single position based on unique identifier
+    Retrieve all of the details about a single position based on unique identifier (positionRetrieve)
     :param request:
     :return:
     """
@@ -398,7 +398,7 @@ def position_retrieve_view(request):
 
 def position_save_view(request):
     """
-    Save a single position
+    Save a single position (positionSave)
     :param request:
     :return:
     """
@@ -760,7 +760,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
                     'voter_device_id': voter_device_id,
                     'address_type': voter_address_retrieve_results['address_type'],
                     'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
-                    'google_civic_election_id': voter_address_retrieve_results['text_for_map_search'],
+                    'google_civic_election_id': voter_address_retrieve_results['google_civic_election_id'],
                     'latitude': voter_address_retrieve_results['latitude'],
                     'longitude': voter_address_retrieve_results['longitude'],
                     'normalized_line1': voter_address_retrieve_results['normalized_line1'],
@@ -896,11 +896,6 @@ def voter_address_save_view(request):  # voterAddressSave
         # Update voter_address with the google_civic_election_id retrieved from Google Civic
         # and clear out ballot_saved information IFF we got a valid google_civic_election_id back
         google_civic_election_id = convert_to_int(google_retrieve_results['google_civic_election_id'])
-
-        if not positive_value_exists(google_civic_election_id):
-            # Check to see if we have a We Vote generated election
-            google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
-                voter_device_id, text_for_map_search, use_test_election)
 
         # At this point proceed to update google_civic_election_id whether it is a positive integer or zero
         voter_address.google_civic_election_id = google_civic_election_id

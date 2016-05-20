@@ -49,6 +49,7 @@ def positions_sync_out_doc_template_values(url_root):
                    '  "public_figure_we_vote_id": string,\n' \
                    '  "speaker_display_name": string,\n' \
                    '  "speaker_image_url_https": string,\n' \
+                   '  "speaker_twitter_handle": string,\n' \
                    '  "stance": string,\n' \
                    '  "state_code": string,\n' \
                    '  "statement_text": string,\n' \

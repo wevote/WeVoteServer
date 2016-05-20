@@ -34,6 +34,7 @@ def voter_all_positions_retrieve_doc_template_values(url_root):
     try_now_link_variables_dict = {
     }
 
+    # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating or is_oppose_or_negative_rating
     api_response = '{\n' \
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \

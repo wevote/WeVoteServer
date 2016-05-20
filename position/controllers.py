@@ -28,7 +28,7 @@ POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
 
 
 # We retrieve from only one of the two possible variables
-def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id):
+def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id):  # positionRetrieve
     position_id = convert_to_int(position_id)
     position_we_vote_id = position_we_vote_id.strip()
 
@@ -46,9 +46,14 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
-            'is_support':               False,
-            'is_oppose':                False,
-            'is_information_only':      False,
+            'speaker_twitter_handle':   '',
+            'is_support':                       False,
+            'is_positive_rating':               False,
+            'is_support_or_positive_rating':    False,
+            'is_oppose':                        False,
+            'is_negative_rating':               False,
+            'is_oppose_or_negative_rating':     False,
+            'is_information_only':              False,
             'organization_we_vote_id':  '',
             'google_civic_election_id': '',
             'voter_id':                 0,
@@ -73,19 +78,6 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
     position_voter_id = 0
     results = position_manager.retrieve_position(position_id, position_we_vote_id, organization_id, position_voter_id,
                                                  contest_office_id, candidate_campaign_id, contest_measure_id)
-    # results = {
-    #     'error_result':             error_result,
-    #     'DoesNotExist':             exception_does_not_exist,
-    #     'MultipleObjectsReturned':  exception_multiple_object_returned,
-    #     'position_found':           True if position_id > 0 else False,
-    #     'position_id':              position_id,
-    #     'position':                 position_on_stage,
-    #     'is_support':               position_on_stage.is_support(),
-    #     'is_oppose':                position_on_stage.is_oppose(),
-    #     'is_no_stance':             position_on_stage.is_no_stance(),
-    #     'is_information_only':      position_on_stage.is_information_only(),
-    #     'is_still_deciding':        position_on_stage.is_still_deciding(),
-    # }
 
     if results['position_found']:
         position = results['position']
@@ -97,8 +89,13 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'ballot_item_display_name': position.ballot_item_display_name,
             'speaker_display_name':     position.speaker_display_name,
             'speaker_image_url_https':  position.speaker_image_url_https,
-            'is_support':               results['is_support'],
-            'is_oppose':                results['is_oppose'],
+            'speaker_twitter_handle':   position.speaker_twitter_handle,
+            'is_support':                       results['is_support'],
+            'is_positive_rating':               results['is_positive_rating'],
+            'is_support_or_positive_rating':    results['is_support_or_positive_rating'],
+            'is_oppose':                        results['is_oppose'],
+            'is_negative_rating':               results['is_negative_rating'],
+            'is_oppose_or_negative_rating':     results['is_oppose_or_negative_rating'],
             'is_information_only':      results['is_information_only'],
             'organization_we_vote_id':  position.organization_we_vote_id,
             'google_civic_election_id': position.google_civic_election_id,
@@ -124,8 +121,13 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
-            'is_support':               False,
-            'is_oppose':                False,
+            'speaker_twitter_handle':   '',
+            'is_support':                       False,
+            'is_positive_rating':               False,
+            'is_support_or_positive_rating':    False,
+            'is_oppose':                        False,
+            'is_negative_rating':               False,
+            'is_oppose_or_negative_rating':     False,
             'is_information_only':      False,
             'organization_we_vote_id':  '',
             'google_civic_election_id': '',
@@ -189,8 +191,13 @@ def position_save_for_api(
             'ballot_item_display_name': ballot_item_display_name,
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
-            'is_support':               False,
-            'is_oppose':                False,
+            'speaker_twitter_handle':   '',
+            'is_support':                       False,
+            'is_positive_rating':               False,
+            'is_support_or_positive_rating':    False,
+            'is_oppose':                        False,
+            'is_negative_rating':               False,
+            'is_oppose_or_negative_rating':     False,
             'is_information_only':      False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
@@ -217,8 +224,13 @@ def position_save_for_api(
             'ballot_item_display_name': ballot_item_display_name,
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
-            'is_support':               False,
-            'is_oppose':                False,
+            'speaker_twitter_handle':   '',
+            'is_support':                       False,
+            'is_positive_rating':               False,
+            'is_support_or_positive_rating':    False,
+            'is_oppose':                        False,
+            'is_negative_rating':               False,
+            'is_oppose_or_negative_rating':     False,
             'is_information_only':      False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
@@ -269,8 +281,13 @@ def position_save_for_api(
             'ballot_item_display_name': position.ballot_item_display_name,
             'speaker_display_name':     position.speaker_display_name,
             'speaker_image_url_https':  position.speaker_image_url_https,
-            'is_support':               position.is_support(),
-            'is_oppose':                position.is_oppose(),
+            'speaker_twitter_handle':   position.speaker_twitter_handle,
+            'is_support':                       position.is_support(),
+            'is_positive_rating':               position.is_positive_rating(),
+            'is_support_or_positive_rating':    position.is_support_or_positive_rating(),
+            'is_oppose':                        position.is_oppose(),
+            'is_negative_rating':               position.is_negative_rating(),
+            'is_oppose_or_negative_rating':     position.is_oppose_or_negative_rating(),
             'is_information_only':      position.is_information_only(),
             'organization_we_vote_id':  position.organization_we_vote_id,
             'google_civic_election_id': position.google_civic_election_id,
@@ -297,8 +314,13 @@ def position_save_for_api(
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
-            'is_support':               False,
-            'is_oppose':                False,
+            'speaker_twitter_handle':   '',
+            'is_support':                       False,
+            'is_positive_rating':               False,
+            'is_support_or_positive_rating':    False,
+            'is_oppose':                        False,
+            'is_negative_rating':               False,
+            'is_oppose_or_negative_rating':     False,
             'is_information_only':      False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
@@ -475,7 +497,8 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
             one_position_success = True
             # Make sure we have this data to display
             if not positive_value_exists(one_position.speaker_display_name) \
-                    or not positive_value_exists(one_position.speaker_image_url_https):
+                    or not positive_value_exists(one_position.speaker_image_url_https) \
+                    or not positive_value_exists(one_position.speaker_twitter_handle):
                 one_position = position_manager.refresh_cached_position_info(one_position)
             speaker_display_name = one_position.speaker_display_name
         elif positive_value_exists(one_position.voter_id):
@@ -486,7 +509,8 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
             # Make sure we have this data to display
             if not positive_value_exists(one_position.speaker_display_name) \
                     or not positive_value_exists(one_position.voter_we_vote_id) \
-                    or not positive_value_exists(one_position.speaker_image_url_https):
+                    or not positive_value_exists(one_position.speaker_image_url_https) \
+                    or not positive_value_exists(one_position.speaker_twitter_handle):
                 one_position = position_manager.refresh_cached_position_info(one_position)
 
             speaker_display_name = "You"
@@ -497,7 +521,8 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
             one_position_success = True
             # Make sure we have this data to display
             if not positive_value_exists(one_position.speaker_display_name) \
-                    or not positive_value_exists(one_position.speaker_image_url_https):
+                    or not positive_value_exists(one_position.speaker_image_url_https) \
+                    or not positive_value_exists(one_position.speaker_twitter_handle):
                 one_position = position_manager.refresh_cached_position_info(one_position)
             speaker_display_name = one_position.speaker_display_name
         else:
@@ -509,19 +534,24 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
 
         if one_position_success:
             one_position_dict_for_api = {
-                'position_id':          one_position.id,
-                'position_we_vote_id':  one_position.we_vote_id,
-                'ballot_item_display_name': one_position.ballot_item_display_name,
-                'speaker_display_name': speaker_display_name,
-                'speaker_image_url_https': one_position.speaker_image_url_https,
-                'speaker_type':         speaker_type,
-                'speaker_id':           speaker_id,
-                'speaker_we_vote_id':   speaker_we_vote_id,
-                'is_support':           one_position.is_support(),
-                'is_oppose':            one_position.is_oppose(),
-                'vote_smart_rating':    one_position.vote_smart_rating,
-                'vote_smart_time_span': one_position.vote_smart_time_span,
-                'last_updated':         one_position.last_updated(),
+                'position_id':                      one_position.id,
+                'position_we_vote_id':              one_position.we_vote_id,
+                'ballot_item_display_name':         one_position.ballot_item_display_name,
+                'speaker_display_name':             speaker_display_name,
+                'speaker_image_url_https':          one_position.speaker_image_url_https,
+                'speaker_twitter_handle':           one_position.speaker_twitter_handle,
+                'speaker_type':                     speaker_type,
+                'speaker_id':                       speaker_id,
+                'speaker_we_vote_id':               speaker_we_vote_id,
+                'is_support':                       one_position.is_support(),
+                'is_positive_rating':               one_position.is_positive_rating(),
+                'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),
+                'is_oppose':                        one_position.is_oppose(),
+                'is_negative_rating':               one_position.is_negative_rating(),
+                'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
+                'vote_smart_rating':                one_position.vote_smart_rating,
+                'vote_smart_time_span':             one_position.vote_smart_time_span,
+                'last_updated':                     one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
 
@@ -738,6 +768,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             # Make sure we have this data to display. If we don't, refresh PositionEntered table from other tables.
             if not positive_value_exists(one_position.ballot_item_display_name) \
                     or not positive_value_exists(one_position.ballot_item_image_url_https) \
+                    or not positive_value_exists(one_position.ballot_item_twitter_handle) \
                     or not positive_value_exists(one_position.state_code):
                 one_position = position_manager.refresh_cached_position_info(one_position)
             one_position_dict_for_api = {
@@ -745,12 +776,17 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'position_we_vote_id':          one_position.we_vote_id,
                 'ballot_item_display_name':     one_position.ballot_item_display_name,
                 'ballot_item_image_url_https':  one_position.ballot_item_image_url_https,
+                'ballot_item_twitter_handle':   one_position.ballot_item_twitter_handle,
                 'kind_of_ballot_item':          kind_of_ballot_item,
                 'ballot_item_id':               ballot_item_id,
                 'ballot_item_we_vote_id':       ballot_item_we_vote_id,
                 'ballot_item_state_code':       one_position.state_code,
-                'is_support':                   one_position.is_support(),
-                'is_oppose':                    one_position.is_oppose(),
+                'is_support':                       one_position.is_support(),
+                'is_positive_rating':               one_position.is_positive_rating(),
+                'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),
+                'is_oppose':                        one_position.is_oppose(),
+                'is_negative_rating':               one_position.is_negative_rating(),
+                'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
                 'vote_smart_rating':            one_position.vote_smart_rating,
                 'vote_smart_time_span':         one_position.vote_smart_time_span,
                 'google_civic_election_id':     one_position.google_civic_election_id,
@@ -993,6 +1029,7 @@ def positions_import_from_structured_json(structured_json):
 
             position_on_stage.ballot_item_display_name = one_position["ballot_item_display_name"]
             position_on_stage.ballot_item_image_url_https = one_position["ballot_item_image_url_https"]
+            position_on_stage.ballot_item_twitter_handle = one_position["ballot_item_twitter_handle"]
             position_on_stage.from_scraper = one_position["from_scraper"]
             position_on_stage.date_last_changed = one_position["date_last_changed"]
             position_on_stage.organization_certified = one_position["organization_certified"]
@@ -1001,6 +1038,7 @@ def positions_import_from_structured_json(structured_json):
             position_on_stage.public_figure_we_vote_id = one_position["public_figure_we_vote_id"]
             position_on_stage.speaker_display_name = one_position["speaker_display_name"]
             position_on_stage.speaker_image_url_https = one_position["speaker_image_url_https"]
+            position_on_stage.speaker_twitter_handle = one_position["speaker_twitter_handle"]
             position_on_stage.tweet_source_id = one_position["tweet_source_id"]
             position_on_stage.twitter_user_entered_position = one_position["twitter_user_entered_position"]
             position_on_stage.volunteer_certified = one_position["volunteer_certified"]
@@ -1055,6 +1093,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
             'success':                  False,
@@ -1063,6 +1103,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
+            'speaker_twitter_handle':   '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -1088,6 +1129,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
     if not positive_value_exists(office_we_vote_id) and \
             not positive_value_exists(candidate_we_vote_id) and \
             not positive_value_exists(measure_we_vote_id):
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   "POSITION_RETRIEVE_MISSING_AT_LEAST_ONE_BALLOT_ITEM_ID",
             'success':                  False,
@@ -1096,6 +1139,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
+            'speaker_twitter_handle':   '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -1130,6 +1174,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
 
     if results['position_found']:
         position = results['position']
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'success':                  True,
             'status':                   results['status'],
@@ -1138,6 +1184,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'ballot_item_display_name': position.ballot_item_display_name,
             'speaker_display_name':     position.speaker_display_name,
             'speaker_image_url_https':  position.speaker_image_url_https,
+            'speaker_twitter_handle':   position.speaker_twitter_handle,
             'is_support':               results['is_support'],
             'is_oppose':                results['is_oppose'],
             'is_information_only':      results['is_information_only'],
@@ -1156,6 +1203,8 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   results['status'],
             'success':                  True,
@@ -1164,6 +1213,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
+            'speaker_twitter_handle':   '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -1243,6 +1293,8 @@ def voter_position_comment_save_for_api(
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         json_data_from_results = results['json_data']
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   json_data_from_results['status'],
             'success':                  False,
@@ -1253,6 +1305,7 @@ def voter_position_comment_save_for_api(
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
+            'speaker_twitter_handle':   '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -1270,6 +1323,8 @@ def voter_position_comment_save_for_api(
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_POSITION_COMMENT",
             'success':                  False,
@@ -1280,6 +1335,7 @@ def voter_position_comment_save_for_api(
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
+            'speaker_twitter_handle':   '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -1314,6 +1370,8 @@ def voter_position_comment_save_for_api(
         positive_value_exists(measure_we_vote_id)
     )
     if not unique_identifier_found:
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
             'success':                  False,
@@ -1324,6 +1382,7 @@ def voter_position_comment_save_for_api(
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
+            'speaker_twitter_handle':   '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -1337,6 +1396,8 @@ def voter_position_comment_save_for_api(
         }
         return json_data
     elif not existing_unique_identifier_found and not required_variables_for_new_entry:
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   "NEW_POSITION_REQUIRED_VARIABLES_MISSING",
             'success':                  False,
@@ -1347,6 +1408,7 @@ def voter_position_comment_save_for_api(
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
+            'speaker_twitter_handle':   '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
@@ -1375,6 +1437,8 @@ def voter_position_comment_save_for_api(
 
     if save_results['success']:
         position = save_results['position']
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'success':                  save_results['success'],
             'status':                   save_results['status'],
@@ -1384,6 +1448,7 @@ def voter_position_comment_save_for_api(
             'ballot_item_display_name': position.ballot_item_display_name,
             'speaker_display_name':     position.speaker_display_name,
             'speaker_image_url_https':  position.speaker_image_url_https,
+            'speaker_twitter_handle':   position.speaker_twitter_handle,
             'new_position_created':     save_results['new_position_created'],
             'is_support':               position.is_support(),
             'is_oppose':                position.is_oppose(),
@@ -1398,6 +1463,8 @@ def voter_position_comment_save_for_api(
         }
         return json_data
     else:
+        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
+        # or is_oppose_or_negative_rating
         json_data = {
             'success':                  False,
             'status':                   save_results['status'],
@@ -1408,6 +1475,7 @@ def voter_position_comment_save_for_api(
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
             'speaker_image_url_https':  '',
+            'speaker_twitter_handle':   '',
             'is_support':               False,
             'is_oppose':                False,
             'is_information_only':      False,
