@@ -99,6 +99,15 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '     "twitter_followers_count": integer,\n' \
                    '     "twitter_handle": integer,\n' \
                    '     "owner_voter_id": integer TO BE DEPRECATED,\n' \
+                   '     "is_support": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "is_positive_rating": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "is_support_or_positive_rating": boolean (Exists if looking at one ballot_item),\n' \
+                   '     "is_oppose": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "is_negative_rating": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "is_oppose_or_negative_rating": boolean (Exists if looking at one ballot_item),\n' \
+                   '     "is_information_only": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "vote_smart_rating": integer (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "vote_smart_time_span": string (Exists if looking at voter guides for one ballot_item),\n' \
                    '   ],\n' \
                    '}\n'
 

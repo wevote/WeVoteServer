@@ -10,7 +10,7 @@ from follow.models import FollowOrganizationList
 from itertools import chain
 import json
 from organization.models import OrganizationManager
-from position.models import ANY_STANCE, PositionListManager
+from position.models import ANY_STANCE, PositionEntered, PositionEnteredManager, PositionListManager
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
@@ -338,7 +338,10 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
 
     if success:
         number_added_to_list = 0
+        position_manager = PositionEnteredManager()
+        position = PositionEntered()
         for voter_guide in voter_guide_list:
+            position_found = False
             one_voter_guide = {
                 'we_vote_id': voter_guide.we_vote_id,
                 'google_civic_election_id': voter_guide.google_civic_election_id,
@@ -354,6 +357,27 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'owner_voter_id': voter_guide.owner_voter_id,
                 'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
+            if positive_value_exists(ballot_item_we_vote_id):
+                if kind_of_ballot_item == CANDIDATE:
+                    organization_id = position.fetch_organization_id_from_we_vote_id(
+                        voter_guide.organization_we_vote_id)
+                    results = position_manager.retrieve_organization_candidate_campaign_position_with_we_vote_id(
+                        organization_id, ballot_item_we_vote_id)
+                    if results['position_found']:
+                        position = results['position']
+                        position_found = True
+
+                if position_found:
+                    one_voter_guide['is_support'] = position.is_support()
+                    one_voter_guide['is_positive_rating'] = position.is_positive_rating()
+                    one_voter_guide['is_support_or_positive_rating'] = position.is_support_or_positive_rating()
+                    one_voter_guide['is_oppose'] = position.is_oppose()
+                    one_voter_guide['is_negative_rating'] = position.is_negative_rating()
+                    one_voter_guide['is_oppose_or_negative_rating'] = position.is_oppose_or_negative_rating()
+                    one_voter_guide['is_information_only'] = position.is_information_only()
+                    one_voter_guide['vote_smart_rating'] = position.vote_smart_rating
+                    one_voter_guide['vote_smart_time_span'] = position.vote_smart_time_span
+
             voter_guides.append(one_voter_guide.copy())
             if positive_value_exists(maximum_number_to_retrieve):
                 number_added_to_list += 1
@@ -433,7 +457,7 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
         results = {
             'success':                      False,
             'status':                       "VOTER_GUIDES_BALLOT_RELATED_VARIABLES_MISSING",
-            'search_string':              search_string,
+            'search_string':                search_string,
             'voter_guide_list_found':       False,
             'voter_guide_list':             voter_guide_list,
         }
