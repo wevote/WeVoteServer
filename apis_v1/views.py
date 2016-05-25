@@ -38,7 +38,7 @@ from twitter.controllers import twitter_identity_retrieve_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, \
     voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
-    VoterDeviceLinkManager, VoterManager
+    VoterDeviceLink, VoterDeviceLinkManager, VoterManager
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
@@ -667,14 +667,42 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
         guess_if_no_address_saved = False
     status = ''
 
+    voter_address_manager = VoterAddressManager()
+    voter_device_link_manager = VoterDeviceLinkManager()
+
     voter_address_retrieve_results = voter_address_retrieve_for_api(voter_device_id)
 
     if voter_address_retrieve_results['address_found']:
+
+        if positive_value_exists(voter_address_retrieve_results['google_civic_election_id']):
+            google_civic_election_id = voter_address_retrieve_results['google_civic_election_id']
+        else:
+            google_civic_election_id = 0
+
+            # This block of code helps us if the google_civic_election_id hasn't been saved in the voter_address table
+            # We retrieve voter_device_link
+            voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+            if voter_device_link_results['voter_device_link_found']:
+                voter_device_link = voter_device_link_results['voter_device_link']
+            else:
+                voter_device_link = VoterDeviceLink()
+
+            # Retrieve the voter_address
+            voter_address_results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
+            if voter_address_results['voter_address_found']:
+                voter_address = voter_address_results['voter_address']
+            else:
+                voter_address = VoterAddress()
+
+            results = choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address)
+            if results['voter_ballot_saved_found']:
+                google_civic_election_id = results['google_civic_election_id']
+
         json_data = {
             'voter_device_id': voter_address_retrieve_results['voter_device_id'],
             'address_type': voter_address_retrieve_results['address_type'],
             'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
-            'google_civic_election_id': voter_address_retrieve_results['google_civic_election_id'],
+            'google_civic_election_id': google_civic_election_id,
             'latitude': voter_address_retrieve_results['latitude'],
             'longitude': voter_address_retrieve_results['longitude'],
             'normalized_line1': voter_address_retrieve_results['normalized_line1'],
@@ -726,7 +754,6 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
             text_for_map_search = voter_location_results['voter_location']
             status += '*** ' + text_for_map_search + ' ***, '
 
-            voter_address_manager = VoterAddressManager()
             voter_address_save_results = voter_address_manager.update_or_create_voter_address(
                 voter_id, BALLOT_ADDRESS, text_for_map_search)
             status += voter_address_save_results['status'] + ", "
@@ -803,6 +830,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
                 'voter_device_id': voter_device_id,
                 'address_type': '',
                 'text_for_map_search': '',
+                'google_civic_election_id': 0,
                 'latitude': '',
                 'longitude': '',
                 'normalized_line1': '',
