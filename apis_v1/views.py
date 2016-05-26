@@ -677,10 +677,10 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
         if positive_value_exists(voter_address_retrieve_results['google_civic_election_id']):
             google_civic_election_id = voter_address_retrieve_results['google_civic_election_id']
         else:
-            google_civic_election_id = 0
-
             # This block of code helps us if the google_civic_election_id hasn't been saved in the voter_address table
             # We retrieve voter_device_link
+            google_civic_election_id = 0
+
             voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
             if voter_device_link_results['voter_device_link_found']:
                 voter_device_link = voter_device_link_results['voter_device_link']
@@ -754,6 +754,8 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
             text_for_map_search = voter_location_results['voter_location']
             status += '*** ' + text_for_map_search + ' ***, '
 
+            google_civic_election_id = 0
+
             voter_address_save_results = voter_address_manager.update_or_create_voter_address(
                 voter_id, BALLOT_ADDRESS, text_for_map_search)
             status += voter_address_save_results['status'] + ", "
@@ -762,22 +764,52 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
                 voter_address = voter_address_save_results['voter_address']
                 use_test_election = False
                 # Reach out to Google and populate ballot items in the database with fresh ballot data
+                # NOTE: 2016-05-26 Google civic NEVER returns a ballot for City, State ZIP, so we could change this
                 google_retrieve_results = voter_ballot_items_retrieve_from_google_civic_for_api(
                     voter_device_id, text_for_map_search, use_test_election)
                 status += google_retrieve_results['status'] + ", "
-                # Update voter_address with the google_civic_election_id retrieved from Google Civic
-                # and clear out ballot_saved information
-                voter_address.google_civic_election_id = google_retrieve_results['google_civic_election_id']
-                voter_address_update_results = voter_address_manager.update_existing_voter_address_object(voter_address)
 
-                if voter_address_update_results['success']:
-                    # Replace the former google_civic_election_id from this voter_device_link
-                    voter_device_link_manager = VoterDeviceLinkManager()
+                if positive_value_exists(google_retrieve_results['google_civic_election_id']):
+                    # Update voter_address with the google_civic_election_id retrieved from Google Civic
+                    # and clear out ballot_saved information
+                    google_civic_election_id = google_retrieve_results['google_civic_election_id']
+
+                    voter_address.google_civic_election_id = google_civic_election_id
+                    voter_address_update_results = voter_address_manager.update_existing_voter_address_object(
+                        voter_address)
+
+                    if voter_address_update_results['success']:
+                        # Replace the former google_civic_election_id from this voter_device_link
+                        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(
+                            voter_device_id)
+                        if voter_device_link_results['voter_device_link_found']:
+                            voter_device_link = voter_device_link_results['voter_device_link']
+                            voter_device_link_manager.update_voter_device_link_with_election_id(
+                                voter_device_link, google_retrieve_results['google_civic_election_id'])
+
+                else:
+                    # This block of code helps us if the google_civic_election_id wasn't found when we reached out
+                    # to the Google Civic API, following finding the voter's location from IP address.
+                    google_civic_election_id = 0
+
+                    # We retrieve voter_device_link
                     voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
                     if voter_device_link_results['voter_device_link_found']:
                         voter_device_link = voter_device_link_results['voter_device_link']
-                        voter_device_link_manager.update_voter_device_link_with_election_id(
-                            voter_device_link, google_retrieve_results['google_civic_election_id'])
+                    else:
+                        voter_device_link = VoterDeviceLink()
+
+                    # Retrieve the voter_address
+                    voter_address_results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
+                    if voter_address_results['voter_address_found']:
+                        voter_address = voter_address_results['voter_address']
+                    else:
+                        voter_address = VoterAddress()
+
+                    results = choose_election_from_existing_data(voter_device_link, google_civic_election_id,
+                                                                 voter_address)
+                    if results['voter_ballot_saved_found']:
+                        google_civic_election_id = results['google_civic_election_id']
 
             voter_address_retrieve_results = voter_address_retrieve_for_api(voter_device_id)
 
@@ -787,7 +819,7 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
                     'voter_device_id': voter_device_id,
                     'address_type': voter_address_retrieve_results['address_type'],
                     'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
-                    'google_civic_election_id': voter_address_retrieve_results['google_civic_election_id'],
+                    'google_civic_election_id': google_civic_election_id,
                     'latitude': voter_address_retrieve_results['latitude'],
                     'longitude': voter_address_retrieve_results['longitude'],
                     'normalized_line1': voter_address_retrieve_results['normalized_line1'],

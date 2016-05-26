@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
@@ -177,6 +178,60 @@ class ElectionManager(models.Model):
         except Election.DoesNotExist as e:
             status = 'NO_ELECTIONS_FOUND'
             success = True
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_list':    election_list,
+        }
+        return results
+
+    def retrieve_we_vote_elections(self):
+        try:
+            election_list_query = Election.objects.all()
+            # We can't do this as long as google_civic_election_id is stored as a char
+            # election_list_query = election_list_query.filter(google_civic_election_id__gte=1000000)
+
+            # Find only the rows where google_civic_election_id is a string longer than 6 digits ("999999")
+            election_list_query = election_list_query.extra(where=["CHAR_LENGTH(google_civic_election_id) > 6"])
+            election_list_query = election_list_query.order_by('election_day_text').reverse()
+            election_list = election_list_query
+            status = 'WE_VOTE_ELECTIONS_FOUND'
+            success = True
+        except Election.DoesNotExist as e:
+            status = 'NO_WE_VOTE_ELECTIONS_FOUND'
+            success = True
+            election_list = []
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'election_list':    election_list,
+        }
+        return results
+
+    def retrieve_google_civic_elections_in_state_list(self, state_code_list):
+        try:
+            election_list_query = Election.objects.all()
+            election_list_query = election_list_query.extra(where=["CHAR_LENGTH(google_civic_election_id) < 7"])
+            election_list_query = election_list_query.exclude(google_civic_election_id=2000)
+
+            q = Q()
+            count = 0
+            for state_code in state_code_list:
+                q = q | Q(state_code__iexact=state_code)
+                count += 1
+            if positive_value_exists(count):
+                election_list_query = election_list_query.filter(q)
+
+            election_list_query = election_list_query.order_by('election_day_text').reverse()
+            election_list = election_list_query
+            status = 'WE_VOTE_ELECTIONS_FOUND'
+            success = True
+        except Election.DoesNotExist as e:
+            status = 'NO_WE_VOTE_ELECTIONS_FOUND'
+            success = True
+            election_list = []
 
         results = {
             'success':          success,

@@ -7,18 +7,22 @@ from .models import Election
 from .serializers import ElectionSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import BallotReturnedListManager
+from candidate.models import CandidateCampaignListManager
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from election.models import ElectionManager
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
 from import_export_google_civic.controllers import retrieve_one_ballot_from_google_civic_api, \
     store_one_ballot_from_google_civic_api
 import json
+from office.models import ContestOfficeListManager
 from polling_location.models import PollingLocation
+from position.models import PositionListManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter.models import voter_has_authority
@@ -385,3 +389,98 @@ def elections_import_from_master_server_view(request):
                                                                not_processed=results['not_processed']))
     return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
                                 str(google_civic_election_id) + "&state_code=" + str(state_code))
+
+
+@login_required()
+def election_migration_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    messages_on_stage = get_messages(request)
+    election_manager = ElectionManager()
+    we_vote_election = Election()
+    office_list_manager = ContestOfficeListManager()
+    candidate_list_manager = CandidateCampaignListManager()
+    position_list_manager = PositionListManager()
+    we_vote_election_office_list = []
+    google_civic_election_office_list = []
+
+    results = election_manager.retrieve_we_vote_elections()
+    we_vote_election_list = results['election_list']
+    state_code_list = []
+    for election in we_vote_election_list:
+        if election.state_code not in state_code_list:
+            state_code_list.append(election.state_code)
+
+    google_civic_election = Election()
+    results = election_manager.retrieve_google_civic_elections_in_state_list(state_code_list)
+    google_civic_election_list = results['election_list']
+
+    we_vote_election_id = convert_to_int(request.GET.get('we_vote_election_id', 0))
+    if not positive_value_exists(we_vote_election_id):
+        we_vote_election_id = convert_to_int(request.POST.get('we_vote_election_id', 0))
+    if positive_value_exists(we_vote_election_id):
+        results = election_manager.retrieve_election(we_vote_election_id)
+        if results['election_found']:
+            we_vote_election = results['election']
+
+            return_list_of_objects = True
+            results = office_list_manager.retrieve_all_offices_for_upcoming_election(we_vote_election_id,
+                                                                                     return_list_of_objects)
+            if results['office_list_found']:
+                we_vote_election_office_list = results['office_list_objects']
+
+    # Go through each office and attach a list of candidates under this office
+    we_vote_election_office_list_new = []
+    for one_office in we_vote_election_office_list:
+        candidate_results = candidate_list_manager.retrieve_all_candidates_for_office(0, one_office.we_vote_id)
+        if candidate_results['candidate_list_found']:
+            candidate_list = candidate_results['candidate_list']
+            new_candidate_list = []
+            # Go through candidate_list and find the number of positions saved for each candidate
+            for candidate in candidate_list:
+                position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+                    0, candidate.we_vote_id)
+                candidate.position_count = len(position_list)  # This is wasteful (instead of using count), but ok
+
+                # Now find the candidates from the Google Civic Election that we might want to transfer data to
+
+                new_candidate_list.append(candidate)
+
+            one_office.candidate_list = new_candidate_list
+        else:
+            one_office.candidate_list = []
+        we_vote_election_office_list_new.append(one_office)
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    if not positive_value_exists(google_civic_election_id):
+        google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
+    if positive_value_exists(google_civic_election_id):
+        results = election_manager.retrieve_election(google_civic_election_id)
+        if results['election_found']:
+            google_civic_election = results['election']
+
+            return_list_of_objects = True
+            results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id,
+                                                                                     return_list_of_objects)
+            if results['office_list_found']:
+                google_civic_election_office_list = results['office_list_objects']
+
+    # We want to transfer the
+    transfer_array = {}
+    transfer_array['wv01off1461'] = "wv02off269"
+
+    template_values = {
+        'messages_on_stage':                    messages_on_stage,
+        'we_vote_election':                     we_vote_election,
+        'we_vote_election_id':                  we_vote_election_id,
+        'we_vote_election_list':                we_vote_election_list,
+        'we_vote_election_office_list':         we_vote_election_office_list_new,
+        'google_civic_election':                google_civic_election,
+        'google_civic_election_id':             google_civic_election_id,
+        'google_civic_election_list':           google_civic_election_list,
+        'google_civic_election_office_list':    google_civic_election_office_list,
+    }
+
+    return render(request, 'election/election_migration.html', template_values)

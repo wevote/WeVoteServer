@@ -1,0 +1,154 @@
+{# templates/election/election_migration.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Migrate Election Data{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+
+<a href="{% url 'election:election_list' %}">< Back to Elections</a>
+
+<h1>Migrate Election Data</h1>
+    <p>Since Google Civic Election data isn't available until 2-3 weeks before the election, we need to have
+        election data entered before that so we can get voter guides entered. This is the "We Vote Election".
+        Once the election data from Google Civic is available, we need to migrate the "We Vote Election" data back over
+        to the "Google Civic Election".</p>
+<form action="{% url "election:election_migration" %}" method="post">
+{% csrf_token %}
+
+    <table>
+        <tr>
+            <td>From this We Vote Election:&nbsp;</td>
+            <td>
+{% if we_vote_election_id %}
+    <strong>
+    {{ we_vote_election.election_name }} - {{ we_vote_election.google_civic_election_id }} - {{ we_vote_election.election_day_text }}
+    </strong>
+    <input type="hidden" name="we_vote_election_id" value="{{ we_vote_election_id }}" />
+{% else %}
+    {% if we_vote_election_list %}
+    <select id="we_vote_election_id" name="we_vote_election_id">
+        <option value="0" {% if 0 == we_vote_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Choose Internal We Vote Election --</option>
+    {% for election in we_vote_election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == we_vote_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    {% else %}
+        We Vote Election List is Missing
+    {% endif %}{# End of if we_vote_election_list #}
+{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>To this Google Civic Election:&nbsp;</td>
+            <td>
+{% if google_civic_election_id %}
+    <strong>
+    {{ google_civic_election.election_name }} - {{ google_civic_election.google_civic_election_id }} - {{ google_civic_election.election_day_text }}
+    </strong>
+    <input type="hidden" name="google_civic_election_id" value="{{ google_civic_election_id }}" />
+{% else %}
+    {% if google_civic_election_list %}
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Choose Election --</option>
+    {% for election in google_civic_election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    {% else %}
+        Google Civic Election List is Missing
+    {% endif %}{# End of if google_civic_election_list #}
+{% endif %}
+            </td>
+        </tr>
+    </table>
+
+{% if not we_vote_election_id or not google_civic_election_id %}
+    {% if we_vote_election_id %}
+        <p><a href="{% url 'election:election_summary' we_vote_election.id %}">cancel</a>
+    {% else %}
+        <p><a href="{% url 'election:election_list' %}">cancel</a>
+    {% endif %}
+
+    <input type="submit" value="Prepare to Migrate" /></p>
+{% endif %}
+
+
+
+
+
+<br />
+
+{% if we_vote_election_id and google_civic_election_id %}
+    {# Now show the Offices + Candidates and Measure, so we can map them, one to the next #}
+    <table border="1">
+        <tr>
+            <td colspan="3">{{ we_vote_election.election_name }} - {{ we_vote_election_id }}</td>
+            <td># Positions</td>
+            <td>&#8594;</td>
+            <td>{{ google_civic_election.election_name }} - {{ google_civic_election_id }}</td>
+            <td># Positions</td>
+            <td>&nbsp;</td>
+        </tr>
+    {% for we_vote_election_office in we_vote_election_office_list %}
+        <tr>
+            <td colspan="3">
+                <strong>{{ we_vote_election_office.office_name }} - {{ we_vote_election_office.we_vote_id }}</strong>
+            </td>
+            <td>&nbsp;</td>
+            <td>&#8594;</td>
+            <td>
+                {% if google_civic_election_office_list %}
+                    <select id="contest_office_id" name="contest_office_id">
+                        <option value="0" {% if 0 == candidate.contest_office_id|convert_to_int %} selected="selected"{% endif %}>
+                            -- Offices from Google Civic --</option>
+                    {% for office in google_civic_election_office_list %}
+                        <option value="{{ office.id }}"
+                                {% if office.id|slugify == candidate.contest_office_id|slugify %} selected="selected"{% endif %}>
+                            {{ office.office_name }} - {{ office.we_vote_id }}</option>
+                    {% endfor %}
+                    </select>
+                {% else %}
+                    (no offices found)
+                {% endif %}
+            </td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+
+        {% for candidate in we_vote_election_office.candidate_list %}
+        <tr>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>
+                {% if candidate.candidate_photo_url %}
+                <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                {% else %}
+                    &nbsp;
+                {% endif %}
+            </td>
+            <td>
+                {{ candidate.candidate_name }} - {{ candidate.we_vote_id }}
+            </td>
+            <td>{{ candidate.position_count }}</td>
+            <td>&#8594;</td>
+            <td>
+
+            </td>
+            <td>0</td>
+            <td><a href="#">Migrate positions</a></td>
+        </tr>
+        {% endfor %}
+    {% endfor %}
+
+    </table>
+{% endif %}
+
+</form>
+
+{% endblock %}
