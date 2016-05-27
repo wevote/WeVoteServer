@@ -41,6 +41,7 @@ def voter_address_retrieve_for_api(voter_device_id):
     if results['voter_address_found']:
         voter_address = results['voter_address']
         status = "VOTER_ADDRESS_RETRIEVE-ADDRESS_FOUND"
+
         voter_address_retrieve_results = {
             'voter_device_id': voter_device_id,
             'address_type': voter_address.address_type if voter_address.address_type else '',
