@@ -10,7 +10,8 @@ from office.models import ContestOffice
 import re
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, extract_first_name_from_full_name, \
+from wevote_functions.functions import convert_to_int, display_full_name_with_correct_capitalization, \
+    extract_first_name_from_full_name, \
     extract_last_name_from_full_name, extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
     positive_value_exists
 
@@ -533,6 +534,12 @@ class CandidateCampaign(models.Model):
                 return extract_state_from_ocd_division_id(ocd_division_id)
             else:
                 return ''
+
+    def display_candidate_name(self):
+        full_name = self.candidate_name
+        if full_name.isupper():
+            return display_full_name_with_correct_capitalization(full_name)
+        return full_name
 
     def extract_first_name(self):
         full_name = self.candidate_name

@@ -54,9 +54,9 @@ Office:
     {% if candidate.generate_twitter_link %}
         <a href="{{ candidate.generate_twitter_link }}" target="_blank">{{ candidate.candidate_twitter_handle }}</a>
         ({{ organization.twitter_followers_count }} Followers)<br />
-        Change: <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" value="{% if candidate %}{{ candidate.candidate_twitter_handle }}{% endif %}" />
+        Change: <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% else %}
-        <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" value="{% if candidate %}{{ candidate.candidate_twitter_handle }}{% endif %}" />
+        <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
     {% endif %}
     <br />
     (<a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">refresh Twitter details</a>)<br />

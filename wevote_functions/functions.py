@@ -168,6 +168,19 @@ def extract_zip_formatted_from_zip9(zip9):
     return formatted_zip_text
 
 
+def display_full_name_with_correct_capitalization(full_name):
+    """
+    See documentation here: https://github.com/derek73/python-nameparser
+    :param full_name:
+    :return:
+    """
+    full_name.strip()
+    full_name_parsed = HumanName(full_name)
+    full_name_parsed.capitalize()
+    full_name_capitalized = str(full_name_parsed)
+    return full_name_capitalized
+
+
 def extract_first_name_from_full_name(full_name):
     """
     See documentation here: https://github.com/derek73/python-nameparser

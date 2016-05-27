@@ -727,7 +727,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                             one_candidate = {
                                 'id':                           candidate.id,
                                 'we_vote_id':                   candidate.we_vote_id,
-                                'ballot_item_display_name':     candidate.candidate_name,
+                                'ballot_item_display_name':     candidate.display_candidate_name(),
                                 'candidate_photo_url':          candidate.candidate_photo_url(),
                                 'party':                        candidate.party_display(),
                                 'order_on_ballot':              candidate.order_on_ballot,
