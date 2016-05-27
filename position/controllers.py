@@ -551,6 +551,8 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
                 'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
                 'vote_smart_rating':                one_position.vote_smart_rating,
                 'vote_smart_time_span':             one_position.vote_smart_time_span,
+                'statement_text':                   one_position.statement_text,
+                'more_info_url':                    one_position.more_info_url,
                 'last_updated':                     one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
