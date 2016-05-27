@@ -581,13 +581,21 @@ def fetch_candidate_count_for_office(office_id=0, office_we_vote_id=''):
 
 
 def candidate_party_display(raw_party):
+    if raw_party == 'Amer. Ind.':
+        return 'American Independent'
     if raw_party == 'DEM':
         return 'Democrat'
     if raw_party == 'Democratic':
         return 'Democrat'
-    elif raw_party == 'LIB':
+    if raw_party == 'GRN':
+        return 'Green'
+    if raw_party == 'LIB':
         return 'Libertarian'
-    elif raw_party == 'REP':
+    if raw_party == 'NPP':
+        return 'No Party Preference'
+    if raw_party == 'PF':
+        return 'Peace and Freedom'
+    if raw_party == 'REP':
         return 'Republican'
     else:
         return raw_party
