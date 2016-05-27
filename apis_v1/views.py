@@ -682,24 +682,24 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
             # We retrieve voter_device_link
             google_civic_election_id = 0
 
-            voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-            if voter_device_link_results['voter_device_link_found']:
-                voter_device_link = voter_device_link_results['voter_device_link']
-            else:
-                voter_device_link = VoterDeviceLink()
+        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+        if voter_device_link_results['voter_device_link_found']:
+            voter_device_link = voter_device_link_results['voter_device_link']
+        else:
+            voter_device_link = VoterDeviceLink()
 
-            # Retrieve the voter_address
-            voter_address_results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
-            if voter_address_results['voter_address_found']:
-                voter_address = voter_address_results['voter_address']
-            else:
-                voter_address = VoterAddress()
+        # Retrieve the voter_address
+        voter_address_results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
+        if voter_address_results['voter_address_found']:
+            voter_address = voter_address_results['voter_address']
+        else:
+            voter_address = VoterAddress()
 
-            results = choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id,
-                                                              voter_address)
-            status += results['status']
-            if results['voter_ballot_saved_found']:
-                google_civic_election_id = results['google_civic_election_id']
+        results = choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id,
+                                                          voter_address)
+        status += results['status']
+        if results['voter_ballot_saved_found']:
+            google_civic_election_id = results['google_civic_election_id']
 
         json_data = {
             'voter_device_id': voter_address_retrieve_results['voter_device_id'],
@@ -795,24 +795,26 @@ def voter_address_retrieve_view(request):  # voterAddressRetrieveView
                     # to the Google Civic API, following finding the voter's location from IP address.
                     google_civic_election_id = 0
 
-                    # We retrieve voter_device_link
-                    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-                    if voter_device_link_results['voter_device_link_found']:
-                        voter_device_link = voter_device_link_results['voter_device_link']
-                    else:
-                        voter_device_link = VoterDeviceLink()
+            # We retrieve voter_device_link
+            voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+            if voter_device_link_results['voter_device_link_found']:
+                voter_device_link = voter_device_link_results['voter_device_link']
+            else:
+                voter_device_link = VoterDeviceLink()
 
-                    # Retrieve the voter_address
-                    voter_address_results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
-                    if voter_address_results['voter_address_found']:
-                        voter_address = voter_address_results['voter_address']
-                    else:
-                        voter_address = VoterAddress()
+            # Retrieve the voter_address
+            voter_address_results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
+            if voter_address_results['voter_address_found']:
+                voter_address = voter_address_results['voter_address']
+            else:
+                voter_address = VoterAddress()
 
-                    results = choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id,
-                                                                      voter_address)
-                    if results['voter_ballot_saved_found']:
-                        google_civic_election_id = results['google_civic_election_id']
+            results = choose_election_and_prepare_ballot_data(voter_device_link, google_civic_election_id,
+                                                              voter_address)
+            status += results['status']
+
+            if results['voter_ballot_saved_found']:
+                google_civic_election_id = results['google_civic_election_id']
 
             voter_address_retrieve_results = voter_address_retrieve_for_api(voter_device_id)
 
