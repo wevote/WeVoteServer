@@ -1,0 +1,1502 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-09-18T02:31:40</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>WWW.CO.MENDOCINO.CA.US</organization_url>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="76">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>WWW.CO.MENDOCINO.CA.US</registration_info>
+  <absentee_ballot_info>WWW.CO.MENDOCINO.CA.US</absentee_ballot_info>
+  <results_url>WWW.CO.MENDOCINO.CA.US</results_url>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-10-20</registration_deadline>
+  <absentee_request_deadline>2014-11-04</absentee_request_deadline>
+</election>
+<locality id="23">
+  <name>COUNTY OF MENDOCINO</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1200000021243">
+  <name>CONSOL PREC NO 100006</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012441</polling_location_id>
+</precinct>
+<precinct id="1200000021244">
+  <name>CONSOL PREC NO 100008</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012441</polling_location_id>
+</precinct>
+<precinct id="1200000021245">
+  <name>CONSOL PREC NO 999522</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021246">
+  <name>CONSOL PREC NO 999523</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021247">
+  <name>CONSOL PREC NO 999514</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021248">
+  <name>CONSOL PREC NO 999546</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021249">
+  <name>CONSOL PREC NO 999521</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021250">
+  <name>CONSOL PREC NO 999516</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021251">
+  <name>CONSOL PREC NO 999517</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021252">
+  <name>CONSOL PREC NO 999513</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021253">
+  <name>CONSOL PREC NO 999518</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021254">
+  <name>CONSOL PREC NO 999515</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021255">
+  <name>CONSOL PREC NO 999519</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021256">
+  <name>CONSOL PREC NO 999510</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021257">
+  <name>CONSOL PREC NO 999511</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021258">
+  <name>CONSOL PREC NO 999545</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021259">
+  <name>CONSOL PREC NO 999507</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021260">
+  <name>CONSOL PREC NO 999508</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021261">
+  <name>CONSOL PREC NO 999512</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021262">
+  <name>CONSOL PREC NO 999506</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021263">
+  <name>CONSOL PREC NO 999520</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021264">
+  <name>CONSOL PREC NO 999509</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021265">
+  <name>CONSOL PREC NO 999503</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021266">
+  <name>CONSOL PREC NO 999501</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021267">
+  <name>CONSOL PREC NO 999505</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021268">
+  <name>CONSOL PREC NO 999557</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021269">
+  <name>CONSOL PREC NO 999502</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021270">
+  <name>CONSOL PREC NO 999504</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021271">
+  <name>CONSOL PREC NO 999541</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021272">
+  <name>CONSOL PREC NO 999529</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021273">
+  <name>CONSOL PREC NO 999558</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021274">
+  <name>CONSOL PRCT NO 999542</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021275">
+  <name>CONSOL PREC NO 999550</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021276">
+  <name>CONSOL PREC NO 999533</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021277">
+  <name>CONSOL PREC NO 999547</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021278">
+  <name>CONSOL PREC NO 999548</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021279">
+  <name>CONSOL PREC NO 999534</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021280">
+  <name>CONSOL PREC NO 999531</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021281">
+  <name>CONSOL PREC NO 999528</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021282">
+  <name>CONSOL PREC NO 999525</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021283">
+  <name>CONSOL PREC NO 999526</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021284">
+  <name>CONSOL PREC NO 999527</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021285">
+  <name>CONSOL PREC NO 999530</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021286">
+  <name>CONSOL PREC NO 999532</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021287">
+  <name>CONSOL PREC NO 999549</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021288">
+  <name>CONSOL PREC NO 999544</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021289">
+  <name>CONSOL PRCT NO 999555</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021290">
+  <name>CONSOL PREC NO 999535</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021291">
+  <name>CONSOL PRCT NO 999543</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021292">
+  <name>CONSOL PREC NO 999552</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021293">
+  <name>CONSOL PREC NO 999536</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021294">
+  <name>CONSOL PREC NO 999538</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021295">
+  <name>CONSOL PREC NO 999540</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021296">
+  <name>CONSOL PREC NO 999537</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021297">
+  <name>CONSOL PRCT NO 999553</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021298">
+  <name>CONSOL PREC NO 999539</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021299">
+  <name>CONSOL PREC NO 999551</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021300">
+  <name>CONSOL PRCT NO 999554</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021301">
+  <name>CONSOL PREC NO 999431</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021302">
+  <name>CONSOL PREC NO 999441</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021303">
+  <name>CONSOL PREC NO 999556</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021304">
+  <name>CONSOL PREC NO 999440</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021305">
+  <name>CONSOL PREC NO 999438</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021306">
+  <name>CONSOL PREC NO 999437</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021307">
+  <name>CONSOL PREC NO 999430</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021308">
+  <name>CONSOL PREC NO 999435</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021309">
+  <name>CONSOL PREC NO 999439</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021310">
+  <name>CONSOL PREC NO 999429</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021311">
+  <name>CONSOL PREC NO 999436</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021312">
+  <name>CONSOL PREC NO 999432</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021313">
+  <name>CONSOL PREC NO 999433</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021314">
+  <name>CONSOL PREC NO 999434</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021315">
+  <name>CONSOL PREC NO 999428</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021316">
+  <name>CONSOL PREC NO 999425</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021317">
+  <name>CONSOL PREC NO 999426</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021318">
+  <name>CONSOL PREC NO 999427</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021319">
+  <name>CONSOL PREC NO 999406</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021320">
+  <name>CONSOL PREC NO 999423</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021321">
+  <name>CONSOL PREC NO 999424</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021322">
+  <name>CONSOL PREC NO 999417</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021323">
+  <name>CONSOL PREC NO 999421</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021324">
+  <name>CONSOL PREC NO 999407</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021325">
+  <name>CONSOL PREC NO 999412</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021326">
+  <name>CONSOL PREC NO 999411</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021327">
+  <name>CONSOL PREC NO 999413</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021328">
+  <name>CONSOL PREC NO 999420</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021329">
+  <name>CONSOL PREC NO 999410</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021330">
+  <name>CONSOL PREC NO 999419</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021331">
+  <name>CONSOL PREC NO 999408</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021332">
+  <name>CONSOL PREC NO 999415</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021333">
+  <name>CONSOL PREC NO 999416</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021334">
+  <name>CONSOL PREC NO 999402</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021335">
+  <name>CONSOL PREC NO 999414</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021336">
+  <name>CONSOL PREC NO 999409</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021337">
+  <name>CONSOL PREC NO 999403</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021338">
+  <name>CONSOL PREC NO 999405</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021339">
+  <name>CONSOL PREC NO 999404</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021340">
+  <name>CONSOL PREC NO 999418</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021341">
+  <name>CONSOL PREC NO 999442</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021342">
+  <name>CONSOL PREC NO 999401</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021343">
+  <name>CONSOL PREC NO 999312</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021344">
+  <name>CONSOL PREC NO 999302</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021345">
+  <name>CONSOL PREC NO 999301</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021346">
+  <name>CONSOL PREC NO 999329</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021347">
+  <name>CONSOL PREC NO 999310</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021348">
+  <name>CONSOL PREC NO 999313</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021349">
+  <name>CONSOL PREC NO 999328</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021350">
+  <name>CONSOL PREC NO 999308</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021351">
+  <name>CONSOL PREC NO 999307</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021352">
+  <name>CONSOL PREC NO 999303</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021353">
+  <name>CONSOL PREC NO 999305</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021354">
+  <name>CONSOL PREC NO 999306</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021355">
+  <name>CONSOL PREC NO 999327</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021356">
+  <name>CONSOL PREC NO 999309</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021357">
+  <name>CONSOL PREC NO 999304</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021358">
+  <name>CONSOL PREC NO 999323</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021359">
+  <name>CONSOL PREC NO 999325</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021360">
+  <name>CONSOL PREC NO 999322</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021361">
+  <name>CONSOL PREC NO 999311</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021362">
+  <name>CONSOL PREC NO 999326</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021363">
+  <name>CONSOL PREC NO 999324</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021364">
+  <name>CONSOL PREC NO 999316</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021365">
+  <name>CONSOL PREC NO 999320</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021366">
+  <name>CONSOL PREC NO 999330</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021367">
+  <name>CONSOL PREC NO 999318</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021368">
+  <name>CONSOL PREC NO 999317</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021369">
+  <name>CONSOL PREC NO 999314</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021370">
+  <name>CONSOL PRCT NO 999224</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021371">
+  <name>CONSOL PREC NO 999315</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021372">
+  <name>CONSOL PREC NO 999319</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021373">
+  <name>CONSOL PREC NO 999209</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021374">
+  <name>CONSOL PREC NO 999207</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021375">
+  <name>CONSOL PREC NO 999201</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021376">
+  <name>CONSOL PREC NO 999227</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021377">
+  <name>CONSOL PREC NO 999228</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021378">
+  <name>CONSOL PREC NO 999220</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021379">
+  <name>CONSOL PREC NO 999215</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021380">
+  <name>CONSOL PREC NO 999217</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021381">
+  <name>CONSOL PREC NO 999214</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021382">
+  <name>CONSOL PREC NO 999202</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021383">
+  <name>CONSOL PREC NO 999211</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021384">
+  <name>CONSOL PRCT NO 999223</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021385">
+  <name>CONSOL PRCT NO 999235</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021386">
+  <name>CONSOL PREC NO 999205</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021387">
+  <name>CONSOL PREC NO 999204</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021388">
+  <name>CONSOL PREC NO 999212</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021389">
+  <name>CONSOL PREC NO 999219</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021390">
+  <name>CONSOL PREC NO 999203</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021391">
+  <name>CONSOL PREC NO 999231</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021392">
+  <name>CONSOL PREC NO 999229</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021393">
+  <name>CONSOL PREC NO 999216</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021394">
+  <name>CONSOL PREC NO 999226</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021395">
+  <name>CONSOL PREC NO 999218</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021396">
+  <name>CONSOL PREC NO 999222</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021397">
+  <name>CONSOL PREC NO 999213</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021398">
+  <name>CONSOL PREC NO 999230</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021399">
+  <name>CONSOL PRCT NO 999221</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021400">
+  <name>CONSOL PREC NO 999208</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021401">
+  <name>CONSOL PREC NO 999225</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021402">
+  <name>CONSOL PREC NO 999206</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021403">
+  <name>CONSOL PREC NO 999233</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021404">
+  <name>CONSOL PREC NO 999234</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021405">
+  <name>CONSOL PREC NO 999236</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021406">
+  <name>CONSOL PREC NO 999122</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021407">
+  <name>CONSOL PREC NO 999232</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021408">
+  <name>CONSOL PRCT NO 999210</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021409">
+  <name>CONSOL PREC NO 999130</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021410">
+  <name>CONSOL PREC NO 999142</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021411">
+  <name>CONSOL PREC NO 999143</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021412">
+  <name>CONSOL PREC NO 999121</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021413">
+  <name>CONSOL PREC NO 999124</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021414">
+  <name>CONSOL PREC NO 999115</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021415">
+  <name>CONSOL PREC NO 999110</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021416">
+  <name>CONSOL PREC NO 999135</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021417">
+  <name>CONSOL PREC NO 999136</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021418">
+  <name>CONSOL PRCT NO 999151</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021419">
+  <name>CONSOL PREC NO 999137</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021420">
+  <name>CONSOL PREC NO 999112</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021421">
+  <name>CONSOL PREC NO 999131</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021422">
+  <name>CONSOL PREC NO 999117</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021423">
+  <name>CONSOL PREC NO 999132</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021424">
+  <name>CONSOL PREC NO 999125</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021425">
+  <name>CONSOL PREC NO 999138</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021426">
+  <name>CONSOL PREC NO 999102</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021427">
+  <name>CONSOL PRCT NO 999148</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021428">
+  <name>CONSOL PRCT NO 999149</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021429">
+  <name>CONSOL PRCT NO 999150</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021430">
+  <name>CONSOL PREC NO 999105</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021431">
+  <name>CONSOL PREC NO 999128</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021432">
+  <name>CONSOL PREC NO 999127</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021433">
+  <name>CONSOL PREC NO 999109</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021434">
+  <name>CONSOL PREC NO 999111</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021435">
+  <name>CONSOL PREC NO 999106</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021436">
+  <name>CONSOL PREC NO 999107</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021437">
+  <name>CONSOL PREC NO 999140</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021438">
+  <name>CONSOL PREC NO 999141</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021439">
+  <name>CONSOL PREC NO 999104</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021440">
+  <name>CONSOL PREC NO 999103</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021441">
+  <name>CONSOL PREC NO 999108</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021442">
+  <name>CONSOL PREC NO 999139</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021443">
+  <name>CONSOL PREC  NO 999129</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021444">
+  <name>CONSOL PRCT NO 999145</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021445">
+  <name>CONSOL PRCT NO 999147</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021446">
+  <name>CONSOL PREC NO 999126</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021447">
+  <name>CONSOL PREC NO 999144</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021448">
+  <name>CONSOL PREC NO 999120</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021449">
+  <name>CONSOL PREC NO 999133</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021450">
+  <name>CONSOL PREC NO 999118</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021451">
+  <name>CONSOL PREC NO 999134</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021452">
+  <name>CONSOL PRCT NO 999146</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021453">
+  <name>CONSOL PREC NO 999119</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021454">
+  <name>CONSOL PREC NO 999113</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021455">
+  <name>CONSOL PREC NO 999116</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021456">
+  <name>CONSOL PREC NO 999114</name>
+  <locality_id>23</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000021457">
+  <name>CONSOL PREC NO 300001</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012460</polling_location_id>
+</precinct>
+<precinct id="1200000021458">
+  <name>CONSOL PREC NO 300002</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012460</polling_location_id>
+</precinct>
+<precinct id="1200000021459">
+  <name>CONSOL PREC NO 300006</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012461</polling_location_id>
+</precinct>
+<precinct id="1200000021460">
+  <name>CONSOL PREC NO 300007</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012461</polling_location_id>
+</precinct>
+<precinct id="1200000021461">
+  <name>CONSOL PREC NO 300004</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012461</polling_location_id>
+</precinct>
+<precinct id="1200000021462">
+  <name>CONSOL PREC NO 300005</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012461</polling_location_id>
+</precinct>
+<precinct id="1200000021463">
+  <name>CONSOL PREC NO 300003</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012461</polling_location_id>
+</precinct>
+<precinct id="1200000021464">
+  <name>CONSOL PREC NO 500005</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012371</polling_location_id>
+</precinct>
+<precinct id="1200000021465">
+  <name>CONSOL PREC NO 500007</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012385</polling_location_id>
+</precinct>
+<precinct id="1200000021466">
+  <name>CONSOL PREC NO 500008</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012385</polling_location_id>
+</precinct>
+<precinct id="1200000021467">
+  <name>CONSOL PREC NO 500002</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012387</polling_location_id>
+</precinct>
+<precinct id="1200000021468">
+  <name>CONSOL PREC NO 100007</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012392</polling_location_id>
+</precinct>
+<precinct id="1200000021469">
+  <name>CONSOL PREC NO 500003</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012395</polling_location_id>
+</precinct>
+<precinct id="1200000021470">
+  <name>CONSOL PREC NO 200003</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012399</polling_location_id>
+</precinct>
+<precinct id="1200000021471">
+  <name>CONSOL PREC NO 100500</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012407</polling_location_id>
+</precinct>
+<precinct id="1200000021472">
+  <name>CONSOL PREC NO 100001</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012407</polling_location_id>
+</precinct>
+<precinct id="1200000021473">
+  <name>CONSOL PREC NO 400007</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012413</polling_location_id>
+</precinct>
+<precinct id="1200000021474">
+  <name>CONSOL PREC NO 200001</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012418</polling_location_id>
+</precinct>
+<precinct id="1200000021475">
+  <name>CONSOL PREC NO 100009</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012423</polling_location_id>
+</precinct>
+<precinct id="1200000021476">
+  <name>CONSOL PREC NO 500006</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012424</polling_location_id>
+</precinct>
+<precinct id="1200000021477">
+  <name>CONSOL PREC NO 300008</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012425</polling_location_id>
+</precinct>
+<precinct id="1200000021478">
+  <name>CONSOL PREC NO 500004</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012428</polling_location_id>
+</precinct>
+<precinct id="1200000021479">
+  <name>CONSOL PREC NO 200004</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012429</polling_location_id>
+</precinct>
+<precinct id="1200000021480">
+  <name>CONSOL PREC NO 400001</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012433</polling_location_id>
+</precinct>
+<precinct id="1200000021481">
+  <name>CONSOL PREC NO 400002</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012433</polling_location_id>
+</precinct>
+<precinct id="1200000021482">
+  <name>CONSOL PREC NO 400005</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012436</polling_location_id>
+</precinct>
+<precinct id="1200000021483">
+  <name>CONSOL PREC NO 400003</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012436</polling_location_id>
+</precinct>
+<precinct id="1200000021484">
+  <name>CONSOL PREC NO 400004</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012436</polling_location_id>
+</precinct>
+<precinct id="1200000021485">
+  <name>CONSOL PREC NO 400006</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012437</polling_location_id>
+</precinct>
+<precinct id="1200000021486">
+  <name>CONSOL PREC NO 500001</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012437</polling_location_id>
+</precinct>
+<precinct id="1200000021487">
+  <name>CONSOL PREC NO 500009</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012438</polling_location_id>
+</precinct>
+<precinct id="1200000021488">
+  <name>CONSOL PREC NO 100004</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012439</polling_location_id>
+</precinct>
+<precinct id="1200000021489">
+  <name>CONSOL PREC NO 100003</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012439</polling_location_id>
+</precinct>
+<precinct id="1200000021490">
+  <name>CONSOL PREC NO 100002</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012439</polling_location_id>
+</precinct>
+<precinct id="1200000021491">
+  <name>CONSOL PREC NO 100005</name>
+  <locality_id>23</locality_id>
+  <polling_location_id>1300000012440</polling_location_id>
+</precinct>
+<polling_location id="1300000012371">
+  <address>
+    <line1>DINING ROOM</line1>
+    <city>BOONVILLE</city>
+    <state>CA</state>
+    <location_name>MENDOCINO COUNTY FAIRGROUNDS</location_name>
+    <zip>95415</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012385">
+  <address>
+    <line1>47950 CENTER ST</line1>
+    <city>GUALALA</city>
+    <state>CA</state>
+    <location_name>COMMUNITY CENTER - MAIN HALL</location_name>
+    <zip>95445</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012387">
+  <address>
+    <line1>43300 LR/AIRPORT RD</line1>
+    <city>LITTLE RIVER</city>
+    <state>CA</state>
+    <location_name>THE WOODS CLUBHOUSE</location_name>
+    <zip>95460</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012392">
+  <address>
+    <line1>501 LOW GAP RD</line1>
+    <city>UKIAH</city>
+    <state>CA</state>
+    <location_name>COUNTY ADMIN BLDG (CONF ROOM A)</location_name>
+    <zip>95482</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012395">
+  <address>
+    <line1>31201 COMPTCHE/UKIAH RD</line1>
+    <city>COMPTCHE</city>
+    <state>CA</state>
+    <location_name>CHAPEL OF THE REDWOODS</location_name>
+    <zip>95427</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012399">
+  <address>
+    <line2>900 S OAK ST</line2>
+    <city>UKIAH</city>
+    <line1>900 S OAK ST., UKIAH</line1>
+    <state>CA</state>
+    <location_name>ST. MARYS CHURCH PARISH HALL</location_name>
+    <zip>95482</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012407">
+  <address>
+    <line2>2800 N STATE ST</line2>
+    <city>UKIAH</city>
+    <line1>2800 N STATE ST, UKIAH</line1>
+    <state>CA</state>
+    <location_name>THURSTON AUTO PLAZA</location_name>
+    <zip>95482</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012413">
+  <address>
+    <line1>15051 CASPAR RD</line1>
+    <city>CASPAR</city>
+    <state>CA</state>
+    <location_name>CASPAR COMMUNITY CENTER</location_name>
+    <zip>95420</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012418">
+  <address>
+    <line2>750 YOSEMITE DR</line2>
+    <city>UKIAH</city>
+    <line1>FELLOWSHIP RM-750 YOSEMITE, UKIAH</line1>
+    <state>CA</state>
+    <location_name>NEW LIFE COMMUNITY CHURCH</location_name>
+    <zip>95482</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012423">
+  <address>
+    <line2>10401 MAIN ST</line2>
+    <city>POTTER VALLEY</city>
+    <line1>ROOM, 10401 MAIN ST, POTTER VLY</line1>
+    <state>CA</state>
+    <location_name>POTTER VLY HIGH SCHL MULTIPURPOSE</location_name>
+    <zip>95469</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012424">
+  <address>
+    <line2>451 SCHOOL ST</line2>
+    <city>POINT ARENA</city>
+    <line1>451 SCHOOL ST., POINT ARENA</line1>
+    <state>CA</state>
+    <location_name>VETERANS MEMORIAL BLDG</location_name>
+    <zip>95468</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012425">
+  <address>
+    <line2>200 BRANSCOMB RD</line2>
+    <city>LAYTONVILLE</city>
+    <line1>200 BRANSCOMB RD., LAYTONVILLE</line1>
+    <state>CA</state>
+    <location_name>OLD HIGH SCHOOL -  WEIGHT ROOM</location_name>
+    <zip>95454</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012428">
+  <address>
+    <line2>32510 NAVARRO RIDGE RD</line2>
+    <city>ALBION</city>
+    <line1>32510 NAVARRO RIDGE RD ALBION</line1>
+    <state>CA</state>
+    <location_name>WHITESBORO GRANGE - ALBION</location_name>
+    <zip>95410</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012429">
+  <address>
+    <line2>395 N BARNES ST</line2>
+    <city>UKIAH</city>
+    <line1>395 N BARNES ST, UKIAH</line1>
+    <state>CA</state>
+    <location_name>UKIAH ASSEMBLY OF GOD CHURCH</location_name>
+    <zip>95482</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012433">
+  <address>
+    <line2>360 N HARRISON ST</line2>
+    <city>FORT BRAGG</city>
+    <line1>360 N. HARRISON ST., FORT BRAGG</line1>
+    <state>CA</state>
+    <location_name>FB VETERANS MEMORIAL BLDG</location_name>
+    <zip>95437</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012436">
+  <address>
+    <line2>300 S LINCOLN AVE</line2>
+    <city>FORT BRAGG</city>
+    <line1>300 S LINCOLN ST - FORT BRAGG</line1>
+    <state>CA</state>
+    <location_name>C V STARR CENTER</location_name>
+    <zip>95437</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012437">
+  <address>
+    <line2>44700 LITTLE LAKE RD</line2>
+    <city>MENDOCINO</city>
+    <line1>44700 LITTLE LAKE RD - MENDOCINO</line1>
+    <state>CA</state>
+    <location_name>MENDOCINO FIRE - MEETING RM</location_name>
+    <zip>95460</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012438">
+  <address>
+    <line1>20 FELIZ CREEK RD</line1>
+    <city>HOPLAND</city>
+    <state>CA</state>
+    <location_name>HOPLAND FIRE</location_name>
+  </address>
+</polling_location>
+<polling_location id="1300000012439">
+  <address>
+    <line2>8481 EAST RD</line2>
+    <city>REDWOOD VALLEY</city>
+    <line1>8481 EAST RD RWD VALLEY</line1>
+    <state>CA</state>
+    <location_name>REDWOOD VALLEY FIRE DEPT</location_name>
+    <zip>95470</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012440">
+  <address>
+    <line2>2140 ARROYO RD</line2>
+    <city>UKIAH</city>
+    <line1>2140 ARROYO DR., UKIAH</line1>
+    <state>CA</state>
+    <location_name>UKIAH BIBLE CHURCH</location_name>
+    <zip>95482</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012441">
+  <address>
+    <line2>1265 AIRPORT PARK BLVD</line2>
+    <city>UKIAH</city>
+    <line1>1265 AIRPORT PARK BLVD - UKIAH</line1>
+    <state>CA</state>
+    <location_name>KEN FOWLER MOTORS</location_name>
+    <zip>95482</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012443">
+  <address>
+    <line1>YOUR BALLOT WILL COME IN THE MAIL</line1>
+    <state>CA</state>
+    <location_name>YOU ARE IN AN ABSENTEE PRECINCT</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012460">
+  <address>
+    <line1>24860 BIRCH ST</line1>
+    <city>WILLITS</city>
+    <state>CA</state>
+    <location_name>BROOKTRAILS COMMUNITY CENTER</location_name>
+    <zip>95490</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000012461">
+  <address>
+    <line1>111 E COMMERCIAL ST</line1>
+    <city>WILLITS</city>
+    <state>CA</state>
+    <location_name>WILLITS COMMUNITY CTR-REC HALL</location_name>
+    <zip>95490</zip>
+  </address>
+</polling_location>
+</vip_object>

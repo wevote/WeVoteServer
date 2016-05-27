@@ -1,0 +1,752 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>San Benito County</name>
+  <vip_id>6069</vip_id>
+  <datetime>2014-04-15T09:29:12.180632</datetime>
+  <feed_contact_id>3</feed_contact_id>
+</source>
+<state id="1">
+  <name>California</name>
+  <election_administration_id>4</election_administration_id>
+</state>
+<election id="100000009">
+  <date>2014-06-03</date>
+  <election_type>Primary</election_type>
+  <state_id>1</state_id>
+  <polling_hours>07:00-20:00</polling_hours>
+</election>
+<locality id="2">
+  <name>San Benito</name>
+  <state_id>1</state_id>
+  <type>county</type>
+  <election_administration_id>4</election_administration_id>
+</locality>
+<precinct id="300000302">
+  <name>Fairview #1 &amp; #4</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000022</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000303">
+  <name>Fairview #2/Pacheco #1 &amp; #2</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000003</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000304">
+  <name>Hollister #9, 23, 24, &amp; #25</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000021</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000305">
+  <name>Hollister #20, 21, &amp; #22</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000037</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000306">
+  <name>Hollister #26</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000044</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000307">
+  <name>Hollister #05, 07 &amp; #08</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000047</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000308">
+  <name>Hollister #12</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000309">
+  <name>Aromas 1,2,3,5,6,7,8,9/Miss 3</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000005</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000310">
+  <name>Anzar #1 &amp; #2/Mission #1 &amp; #2</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000009</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000311">
+  <name>San Juan</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <polling_location_id>400000048</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000312">
+  <name>Hollister #11 &amp;#13</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000533</electoral_district_id>
+  <polling_location_id>400000018</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000533</electoral_district_id>
+</precinct>
+<precinct id="300000313">
+  <name>Hollister #15, 16 &amp; #19</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000533</electoral_district_id>
+  <polling_location_id>400000036</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000533</electoral_district_id>
+</precinct>
+<precinct id="300000314">
+  <name>Santa Anita/Tres Pinos 1 &amp; 2</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+  <polling_location_id>400000042</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+</precinct>
+<precinct id="300000315">
+  <name>Ridgemark #1, 2 &amp; #3</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+  <polling_location_id>400000016</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+</precinct>
+<precinct id="300000316">
+  <name>Enterprise #1 &amp; #2/Union #3</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+  <polling_location_id>400000045</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+</precinct>
+<precinct id="300000317">
+  <name>Hollister #27</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+  <polling_location_id>400000002</polling_location_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+</precinct>
+<precinct id="300000332">
+  <name>Bitterwater/Coalinga/Union #5</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+</precinct>
+<precinct id="300000333">
+  <name>Cienega</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+</precinct>
+<precinct id="300000334">
+  <name>Southside</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+</precinct>
+<precinct id="300000335">
+  <name>Paicines/Panoche</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+</precinct>
+<precinct id="300000320">
+  <name>Fair.6,7,8/Pacheco 4,5/West. 3</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000321">
+  <name>Hollister #1,2,3,6 &amp; #10</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000323">
+  <name>Enterprise 3,4,5,6,7/Mission 4</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000324">
+  <name>Union #1 &amp; #2</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000325">
+  <name>Hollister #14</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000331">
+  <name>Severinsen #1,2,3 &amp; #4</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000533</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000533</electoral_district_id>
+</precinct>
+<precinct id="300000336">
+  <name>San Benito</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000534</electoral_district_id>
+</precinct>
+<precinct id="300000318">
+  <name>Fairview #03</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000319">
+  <name>Fairview #05</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000322">
+  <name>Hollister #17 &amp; #18</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000326">
+  <name>Pacheco #3/Westside #1,4,5 &amp; 6</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000327">
+  <name>Hollister #04</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000529</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000328">
+  <name>Aromas #4</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000329">
+  <name>Mission #5 &amp; #6/Union #4</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<precinct id="300000330">
+  <name>Westside #2</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+  <electoral_district_id>200000492</electoral_district_id>
+  <electoral_district_id>200000494</electoral_district_id>
+  <electoral_district_id>200000514</electoral_district_id>
+  <electoral_district_id>200000515</electoral_district_id>
+  <electoral_district_id>200000530</electoral_district_id>
+</precinct>
+<election_administration id="4">
+  <eo_id>3</eo_id>
+  <physical_address>
+    <state>CA</state>
+    <city>Hollister</city>
+    <line1>440 5th Street Room 206</line1>
+    <zip>95023</zip>
+  </physical_address>
+</election_administration>
+<election_official id="3">
+  <name>Joe Paul Gonzalez</name>
+  <phone>(831)636-4029</phone>
+</election_official>
+<polling_location id="400000002">
+  <address>
+    <city>Hollister</city>
+    <line1>2121 Sunnyslope Rd</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000003">
+  <address>
+    <city>Hollister</city>
+    <line1>500 Spring Grove Rd</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000005">
+  <address>
+    <city>Aromas</city>
+    <line1>492 Carpenteria Rd</line1>
+    <state>CA</state>
+    <zip>95004</zip>
+  </address>
+</polling_location>
+<polling_location id="400000009">
+  <address>
+    <city>San Juan Bautista</city>
+    <line1>58 Monterey St</line1>
+    <state>CA</state>
+    <zip>95045</zip>
+  </address>
+</polling_location>
+<polling_location id="400000013">
+  <address>
+    <city>Hollister</city>
+    <line1>1151 Buena Vista Rd</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000016">
+  <address>
+    <city>Hollister</city>
+    <line1>3800 Airline Hwy</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000018">
+  <address>
+    <city>Hollister</city>
+    <line1>501 6th St.</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000021">
+  <address>
+    <city>Hollister</city>
+    <line1>1221 Memorial Dr</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000022">
+  <address>
+    <city>Hollister</city>
+    <line1>1515 Santa Ana Rd</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000036">
+  <address>
+    <city>Hollister</city>
+    <line1>1201 Rancho Dr</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000037">
+  <address>
+    <city>Hollister</city>
+    <line1>161 Ladd Ln</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000042">
+  <address>
+    <city>Tres Pinos</city>
+    <line1>7290 Airline Hwy</line1>
+    <state>CA</state>
+    <zip>95075</zip>
+  </address>
+</polling_location>
+<polling_location id="400000044">
+  <address>
+    <city>Hollister</city>
+    <line1>1900 Highland Dr</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000045">
+  <address>
+    <city>Hollister</city>
+    <line1>3570 Airline Hwy</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000047">
+  <address>
+    <city>Hollister</city>
+    <line1>440 5th St  # 101</line1>
+    <state>CA</state>
+    <zip>95023</zip>
+  </address>
+</polling_location>
+<polling_location id="400000048">
+  <address>
+    <city>San Juan Bautista</city>
+    <line1>10 San Jose St</line1>
+    <state>CA</state>
+    <zip>95045</zip>
+  </address>
+</polling_location>
+</vip_object>

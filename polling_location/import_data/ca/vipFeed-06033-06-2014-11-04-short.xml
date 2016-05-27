@@ -1,0 +1,1570 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Lake County</name>
+  <vip_id>6033</vip_id>
+  <datetime>2014-09-22T09:19:27</datetime>
+  <feed_contact_id>3</feed_contact_id>
+</source>
+<state id="1">
+  <name>California</name>
+  <election_administration_id>4</election_administration_id>
+</state>
+<election id="100000027">
+  <date>2014-11-04</date>
+  <election_type>General</election_type>
+  <state_id>1</state_id>
+  <polling_hours>07:00-20:00</polling_hours>
+</election>
+<locality id="2">
+  <name>Lake</name>
+  <state_id>1</state_id>
+  <type>county</type>
+  <election_administration_id>4</election_administration_id>
+</locality>
+<precinct id="300001178">
+  <name>CL PIERCE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000077</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001179">
+  <name>BALLY PEAK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001180">
+  <name>UPPER LAKE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000011</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001181">
+  <name>BACHELOR</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <polling_location_id>400000039</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+</precinct>
+<precinct id="300001183">
+  <name>NICE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000055</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001185">
+  <name>FORTY SPRINGS</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001186">
+  <name>LUCERNE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001187">
+  <name>THE CASTLE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000041</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001188">
+  <name>KONO TAYEE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000042</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001189">
+  <name>GLENHAVEN</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001190">
+  <name>GRAVELLY</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001191">
+  <name>BARTLETT</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001192">
+  <name>LONG VALLEY</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000087</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001193">
+  <name>EAST LAKE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000088</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001194">
+  <name>KEYS WEST</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000089</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001195">
+  <name>KEYS EAST</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000110</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001196">
+  <name>LAKESHORE PARK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001197">
+  <name>SULPHUR PARK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001198">
+  <name>BALD MTN</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001199">
+  <name>LP LANGE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002040</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000122</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002040</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001200">
+  <name>LP WILLOW TREE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002040</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000123</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002040</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001201">
+  <name>LP GOVERNMENT</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002040</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000016</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002040</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001202">
+  <name>LP FAIRGROUNDS</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002040</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000068</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002040</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001203">
+  <name>COW MTN</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <polling_location_id>400000116</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+</precinct>
+<precinct id="300001204">
+  <name>SCOTTS VALLEY</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000094</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001205">
+  <name>ROBIN HILL</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <polling_location_id>400000067</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+</precinct>
+<precinct id="300001206">
+  <name>WESTLAKE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <polling_location_id>400000084</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+</precinct>
+<precinct id="300001207">
+  <name>BIG VALLEY</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000082</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001208">
+  <name>LANDS END</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001209">
+  <name>ADOBE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000117</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001210">
+  <name>LAKESIDE PK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001211">
+  <name>SODA BAY</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000095</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001177">
+  <name>CL MOLESWORTH</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000076</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001176">
+  <name>CL DAVIS</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000075</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001175">
+  <name>CL PALMER</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000008</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001174">
+  <name>CL AUSTIN PK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000069</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001173">
+  <name>CL BURNS VLY</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000054</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001172">
+  <name>CL MONITOR PT</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000053</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002035</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001171">
+  <name>CL VILLAGE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000114</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001170">
+  <name>CL REDBUD</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000036</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002039</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001169">
+  <name>BUCK ISLAND</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001168">
+  <name>MORGAN VLY</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001167">
+  <name>BELL PARK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001166">
+  <name>PERINI HILL</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001165">
+  <name>LOWER LAKE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000074</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001164">
+  <name>TWIN LAKES</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000063</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001163">
+  <name>COYOTE VLY</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001162">
+  <name>JERUSALEM</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001161">
+  <name>SPRUCE GROVE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001160">
+  <name>HV RANCHOS</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001159">
+  <name>HIDDEN VLY 4</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000108</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001158">
+  <name>HIDDEN VLY 3</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000107</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001157">
+  <name>HIDDEN VLY 2</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000106</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001156">
+  <name>HIDDEN VLY 1</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000105</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001155">
+  <name>CENTRAL PARK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000109</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001154">
+  <name>MIDDLETOWN</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000086</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001212">
+  <name>DONOVAN VLY</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002081</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001213">
+  <name>HIGHLAND SPGS</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001214">
+  <name>KELSEYVILLE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000021</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001215">
+  <name>COLE CREEK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000047</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001216">
+  <name>KELSEY CREEK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000060</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001217">
+  <name>WHEELER PT</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000024</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001218">
+  <name>RIVIERA</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000118</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001219">
+  <name>MTN PEAK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000112</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001220">
+  <name>LITTLE BORAX</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000096</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001221">
+  <name>THURSTON LAKE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001184">
+  <name>NICE HARBOR</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <polling_location_id>400000058</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002031</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002036</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+</precinct>
+<precinct id="300001222">
+  <name>LOCH LOMOND</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000119</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001223">
+  <name>GLENBROOK</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000120</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<precinct id="300001224">
+  <name>W PINE/HOBERGS</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+  <polling_location_id>400000121</polling_location_id>
+  <electoral_district_id>200002030</electoral_district_id>
+  <electoral_district_id>200002032</electoral_district_id>
+  <electoral_district_id>200002033</electoral_district_id>
+  <electoral_district_id>200002047</electoral_district_id>
+  <electoral_district_id>200002106</electoral_district_id>
+</precinct>
+<election_administration id="4">
+  <eo_id>3</eo_id>
+  <physical_address>
+    <state>CA</state>
+    <city>Lakeport</city>
+    <line1>255 N. Forbes St</line1>
+    <zip>95453</zip>
+  </physical_address>
+</election_administration>
+<election_official id="3">
+  <name>Diane C. Fridley</name>
+  <phone>(707)263-2372</phone>
+</election_official>
+<polling_location id="400000008">
+  <address>
+    <city>Clearlake</city>
+    <line1>14550 Pearl Ave</line1>
+    <state>CA</state>
+    <zip>95422</zip>
+  </address>
+</polling_location>
+<polling_location id="400000011">
+  <address>
+    <city>Upper Lake</city>
+    <line1>9355 Government St</line1>
+    <state>CA</state>
+    <zip>95485</zip>
+  </address>
+</polling_location>
+<polling_location id="400000013">
+  <address>
+    <city>Lucerne</city>
+    <line1>3863 Country Club Dr</line1>
+    <state>CA</state>
+    <zip>95458</zip>
+  </address>
+</polling_location>
+<polling_location id="400000016">
+  <address>
+    <city>Lakeport</city>
+    <line1>527 Konocti Ave</line1>
+    <state>CA</state>
+    <zip>95453</zip>
+  </address>
+</polling_location>
+<polling_location id="400000020">
+  <address>
+    <city>Finley</city>
+    <line1>1510 Big Valley Rd</line1>
+    <state>CA</state>
+    <zip>95435</zip>
+  </address>
+</polling_location>
+<polling_location id="400000021">
+  <address>
+    <city>Kelseyville</city>
+    <line1>5340 3rd St</line1>
+    <state>CA</state>
+    <zip>95451</zip>
+  </address>
+</polling_location>
+<polling_location id="400000024">
+  <address>
+    <city>Kelseyville</city>
+    <line1>8860 Soda Bay Rd</line1>
+    <state>CA</state>
+    <zip>95451</zip>
+  </address>
+</polling_location>
+<polling_location id="400000036">
+  <address>
+    <city>Clearlake</city>
+    <line1>14550 Pearl Ave</line1>
+    <state>CA</state>
+    <zip>95422</zip>
+  </address>
+</polling_location>
+<polling_location id="400000039">
+  <address>
+    <city>Upper Lake</city>
+    <line1>9355 Government St</line1>
+    <state>CA</state>
+    <zip>95485</zip>
+  </address>
+</polling_location>
+<polling_location id="400000041">
+  <address>
+    <city>Lucerne</city>
+    <line1>3863 Country Club Dr</line1>
+    <state>CA</state>
+    <zip>95458</zip>
+  </address>
+</polling_location>
+<polling_location id="400000042">
+  <address>
+    <city>Lucerne</city>
+    <line1>3863 Country Club Dr</line1>
+    <state>CA</state>
+    <zip>95458</zip>
+  </address>
+</polling_location>
+<polling_location id="400000047">
+  <address>
+    <city>Kelseyville</city>
+    <line1>5340 3rd St</line1>
+    <state>CA</state>
+    <zip>95451</zip>
+  </address>
+</polling_location>
+<polling_location id="400000053">
+  <address>
+    <city>Clearlake</city>
+    <line1>14050 Olympic Dr</line1>
+    <state>CA</state>
+    <zip>95422</zip>
+  </address>
+</polling_location>
+<polling_location id="400000054">
+  <address>
+    <city>Clearlake</city>
+    <line1>14050 Olympic Dr</line1>
+    <state>CA</state>
+    <zip>95422</zip>
+  </address>
+</polling_location>
+<polling_location id="400000055">
+  <address>
+    <city>Nice</city>
+    <line1>2877 E Highway 20</line1>
+    <state>CA</state>
+    <zip>95464</zip>
+  </address>
+</polling_location>
+<polling_location id="400000058">
+  <address>
+    <city>Nice</city>
+    <line1>2877 E Highway 20</line1>
+    <state>CA</state>
+    <zip>95464</zip>
+  </address>
+</polling_location>
+<polling_location id="400000060">
+  <address>
+    <city>Kelseyville</city>
+    <line1>5340 3rd St</line1>
+    <state>CA</state>
+    <zip>95451</zip>
+  </address>
+</polling_location>
+<polling_location id="400000063">
+  <address>
+    <city>Lower Lake</city>
+    <line1>16255 2nd St</line1>
+    <state>CA</state>
+    <zip>95457</zip>
+  </address>
+</polling_location>
+<polling_location id="400000067">
+  <address>
+    <city>Lakeport</city>
+    <line1>1111 Park Way</line1>
+    <state>CA</state>
+    <zip>95453</zip>
+  </address>
+</polling_location>
+<polling_location id="400000068">
+  <address>
+    <city>Lakeport</city>
+    <line1>305 Peckham Ct</line1>
+    <state>CA</state>
+    <zip>95453</zip>
+  </address>
+</polling_location>
+<polling_location id="400000069">
+  <address>
+    <city>Clearlake</city>
+    <line1>3245 Bowers Ave</line1>
+    <state>CA</state>
+    <zip>95422</zip>
+  </address>
+</polling_location>
+<polling_location id="400000074">
+  <address>
+    <city>Lower Lake</city>
+    <line1>16255 2nd St</line1>
+    <state>CA</state>
+    <zip>95457</zip>
+  </address>
+</polling_location>
+<polling_location id="400000075">
+  <address>
+    <city>Clearlake</city>
+    <line1>14050 Olympic Dr</line1>
+    <state>CA</state>
+    <zip>95422</zip>
+  </address>
+</polling_location>
+<polling_location id="400000076">
+  <address>
+    <city>Clearlake</city>
+    <line1>3245 Bowers Ave</line1>
+    <state>CA</state>
+    <zip>95422</zip>
+  </address>
+</polling_location>
+<polling_location id="400000077">
+  <address>
+    <city>Clearlake</city>
+    <line1>3245 Bowers Ave</line1>
+    <state>CA</state>
+    <zip>95422</zip>
+  </address>
+</polling_location>
+<polling_location id="400000082">
+  <address>
+    <city>Lakeport</city>
+    <line1>305 Peckham Ct</line1>
+    <state>CA</state>
+    <zip>95453</zip>
+  </address>
+</polling_location>
+<polling_location id="400000084">
+  <address>
+    <city>Lakeport</city>
+    <line1>1111 Park Way</line1>
+    <state>CA</state>
+    <zip>95453</zip>
+  </address>
+</polling_location>
+<polling_location id="400000086">
+  <address>
+    <city>Middletown</city>
+    <line1>15399 Central Park Rd</line1>
+    <state>CA</state>
+    <zip>95461</zip>
+  </address>
+</polling_location>
+<polling_location id="400000087">
+  <address>
+    <city>Clearlake Oaks</city>
+    <line1>500 Orchard Shores Dr</line1>
+    <state>CA</state>
+    <zip>95423</zip>
+  </address>
+</polling_location>
+<polling_location id="400000088">
+  <address>
+    <city>Clearlake Oaks</city>
+    <line1>500 Orchard Shores Dr</line1>
+    <state>CA</state>
+    <zip>95423</zip>
+  </address>
+</polling_location>
+<polling_location id="400000089">
+  <address>
+    <city>Clearlake Oaks</city>
+    <line1>500 Orchard Shores Dr</line1>
+    <state>CA</state>
+    <zip>95423</zip>
+  </address>
+</polling_location>
+<polling_location id="400000094">
+  <address>
+    <city>Lakeport</city>
+    <line1>2298 Hendricks Rd</line1>
+    <state>CA</state>
+    <zip>95453</zip>
+  </address>
+</polling_location>
+<polling_location id="400000095">
+  <address>
+    <city>Kelseyville</city>
+    <line1>2850 Eastlake Dr</line1>
+    <state>CA</state>
+    <zip>95451</zip>
+  </address>
+</polling_location>
+<polling_location id="400000096">
+  <address>
+    <city>Kelseyville</city>
+    <line1>2850 Eastlake Dr</line1>
+    <state>CA</state>
+    <zip>95451</zip>
+  </address>
+</polling_location>
+<polling_location id="400000105">
+  <address>
+    <city>Middletown</city>
+    <line1>18160 Spruce Road Ext</line1>
+    <state>CA</state>
+    <zip>95461</zip>
+  </address>
+</polling_location>
+<polling_location id="400000106">
+  <address>
+    <city>Middletown</city>
+    <line1>18160 Spruce Road Ext</line1>
+    <state>CA</state>
+    <zip>95461</zip>
+  </address>
+</polling_location>
+<polling_location id="400000107">
+  <address>
+    <city>Middletown</city>
+    <line1>18160 Spruce Road Ext</line1>
+    <state>CA</state>
+    <zip>95461</zip>
+  </address>
+</polling_location>
+<polling_location id="400000108">
+  <address>
+    <city>Middletown</city>
+    <line1>18160 Spruce Road Ext</line1>
+    <state>CA</state>
+    <zip>95461</zip>
+  </address>
+</polling_location>
+<polling_location id="400000109">
+  <address>
+    <city>Middletown</city>
+    <line1>15399 Central Park Rd</line1>
+    <state>CA</state>
+    <zip>95461</zip>
+  </address>
+</polling_location>
+<polling_location id="400000110">
+  <address>
+    <city>Clearlake Oaks</city>
+    <line1>500 Orchard Shores Dr</line1>
+    <state>CA</state>
+    <zip>95423</zip>
+  </address>
+</polling_location>
+<polling_location id="400000112">
+  <address>
+    <city>Kelseyville</city>
+    <line1>9689 Highway 281</line1>
+    <state>CA</state>
+    <zip>95451</zip>
+  </address>
+</polling_location>
+<polling_location id="400000114">
+  <address>
+    <city>Clearlake</city>
+    <line1>14550 Pearl Ave</line1>
+    <state>CA</state>
+    <zip>95422</zip>
+  </address>
+</polling_location>
+<polling_location id="400000116">
+  <address>
+    <city>Lakeport</city>
+    <line1>2298 Hendricks Rd</line1>
+    <state>CA</state>
+    <zip>95453</zip>
+  </address>
+</polling_location>
+<polling_location id="400000117">
+  <address>
+    <city>Finley</city>
+    <line1>1510 Big Valley Rd</line1>
+    <state>CA</state>
+    <zip>95435</zip>
+  </address>
+</polling_location>
+<polling_location id="400000118">
+  <address>
+    <city>Kelseyville</city>
+    <line1>9689 Highway 281</line1>
+    <state>CA</state>
+    <zip>95451</zip>
+  </address>
+</polling_location>
+<polling_location id="400000119">
+  <address>
+    <city>Cobb</city>
+    <line1>15780 Bottle Rock Rd</line1>
+    <state>CA</state>
+    <zip>95426</zip>
+  </address>
+</polling_location>
+<polling_location id="400000120">
+  <address>
+    <city>Cobb</city>
+    <line1>15780 Bottle Rock Rd</line1>
+    <state>CA</state>
+    <zip>95426</zip>
+  </address>
+</polling_location>
+<polling_location id="400000121">
+  <address>
+    <city>Cobb</city>
+    <line1>15780 Bottle Rock Rd</line1>
+    <state>CA</state>
+    <zip>95426</zip>
+  </address>
+</polling_location>
+<polling_location id="400000122">
+  <address>
+    <city>Lakeport</city>
+    <line1>600 16th St</line1>
+    <state>CA</state>
+    <zip>95453</zip>
+  </address>
+</polling_location>
+<polling_location id="400000123">
+  <address>
+    <city>Lakeport</city>
+    <line1>600 16th St</line1>
+    <state>CA</state>
+    <zip>95453</zip>
+  </address>
+</polling_location>
+</vip_object>

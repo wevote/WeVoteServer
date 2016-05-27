@@ -1,0 +1,811 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Napa County</name>
+  <vip_id>6055</vip_id>
+  <datetime>2014-09-24T20:00:21</datetime>
+  <feed_contact_id>3</feed_contact_id>
+</source>
+<state id="1">
+  <name>California</name>
+  <election_administration_id>4</election_administration_id>
+</state>
+<election id="100000029">
+  <date>2014-11-04</date>
+  <election_type>General</election_type>
+  <state_id>1</state_id>
+  <polling_hours>07:00-20:00</polling_hours>
+</election>
+<locality id="2">
+  <name>Napa</name>
+  <state_id>1</state_id>
+  <type>county</type>
+  <election_administration_id>4</election_administration_id>
+</locality>
+<precinct id="300002410">
+  <name>El Centro School-Multiuse Room</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000165</polling_location_id>
+</precinct>
+<precinct id="300002354">
+  <name>Crosswalk Community Church</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000023</polling_location_id>
+</precinct>
+<precinct id="300002433">
+  <name>Angwin Fire House</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000045</polling_location_id>
+</precinct>
+<precinct id="300002438">
+  <name>NVC Upper Valley Campus-Librar</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000164</polling_location_id>
+</precinct>
+<precinct id="300002443">
+  <name>Calistoga Fire House</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000198</polling_location_id>
+</precinct>
+<precinct id="300002480">
+  <name>Springs of Napa</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000068</polling_location_id>
+</precinct>
+<precinct id="300002482">
+  <name>Bel Aire Park School-Multiuse</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000191</polling_location_id>
+</precinct>
+<precinct id="300002498">
+  <name>Canyon Oak School-Multiuse Rm</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000160</polling_location_id>
+</precinct>
+<precinct id="300002500">
+  <name>American Canyon Library</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000196</polling_location_id>
+</precinct>
+<precinct id="300002501">
+  <name>American Canyon Middle School</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000197</polling_location_id>
+</precinct>
+<precinct id="300002502">
+  <name>American Canyon Middle School</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000193</polling_location_id>
+</precinct>
+<precinct id="300002503">
+  <name>Canyon Oaks School-Multiuse</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000187</polling_location_id>
+</precinct>
+<precinct id="300002403">
+  <name>Napa Valley Baptist Church - G</name>
+  <locality_id>2</locality_id>
+  <polling_location_id>400000030</polling_location_id>
+</precinct>
+<precinct id="300002341">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002371">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002372">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002381">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002382">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002383">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002384">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002397">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002406">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002407">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002408">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002409">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002411">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002413">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002414">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002415">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002416">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002417">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002418">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002419">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002420">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002421">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002423">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002424">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002425">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002426">
+  <name>Vote by Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002427">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002428">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002429">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002430">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002431">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002432">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002434">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002435">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002436">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002437">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002398">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002399">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002400">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002401">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002402">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002412">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002422">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002439">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002440">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002441">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002442">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002444">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002445">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002446">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002447">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002448">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002449">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002450">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002451">
+  <name>Vote by Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002452">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002453">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002454">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002455">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002456">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002457">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002458">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002459">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002460">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002461">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002462">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002463">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002464">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002465">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002466">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002467">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002468">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002469">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002470">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002471">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002472">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002473">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002474">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002475">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002476">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002477">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002478">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002479">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002481">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002483">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002484">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002485">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002486">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002487">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002488">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002489">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002490">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002491">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002492">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002493">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002494">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002495">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002496">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002497">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002499">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002504">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002342">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002343">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002344">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002345">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002346">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002347">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002348">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002349">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002350">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002351">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002352">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002353">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002355">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002356">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002357">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002358">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002359">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002360">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002361">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002362">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002363">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002364">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002365">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002366">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002367">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002368">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002369">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002370">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002373">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002374">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002375">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002376">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002377">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002378">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002379">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002380">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002385">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002386">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002387">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002388">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002389">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002390">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002391">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002392">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002393">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002394">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002395">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002396">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002404">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<precinct id="300002405">
+  <name>Vote By Mail</name>
+  <locality_id>2</locality_id>
+</precinct>
+<election_administration id="4">
+  <eo_id>3</eo_id>
+  <physical_address>
+    <state>CA</state>
+    <city>Napa</city>
+    <line1>900 Coombs Street, Room 256</line1>
+    <zip>94559</zip>
+  </physical_address>
+</election_administration>
+<election_official id="3">
+  <name>John Tuteur</name>
+  <phone>(707)235-3445</phone>
+</election_official>
+<polling_location id="400000023">
+  <address>
+    <city>Napa</city>
+    <line1>2590 1st St</line1>
+    <state>CA</state>
+    <zip>94558</zip>
+  </address>
+</polling_location>
+<polling_location id="400000030">
+  <address>
+    <city>Napa</city>
+    <line1>2303 Trower Ave</line1>
+    <state>CA</state>
+    <zip>94558</zip>
+  </address>
+</polling_location>
+<polling_location id="400000045">
+  <address>
+    <city>Angwin</city>
+    <line1>275 College Ave</line1>
+    <state>CA</state>
+    <zip>94508</zip>
+  </address>
+</polling_location>
+<polling_location id="400000068">
+  <address>
+    <city>Napa</city>
+    <line1>3460 Villa Ln</line1>
+    <state>CA</state>
+    <zip>94558</zip>
+  </address>
+</polling_location>
+<polling_location id="400000160">
+  <address>
+    <city>American Canyon</city>
+    <line1>475 Silver Oak Trl</line1>
+    <state>CA</state>
+    <zip>94503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000164">
+  <address>
+    <city>St Helena</city>
+    <line1>1088 College Ave</line1>
+    <state>CA</state>
+    <zip>94574</zip>
+  </address>
+</polling_location>
+<polling_location id="400000165">
+  <address>
+    <city>Napa</city>
+    <line1>1840 El Centro Ave</line1>
+    <state>CA</state>
+    <zip>94558</zip>
+  </address>
+</polling_location>
+<polling_location id="400000187">
+  <address>
+    <city>American Canyon</city>
+    <line1>475 Silver Oak Trl</line1>
+    <state>CA</state>
+    <zip>94503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000191">
+  <address>
+    <city>Napa</city>
+    <line1>3580 Beckworth Dr</line1>
+    <state>CA</state>
+    <zip>94558</zip>
+  </address>
+</polling_location>
+<polling_location id="400000193">
+  <address>
+    <city>American Canyon</city>
+    <line1>300 Benton Way</line1>
+    <state>CA</state>
+    <zip>94503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000196">
+  <address>
+    <city>American Canyon</city>
+    <line1>300 Crawford Way</line1>
+    <state>CA</state>
+    <zip>94503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000197">
+  <address>
+    <city>American Canyon</city>
+    <line1>300 Benton Way</line1>
+    <state>CA</state>
+    <zip>94503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000198">
+  <address>
+    <city>Calistoga</city>
+    <line1>1113 Washington St</line1>
+    <state>CA</state>
+    <zip>94515</zip>
+  </address>
+</polling_location>
+</vip_object>

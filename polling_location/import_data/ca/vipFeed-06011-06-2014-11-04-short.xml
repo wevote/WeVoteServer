@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Colusa County</name>
+  <vip_id>6011</vip_id>
+  <datetime>2014-09-29T20:27:17.240287</datetime>
+  <feed_contact_id>3</feed_contact_id>
+</source>
+<state id="1">
+  <name>California</name>
+  <election_administration_id>4</election_administration_id>
+</state>
+<election id="100000015">
+  <date>2014-11-04</date>
+  <election_type>General</election_type>
+  <state_id>1</state_id>
+  <polling_hours>07:00-20:00</polling_hours>
+</election>
+<locality id="2">
+  <name>Colusa</name>
+  <state_id>1</state_id>
+  <type>county</type>
+  <election_administration_id>4</election_administration_id>
+</locality>
+<precinct id="300000238">
+  <name>Arbuckle-College City A</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000765</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+  <polling_location_id>400000001</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000765</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+</precinct>
+<precinct id="300000221">
+  <name>Arbuckle B</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000765</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+  <polling_location_id>400000002</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000765</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+</precinct>
+<precinct id="300000222">
+  <name>Wescott Precinct</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000003</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000223">
+  <name>Grimes Precinct MB</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000765</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000765</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+</precinct>
+<precinct id="300000224">
+  <name>Vista A</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000004</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000225">
+  <name>Vista B</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000005</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000226">
+  <name>Geneva</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+  <polling_location_id>400000016</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+</precinct>
+<precinct id="300000227">
+  <name>Williams</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000754</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+  <polling_location_id>400000016</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000754</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+</precinct>
+<precinct id="300000228">
+  <name>Valley Ranch</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000754</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+  <polling_location_id>400000016</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000754</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+</precinct>
+<precinct id="300000229">
+  <name>Maxwell Precinct</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000764</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000008</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000764</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000230">
+  <name>Stonyford Prec MB</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000781</electoral_district_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000781</electoral_district_id>
+</precinct>
+<precinct id="300000231">
+  <name>Lodoga Prec MB</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000764</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000764</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000232">
+  <name>Venado Precinct MB</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+</precinct>
+<precinct id="300000233">
+  <name>Cortina Precinct</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000754</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+  <polling_location_id>400000016</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000754</electoral_district_id>
+  <electoral_district_id>200000768</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+</precinct>
+<precinct id="300000234">
+  <name>Newland  Precinc</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000759</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000009</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000759</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000235">
+  <name>Princeton MB</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000766</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000766</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000236">
+  <name>Colusa A</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000759</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000010</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000759</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000237">
+  <name>Colusa B</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000759</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000759</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000239">
+  <name>Geneva- Pierce</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000765</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+  <polling_location_id>400000016</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000765</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <electoral_district_id>200000787</electoral_district_id>
+</precinct>
+<precinct id="300000240">
+  <name>Maxwell-Princeton</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000766</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000008</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000766</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000241">
+  <name>Colusa A</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000010</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<precinct id="300000242">
+  <name>Colusa B</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200000751</electoral_district_id>
+  <electoral_district_id>200000752</electoral_district_id>
+  <electoral_district_id>200000763</electoral_district_id>
+  <electoral_district_id>200000769</electoral_district_id>
+  <electoral_district_id>200000775</electoral_district_id>
+</precinct>
+<election_administration id="4">
+  <eo_id>3</eo_id>
+  <physical_address>
+    <state>CA</state>
+    <city>Colusa</city>
+    <line1>546 Jay Street</line1>
+    <zip>95932</zip>
+  </physical_address>
+</election_administration>
+<election_official id="3">
+  <name>Kathleen Moran</name>
+  <phone>(530)458-0500</phone>
+</election_official>
+<polling_location id="400000001">
+  <address>
+    <city>Arbuckle</city>
+    <line1>104 5th St</line1>
+    <state>CA</state>
+    <zip>95912</zip>
+  </address>
+</polling_location>
+<polling_location id="400000002">
+  <address>
+    <city>Arbuckle</city>
+    <line1>901 Gail Ave</line1>
+    <state>CA</state>
+    <zip>95912</zip>
+  </address>
+</polling_location>
+<polling_location id="400000003">
+  <address>
+    <city>Colusa</city>
+    <line1>2963 Davison Ct</line1>
+    <state>CA</state>
+    <zip>95932</zip>
+  </address>
+</polling_location>
+<polling_location id="400000004">
+  <address>
+    <city>Colusa</city>
+    <line1>745 Ware Ave</line1>
+    <state>CA</state>
+    <zip>95932</zip>
+  </address>
+</polling_location>
+<polling_location id="400000005">
+  <address>
+    <city>Colusa</city>
+    <line1>232 E Carson St</line1>
+    <state>CA</state>
+    <zip>95932</zip>
+  </address>
+</polling_location>
+<polling_location id="400000008">
+  <address>
+    <city>Maxwell</city>
+    <line1>122 Old Hwy 99</line1>
+    <state>CA</state>
+    <zip>95955</zip>
+  </address>
+</polling_location>
+<polling_location id="400000009">
+  <address>
+    <city>Colusa</city>
+    <line1>901 Parkhill St</line1>
+    <state>CA</state>
+    <zip>95932</zip>
+  </address>
+</polling_location>
+<polling_location id="400000010">
+  <address>
+    <city>Colusa</city>
+    <line1>425 Webster St</line1>
+    <state>CA</state>
+    <zip>95932</zip>
+  </address>
+</polling_location>
+<polling_location id="400000016">
+  <address>
+    <city>Williams</city>
+    <line1>860 C St</line1>
+    <state>CA</state>
+    <zip>95987</zip>
+  </address>
+</polling_location>
+<polling_location id="400000017">
+  <address>
+    <city>Colusa</city>
+    <line1>750 Market St</line1>
+    <state>CA</state>
+    <zip>95932</zip>
+  </address>
+</polling_location>
+</vip_object>

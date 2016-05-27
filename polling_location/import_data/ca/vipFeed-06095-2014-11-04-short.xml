@@ -1,0 +1,1998 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-09-10T12:47:50</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>http://www.solanocounty.com/elections</organization_url>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="70">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>http://www.solanocounty.com/elections</registration_info>
+  <absentee_ballot_info>http://www.solanocounty.com/elections</absentee_ballot_info>
+  <results_url>http://www.solanocounty.com/elections</results_url>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-10-19</registration_deadline>
+  <absentee_request_deadline>2014-10-28</absentee_request_deadline>
+</election>
+<locality id="48">
+  <name>COUNTY OF SOLANO</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1200000031878">
+  <name>FAIRFIELD 33250</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660087</polling_location_id>
+</precinct>
+<precinct id="1200000031879">
+  <name>VACAVILLE 46270</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660035</polling_location_id>
+</precinct>
+<precinct id="1200000031880">
+  <name>VALLEJO 17180</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660053</polling_location_id>
+</precinct>
+<precinct id="1200000031881">
+  <name>VALLEJO 17395</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660102</polling_location_id>
+</precinct>
+<precinct id="1200000031882">
+  <name>VACAVILLE 46010</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660112</polling_location_id>
+</precinct>
+<precinct id="1200000031883">
+  <name>VACAVILLE 56155</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660089</polling_location_id>
+</precinct>
+<precinct id="1200000031884">
+  <name>VACAVILLE 56165</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660090</polling_location_id>
+</precinct>
+<precinct id="1200000031885">
+  <name>RIO VISTA 54010</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660022</polling_location_id>
+</precinct>
+<precinct id="1200000031886">
+  <name>VALLEJO 27165</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660060</polling_location_id>
+</precinct>
+<precinct id="1200000031887">
+  <name>DIXON 42065</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660006</polling_location_id>
+</precinct>
+<precinct id="1200000031888">
+  <name>VALLEJO 17070</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660108</polling_location_id>
+</precinct>
+<precinct id="1200000031889">
+  <name>VALLEJO 27175</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660047</polling_location_id>
+</precinct>
+<precinct id="1200000031890">
+  <name>VACAVILLE 49700</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660132</polling_location_id>
+</precinct>
+<precinct id="1200000031891">
+  <name>FAIRFIELD 53140</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660016</polling_location_id>
+</precinct>
+<precinct id="1200000031892">
+  <name>BENICIA 21035</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660003</polling_location_id>
+</precinct>
+<precinct id="1200000031893">
+  <name>VACAVILLE 46190</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660041</polling_location_id>
+</precinct>
+<precinct id="1200000031894">
+  <name>FAIRFIELD 39452</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660018</polling_location_id>
+</precinct>
+<precinct id="1200000031895">
+  <name>FAIRFIELD 53070</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660014</polling_location_id>
+</precinct>
+<precinct id="1200000031896">
+  <name>FAIRFIELD 29405</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660011</polling_location_id>
+</precinct>
+<precinct id="1200000031897">
+  <name>VALLEJO 27020</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660062</polling_location_id>
+</precinct>
+<precinct id="1200000031898">
+  <name>FAIRFIELD 23005</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660118</polling_location_id>
+</precinct>
+<precinct id="1200000031899">
+  <name>FAIRFIELD 33115</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660119</polling_location_id>
+</precinct>
+<precinct id="1200000031947">
+  <name>BENICIA 21005</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660074</polling_location_id>
+</precinct>
+<precinct id="1200000031948">
+  <name>BENICIA 21007</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660075</polling_location_id>
+</precinct>
+<precinct id="1200000031949">
+  <name>BENICIA 21020</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660001</polling_location_id>
+</precinct>
+<precinct id="1200000031950">
+  <name>BENICIA 21090</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660002</polling_location_id>
+</precinct>
+<precinct id="1200000031951">
+  <name>BENICIA 21095</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660071</polling_location_id>
+</precinct>
+<precinct id="1200000031952">
+  <name>BENICIA 21115</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660072</polling_location_id>
+</precinct>
+<precinct id="1200000031953">
+  <name>BENICIA 21125</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660073</polling_location_id>
+</precinct>
+<precinct id="1200000031954">
+  <name>DIXON 42045</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660091</polling_location_id>
+</precinct>
+<precinct id="1200000031955">
+  <name>DIXON 42020</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660097</polling_location_id>
+</precinct>
+<precinct id="1200000031956">
+  <name>DIXON 42035</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660098</polling_location_id>
+</precinct>
+<precinct id="1200000031957">
+  <name>ELMIRA 59700</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660008</polling_location_id>
+</precinct>
+<precinct id="1200000031958">
+  <name>RIO VISTA 54005</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660023</polling_location_id>
+</precinct>
+<precinct id="1200000031959">
+  <name>RIO VISTA 54020</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660124</polling_location_id>
+</precinct>
+<precinct id="1200000031960">
+  <name>RIO VISTA 54025</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660125</polling_location_id>
+</precinct>
+<precinct id="1200000031961">
+  <name>SUISUN 35020</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660025</polling_location_id>
+</precinct>
+<precinct id="1200000031962">
+  <name>SUISUN 35055</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660099</polling_location_id>
+</precinct>
+<precinct id="1200000031963">
+  <name>SUISUN 55005</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660100</polling_location_id>
+</precinct>
+<precinct id="1200000031964">
+  <name>SUISUN 55010</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660101</polling_location_id>
+</precinct>
+<precinct id="1200000031965">
+  <name>SUISUN 35005</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660026</polling_location_id>
+</precinct>
+<precinct id="1200000031966">
+  <name>SUISUN 35040</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660027</polling_location_id>
+</precinct>
+<precinct id="1200000031967">
+  <name>TRAVIS 53005</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660122</polling_location_id>
+</precinct>
+<precinct id="1200000031968">
+  <name>FAIRFIELD 33045</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660009</polling_location_id>
+</precinct>
+<precinct id="1200000031969">
+  <name>FAIRFIELD 53100</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660093</polling_location_id>
+</precinct>
+<precinct id="1200000031970">
+  <name>FAIRFIELD 53110</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660094</polling_location_id>
+</precinct>
+<precinct id="1200000031971">
+  <name>FAIRFIELD 33195</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660096</polling_location_id>
+</precinct>
+<precinct id="1200000031972">
+  <name>FAIRFIELD 33190</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660095</polling_location_id>
+</precinct>
+<precinct id="1200000031973">
+  <name>FAIRFIELD 33050</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660013</polling_location_id>
+</precinct>
+<precinct id="1200000031974">
+  <name>FAIRFIELD 23016</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660110</polling_location_id>
+</precinct>
+<precinct id="1200000031975">
+  <name>FAIRFIELD 23020</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660111</polling_location_id>
+</precinct>
+<precinct id="1200000031976">
+  <name>FAIRFIELD 23050</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660017</polling_location_id>
+</precinct>
+<precinct id="1200000031977">
+  <name>FAIRFIELD 33265</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660020</polling_location_id>
+</precinct>
+<precinct id="1200000031978">
+  <name>BENICIA 21130</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660004</polling_location_id>
+</precinct>
+<precinct id="1200000031979">
+  <name>FAIRFIELD 53115</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660083</polling_location_id>
+</precinct>
+<precinct id="1200000031980">
+  <name>FAIRFIELD 53125</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660084</polling_location_id>
+</precinct>
+<precinct id="1200000031981">
+  <name>VALLEJO 17380</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660057</polling_location_id>
+</precinct>
+<precinct id="1200000031982">
+  <name>VALLEJO 17265</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660049</polling_location_id>
+</precinct>
+<precinct id="1200000031983">
+  <name>VALLEJO 17115</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660065</polling_location_id>
+</precinct>
+<precinct id="1200000031984">
+  <name>VALLEJO 17095</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660126</polling_location_id>
+</precinct>
+<precinct id="1200000031985">
+  <name>VALLEJO 17100</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660127</polling_location_id>
+</precinct>
+<precinct id="1200000031986">
+  <name>VALLEJO 17310</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660066</polling_location_id>
+</precinct>
+<precinct id="1200000031987">
+  <name>VALLEJO 17245</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660134</polling_location_id>
+</precinct>
+<precinct id="1200000031988">
+  <name>VALLEJO 27130</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660070</polling_location_id>
+</precinct>
+<precinct id="1200000031989">
+  <name>VALLEJO 27050</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660063</polling_location_id>
+</precinct>
+<precinct id="1200000031990">
+  <name>VALLEJO 27090</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660051</polling_location_id>
+</precinct>
+<precinct id="1200000031991">
+  <name>VACAVILLE 46130</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660028</polling_location_id>
+</precinct>
+<precinct id="1200000031992">
+  <name>VACAVILLE 56125</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660031</polling_location_id>
+</precinct>
+<precinct id="1200000031993">
+  <name>VACAVILLE 46115</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660086</polling_location_id>
+</precinct>
+<precinct id="1200000031994">
+  <name>VACAVILLE 46080</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660085</polling_location_id>
+</precinct>
+<precinct id="1200000031995">
+  <name>VACAVILLE 46020</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660128</polling_location_id>
+</precinct>
+<precinct id="1200000031996">
+  <name>VACAVILLE 46050</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660129</polling_location_id>
+</precinct>
+<precinct id="1200000031997">
+  <name>VACAVILLE 46400</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660034</polling_location_id>
+</precinct>
+<precinct id="1200000031998">
+  <name>VACAVILLE 56110</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660037</polling_location_id>
+</precinct>
+<precinct id="1200000031999">
+  <name>VACAVILLE 56010</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660038</polling_location_id>
+</precinct>
+<precinct id="1200000032000">
+  <name>VACAVILLE 46150</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660106</polling_location_id>
+</precinct>
+<precinct id="1200000032001">
+  <name>VACAVILLE 46155</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660107</polling_location_id>
+</precinct>
+<precinct id="1200000032002">
+  <name>VACAVILLE 56050</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660033</polling_location_id>
+</precinct>
+<precinct id="1200000032003">
+  <name>VACAVILLE 56100</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660036</polling_location_id>
+</precinct>
+<precinct id="1200000032004">
+  <name>VALLEJO 17220</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660048</polling_location_id>
+</precinct>
+<precinct id="1200000032005">
+  <name>VACAVILLE 46180</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660040</polling_location_id>
+</precinct>
+<precinct id="1200000032006">
+  <name>VACAVILLE 46065</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660043</polling_location_id>
+</precinct>
+<precinct id="1200000032007">
+  <name>VALLEJO 17005</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660078</polling_location_id>
+</precinct>
+<precinct id="1200000032008">
+  <name>VALLEJO 17010</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660079</polling_location_id>
+</precinct>
+<precinct id="1200000032009">
+  <name>VALLEJO 27055</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660046</polling_location_id>
+</precinct>
+<precinct id="1200000032010">
+  <name>VALLEJO 17205</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660052</polling_location_id>
+</precinct>
+<precinct id="1200000032011">
+  <name>VACAVILLE 46380</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660032</polling_location_id>
+</precinct>
+<precinct id="1200000032012">
+  <name>VALLEJO 17045</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660069</polling_location_id>
+</precinct>
+<precinct id="1200000032013">
+  <name>VALLEJO 17140</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660058</polling_location_id>
+</precinct>
+<precinct id="1200000032014">
+  <name>VALLEJO 17335</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660059</polling_location_id>
+</precinct>
+<precinct id="1200000032015">
+  <name>DIXON 42050</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660005</polling_location_id>
+</precinct>
+<precinct id="1200000032016">
+  <name>VALLEJO 27115</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660054</polling_location_id>
+</precinct>
+<precinct id="1200000032017">
+  <name>VALLEJO 17185</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660056</polling_location_id>
+</precinct>
+<precinct id="1200000032018">
+  <name>VACAVILLE 56190</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660042</polling_location_id>
+</precinct>
+<precinct id="1200000032019">
+  <name>VALLEJO 27070</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660050</polling_location_id>
+</precinct>
+<precinct id="1200000032020">
+  <name>VALLEJO 17290</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660061</polling_location_id>
+</precinct>
+<precinct id="1200000032021">
+  <name>SUISUN 35045</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660024</polling_location_id>
+</precinct>
+<precinct id="1200000032022">
+  <name>VALLEJO 27185</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660064</polling_location_id>
+</precinct>
+<precinct id="1200000032023">
+  <name>FAIRFIELD 33215</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660021</polling_location_id>
+</precinct>
+<precinct id="1200000032024">
+  <name>FAIRFIELD 33230</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660080</polling_location_id>
+</precinct>
+<precinct id="1200000032025">
+  <name>FAIRFIELD 33245</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660081</polling_location_id>
+</precinct>
+<precinct id="1200000032026">
+  <name>VACAVILLE 46210</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660029</polling_location_id>
+</precinct>
+<precinct id="1200000032027">
+  <name>VALLEJO 27080</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660045</polling_location_id>
+</precinct>
+<precinct id="1200000032028">
+  <name>FAIRFIELD 33075</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660019</polling_location_id>
+</precinct>
+<precinct id="1200000032029">
+  <name>VACAVILLE 49733</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660130</polling_location_id>
+</precinct>
+<precinct id="1200000032030">
+  <name>VACAVILLE 49740</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660131</polling_location_id>
+</precinct>
+<precinct id="1200000032031">
+  <name>VALLEJO 17285</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660116</polling_location_id>
+</precinct>
+<precinct id="1200000032032">
+  <name>VALLEJO 27110</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660055</polling_location_id>
+</precinct>
+<precinct id="1200000032033">
+  <name>VACAVILLE 56105</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660114</polling_location_id>
+</precinct>
+<precinct id="1200000032034">
+  <name>VALLEJO 17152</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660068</polling_location_id>
+</precinct>
+<precinct id="1200000032035">
+  <name>VALLEJO 17400</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660103</polling_location_id>
+</precinct>
+<precinct id="1200000032036">
+  <name>VALLEJO 17085</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660109</polling_location_id>
+</precinct>
+<precinct id="1200000032037">
+  <name>VALLEJO 17289</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660117</polling_location_id>
+</precinct>
+<precinct id="1200000032038">
+  <name>VACAVILLE 56107</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660115</polling_location_id>
+</precinct>
+<precinct id="1200000032039">
+  <name>TRAVIS 53007</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660123</polling_location_id>
+</precinct>
+<precinct id="1200000032040">
+  <name>VALLEJO 17250</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660135</polling_location_id>
+</precinct>
+<precinct id="1200000032041">
+  <name>VACAVILLE 56020</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660039</polling_location_id>
+</precinct>
+<precinct id="1200000032042">
+  <name>VACAVILLE 56210</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660030</polling_location_id>
+</precinct>
+<precinct id="1200000032043">
+  <name>VACAVILLE 46127</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660104</polling_location_id>
+</precinct>
+<precinct id="1200000032044">
+  <name>FAIRFIELD 33070</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660012</polling_location_id>
+</precinct>
+<precinct id="1200000032045">
+  <name>FAIRFIELD 33040</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660010</polling_location_id>
+</precinct>
+<precinct id="1200000032046">
+  <name>FAIRFIELD 33010</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660120</polling_location_id>
+</precinct>
+<precinct id="1200000032047">
+  <name>FAIRFIELD 33025</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660121</polling_location_id>
+</precinct>
+<precinct id="1200000032048">
+  <name>DIXON 42010</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660007</polling_location_id>
+</precinct>
+<precinct id="1200000032049">
+  <name>FAIRFIELD 23090</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660076</polling_location_id>
+</precinct>
+<precinct id="1200000032050">
+  <name>FAIRFIELD 33065</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660015</polling_location_id>
+</precinct>
+<precinct id="1200000032051">
+  <name>VALLEJO 17110</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660067</polling_location_id>
+</precinct>
+<precinct id="1200000032052">
+  <name>VACAVILLE 46120</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660044</polling_location_id>
+</precinct>
+<precinct id="1200000032053">
+  <name>MAIL PCT 99929</name>
+  <locality_id>48</locality_id>
+</precinct>
+<precinct id="1200000032055">
+  <name>MAIL PCT 99927</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032056">
+  <name>MAIL PCT 99926</name>
+  <locality_id>48</locality_id>
+</precinct>
+<precinct id="1200000032059">
+  <name>MAIL PCT 99922</name>
+  <locality_id>48</locality_id>
+</precinct>
+<precinct id="1200000032062">
+  <name>MAIL PCT 99917</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032065">
+  <name>MAIL PCT 99923</name>
+  <locality_id>48</locality_id>
+</precinct>
+<precinct id="1200000032073">
+  <name>MAIL PCT 99919</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032076">
+  <name>MAIL PCT 99907</name>
+  <locality_id>48</locality_id>
+</precinct>
+<precinct id="1200000032080">
+  <name>MAIL PCT 99905</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032084">
+  <name>MAIL PCT 99035</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032085">
+  <name>MAIL PCT 99034</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032087">
+  <name>MAIL PCT 99031</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032089">
+  <name>MAIL PCT 99020</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032091">
+  <name>MAIL PCT 99018</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032093">
+  <name>MAIL PCT 99024</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032097">
+  <name>MAIL PCT 99028</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032099">
+  <name>MAIL PCT 99025</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032102">
+  <name>MAIL PCT 99021</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032103">
+  <name>MAIL PCT 99015</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032104">
+  <name>MAIL PCT 99913</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032105">
+  <name>MAIL PCT 99010</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032106">
+  <name>MAIL PCT 99009</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032107">
+  <name>MAIL PCT 99008</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032110">
+  <name>MAIL PCT 99004</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032112">
+  <name>MAIL PCT 99001</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032114">
+  <name>MAIL PCT 99006</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032116">
+  <name>MAIL PCT 99011</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032117">
+  <name>MAIL PCT 99002</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032122">
+  <name>MAIL PCT 99027</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032124">
+  <name>MAIL PCT 99032</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032126">
+  <name>MAIL PCT 99016</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032127">
+  <name>MAIL PCT 99915</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032130">
+  <name>MAIL PCT 99904</name>
+  <locality_id>48</locality_id>
+</precinct>
+<precinct id="1200000032131">
+  <name>MAIL PCT 99909</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032132">
+  <name>MAIL PCT 99918</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032133">
+  <name>VACAVILLE 49725</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660133</polling_location_id>
+</precinct>
+<precinct id="1200000032134">
+  <name>FAIRFIELD 23095</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660077</polling_location_id>
+</precinct>
+<precinct id="1200000032136">
+  <name>FAIRFIELD 33247</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660082</polling_location_id>
+</precinct>
+<precinct id="1200000032137">
+  <name>FAIRFIELD 33255</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660088</polling_location_id>
+</precinct>
+<precinct id="1200000032138">
+  <name>VACAVILLE 46015</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660113</polling_location_id>
+</precinct>
+<precinct id="1200000032139">
+  <name>VACAVILLE 46128</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660105</polling_location_id>
+</precinct>
+<precinct id="1200000032140">
+  <name>MAIL PCT 99005</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032141">
+  <name>DIXON 42047</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660092</polling_location_id>
+</precinct>
+<precinct id="1200000032143">
+  <name>MAIL PCT 99029</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032144">
+  <name>MAIL PCT 99038</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032145">
+  <name>MAIL PCT 99039</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032146">
+  <name>MAIL PCT 99003</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032148">
+  <name>MAIL PCT 99931</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032149">
+  <name>MAIL PCT 99932</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032150">
+  <name>MAIL PCT 99925</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<precinct id="1200000032151">
+  <name>MAIL PCT 99012</name>
+  <locality_id>48</locality_id>
+  <polling_location_id>6660136</polling_location_id>
+</precinct>
+<polling_location id="6660001">
+  <address>
+    <city>BENICIA</city>
+    <line1>711 HILLCREST AVE</line1>
+    <state>CA</state>
+    <location_name>CALIFORNIA NAT. GUARD ARMORY</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660002">
+  <address>
+    <city>BENICIA</city>
+    <line1>1300 SOUTHAMPTON ROAD</line1>
+    <state>CA</state>
+    <location_name>CLUB PACIFICA</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660003">
+  <address>
+    <city>BENICIA</city>
+    <line1>1315 MILITARY WEST</line1>
+    <state>CA</state>
+    <location_name>THE GATEWAY</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660004">
+  <address>
+    <city>BENICIA</city>
+    <line1>540 ROSE DRIVE</line1>
+    <state>CA</state>
+    <location_name>TURNER ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660005">
+  <address>
+    <city>DIXON</city>
+    <line1>200 N. LINCOLN STREET</line1>
+    <state>CA</state>
+    <location_name>C. A. JACOBS MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660006">
+  <address>
+    <city>DIXON</city>
+    <line1>600 EAST A STREET</line1>
+    <state>CA</state>
+    <location_name>DIXON CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660007">
+  <address>
+    <city>DIXON</city>
+    <line1>1305 N. 1ST ST</line1>
+    <state>CA</state>
+    <location_name>VETERANS MEMORIAL HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660008">
+  <address>
+    <city>ELMIRA</city>
+    <line1>6080 A STREET</line1>
+    <state>CA</state>
+    <location_name>VACAVILLE FIRE STATION # 65</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660009">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>3301 CHERRY HILLS CT.</line1>
+    <state>CA</state>
+    <location_name>B. GALE WILSON SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660010">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>2490 HILBORN RD</line1>
+    <state>CA</state>
+    <location_name>FAIRFIELD/SUISUN SCHOOL DISTRICT OFFICE</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660011">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1634 ROCKVILLE RD.</line1>
+    <state>CA</state>
+    <location_name>FALLS EDUCATION CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660012">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1405 KENTUCKY STREET</line1>
+    <state>CA</state>
+    <location_name>GRACE EPISCOPAL CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660013">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>3250 RANCHO SOLANO  PARKWAY</line1>
+    <state>CA</state>
+    <location_name>IN-SHAPE: FAIRFIELD RANCHO SOLANO</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660014">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>2900 GULF DRIVE</line1>
+    <state>CA</state>
+    <location_name>LAUREL CREEK SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660015">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>3690 HILBORN RD</line1>
+    <state>CA</state>
+    <location_name>NORTHERN SOLANO CO. ASSOC. OF REALTORS</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660016">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>2600 ESTATES DR (MULTI-USE RM)</line1>
+    <state>CA</state>
+    <location_name>PARADISE VALLEY ESTATES</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660017">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>720 LINK RD</line1>
+    <state>CA</state>
+    <location_name>ROCKVILLE BIBLE CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660018">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>4000 SUISUN VALLEY ROAD</line1>
+    <state>CA</state>
+    <location_name>SOLANO COMM. COLLEGE</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660019">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1350 TRAVIS BOULEVARD</line1>
+    <state>CA</state>
+    <location_name>SOLANO MALL - 2ND FLR NEAR DINING AREA</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660020">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>2301 UNION AVE</line1>
+    <state>CA</state>
+    <location_name>ST. STEPHEN C.M.E. CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660021">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>2075 DOVER AVENUE</line1>
+    <state>CA</state>
+    <location_name>TRINITY LUTHERAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660022">
+  <address>
+    <city>RIO VISTA</city>
+    <line1>1 MAIN STREET</line1>
+    <state>CA</state>
+    <location_name>RIO VISTA CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660023">
+  <address>
+    <city>RIO VISTA</city>
+    <line1>350 MAIN ST</line1>
+    <state>CA</state>
+    <location_name>RIO VISTA FIRE DEPARTMENT</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660024">
+  <address>
+    <city>SUISUN</city>
+    <line1>1001 ANDERSON DRIVE</line1>
+    <state>CA</state>
+    <location_name>CRESCENT ELEMENTARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660025">
+  <address>
+    <city>SUISUN</city>
+    <line1>611 VILLAGE DR</line1>
+    <state>CA</state>
+    <location_name>NELSON COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660026">
+  <address>
+    <city>SUISUN</city>
+    <line1>701 CIVIC CENTER BLVD</line1>
+    <state>CA</state>
+    <location_name>SUISUN CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660027">
+  <address>
+    <city>SUISUN</city>
+    <line1>601 PINTAIL DR</line1>
+    <state>CA</state>
+    <location_name>SUISUN CITY LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660028">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>333 WRENTHAM DRIVE</line1>
+    <state>CA</state>
+    <location_name>BROWNS VALLEY ELEMENTARY SCH.</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660029">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>188-B BELLA VISTA ROAD</line1>
+    <state>CA</state>
+    <location_name>BUCKINGHAM CHARTER MAGNET H.S.</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660030">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>6261 VANDEN RD</line1>
+    <state>CA</state>
+    <location_name>CALLISON ELEMENTARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660031">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>100 CAMBRIDGE DRIVE</line1>
+    <state>CA</state>
+    <location_name>CAMBRIDGE ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660032">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>1201 MARSHALL ROAD</line1>
+    <state>CA</state>
+    <location_name>CHRISTIAN BODY OF LIFE FLSHP</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660033">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>750 CHRISTINE DRIVE</line1>
+    <state>CA</state>
+    <location_name>COOPER SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660034">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>1111 ULATIS DRIVE</line1>
+    <state>CA</state>
+    <location_name>EMERITUS AT VACAVILLE</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660035">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>200 PADAN SCHOOL ROAD</line1>
+    <state>CA</state>
+    <location_name>EUGENE PADAN ELEMENTARY SCH.</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660036">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>1355 MARSHALL ROAD</line1>
+    <state>CA</state>
+    <location_name>FAIRMONT CHARTER ELEM. SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660037">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>600 MORNING GLORY DRIVE</line1>
+    <state>CA</state>
+    <location_name>FOXBORO ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660038">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>100 SEQUOIA DRIVE</line1>
+    <state>CA</state>
+    <location_name>LEISURE TOWN COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660039">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>6391 LEISURE TOWN RD</line1>
+    <state>CA</state>
+    <location_name>MISSION CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660040">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>2001 NORTH VILLAGE PARKWAY</line1>
+    <state>CA</state>
+    <location_name>SOLANO COMM. COLLEGE VACA.</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660041">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>1100 ALAMO DRIVE</line1>
+    <state>CA</state>
+    <location_name>THREE OAKS COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660042">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>200 KEITH WAY</line1>
+    <state>CA</state>
+    <location_name>VACA PENA MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660043">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>650 MERCHANT STREET</line1>
+    <state>CA</state>
+    <location_name>VACAVILLE CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660044">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>1119 E. MONTE VISTA AVE</line1>
+    <state>CA</state>
+    <location_name>WILLIAM J CARROLL GOV. CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660045">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1450 CORONEL AVENUE</line1>
+    <state>CA</state>
+    <location_name>BEVERLY HILLS ELEMENTARY SCH.</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660046">
+  <address>
+    <city>VALLEJO</city>
+    <line1>150 SEAPORT DRIVE</line1>
+    <state>CA</state>
+    <location_name>CARQUINEZ HIGHLANDS MHP</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660047">
+  <address>
+    <city>VALLEJO</city>
+    <line1>2800 GEORGIA STREET</line1>
+    <state>CA</state>
+    <location_name>COMMUNITY PRESBYTERIAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660048">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1256 NEBRASKA STREET</line1>
+    <state>CA</state>
+    <location_name>CONGREGATION BNAI ISRAEL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660049">
+  <address>
+    <city>VALLEJO</city>
+    <line1>350 LOCUST DRIVE</line1>
+    <state>CA</state>
+    <location_name>EMERITUS AT VALLEJO</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660050">
+  <address>
+    <city>VALLEJO</city>
+    <line1>901 SOLANO AVENUE</line1>
+    <state>CA</state>
+    <location_name>FAITH BIBLE CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660051">
+  <address>
+    <city>VALLEJO</city>
+    <line1>140 LADERA DRIVE</line1>
+    <state>CA</state>
+    <location_name>FELLOWSHIP UNITED METH. CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660052">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1350 AMADOR STREET</line1>
+    <state>CA</state>
+    <location_name>FIRST PRESBYTERIAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660053">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1905 FLORIDA STREET</line1>
+    <state>CA</state>
+    <location_name>FRIENDSHIP BAPTIST HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660054">
+  <address>
+    <city>VALLEJO</city>
+    <line1>501 GLEN COVE PARKWAY</line1>
+    <state>CA</state>
+    <location_name>GLEN COVE SCHOOL - CLASSROOM</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660055">
+  <address>
+    <city>VALLEJO</city>
+    <line1>501 GLEN COVE PARKWAY</line1>
+    <state>CA</state>
+    <location_name>GLEN COVE SCHOOL - LIBRARY</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660056">
+  <address>
+    <city>VALLEJO</city>
+    <line1>401 AMADOR STREET</line1>
+    <state>CA</state>
+    <location_name>GVRD COMMUNITY SERVICES BLDG.</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660057">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1095 HIDDENBROOKE PARKWAY</line1>
+    <state>CA</state>
+    <location_name>HIDDENBROOKE GOLF CLUB</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660058">
+  <address>
+    <city>VALLEJO</city>
+    <line1>800 LIGHTHOUSE DRIVE</line1>
+    <state>CA</state>
+    <location_name>HILLCREST BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660059">
+  <address>
+    <city>VALLEJO</city>
+    <line1>850 ROSEWOOD AVENUE</line1>
+    <state>CA</state>
+    <location_name>HOGAN MIDDLE SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660060">
+  <address>
+    <city>VALLEJO</city>
+    <line1>201 DOYLE DRIVE</line1>
+    <state>CA</state>
+    <location_name>HOLY TRINITY LUTHERAN CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660061">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1800 ASCOT PARKWAY</line1>
+    <state>CA</state>
+    <location_name>JESSE BETHEL HIGH SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660062">
+  <address>
+    <city>VALLEJO</city>
+    <line1>400 RICKOVER STREET</line1>
+    <state>CA</state>
+    <location_name>MARE ISLAND ELEMENTARY SCHOOL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660063">
+  <address>
+    <city>VALLEJO</city>
+    <line1>545 MAGAZINE STREET</line1>
+    <state>CA</state>
+    <location_name>NORMAN C. KING COMMUNITY CTR.</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660064">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1170 BENICIA ROAD</line1>
+    <state>CA</state>
+    <location_name>SECOND BAPTIST CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660065">
+  <address>
+    <city>VALLEJO</city>
+    <line1>900 FAIRGROUNDS DRIVE</line1>
+    <state>CA</state>
+    <location_name>SOLANO COUNTY FAIRGROUNDS</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660066">
+  <address>
+    <city>VALLEJO</city>
+    <line1>555 SANTA CLARA STREET</line1>
+    <state>CA</state>
+    <location_name>VALLEJO CITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660067">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1640 BROADWAY STREET</line1>
+    <state>CA</state>
+    <location_name>VALLEJO DEAF CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660068">
+  <address>
+    <city>VALLEJO</city>
+    <line1>301 FARRAGUT AVENUE</line1>
+    <state>CA</state>
+    <location_name>VALLEJO ED. ACADEMY (FRMLY FARRAGUT SCH)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660069">
+  <address>
+    <city>VALLEJO</city>
+    <line1>595 MINI DRIVE</line1>
+    <state>CA</state>
+    <location_name>VALLEJO FIRE STATION 25</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660070">
+  <address>
+    <city>VALLEJO</city>
+    <line1>2309 COLUMBUS PARKWAY</line1>
+    <state>CA</state>
+    <location_name>WAYSIDE UNITED METHODIST CH.</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660071">
+  <address>
+    <city>BENICIA</city>
+    <line1>1055 SOUTHAMPTON ROAD</line1>
+    <state>CA</state>
+    <location_name>BENICIA FIRST BAPTIST CHURCH (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660072">
+  <address>
+    <city>BENICIA</city>
+    <line1>1055 SOUTHAMPTON ROAD</line1>
+    <state>CA</state>
+    <location_name>BENICIA FIRST BAPTIST CHURCH (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660073">
+  <address>
+    <city>BENICIA</city>
+    <line1>1055 SOUTHAMPTON ROAD</line1>
+    <state>CA</state>
+    <location_name>BENICIA FIRST BAPTIST CHURCH (C)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660074">
+  <address>
+    <city>BENICIA</city>
+    <line1>187 EAST L STREET</line1>
+    <state>CA</state>
+    <location_name>BENICIA SENIOR CENTER (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660075">
+  <address>
+    <city>BENICIA</city>
+    <line1>187 EAST L STREET</line1>
+    <state>CA</state>
+    <location_name>BENICIA SENIOR CENTER (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660076">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1745 ENTERPRISE DR.</line1>
+    <state>CA</state>
+    <location_name>BLDG 2 (NEXT TO MT. CALVARY) (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660077">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1745 ENTERPRISE DR.</line1>
+    <state>CA</state>
+    <location_name>BLDG 2 (NEXT TO MT. CALVARY) (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660078">
+  <address>
+    <city>VALLEJO</city>
+    <line1>585 MINI DRIVE</line1>
+    <state>CA</state>
+    <location_name>CALVARY COMMUNITY CHURCH (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660079">
+  <address>
+    <city>VALLEJO</city>
+    <line1>585 MINI DRIVE</line1>
+    <state>CA</state>
+    <location_name>CALVARY COMMUNITY CHURCH (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660080">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1837 BLOSSOM AVENUE</line1>
+    <state>CA</state>
+    <location_name>CELEBRATION LIFE CENTER (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660081">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1837 BLOSSOM AVENUE</line1>
+    <state>CA</state>
+    <location_name>CELEBRATION LIFE CENTER (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660082">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1837 BLOSSOM AVENUE</line1>
+    <state>CA</state>
+    <location_name>CELEBRATION LIFE CENTER (C)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660083">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>300 MARIGOLD DRIVE</line1>
+    <state>CA</state>
+    <location_name>CHRISTIAN REFORMED CHURCH (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660084">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>300 MARIGOLD DRIVE</line1>
+    <state>CA</state>
+    <location_name>CHRISTIAN REFORMED CHURCH (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660085">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>300 WEST STREET</line1>
+    <state>CA</state>
+    <location_name>CHURCH OF THE EPIPHANY PARISH (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660086">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>300 WEST STREET</line1>
+    <state>CA</state>
+    <location_name>CHURCH OF THE EPIPHANY PARISH (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660087">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1800 E TABOR AVENUE</line1>
+    <state>CA</state>
+    <location_name>COUNTRY CLUB ESTATES MHP (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660088">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1800 E TABOR AVENUE</line1>
+    <state>CA</state>
+    <location_name>COUNTRY CLUB ESTATES MHP (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660089">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>3870 ALAMO DRIVE</line1>
+    <state>CA</state>
+    <location_name>COVENANT COMMUNITY CHURCH (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660090">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>3870 ALAMO DRIVE</line1>
+    <state>CA</state>
+    <location_name>COVENANT COMMUNITY CHURCH (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660091">
+  <address>
+    <city>DIXON</city>
+    <line1>655 S. 1ST STREET</line1>
+    <state>CA</state>
+    <location_name>DIXON FAIRGROUNDS DENVERTON (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660092">
+  <address>
+    <city>DIXON</city>
+    <line1>655 S. 1ST STREET</line1>
+    <state>CA</state>
+    <location_name>DIXON FAIRGROUNDS DENVERTON (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660093">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>3200 N. TEXAS ST</line1>
+    <state>CA</state>
+    <location_name>FAIRFIELD FIRE STATION # 41 (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660094">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>3200 N. TEXAS ST</line1>
+    <state>CA</state>
+    <location_name>FAIRFIELD FIRE STATION # 41 (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660095">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1108 WASHINGTON STREET</line1>
+    <state>CA</state>
+    <location_name>FAIRFIELD FIRST BAPTIST CH. (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660096">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1108 WASHINGTON STREET</line1>
+    <state>CA</state>
+    <location_name>FAIRFIELD FIRST BAPTIST CH. (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660097">
+  <address>
+    <city>DIXON</city>
+    <line1>535 WEST H STREET</line1>
+    <state>CA</state>
+    <location_name>GRACE FELLOWSHIP OF DIXON (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660098">
+  <address>
+    <city>DIXON</city>
+    <line1>535 WEST H STREET</line1>
+    <state>CA</state>
+    <location_name>GRACE FELLOWSHIP OF DIXON (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660099">
+  <address>
+    <city>SUISUN</city>
+    <line1>586 EAST WIGEON WAY</line1>
+    <state>CA</state>
+    <location_name>KROC CENTER (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660100">
+  <address>
+    <city>SUISUN</city>
+    <line1>586 EAST WIGEON WAY</line1>
+    <state>CA</state>
+    <location_name>KROC CENTER (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660101">
+  <address>
+    <city>SUISUN</city>
+    <line1>586 EAST WIGEON WAY</line1>
+    <state>CA</state>
+    <location_name>KROC CENTER (C)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660102">
+  <address>
+    <city>VALLEJO</city>
+    <line1>101 TEMPLE WAY</line1>
+    <state>CA</state>
+    <location_name>MASONIC TEMPLE (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660103">
+  <address>
+    <city>VALLEJO</city>
+    <line1>101 TEMPLE WAY</line1>
+    <state>CA</state>
+    <location_name>MASONIC TEMPLE (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660104">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>6585 GIBSON CANYON ROAD</line1>
+    <state>CA</state>
+    <location_name>MOOSE LODGE (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660105">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>6585 GIBSON CANYON ROAD</line1>
+    <state>CA</state>
+    <location_name>MOOSE LODGE (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660106">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>4910 ALLISON PARKWAY</line1>
+    <state>CA</state>
+    <location_name>NEW HOPE CHRISTIAN FELLOWSHIP (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660107">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>4910 ALLISON PARKWAY</line1>
+    <state>CA</state>
+    <location_name>NEW HOPE CHRISTIAN FELLOWSHIP (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660108">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1121 WHITNEY AVENUE</line1>
+    <state>CA</state>
+    <location_name>NORTH VALLEJO COMMUNITY CTR. (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660109">
+  <address>
+    <city>VALLEJO</city>
+    <line1>1121 WHITNEY AVENUE</line1>
+    <state>CA</state>
+    <location_name>NORTH VALLEJO COMMUNITY CTR. (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660110">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>700 OAKBROOK DR</line1>
+    <state>CA</state>
+    <location_name>OAKBROOK ELEMENTARY SCHOOL (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660111">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>700 OAKBROOK DR</line1>
+    <state>CA</state>
+    <location_name>OAKBROOK ELEMENTARY SCHOOL (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660112">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>805 N ORCHARD AVENUE</line1>
+    <state>CA</state>
+    <location_name>ORCHARD SCHOOL (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660113">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>805 N ORCHARD AVENUE</line1>
+    <state>CA</state>
+    <location_name>ORCHARD SCHOOL (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660114">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>301 BEL AIR DRIVE</line1>
+    <state>CA</state>
+    <location_name>SIERRA VISTA SCHOOL (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660115">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>301 BEL AIR DRIVE</line1>
+    <state>CA</state>
+    <location_name>SIERRA VISTA SCHOOL (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660116">
+  <address>
+    <city>VALLEJO</city>
+    <line1>545 COLUMBUS PARKWAY</line1>
+    <state>CA</state>
+    <location_name>SOLANO COMM COLLEGE - VJO (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660117">
+  <address>
+    <city>VALLEJO</city>
+    <line1>545 COLUMBUS PARKWAY</line1>
+    <state>CA</state>
+    <location_name>SOLANO COMM COLLEGE - VJO (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660118">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>5100 BUSINESS CENTER DRIVE</line1>
+    <state>CA</state>
+    <location_name>SOLANO COUNTY OFFICE OF ED. (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660119">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>5100 BUSINESS CENTER DRIVE</line1>
+    <state>CA</state>
+    <location_name>SOLANO COUNTY OFFICE OF ED. (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660120">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1307 OLIVER RD</line1>
+    <state>CA</state>
+    <location_name>SOLANO VALLEY CHURCH (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660121">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>1307 OLIVER RD</line1>
+    <state>CA</state>
+    <location_name>SOLANO VALLEY CHURCH (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660122">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>2775 DE RONDE DR</line1>
+    <state>CA</state>
+    <location_name>TRAVIS EDUCATION CENTER (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660123">
+  <address>
+    <city>FAIRFIELD</city>
+    <line1>2775 DE RONDE DR</line1>
+    <state>CA</state>
+    <location_name>TRAVIS EDUCATION CENTER (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660124">
+  <address>
+    <city>RIO VISTA</city>
+    <line1>990 SUMMERSET DR</line1>
+    <state>CA</state>
+    <location_name>TRILOGY AT RIO VISTA (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660125">
+  <address>
+    <city>RIO VISTA</city>
+    <line1>990 SUMMERSET DR</line1>
+    <state>CA</state>
+    <location_name>TRILOGY AT RIO VISTA (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660126">
+  <address>
+    <city>VALLEJO</city>
+    <line1>128 ENCERTI AVENUE</line1>
+    <state>CA</state>
+    <location_name>UNION BAPTIST CHURCH (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660127">
+  <address>
+    <city>VALLEJO</city>
+    <line1>128 ENCERTI AVENUE</line1>
+    <state>CA</state>
+    <location_name>UNION BAPTIST CHURCH (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660128">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>425 HEMLOCK STREET</line1>
+    <state>CA</state>
+    <location_name>VACA. COMM. PRESBYTERIAN CH. (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660129">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>425 HEMLOCK STREET</line1>
+    <state>CA</state>
+    <location_name>VACA. COMM. PRESBYTERIAN CH. (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660130">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>4740 ALLENDALE ROAD</line1>
+    <state>CA</state>
+    <location_name>VACA. SEVENTH DAY ADVENT. CH. (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660131">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>4740 ALLENDALE ROAD</line1>
+    <state>CA</state>
+    <location_name>VACA. SEVENTH DAY ADVENT. CH. (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660132">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>4135 CANTELOW ROAD</line1>
+    <state>CA</state>
+    <location_name>VACAVILLE FIRE STATION 67 (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660133">
+  <address>
+    <city>VACAVILLE</city>
+    <line1>4135 CANTELOW ROAD</line1>
+    <state>CA</state>
+    <location_name>VACAVILLE FIRE STATION 67 (B)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660134">
+  <address>
+    <city>VALLEJO</city>
+    <line1>420 ADMIRAL CALLAGHAN LANE</line1>
+    <state>CA</state>
+    <location_name>VALLEJO VETERANS BUILDING (A)</location_name>
+  </address>
+</polling_location>
+<polling_location id="6660135">
+  <address>
+    <city>VALLEJO</city>
+    <line1>420 ADMIRAL CALLAGHAN LANE</line1>
+    <state>CA</state>
+    <location_name>VALLEJO VETERANS BUILDING (B)</location_name>
+  </address>
+</polling_location>
+</vip_object>

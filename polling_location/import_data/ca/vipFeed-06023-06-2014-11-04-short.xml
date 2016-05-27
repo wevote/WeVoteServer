@@ -1,0 +1,2027 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Humboldt County</name>
+  <vip_id>6023</vip_id>
+  <datetime>2014-10-01T20:10:04.916793</datetime>
+  <feed_contact_id>3</feed_contact_id>
+</source>
+<state id="1">
+  <name>California</name>
+  <election_administration_id>4</election_administration_id>
+</state>
+<election id="100000017">
+  <date>2014-11-04</date>
+  <election_type>General</election_type>
+  <state_id>1</state_id>
+  <polling_hours>07:00-20:00</polling_hours>
+</election>
+<locality id="2">
+  <name>Humboldt</name>
+  <state_id>1</state_id>
+  <type>county</type>
+  <election_administration_id>4</election_administration_id>
+</locality>
+<precinct id="300001088">
+  <name>100013</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001190">
+  <name>100001</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000001</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001096">
+  <name>100017</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000006</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001098">
+  <name>100022</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001100">
+  <name>100067</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001213">
+  <name>300105</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000105</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001103">
+  <name>100029</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001104">
+  <name>100030</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001108">
+  <name>100042</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000034</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001110">
+  <name>100103</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000076</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001118">
+  <name>200072</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000071</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001089">
+  <name>100015</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000015</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001125">
+  <name>200088</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000088</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001135">
+  <name>300106</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000106</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001138">
+  <name>300113</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000113</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001143">
+  <name>300298</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001149">
+  <name>300149</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002740</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000148</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002740</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001154">
+  <name>300167</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001155">
+  <name>400168</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000328</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001156">
+  <name>400169</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000169</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001157">
+  <name>400171</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000330</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001161">
+  <name>400178</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000169</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001162">
+  <name>400179</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000173</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001163">
+  <name>400184</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000333</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001164">
+  <name>400185</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000331</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001165">
+  <name>400189</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000188</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001166">
+  <name>400190</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000188</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001167">
+  <name>400194</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001169">
+  <name>500207</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000323</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001183">
+  <name>500234</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000259</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001184">
+  <name>500236</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000236</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001185">
+  <name>500237</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000239</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001191">
+  <name>100020</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002864</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002864</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001209">
+  <name>400183</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002740</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002740</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001090">
+  <name>100016</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000016</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001092">
+  <name>100004</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000001</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001094">
+  <name>100006</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000006</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001095">
+  <name>100008</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000008</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001101">
+  <name>100299</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001211">
+  <name>500228</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000228</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001107">
+  <name>100034</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000034</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001109">
+  <name>100044</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001111">
+  <name>200311</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000048</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001112">
+  <name>200049</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000049</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001113">
+  <name>200051</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000051</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001114">
+  <name>200053</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000078</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001115">
+  <name>200055</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000051</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001116">
+  <name>200058</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000058</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001117">
+  <name>200060</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000060</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002865</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001119">
+  <name>200073</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001133">
+  <name>300104</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000104</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001182">
+  <name>500262</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000259</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001212">
+  <name>500230</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000228</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001124">
+  <name>200087</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001127">
+  <name>200304</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000096</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001129">
+  <name>200082</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001132">
+  <name>200084</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001142">
+  <name>300130</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001144">
+  <name>300206</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002862</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000324</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002862</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001152">
+  <name>300159</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000160</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001168">
+  <name>500199</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001172">
+  <name>500217</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001173">
+  <name>500219</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001174">
+  <name>500221</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000221</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001179">
+  <name>500229</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000326</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001180">
+  <name>500231</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000326</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001181">
+  <name>500233</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000259</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001186">
+  <name>500241</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001193">
+  <name>100026</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000026</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001121">
+  <name>200078</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000078</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001122">
+  <name>200081</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001123">
+  <name>200085</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001128">
+  <name>200100</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001130">
+  <name>200083</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001131">
+  <name>200281</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001146">
+  <name>300136</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000311</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001148">
+  <name>300142</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000139</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001153">
+  <name>300162</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000332</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001187">
+  <name>500243</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001192">
+  <name>100064</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001196">
+  <name>100079</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002847</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001195">
+  <name>100031</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000297</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001197">
+  <name>500246</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002867</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000212</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002867</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001198">
+  <name>500247</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000212</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001199">
+  <name>500250</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000249</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001218">
+  <name>300283</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000108</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001219">
+  <name>300110</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000110</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001210">
+  <name>500216</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001220">
+  <name>300112</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000110</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001221">
+  <name>300114</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000108</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001222">
+  <name>300115</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000115</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001120">
+  <name>200074</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002866</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000074</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002866</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001126">
+  <name>200091</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000091</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002755</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001140">
+  <name>300121</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000122</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001141">
+  <name>300124</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000122</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001145">
+  <name>300135</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002740</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002740</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001147">
+  <name>300139</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000139</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001150">
+  <name>300317</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001151">
+  <name>300158</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001158">
+  <name>400173</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000173</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001159">
+  <name>400175</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000175</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<precinct id="300001170">
+  <name>500214</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000214</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001216">
+  <name>300118</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002740</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000105</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002740</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002875</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001175">
+  <name>500234</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <polling_location_id>400000223</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001176">
+  <name>500220</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001177">
+  <name>500226</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+</precinct>
+<precinct id="300001217">
+  <name>400177</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+  <polling_location_id>400000177</polling_location_id>
+  <electoral_district_id>200002727</electoral_district_id>
+  <electoral_district_id>200002835</electoral_district_id>
+  <electoral_district_id>200002836</electoral_district_id>
+  <electoral_district_id>200002863</electoral_district_id>
+  <electoral_district_id>200002879</electoral_district_id>
+  <electoral_district_id>200002897</electoral_district_id>
+</precinct>
+<election_administration id="4">
+  <eo_id>3</eo_id>
+  <physical_address>
+    <state>CA</state>
+    <city>EUREKA</city>
+    <line1>3033 H STREET, ROOM 20</line1>
+    <zip>95501</zip>
+  </physical_address>
+</election_administration>
+<election_official id="3">
+  <name>CAROLYN CRNICH</name>
+  <phone>(707)445-7678</phone>
+</election_official>
+<polling_location id="400000001">
+  <address>
+    <city>Eureka</city>
+    <line1>2500 J St</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+<polling_location id="400000006">
+  <address>
+    <city>Eureka</city>
+    <line1>3901 G St</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+<polling_location id="400000008">
+  <address>
+    <city>Eureka</city>
+    <line1>220 Buhne St</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+<polling_location id="400000013">
+  <address>
+    <city>Eureka</city>
+    <line1>4182 Walnut Dr</line1>
+    <state>CA</state>
+    <zip>95503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000015">
+  <address>
+    <city>Eureka</city>
+    <line1>5055 Walnut Dr</line1>
+    <state>CA</state>
+    <zip>95503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000016">
+  <address>
+    <city>Eureka</city>
+    <line1>2060 Ridgewood Dr</line1>
+    <state>CA</state>
+    <zip>95503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000020">
+  <address>
+    <city>Ferndale</city>
+    <line1>1250 5th St</line1>
+    <state>CA</state>
+    <zip>95536</zip>
+  </address>
+</polling_location>
+<polling_location id="400000026">
+  <address>
+    <city>Loleta</city>
+    <line1>567 Park Ave</line1>
+    <state>CA</state>
+    <zip>95551</zip>
+  </address>
+</polling_location>
+<polling_location id="400000034">
+  <address>
+    <city>Eureka</city>
+    <line1>6077 Loma Ave</line1>
+    <state>CA</state>
+    <zip>95503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000048">
+  <address>
+    <city>Bridgeville</city>
+    <line1>38717 Kneeland Rd</line1>
+    <state>CA</state>
+    <zip>95526</zip>
+  </address>
+</polling_location>
+<polling_location id="400000049">
+  <address>
+    <city>Carlotta</city>
+    <line1>300 Wilder Rd</line1>
+    <state>CA</state>
+    <zip>95528</zip>
+  </address>
+</polling_location>
+<polling_location id="400000051">
+  <address>
+    <city>Fortuna</city>
+    <line1>621 11th St</line1>
+    <state>CA</state>
+    <zip>95540</zip>
+  </address>
+</polling_location>
+<polling_location id="400000058">
+  <address>
+    <city>Fortuna</city>
+    <line1>3850 Rohnerville Rd</line1>
+    <state>CA</state>
+    <zip>95540</zip>
+  </address>
+</polling_location>
+<polling_location id="400000060">
+  <address>
+    <city>Fortuna</city>
+    <line1>1500 Alamar Way</line1>
+    <state>CA</state>
+    <zip>95540</zip>
+  </address>
+</polling_location>
+<polling_location id="400000071">
+  <address>
+    <city>Hydesville</city>
+    <line1>3495 Hwy 36</line1>
+    <state>CA</state>
+    <zip>95547</zip>
+  </address>
+</polling_location>
+<polling_location id="400000074">
+  <address>
+    <city>Rio Dell</city>
+    <line1>95 Center St</line1>
+    <state>CA</state>
+    <zip>95562</zip>
+  </address>
+</polling_location>
+<polling_location id="400000076">
+  <address>
+    <city>Scotia</city>
+    <line1>145 Main St</line1>
+    <state>CA</state>
+    <zip>95565</zip>
+  </address>
+</polling_location>
+<polling_location id="400000078">
+  <address>
+    <city>Fortuna</city>
+    <line1>320 S Fortuna Blvd</line1>
+    <state>CA</state>
+    <zip>95540</zip>
+  </address>
+</polling_location>
+<polling_location id="400000088">
+  <address>
+    <city>Garberville</city>
+    <line1>1180 Evergreen</line1>
+    <state>CA</state>
+    <zip>95542</zip>
+  </address>
+</polling_location>
+<polling_location id="400000091">
+  <address>
+    <city>Miranda</city>
+    <line1>6831 Hwy 254</line1>
+    <state>CA</state>
+    <zip>95553</zip>
+  </address>
+</polling_location>
+<polling_location id="400000096">
+  <address>
+    <city>Redway</city>
+    <line1>456 Briceland Rd</line1>
+    <state>CA</state>
+    <zip>95560</zip>
+  </address>
+</polling_location>
+<polling_location id="400000104">
+  <address>
+    <city>Arcata</city>
+    <line1>736 F St</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000105">
+  <address>
+    <city>Arcata</city>
+    <line1>1430 Buttermilk Ln</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000106">
+  <address>
+    <city>Arcata</city>
+    <line1>151 E 16th St</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000108">
+  <address>
+    <city>Arcata</city>
+    <line1>1425 J St</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000110">
+  <address>
+    <city>Arcata</city>
+    <line1>1761 11th St</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000113">
+  <address>
+    <city>Arcata</city>
+    <line1>2450 Alliance Rd</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000115">
+  <address>
+    <city>Arcata</city>
+    <line1>355 Granite Ave</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000122">
+  <address>
+    <city>Arcata</city>
+    <line1>3001 Janes Rd</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000139">
+  <address>
+    <city>Eureka</city>
+    <line1>75 Greenwood Hts Dr</line1>
+    <state>CA</state>
+    <zip>95503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000148">
+  <address>
+    <city>Bayside</city>
+    <line1>1617 Old Arcata Rd</line1>
+    <state>CA</state>
+    <zip>95524</zip>
+  </address>
+</polling_location>
+<polling_location id="400000160">
+  <address>
+    <city>Arcata</city>
+    <line1>1611 Peninsula Dr</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000169">
+  <address>
+    <city>Eureka</city>
+    <line1>1120 F St</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+<polling_location id="400000173">
+  <address>
+    <city>Eureka</city>
+    <line1>901 Myrtle Ave</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+<polling_location id="400000175">
+  <address>
+    <city>Eureka</city>
+    <line1>2155 S St</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+<polling_location id="400000177">
+  <address>
+    <city>Eureka</city>
+    <line1>2100 J St</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+<polling_location id="400000188">
+  <address>
+    <city>Eureka</city>
+    <line1>3100 Edgewood Rd</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+<polling_location id="400000212">
+  <address>
+    <city>Trinidad</city>
+    <line1>409 Trinity St</line1>
+    <state>CA</state>
+    <zip>95570</zip>
+  </address>
+</polling_location>
+<polling_location id="400000214">
+  <address>
+    <city>McKinleyville</city>
+    <line1>4070 Fieldbrook Rd</line1>
+    <state>CA</state>
+    <zip>95519</zip>
+  </address>
+</polling_location>
+<polling_location id="400000221">
+  <address>
+    <city>Hoopa</city>
+    <line1>0 Hwy 96</line1>
+    <state>CA</state>
+    <zip>95546</zip>
+  </address>
+</polling_location>
+<polling_location id="400000223">
+  <address>
+    <city>Willow Creek</city>
+    <line1>0 Hwy 96</line1>
+    <state>CA</state>
+    <zip>95573</zip>
+  </address>
+</polling_location>
+<polling_location id="400000228">
+  <address>
+    <city>McKinleyville</city>
+    <line1>1951 Mckinleyville Ave</line1>
+    <state>CA</state>
+    <zip>95519</zip>
+  </address>
+</polling_location>
+<polling_location id="400000236">
+  <address>
+    <city>McKinleyville</city>
+    <line1>1620 Pickett Rd</line1>
+    <state>CA</state>
+    <zip>95519</zip>
+  </address>
+</polling_location>
+<polling_location id="400000239">
+  <address>
+    <city>McKinleyville</city>
+    <line1>3940 Dows Prairie Rd</line1>
+    <state>CA</state>
+    <zip>95519</zip>
+  </address>
+</polling_location>
+<polling_location id="400000249">
+  <address>
+    <city>Trinidad</city>
+    <line1>446 6th Ave</line1>
+    <state>CA</state>
+    <zip>95570</zip>
+  </address>
+</polling_location>
+<polling_location id="400000259">
+  <address>
+    <city>McKinleyville</city>
+    <line1>2395 Mckinleyville Ave</line1>
+    <state>CA</state>
+    <zip>95519</zip>
+  </address>
+</polling_location>
+<polling_location id="400000297">
+  <address>
+    <city>Eureka</city>
+    <line1>5230 Vance Ave</line1>
+    <state>CA</state>
+    <zip>95503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000311">
+  <address>
+    <city>Eureka</city>
+    <line1>3322 Dolbeer St</line1>
+    <state>CA</state>
+    <zip>95503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000323">
+  <address>
+    <city>Blue Lake</city>
+    <line1>631 Greenwood Ave</line1>
+    <state>CA</state>
+    <zip>95525</zip>
+  </address>
+</polling_location>
+<polling_location id="400000324">
+  <address>
+    <city>Blue Lake</city>
+    <line1>111 Greenwood Ave</line1>
+    <state>CA</state>
+    <zip>95525</zip>
+  </address>
+</polling_location>
+<polling_location id="400000326">
+  <address>
+    <city>McKinleyville</city>
+    <line1>1200 Central Ave</line1>
+    <state>CA</state>
+    <zip>95519</zip>
+  </address>
+</polling_location>
+<polling_location id="400000328">
+  <address>
+    <city>Eureka</city>
+    <line1>1000 B St</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+<polling_location id="400000330">
+  <address>
+    <city>Eureka</city>
+    <line1>200 W Harris St</line1>
+    <state>CA</state>
+    <zip>95503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000331">
+  <address>
+    <city>Eureka</city>
+    <line1>716 South Ave</line1>
+    <state>CA</state>
+    <zip>95503</zip>
+  </address>
+</polling_location>
+<polling_location id="400000332">
+  <address>
+    <city>Arcata</city>
+    <line1>1690 Janes Rd</line1>
+    <state>CA</state>
+    <zip>95521</zip>
+  </address>
+</polling_location>
+<polling_location id="400000333">
+  <address>
+    <city>Eureka</city>
+    <line1>220 Buhne St</line1>
+    <state>CA</state>
+    <zip>95501</zip>
+  </address>
+</polling_location>
+</vip_object>

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-09-19T09:24:29</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="44">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-11-04</registration_deadline>
+  <absentee_request_deadline>2014-11-04</absentee_request_deadline>
+</election>
+<locality id="8">
+  <name>Del Norte</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="12000000133">
+  <name>PRECINCT 01</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000259</polling_location_id>
+</precinct>
+<precinct id="12000000134">
+  <name>PRECINCT 02</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000279</polling_location_id>
+</precinct>
+<precinct id="12000000135">
+  <name>PRECINCT 03</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000260</polling_location_id>
+</precinct>
+<precinct id="12000000136">
+  <name>PRECINCT 04</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000261</polling_location_id>
+</precinct>
+<precinct id="12000000137">
+  <name>PRECINCT 05</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000261</polling_location_id>
+</precinct>
+<precinct id="12000000138">
+  <name>PRECINCT 06</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000273</polling_location_id>
+</precinct>
+<precinct id="12000000139">
+  <name>PRECINCT 07</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000262</polling_location_id>
+</precinct>
+<precinct id="12000000140">
+  <name>PRECINCT 08</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000263</polling_location_id>
+</precinct>
+<precinct id="12000000141">
+  <name>PRECINCT 09</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000264</polling_location_id>
+</precinct>
+<precinct id="12000000142">
+  <name>PRECINCT 10</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000265</polling_location_id>
+</precinct>
+<precinct id="12000000143">
+  <name>PRECINCT 11</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000266</polling_location_id>
+</precinct>
+<precinct id="12000000144">
+  <name>PRECINCT 12</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000274</polling_location_id>
+</precinct>
+<precinct id="12000000145">
+  <name>PRECINCT 13</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000267</polling_location_id>
+</precinct>
+<precinct id="12000000146">
+  <name>PRECINCT 14</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000267</polling_location_id>
+</precinct>
+<precinct id="12000000147">
+  <name>PRECINCT 15</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000268</polling_location_id>
+</precinct>
+<precinct id="12000000148">
+  <name>PRECINCT 16</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000269</polling_location_id>
+</precinct>
+<precinct id="12000000149">
+  <name>PRECINCT 17</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000270</polling_location_id>
+</precinct>
+<precinct id="12000000150">
+  <name>PRECINCT 18</name>
+  <locality_id>8</locality_id>
+  <polling_location_id>13000000271</polling_location_id>
+</precinct>
+<polling_location id="13000000259">
+  <address>
+    <line1>450 H STREET</line1>
+    <city>CRESCENT CITY</city>
+    <state>CA</state>
+    <location_name>COUNTY COURTHOUSE, MAIN HALLWAY</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000260">
+  <address>
+    <line1>800 E WASHINGTON BLVD</line1>
+    <city>CRESCENT CITY</city>
+    <state>CA</state>
+    <location_name>SUTTER COAST HOSPITAL</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000261">
+  <address>
+    <line1>810 H STREET CRESCENT CITY</line1>
+    <city>CRESCENT CITY</city>
+    <state>CA</state>
+    <location_name>VETERANS MEMORIAL BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000262">
+  <address>
+    <line1>202 DALE RUPERT ROAD CRESCENT CITY</line1>
+    <city>CRESCENT CITY</city>
+    <state>CA</state>
+    <location_name>DEL NORTE COUNTY AIRPORT, WESTLOG BLDG</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000263">
+  <address>
+    <line1>12370 HIGHWAY 101 NORTH</line1>
+    <city>SMITH RIVER</city>
+    <state>CA</state>
+    <location_name>SHIP A SHORE RESORT, RECREATION HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000264">
+  <address>
+    <line1>241 FIRST STREET</line1>
+    <city>SMITH RIVER</city>
+    <state>CA</state>
+    <location_name>SMITH RIVER COMMUNITY HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000265">
+  <address>
+    <line1>HWY 199, NORTH HIOUCHI</line1>
+    <city>HIOUCHI</city>
+    <state>CA</state>
+    <location_name>MADRONE TRAILER COURT, RECREATION HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000266">
+  <address>
+    <line1>6534 KINGS VALLEY ROAD</line1>
+    <city>FORT DICK</city>
+    <state>CA</state>
+    <location_name>FORT DICK FIRE HALL</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000267">
+  <address>
+    <line1>255 W WASHINGTON BLVD</line1>
+    <city>CRESCENT CITY</city>
+    <state>CA</state>
+    <location_name>CRESCENT FIRE PROTECTION BUILDING</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000268">
+  <address>
+    <line1>6820 LAKE EARL DRIVE</line1>
+    <city>FORT DICK</city>
+    <state>CA</state>
+    <location_name>LAKE EARL GRANGE</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000269">
+  <address>
+    <line1>2900 ENGLISH LANE</line1>
+    <city>CRESCENT CITY</city>
+    <state>CA</state>
+    <location_name>REDWOODS FAMILY CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000270">
+  <address>
+    <line1>101 CITIZENS DOCK ROAD, BOARD</line1>
+    <city>CRESCENT CITY</city>
+    <state>CA</state>
+    <location_name>CRESCENT CITY HARBOR DISTRICT</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000271">
+  <address>
+    <line1>219 SALMON BLVD.</line1>
+    <city>KLAMATH</city>
+    <state>CA</state>
+    <location_name>KLAMATH COMMUNITY CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000273">
+  <address>
+    <line1>494 PACIFIC AVE</line1>
+    <city>CRESCENT CITY</city>
+    <state>CA</state>
+    <location_name>DEL NORTE FAMILY RESOURCE CENTER</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000274">
+  <address>
+    <line1>1340 GASQUET FLAT RD</line1>
+    <city>GASQUET</city>
+    <state>CA</state>
+    <location_name>GASQUET BIBLE CHURCH</location_name>
+  </address>
+</polling_location>
+<polling_location id="13000000279">
+  <address>
+    <line2>188 E COOPER AVE</line2>
+    <city>CRESCENT CITY</city>
+    <line1>188 E. COOPER AVE.</line1>
+    <state>CA</state>
+    <location_name>GRACE LUTHERAN CHURCH</location_name>
+    <zip>95531</zip>
+  </address>
+</polling_location>
+</vip_object>

@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-09-19T11:11:16</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>www.tuolumnecounty.ca.gov</organization_url>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="88">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>www.tuolumnecounty.ca.gov</registration_info>
+  <absentee_ballot_info>www.tuolumnecounty.ca.gov</absentee_ballot_info>
+  <results_url>www.tuolumnecounty.ca.gov</results_url>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-10-20</registration_deadline>
+  <absentee_request_deadline>2014-10-29</absentee_request_deadline>
+</election>
+<locality id="55">
+  <name>TUOLUMNE COUNTY</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1200000011274">
+  <name>APPLE VALLEY 1</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011275">
+  <name>APPLE VALLEY 2</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011276">
+  <name>OAK GARDEN</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011277">
+  <name>SOULSBYVILLE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011278">
+  <name>YANKEE HILL EandS</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011279">
+  <name>YANKEE HILL WEST</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011280">
+  <name>CHERRY LK/CLAVEY/CTNWD</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011281">
+  <name>TWAIN HARTE NORTH</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006958</polling_location_id>
+</precinct>
+<precinct id="1200000011282">
+  <name>LONG BARN</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006960</polling_location_id>
+</precinct>
+<precinct id="1200000011283">
+  <name>MARSHALL-PONDEROSA</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006969</polling_location_id>
+</precinct>
+<precinct id="1200000011284">
+  <name>SUGAR PINE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006963</polling_location_id>
+</precinct>
+<precinct id="1200000011285">
+  <name>TUOLUMNE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006979</polling_location_id>
+</precinct>
+<precinct id="1200000011286">
+  <name>PINECREST EAST</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011287">
+  <name>PINECREST WEST</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011288">
+  <name>TWAIN HARTE VALLEY</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011289">
+  <name>BUCKHORN</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011290">
+  <name>SOULSBY/CURTIS CREEK</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011291">
+  <name>GOOD SHEPERD</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011292">
+  <name>GOOD SHEPHERD 2</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011293">
+  <name>WOODHAMS CARNE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011294">
+  <name>BIG OAK/GROVE N and S</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006995</polling_location_id>
+</precinct>
+<precinct id="1200000011295">
+  <name>YOSEMT/NandS RL 120/CHERRY</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011296">
+  <name>CLINE CRK/NO FERRETTI</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011297">
+  <name>CURTIS CREEK</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011298">
+  <name>DON PEDRO</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006982</polling_location_id>
+</precinct>
+<precinct id="1200000011299">
+  <name>GRIZZLY and HOG MTN</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011300">
+  <name>JACKSONVILLE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011301">
+  <name>LAMBERT LAKE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006975</polling_location_id>
+</precinct>
+<precinct id="1200000011302">
+  <name>LIME KILN</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011303">
+  <name>PRIEST CLTRVL/MOCCASIN</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011304">
+  <name>MONO VILLAGE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006975</polling_location_id>
+</precinct>
+<precinct id="1200000011305">
+  <name>PINE MTN EAST</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006968</polling_location_id>
+</precinct>
+<precinct id="1200000011306">
+  <name>PINE MTN SOUTH</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011307">
+  <name>POQUITOS - DRAPER</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006993</polling_location_id>
+</precinct>
+<precinct id="1200000011308">
+  <name>SOMMETTE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011309">
+  <name>WAIF MINE ROAD</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011310">
+  <name>SOUTH FERRETTI</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011311">
+  <name>WARDS FERRY</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011312">
+  <name>ALGERINE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011313">
+  <name>CHINESE CMP/GRN SPGS</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011314">
+  <name>RED HILLS</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011315">
+  <name>AIRPORT</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006985</polling_location_id>
+</precinct>
+<precinct id="1200000011316">
+  <name>CAMPO SECO</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011317">
+  <name>CHINESE CMP/GRN SPGS</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011318">
+  <name>JAMESTOWN W/PULPIT</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006997</polling_location_id>
+</precinct>
+<precinct id="1200000011319">
+  <name>GIBBS and PEPPERMINT</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006976</polling_location_id>
+</precinct>
+<precinct id="1200000011320">
+  <name>VILLA and VALPONI</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000007004</polling_location_id>
+</precinct>
+<precinct id="1200000011321">
+  <name>MORMCRK/RAWHDE/TUTLE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006978</polling_location_id>
+</precinct>
+<precinct id="1200000011322">
+  <name>PEORIA FLAT and QUARTZ</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011323">
+  <name>BALD MTN</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011324">
+  <name>BIG HILL SOUTH</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011325">
+  <name>CABEZUT</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011326">
+  <name>GREENLEY</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006974</polling_location_id>
+</precinct>
+<precinct id="1200000011327">
+  <name>SONORA HOPE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006971</polling_location_id>
+</precinct>
+<precinct id="1200000011328">
+  <name>SONORA NORTH</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006991</polling_location_id>
+</precinct>
+<precinct id="1200000011329">
+  <name>NORTH HESS</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011330">
+  <name>PHOENIX LAKE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006986</polling_location_id>
+</precinct>
+<precinct id="1200000011331">
+  <name>RIDGEWOOD</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011332">
+  <name>SAWMILL FLAT</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011333">
+  <name>TELEGRAPH HILL</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011334">
+  <name>UNION HILL</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011335">
+  <name>SONORA  EAST</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006974</polling_location_id>
+</precinct>
+<precinct id="1200000011336">
+  <name>SONORA  FAIR and WEST</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006962</polling_location_id>
+</precinct>
+<precinct id="1200000011337">
+  <name>SONORA  SOUTH</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011338">
+  <name>SONORA MEADOWS</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006988</polling_location_id>
+</precinct>
+<precinct id="1200000011339">
+  <name>BIG HILL and CEDAR RIDGE</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006981</polling_location_id>
+</precinct>
+<precinct id="1200000011340">
+  <name>BIG TREES</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011341">
+  <name>COUNTRY CLUB</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006986</polling_location_id>
+</precinct>
+<precinct id="1200000011342">
+  <name>CRYSTAL FALLS and C. F. NO</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006987</polling_location_id>
+</precinct>
+<precinct id="1200000011343">
+  <name>CRYSTAL FALLS  SOUTH</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011344">
+  <name>HUNTS</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011345">
+  <name>MIDDLE CAMP</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006967</polling_location_id>
+</precinct>
+<precinct id="1200000011346">
+  <name>MONO VISTA</name>
+  <locality_id>55</locality_id>
+  <polling_location_id>130000006961</polling_location_id>
+</precinct>
+<polling_location id="130000006958">
+  <address>
+    <line2>18775 MANZANITA DR</line2>
+    <line1>18775 MANZANITA DR  TWAIN HARTE</line1>
+    <state>CA</state>
+    <location_name>AMERICAN LEGION HALL</location_name>
+    <zip>95383</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006960">
+  <address>
+    <line1>24411 SIERRA PARK RD  MIWUK VLG</line1>
+    <state>CA</state>
+    <location_name>MIWUK LIBRARY/OLD MIWUK FIRE STN</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006961">
+  <address>
+    <line1>16925 MONO VISTA RD</line1>
+    <state>CA</state>
+    <location_name>MONO VISTA FIRE STATION</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006962">
+  <address>
+    <line1>220 SOUTHGATE DR SONORA CA 95370</line1>
+    <state>CA</state>
+    <location_name>MOTHER LODE FAIRGROUNDS MANZANITA BLD</location_name>
+    <zip>95370</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006963">
+  <address>
+    <line1>24176 PINE LAKE DR MIWUK VILLAGE</line1>
+    <state>CA</state>
+    <location_name>MT  CALVARY LUTHERAN CHURCH (PARISH HALL</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006967">
+  <address>
+    <line2>RD</line2>
+    <line1>YOUR BALLOT WILL BE MAILED</line1>
+    <state>CA</state>
+    <location_name>NO POLL-MAIL BALLOT ONLY</location_name>
+  </address>
+</polling_location>
+<polling_location id="130000006968">
+  <address>
+    <line1>20270 PINE MT DR GROVELAND</line1>
+    <state>CA</state>
+    <location_name>PINE MOUNTAIN LAKE LODGE</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006969">
+  <address>
+    <city>SONORA</city>
+    <line1>20810 TOMIRA MEADOWS CT</line1>
+    <state>CA</state>
+    <location_name>PONDEROSA HILLS FIRE STATION</location_name>
+    <zip>95379</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006971">
+  <address>
+    <line2>12877 SYLVA LN</line2>
+    <city>SONORA</city>
+    <line1>12877 SYLVA LANE SONORA</line1>
+    <state>CA</state>
+    <location_name>SKYLINE PLACE</location_name>
+    <zip>95370</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006974">
+  <address>
+    <line2>LN</line2>
+    <line1>480 GREENLEY RD SONORA CA 95370</line1>
+    <state>CA</state>
+    <location_name>SONORA LIBRARY</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006975">
+  <address>
+    <line2>13880 JOSHUA WAY</line2>
+    <city>SONORA</city>
+    <line1>13880 JOSHUA WAY</line1>
+    <state>CA</state>
+    <location_name>ST MATTHEWS LUTHERAN CHURCH</location_name>
+    <zip>95370</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006976">
+  <address>
+    <line2>10825 ROBINWOOD LN</line2>
+    <city>SONORA</city>
+    <line1>10825 ROBINWOOD LN SONORA</line1>
+    <state>CA</state>
+    <location_name>ST SUSANNA ORTHODOX CHRISTIAN CHURCH</location_name>
+    <zip>95370</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006978">
+  <address>
+    <line2>19633 RAWHIDE RD</line2>
+    <city>SONORA</city>
+    <line1>19633 RAWHIDE RD  SONORA</line1>
+    <state>CA</state>
+    <location_name>TABLE MOUNTAIN CHAPEL</location_name>
+    <zip>95370</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006979">
+  <address>
+    <line1>18375 FIR DR  TUOLUMNE  CA</line1>
+    <state>CA</state>
+    <location_name>TUOLUMNE MEMORIAL HALL KITCHEN</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006981">
+  <address>
+    <line1>22736 KUIEN MILL RD  SONORA  CA</line1>
+    <state>CA</state>
+    <location_name>BELLEVIEW SCHOOL</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006982">
+  <address>
+    <line2>2990 HWY 120</line2>
+    <line1>2990 HWY 132 LA GRANGE CA 95329</line1>
+    <state>CA</state>
+    <location_name>BLANCHARD FIRE STATION</location_name>
+    <zip>95329</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006985">
+  <address>
+    <line2>11155 JACKSON ST</line2>
+    <city>COLUMBIA</city>
+    <line1>11155 JACKSON STREET COLUMBIA</line1>
+    <state>CA</state>
+    <location_name>CHURCH OF THE FORTY-NINERS</location_name>
+    <zip>95310</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006986">
+  <address>
+    <line2>13650 BERGEL RD</line2>
+    <city>SONORA</city>
+    <line1>13650 BERGEL RD SONORA</line1>
+    <state>CA</state>
+    <location_name>CREEKSIDE COMMUNITY CHURCH</location_name>
+    <zip>95370</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006987">
+  <address>
+    <line1>21725 CRYSTAL FALLS DR  SONORA</line1>
+    <state>CA</state>
+    <location_name>CRYSTAL FALLS CLUBHOUSE</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006988">
+  <address>
+    <line2>ACORN and PHOENIX LAKE RD</line2>
+    <line1>ACORN AND PHOENIX LAKE RD</line1>
+    <state>CA</state>
+    <location_name>CRYSTAL FALLS FIRE STATION</location_name>
+    <zip>95370</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006991">
+  <address>
+    <line1>100 ELK DR  SONORA  CA</line1>
+    <state>CA</state>
+    <location_name>ELKS LODGE</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006993">
+  <address>
+    <line1>19765 GRACE WAY  SONORA  CA</line1>
+    <state>CA</state>
+    <location_name>GRACE BAPTIST CHURCH</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006995">
+  <address>
+    <line2>18990 HWY 120</line2>
+    <city>GROVELAND</city>
+    <line1>18990 HWY 120  GROVELAND</line1>
+    <state>CA</state>
+    <location_name>GROVELAND LIBRARY/MEETING ROOM</location_name>
+    <zip>95321</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006997">
+  <address>
+    <line2>RD B</line2>
+    <line1>MAIN ST  JAMESTOWN,  CA</line1>
+    <state>CA</state>
+    <location_name>JAMESTOWN COMMUNITY HALL</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="130000007004">
+  <address>
+    <line2>18717 MILL VILLA RD B</line2>
+    <city>JAMESTOWN</city>
+    <line1>18717 MILL VILLA RD, JAMESTOWN</line1>
+    <state>CA</state>
+    <location_name>MILL VILLA ESTATES</location_name>
+    <zip>95327</zip>
+  </address>
+</polling_location>
+</vip_object>

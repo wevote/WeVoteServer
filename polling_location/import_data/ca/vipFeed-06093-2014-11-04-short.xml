@@ -1,0 +1,200 @@
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://election-info-standard.googlecode.com/files/election_spec_v2.1.xsd" schemaVersion="2.1">
+	<source id="0">
+		<name>CALIFORNIA</name>
+		<vip_id>06093</vip_id>
+		<datetime>2014-09-09T04:18:29</datetime>
+		<description>Voter Data is prohibited from unauthorized use.</description>
+		<organization_url>http://WWW.CO.SISKIYOU.CA.US</organization_url>
+	</source>
+		<state id="05">
+		<name>CALIFORNIA</name>
+	</state>
+		<locality id="47">
+		<name>SISKIYOU COUNTY</name>
+		<state_id>05</state_id>
+		<type>county</type>
+	</locality>
+	<election id="71">
+		<date>2014-11-04</date>
+		<election_type>GEN</election_type>
+		<state_id>05</state_id>
+		<registration_info>http://WWW.CO.SISKIYOU.CA.US</registration_info>
+		<absentee_ballot_info>http://WWW.CO.SISKIYOU.CA.US</absentee_ballot_info>
+		<results_url>http://WWW.CO.SISKIYOU.CA.US</results_url>
+		<polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+		<election_day_registration>no</election_day_registration>
+		<registration_deadline>2014-10-20</registration_deadline>
+		<absentee_request_deadline>2014-10-29</absentee_request_deadline>
+	</election>
+	<polling_location id="13000000765">
+		<address>
+			<location_name>DORRIS CITY HALL</location_name>
+			<line1>307 S MAIN ST</line1>
+			<city>DORRIS</city>
+			<state>CA</state>
+			<zip>96023</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000766">
+		<address>
+			<location_name>DUNSMUIR COMMUNITY BUILDING</location_name>
+			<line1>4835 DUNSMUIR AVE</line1>
+			<city>DUNSMUIR</city>
+			<state>CA</state>
+			<zip>96025</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000768">
+		<address>
+			<location_name>FIRST BAPTIST CHURCH</location_name>
+			<line1>812 LASSEN LN</line1>
+			<city>MT SHASTA</city>
+			<state>CA</state>
+			<zip>96067</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000769">
+		<address>
+			<location_name>FORT JONES COMMUNITY CENTER</location_name>
+			<line1>11960 EAST ST</line1>
+			<city>FORT JONES</city>
+			<state>CA</state>
+			<zip></zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000771">
+		<address>
+			<location_name>GREENHORN GRANGE</location_name>
+			<line1>300 RANCH LANE</line1>
+			<city>YREKA</city>
+			<state>CA</state>
+			<zip>96097</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000772">
+		<address>
+			<location_name>GRENADA FIRE HALL</location_name>
+			<line1>6035 FOURTH AVE</line1>
+			<city>GRENADA</city>
+			<state>CA</state>
+			<zip>96038</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000774">
+		<address>
+			<location_name>HORNBROOK COMMUNITY BIBLE CHURCH</location_name>
+			<line1>430 HENLEY HORNBROOK RD</line1>
+			<city>HORNBROOK</city>
+			<state>CA</state>
+			<zip>96044</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000776">
+		<address>
+			<location_name>LAKE SHASTINA COMMUNITY CENTER</location_name>
+			<line1>15244 DRIFTWOOD LN</line1>
+			<city>WEED</city>
+			<state>CA</state>
+			<zip>96094</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000777">
+		<address>
+			<location_name>MAYTEN FIRE HALL</location_name>
+			<line1>7427 HWY A-12</line1>
+			<city>MONTAGUE</city>
+			<state>CA</state>
+			<zip>96064</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000778">
+		<address>
+			<location_name>MCCLOUD HIGH SCHOOL GYM</location_name>
+			<line1>133 CAMPUS DR</line1>
+			<city>MCCLOUD</city>
+			<state>CA</state>
+			<zip>96057</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000779">
+		<address>
+			<location_name>MINERS INN CONVENTION CENTER</location_name>
+			<line1>122 E MINER ST</line1>
+			<city>YREKA</city>
+			<state>CA</state>
+			<zip>96097</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000780">
+		<address>
+			<location_name>MONTAGUE COMMUNITY CENTER</location_name>
+			<line1>200 S 11TH ST</line1>
+			<city>MONTAGUE</city>
+			<state>CA</state>
+			<zip>96064</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000782">
+		<address>
+			<location_name>MT SHASTA COMMUNITY BUILDING</location_name>
+			<line1>629 ALDER ST</line1>
+			<city>MT SHASTA</city>
+			<state>CA</state>
+			<zip>96067</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000786">
+		<address>
+			<location_name>SCOTT VALLEY BEREAN CHURCH</location_name>
+			<line1>134 CHURCH ST</line1>
+			<city>ETNA</city>
+			<state>CA</state>
+			<zip>96027</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000787">
+		<address>
+			<location_name>SCOTT VALLEY GRANGE HALL</location_name>
+			<line1>7246 QUARTZ VALLEY RD</line1>
+			<city>FORT JONES</city>
+			<state>CA</state>
+			<zip>96032</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000788">
+		<address>
+			<location_name>SISKIYOU MASONIC LODGE</location_name>
+			<line1>629 ALDER ST</line1>
+			<city>MT SHASTA</city>
+			<state>CA</state>
+			<zip>96067</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000789">
+		<address>
+			<location_name>SONS OF ITALY HALL</location_name>
+			<line1>155 CLAY ST.</line1>
+			<city>WEED</city>
+			<state>CA</state>
+			<zip>96094</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000790">
+		<address>
+			<location_name>WILLOW CREEK SCHOOL</location_name>
+			<line1>5321 YORK RD</line1>
+			<city>MONTAGUE</city>
+			<state>CA</state>
+			<zip>96064</zip>
+		</address>
+	</polling_location>
+	<polling_location id="13000000792">
+		<address>
+			<location_name>HAPPY CAMP GRANGE HALL</location_name>
+			<line1>64501 SECOND AVE</line1>
+			<city>HAPPY CAMP</city>
+			<state>CA</state>
+			<zip>96039</zip>
+		</address>
+	</polling_location>
+</vip_object>

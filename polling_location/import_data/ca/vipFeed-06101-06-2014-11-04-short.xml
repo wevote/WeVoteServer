@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Sutter County</name>
+  <vip_id>6101</vip_id>
+  <datetime>2014-10-14T20:01:38.747158</datetime>
+  <feed_contact_id>3</feed_contact_id>
+</source>
+<state id="1">
+  <name>California</name>
+  <election_administration_id>4</election_administration_id>
+</state>
+<election id="100000028">
+  <date>2014-11-04</date>
+  <election_type>General</election_type>
+  <state_id>1</state_id>
+  <polling_hours>07:00-20:00</polling_hours>
+</election>
+<locality id="2">
+  <name>Sutter</name>
+  <state_id>1</state_id>
+  <type>county</type>
+  <election_administration_id>4</election_administration_id>
+</locality>
+<precinct id="300001681">
+  <name>LO Comm 01</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001280</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+  <polling_location_id>400000131</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001280</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+</precinct>
+<precinct id="300001682">
+  <name>LO Comm 02</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001280</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+  <polling_location_id>400000131</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001280</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+</precinct>
+<precinct id="300001685">
+  <name>United Pent 05</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000149</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001686">
+  <name>United Pent 06</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000149</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001687">
+  <name>Sutter Estates 07</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000127</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001689">
+  <name>YS Fair 09</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000116</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001690">
+  <name>YS Fair 10</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000116</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001691">
+  <name>Sutter Ch 11</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <polling_location_id>400000147</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+</precinct>
+<precinct id="300001692">
+  <name>Sutter Ch 12</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <polling_location_id>400000147</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+</precinct>
+<precinct id="300001693">
+  <name>Franklin 13</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+  <polling_location_id>400000153</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+</precinct>
+<precinct id="300001696">
+  <name>Veterans 16</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000126</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001698">
+  <name>Veterans 18</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000126</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001683">
+  <name>LO Resource 03</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001280</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+  <polling_location_id>400000146</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001280</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+</precinct>
+<precinct id="300001684">
+  <name>Dell Wayne 04</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000006</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001699">
+  <name>Veterans 19</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000126</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001700">
+  <name>St Andrew 20</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000141</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001701">
+  <name>St Andrew 21</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000141</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001702">
+  <name>AK School 22</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000071</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001703">
+  <name>AK School 23</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000071</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001704">
+  <name>AK School 24</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000071</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001705">
+  <name>7th Day 25</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000073</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001707">
+  <name>Walnut Ave 27</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000157</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001708">
+  <name>Walnut Ave 28</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000157</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001715">
+  <name>Mail Ballot 35</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+</precinct>
+<precinct id="300001716">
+  <name>Mail Ballot 36</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001299</electoral_district_id>
+</precinct>
+<precinct id="300001717">
+  <name>Mail Ballot 37</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+</precinct>
+<precinct id="300001720">
+  <name>Mail Ballot 39</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+</precinct>
+<precinct id="300001721">
+  <name>Mail Ballot 40</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+</precinct>
+<precinct id="300001722">
+  <name>Mail Ballot 41</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+</precinct>
+<precinct id="300001723">
+  <name>Mail Ballot 42</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001724">
+  <name>Mail Ballot 43</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001688">
+  <name>St Isidore 08</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000132</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001694">
+  <name>1st United 14</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000110</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001695">
+  <name>1st United 15</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000110</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001697">
+  <name>Veterans 17</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000126</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001706">
+  <name>St James 26</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+  <polling_location_id>400000143</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+</precinct>
+<precinct id="300001714">
+  <name>E Nicolaus 34</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001301</electoral_district_id>
+  <electoral_district_id>200001309</electoral_district_id>
+  <polling_location_id>400000059</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001301</electoral_district_id>
+  <electoral_district_id>200001309</electoral_district_id>
+</precinct>
+<precinct id="300001719">
+  <name>Mail Ballot 38</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+</precinct>
+<precinct id="300001725">
+  <name>Mail Ballot 44</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001726">
+  <name>Mail Ballot 45</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001709">
+  <name>NV Calvary 29</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000084</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001710">
+  <name>NV Calvary 30</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000084</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001711">
+  <name>Riverbend 31</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000152</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001712">
+  <name>1st Reform 32</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <polling_location_id>400000057</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001713">
+  <name>P Grove 33</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001306</electoral_district_id>
+  <electoral_district_id>200001309</electoral_district_id>
+  <polling_location_id>400000060</polling_location_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001306</electoral_district_id>
+  <electoral_district_id>200001309</electoral_district_id>
+</precinct>
+<precinct id="300001727">
+  <name>Mail Ballot 46</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001728">
+  <name>Mail Ballot 47</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001729">
+  <name>Mail Ballot 48</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001730">
+  <name>Mail Ballot 49</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001731">
+  <name>Mail Ballot 50</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001732">
+  <name>Mail Ballot 51</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001733">
+  <name>Mail Ballot 52</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001734">
+  <name>Mail Ballot 53</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001735">
+  <name>Mail Ballot 54</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001289</electoral_district_id>
+</precinct>
+<precinct id="300001736">
+  <name>Mail Ballot 55</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+</precinct>
+<precinct id="300001737">
+  <name>Mail Ballot 56</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+</precinct>
+<precinct id="300001738">
+  <name>Mail Ballot 57</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001279</electoral_district_id>
+  <electoral_district_id>200001302</electoral_district_id>
+</precinct>
+<precinct id="300001739">
+  <name>Mail Ballot 58</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001308</electoral_district_id>
+  <electoral_district_id>200001270</electoral_district_id>
+  <electoral_district_id>200001308</electoral_district_id>
+</precinct>
+<election_administration id="4">
+  <eo_id>3</eo_id>
+  <physical_address>
+    <state>CA</state>
+    <city>Yuba City</city>
+    <line1>1435 Veterans Memorial Circle</line1>
+    <zip>95993</zip>
+  </physical_address>
+</election_administration>
+<election_official id="3">
+  <name>Donna Johnston</name>
+  <phone>(530)822-7122</phone>
+</election_official>
+<polling_location id="400000006">
+  <address>
+    <city>Yuba City</city>
+    <line1>3120 Live Oak Blvd</line1>
+    <state>CA</state>
+    <zip>95991</zip>
+  </address>
+</polling_location>
+<polling_location id="400000057">
+  <address>
+    <city>Yuba City</city>
+    <line1>9882 Garden Hwy</line1>
+    <state>CA</state>
+    <zip>95991</zip>
+  </address>
+</polling_location>
+<polling_location id="400000059">
+  <address>
+    <city>East Nicolaus</city>
+    <line1>1991 Nicolaus Ave</line1>
+    <state>CA</state>
+    <zip>95659</zip>
+  </address>
+</polling_location>
+<polling_location id="400000060">
+  <address>
+    <city>Pleasant Grove</city>
+    <line1>3100 Howsley Rd</line1>
+    <state>CA</state>
+    <zip>95668</zip>
+  </address>
+</polling_location>
+<polling_location id="400000071">
+  <address>
+    <city>Yuba City</city>
+    <line1>1666 Camino De Flores</line1>
+    <state>CA</state>
+    <zip>95993</zip>
+  </address>
+</polling_location>
+<polling_location id="400000073">
+  <address>
+    <city>Yuba City</city>
+    <line1>1460 Richland Rd</line1>
+    <state>CA</state>
+    <zip>95993</zip>
+  </address>
+</polling_location>
+<polling_location id="400000084">
+  <address>
+    <city>Yuba City</city>
+    <line1>613 Bogue Rd</line1>
+    <state>CA</state>
+    <zip>95991</zip>
+  </address>
+</polling_location>
+<polling_location id="400000110">
+  <address>
+    <city>Yuba City</city>
+    <line1>3101 Colusa Hwy</line1>
+    <state>CA</state>
+    <zip>95993</zip>
+  </address>
+</polling_location>
+<polling_location id="400000116">
+  <address>
+    <city>Yuba City</city>
+    <line1>442 Franklin Ave</line1>
+    <state>CA</state>
+    <zip>95991</zip>
+  </address>
+</polling_location>
+<polling_location id="400000126">
+  <address>
+    <city>Yuba City</city>
+    <line1>1425 Veterans Memorial Cir</line1>
+    <state>CA</state>
+    <zip>95993</zip>
+  </address>
+</polling_location>
+<polling_location id="400000127">
+  <address>
+    <city>Yuba City</city>
+    <line1>1230 Plumas St</line1>
+    <state>CA</state>
+    <zip>95991</zip>
+  </address>
+</polling_location>
+<polling_location id="400000131">
+  <address>
+    <city>Live Oak</city>
+    <line1>10200 O St</line1>
+    <state>CA</state>
+    <zip>95953</zip>
+  </address>
+</polling_location>
+<polling_location id="400000132">
+  <address>
+    <city>Yuba City</city>
+    <line1>222 Clark Ave</line1>
+    <state>CA</state>
+    <zip>95991</zip>
+  </address>
+</polling_location>
+<polling_location id="400000141">
+  <address>
+    <city>Yuba City</city>
+    <line1>1390 Franklin Rd</line1>
+    <state>CA</state>
+    <zip>95993</zip>
+  </address>
+</polling_location>
+<polling_location id="400000143">
+  <address>
+    <city>Yuba City</city>
+    <line1>556 N George Washington Blvd</line1>
+    <state>CA</state>
+    <zip>95993</zip>
+  </address>
+</polling_location>
+<polling_location id="400000146">
+  <address>
+    <city>Live Oak</city>
+    <line1>10720 Live Oak Blvd</line1>
+    <state>CA</state>
+    <zip>95953</zip>
+  </address>
+</polling_location>
+<polling_location id="400000147">
+  <address>
+    <city>Sutter</city>
+    <line1>2900 Acacia Ave</line1>
+    <state>CA</state>
+    <zip>95982</zip>
+  </address>
+</polling_location>
+<polling_location id="400000149">
+  <address>
+    <city>Yuba City</city>
+    <line1>2649 E Onstott Rd</line1>
+    <state>CA</state>
+    <zip>95991</zip>
+  </address>
+</polling_location>
+<polling_location id="400000152">
+  <address>
+    <city>Yuba City</city>
+    <line1>301 Stewart Rd</line1>
+    <state>CA</state>
+    <zip>95991</zip>
+  </address>
+</polling_location>
+<polling_location id="400000153">
+  <address>
+    <city>Yuba City</city>
+    <line1>332 N Township Rd</line1>
+    <state>CA</state>
+    <zip>95993</zip>
+  </address>
+</polling_location>
+<polling_location id="400000157">
+  <address>
+    <city>Yuba City</city>
+    <line1>1431 Walnut Ave</line1>
+    <state>CA</state>
+    <zip>95993</zip>
+  </address>
+</polling_location>
+</vip_object>
