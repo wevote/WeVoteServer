@@ -776,7 +776,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             one_position_dict_for_api = {
                 'position_id':                  one_position.id,
                 'position_we_vote_id':          one_position.we_vote_id,
-                'ballot_item_display_name':     one_position.ballot_item_display_name,
+                'ballot_item_display_name':     one_position.ballot_item_display_name,  # Candidate name or Measure
                 'ballot_item_image_url_https':  one_position.ballot_item_image_url_https,
                 'ballot_item_twitter_handle':   one_position.ballot_item_twitter_handle,
                 'kind_of_ballot_item':          kind_of_ballot_item,
@@ -789,9 +789,12 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'is_oppose':                        one_position.is_oppose(),
                 'is_negative_rating':               one_position.is_negative_rating(),
                 'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
+                'speaker_display_name':         one_position.speaker_display_name,  # Organization name
                 'vote_smart_rating':            one_position.vote_smart_rating,
                 'vote_smart_time_span':         one_position.vote_smart_time_span,
                 'google_civic_election_id':     one_position.google_civic_election_id,
+                'more_info_url':                one_position.more_info_url,
+                'statement_text':               one_position.statement_text,
                 'last_updated':                 one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)

@@ -127,6 +127,7 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "is_oppose": boolean,\n' \
                    '     "is_negative_rating": boolean,\n' \
                    '     "is_oppose_or_negative_rating": boolean,\n' \
+                   '     "more_info_url": string,\n' \
                    '     "statement_text": string,\n' \
                    '     "statement_html": string,\n' \
                    '     "google_civic_election_id": integer,\n' \
