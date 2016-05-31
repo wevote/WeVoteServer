@@ -108,6 +108,10 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '     "is_information_only": boolean (Exists if looking at voter guides for one ballot_item),\n' \
                    '     "vote_smart_rating": integer (Exists if looking at voter guides for one ballot_item),\n' \
                    '     "vote_smart_time_span": string (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "candidate_name": string (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "speaker_display_name": string (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "statement_text": string (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "more_info_url": string (Exists if looking at voter guides for one ballot_item),\n' \
                    '   ],\n' \
                    '}\n'
 
