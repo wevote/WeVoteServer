@@ -549,6 +549,7 @@ def position_list_for_ballot_item_for_api(voter_device_id,  # positionListForBal
                 'is_oppose':                        one_position.is_oppose(),
                 'is_negative_rating':               one_position.is_negative_rating(),
                 'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
+                'is_information_only':              one_position.is_information_only(),
                 'vote_smart_rating':                one_position.vote_smart_rating,
                 'vote_smart_time_span':             one_position.vote_smart_time_span,
                 'statement_text':                   one_position.statement_text,
@@ -789,6 +790,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 'is_oppose':                        one_position.is_oppose(),
                 'is_negative_rating':               one_position.is_negative_rating(),
                 'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
+                'is_information_only':              one_position.is_information_only(),
                 'speaker_display_name':         one_position.speaker_display_name,  # Organization name
                 'vote_smart_rating':            one_position.vote_smart_rating,
                 'vote_smart_time_span':         one_position.vote_smart_time_span,

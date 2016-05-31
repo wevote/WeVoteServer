@@ -112,6 +112,7 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '     "is_oppose": boolean,\n' \
                    '     "is_negative_rating": boolean,\n' \
                    '     "is_oppose_or_negative_rating": boolean,\n' \
+                   '     "is_information_only": boolean,\n' \
                    '     "more_info_url": string,\n' \
                    '     "statement_text": string,\n' \
                    '     "last_updated": string,\n' \
