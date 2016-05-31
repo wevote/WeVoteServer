@@ -367,6 +367,10 @@ def organization_position_list_view(request, organization_id):
         except Exception as e:
             organization_position_list = []
 
+        for one_position in organization_position_list:
+            position_manager = PositionEnteredManager()
+            one_position = position_manager.refresh_cached_position_info(one_position)
+
         election_list = Election.objects.order_by('-election_day_text')
 
         if organization_position_list_found:

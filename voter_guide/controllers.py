@@ -376,7 +376,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                     one_voter_guide['is_oppose_or_negative_rating'] = position.is_oppose_or_negative_rating()
                     one_voter_guide['is_information_only'] = position.is_information_only()
                     one_voter_guide['candidate_name'] = position.ballot_item_display_name
-                    one_voter_guide['speaker_display_name'] = position.speaker_display_name
+                    one_voter_guide['speaker_display_name'] = voter_guide.voter_guide_display_name()
                     one_voter_guide['statement_text'] = position.statement_text
                     one_voter_guide['more_info_url'] = position.more_info_url
                     one_voter_guide['vote_smart_rating'] = position.vote_smart_rating
