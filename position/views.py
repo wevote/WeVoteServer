@@ -84,7 +84,7 @@ def assemble_candidate_campaign_stance_html(
     results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_campaign_id)
     if results['candidate_campaign_found']:
         candidate_campaign = results['candidate_campaign']
-        popup_box_title_candidate_name = candidate_campaign.candidate_name
+        popup_box_title_candidate_name = candidate_campaign.display_candidate_name()
     else:
         popup_box_title_candidate_name = ""
 

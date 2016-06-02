@@ -469,7 +469,7 @@ def quick_info_edit_process_view(request):
                 candidate_campaign_we_vote_id)
             if results['success']:
                 candidate_campaign = results['candidate_campaign']
-                ballot_item_display_name = candidate_campaign.candidate_name
+                ballot_item_display_name = candidate_campaign.display_candidate_name()
             else:
                 ballot_item_display_name = ''
         # if positive_value_exists(politician_we_vote_id):

@@ -715,7 +715,7 @@ def organization_position_edit_process_view(request):
             messages.add_message(
                 request, messages.INFO,
                 "Position on {candidate_name} updated.".format(
-                    candidate_name=candidate_campaign_on_stage.candidate_name))
+                    candidate_name=candidate_campaign_on_stage.display_candidate_name()))
         else:
             # Create new
             organization_position_on_stage = PositionEntered(
@@ -735,7 +735,7 @@ def organization_position_edit_process_view(request):
             messages.add_message(
                 request, messages.INFO,
                 "New position on {candidate_name} saved.".format(
-                    candidate_name=candidate_campaign_on_stage.candidate_name))
+                    candidate_name=candidate_campaign_on_stage.display_candidate_name()))
             go_back_to_add_new = True
     except Exception as e:
         handle_record_not_saved_exception(e, logger=logger)

@@ -2204,7 +2204,7 @@ class PositionEnteredManager(models.Model):
                         candidate = results['candidate_campaign']
                         if not positive_value_exists(position_object.ballot_item_display_name):
                             # ballot_item_display_name is missing so look it up from source
-                            position_object.ballot_item_display_name = candidate.candidate_name
+                            position_object.ballot_item_display_name = candidate.display_candidate_name()
                             position_change = True
                         if not positive_value_exists(position_object.ballot_item_image_url_https):
                             # ballot_item_image_url_https is missing so look it up from source

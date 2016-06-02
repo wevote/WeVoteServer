@@ -109,7 +109,7 @@ class CandidateCampaignListManager(models.Model):
         if candidate_list_found:
             for candidate in candidate_list_objects:
                 one_candidate = {
-                    'ballot_item_display_name': candidate.candidate_name,
+                    'ballot_item_display_name': candidate.display_candidate_name(),
                     'candidate_we_vote_id':     candidate.we_vote_id,
                     'office_we_vote_id':        candidate.contest_office_we_vote_id,
                     'measure_we_vote_id':       '',
@@ -478,13 +478,13 @@ class CandidateCampaign(models.Model):
         return office
 
     def candidate_photo_url(self):
+        if self.photo_url_from_vote_smart:
+            return self.photo_url_from_vote_smart_large()
         if self.twitter_profile_image_url_https:
             return self.twitter_profile_image_url_https_original()
-        elif self.photo_url_from_maplight:
+        if self.photo_url_from_maplight:
             return self.photo_url_from_maplight
-        elif self.photo_url_from_vote_smart:
-            return self.photo_url_from_vote_smart_large()
-        elif self.photo_url:
+        if self.photo_url:
             return self.photo_url
         else:
             return ""
@@ -542,11 +542,11 @@ class CandidateCampaign(models.Model):
         return full_name
 
     def extract_first_name(self):
-        full_name = self.candidate_name
+        full_name = self.display_candidate_name()
         return extract_first_name_from_full_name(full_name)
 
     def extract_last_name(self):
-        full_name = self.candidate_name
+        full_name = self.display_candidate_name
         return extract_last_name_from_full_name(full_name)
 
     def party_display(self):

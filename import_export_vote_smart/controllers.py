@@ -692,7 +692,7 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
                     public_figure_we_vote_id=False,
                     voter_we_vote_id=False,
                     google_civic_election_id=False,
-                    ballot_item_display_name=candidate_campaign.candidate_name,
+                    ballot_item_display_name=candidate_campaign.display_candidate_name(),
                     office_we_vote_id=False,
                     candidate_we_vote_id=candidate_campaign.we_vote_id,
                     measure_we_vote_id=False,

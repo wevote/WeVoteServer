@@ -271,7 +271,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
             'kind_of_ballot_item':          CANDIDATE,
             'id':                           candidate_campaign.id,
             'we_vote_id':                   candidate_campaign.we_vote_id,
-            'ballot_item_display_name':     candidate_campaign.candidate_name,
+            'ballot_item_display_name':     candidate_campaign.display_candidate_name(),
             'candidate_photo_url':          candidate_campaign.candidate_photo_url(),
             'order_on_ballot':              candidate_campaign.order_on_ballot,
             'google_civic_election_id':     candidate_campaign.google_civic_election_id,
@@ -353,7 +353,7 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
             one_candidate = {
                 'id':                           candidate.id,
                 'we_vote_id':                   candidate.we_vote_id,
-                'ballot_item_display_name':     candidate.candidate_name,
+                'ballot_item_display_name':     candidate.display_candidate_name(),
                 'candidate_photo_url':          candidate.candidate_photo_url(),
                 'party':                        candidate.party_display(),
                 'order_on_ballot':              candidate.order_on_ballot,
