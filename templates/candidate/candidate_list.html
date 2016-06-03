@@ -9,20 +9,18 @@
 
 <h1>Candidates</h1>
 
+<form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
+    {% csrf_token %}
     {% if election_list %}
-    <form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
-        {% csrf_token %}
-
     <select id="google_civic_election_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
             -- Filter by Election --</option>
-    {% for election in election_list %}
+        {% for election in election_list %}
         <option value="{{ election.google_civic_election_id }}"
                 {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
             {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
-    {% endfor %}
+        {% endfor %}
     </select>
-    </form>
     {% endif %}{# End of if election_list #}
 
 {% if candidate_list %}
@@ -50,15 +48,21 @@
 
         6. <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
             Generate Voter Guides for this Election</a> (about 1 minute)<br />
-        <br />
-        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
     </p>
     {% endif %}
+{% endif %}
+    <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
 
-    <p>
-        <a href="{% url 'candidate:candidates_export' %}?format=json" target="_blank" >Export Candidates</a><br />
-    </p>
+    <br />
+    {% if candidate_search %}
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&organization_state={{ organization_state }}">
+         clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" />
+    <input type="submit" value="Search for Candidate" />
+</form>
 
+{% if candidate_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td>&nbsp;</td>
@@ -103,6 +107,10 @@
         </tr>
     {% endfor %}
     </table>
+
+    <p>
+        <a href="{% url 'candidate:candidates_export' %}?format=json" target="_blank" >Export Candidates</a><br />
+    </p>
 
     <p></p>
 {% else %}

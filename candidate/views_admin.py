@@ -8,6 +8,7 @@ from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCa
 from .serializers import CandidateCampaignSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from office.models import ContestOffice, ContestOfficeManager
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -96,13 +97,42 @@ def candidate_list_view(request):
 
     messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    candidate_search = request.GET.get('candidate_search', '')
     candidate_list = []
 
     try:
         candidate_list = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
-        candidate_list = candidate_list.order_by('candidate_name')[:500]
+
+        filters = []
+        if positive_value_exists(candidate_search):
+            new_filter = Q(candidate_name__icontains=candidate_search)
+            filters.append(new_filter)
+
+            new_filter = Q(candidate_twitter_handle__icontains=candidate_search)
+            filters.append(new_filter)
+
+            new_filter = Q(candidate_url__icontains=candidate_search)
+            filters.append(new_filter)
+
+            new_filter = Q(party__icontains=candidate_search)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__icontains=candidate_search)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                candidate_list = candidate_list.filter(final_filters)
+
+        candidate_list = candidate_list.order_by('candidate_name')[:200]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
         pass
@@ -110,9 +140,10 @@ def candidate_list_view(request):
     election_list = Election.objects.order_by('-election_day_text')
 
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'candidate_list': candidate_list,
-        'election_list': election_list,
+        'messages_on_stage':        messages_on_stage,
+        'candidate_list':           candidate_list,
+        'candidate_search':         candidate_search,
+        'election_list':            election_list,
         'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'candidate/candidate_list.html', template_values)

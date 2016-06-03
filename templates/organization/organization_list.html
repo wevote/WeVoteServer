@@ -22,10 +22,10 @@
     <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ organization_state }}">Retrieve photos from Wikipedia</a>
 </p>
 
-{% if state_list %}
-    <form name="organization_state_form" method="get" action="{% url 'organization:organization_list' %}">
-        {% csrf_token %}
+<form name="organization_state_form" method="get" action="{% url 'organization:organization_list' %}">
+    {% csrf_token %}
 
+{% if state_list %}
     <select id="organization_state_id" name="organization_state">
         <option value="" {% if '' == organization_state %} selected="selected"{% endif %}>
             -- Filter by State Served --</option>
@@ -35,8 +35,17 @@
             {{ state }}</option>
     {% endfor %}
     </select>
-    </form>
 {% endif %}{# End of if state_list #}
+
+    <br />
+{% if organization_search %}
+    <a href="{% url 'organization:organization_list' %}?organization_state={{ organization_state }}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="organization_search" id="organization_search_id" value="{{ organization_search }}" />
+    <input type="submit" value="Search for Organization" />
+
+</form>
 
 {% if organization_list %}
     <table cellpadding="5" cellspacing="5" border="1">

@@ -7,6 +7,7 @@ from .models import Organization
 from .serializers import OrganizationSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -82,11 +83,37 @@ def organization_list_view(request):
     organization_state_code = request.GET.get('organization_state', '')
     google_civic_election_id = request.GET.get('google_civic_election_id', '')
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
+    organization_search = request.GET.get('organization_search', '')
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
     if positive_value_exists(organization_state_code):
         organization_list_query = organization_list_query.filter(state_served_code__iexact=organization_state_code)
+
+    if positive_value_exists(organization_search):
+        filters = []
+        new_filter = Q(organization_name__icontains=organization_search)
+        filters.append(new_filter)
+
+        new_filter = Q(organization_twitter_handle__icontains=organization_search)
+        filters.append(new_filter)
+
+        new_filter = Q(organization_website__icontains=organization_search)
+        filters.append(new_filter)
+
+        new_filter = Q(we_vote_id__icontains=organization_search)
+        filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            organization_list_query = organization_list_query.filter(final_filters)
+
     organization_list_query = organization_list_query.order_by('organization_name')
 
     organization_list = organization_list_query
@@ -96,11 +123,12 @@ def organization_list_view(request):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
-        'organization_list':        organization_list,
-        'state_list':               sorted_state_list,
-        'organization_state':       organization_state_code,
-        'google_civic_election_id': google_civic_election_id,
         'candidate_we_vote_id':     candidate_we_vote_id,
+        'google_civic_election_id': google_civic_election_id,
+        'organization_list':        organization_list,
+        'organization_search':      organization_search,
+        'organization_state':       organization_state_code,
+        'state_list':               sorted_state_list,
     }
     return render(request, 'organization/organization_list.html', template_values)
 
@@ -403,6 +431,12 @@ def organization_position_new_view(request, organization_id):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
 
+    # Take in some incoming values
+    candidate_not_found = request.GET.get('candidate_not_found', False)
+    stance = request.GET.get('stance', SUPPORT)  # Set a default if stance comes in empty
+    statement_text = request.GET.get('statement_text', '')  # Set a default if stance comes in empty
+    more_info_url = request.GET.get('more_info_url', '')
+
     # We pass candidate_we_vote_id to this page to pre-populate the form
     candidate_campaign_id = 0
     if positive_value_exists(candidate_we_vote_id):
@@ -464,11 +498,16 @@ def organization_position_new_view(request, organization_id):
             'organization':                                 organization_on_stage,
             'organization_position_candidate_campaign_id':  0,
             'possible_stances_list':                        ORGANIZATION_STANCE_CHOICES,
-            'stance_selected':                              SUPPORT,  # Default stance
+            'stance_selected':                              stance,
             'election_list':                                election_list,
             'google_civic_election_id':                     google_civic_election_id,
             'organization_position_list':                   organization_position_list,
             'voter_authority':                              authority_results,
+            # Incoming values from error state
+            'candidate_not_found':                          candidate_not_found,
+            'stance':                                       stance,
+            'statement_text':                               statement_text,
+            'more_info_url':                                more_info_url,
         }
     return render(request, 'organization/organization_position_edit.html', template_values)
 
@@ -656,7 +695,11 @@ def organization_position_edit_process_view(request):
             "Unable to find either Candidate or Measure.")
         return HttpResponseRedirect(
             reverse('organization:organization_position_new', args=([organization_id])) +
-            "?google_civic_election_id=" + str(google_civic_election_id)
+            "?google_civic_election_id=" + str(google_civic_election_id) +
+            "&stance=" + stance +
+            "&statement_text=" + statement_text +
+            "&more_info_url=" + more_info_url +
+            "&candidate_not_found=1"
         )
 
     organization_position_on_stage_found = False
