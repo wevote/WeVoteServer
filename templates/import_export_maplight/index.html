@@ -1,0 +1,33 @@
+{# templates/import_export_maplight/index.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Import Export MapLight{% endblock %}
+
+{%  block content %}
+
+<h1>Import from Other Data Sources</h1>
+
+<p>Bring data in from these sources, into the local database cache:</p>
+<ul>
+    <li>MapLight API
+    (<a href="{% url 'import_export_maplight:import_maplight_from_json_view' %}">import json files now</a>)
+        <ul>
+            <li>JSON Ballot info for San Francisco address</li>
+        </ul>
+    </li>
+</ul>
+
+
+<p>Take the data cached locally and distribute it to the correct local We Vote db tables:</p>
+<ul>
+
+<li>MapLight API
+    (<a href="{% url 'import_export_maplight:transfer_from_maplight' %}">transfer now</a>)
+    <ul>
+        <li>MapLightCandidate (using the photo)</li>
+    </ul>
+</li>
+
+</ul>
+
+{% endblock %}

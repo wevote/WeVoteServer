@@ -1,0 +1,92 @@
+{
+    "5755": {
+        "bio": "",
+        "candidate_flags": "",
+        "candidate_id": "5755",
+        "contest": {
+            "election_date": "2014-11-04",
+            "id": "O1525",
+            "jurisdiction": {
+                "id": "1",
+                "level": "S",
+                "name": "California",
+                "region_name": "California",
+                "state": "California",
+                "statecode": "CA"
+            },
+            "office": {
+                "body": "",
+                "class": " ",
+                "district": "0",
+                "flags": "",
+                "region_name": "California",
+                "state": "California",
+                "statecode": "CA",
+                "title": "Secretary of State"
+            },
+            "title": "Secretary of State - California",
+            "type": "office",
+            "url": "http://votersedge.org/california/2014/november/state/candidates/secretary-of-state"
+        },
+        "display_name": "Alex Padilla",
+        "first_name": "",
+        "gender": "M",
+        "last_funding_update": "2014-09-03",
+        "last_name": "Padilla",
+        "middle_name": "",
+        "name_prefix": "",
+        "name_suffix": "",
+        "original_name": "Alex  Padilla",
+        "party": "Democratic",
+        "photo": "http://votersedge.org/sites/all/modules/map/modules/map_proposition/images/politicians/2653.jpg?v",
+        "politician_id": "2653",
+        "roster_name": "Alex Padilla",
+        "type": "",
+        "url": "http://votersedge.org/california/2014/november/state/candidates/secretary-of-state/2653-alex-padilla"
+    },
+    "5756": {
+        "bio": "",
+        "candidate_flags": "",
+        "candidate_id": "5756",
+        "contest": {
+            "election_date": "2014-11-04",
+            "id": "O1525",
+            "jurisdiction": {
+                "id": "1",
+                "level": "S",
+                "name": "California",
+                "region_name": "California",
+                "state": "California",
+                "statecode": "CA"
+            },
+            "office": {
+                "body": "",
+                "class": " ",
+                "district": "0",
+                "flags": "",
+                "region_name": "California",
+                "state": "California",
+                "statecode": "CA",
+                "title": "Secretary of State"
+            },
+            "title": "Secretary of State - California",
+            "type": "office",
+            "url": "http://votersedge.org/california/2014/november/state/candidates/secretary-of-state"
+        },
+        "display_name": "Pete Peterson",
+        "first_name": "",
+        "gender": "M",
+        "last_funding_update": "2014-09-03",
+        "last_name": "Peterson",
+        "middle_name": "",
+        "name_prefix": "",
+        "name_suffix": "",
+        "original_name": "Pete N Peterson",
+        "party": "Republican",
+        "photo": "http://votersedge.org/sites/all/modules/map/modules/map_proposition/images/politicians/2655.jpg?v",
+        "politician_id": "2655",
+        "roster_name": "Pete Peterson",
+        "type": "",
+        "url": "http://votersedge.org/california/2014/november/state/candidates/secretary-of-state/2655-pete-peterson"
+    }
+}

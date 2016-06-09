@@ -1,0 +1,120 @@
+
+
+Address: 254 Hartford Street, San Francisco CA 94114
+
+http://votersedge.org/services_open_api/cvg.ballot_v1?apikey=example&address=254%20Hartford%20Street%2C%20San%20Francisco%20CA%2094114&date=#.VUAZi61VhBc
+
+{"O55":{"id":"O55","type":"office","election_date":"2014-11-04","title":"Congressional District 12 - California","office":
+
+CONTEST ITEMS FOR A PARTICULAR BALLOT LOCATION
+
+OFFICE CONTEST
+[id] => O55
+[type] => office
+[election_date] => 2014-11-04
+[title] => Congressional District 12 - California
+[office]
+[url]
+[jurisdiction]
+
+
+MEASURE CONTEST - Maplight treats all Measures as a single contest
+THIS STUB MAY NOT APPLY TO WE VOTE
+[id] => M193
+[url] => http://votersedge.org/california/ballot-measures/2014/november
+[last_funding_update] => 2014-10-17
+[election_date] => 2014-11-04
+[election_type] => G
+[title] => California Ballot Measures
+[type] => measure
+[region_name] => California
+[new_url] => new_url
+[jurisdiction] => stdClass Object
+
+
+
+
+http://votersedge.org/services_open_api/cvg.contest_v1?apikey=example&contest=O55&date=2014-11-02#.VUAam61VhBc
+
+ITEMS IN A GIVEN CONTEST
+
+"office":{"title":"Congressperson","class":"lower","flags":"","statecode":"CA","state":"California",
+"body":"House of Representatives","region_name":"California","district":"12","super_district":"ca"}
+
+POLITICIAN COMPETING FOR AN OFFICE
+[politician_id] => 692
+[candidate_id] => 5817
+[display_name] => John Dennis
+[original_name] => John Dennis
+[gender] => M
+[first_name] => John
+[middle_name] => 
+[last_name] => Dennis
+[name_prefix] => 
+[name_suffix] => 
+[bio] => 
+[party] => Republican
+[candidate_flags] => 
+[last_funding_update] => 2014-09-03
+[roster_name] => John Dennis
+[photo] => http://m.es.votersedge.org/sites/all/modules/map/modules/map_proposition/images/politicians/692.jpg?v
+[url] => http://votersedge.org/united-states/2014/november/california/candidates/representative-district-12/692-john-dennis
+[contest] => stdClass Object
+
+
+OFFICE CONTEST
+[id] => O55
+[type] => office
+[election_date] => 2014-11-04
+[title] => Congressional District 12 - California
+[office]
+[url]
+[jurisdiction]
+
+
+
+
+
+http://votersedge.org/services_open_api/cvg.contest_v1?apikey=example&contest=M193&date=2015-04-23#.VUAfhK1VhBc
+
+MEASURE
+[measure_id] => 296
+[measure_main_id] => 325
+[funding_csv_file] => california-2014-11-prop-46-funding_20141017.csv
+[last_funding_update] => 2014-10-17
+[outcome] => 
+[county_jurisdiction_id] => 0
+[identifier] => Prop. 46
+[topic] => Drug and Alcohol Testing of Doctors; Medical Negligence Lawsuits
+[summary] => <p>This measure would increase the state's cap on damages that can be assessed in medical negligence lawsuits to over $1 million from the current cap of $250,000, with &nbsp;annual adjuments for inflation going forward. Additionally, it requires drug and alcohol testing of doctors and the reporting of positive tests to the California Medical Board for mandated discipline. Lastly, it mandates that health care practitioners consult a state prescription drug history database before prescribing certain medications.</p>
+[fulltext_url] => http://www.sos.ca.gov/elections/ballot-measures/pdf/prop-46-text.pdf
+[proposition_type] => Initiated State Statute - Majority Approval Required
+[url] => http://votersedge.org/california/ballot-measures/2014/november/prop-46
+[maplight_title] => Increases cap on medical malpractice damages, required drug and alcohol testing of doctors, and mandates checking a prescription drug database before prescribing certain drugs. 
+[contest] => stdClass Object
+
+
+MEASURE CONTEST
+ [id] => M193
+[url] => http://votersedge.org/california/ballot-measures/2014/november
+[last_funding_update] => 2014-10-17
+[election_date] => 2014-11-04
+[election_type] => G
+[title] => California Ballot Measures
+[type] => measure
+[region_name] => California
+[new_url] => new_url
+[jurisdiction] => 
+
+
+JURISDICTION
+stdClass Object
+    (
+        [id] => 1
+        [name] => California
+        [region_name] => California
+        [level] => S
+        [url_name] => california
+        [state] => California
+        [statecode] => CA
+    )

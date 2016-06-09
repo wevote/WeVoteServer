@@ -88,6 +88,7 @@ INSTALLED_APPS = (
     'geoip',
     'import_export_facebook',
     'import_export_google_civic',
+    'import_export_maplight',
     'import_export_twitter',  # See also twitter (below)
     'import_export_vote_smart',
     'import_export_wikipedia',
