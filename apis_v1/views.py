@@ -628,7 +628,13 @@ def twitter_identity_retrieve_view(request):
         'owner_we_vote_id':         results['owner_we_vote_id'],
         'owner_id':                 results['owner_id'],
         'google_civic_election_id': results['google_civic_election_id'],
-    }
+        # These values only returned if kind_of_owner == TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE
+        'twitter_description':      results['twitter_description'],
+        'twitter_followers_count':  results['twitter_followers_count'],
+        'twitter_photo_url':        results['twitter_photo_url'],
+        'twitter_user_website':     results['twitter_user_website'],
+        'twitter_name':             results['twitter_name'],
+        }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

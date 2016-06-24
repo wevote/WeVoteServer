@@ -131,6 +131,7 @@ def retrieve_twitter_user_info(twitter_handle):
         twitter_json = twitter_user._json
         success = True
         status = 'TWITTER_RETRIEVE_SUCCESSFUL'
+        twitter_handle_found = True
     except tweepy.RateLimitError:
         success = False
         status = 'TWITTER_RATE_LIMIT_ERROR'

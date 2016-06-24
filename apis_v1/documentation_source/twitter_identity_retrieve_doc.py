@@ -29,10 +29,21 @@ def twitter_identity_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "twitter_handle": string,\n' \
                    '  "owner_found": boolean,\n' \
-                   '  "kind_of_owner": string, (POLITICIAN, CANDIDATE, ORGANIZATION)\n' \
+                   '  "kind_of_owner": string, (POLITICIAN, CANDIDATE, ORGANIZATION,' \
+                   ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE, TWITTER_HANDLE_DOES_NOT_EXIST)\n' \
                    '  "owner_we_vote_id": string,\n' \
                    '  "owner_id": integer,\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "twitter_description": string, (ONLY RETURNED FOR kind_of_owner ==' \
+                   ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
+                   '  "twitter_followers_count": string, (ONLY RETURNED FOR kind_of_owner ==' \
+                   ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
+                   '  "twitter_photo_url": string, (ONLY RETURNED FOR kind_of_owner ==' \
+                   ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
+                   '  "twitter_user_website": string, (ONLY RETURNED FOR kind_of_owner ==' \
+                   ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
+                   '  "twitter_name": string, (ONLY RETURNED FOR kind_of_owner ==' \
+                   ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
                    '}'
 
     template_values = {

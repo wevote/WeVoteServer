@@ -3,18 +3,25 @@
 # -*- coding: UTF-8 -*-
 
 # See also WeVoteServer/import_export_twitter/controllers.py for routines that manage incoming twitter data
+from .models import TwitterUserManager
 from candidate.models import CandidateCampaignListManager
+from import_export_twitter.controllers import retrieve_twitter_user_info
 from organization.models import OrganizationListManager
 from wevote_functions.functions import positive_value_exists
 
 
 def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
-    status = "ENTERING_TWITTER_IDENTITY_RETRIEVE"
+    status = "TWITTER_HANDLE_DOES_NOT_EXIST"  # Default to this
     success = True
-    kind_of_owner = ""
+    kind_of_owner = "TWITTER_HANDLE_DOES_NOT_EXIST"
     owner_we_vote_id = ''
     owner_id = 0
     google_civic_election_id = 0
+    twitter_description = ''
+    twitter_followers_count = ''
+    twitter_photo_url = ''
+    twitter_user_website = ''
+    twitter_name = ''
 
     owner_found = False
 
@@ -51,8 +58,20 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
             owner_found = True
             status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-ORGANIZATION"
 
+    # Reach out to Twitter (or our Twitter account cache) to retrieve some information we can display
     if not positive_value_exists(owner_found):
-        status = "OWNER_OF_THIS_TWITTER_HANDLE_NOT_FOUND"
+        twitter_user_manager = TwitterUserManager()
+        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(twitter_handle)
+
+        if twitter_results['twitter_user_found']:
+            twitter_user = twitter_results['twitter_user']
+            twitter_description = twitter_user.twitter_description
+            twitter_followers_count = twitter_user.twitter_followers_count
+            twitter_photo_url = twitter_user.twitter_profile_image_url_https
+            twitter_user_website = twitter_user.twitter_url
+            twitter_name = twitter_user.twitter_name
+            kind_of_owner = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
+            status = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
 
     results = {
         'status':                   status,
@@ -63,5 +82,11 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
         'owner_we_vote_id':         owner_we_vote_id,
         'owner_id':                 owner_id,
         'google_civic_election_id': google_civic_election_id,
+        # These values only returned if kind_of_owner == TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE
+        'twitter_description':      twitter_description,
+        'twitter_followers_count':  twitter_followers_count,
+        'twitter_photo_url':        twitter_photo_url,
+        'twitter_user_website':     twitter_user_website,
+        'twitter_name':             twitter_name,
     }
     return results
