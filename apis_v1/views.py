@@ -7,11 +7,13 @@ from .controllers import organization_count, organization_follow, organization_f
 from ballot.controllers import ballot_item_options_retrieve_for_api, choose_election_from_existing_data, \
     voter_ballot_items_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
-from django.http import HttpResponse
+from config.base import get_environment_variable
+from django.http import HttpResponse, HttpResponseRedirect
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_facebook.controllers import facebook_disconnect_for_api, facebook_sign_in_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
-from import_export_twitter.controllers import twitter_sign_in_start_for_api
+from import_export_twitter.controllers import twitter_sign_in_start_for_api, \
+    twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api
 import json
 from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
@@ -50,6 +52,8 @@ from wevote_functions.functions import convert_to_int, generate_voter_device_id,
 
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
 def ballot_item_options_retrieve_view(request):  # ballotItemOptionsRetrieve
@@ -646,14 +650,76 @@ def twitter_sign_in_start_view(request):
     """
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    return_url = request.GET.get('return_url', '')
 
-    results = twitter_sign_in_start_for_api(voter_device_id)
+    results = twitter_sign_in_start_for_api(voter_device_id, return_url)
+    json_data = {
+        'status':               results['status'],
+        'success':              results['success'],
+        'voter_device_id':      voter_device_id,
+        'twitter_redirect_url': results['twitter_redirect_url'],
+        'voter_info_retrieved': results['voter_info_retrieved'],
+        'switch_accounts':      results['switch_accounts'],  # If true, new voter_device_id returned
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def twitter_sign_in_request_access_token_view(request):
+    """
+    Step 2 of the Twitter Sign In Process (twitterSignInRequestAccessToken)
+    :param request:
+    :return:
+    """
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    incoming_request_token = request.GET.get('oauth_token', '')
+    incoming_oauth_verifier = request.GET.get('oauth_verifier', '')
+    return_url = request.GET.get('return_url', '')
+
+    results = twitter_sign_in_request_access_token_for_api(voter_device_id,
+                                                           incoming_request_token, incoming_oauth_verifier,
+                                                           return_url)
+
+    if positive_value_exists(results['return_url']):
+        next_step_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestVoterInfo/"
+        next_step_url += "?voter_device_id=" + voter_device_id
+        next_step_url += "&return_url=" + results['return_url']
+        return HttpResponseRedirect(next_step_url)
+
     json_data = {
         'status': results['status'],
         'success': results['success'],
         'voter_device_id': voter_device_id,
-        'twitter_redirect_url': results['twitter_redirect_url'],
+        'access_token_and_secret_returned': results['access_token_and_secret_returned'],
     }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def twitter_sign_in_request_voter_info_view(request):
+    """
+    Step 3 of the Twitter Sign In Process (twitterSignInRequestVoterInfo)
+    :param request:
+    :return:
+    """
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    return_url = request.GET.get('return_url', '')
+
+    results = twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url)
+
+    if positive_value_exists(results['return_url']):
+        return HttpResponseRedirect(results['return_url'])
+
+    json_data = {
+        'status':               results['status'],
+        'success':              results['success'],
+        'voter_device_id':      voter_device_id,
+        'twitter_handle':       results['twitter_handle'],
+        'twitter_handle_found': results['twitter_handle_found'],
+        'voter_info_retrieved': results['voter_info_retrieved'],
+        'switch_accounts':      results['switch_accounts'],
+    }
+
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

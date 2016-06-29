@@ -446,7 +446,7 @@ def voter_retrieve_list_for_api(voter_device_id):
     return results
 
 
-def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):
+def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # voterSignOut
     voter_device_link_manager = VoterDeviceLinkManager()
     if sign_out_all_devices:
         results = voter_device_link_manager.delete_all_voter_device_links(voter_device_id)

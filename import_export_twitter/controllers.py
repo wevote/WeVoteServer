@@ -10,10 +10,9 @@ from organization.controllers import update_social_media_statistics_in_other_tab
 from organization.models import Organization, OrganizationManager
 import re
 from socket import timeout
-import string
 import tweepy
 import urllib.request
-from voter.models import VoterManager
+from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists
 
@@ -465,20 +464,23 @@ def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_i
     return results
 
 
-def twitter_sign_in_start_for_api(voter_device_id):  # twitterSignInStart
+def twitter_sign_in_start_for_api(voter_device_id, return_url):  # twitterSignInStart
     """
 
     :param voter_device_id:
+    :param return_url: Where to direct the browser at the very end of the process
     :return:
     """
-    # Get voter_id from the voter_device_id so we can figure out which ballot_items to offer
+    # Get voter_id from the voter_device_id
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results = {
-            'success': False,
-            'status': "VALID_VOTER_DEVICE_ID_MISSING",
-            'voter_device_id': voter_device_id,
+            'success':              False,
+            'status':               "VALID_VOTER_DEVICE_ID_MISSING",
+            'voter_device_id':      voter_device_id,
             'twitter_redirect_url': '',
+            'voter_info_retrieved': False,
+            'switch_accounts':      False,
         }
         return results
 
@@ -486,21 +488,71 @@ def twitter_sign_in_start_for_api(voter_device_id):  # twitterSignInStart
     results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if not positive_value_exists(results['voter_found']):
         results = {
-            'status': "VALID_VOTER_MISSING",
-            'success': False,
-            'voter_device_id': voter_device_id,
+            'status':               "VALID_VOTER_MISSING",
+            'success':              False,
+            'voter_device_id':      voter_device_id,
             'twitter_redirect_url': '',
+            'voter_info_retrieved': False,
+            'switch_accounts':      False,
         }
         return results
 
     voter = results['voter']
-    callback_url = WE_VOTE_SERVER_ROOT_URL + "/twitter/process_sign_in_response/"
-    redirect_url = ''
+
+    if voter.twitter_access_token and voter.twitter_access_secret:
+        # If here the voter might already be signed in, so we don't want to ask them to approve again
+        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+        auth.set_access_token(voter.twitter_access_token, voter.twitter_access_secret)
+
+        api = tweepy.API(auth)
+
+        try:
+            tweepy_user_object = api.me()
+            success = True
+        # What is the error situation where the twitter_access_token and twitter_access_secret are no longer valid?
+        # We need to deal with this (wipe them from the database and rewind to the right place in the process
+        except tweepy.RateLimitError:
+            success = False
+            status = 'TWITTER_RATE_LIMIT_ERROR'
+        except tweepy.error.TweepError as error_instance:
+            success = False
+            status = ''
+            error_tuple = error_instance.args
+            for error_dict in error_tuple:
+                for one_error in error_dict:
+                    status += '[' + one_error['message'] + '] '
+
+        if success:
+            # Reach out to the twitterSignInRequestVoterInfo -- no need to redirect
+            empty_return_url = ""
+            voter_info_results = twitter_sign_in_request_voter_info_for_api(voter_device_id, empty_return_url)
+
+            success = voter_info_results['success']
+            status = "SKIPPED_AUTH_DIRECT_REQUEST_VOTER_INFO: " + voter_info_results['status']
+            results = {
+                'status':               status,
+                'success':              success,
+                'voter_device_id':      voter_device_id,
+                'twitter_redirect_url': '',
+                'voter_info_retrieved': voter_info_results['voter_info_retrieved'],
+                'switch_accounts':      voter_info_results['switch_accounts'],  # If true, new voter_device_id returned
+            }
+            return results
+        else:
+            # Somehow reset tokens and start over.
+            pass
+
+    callback_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestAccessToken/"
+    callback_url += "?voter_device_id=" + voter_device_id
+    callback_url += "&return_url=" + return_url
+
+    # This is where
+    twitter_authorization_url = ''
 
     try:
         # We take the Consumer Key and the Consumer Secret, and request a token & token_secret
         auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, callback_url)
-        redirect_url = auth.get_authorization_url()
+        twitter_authorization_url = auth.get_authorization_url()
         request_token_dict = auth.request_token
         twitter_request_token = ''
         twitter_request_token_secret = ''
@@ -510,10 +562,12 @@ def twitter_sign_in_start_for_api(voter_device_id):  # twitterSignInStart
         if 'oauth_token_secret' in request_token_dict:
             twitter_request_token_secret = request_token_dict['oauth_token_secret']
 
-        # We save these values in the Voter table, and then return a redirect_url where the user can sign in
+        # We save these values in the Voter table, and then return a twitter_authorization_url where the voter signs in
         # Once they sign in to the Twitter login, they are redirected back to the We Vote callback_url
-        # On that callback_url page (a Django/Python page as opposed to ReactJS), we are told if they are signed in
+        # On that callback_url page, we are told if they are signed in
         #  on Twitter or not, and capture an access key we can use to retrieve information about the Twitter user
+        # NOTE: Regarding the callback url, I think this can just be a direct call to the API server,
+        #  since we have the voter_device_id
         if positive_value_exists(twitter_request_token) and positive_value_exists(twitter_request_token_secret):
             voter.twitter_request_token = twitter_request_token
             voter.twitter_request_secret = twitter_request_token_secret
@@ -538,16 +592,273 @@ def twitter_sign_in_start_for_api(voter_device_id):  # twitterSignInStart
 
     if success:
         results = {
-            'status': status,
-            'success': True,
+            'status':               status,
+            'success':              True,
+            'voter_device_id':      voter_device_id,
+            'twitter_redirect_url': twitter_authorization_url,
+            'voter_info_retrieved': False,
+            'switch_accounts':      False,
+        }
+    else:
+        results = {
+            'status':               status,
+            'success':              False,
+            'voter_device_id':      voter_device_id,
+            'twitter_redirect_url': '',
+            'voter_info_retrieved': False,
+            'switch_accounts':      False,
+        }
+    return results
+
+
+def twitter_sign_in_request_access_token_for_api(voter_device_id,
+                                                 incoming_request_token, incoming_oauth_verifier,
+                                                 return_url):
+    """
+    twitterSignInRequestAccessToken
+    After signing in and agreeing to the application's terms, the user is redirected back to the application with
+    the same request token and another value, this time the OAuth verifier.
+
+    Within this function we use
+    1) the request token and
+    2) request secret along with the
+    3) OAuth verifier to get an access token, also from Twitter.
+    :param voter_device_id:
+    :param incoming_request_token:
+    :param incoming_oauth_verifier:
+    :param return_url: If a value is provided, return to this URL when the whole process is complete
+    :return:
+    """
+    # Get voter_id from the voter_device_id
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        results = {
+            'success': False,
+            'status': "VALID_VOTER_DEVICE_ID_MISSING",
             'voter_device_id': voter_device_id,
-            'twitter_redirect_url': redirect_url,
+            'access_token_and_secret_returned': False,
+            'return_url':                   return_url,
+        }
+        return results
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if not positive_value_exists(results['voter_found']):
+        results = {
+            'status': "VALID_VOTER_MISSING",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'access_token_and_secret_returned': False,
+            'return_url': return_url,
+        }
+        return results
+
+    voter = results['voter']
+
+    if not voter.twitter_request_token == incoming_request_token:
+        results = {
+            'status': "TWITTER_REQUEST_TOKEN_DOES_NOT_MATCH_STORED_VOTER_VALUE",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'access_token_and_secret_returned': False,
+            'return_url': return_url,
+        }
+        return results
+
+    twitter_access_token = ''
+    twitter_access_token_secret = ''
+    try:
+        # We take the Request Token, Request Secret, and OAuth Verifier and request an access_token
+        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+        auth.request_token = {'oauth_token': voter.twitter_request_token,
+                              'oauth_token_secret': voter.twitter_request_secret}
+        auth.get_access_token(incoming_oauth_verifier)
+        if positive_value_exists(auth.access_token) and positive_value_exists(auth.access_token_secret):
+            twitter_access_token = auth.access_token
+            twitter_access_token_secret = auth.access_token_secret
+
+    except tweepy.RateLimitError:
+        success = False
+        status = 'TWITTER_RATE_LIMIT_ERROR'
+    except tweepy.error.TweepError as error_instance:
+        success = False
+        status = 'TWITTER_SIGN_IN_REQUEST_ACCESS_TOKEN: '
+        error_tuple = error_instance.args
+        for error_dict in error_tuple:
+            count = 0
+            # for one_error in error_dict:
+            #     status += '[' + one_error[count] + '] '
+            #     count += 1
+
+    try:
+        # We save these values in the Voter table
+        if positive_value_exists(twitter_access_token) and positive_value_exists(twitter_access_token_secret):
+            voter.twitter_access_token = twitter_access_token
+            voter.twitter_access_secret = twitter_access_token_secret
+            voter.save()
+
+            success = True
+            status = "TWITTER_ACCESS_TOKEN_RETRIEVED_AND_SAVED"
+        else:
+            success = False
+            status = "TWITTER_ACCESS_TOKEN_NOT_RETRIEVED"
+    except Exception as e:
+        success = False
+        status = "TWITTER_ACCESS_TOKEN_NOT_SAVED"
+
+    if success:
+        results = {
+            'status':                           status,
+            'success':                          True,
+            'voter_device_id':                  voter_device_id,
+            'access_token_and_secret_returned': True,
+            'return_url':                       return_url,
         }
     else:
         results = {
             'status': status,
             'success': False,
             'voter_device_id': voter_device_id,
-            'twitter_redirect_url': '',
+            'access_token_and_secret_returned': False,
+            'return_url': return_url,
         }
+    return results
+
+
+def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url, switch_accounts_if_needed=True):
+    """
+    twitterSignInRequestVoterInfo
+    When here, the incoming voter_device_id should already be authenticated
+    :param voter_device_id:
+    :param return_url: Where to return the browser when sign in process is complete
+    :param switch_accounts_if_needed:
+    :return:
+    """
+
+    twitter_handle = ''
+    twitter_handle_found = False
+    tweepy_user_object = None
+    twitter_user_object_found = False
+    twitter_json = []
+    voter_info_retrieved = False
+    switch_accounts = False
+
+    # Get voter_id from the voter_device_id
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        results = {
+            'success': False,
+            'status': "VALID_VOTER_DEVICE_ID_MISSING",
+            'voter_device_id': voter_device_id,
+            'twitter_handle': twitter_handle,
+            'twitter_handle_found': twitter_handle_found,
+            'twitter_json': twitter_json,
+            'twitter_user_object': tweepy_user_object,
+            'twitter_user_object_found': twitter_user_object_found,
+            'voter_info_retrieved': voter_info_retrieved,
+            'switch_accounts': switch_accounts,
+            'return_url':                   return_url,
+        }
+        return results
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if not positive_value_exists(results['voter_found']):
+        results = {
+            'status': "VALID_VOTER_MISSING",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'twitter_handle': twitter_handle,
+            'twitter_handle_found': twitter_handle_found,
+            'twitter_json': twitter_json,
+            'twitter_user_object': tweepy_user_object,
+            'twitter_user_object_found': twitter_user_object_found,
+            'voter_info_retrieved': voter_info_retrieved,
+            'switch_accounts': switch_accounts,
+            'return_url':                return_url,
+        }
+        return results
+
+    voter = results['voter']
+
+    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    auth.set_access_token(voter.twitter_access_token, voter.twitter_access_secret)
+
+    api = tweepy.API(auth)
+
+    try:
+        tweepy_user_object = api.me()
+        twitter_json = tweepy_user_object._json
+
+        success = True
+        status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_SUCCESSFUL'
+        twitter_handle = tweepy_user_object.screen_name
+        twitter_handle_found = True
+        twitter_user_object_found = True
+    except tweepy.RateLimitError:
+        success = False
+        status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_RATE_LIMIT_ERROR'
+    except tweepy.error.TweepError as error_instance:
+        success = False
+        status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TWEEPY_ERROR: '
+        error_tuple = error_instance.args
+        for error_dict in error_tuple:
+            for one_error in error_dict:
+                status += '[' + one_error['message'] + '] '
+
+    if twitter_user_object_found:
+        # We need to deal with these cases
+
+        # 1) Does account already exist?
+        results = voter_manager.retrieve_voter_by_twitter_id(tweepy_user_object.id)
+        if results['voter_found'] and switch_accounts_if_needed:
+            voter_found_with_twitter_id = results['voter']
+
+            switch_accounts = True
+
+            # Relink this voter_device_id to the original account
+            voter_device_manager = VoterDeviceLinkManager()
+            voter_device_link_results = voter_device_manager.retrieve_voter_device_link(voter_device_id)
+            voter_device_link = voter_device_link_results['voter_device_link']
+
+            update_voter_device_link_results = voter_device_manager.update_voter_device_link(
+                voter_device_link, voter_found_with_twitter_id)
+            if update_voter_device_link_results['voter_device_link_updated']:
+                # Transfer access token and secret
+                voter_found_with_twitter_id.twitter_access_token = voter.twitter_access_token
+                voter_found_with_twitter_id.twitter_access_secret = voter.twitter_access_secret
+                voter_found_with_twitter_id.save()
+
+                status += "TWITTER_SIGN_IN-ALREADY_LINKED_TO_OTHER_ACCOUNT-TRANSFERRED "
+                success = True
+                save_user_results = voter_manager.save_twitter_user_values(voter_found_with_twitter_id,
+                                                                           tweepy_user_object)
+
+                if save_user_results['success']:
+                    voter_info_retrieved = True
+                status += save_user_results['status']
+            else:
+                status = "TWITTER_SIGN_IN-ALREADY_LINKED_TO_OTHER_ACCOUNT-COULD_NOT_TRANSFER "
+                success = False
+
+        # 2) If account doesn't exist for this person, save
+        else:
+            save_user_results = voter_manager.save_twitter_user_values(voter, tweepy_user_object)
+
+            if save_user_results['success']:
+                voter_info_retrieved = True
+
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'voter_device_id':              voter_device_id,
+        'twitter_handle':               twitter_handle,
+        'twitter_handle_found':         twitter_handle_found,
+        'twitter_json':                 twitter_json,
+        'twitter_user_object':          tweepy_user_object,
+        'twitter_user_object_found':    twitter_user_object_found,
+        'voter_info_retrieved':         voter_info_retrieved,
+        'switch_accounts':              switch_accounts,
+        'return_url':                   return_url,
+    }
     return results

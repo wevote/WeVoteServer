@@ -19,7 +19,9 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     positions_sync_out_doc, \
     position_public_support_count_for_ballot_item_doc, position_support_count_for_ballot_item_doc, \
     positions_count_for_all_ballot_items_doc, \
-    quick_info_retrieve_doc, twitter_identity_retrieve_doc, twitter_sign_in_start_doc, voter_address_retrieve_doc, \
+    quick_info_retrieve_doc, twitter_identity_retrieve_doc, \
+    twitter_sign_in_start_doc, twitter_sign_in_request_access_token_doc, twitter_sign_in_request_voter_info_doc, \
+    voter_address_retrieve_doc, \
     voter_address_save_doc, voter_all_positions_retrieve_doc, voter_all_stars_status_retrieve_doc, \
     voter_ballot_items_retrieve_doc, voter_ballot_items_retrieve_from_google_civic_doc, voter_count_doc, \
     voter_create_doc, voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
@@ -425,6 +427,28 @@ def twitter_sign_in_start_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = twitter_sign_in_start_doc.twitter_sign_in_start_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def twitter_sign_in_request_access_token_doc_view(request):
+    """
+    Show documentation about twitterSignInRequestAccessToken
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        twitter_sign_in_request_access_token_doc.twitter_sign_in_request_access_token_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def twitter_sign_in_request_voter_info_doc_view(request):
+    """
+    Show documentation about twitterSignInRequestVoterInfo
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = \
+        twitter_sign_in_request_voter_info_doc.twitter_sign_in_request_voter_info_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 
