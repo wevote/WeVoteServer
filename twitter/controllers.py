@@ -4,10 +4,10 @@
 
 # See also WeVoteServer/import_export_twitter/controllers.py for routines that manage incoming twitter data
 from .models import TwitterUserManager
+from ballot.controllers import figure_out_google_civic_election_id_voter_is_watching
 from candidate.models import CandidateCampaignListManager
-from import_export_twitter.controllers import retrieve_twitter_user_info
 from organization.models import OrganizationListManager
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists
 
 
 def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
@@ -17,6 +17,7 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
     owner_we_vote_id = ''
     owner_id = 0
     google_civic_election_id = 0
+    google_civic_election_id_voter_is_watching = 0
     twitter_description = ''
     twitter_followers_count = ''
     twitter_photo_url = ''
@@ -35,13 +36,31 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
         candidate_results = candidate_list_manager.retrieve_candidates_from_non_unique_identifiers(twitter_handle)
         if candidate_results['candidate_list_found']:
             candidate_list = candidate_results['candidate_list']
-            one_candidate = candidate_list[0]
-            kind_of_owner = "CANDIDATE"
-            owner_we_vote_id = one_candidate.we_vote_id
-            owner_id = one_candidate.id
-            google_civic_election_id = one_candidate.google_civic_election_id
-            owner_found = True
-            status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-CANDIDATE"
+
+            # Find out the election the voter is looking at
+            results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
+            if positive_value_exists(results['google_civic_election_id']):
+                google_civic_election_id_voter_is_watching = results['google_civic_election_id']
+
+            # ...and then find the candidate entry for that election
+            most_recent_candidate = candidate_list[0]
+            for one_candidate in candidate_list:
+                if google_civic_election_id_voter_is_watching == convert_to_int(one_candidate.google_civic_election_id):
+                    kind_of_owner = "CANDIDATE"
+                    owner_we_vote_id = one_candidate.we_vote_id
+                    owner_id = one_candidate.id
+                    google_civic_election_id = one_candidate.google_civic_election_id
+                    owner_found = True
+                    status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-CANDIDATE"
+                    # Now that we have candidate, break out of for-loop
+                    break
+            if not owner_found:
+                kind_of_owner = "CANDIDATE"
+                owner_we_vote_id = most_recent_candidate.we_vote_id
+                owner_id = most_recent_candidate.id
+                google_civic_election_id = most_recent_candidate.google_civic_election_id
+                owner_found = True
+                status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-CANDIDATE"
 
     # Check Organization table
     if not positive_value_exists(owner_found):

@@ -713,7 +713,7 @@ def twitter_sign_in_request_voter_info_view(request):
     json_data = {
         'status':               results['status'],
         'success':              results['success'],
-        'voter_device_id':      voter_device_id,
+        'voter_device_id':      results['voter_device_id'],
         'twitter_handle':       results['twitter_handle'],
         'twitter_handle_found': results['twitter_handle_found'],
         'voter_info_retrieved': results['voter_info_retrieved'],

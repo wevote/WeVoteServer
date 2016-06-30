@@ -14,6 +14,12 @@ def twitter_sign_in_start_doc_template_values(url_root):
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
+            'name':         'return_url',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The URL where the browser should be redirected once authenticated. '
+                            'Usually https://wevote.me/more/sign_in',
+        },
+        {
             'name':         'api_key',
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
@@ -31,28 +37,29 @@ def twitter_sign_in_start_doc_template_values(url_root):
             'code':         'VALID_VOTER_ID_MISSING',
             'description':  'Cannot proceed. A valid voter_id was not found.',
         },
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
-        # 'organization_we_vote_id': 'wv85org1',
     }
 
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "twitter_redirect_url": string,\n' \
+                   '  "twitter_redirect_url": string, ' \
+                   '(Where twitter wants We Vote to redirect the browser, with variables)\n' \
+                   '  "voter_info_retrieved": boolean, ' \
+                   '(if handled without redirect, was voter info retrieved from Twitter?)\n' \
+                   '  "switch_accounts": boolean, (Was there an existing account for this Twitter account? ' \
+                   'If true, a new voter_device_id is returned that links to this other We Vote account.)\n' \
                    '}'
 
     template_values = {
         'api_name': 'twitterSignInStart',
         'api_slug': 'twitterSignInStart',
         'api_introduction':
-            "",
+            "Flow chart showing entire process here: "
+            "https://docs.google.com/drawings/d/1WdVFsPZl3aLM9wxGuPTW3veqP-5EmZKv36KWjTz5pbU/edit",
         'try_now_link': 'apis_v1:twitterSignInStartView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

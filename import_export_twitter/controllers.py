@@ -739,7 +739,6 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url, swit
     twitter_handle_found = False
     tweepy_user_object = None
     twitter_user_object_found = False
-    twitter_json = []
     voter_info_retrieved = False
     switch_accounts = False
 
@@ -747,17 +746,14 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url, swit
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results = {
-            'success': False,
-            'status': "VALID_VOTER_DEVICE_ID_MISSING",
-            'voter_device_id': voter_device_id,
-            'twitter_handle': twitter_handle,
+            'success':              False,
+            'status':               "VALID_VOTER_DEVICE_ID_MISSING",
+            'voter_device_id':      voter_device_id,
+            'twitter_handle':       twitter_handle,
             'twitter_handle_found': twitter_handle_found,
-            'twitter_json': twitter_json,
-            'twitter_user_object': tweepy_user_object,
-            'twitter_user_object_found': twitter_user_object_found,
             'voter_info_retrieved': voter_info_retrieved,
-            'switch_accounts': switch_accounts,
-            'return_url':                   return_url,
+            'switch_accounts':      switch_accounts,
+            'return_url':           return_url,
         }
         return results
 
@@ -765,17 +761,14 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url, swit
     results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if not positive_value_exists(results['voter_found']):
         results = {
-            'status': "VALID_VOTER_MISSING",
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'twitter_handle': twitter_handle,
+            'status':               "VALID_VOTER_MISSING",
+            'success':              False,
+            'voter_device_id':      voter_device_id,
+            'twitter_handle':       twitter_handle,
             'twitter_handle_found': twitter_handle_found,
-            'twitter_json': twitter_json,
-            'twitter_user_object': tweepy_user_object,
-            'twitter_user_object_found': twitter_user_object_found,
             'voter_info_retrieved': voter_info_retrieved,
-            'switch_accounts': switch_accounts,
-            'return_url':                return_url,
+            'switch_accounts':      switch_accounts,
+            'return_url':           return_url,
         }
         return results
 
@@ -854,9 +847,6 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url, swit
         'voter_device_id':              voter_device_id,
         'twitter_handle':               twitter_handle,
         'twitter_handle_found':         twitter_handle_found,
-        'twitter_json':                 twitter_json,
-        'twitter_user_object':          tweepy_user_object,
-        'twitter_user_object_found':    twitter_user_object_found,
         'voter_info_retrieved':         voter_info_retrieved,
         'switch_accounts':              switch_accounts,
         'return_url':                   return_url,

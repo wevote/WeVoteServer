@@ -71,7 +71,7 @@ urlpatterns = [
     url(r'^twitterSignInRequestAccessToken/',
         views.twitter_sign_in_request_access_token_view, name='twitterSignInRequestAccessTokenView'),
     url(r'^twitterSignInRequestVoterInfo/',
-        views.twitter_sign_in_request_voter_info_view, name='twitterSignInRequestVoterInfo'),
+        views.twitter_sign_in_request_voter_info_view, name='twitterSignInRequestVoterInfoView'),
     url(r'^voterAddressRetrieve/', views.voter_address_retrieve_view, name='voterAddressRetrieveView'),
     url(r'^voterAddressSave/', views.voter_address_save_view, name='voterAddressSaveView'),
     url(r'^voterAllPositionsRetrieve/', views.voter_all_positions_retrieve_view, name='voterAllPositionsRetrieveView'),

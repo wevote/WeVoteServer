@@ -56,6 +56,7 @@ def voter_retrieve_doc_template_values(url_root):
                    '  "facebook_email": string,\n' \
                    '  "facebook_profile_image_url_https": string,\n' \
                    '  "voter_photo_url": string,\n' \
+                   '  "twitter_screen_name": string,\n' \
                    '  "signed_in_personal": boolean,\n' \
                    '  "signed_in_facebook": boolean,\n' \
                    '  "signed_in_google": boolean,\n' \
