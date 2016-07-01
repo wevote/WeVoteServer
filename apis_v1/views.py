@@ -708,7 +708,11 @@ def twitter_sign_in_request_voter_info_view(request):
     results = twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url)
 
     if positive_value_exists(results['return_url']):
-        return HttpResponseRedirect(results['return_url'])
+        modified_return_url = results['return_url']
+        if results['twitter_handle_found']:
+            modified_return_url = modified_return_url.replace("signinswitchend", "signinswitchend/" +
+                                                              results['twitter_handle'])
+        return HttpResponseRedirect(modified_return_url)
 
     json_data = {
         'status':               results['status'],

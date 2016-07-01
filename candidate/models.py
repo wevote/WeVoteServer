@@ -503,7 +503,11 @@ class CandidateCampaign(models.Model):
             return ""
 
     def fetch_twitter_handle(self):
-        # TODO extract the twitter handle from twitter_url if we don't have it stored as a handle yet
+        if positive_value_exists(self.candidate_twitter_handle):
+            return self.candidate_twitter_handle
+        elif self.twitter_url:
+            # Extract the twitter handle from twitter_url if we don't have it stored as a handle yet
+            return extract_twitter_handle_from_text_string(self.twitter_url)
         return self.twitter_url
 
     def twitter_profile_image_url_https_bigger(self):
