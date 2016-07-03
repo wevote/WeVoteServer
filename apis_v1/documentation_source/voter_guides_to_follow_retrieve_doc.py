@@ -86,7 +86,7 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '  "search_string": string,\n' \
                    '  "maximum_number_to_retrieve": integer,\n' \
                    '  "voter_guides": list\n' \
-                   '   [\n' \
+                   '   [{\n' \
                    '     "voter_guide_display_name": string (Name of this org or person),\n' \
                    '     "voter_guide_owner_type": ORGANIZATION, PUBLIC_FIGURE, VOTER),\n' \
                    '     "we_vote_id": string (We Vote ID of the voter guide),\n' \
@@ -112,7 +112,7 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '     "speaker_display_name": string (Exists if looking at voter guides for one ballot_item),\n' \
                    '     "statement_text": string (Exists if looking at voter guides for one ballot_item),\n' \
                    '     "more_info_url": string (Exists if looking at voter guides for one ballot_item),\n' \
-                   '   ],\n' \
+                   '   },],\n' \
                    '}\n'
 
     template_values = {

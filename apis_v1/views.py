@@ -30,6 +30,7 @@ from ballot.controllers import choose_election_and_prepare_ballot_data
 from ballot.models import OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from search.controllers import search_all_for_api
 from star.controllers import voter_all_stars_status_retrieve_for_api, voter_star_off_save_for_api, \
     voter_star_on_save_for_api, voter_star_status_retrieve_for_api
 from support_oppose_deciding.controllers import position_oppose_count_for_ballot_item_for_api, \
@@ -596,6 +597,43 @@ def quick_info_retrieve_view(request):
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', "")
     return quick_info_retrieve_for_api(kind_of_ballot_item=kind_of_ballot_item,
                                        ballot_item_we_vote_id=ballot_item_we_vote_id)
+
+
+def search_all_view(request):
+    """
+    Find information anywhere in the We Vote universe.
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    text_from_search_field = request.GET.get('text_from_search_field', '')
+
+    if not positive_value_exists(text_from_search_field):
+        status = 'MISSING_TEXT_FROM_SEARCH_FIELD'
+        json_data = {
+            'status':                   status,
+            'success':                  False,
+            'text_from_search_field':   text_from_search_field,
+            'voter_device_id':          voter_device_id,
+            'search_results':           [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = search_all_for_api(text_from_search_field, voter_device_id)
+    status = "UNABLE_TO_FIND_ANY_SEARCH_RESULTS"
+    search_results = []
+    if results['search_results_found']:
+        search_results = results['search_results']
+        status = results['status']
+
+    json_data = {
+        'status':                   status,
+        'success':                  True,
+        'text_from_search_field':   text_from_search_field,
+        'voter_device_id':          voter_device_id,
+        'search_results':           search_results,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def twitter_identity_retrieve_view(request):

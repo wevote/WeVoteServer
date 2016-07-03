@@ -11,6 +11,9 @@
   "DATABASE_HOST":                  "",
   "DATABASE_PORT":                  "",
 
+  "_comment":                       "The connection string for Elastic Search database",
+  "ELASTIC_SEARCH_CONNECTION_STRING": "",
+
   "_comment":                       "These are the levels of logging available: CRITICAL, ERROR, INFO, WARN, DEBUG",
   "_comment":                       "*** LOG_STREAM turns on or off the messages to the command line: true or false",
   "LOG_STREAM":                     true,

@@ -102,6 +102,7 @@ INSTALLED_APPS = (
     'quick_info',
     'rest_framework',
     'support_oppose_deciding',
+    'search',
     'star',
     'tag',
     'twitter',  # See also import_export_twitter
