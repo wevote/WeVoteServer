@@ -620,11 +620,13 @@ def search_all_view(request):
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     results = search_all_for_api(text_from_search_field, voter_device_id)
-    status = "UNABLE_TO_FIND_ANY_SEARCH_RESULTS"
+    status = "UNABLE_TO_FIND_ANY_SEARCH_RESULTS "
     search_results = []
     if results['search_results_found']:
         search_results = results['search_results']
         status = results['status']
+    else:
+        status += results['status']
 
     json_data = {
         'status':                   status,

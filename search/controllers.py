@@ -67,10 +67,11 @@ def search_all_for_api(text_from_search_field, voter_device_id):
         return results
 
     elastic_search_object = Elasticsearch([ELASTIC_SEARCH_CONNECTION_STRING],
-                                          timeout=120, max_retries=5, retry_on_timeout=True)
+                                          timeout=2, max_retries=1, retry_on_timeout=True)
 
     # query = {"query": {"match": {"candidate_name": text_from_search_field}}}
-    query = {"query": {"multi_match": {"query": text_from_search_field,
+    query = {"query": {"multi_match": {"type": "phrase_prefix",
+                                       "query": text_from_search_field,
                                        "fields": ["candidate_name",
                                                   "candidate_twitter_handle", "twitter_name",
                                                   "measure_subtitle", "measure_text", "measure_title",
@@ -157,10 +158,6 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                 if 'organization_twitter_handle' in one_search_result_dict and \
                         positive_value_exists(one_search_result_dict['organization_twitter_handle']):
                     link_internal = "/" + one_search_result_dict['organization_twitter_handle']
-                # There was a typo in the ElasticSearch setup
-                elif 'organization_twitter_handle,' in one_search_result_dict and \
-                        positive_value_exists(one_search_result_dict['organization_twitter_handle,']):
-                    link_internal = "/" + one_search_result_dict['organization_twitter_handle,']
                 else:
                     link_internal = "/voterguide/" + one_search_result_dict['we_vote_id']
 
@@ -168,13 +165,13 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                     'result_title':             one_search_result_dict['organization_name'],
                     'result_image':             "",
                     'result_subtitle':          "",
-                    'result_summary':           one_search_result_dict['twitter_description,'],
+                    'result_summary':           one_search_result_dict['twitter_description'],
                     'result_score':             one_search_result_score,
                     'link_internal':            link_internal,
                     'kind_of_owner':            "ORGANIZATION",
                     'google_civic_election_id': 0,
                     'state_code':               one_search_result_dict['state_served_code'],
-                    'twitter_handle':           one_search_result_dict['organization_twitter_handle,'],
+                    'twitter_handle':           one_search_result_dict['organization_twitter_handle'],
                     'we_vote_id':               one_search_result_dict['we_vote_id'],
                     'local_id':                 one_search_result_id,
                 }
