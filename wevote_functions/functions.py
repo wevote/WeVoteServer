@@ -96,6 +96,25 @@ class LocalSwitch(object):
             return False
 
 
+# This is how we make sure a variable is a boolean
+def convert_to_bool(value):
+    if value is True:
+        return True
+    elif value is 1:
+        return True
+    elif value is False:
+        return False
+    elif value is 0:
+        return True
+
+    value = value.lower()
+    if value in ['true', '1']:
+        return True
+    elif value in ['false', '0']:
+        return False
+    return False
+
+
 # This is how we make sure a variable is an integer
 def convert_to_int(value):
     try:

@@ -48,7 +48,7 @@ from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, vo
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
 from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, \
+from wevote_functions.functions import convert_to_bool, convert_to_int, generate_voter_device_id, get_voter_device_id, \
     is_voter_device_id_valid, positive_value_exists
 
 
@@ -360,6 +360,11 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     state_code = request.GET.get('state_code', "")
     filter_for_voter = request.GET.get('filter_for_voter', True)
+    filter_for_voter = convert_to_bool(filter_for_voter)
+    filter_out_voter = request.GET.get('filter_out_voter', False)
+    filter_out_voter = convert_to_bool(filter_out_voter)
+    # Make sure filter_for_voter is reset to False if filter_out_voter is true
+    filter_for_voter = False if filter_out_voter else filter_for_voter
     if (kind_of_opinion_maker == ORGANIZATION) or (kind_of_opinion_maker == "ORGANIZATION"):
         organization_id = opinion_maker_id
         organization_we_vote_id = opinion_maker_we_vote_id
@@ -382,6 +387,7 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
                                                    public_figure_we_vote_id=public_figure_we_vote_id,
                                                    stance_we_are_looking_for=stance_we_are_looking_for,
                                                    filter_for_voter=filter_for_voter,
+                                                   filter_out_voter=filter_out_voter,
                                                    google_civic_election_id=google_civic_election_id,
                                                    state_code=state_code)
 

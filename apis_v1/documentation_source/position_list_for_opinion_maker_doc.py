@@ -65,6 +65,12 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                             'google_civic_election_id is, only show positions about things on the current ballot. '
                             'If not, figure out the state_code and only show positions about items in this state.',
         },
+        {
+            'name':         'filter_out_voter',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'The default is \'False\'. Show the positions for this ballot item that are NOT on this '
+                            'voter\'s ballot.',
+        },
     ]
 
     potential_status_codes_list = [
@@ -136,6 +142,8 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "vote_smart_time_span": string,\n' \
                    '     "last_updated": string,\n' \
                    '   ],\n' \
+                   '  "filter_for_voter": boolean (True if only returning positions for voter\'s ballot),\n' \
+                   '  "filter_out_voter": boolean (True if returning positions NOT on voter\'s ballot,\n' \
                    '}'
 
     template_values = {

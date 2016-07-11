@@ -574,7 +574,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                                             organization_id, organization_we_vote_id,
                                             public_figure_id, public_figure_we_vote_id,
                                             stance_we_are_looking_for=ANY_STANCE,
-                                            filter_for_voter=True,
+                                            filter_for_voter=False,
+                                            filter_out_voter=False,
                                             google_civic_election_id=0,
                                             state_code=''):
     """
@@ -624,6 +625,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'google_civic_election_id':         google_civic_election_id,
             'state_code':                       state_code,
             'position_list':                    position_list,
+            'filter_for_voter':                 filter_for_voter,
+            'filter_out_voter':                 filter_out_voter,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -644,6 +647,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'google_civic_election_id':         google_civic_election_id,
             'state_code':                       state_code,
             'position_list':                    position_list,
+            'filter_for_voter':                 filter_for_voter,
+            'filter_out_voter':                 filter_out_voter,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -678,14 +683,14 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
 
             all_positions_list = position_list_manager.retrieve_all_positions_for_organization(
                     organization_id, organization_we_vote_id, stance_we_are_looking_for,
-                    filter_for_voter, voter_device_id, google_civic_election_id, state_code)
+                    filter_for_voter, filter_out_voter, voter_device_id, google_civic_election_id, state_code)
         else:
             opinion_maker_id = organization_id
             opinion_maker_we_vote_id = organization_we_vote_id
     elif kind_of_opinion_maker == PUBLIC_FIGURE:
         all_positions_list = position_list_manager.retrieve_all_positions_for_public_figure(
                 public_figure_id, public_figure_we_vote_id, stance_we_are_looking_for,
-                filter_for_voter, voter_device_id, google_civic_election_id, state_code)
+                filter_for_voter, filter_out_voter, voter_device_id, google_civic_election_id, state_code)
 
         # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
         # for this opinion_maker, we retrieve the following so we can have the id and we_vote_id (per the request of
@@ -721,6 +726,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'google_civic_election_id':         google_civic_election_id,
             'state_code':                       state_code,
             'position_list':                    position_list,
+            'filter_for_voter':                 filter_for_voter,
+            'filter_out_voter':                 filter_out_voter,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -740,6 +747,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             'google_civic_election_id':         google_civic_election_id,
             'state_code':                       state_code,
             'position_list':                    position_list,
+            'filter_for_voter':                 filter_for_voter,
+            'filter_out_voter':                 filter_out_voter,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -817,6 +826,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         'google_civic_election_id':         google_civic_election_id,
         'state_code':                       state_code,
         'position_list':                    position_list,
+        'filter_for_voter':                 filter_for_voter,
+        'filter_out_voter':                 filter_out_voter,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
