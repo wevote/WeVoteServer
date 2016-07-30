@@ -4,6 +4,7 @@
 
 # See also WeVoteServer/twitter/controllers.py for routines that manage internal twitter data
 
+from .functions import retrieve_twitter_user_info
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
 from organization.controllers import update_social_media_statistics_in_other_tables
@@ -14,7 +15,8 @@ import tweepy
 import urllib.request
 from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
+    is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -113,41 +115,6 @@ def refresh_twitter_organization_details(organization):
     results = {
         'success':                  True,
         'status':                   status,
-    }
-    return results
-
-
-def retrieve_twitter_user_info(twitter_handle):
-    auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-    auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
-
-    api = tweepy.API(auth)
-
-    twitter_handle_found = False
-    twitter_json = []
-    try:
-        twitter_user = api.get_user(twitter_handle)
-        twitter_json = twitter_user._json
-        success = True
-        status = 'TWITTER_RETRIEVE_SUCCESSFUL'
-        twitter_handle_found = True
-    except tweepy.RateLimitError:
-        success = False
-        status = 'TWITTER_RATE_LIMIT_ERROR'
-    except tweepy.error.TweepError as error_instance:
-        success = False
-        status = ''
-        error_tuple = error_instance.args
-        for error_dict in error_tuple:
-            for one_error in error_dict:
-                status += '[' + one_error['message'] + '] '
-
-    results = {
-        'status':               status,
-        'success':              success,
-        'twitter_handle':       twitter_handle,
-        'twitter_handle_found': twitter_handle_found,
-        'twitter_json':         twitter_json,
     }
     return results
 
@@ -411,7 +378,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id):
             if positive_value_exists(candidate.twitter_url) \
                     and not positive_value_exists(candidate.candidate_twitter_handle):
                 # If we got a twitter_url from Google Civic, and we haven't already stored a twitter handle, move it
-                candidate.candidate_twitter_handle = candidate.twitter_url.replace("https://twitter.com/", "")
+                candidate.candidate_twitter_handle = extract_twitter_handle_from_text_string(candidate.twitter_url)
                 candidate.save()
                 twitter_handles_added += 1
             if positive_value_exists(candidate.candidate_twitter_handle):

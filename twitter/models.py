@@ -5,7 +5,7 @@
 # See also WeVoteServer/import_export_twitter/models.py for the code that interfaces with twitter (or other) servers
 
 from django.db import models
-from import_export_twitter.controllers import retrieve_twitter_user_info
+from import_export_twitter.functions import retrieve_twitter_user_info
 from wevote_functions.functions import positive_value_exists
 
 

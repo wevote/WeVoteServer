@@ -229,26 +229,28 @@ def organization_retrieve_view(request):
 
 def organization_save_view(request):
     """
-    Retrieve a single organization based on unique identifier
+    Save a single organization based on unique identifier
     :param request:
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    organization_id = request.POST.get('organization_id', 0)
-    organization_we_vote_id = request.POST.get('organization_we_vote_id', '')
-    organization_name = request.POST.get('organization_name', False)
-    organization_email = request.POST.get('organization_email', False)
-    organization_website = request.POST.get('organization_website', False)
-    organization_twitter_handle = request.POST.get('organization_twitter_handle', False)
-    organization_facebook = request.POST.get('organization_facebook', False)
-    organization_image = request.POST.get('organization_image', False)
+    organization_id = request.GET.get('organization_id', 0)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', '')
+    organization_name = request.GET.get('organization_name', False)
+    organization_email = request.GET.get('organization_email', False)
+    organization_website = request.GET.get('organization_website', False)
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', False)
+    organization_facebook = request.GET.get('organization_facebook', False)
+    organization_image = request.GET.get('organization_image', False)
+    refresh_from_twitter = request.GET.get('refresh_from_twitter', False)
 
     results = organization_save_for_api(
         voter_device_id=voter_device_id, organization_id=organization_id,
         organization_we_vote_id=organization_we_vote_id,
         organization_name=organization_name, organization_email=organization_email,
         organization_website=organization_website, organization_twitter_handle=organization_twitter_handle,
-        organization_facebook=organization_facebook, organization_image=organization_image)
+        organization_facebook=organization_facebook, organization_image=organization_image,
+        refresh_from_twitter=refresh_from_twitter)
 
     return HttpResponse(json.dumps(results), content_type='application/json')
 

@@ -76,6 +76,11 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
             google_civic_election_id = 0
             owner_found = True
             status = "OWNER_OF_THIS_TWITTER_HANDLE_FOUND-ORGANIZATION"
+            twitter_description = one_organization.twitter_description
+            twitter_followers_count = one_organization.twitter_followers_count
+            twitter_photo_url = one_organization.twitter_profile_image_url_https
+            twitter_user_website = one_organization.organization_website
+            twitter_name = one_organization.twitter_name
 
     # Reach out to Twitter (or our Twitter account cache) to retrieve some information we can display
     if not positive_value_exists(owner_found):
@@ -101,7 +106,6 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
         'owner_we_vote_id':         owner_we_vote_id,
         'owner_id':                 owner_id,
         'google_civic_election_id': google_civic_election_id,
-        # These values only returned if kind_of_owner == TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE
         'twitter_description':      twitter_description,
         'twitter_followers_count':  twitter_followers_count,
         'twitter_photo_url':        twitter_photo_url,

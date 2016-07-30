@@ -542,7 +542,8 @@ class CandidateCampaign(models.Model):
     def display_candidate_name(self):
         full_name = self.candidate_name
         if full_name.isupper():
-            return display_full_name_with_correct_capitalization(full_name)
+            full_name_corrected_capitalization = display_full_name_with_correct_capitalization(full_name)
+            return full_name_corrected_capitalization
         return full_name
 
     def extract_first_name(self):

@@ -4,9 +4,10 @@
 
 from .controllers import refresh_twitter_candidate_details, retrieve_twitter_data_for_all_organizations, \
     refresh_twitter_organization_details, \
-    retrieve_twitter_user_info, scrape_social_media_from_one_site, refresh_twitter_candidate_details_for_election, \
+    scrape_social_media_from_one_site, refresh_twitter_candidate_details_for_election, \
     scrape_and_save_social_media_for_candidates_in_one_election, scrape_and_save_social_media_from_all_organizations, \
     transfer_candidate_twitter_handles_from_google_civic
+from .functions import retrieve_twitter_user_info
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignManager
 from django.contrib.auth.decorators import login_required

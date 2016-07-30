@@ -7,6 +7,7 @@ from django.db.models import Q
 
 from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
+from import_export_twitter.functions import retrieve_twitter_user_info
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
@@ -143,7 +144,8 @@ class OrganizationManager(models.Manager):
                                       organization_website_search, organization_twitter_search,
                                       organization_name=False, organization_website=False,
                                       organization_twitter_handle=False, organization_email=False,
-                                      organization_facebook=False, organization_image=False):
+                                      organization_facebook=False, organization_image=False,
+                                      refresh_from_twitter=False):
         """
         Either update or create an organization entry.
         """
@@ -154,16 +156,27 @@ class OrganizationManager(models.Manager):
         organization_on_stage = Organization()
         status = "ENTERING_UPDATE_OR_CREATE_ORGANIZATION"
 
-        organization_id = convert_to_int(organization_id)
-        we_vote_id = we_vote_id.strip()
-        organization_website_search = organization_website_search.strip()
-        organization_twitter_search = organization_twitter_search.strip()
+        organization_id = convert_to_int(organization_id) if positive_value_exists(organization_id) else False
+        we_vote_id = we_vote_id.strip() if we_vote_id else False
+        organization_website_search = organization_website_search.strip() if organization_website_search else False
+        organization_twitter_search = organization_twitter_search.strip() if organization_twitter_search else False
         organization_name = organization_name.strip() if organization_name else False
         organization_website = organization_website.strip() if organization_website else False
         organization_twitter_handle = organization_twitter_handle.strip() if organization_twitter_handle else False
         organization_email = organization_email.strip() if organization_email else False
         organization_facebook = organization_facebook.strip() if organization_facebook else False
         organization_image = organization_image.strip() if organization_image else False
+
+        # Values that can only be updated by a refresh_from_twitter
+        twitter_user_id = False
+        twitter_name = False
+        twitter_followers_count = False
+        twitter_profile_image_url_https = False
+        twitter_profile_banner_url_https = False
+        twitter_profile_background_image_url_https = False
+        twitter_description = False
+        twitter_location = False
+        twitter_url = False
 
         # In order of authority
         # 1) organization_id exists? Find it with organization_id or fail
@@ -179,21 +192,77 @@ class OrganizationManager(models.Manager):
             organization_results = self.retrieve_organization(organization_id, we_vote_id)
             if organization_results['success']:
                 organization_on_stage = organization_results['organization']
-                if organization_name:
-                    organization_on_stage.organization_name = organization_name
-                if organization_website:
-                    organization_on_stage.organization_website = organization_website
-                if organization_twitter_handle:
-                    organization_on_stage.organization_twitter_handle = organization_twitter_handle
-                if organization_email:
-                    organization_on_stage.organization_email = organization_email
-                if organization_facebook:
-                    organization_on_stage.organization_facebook = organization_facebook
-                if organization_image:
-                    organization_on_stage.organization_image = organization_image
+                organization_on_stage_found = True
 
+                # Now that we have an organization to update, get supplemental data from Twitter if
+                # refresh_from_twitter is true
+                if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
+                    results = retrieve_twitter_user_info(organization_twitter_handle)
+                    if results['success']:
+                        twitter_json = results['twitter_json']
+                        if positive_value_exists(twitter_json['id']):
+                            twitter_user_id = convert_to_int(twitter_json['id'])
+                        if positive_value_exists(twitter_json['name']):
+                            twitter_name = twitter_json['name']
+                            # Use Twitter value if a value for this variable was NOT passed in
+                            if not positive_value_exists(organization_name):
+                                organization_name = twitter_json['name']
+                        # TODO DALE What is twitter_url?
+                        # if positive_value_exists(twitter_json['twitter_url']):
+                        #     # Use Twitter value if a value for this variable was NOT passed in
+                        #     if not positive_value_exists(organization_website):
+                        #         organization_website = twitter_json['twitter_url']
+                        twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+                        if positive_value_exists(twitter_json['profile_image_url_https']):
+                            twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+                        if 'profile_banner_url' in twitter_json:
+                            twitter_profile_banner_url_https = twitter_json['profile_banner_url']
+                        twitter_profile_background_image_url_https = \
+                            twitter_json['profile_background_image_url_https']
+                        twitter_description = twitter_json['description']
+                        twitter_location = twitter_json['location']
+
+                value_changed = False
                 if organization_name or organization_website or organization_twitter_handle \
                         or organization_email or organization_facebook or organization_image:
+                    value_changed = True
+                    if organization_name:
+                        organization_on_stage.organization_name = organization_name
+                    if organization_website:
+                        organization_on_stage.organization_website = organization_website
+                    if organization_twitter_handle:
+                        organization_on_stage.organization_twitter_handle = organization_twitter_handle
+                    if organization_email:
+                        organization_on_stage.organization_email = organization_email
+                    if organization_facebook:
+                        organization_on_stage.organization_facebook = organization_facebook
+                    if organization_image:
+                        organization_on_stage.organization_image = organization_image
+
+                if twitter_user_id or twitter_name or twitter_followers_count or twitter_profile_image_url_https \
+                        or twitter_profile_banner_url_https or twitter_profile_background_image_url_https \
+                        or twitter_description or twitter_location:
+                    # Values that can only be added by a refresh_from_twitter
+                    value_changed = True
+                    if twitter_user_id:
+                        organization_on_stage.twitter_user_id = twitter_user_id
+                    if twitter_name:
+                        organization_on_stage.twitter_name = twitter_name
+                    if twitter_followers_count:
+                        organization_on_stage.twitter_followers_count = twitter_followers_count
+                    if twitter_profile_image_url_https:
+                        organization_on_stage.twitter_profile_image_url_https = twitter_profile_image_url_https
+                    if twitter_profile_banner_url_https:
+                        organization_on_stage.twitter_profile_banner_url_https = twitter_profile_banner_url_https
+                    if twitter_profile_background_image_url_https:
+                        organization_on_stage.twitter_profile_background_image_url_https = \
+                            twitter_profile_background_image_url_https
+                    if twitter_description:
+                        organization_on_stage.twitter_description = twitter_description
+                    if twitter_location:
+                        organization_on_stage.twitter_location = twitter_location
+
+                if value_changed:
                     organization_on_stage.save()
                     success = True
                     status = "SAVED_WITH_ORG_ID_OR_WE_VOTE_ID"
@@ -239,8 +308,33 @@ class OrganizationManager(models.Manager):
 
                 # 3 & 4) Save values entered in steps 3 & 4
                 if organization_on_stage_found:
+                    # Now that we have an organization to update, get supplemental data from Twitter if
+                    # refresh_from_twitter is true
+                    if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
+                        results = retrieve_twitter_user_info(organization_twitter_handle)
+                        if results['success']:
+                            twitter_json = results['twitter_json']
+                            if positive_value_exists(twitter_json['id']):
+                                twitter_user_id = convert_to_int(twitter_json['id'])
+                            if positive_value_exists(twitter_json['name']):
+                                twitter_name = twitter_json['name']
+                                # Use Twitter value if a value for this variable was NOT passed in
+                                if not positive_value_exists(organization_name):
+                                    organization_name = twitter_json['name']
+                            twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+                            if positive_value_exists(twitter_json['profile_image_url_https']):
+                                twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+                            if 'profile_banner_url' in twitter_json:
+                                twitter_profile_banner_url_https = twitter_json['profile_banner_url']
+                            twitter_profile_background_image_url_https = \
+                                twitter_json['profile_background_image_url_https']
+                            twitter_description = twitter_json['description']
+                            twitter_location = twitter_json['location']
+
+                    value_changed = False
                     if organization_name or organization_website or organization_twitter_handle \
                             or organization_email or organization_facebook or organization_image:
+                        value_changed = True
                         if organization_name:
                             organization_on_stage.organization_name = organization_name
                         if organization_website:
@@ -253,6 +347,31 @@ class OrganizationManager(models.Manager):
                             organization_on_stage.organization_facebook = organization_facebook
                         if organization_image:
                             organization_on_stage.organization_image = organization_image
+
+                    if twitter_user_id or twitter_name or twitter_followers_count or twitter_profile_image_url_https \
+                            or twitter_profile_banner_url_https or twitter_profile_background_image_url_https \
+                            or twitter_description or twitter_location:
+                        # Values that can only be added by a refresh_from_twitter
+                        value_changed = True
+                        if twitter_user_id:
+                            organization_on_stage.twitter_user_id = twitter_user_id
+                        if twitter_name:
+                            organization_on_stage.twitter_name = twitter_name
+                        if twitter_followers_count:
+                            organization_on_stage.twitter_followers_count = twitter_followers_count
+                        if twitter_profile_image_url_https:
+                            organization_on_stage.twitter_profile_image_url_https = twitter_profile_image_url_https
+                        if twitter_profile_banner_url_https:
+                            organization_on_stage.twitter_profile_banner_url_https = twitter_profile_banner_url_https
+                        if twitter_profile_background_image_url_https:
+                            organization_on_stage.twitter_profile_background_image_url_https = \
+                                twitter_profile_background_image_url_https
+                        if twitter_description:
+                            organization_on_stage.twitter_description = twitter_description
+                        if twitter_location:
+                            organization_on_stage.twitter_location = twitter_location
+
+                    if value_changed:
                         organization_on_stage.save()
                         success = True
                         status = found_with_status + " SAVED"
@@ -264,6 +383,29 @@ class OrganizationManager(models.Manager):
 
         if not organization_on_stage_found:
             try:
+                # Now that we have an organization to update, get supplemental data from Twitter if
+                # refresh_from_twitter is true
+                if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
+                    results = retrieve_twitter_user_info(organization_twitter_handle)
+                    if results['success']:
+                        twitter_json = results['twitter_json']
+                        if positive_value_exists(twitter_json['id']):
+                            twitter_user_id = convert_to_int(twitter_json['id'])
+                        if positive_value_exists(twitter_json['name']):
+                            twitter_name = twitter_json['name']
+                            # Use Twitter value if a value for this variable was NOT passed in
+                            if not positive_value_exists(organization_name):
+                                organization_name = twitter_json['name']
+                        twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+                        if positive_value_exists(twitter_json['profile_image_url_https']):
+                            twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+                        if 'profile_banner_url' in twitter_json:
+                            twitter_profile_banner_url_https = twitter_json['profile_banner_url']
+                        twitter_profile_background_image_url_https = \
+                            twitter_json['profile_background_image_url_https']
+                        twitter_description = twitter_json['description']
+                        twitter_location = twitter_json['location']
+
                 # If here, create new organization
                 results = Organization.objects.create_organization(organization_name, organization_website,
                                                                    organization_twitter_handle, organization_email,
@@ -273,6 +415,32 @@ class OrganizationManager(models.Manager):
                     success = True
                     status = "NEW_ORGANIZATION_CREATED_IN_UPDATE_OR_CREATE"
                     organization_on_stage = results['organization']
+
+                    if twitter_user_id or twitter_name or twitter_followers_count or twitter_profile_image_url_https \
+                            or twitter_profile_banner_url_https or twitter_profile_background_image_url_https \
+                            or twitter_description or twitter_location:
+                        # Values that can only be added by a refresh_from_twitter
+                        if twitter_user_id:
+                            organization_on_stage.twitter_user_id = twitter_user_id
+                        if twitter_name:
+                            organization_on_stage.twitter_name = twitter_name
+                        if twitter_followers_count:
+                            organization_on_stage.twitter_followers_count = twitter_followers_count
+                        if twitter_profile_image_url_https:
+                            organization_on_stage.twitter_profile_image_url_https = twitter_profile_image_url_https
+                        if twitter_profile_banner_url_https:
+                            organization_on_stage.twitter_profile_banner_url_https = twitter_profile_banner_url_https
+                        if twitter_profile_background_image_url_https:
+                            organization_on_stage.twitter_profile_background_image_url_https = \
+                                twitter_profile_background_image_url_https
+                        if twitter_description:
+                            organization_on_stage.twitter_description = twitter_description
+                        if twitter_location:
+                            organization_on_stage.twitter_location = twitter_location
+
+                        organization_on_stage.save()
+                        status += " TWITTER_VALUES_RETRIEVED_AND_SAVED"
+
                 else:
                     success = False
                     status = results['status']
@@ -794,11 +962,11 @@ class Organization(models.Model):
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
     def organization_photo_url(self):
-        if self.organization_image:
+        if positive_value_exists(self.organization_image):
             return self.organization_image
-        elif self.twitter_profile_image_url_https:
+        elif positive_value_exists(self.twitter_profile_image_url_https):
             return self.twitter_profile_image_url_https_bigger()
-        elif self.wikipedia_photo_url:
+        elif positive_value_exists(self.wikipedia_photo_url):
             return self.wikipedia_photo_url
         return ''
 

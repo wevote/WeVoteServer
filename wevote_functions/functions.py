@@ -230,9 +230,19 @@ def extract_twitter_handle_from_text_string(twitter_text_string):
     :param twitter_text_string:
     :return:
     """
+    if not twitter_text_string:
+        return ""
+    if not positive_value_exists(twitter_text_string):
+        return ""
     twitter_text_string = str(twitter_text_string)
     twitter_text_string.strip()
+    twitter_text_string = twitter_text_string.lower()
+    twitter_text_string = twitter_text_string.replace("http://twitter.com/", "")
+    twitter_text_string = twitter_text_string.replace("http://www.twitter.com/", "")
     twitter_text_string = twitter_text_string.replace("https://twitter.com/", "")
+    twitter_text_string = twitter_text_string.replace("https://www.twitter.com/", "")
+    twitter_text_string = twitter_text_string.replace("www.twitter.com/", "")
+    twitter_text_string = twitter_text_string.replace("twitter.com/", "")
     twitter_text_string = twitter_text_string.replace("@", "")
     return twitter_text_string
 
@@ -402,7 +412,7 @@ def positive_value_exists(value):
     :return: bool
     """
     try:
-        if value in [None, '', 'None']:
+        if value in [None, '', 'None', False, 'False', 'false']:
             return False
         if sys.version_info > (3, 0):
             # Python 3 code in this block
