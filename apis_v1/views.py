@@ -22,7 +22,8 @@ from organization.controllers import organization_retrieve_for_api, organization
 from position.controllers import position_list_for_ballot_item_for_api, position_list_for_opinion_maker_for_api, \
     position_retrieve_for_api, position_save_for_api, voter_all_positions_retrieve_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api
-from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING, \
+    FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC
 from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
 from quick_info.controllers import quick_info_retrieve_for_api
@@ -42,7 +43,7 @@ from twitter.controllers import twitter_identity_retrieve_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, \
     voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
-    VoterDeviceLink, VoterDeviceLinkManager, VoterManager
+    VoterDeviceLink, VoterDeviceLinkManager, voter_has_authority, VoterManager
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
@@ -227,7 +228,7 @@ def organization_retrieve_view(request):
         organization_id=organization_id, organization_we_vote_id=organization_we_vote_id)
 
 
-def organization_save_view(request):
+def organization_save_view(request):  # organizationSave
     """
     Save a single organization based on unique identifier
     :param request:
@@ -243,6 +244,46 @@ def organization_save_view(request):
     organization_facebook = request.GET.get('organization_facebook', False)
     organization_image = request.GET.get('organization_image', False)
     refresh_from_twitter = request.GET.get('refresh_from_twitter', False)
+
+    # We only want to allow save if either this is your organization (i.e., you have the Twitter handle)
+    voter_owns_twitter_handle = False
+    #  or if you are a verified volunteer or admin
+    authority_required = {'admin', 'verified_volunteer'}  # admin, verified_volunteer
+    voter_is_admin_or_verified_volunteer = False
+    if voter_has_authority(request, authority_required):
+        voter_is_admin_or_verified_volunteer = True
+    else:
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+
+            # Does this voter have the same Twitter handle as this organization? If so, link this organization to
+            #  this particular voter
+            if voter.twitter_screen_name.lower() == organization_twitter_handle.lower():
+                # This will fail if the organization's twitter handle isn't passed in as a variable
+                voter_owns_twitter_handle = True
+
+    if not voter_is_admin_or_verified_volunteer:
+        if not voter_owns_twitter_handle:
+            # Only refuse entry if *both* conditions are not met
+            results = {
+                'status': "VOTER_LACKS_AUTHORITY_TO_SAVE_ORGANIZATION",
+                'success': False,
+                'organization_id': organization_id,
+                'organization_we_vote_id': organization_we_vote_id,
+                'new_organization_created': False,
+                'organization_name': organization_name,
+                'organization_email': organization_email,
+                'organization_website': organization_website,
+                'organization_facebook': organization_facebook,
+                'organization_photo_url': organization_image,
+                'organization_twitter_handle': organization_twitter_handle,
+                'refresh_from_twitter': refresh_from_twitter,
+                'twitter_followers_count': 0,
+                'twitter_description': "",
+            }
+            return HttpResponse(json.dumps(results), content_type='application/json')
 
     results = organization_save_for_api(
         voter_device_id=voter_device_id, organization_id=organization_id,
@@ -298,10 +339,17 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     stance = request.GET.get('stance', ANY_STANCE)
-    if stance in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+    if stance in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
         stance_we_are_looking_for = stance
     else:
         stance_we_are_looking_for = ANY_STANCE
+
+    friends_vs_public_incoming = request.GET.get('friends_vs_public', FRIENDS_AND_PUBLIC)
+    if friends_vs_public_incoming in (FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC):
+        friends_vs_public = friends_vs_public_incoming
+    else:
+        friends_vs_public = FRIENDS_AND_PUBLIC
+
     show_positions_this_voter_follows = request.GET.get('show_positions_this_voter_follows', True)
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
@@ -335,6 +383,7 @@ def position_list_for_ballot_item_view(request):  # positionListForBallotItem
         measure_id = 0
         measure_we_vote_id = ''
     return position_list_for_ballot_item_for_api(voter_device_id=voter_device_id,
+                                                 friends_vs_public=friends_vs_public,
                                                  office_id=office_id,
                                                  office_we_vote_id=office_we_vote_id,
                                                  candidate_id=candidate_id,
@@ -356,6 +405,11 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
         stance_we_are_looking_for = stance
     else:
         stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public_incoming = request.GET.get('friends_vs_public', ANY_STANCE)
+    if friends_vs_public_incoming in (FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC):
+        friends_vs_public = friends_vs_public_incoming
+    else:
+        friends_vs_public = FRIENDS_AND_PUBLIC
     kind_of_opinion_maker = request.GET.get('kind_of_opinion_maker', "")
     opinion_maker_id = request.GET.get('opinion_maker_id', 0)
     opinion_maker_we_vote_id = request.GET.get('opinion_maker_we_vote_id', "")
@@ -387,6 +441,7 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
                                                    organization_we_vote_id=organization_we_vote_id,
                                                    public_figure_id=public_figure_id,
                                                    public_figure_we_vote_id=public_figure_we_vote_id,
+                                                   friends_vs_public=friends_vs_public,
                                                    stance_we_are_looking_for=stance_we_are_looking_for,
                                                    filter_for_voter=filter_for_voter,
                                                    filter_out_voter=filter_out_voter,
@@ -410,29 +465,30 @@ def position_retrieve_view(request):
     )
 
 
-def position_save_view(request):
+def position_save_view(request):  # positionSave
     """
-    Save a single position (positionSave)
+    Save a single position
     :param request:
     :return:
     """
     # We set values that aren't passed in, to False so we know to treat them as null or unchanged. This allows us to
     #  only change the values we want to
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_id = request.POST.get('position_id', False)
-    position_we_vote_id = request.POST.get('position_we_vote_id', False)
-    organization_we_vote_id = request.POST.get('organization_we_vote_id', False)
-    public_figure_we_vote_id = request.POST.get('public_figure_we_vote_id', False)
-    voter_we_vote_id = request.POST.get('voter_we_vote_id', False)
-    google_civic_election_id = request.POST.get('google_civic_election_id', False)
-    ballot_item_display_name = request.POST.get('ballot_item_display_name', False)
-    office_we_vote_id = request.POST.get('office_we_vote_id', False)
-    candidate_we_vote_id = request.POST.get('candidate_we_vote_id', False)
-    measure_we_vote_id = request.POST.get('measure_we_vote_id', False)
-    stance = request.POST.get('stance', False)
-    statement_text = request.POST.get('statement_text', False)
-    statement_html = request.POST.get('statement_html', False)
-    more_info_url = request.POST.get('more_info_url', False)
+    position_id = request.GET.get('position_id', False)
+    position_we_vote_id = request.GET.get('position_we_vote_id', False)
+    organization_we_vote_id = request.GET.get('organization_we_vote_id', False)
+    public_figure_we_vote_id = request.GET.get('public_figure_we_vote_id', False)
+    voter_we_vote_id = request.GET.get('voter_we_vote_id', False)
+    google_civic_election_id = request.GET.get('google_civic_election_id', False)
+    ballot_item_display_name = request.GET.get('ballot_item_display_name', False)
+    office_we_vote_id = request.GET.get('office_we_vote_id', False)
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
+    measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
+    stance = request.GET.get('stance', False)
+    set_as_public_position = request.GET.get('set_as_public_position', True)
+    statement_text = request.GET.get('statement_text', False)
+    statement_html = request.GET.get('statement_html', False)
+    more_info_url = request.GET.get('more_info_url', False)
 
     results = position_save_for_api(
         voter_device_id=voter_device_id,
@@ -447,6 +503,7 @@ def position_save_view(request):
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
         stance=stance,
+        set_as_public_position=set_as_public_position,
         statement_text=statement_text,
         statement_html=statement_html,
         more_info_url=more_info_url,
@@ -1036,7 +1093,7 @@ def voter_address_save_view(request):  # voterAddressSave
 
     if not address_variable_exists:
         json_data = {
-                'status': "MISSING_POST_VARIABLE-ADDRESS",
+                'status': "MISSING_GET_VARIABLE-ADDRESS",
                 'success': False,
                 'voter_device_id': voter_device_id,
                 'text_for_map_search': text_for_map_search,
@@ -1199,7 +1256,7 @@ def voter_guide_possibility_save_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    voter_guide_possibility_url = request.POST.get('voter_guide_possibility_url', '')
+    voter_guide_possibility_url = request.GET.get('voter_guide_possibility_url', '')
     return voter_guide_possibility_save_for_api(voter_device_id=voter_device_id,
                                                 voter_guide_possibility_url=voter_guide_possibility_url)
 
@@ -1374,6 +1431,7 @@ def voter_position_retrieve_view(request):
 def voter_all_positions_retrieve_view(request):
     """
     Retrieve a list of all support or oppose positions for one voter. voterAllPositionsRetrieve
+    Note that these can either be public positions or private positions.
     :param request:
     :return:
     """
@@ -1444,14 +1502,15 @@ def voter_position_comment_save_view(request):  # voterPositionCommentSave
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_id = request.POST.get('position_id', False)
-    position_we_vote_id = request.POST.get('position_we_vote_id', False)
-    google_civic_election_id = request.POST.get('google_civic_election_id', False)
-    office_we_vote_id = request.POST.get('office_we_vote_id', False)
-    candidate_we_vote_id = request.POST.get('candidate_we_vote_id', False)
-    measure_we_vote_id = request.POST.get('measure_we_vote_id', False)
-    statement_text = request.POST.get('statement_text', False)
-    statement_html = request.POST.get('statement_html', False)
+    position_id = request.GET.get('position_id', False)
+    position_we_vote_id = request.GET.get('position_we_vote_id', False)
+    google_civic_election_id = request.GET.get('google_civic_election_id', False)
+    office_we_vote_id = request.GET.get('office_we_vote_id', False)
+    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
+    measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
+    statement_text = request.GET.get('statement_text', False)
+    statement_html = request.GET.get('statement_html', False)
+    set_as_public_position = request.GET.get('set_as_public_position', False)
 
     results = voter_position_comment_save_for_api(
         voter_device_id=voter_device_id,
@@ -1463,6 +1522,7 @@ def voter_position_comment_save_view(request):  # voterPositionCommentSave
         measure_we_vote_id=measure_we_vote_id,
         statement_text=statement_text,
         statement_html=statement_html,
+        set_as_public_position=set_as_public_position,
     )
 
     return HttpResponse(json.dumps(results), content_type='application/json')
@@ -1478,6 +1538,7 @@ def voter_opposing_save_view(request):
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    set_as_public_position = request.GET.get('set_as_public_position', False)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1495,7 +1556,8 @@ def voter_opposing_save_view(request):
         measure_we_vote_id = None
     return voter_opposing_save(voter_device_id=voter_device_id,
                                candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                               measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
+                               measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
+                               set_as_public_position=set_as_public_position)
 
 
 class VoterExportView(APIView):
@@ -1569,6 +1631,7 @@ def voter_stop_opposing_save_view(request):
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    set_as_public_position = request.GET.get('set_as_public_position', False)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1586,12 +1649,15 @@ def voter_stop_opposing_save_view(request):
         measure_we_vote_id = None
     return voter_stop_opposing_save(voter_device_id=voter_device_id,
                                     candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                                    measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
+                                    measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
+                                    set_as_public_position=set_as_public_position)
 
 
 def voter_stop_supporting_save_view(request):
     """
     Save support for a single measure or candidate for one voter (voterStopSupportingSave)
+    Default to set this as a position for your friends only.
+    set_as_public_position to save position publicly
     :param request:
     :return:
     """
@@ -1599,6 +1665,7 @@ def voter_stop_supporting_save_view(request):
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    set_as_public_position = request.GET.get('set_as_public_position', False)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1616,12 +1683,15 @@ def voter_stop_supporting_save_view(request):
         measure_we_vote_id = None
     return voter_stop_supporting_save(voter_device_id=voter_device_id,
                                       candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                                      measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
+                                      measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
+                                      set_as_public_position=set_as_public_position)
 
 
 def voter_supporting_save_view(request):
     """
     Save support for a single measure or candidate for one voter (voterSupportingSave)
+    Default to set this as a position for your friends only.
+    set_as_public_position to save position publicly
     :param request:
     :return:
     """
@@ -1629,6 +1699,7 @@ def voter_supporting_save_view(request):
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+    set_as_public_position = request.GET.get('set_as_public_position', False)
     if kind_of_ballot_item == CANDIDATE:
         candidate_id = ballot_item_id
         candidate_we_vote_id = ballot_item_we_vote_id
@@ -1646,7 +1717,8 @@ def voter_supporting_save_view(request):
         measure_we_vote_id = None
     return voter_supporting_save_for_api(voter_device_id=voter_device_id,
                                          candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
-                                         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
+                                         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id,
+                                         set_as_public_position=set_as_public_position)
 
 
 def voter_star_off_save_view(request):

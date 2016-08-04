@@ -48,6 +48,12 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                             'PERCENT_RATING',
         },
         {
+            'name':         'friends_vs_public',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Default is FRIENDS_AND_PUBLIC. '
+                            'Other options include FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC',
+        },
+        {
             'name':         'show_positions_this_voter_follows',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'True default shows the positions of organizations, public figures and '
@@ -84,6 +90,7 @@ def position_list_for_ballot_item_doc_template_values(url_root):
         'ballot_item_id': '5655',
         'show_positions_this_voter_follows': 'False',
         'stance': 'ANY_STANCE',
+        'friends_vs_public': 'FRIENDS_AND_PUBLIC',
     }
 
     api_response = '{\n' \

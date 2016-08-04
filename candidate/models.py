@@ -224,7 +224,7 @@ class CandidateCampaignListManager(models.Model):
         return candidates_list_temp
 
     def remove_duplicate_candidate(self, candidate_id, google_civic_election_id):
-        # TODO DALE We need to look delete the positions associated with this candidate, and convert them to belong
+        # TODO DALE We need to delete the positions associated with this candidate, and convert them to belong
         # to candidate we leave in place.
 
         success = False
@@ -561,7 +561,7 @@ class CandidateCampaign(models.Model):
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:
-            self.we_vote_id = self.we_vote_id.strip()
+            self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()

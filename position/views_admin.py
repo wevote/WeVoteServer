@@ -326,9 +326,10 @@ def position_delete_process_view(request):
 #     candidate_campaign_id = convert_to_int(candidate_campaign_id)
 #
 #     position_list_manager = PositionListManager()
+#     public_positions = True  # The alternate is positions for friends-only
 #     all_positions_list_for_candidate_campaign = \
 #         position_list_manager.retrieve_all_positions_for_candidate_campaign(
-#             candidate_campaign_id, stance_we_are_looking_for)
+#             public_positions, candidate_campaign_id, stance_we_are_looking_for)
 #
 #     voter_api_device_id = get_voter_api_device_id(request)
 #     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)

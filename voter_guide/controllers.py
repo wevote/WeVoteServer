@@ -442,16 +442,18 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
 def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item, ballot_item_we_vote_id,
                                                    search_string):
     voter_guide_list_found = False
+    retrieve_public_positions = True  # The alternate is positions for friends-only. Since this method returns positions
+    # to follow, we never need to return friend's positions here
 
     position_list_manager = PositionListManager()
     if (kind_of_ballot_item == CANDIDATE) and positive_value_exists(ballot_item_we_vote_id):
         candidate_id = 0
         all_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                candidate_id, ballot_item_we_vote_id, ANY_STANCE)
+            retrieve_public_positions, candidate_id, ballot_item_we_vote_id, ANY_STANCE)
     elif (kind_of_ballot_item == MEASURE) and positive_value_exists(ballot_item_we_vote_id):
         measure_id = 0
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
-                measure_id, ballot_item_we_vote_id, ANY_STANCE)
+            retrieve_public_positions, measure_id, ballot_item_we_vote_id, ANY_STANCE)
     elif (kind_of_ballot_item == OFFICE) and positive_value_exists(ballot_item_we_vote_id):
         office_id = 0
         all_positions_list = position_list_manager.retrieve_all_positions_for_contest_office(

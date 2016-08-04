@@ -107,16 +107,18 @@ def organization_save_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
                    '  "organization_id": integer,\n' \
                    '  "organization_we_vote_id": string,\n' \
                    '  "new_organization_created": boolean,\n' \
                    '  "organization_name": string,\n' \
                    '  "organization_email": string,\n' \
                    '  "organization_website": string,\n' \
+                   '  "organization_facebook": string,\n' \
+                   '  "organization_photo_url": string,\n' \
                    '  "organization_twitter_handle": string,\n' \
                    '  "twitter_followers_count": integer,\n' \
                    '  "twitter_description": string,\n' \
+                   '  "refresh_from_twitter": boolean,\n' \
                    '}'
 
     template_values = {

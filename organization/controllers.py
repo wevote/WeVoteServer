@@ -11,7 +11,7 @@ from follow.models import FollowOrganizationManager, FollowOrganizationList, FOL
 import json
 from organization.models import Organization
 import requests
-from voter.models import fetch_voter_id_from_voter_device_link
+from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 from voter_guide.models import VoterGuide, VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
@@ -466,7 +466,7 @@ def organizations_import_from_structured_json(structured_json):
 def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # organizationRetrieve
     organization_id = convert_to_int(organization_id)
 
-    we_vote_id = organization_we_vote_id.strip()
+    we_vote_id = organization_we_vote_id.strip().lower()
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
         json_data = {
             'status': "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING",
@@ -533,12 +533,13 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organization_save_for_api(voter_device_id, organization_id, organization_we_vote_id, organization_name,
+def organization_save_for_api(voter_device_id, organization_id, organization_we_vote_id,   # organizationSave
+                              organization_name,
                               organization_email, organization_website,
                               organization_twitter_handle, organization_facebook, organization_image,
                               refresh_from_twitter):
     organization_id = convert_to_int(organization_id)
-    organization_we_vote_id = organization_we_vote_id.strip()
+    organization_we_vote_id = organization_we_vote_id.strip().lower()
 
     # Make sure we are only working with the twitter handle, and not the "https" or "@"
     organization_twitter_handle = extract_twitter_handle_from_text_string(organization_twitter_handle)
@@ -566,7 +567,8 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'organization_twitter_handle': organization_twitter_handle,
             'twitter_followers_count': 0,
             'twitter_description': "",
-            }
+            'refresh_from_twitter': refresh_from_twitter,
+        }
         return results
     elif not existing_unique_identifier_found and not required_variables_for_new_entry:
         results = {
@@ -583,6 +585,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'organization_twitter_handle': organization_twitter_handle,
             'twitter_followers_count': 0,
             'twitter_description': "",
+            'refresh_from_twitter': refresh_from_twitter,
         }
         return results
 
@@ -597,9 +600,29 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
 
     if save_results['success']:
         organization = save_results['organization']
+        status = save_results['status']
+
+        # Now update the voter record with the organization_we_vote_id
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+
+            # Does this voter have the same Twitter handle as this organization? If so, link this organization to
+            #  this particular voter
+            if voter.twitter_screen_name.lower() == organization.organization_twitter_handle.lower():
+                try:
+                    voter.linked_organization_we_vote_id = organization.we_vote_id
+                    voter.save()
+                except Exception as e:
+                    status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID"
+            # If not, then this is a volunteer or admin setting up an organization
+            else:
+                status += " DID_NOT_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID-VOTER_DOES_NOT_MATCH_TWITTER_HANDLE"
+
         results = {
             'success':                      save_results['success'],
-            'status':                       save_results['status'],
+            'status':                       status,
             'voter_device_id':              voter_device_id,
             'organization_id':              organization.id,
             'organization_we_vote_id':      organization.we_vote_id,
@@ -623,6 +646,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'twitter_description':
                 organization.twitter_description if positive_value_exists(
                     organization.twitter_description) else '',
+            'refresh_from_twitter': refresh_from_twitter,
         }
         return results
     else:
@@ -641,6 +665,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             'organization_twitter_handle': organization_twitter_handle,
             'twitter_followers_count':  0,
             'twitter_description':      "",
+            'refresh_from_twitter':     refresh_from_twitter,
         }
         return results
 

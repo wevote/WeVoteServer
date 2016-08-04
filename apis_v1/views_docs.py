@@ -681,7 +681,7 @@ def voter_position_retrieve_doc_view(request):
 
 def voter_position_comment_save_doc_view(request):
     """
-    Show documentation about positionSave
+    Show documentation about voterPositionCommentSave
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_position_comment_save_doc.voter_position_comment_save_doc_template_values(url_root)

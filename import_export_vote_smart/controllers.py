@@ -697,6 +697,7 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
                     candidate_we_vote_id=candidate_campaign.we_vote_id,
                     measure_we_vote_id=False,
                     stance=PERCENT_RATING,
+                    set_as_public_position=True,
                     statement_text=one_candidate_rating.ratingText,
                     statement_html=False,
                     more_info_url=False,
@@ -754,7 +755,7 @@ def transfer_vote_smart_special_interest_groups_to_we_vote_organizations():
         if update_results['organization_updated']:
             number_of_we_vote_organizations_updated += 1
         # process_count += 1
-        # if process_count > 50:  # TODO DALE Temp limit
+        # if process_count > 50:  # Temp limit
         #     break
 
     success = True

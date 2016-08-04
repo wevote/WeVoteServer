@@ -440,8 +440,9 @@ def election_migration_view(request):
             new_candidate_list = []
             # Go through candidate_list and find the number of positions saved for each candidate
             for candidate in candidate_list:
+                retrieve_public_positions = True  # The alternate is positions for friends-only
                 position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                    0, candidate.we_vote_id)
+                    retrieve_public_positions, 0, candidate.we_vote_id)
                 candidate.position_count = len(position_list)  # This is wasteful (instead of using count), but ok
 
                 # Now find the candidates from the Google Civic Election that we might want to transfer data to

@@ -157,7 +157,7 @@ class OrganizationManager(models.Manager):
         status = "ENTERING_UPDATE_OR_CREATE_ORGANIZATION"
 
         organization_id = convert_to_int(organization_id) if positive_value_exists(organization_id) else False
-        we_vote_id = we_vote_id.strip() if we_vote_id else False
+        we_vote_id = we_vote_id.strip().lower() if we_vote_id else False
         organization_website_search = organization_website_search.strip() if organization_website_search else False
         organization_twitter_search = organization_twitter_search.strip() if organization_twitter_search else False
         organization_name = organization_name.strip() if organization_name else False
@@ -207,7 +207,7 @@ class OrganizationManager(models.Manager):
                             # Use Twitter value if a value for this variable was NOT passed in
                             if not positive_value_exists(organization_name):
                                 organization_name = twitter_json['name']
-                        # TODO DALE What is twitter_url?
+                        # TODO DALE Look more closely at saving the actual url from twitter (not the Twitter shortcut)
                         # if positive_value_exists(twitter_json['twitter_url']):
                         #     # Use Twitter value if a value for this variable was NOT passed in
                         #     if not positive_value_exists(organization_website):
@@ -1005,7 +1005,7 @@ class Organization(models.Model):
     def save(self, *args, **kwargs):
         # Even if this organization came from another source we still need a unique we_vote_id
         if self.we_vote_id:
-            self.we_vote_id = self.we_vote_id.strip()
+            self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()

@@ -66,6 +66,12 @@ def voter_position_comment_save_doc_template_values(url_root):
             'value':        'string',  # boolean, integer, long, string
             'description':  'We Vote unique identifier for this position.',
         },
+        {
+            'name':         'set_as_public_position',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Should this position be saved so it can be seen by anyone in the public, '
+                            'or only for friends',
+        },
     ]
 
     potential_status_codes_list = [
@@ -77,46 +83,6 @@ def voter_position_comment_save_doc_template_values(url_root):
             'code':         'VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID',
             'description':  'Cannot proceed. A valid voter_id was not found.',
         },
-        # {
-        #     'code':         'POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING',
-        #     'description':  'Cannot proceed. Missing sufficient unique identifiers for either save new or update.',
-        # },
-        # {
-        #     'code':         'NEW_ORGANIZATION_REQUIRED_VARIABLES_MISSING',
-        #     'description':  'Cannot proceed. This is a new entry and there are not sufficient variables.',
-        # },
-        # {
-        #     'code':         'CREATE_POSITION_SUCCESSFUL',
-        #     'description':  'Position created.',
-        # },
-        # {
-        #     'code':         'POSITION_SAVED_WITH_POSITION_ID',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'POSITION_SAVED_WITH_POSITION_WE_VOTE_ID',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'POSITION_CHANGES_SAVED',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'NO_POSITION_CHANGES_SAVED_WITH_POSITION_ID',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'NO_POSITION_CHANGES_SAVED_WITH_POSITION_WE_VOTE_ID',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'NO_POSITION_CHANGES_SAVED',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'POSITION_COULD_NOT_BE_FOUND_WITH_POSITION_ID_OR_WE_VOTE_ID',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
@@ -149,7 +115,7 @@ def voter_position_comment_save_doc_template_values(url_root):
         'try_now_link': 'apis_v1:voterPositionCommentSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
-        'get_or_post': 'POST',
+        'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,

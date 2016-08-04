@@ -701,7 +701,8 @@ def candidate_delete_process_view(request):
     # Are there any positions attached to this candidate that should be moved to another
     # instance of this candidate?
     position_list_manager = PositionListManager()
-    position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(candidate_id)
+    retrieve_public_positions = True  # The alternate is positions for friends-only
+    position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(retrieve_public_positions, candidate_id)
     if positive_value_exists(len(position_list)):
         positions_found_for_this_candidate = True
     else:

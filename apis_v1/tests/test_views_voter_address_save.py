@@ -86,9 +86,9 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
 
         # First address save
         self.assertEqual(
-            json_data2['status'], ' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED',
+            json_data2['status'], ' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED-SUFFICIENT_ADDRESS_PROBABLY_MISSING',
             "status: {status} "
-            "' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED'"
+            "' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED-SUFFICIENT_ADDRESS_PROBABLY_MISSING'"
             " expected in voterAddressSaveView), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data2['status'], voter_device_id=json_data2['voter_device_id']))
@@ -102,8 +102,8 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
 
         # First address update
         self.assertEqual(
-            json_data3['status'], ' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED',
-            "status: {status} (' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED'"
+            json_data3['status'], ' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED-SUFFICIENT_ADDRESS_PROBABLY_MISSING',
+            "status: {status} (' VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE BALLOT_NOT_FOUND_OR_GENERATED-SUFFICIENT_ADDRESS_PROBABLY_MISSING'"
             " expected in voterAddressSaveView), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data3['status'], voter_device_id=json_data3['voter_device_id']))

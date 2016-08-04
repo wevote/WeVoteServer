@@ -623,7 +623,7 @@ class VoterGuide(models.Model):
     def save(self, *args, **kwargs):
         # Even if this voter_guide came from another source we still need a unique we_vote_id
         if self.we_vote_id:
-            self.we_vote_id = self.we_vote_id.strip()
+            self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()

@@ -26,7 +26,7 @@ def offices_import_from_sample_file():
     with open("office/import_data/contest_office_sample.json") as json_data:
         structured_json = json.load(json_data)
 
-    return offices_import_from_structured_json(structured_json)  # TODO DALE Make sure this is correct
+    return offices_import_from_structured_json(structured_json)
 
 
 def offices_import_from_master_server(request, google_civic_election_id=''):

@@ -33,7 +33,7 @@ def candidates_import_from_sample_file():
     with open("candidate/import_data/candidate_campaigns_sample.json") as json_data:
         structured_json = json.load(json_data)
 
-    return candidates_import_from_structured_json(structured_json)  # TODO DALE Make sure this is correct
+    return candidates_import_from_structured_json(structured_json)
 
 
 def candidates_import_from_master_server(request, google_civic_election_id=''):

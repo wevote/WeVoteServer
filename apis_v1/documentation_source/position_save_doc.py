@@ -93,6 +93,12 @@ def position_save_doc_template_values(url_root):
             'description':  'SUPPORT, OPPOSE, INFORMATION_ONLY (future: STILL_DECIDING, NO_STANCE)',
         },
         {
+            'name':         'set_as_public_position',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Should this position be saved so it can be seen by anyone in the public, '
+                            'or only for friends',
+        },
+        {
             'name':         'statement_text',
             'value':        'string',  # boolean, integer, long, string
             'description':  'A text description of this stance.',
@@ -166,6 +172,7 @@ def position_save_doc_template_values(url_root):
         'ballot_item_display_name': 'Test Ballot Item Label',
         'candidate_we_vote_id': 'wv01cand1755',
         'stance': 'SUPPORT',
+        'set_as_public_position': 'true',
         'statement_text': 'This is what I believe...',
         'google_civic_election_id': '4162',
     }
@@ -212,7 +219,7 @@ def position_save_doc_template_values(url_root):
         'try_now_link': 'apis_v1:positionSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
-        'get_or_post': 'POST',
+        'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,

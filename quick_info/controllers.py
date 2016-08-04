@@ -37,7 +37,7 @@ def quick_info_save_for_api(  # TODO to be converted
         more_info_url
         ):
     quick_info_id = convert_to_int(quick_info_id)
-    quick_info_we_vote_id = quick_info_we_vote_id.strip()
+    quick_info_we_vote_id = quick_info_we_vote_id.strip().lower()
 
     existing_unique_identifier_found = positive_value_exists(quick_info_id) \
         or positive_value_exists(quick_info_we_vote_id)
@@ -306,7 +306,7 @@ def quick_info_import_from_sample_file(request=None):  # , load_from_uri=False  
 # We retrieve the quick info for one ballot item. Could just be the stance, but for now we are
 # retrieving all data
 def quick_info_retrieve_for_api(kind_of_ballot_item, ballot_item_we_vote_id):
-    ballot_item_we_vote_id = ballot_item_we_vote_id.strip()
+    ballot_item_we_vote_id = ballot_item_we_vote_id.strip().lower()
 
     if not positive_value_exists(kind_of_ballot_item) and \
             not kind_of_ballot_item in(OFFICE, CANDIDATE, POLITICIAN, MEASURE):
@@ -555,7 +555,7 @@ def quick_info_text_save_for_api(  # TODO to be converted
 
     voter = voter_results['voter']
     quick_info_id = convert_to_int(quick_info_id)
-    quick_info_we_vote_id = quick_info_we_vote_id.strip()
+    quick_info_we_vote_id = quick_info_we_vote_id.strip().lower()
 
     existing_unique_identifier_found = positive_value_exists(quick_info_id) \
         or positive_value_exists(quick_info_we_vote_id)

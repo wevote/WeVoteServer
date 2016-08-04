@@ -210,14 +210,27 @@ class VoterManager(BaseUserManager):
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
                                             twitter_id)
 
+    def retrieve_voter_from_organization_we_vote_id(self, organization_we_vote_id):
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
+        twitter_request_token = ''
+        facebook_id = 0
+        twitter_id = 0
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
+                                            twitter_id, organization_we_vote_id)
+
     def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=0,
-                       twitter_id=0):
+                       twitter_id=0, organization_we_vote_id=''):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
             email = None
         if positive_value_exists(voter_we_vote_id):
-            voter_we_vote_id = voter_we_vote_id.strip()
+            voter_we_vote_id = voter_we_vote_id.strip().lower()
+        if positive_value_exists(organization_we_vote_id):
+            organization_we_vote_id = organization_we_vote_id.strip().lower()
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -251,6 +264,11 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(twitter_id):
                 voter_on_stage = Voter.objects.get(
                     twitter_id=twitter_id)
+                # If still here, we found an existing voter
+                voter_id = voter_on_stage.id
+            elif positive_value_exists(organization_we_vote_id):
+                voter_on_stage = Voter.objects.get(
+                    linked_organization_we_vote_id=organization_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             else:
@@ -478,6 +496,10 @@ class Voter(AbstractBaseUser):
     # We keep the last value in WeVoteSetting.we_vote_id_last_org_integer
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True)
+    # When a person using an organization's Twitter handle signs in, we create a voter account. This is how
+    #  we link the voter account to the organization.
+    linked_organization_we_vote_id = models.CharField(
+        verbose_name="we vote id for linked organization", max_length=255, null=True, blank=True, unique=True)
 
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=20, validators=[alphanumeric])  # Increase max_length to 255
@@ -543,7 +565,7 @@ class Voter(AbstractBaseUser):
         if self.email == "":
             self.email = None
         if self.we_vote_id:
-            self.we_vote_id = self.we_vote_id.strip()
+            self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()

@@ -48,6 +48,12 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                             'PERCENT_RATING',
         },
         {
+            'name':         'friends_vs_public',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Default is FRIENDS_AND_PUBLIC. '
+                            'Other options include FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC',
+        },
+        {
             'name':         'google_civic_election_id',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'The unique identifier for a particular election. If not provided, return all positions'
@@ -101,6 +107,7 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
         'opinion_maker_id': '145',
         'opinion_maker_we_vote_id': '',
         'stance': 'ANY_STANCE',
+        'friends_vs_public': 'FRIENDS_AND_PUBLIC',
     }
 
     api_response = '{\n' \
@@ -109,6 +116,8 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '  "count": integer,\n' \
                    '  "kind_of_opinion_maker": string ' \
                    '   (One of these: \'ORGANIZATION\', \'PUBLIC_FIGURE\', \'UNKNOWN\'),\n' \
+                   '  "friends_vs_public": string ' \
+                   '   (One of these: \'FRIENDS_ONLY\', \'PUBLIC_ONLY\', \'FRIENDS_AND_PUBLIC\'),\n' \
                    '  "opinion_maker_id": integer,\n' \
                    '  "opinion_maker_we_vote_id": string,\n' \
                    '  "opinion_maker_display_name": string,\n' \

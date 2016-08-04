@@ -4,7 +4,7 @@
 
 from django.http import JsonResponse
 from position.models import PositionEnteredManager
-from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority
+from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import get_voter_api_device_id
 
@@ -20,7 +20,9 @@ def voter_supporting_candidate_campaign_view(request, candidate_campaign_id):
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id)
+    set_as_public_position = False
+    results = position_entered_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id,
+                                                                                      set_as_public_position)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -35,7 +37,9 @@ def voter_stop_supporting_candidate_campaign_view(request, candidate_campaign_id
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id)
+    set_as_public_position = False
+    results = position_entered_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id,
+                                                                                       set_as_public_position)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -50,7 +54,9 @@ def voter_opposing_candidate_campaign_view(request, candidate_campaign_id):
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id)
+    set_as_public_position = False
+    results = position_entered_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id,
+                                                                                     set_as_public_position)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -65,7 +71,9 @@ def voter_stop_opposing_candidate_campaign_view(request, candidate_campaign_id):
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id)
+    set_as_public_position = False
+    results = position_entered_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id,
+                                                                                      set_as_public_position)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -106,7 +114,9 @@ def voter_stance_for_candidate_campaign_view(request, candidate_campaign_id):
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
     position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.retrieve_voter_candidate_campaign_position(voter_id, candidate_campaign_id)
+    retrieve_position_for_friends = True
+    results = position_entered_manager.retrieve_voter_candidate_campaign_position(voter_id, candidate_campaign_id,
+                                                                                  retrieve_position_for_friends)
     if results['position_found']:
         if results['is_support']:
             return JsonResponse({0: "support"})
@@ -122,7 +132,7 @@ def voter_stance_for_candidate_campaign_view(request, candidate_campaign_id):
 
 
 def voter_stance_for_contest_measure_view(request, contest_measure_id):
-    logger.debug("voter_stance_for_candidate_campaign_view {candidate_campaign_id}".format(
+    logger.debug("voter_stance_for_contest_measure_view {contest_measure_id}".format(
         contest_measure_id=contest_measure_id
     ))
     voter_api_device_id = get_voter_api_device_id(request)
