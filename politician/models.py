@@ -7,6 +7,16 @@ from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 from tag.models import Tag
 import wevote_functions.admin
+from wevote_functions.functions import convert_to_int, convert_to_political_party_constant, \
+    display_full_name_with_correct_capitalization, \
+    extract_first_name_from_full_name, extract_middle_name_from_full_name, \
+    extract_last_name_from_full_name, extract_state_from_ocd_division_id, extract_twitter_handle_from_text_string, \
+    positive_value_exists, \
+    AMERICAN_INDEPENDENT, DEMOCRAT, D_R, ECONOMIC_GROWTH, GREEN, INDEPENDENT,  INDEPENDENT_GREEN, LIBERTARIAN, \
+    NO_PARTY_PREFERENCE, NON_PARTISAN, PEACE_AND_FREEDOM, REFORM, REPUBLICAN
+
+
+from wevote_settings.models import fetch_next_we_vote_id_last_politician_integer, fetch_site_unique_id_prefix
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -14,6 +24,14 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 class Politician(models.Model):
     # We are relying on built-in Python id field
+    # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our data with other
+    # organizations
+    # It starts with "wv" then we add on a database specific identifier like "3v" (WeVoteSetting.site_unique_id_prefix)
+    # then the string "pol", and then a sequential integer like "123".
+    # We keep the last value in WeVoteSetting.we_vote_id_last_politician_integer
+    we_vote_id = models.CharField(
+        verbose_name="we vote permanent id of this politician", max_length=255, default=None, null=True,
+        blank=True, unique=True)
     # See this url for properties: https://docs.python.org/2/library/functions.html#property
     first_name = models.CharField(verbose_name="first name",
                                   max_length=255, default=None, null=True, blank=True)
@@ -21,11 +39,11 @@ class Politician(models.Model):
                                    max_length=255, default=None, null=True, blank=True)
     last_name = models.CharField(verbose_name="last name",
                                  max_length=255, default=None, null=True, blank=True)
-    full_name_official = models.CharField(verbose_name="official full name",
+    politician_name = models.CharField(verbose_name="official full name",
                                           max_length=255, default=None, null=True, blank=True)
     # This is the politician's name from GoogleCivicCandidateCampaign
-    full_name_google_civic = models.CharField(verbose_name="full name from google civic",
-                                              max_length=255, default=None, null=True, blank=True)
+    google_civic_candidate_name = models.CharField(verbose_name="full name from google civic",
+                                                   max_length=255, default=None, null=True, blank=True)
     # This is the politician's name assembled from TheUnitedStatesIo first_name + last_name for quick search
     full_name_assembled = models.CharField(verbose_name="full name assembled from first_name + last_name",
                                            max_length=255, default=None, null=True, blank=True)
@@ -47,42 +65,62 @@ class Politician(models.Model):
     # race = enum?
     # official_image_id = ??
 
-    id_bioguide = models.CharField(verbose_name="bioguide unique identifier",
+    bioguide_id = models.CharField(verbose_name="bioguide unique identifier",
                                    max_length=200, null=True, unique=True)
-    id_thomas = models.CharField(verbose_name="thomas unique identifier",
+    thomas_id = models.CharField(verbose_name="thomas unique identifier",
                                  max_length=200, null=True, unique=True)
-    id_lis = models.CharField(verbose_name="lis unique identifier",
+    lis_id = models.CharField(verbose_name="lis unique identifier",
                               max_length=200, null=True, blank=True, unique=False)
-    id_govtrack = models.CharField(verbose_name="govtrack unique identifier",
+    govtrack_id = models.CharField(verbose_name="govtrack unique identifier",
                                    max_length=200, null=True, unique=True)
-    id_opensecrets = models.CharField(verbose_name="opensecrets unique identifier",
+    opensecrets_id = models.CharField(verbose_name="opensecrets unique identifier",
                                       max_length=200, null=True, unique=False)
-    id_votesmart = models.CharField(verbose_name="votesmart unique identifier",
+    vote_smart_id = models.CharField(verbose_name="votesmart unique identifier",
                                     max_length=200, null=True, unique=False)
-    id_fec = models.CharField(verbose_name="fec unique identifier",
+    fec_id = models.CharField(verbose_name="fec unique identifier",
                               max_length=200, null=True, unique=True, blank=True)
-    id_cspan = models.CharField(verbose_name="cspan unique identifier",
+    cspan_id = models.CharField(verbose_name="cspan unique identifier",
                                 max_length=200, null=True, blank=True, unique=False)
     wikipedia_id = models.CharField(verbose_name="wikipedia url",
                                     max_length=500, default=None, null=True, blank=True)
     ballotpedia_id = models.CharField(verbose_name="ballotpedia url",
                                       max_length=500, default=None, null=True, blank=True)
-    id_house_history = models.CharField(verbose_name="house history unique identifier",
+    house_history_id = models.CharField(verbose_name="house history unique identifier",
                                         max_length=200, null=True, blank=True)
     maplight_id = models.CharField(verbose_name="maplight unique identifier",
                                    max_length=200, null=True, unique=True, blank=True)
-    id_washington_post = models.CharField(verbose_name="washington post unique identifier",
+    washington_post_id = models.CharField(verbose_name="washington post unique identifier",
                                           max_length=200, null=True, unique=False)
-    id_icpsr = models.CharField(verbose_name="icpsr unique identifier",
+    icpsr_id = models.CharField(verbose_name="icpsr unique identifier",
                                 max_length=200, null=True, unique=False)
     tag_link = models.ManyToManyField(Tag, through='PoliticianTagLink')
     # The full name of the party the official belongs to.
-    party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
+    political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
 
-    # id_bioguide, id_thomas, id_lis, id_govtrack, id_opensecrets, id_votesmart, id_fec, id_cspan, wikipedia_id,
-    # ballotpedia_id, id_house_history, maplight_id, id_washington_post, id_icpsr, first_name, middle_name,
-    # last_name, name_official_full, gender, birth_date
+    politician_twitter_handle = models.CharField(
+        verbose_name='politician twitter screen_name', max_length=255, null=True, unique=False)
+
+    # We override the save function so we can auto-generate we_vote_id
+    def save(self, *args, **kwargs):
+        # Even if this data came from another source we still need a unique we_vote_id
+        if self.we_vote_id:
+            self.we_vote_id = self.we_vote_id.strip().lower()
+        if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
+            # ...generate a new id
+            site_unique_id_prefix = fetch_site_unique_id_prefix()
+            next_local_integer = fetch_next_we_vote_id_last_politician_integer()
+            # "wv" = We Vote
+            # site_unique_id_prefix = a generated (or assigned) unique id for one server running We Vote
+            # "pol" = tells us this is a unique id for a Politician
+            # next_integer = a unique, sequential integer for this server - not necessarily tied to database id
+            self.we_vote_id = "wv{site_unique_id_prefix}pol{next_integer}".format(
+                site_unique_id_prefix=site_unique_id_prefix,
+                next_integer=next_local_integer,
+            )
+        if self.maplight_id == "":  # We want this to be unique IF there is a value, and otherwise "None"
+            self.maplight_id = None
+        super(Politician, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.last_name
@@ -91,12 +129,12 @@ class Politician(models.Model):
         ordering = ('last_name',)
 
     def display_full_name(self):
-        if self.first_name and self.last_name:
+        if self.politician_name:
+            return self.politician_name
+        elif self.first_name and self.last_name:
             return self.first_name + " " + self.last_name
-        elif self.full_name_google_civic:
-            return self.full_name_google_civic
-        elif self.full_name_official:
-            return self.full_name_official
+        elif self.google_civic_candidate_name:
+            return self.google_civic_candidate_name
         else:
             return self.first_name + " " + self.last_name
 
@@ -104,9 +142,9 @@ class Politician(models.Model):
         """
         fetch URL of politician's photo from TheUnitedStatesIo repo
         """
-        if self.id_bioguide:
-            url_str = 'https://theunitedstates.io/images/congress/225x275/{id_bioguide}.jpg'.format(
-                id_bioguide=self.id_bioguide)
+        if self.bioguide_id:
+            url_str = 'https://theunitedstates.io/images/congress/225x275/{bioguide_id}.jpg'.format(
+                bioguide_id=self.bioguide_id)
             return url_str
         else:
             return ""
@@ -171,6 +209,150 @@ class PoliticianManager(models.Model):
             'MultipleObjectsReturned':      exception_multiple_object_returned,
         }
         return results
+
+    def retrieve_all_politicians_that_might_match_candidate(self, vote_smart_id, maplight_id, candidate_twitter_handle,
+                                                            candidate_name='', state_code=''):
+        politician_list = []
+        politician_list_found = False
+        politician = Politician()
+        politician_found = False
+
+        # if not positive_value_exists(politician_id) and not positive_value_exists(politician_we_vote_id):
+        #     status = 'VALID_POLITICIAN_ID_AND_POLITICIAN_WE_VOTE_ID_MISSING'
+        #     results = {
+        #         'success':                  True if politician_list_found else False,
+        #         'status':                   status,
+        #         'politician_id':            politician_id,
+        #         'politician_we_vote_id':    politician_we_vote_id,
+        #         'politician_list_found':    politician_list_found,
+        #         'politician_list':          politician_list,
+        #     }
+        #     return results
+
+        try:
+            filter_set = False
+            politician_queryset = Politician.objects.all()
+            if positive_value_exists(vote_smart_id):
+                filter_set = True
+                politician_queryset = politician_queryset.filter(vote_smart_id=vote_smart_id)
+            elif positive_value_exists(maplight_id):
+                filter_set = True
+                politician_queryset = politician_queryset.filter(maplight_id=maplight_id)
+            elif positive_value_exists(candidate_twitter_handle):
+                filter_set = True
+                politician_queryset = politician_queryset.filter(politician_twitter_handle=candidate_twitter_handle)
+
+            if filter_set:
+                politician_list = politician_queryset
+            else:
+                politician_list = []
+
+            if len(politician_list) is 1:
+                politician_found = True
+                politician_list_found = False
+                status = 'ONE_POLITICIAN_RETRIEVED'
+            elif len(politician_list):
+                politician_found = False
+                politician_list_found = True
+                status = 'POLITICIAN_LIST_RETRIEVED'
+            else:
+                status = 'NO_POLITICIANS_RETRIEVED'
+            success = True
+        except Exception as e:
+            status = 'FAILED retrieve_all_politicians_for_office ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'politician_list_found':    politician_list_found,
+            'politician_list':          politician_list,
+            'politician_found':         politician_found,
+            'politician':               politician,
+        }
+        return results
+
+    def update_or_create_politician_from_candidate(self, candidate):
+        """
+        Take a We Vote candidate_campaign object, and map it to update_or_create_politician
+        :param candidate:
+        :return:
+        """
+
+        first_name = extract_first_name_from_full_name(candidate.candidate_name)
+        middle_name = extract_middle_name_from_full_name(candidate.candidate_name)
+        last_name = extract_last_name_from_full_name(candidate.candidate_name)
+        political_party = convert_to_political_party_constant(candidate.party)
+        # TODO Add all other identifiers from other systems
+        updated_politician_values = {
+            'vote_smart_id':                candidate.vote_smart_id,
+            'maplight_id':                  candidate.maplight_id,
+            'politician_name':              candidate.candidate_name,
+            'google_civic_candidate_name':  candidate.google_civic_candidate_name,
+            'state_code':                   candidate.state_code,
+            'politician_twitter_handle':    candidate.candidate_twitter_handle,
+            'first_name':                   first_name,
+            'middle_name':                  middle_name,
+            'last_name':                    last_name,
+            'political_party':              political_party,
+        }
+
+        return self.update_or_create_politician(
+            candidate.politician_we_vote_id, candidate.vote_smart_id, candidate.maplight_id,
+            candidate.candidate_name, candidate.state_code, candidate.candidate_twitter_handle,
+            first_name, middle_name, last_name,
+            updated_politician_values)
+
+    def update_or_create_politician(self, we_vote_id, vote_smart_id, maplight_id,
+                                    candidate_twitter_handle, candidate_name, state_code,
+                                    first_name, middle_name, last_name,
+                                    updated_politician_values):
+        """
+        Either update or create a politician entry. The individual variables passed in are for the purpose of finding
+        a politician to update, and the updated_politician_values variable contains the values we want to update to.
+        """
+        politician_found = False
+        new_politician_created = False
+        politician = Politician()
+
+        try:
+            # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
+            #  updating candidate_name via subsequent Google Civic imports
+
+            # If coming from a record that has already been in We Vote
+            if positive_value_exists(we_vote_id):
+                politician, new_politician_created = \
+                    Politician.objects.update_or_create(
+                        we_vote_id__iexact=we_vote_id,
+                        defaults=updated_politician_values)
+                politician_found = True
+            elif positive_value_exists(vote_smart_id):
+                politician, new_politician_created = \
+                    Politician.objects.update_or_create(
+                        vote_smart_id=vote_smart_id,
+                        defaults=updated_politician_values)
+                politician_found = True
+            else:
+                # To be created
+                politician_found = False
+                pass
+
+            success = True
+            status = 'POLITICIAN_SAVED'
+        except Exception as e:
+            success = False
+            status = 'UNABLE_TO_UPDATE_OR_CREATE_POLITICIAN'
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'politician_created':   new_politician_created,
+            'politician_found':     politician_found,
+            'politician':           politician,
+        }
+        return results
+
 
 # def delete_all_politician_data():
 #     with open(LEGISLATORS_CURRENT_FILE, 'rU') as politicians_current_data:

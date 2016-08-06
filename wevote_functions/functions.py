@@ -74,6 +74,20 @@ STATE_CODE_MAP = {
     'WY': 'Wyoming'
 }
 
+AMERICAN_INDEPENDENT = 'AMERICAN_INDEPENDENT'
+DEMOCRAT = 'DEMOCRAT'
+D_R = 'D_R'
+ECONOMIC_GROWTH = 'ECONOMIC_GROWTH'
+GREEN = 'GREEN'
+INDEPENDENT = 'INDEPENDENT'
+INDEPENDENT_GREEN = 'INDEPENDENT_GREEN'
+LIBERTARIAN = 'LIBERTARIAN'
+NO_PARTY_PREFERENCE = 'NO_PARTY_PREFERENCE'
+NON_PARTISAN = 'NON_PARTISAN'
+PEACE_AND_FREEDOM = 'PEACE_AND_FREEDOM'
+REFORM = 'REFORM'
+REPUBLICAN = 'REPUBLICAN'
+
 
 class LocalSwitch(object):
     def __init__(self, value):
@@ -131,6 +145,65 @@ def convert_to_str(value):
     except ValueError:
         new_value = ''
     return new_value
+
+
+# See also 'candidate_party_display' in candidate/models.py
+def convert_to_political_party_constant(raw_party_incoming):
+    raw_party = raw_party_incoming.lower()
+    raw_party = raw_party.replace("Party Preference: ", "")
+
+    if raw_party == 'amer. ind.':
+        return AMERICAN_INDEPENDENT
+    if raw_party == 'american independent':
+        return AMERICAN_INDEPENDENT
+    if raw_party == 'dem':
+        return DEMOCRAT
+    if raw_party == 'democrat':
+        return DEMOCRAT
+    if raw_party == 'democratic':
+        return DEMOCRAT
+    if raw_party == 'democratic party':
+        return DEMOCRAT
+    if raw_party == 'd-r party':
+        return D_R
+    if raw_party == 'economic growth':
+        return ECONOMIC_GROWTH
+    if raw_party == 'grn':
+        return GREEN
+    if raw_party == 'green':
+        return GREEN
+    if raw_party == 'green party':
+        return GREEN
+    if raw_party == 'independent':
+        return INDEPENDENT
+    if raw_party == 'independent green':
+        return INDEPENDENT_GREEN
+    if raw_party == 'lib':
+        return LIBERTARIAN
+    if raw_party == 'Libertarian':
+        return LIBERTARIAN
+    if raw_party == 'npp':
+        return NO_PARTY_PREFERENCE
+    if raw_party == 'no party preference':
+        return NO_PARTY_PREFERENCE
+    if raw_party == 'non-partisan':
+        return NON_PARTISAN
+    if raw_party == 'nonpartisan':
+        return NON_PARTISAN
+    if raw_party == 'pf':
+        return PEACE_AND_FREEDOM
+    if raw_party == 'peace and freedom':
+        return PEACE_AND_FREEDOM
+    if raw_party == 'reform':
+        return REFORM
+    if raw_party == 'rep':
+        return REPUBLICAN
+    if raw_party == 'republican':
+        return REPUBLICAN
+    if raw_party == 'republican party':
+        return REPUBLICAN
+    else:
+        return raw_party_incoming
 
 
 def extract_state_from_ocd_division_id(ocd_division_id):
@@ -210,6 +283,18 @@ def extract_first_name_from_full_name(full_name):
     full_name_parsed = HumanName(full_name)
     first_name = full_name_parsed.first
     return first_name
+
+
+def extract_middle_name_from_full_name(full_name):
+    """
+    See documentation here: https://github.com/derek73/python-nameparser
+    :param full_name:
+    :return:
+    """
+    full_name.strip()
+    full_name_parsed = HumanName(full_name)
+    middle_name = full_name_parsed.middle
+    return middle_name
 
 
 def extract_last_name_from_full_name(full_name):

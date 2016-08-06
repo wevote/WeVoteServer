@@ -270,7 +270,7 @@ class PositionEntered(models.Model):
             return True
         elif self.stance == PERCENT_RATING:
             rating_percentage = convert_to_int(self.vote_smart_rating)
-            if (rating_percentage > 33) and (rating_percentage <= 66):
+            if (rating_percentage > 33) and (rating_percentage < 66):
                 return True
         return False
 
@@ -660,7 +660,7 @@ class PositionForFriends(models.Model):
             return True
         elif self.stance == PERCENT_RATING:
             rating_percentage = convert_to_int(self.vote_smart_rating)
-            if (rating_percentage > 33) and (rating_percentage <= 66):
+            if (rating_percentage > 33) and (rating_percentage < 66):
                 return True
         return False
 

@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
-    retrieve_candidate_photos
+    candidate_politician_match, retrieve_candidate_photos
 from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from .serializers import CandidateCampaignSerializer
 from admin_tools.views import redirect_to_sign_in_page
@@ -387,6 +387,116 @@ def candidate_edit_process_view(request):
                                     "?google_civic_election_id=" + str(google_civic_election_id))
     else:
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+
+
+@login_required
+def candidate_politician_match_view(request):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    candidate_id = request.GET.get('candidate_id', 0)
+    candidate_id = convert_to_int(candidate_id)
+    # google_civic_election_id is included for interface usability reasons and isn't used in the processing
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    if not positive_value_exists(candidate_id):
+        messages.add_message(request, messages.ERROR, "The candidate_id variable was not passed in.")
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+
+    candidate_campaign_manager = CandidateCampaignManager()
+
+    results = candidate_campaign_manager.retrieve_candidate_campaign_from_id(candidate_id)
+    if not positive_value_exists(results['candidate_campaign_found']):
+        messages.add_message(request, messages.ERROR,
+                             "Candidate '{candidate_id}' not found.".format(candidate_id=candidate_id))
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+
+    we_vote_candidate = results['candidate_campaign']
+
+    # Make sure we have a politician for this candidate. If we don't, create a politician entry, and save the
+    # politician_we_vote_id in the candidate
+    results = candidate_politician_match(we_vote_candidate)
+
+    display_messages = True
+    if results['status'] and display_messages:
+        messages.add_message(request, messages.INFO, results['status'])
+    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))
+
+
+@login_required
+def candidate_politician_match_for_this_election_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    candidate_list = []
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(google_civic_election_id)
+
+    # We only want to process if a google_civic_election_id comes in
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+
+    try:
+        candidate_list = CandidateCampaign.objects.order_by('candidate_name')
+        candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+    except CandidateCampaign.DoesNotExist:
+        messages.add_message(request, messages.INFO, "No candidates found for this election: {id}.".format(
+            id=google_civic_election_id))
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}"
+                                                                                   "".format(
+                                                                                   var=google_civic_election_id))
+
+    num_candidates_reviewed = 0
+    num_that_already_have_politician_we_vote_id = 0
+    new_politician_created = 0
+    existing_politician_found = 0
+    multiple_politicians_found = 0
+    other_results = 0
+
+    message = "About to loop through all of the candidates in this election to make sure we have a politician record."
+    print_to_log(logger, exception_message_optional=message)
+
+    # Loop through all of the candidates in this election
+    for we_vote_candidate in candidate_list:
+        num_candidates_reviewed += 1
+        if we_vote_candidate.politician_we_vote_id:
+            num_that_already_have_politician_we_vote_id += 1
+            continue
+        match_results = candidate_politician_match(we_vote_candidate)
+        if match_results['politician_created']:
+            new_politician_created += 1
+        elif match_results['politician_found']:
+            existing_politician_found += 1
+        elif match_results['politician_list_found']:
+            multiple_politicians_found += 1
+        else:
+            other_results += 1
+
+    message = "Google Civic Election ID: {election_id}, " \
+              "{num_candidates_reviewed} candidates reviewed, " \
+              "{num_that_already_have_politician_we_vote_id} Candidates that already have Politician Ids, " \
+              "{new_politician_created} politicians just created, " \
+              "{existing_politician_found} politicians found that already exist, " \
+              "{multiple_politicians_found} times we found multiple politicians and could not link, " \
+              "{other_results} other results". \
+              format(election_id=google_civic_election_id,
+                     num_candidates_reviewed=num_candidates_reviewed,
+                     num_that_already_have_politician_we_vote_id=num_that_already_have_politician_we_vote_id,
+                     new_politician_created=new_politician_created,
+                     existing_politician_found=existing_politician_found,
+                     multiple_politicians_found=multiple_politicians_found,
+                     other_results=other_results)
+
+    print_to_log(logger, exception_message_optional=message)
+    messages.add_message(request, messages.INFO, message)
+
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}".format(
+        var=google_civic_election_id))
 
 
 @login_required

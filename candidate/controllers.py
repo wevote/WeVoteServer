@@ -12,6 +12,7 @@ from import_export_vote_smart.controllers import retrieve_and_match_candidate_fr
     retrieve_candidate_photo_from_vote_smart
 import json
 from office.models import ContestOfficeManager
+from politician.models import PoliticianManager
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
@@ -429,6 +430,100 @@ def retrieve_candidate_photos(we_vote_candidate, force_retrieve=False):
         'vote_smart_candidate_just_retrieved':          vote_smart_candidate_just_retrieved,
         'vote_smart_candidate_photo_just_retrieved':    vote_smart_candidate_photo_just_retrieved,
         'vote_smart_candidate_photo_exists':            vote_smart_candidate_photo_exists,
+    }
+
+    return results
+
+
+def candidate_politician_match(we_vote_candidate):
+    politician_manager = PoliticianManager()
+    politician_created = False
+    politician_found = False
+    politician_list_found = False
+    politician_list = []
+
+    # Does this candidate already have a we_vote_id for a politician?
+    if positive_value_exists(we_vote_candidate.politician_we_vote_id):
+        # Synchronize data and exit
+        update_results = politician_manager.update_or_create_politician_from_candidate(we_vote_candidate)
+
+        results = {
+            'success': update_results['success'],
+            'status': update_results['status'],
+            'politician_list_found': False,
+            'politician_list': [],
+            'politician_found': update_results['politician_found'],
+            'politician_created': update_results['politician_created'],
+            'politician': update_results['politician'],
+        }
+        return results
+    else:
+        # Search the politician table for a match
+        results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
+            we_vote_candidate.vote_smart_id, we_vote_candidate.maplight_id, we_vote_candidate.candidate_twitter_handle,
+            we_vote_candidate.candidate_name, we_vote_candidate.state_code)
+        if results['politician_list_found']:
+            # If here, return
+            politician_list = results['politician_list']
+
+            results = {
+                'success':                  results['success'],
+                'status':                   results['status'],
+                'politician_list_found':    True,
+                'politician_list':          politician_list,
+                'politician_found':         False,
+                'politician_created':       False,
+                'politician':               None,
+            }
+            return results
+        elif results['politician_found']:
+            # Save this politician_we_vote_id with the candidate
+            politician = results['politician']
+            # Save politician_we_vote_id in we_vote_candidate
+            we_vote_candidate.politician_we_vote_id = politician.we_vote_id
+            we_vote_candidate.save()
+
+            results = {
+                'success':                  results['success'],
+                'status':                   results['status'],
+                'politician_list_found':    False,
+                'politician_list':          [],
+                'politician_found':         True,
+                'politician_created':       False,
+                'politician':               politician,
+            }
+            return results
+        else:
+            # Create new politician for this candidate
+            create_results = politician_manager.update_or_create_politician_from_candidate(we_vote_candidate)
+
+            if create_results['politician_found']:
+                politician = create_results['politician']
+                # Save politician_we_vote_id in we_vote_candidate
+                we_vote_candidate.politician_we_vote_id = politician.we_vote_id
+                we_vote_candidate.save()
+
+            results = {
+                'success':                      create_results['success'],
+                'status':                       create_results['status'],
+                'politician_list_found':        False,
+                'politician_list':              [],
+                'politician_found':             create_results['politician_found'],
+                'politician_created':           create_results['politician_created'],
+                'politician':                   create_results['politician'],
+            }
+            return results
+
+    success = False
+    status = "TO_BE_IMPLEMENTED"
+    results = {
+        'success':                  success,
+        'status':                   status,
+        'politician_list_found':    politician_list_found,
+        'politician_list':          politician_list,
+        'politician_found':         politician_found,
+        'politician_created':       politician_created,
+        'politician':               None,
     }
 
     return results

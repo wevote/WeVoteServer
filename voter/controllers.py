@@ -347,6 +347,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'signed_in_facebook':               voter.signed_in_facebook(),
             'signed_in_google':                 voter.signed_in_google(),
             'signed_in_twitter':                voter.signed_in_twitter(),
+            'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
             'voter_photo_url':                  voter.voter_photo_url(),
         }
         return json_data
@@ -371,6 +372,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'signed_in_facebook':               False,
             'signed_in_google':                 False,
             'signed_in_twitter':                False,
+            'linked_organization_we_vote_id':   '',
             'voter_photo_url':                  '',
         }
         return json_data
