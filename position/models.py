@@ -1464,6 +1464,7 @@ class PositionListManager(models.Model):
                     'ballot_item_we_vote_id':   ballot_item_we_vote_id,
                     'is_support':               position.is_support(),
                     'is_oppose':                position.is_oppose(),
+                    'statement_text':           position.statement_text,
                 }
                 simple_position_list.append(one_position)
 
