@@ -2297,6 +2297,12 @@ class PositionEnteredManager(models.Model):
         retrieve_position_for_friends = not set_as_public_position
 
         voter_position_found = False
+
+        # Set these in case of error
+        if set_as_public_position:
+            voter_position_on_stage = PositionEntered
+        else:
+            voter_position_on_stage = PositionForFriends
         if positive_value_exists(position_id):
             # Retrieve the position this way
             pass
@@ -2343,30 +2349,29 @@ class PositionEnteredManager(models.Model):
                 voter_position_on_stage_found = True
                 status = 'POSITION_COMMENT_UPDATED'
             except Exception as e:
-                handle_record_not_saved_exception(e, logger=logger)
                 status = 'POSITION_COMMENT_COULD_NOT_BE_UPDATED'
         else:
             try:
                 # Create new
-                if candidate_campaign_id:
-                    candidate_campaign_we_vote_id = \
-                        voter_position_on_stage.fetch_candidate_campaign_we_vote_id(candidate_campaign_id)
+                if candidate_we_vote_id:
+                    candidate_campaign_id = \
+                        voter_position_on_stage.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
                 else:
-                    candidate_campaign_we_vote_id = None
+                    candidate_campaign_id = None
 
-                if contest_measure_id:
-                    contest_measure_we_vote_id = \
-                        voter_position_on_stage.fetch_contest_measure_we_vote_id(contest_measure_id)
+                if measure_we_vote_id:
+                    contest_measure_id = \
+                        voter_position_on_stage.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
                 else:
-                    contest_measure_we_vote_id = None
+                    contest_measure_id = None
 
                 if set_as_public_position:
                     voter_position_on_stage = PositionEntered(
                         voter_id=voter_id,
                         candidate_campaign_id=candidate_campaign_id,
-                        candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                        candidate_campaign_we_vote_id=candidate_we_vote_id,
                         contest_measure_id=contest_measure_id,
-                        contest_measure_we_vote_id=contest_measure_we_vote_id,
+                        contest_measure_we_vote_id=measure_we_vote_id,
                         # stance=stance,
                         statement_text=statement_text,
                     )
@@ -2374,9 +2379,9 @@ class PositionEnteredManager(models.Model):
                     voter_position_on_stage = PositionForFriends(
                         voter_id=voter_id,
                         candidate_campaign_id=candidate_campaign_id,
-                        candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                        candidate_campaign_we_vote_id=candidate_we_vote_id,
                         contest_measure_id=contest_measure_id,
-                        contest_measure_we_vote_id=contest_measure_we_vote_id,
+                        contest_measure_we_vote_id=measure_we_vote_id,
                         # stance=stance,
                         statement_text=statement_text,
                     )
