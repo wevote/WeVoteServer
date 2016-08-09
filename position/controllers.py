@@ -1372,7 +1372,6 @@ def voter_all_positions_retrieve_for_api(voter_device_id, google_civic_election_
 
 def voter_position_comment_save_for_api(  # voterPositionCommentSave
         voter_device_id, position_id, position_we_vote_id,
-        google_civic_election_id,
         office_we_vote_id,
         candidate_we_vote_id,
         measure_we_vote_id,
@@ -1383,29 +1382,13 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         json_data_from_results = results['json_data']
-        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
-        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   json_data_from_results['status'],
             'success':                  False,
-            'voter_device_id':          voter_device_id,
-            'position_id':              position_id,
-            'position_we_vote_id':      position_we_vote_id,
-            'new_position_created':     False,
-            'ballot_item_display_name': '',
-            'speaker_display_name':     '',
-            'speaker_image_url_https':  '',
-            'speaker_twitter_handle':   '',
-            'is_support':               False,
-            'is_oppose':                False,
-            'is_information_only':      False,
-            'google_civic_election_id': google_civic_election_id,
-            'office_we_vote_id':        office_we_vote_id,
-            'candidate_we_vote_id':     candidate_we_vote_id,
-            'measure_we_vote_id':       measure_we_vote_id,
+            'ballot_item_id':           0,
+            'ballot_item_we_vote_id':   '',
+            'kind_of_ballot_item':      '',
             'statement_text':           statement_text,
-            'statement_html':           statement_html,
-            'last_updated':             '',
         }
         return json_data
 
@@ -1413,29 +1396,16 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
-        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
-        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_POSITION_COMMENT",
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
-            'new_position_created':     False,
-            'ballot_item_display_name': '',
-            'speaker_display_name':     '',
-            'speaker_image_url_https':  '',
-            'speaker_twitter_handle':   '',
-            'is_support':               False,
-            'is_oppose':                False,
-            'is_information_only':      False,
-            'google_civic_election_id': google_civic_election_id,
-            'office_we_vote_id':        office_we_vote_id,
-            'candidate_we_vote_id':     candidate_we_vote_id,
-            'measure_we_vote_id':       measure_we_vote_id,
+            'ballot_item_id':           0,
+            'ballot_item_we_vote_id':   '',
+            'kind_of_ballot_item':      '',
             'statement_text':           statement_text,
-            'statement_html':           statement_html,
-            'last_updated':             '',
         }
         return json_data
 
@@ -1446,43 +1416,30 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
     existing_unique_identifier_found = positive_value_exists(position_id) \
         or positive_value_exists(position_we_vote_id)
     new_unique_identifier_found = positive_value_exists(voter_id) \
-        and positive_value_exists(google_civic_election_id) and (
+        and (
         positive_value_exists(office_we_vote_id) or
         positive_value_exists(candidate_we_vote_id) or
         positive_value_exists(measure_we_vote_id)
-    )
+        )
     unique_identifier_found = existing_unique_identifier_found or new_unique_identifier_found
     # We must have these variables in order to create a new entry
     required_variables_for_new_entry = positive_value_exists(voter_id) \
-        and positive_value_exists(google_civic_election_id) and (
+        and (
         positive_value_exists(office_we_vote_id) or
         positive_value_exists(candidate_we_vote_id) or
         positive_value_exists(measure_we_vote_id)
-    )
+        )
     if not unique_identifier_found:
-        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
-        # or is_oppose_or_negative_rating
         json_data = {
             'status':                   "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
-            'new_position_created':     False,
-            'ballot_item_display_name': '',
-            'speaker_display_name':     '',
-            'speaker_image_url_https':  '',
-            'speaker_twitter_handle':   '',
-            'is_support':               False,
-            'is_oppose':                False,
-            'is_information_only':      False,
-            'google_civic_election_id': google_civic_election_id,
-            'office_we_vote_id':        office_we_vote_id,
-            'candidate_we_vote_id':     candidate_we_vote_id,
-            'measure_we_vote_id':       measure_we_vote_id,
+            'ballot_item_id':           0,
+            'ballot_item_we_vote_id':   '',
+            'kind_of_ballot_item':      '',
             'statement_text':           statement_text,
-            'statement_html':           statement_html,
-            'last_updated':             '',
         }
         return json_data
     elif not existing_unique_identifier_found and not required_variables_for_new_entry:
@@ -1494,30 +1451,19 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
             'voter_device_id':          voter_device_id,
             'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
-            'new_position_created':     False,
-            'ballot_item_display_name': '',
-            'speaker_display_name':     '',
-            'speaker_image_url_https':  '',
-            'speaker_twitter_handle':   '',
-            'is_support':               False,
-            'is_oppose':                False,
-            'is_information_only':      False,
-            'google_civic_election_id': google_civic_election_id,
-            'office_we_vote_id':        office_we_vote_id,
-            'candidate_we_vote_id':     candidate_we_vote_id,
-            'measure_we_vote_id':       measure_we_vote_id,
+            'ballot_item_id':           0,
+            'ballot_item_we_vote_id':   '',
+            'kind_of_ballot_item':      '',
             'statement_text':           statement_text,
-            'statement_html':           statement_html,
-            'last_updated':             '',
         }
         return json_data
 
     position_manager = PositionEnteredManager()
-    save_results = position_manager.update_or_create_position(
+    save_results = position_manager.update_or_create_position_comment(
         position_id=position_id,
         position_we_vote_id=position_we_vote_id,
+        voter_id=voter_id,
         voter_we_vote_id=voter.we_vote_id,
-        google_civic_election_id=google_civic_election_id,
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
@@ -1528,54 +1474,48 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
 
     if save_results['success']:
         position = save_results['position']
-        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
-        # or is_oppose_or_negative_rating
+
+        if positive_value_exists(position.candidate_campaign_we_vote_id):
+            kind_of_ballot_item = CANDIDATE
+            ballot_item_id = position.candidate_campaign_id
+            ballot_item_we_vote_id = position.candidate_campaign_we_vote_id
+        elif positive_value_exists(position.contest_measure_we_vote_id):
+            kind_of_ballot_item = MEASURE
+            ballot_item_id = position.contest_measure_id
+            ballot_item_we_vote_id = position.contest_measure_we_vote_id
+        elif positive_value_exists(position.contest_office_we_vote_id):
+            kind_of_ballot_item = OFFICE
+            ballot_item_id = position.contest_office_id
+            ballot_item_we_vote_id = position.contest_office_we_vote_id
+        else:
+            kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
+            ballot_item_id = None
+            ballot_item_we_vote_id = None
+
         json_data = {
             'success':                  save_results['success'],
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
             'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
-            'ballot_item_display_name': position.ballot_item_display_name,
-            'speaker_display_name':     position.speaker_display_name,
-            'speaker_image_url_https':  position.speaker_image_url_https,
-            'speaker_twitter_handle':   position.speaker_twitter_handle,
-            'new_position_created':     save_results['new_position_created'],
-            'is_support':               position.is_support(),
-            'is_oppose':                position.is_oppose(),
-            'is_information_only':      position.is_information_only(),
-            'google_civic_election_id': position.google_civic_election_id,
-            'office_we_vote_id':        position.contest_office_we_vote_id,
-            'candidate_we_vote_id':     position.candidate_campaign_we_vote_id,
-            'measure_we_vote_id':       position.contest_measure_we_vote_id,
+            'ballot_item_id':           ballot_item_id,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+            'kind_of_ballot_item':      kind_of_ballot_item,
             'statement_text':           position.statement_text,
             'statement_html':           position.statement_html,
-            'last_updated':             position.last_updated(),
         }
         return json_data
     else:
-        # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating,
-        # or is_oppose_or_negative_rating
         json_data = {
             'success':                  False,
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
-            'position_id':              position_id,
-            'position_we_vote_id':      position_we_vote_id,
-            'new_position_created':     False,
-            'ballot_item_display_name': '',
-            'speaker_display_name':     '',
-            'speaker_image_url_https':  '',
-            'speaker_twitter_handle':   '',
-            'is_support':               False,
-            'is_oppose':                False,
-            'is_information_only':      False,
-            'google_civic_election_id': google_civic_election_id,
-            'office_we_vote_id':        office_we_vote_id,
-            'candidate_we_vote_id':     candidate_we_vote_id,
-            'measure_we_vote_id':       measure_we_vote_id,
+            'position_id':              0,
+            'position_we_vote_id':      '',
+            'ballot_item_id':           0,
+            'ballot_item_we_vote_id':   "",
+            'kind_of_ballot_item':      "",
             'statement_text':           statement_text,
             'statement_html':           statement_html,
-            'last_updated':             '',
         }
         return json_data

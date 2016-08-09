@@ -15,7 +15,8 @@ from measure.models import ContestMeasure, ContestMeasureList
 from office.models import ContestOffice
 from organization.models import Organization, OrganizationManager
 from twitter.models import TwitterUser
-from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager
+from voter.models import fetch_voter_id_from_voter_we_vote_id, Voter, VoterAddress, VoterAddressManager, \
+    VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_position_integer, fetch_site_unique_id_prefix
@@ -1864,7 +1865,8 @@ class PositionEnteredManager(models.Model):
         position_entered_manager = PositionEnteredManager()
         return position_entered_manager.retrieve_position(
             position_id, position_we_vote_id, organization_id, voter_id,
-            contest_office_id, candidate_campaign_id, contest_measure_id, retrieve_position_for_friends)
+            contest_office_id, candidate_campaign_id, contest_measure_id,
+            retrieve_position_for_friends)
 
     def retrieve_voter_candidate_campaign_position_with_we_vote_id(self, voter_id, candidate_campaign_we_vote_id,
                                                                    retrieve_position_for_friends=False):
@@ -2288,6 +2290,112 @@ class PositionEnteredManager(models.Model):
                                                               stance, candidate_campaign_id, contest_measure_id,
                                                               set_as_public_position)
 
+    def update_or_create_position_comment(self, position_id, position_we_vote_id, voter_id, voter_we_vote_id,
+                                          office_we_vote_id, candidate_we_vote_id, measure_we_vote_id,
+                                          statement_text, statement_html,
+                                          set_as_public_position):
+        retrieve_position_for_friends = not set_as_public_position
+
+        voter_position_found = False
+        if positive_value_exists(position_id):
+            # Retrieve the position this way
+            pass
+        elif positive_value_exists(position_we_vote_id):
+            # Retrieve the position this way
+            pass
+        else:
+            if not positive_value_exists(voter_id):
+                voter_id = fetch_voter_id_from_voter_we_vote_id(voter_we_vote_id)
+
+            if positive_value_exists(candidate_we_vote_id):
+                results = self.retrieve_voter_candidate_campaign_position_with_we_vote_id(voter_id, candidate_we_vote_id,
+                                                                                          retrieve_position_for_friends)
+                if results['position_found']:
+                    voter_position_found = True
+                    voter_position_on_stage = results['position']
+            elif positive_value_exists(office_we_vote_id):
+                # TODO
+                pass
+            elif positive_value_exists(measure_we_vote_id):
+                # TODO
+                pass
+
+        voter_position_on_stage_found = False
+        position_id = 0
+        if voter_position_found:
+            # Update this position with new values
+            try:
+                voter_position_on_stage.statement_text = statement_text
+                if voter_position_on_stage.candidate_campaign_we_vote_id:
+                    if not positive_value_exists(voter_position_on_stage.candidate_campaign_id):
+                        # Heal the data, and fill in the candidate_campaign_id
+                        voter_position_on_stage.candidate_campaign_id = \
+                            voter_position_on_stage.fetch_candidate_campaign_id_from_we_vote_id(
+                                voter_position_on_stage.candidate_campaign_we_vote_id)
+                if voter_position_on_stage.contest_measure_we_vote_id:
+                    if not positive_value_exists(voter_position_on_stage.contest_measure_id):
+                        # Heal the data, and fill in the contest_measure_id
+                        voter_position_on_stage.contest_measure_id = \
+                            voter_position_on_stage.fetch_contest_measure_id_from_we_vote_id(
+                                voter_position_on_stage.contest_measure_we_vote_id)
+                voter_position_on_stage.save()
+                position_id = voter_position_on_stage.id
+                voter_position_on_stage_found = True
+                status = 'POSITION_COMMENT_UPDATED'
+            except Exception as e:
+                handle_record_not_saved_exception(e, logger=logger)
+                status = 'POSITION_COMMENT_COULD_NOT_BE_UPDATED'
+        else:
+            try:
+                # Create new
+                if candidate_campaign_id:
+                    candidate_campaign_we_vote_id = \
+                        voter_position_on_stage.fetch_candidate_campaign_we_vote_id(candidate_campaign_id)
+                else:
+                    candidate_campaign_we_vote_id = None
+
+                if contest_measure_id:
+                    contest_measure_we_vote_id = \
+                        voter_position_on_stage.fetch_contest_measure_we_vote_id(contest_measure_id)
+                else:
+                    contest_measure_we_vote_id = None
+
+                if set_as_public_position:
+                    voter_position_on_stage = PositionEntered(
+                        voter_id=voter_id,
+                        candidate_campaign_id=candidate_campaign_id,
+                        candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                        contest_measure_id=contest_measure_id,
+                        contest_measure_we_vote_id=contest_measure_we_vote_id,
+                        # stance=stance,
+                        statement_text=statement_text,
+                    )
+                else:
+                    voter_position_on_stage = PositionForFriends(
+                        voter_id=voter_id,
+                        candidate_campaign_id=candidate_campaign_id,
+                        candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
+                        contest_measure_id=contest_measure_id,
+                        contest_measure_we_vote_id=contest_measure_we_vote_id,
+                        # stance=stance,
+                        statement_text=statement_text,
+                    )
+
+                voter_position_on_stage.save()
+                position_id = voter_position_on_stage.id
+                voter_position_on_stage_found = True
+                status = 'NEW_POSITION_COMMENT_SAVED'
+            except Exception as e:
+                status = 'NEW_POSITION_COMMENT_COULD_NOT_BE_SAVED'
+
+        results = {
+            'status': status,
+            'success': True if voter_position_on_stage_found else False,
+            'position_id': position_id,
+            'position': voter_position_on_stage,
+        }
+        return results
+
     # We rely on these unique identifiers:
     #   position_id, position_we_vote_id
     # Pass in a value if we want it saved. Pass in "False" if we want to leave it the same.
@@ -2324,10 +2432,10 @@ class PositionEnteredManager(models.Model):
         too_many_unique_ballot_item_variables_received = False
         no_unique_ballot_item_variables_received = False
         if set_as_public_position:
-            position_on_stage = PositionEntered()
+            position_on_stage = PositionEntered
             retrieve_position_for_friends = False
         else:
-            position_on_stage = PositionForFriends()
+            position_on_stage = PositionForFriends
             retrieve_position_for_friends = True
         status = "ENTERING_UPDATE_OR_CREATE_POSITION"
 

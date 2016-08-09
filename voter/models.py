@@ -855,6 +855,16 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
     return 0
 
 
+# This method *just* returns the voter_id or 0
+def fetch_voter_id_from_voter_we_vote_id(we_vote_id):
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_by_we_vote_id(we_vote_id)
+    if results['voter_found']:
+        voter = results['voter']
+        return voter.id
+    return 0
+
+
 def retrieve_voter_authority(request):
     voter_api_device_id = get_voter_api_device_id(request)
     voter_manager = VoterManager()

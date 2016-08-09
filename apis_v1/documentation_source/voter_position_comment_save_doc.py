@@ -19,25 +19,15 @@ def voter_position_comment_save_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
-            'name':         'office_we_vote_id',
+            'name':         'kind_of_ballot_item',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for the office the position about. '
-                            '(One and only one of these is required: '
-                            'office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)',
+            'description':  'The kind of ballot item the voter wants to comment on. '
+                            '(kind_of_ballot_item is either "CANDIDATE", "POLITICIAN" or "MEASURE")',
         },
         {
-            'name':         'candidate_we_vote_id',
+            'name':         'ballot_item_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for the candidate the position about. '
-                            '(One and only one of these is required: '
-                            'office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)',
-        },
-        {
-            'name':         'measure_we_vote_id',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for the measure the position about. '
-                            '(One and only one of these is required: '
-                            'office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)',
+            'description':  'The unique identifier for this ballot_item across all networks.',
         },
         {
             'name':         'statement_text',
@@ -86,7 +76,8 @@ def voter_position_comment_save_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        'candidate_we_vote_id': 'wv01cand1755',
+        'kind_of_ballot_item': 'CANDIDATE',
+        'ballot_item_we_vote_id': 'wv01cand1755',
         'statement_text': 'This is what I believe...',
         'google_civic_election_id': '4162',
     }

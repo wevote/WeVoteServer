@@ -1518,26 +1518,42 @@ def position_like_count_view(request):
 
 def voter_position_comment_save_view(request):  # voterPositionCommentSave
     """
-    Save a single position
+    Save comment for a single measure or candidate for one voter
     :param request:
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_id = request.GET.get('position_id', False)
-    position_we_vote_id = request.GET.get('position_we_vote_id', False)
-    google_civic_election_id = request.GET.get('google_civic_election_id', False)
-    office_we_vote_id = request.GET.get('office_we_vote_id', False)
-    candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
-    measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
+    position_id = request.GET.get('position_id', 0)
+    position_we_vote_id = request.GET.get('position_we_vote_id', "")
+
     statement_text = request.GET.get('statement_text', False)
     statement_html = request.GET.get('statement_html', False)
     set_as_public_position = request.GET.get('set_as_public_position', False)
+
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
+
+    if kind_of_ballot_item == CANDIDATE:
+        candidate_we_vote_id = ballot_item_we_vote_id
+        measure_we_vote_id = None
+        office_we_vote_id = None
+    elif kind_of_ballot_item == MEASURE:
+        candidate_we_vote_id = None
+        measure_we_vote_id = ballot_item_we_vote_id
+        office_we_vote_id = None
+    elif kind_of_ballot_item == OFFICE:
+        candidate_we_vote_id = None
+        measure_we_vote_id = None
+        office_we_vote_id = ballot_item_we_vote_id
+    else:
+        candidate_we_vote_id = None
+        measure_we_vote_id = None
+        office_we_vote_id = None
 
     results = voter_position_comment_save_for_api(
         voter_device_id=voter_device_id,
         position_id=position_id,
         position_we_vote_id=position_we_vote_id,
-        google_civic_election_id=google_civic_election_id,
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,
         measure_we_vote_id=measure_we_vote_id,
