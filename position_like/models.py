@@ -36,7 +36,8 @@ class PositionLike(models.Model):
 
     def position_we_vote_id(self):
         position_manager = PositionEnteredManager()
-        return position_manager.fetch_we_vote_id_from_local_id(self.voter_id)
+        retrieve_position_for_friends = False  # Revisit this
+        return position_manager.fetch_we_vote_id_from_local_id(self.voter_id, retrieve_position_for_friends)
 
 
 class PositionLikeManager(models.Model):

@@ -11,12 +11,11 @@ from django.db.models import Q
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
-from measure.models import ContestMeasure, ContestMeasureList
-from office.models import ContestOffice
+from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
+from office.models import ContestOfficeManager
 from organization.models import Organization, OrganizationManager
 from twitter.models import TwitterUser
-from voter.models import fetch_voter_id_from_voter_we_vote_id, Voter, VoterAddress, VoterAddressManager, \
-    VoterDeviceLinkManager, VoterManager
+from voter.models import fetch_voter_id_from_voter_we_vote_id, Voter, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_position_integer, fetch_site_unique_id_prefix
@@ -117,7 +116,8 @@ class PositionEntered(models.Model):
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=True, blank=True)
     # State code
-    state_code = models.CharField(verbose_name="us state of the ballot item position is for", max_length=2, null=True, blank=True)
+    state_code = models.CharField(verbose_name="us state of the ballot item position is for",
+                                  max_length=2, null=True, blank=True)
     # ### Values from Vote Smart ###
     vote_smart_rating_id = models.BigIntegerField(null=True, blank=True, unique=False)
     # Usually in one of these two formats 2015, 2014-2015
@@ -330,111 +330,6 @@ class PositionEntered(models.Model):
         except Organization.DoesNotExist:
             return
         return organization
-
-    def fetch_organization_we_vote_id(self, organization_id=0):
-        try:
-            if positive_value_exists(organization_id):
-                organization_on_stage = Organization.objects.get(id=organization_id)
-            else:
-                organization_on_stage = Organization.objects.get(id=self.organization_id)
-            if organization_on_stage.we_vote_id:
-                return organization_on_stage.we_vote_id
-        except Organization.DoesNotExist:
-            logger.error("position.organization fetch_organization_we_vote_id did not find we_vote_id")
-            return
-        return
-
-    def fetch_organization_id_from_we_vote_id(self, organization_we_vote_id=''):
-        try:
-            if positive_value_exists(organization_we_vote_id):
-                organization_on_stage = Organization.objects.get(we_vote_id=organization_we_vote_id)
-            else:
-                organization_on_stage = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
-            if organization_on_stage.id:
-                return organization_on_stage.id
-        except Organization.DoesNotExist:
-            logger.error("position.organization fetch_organization_id_from_we_vote_id did not find id")
-            return
-        return
-
-    def fetch_contest_office_we_vote_id(self, office_id=0):
-        try:
-            if positive_value_exists(office_id):
-                contest_office_on_stage = ContestOffice.objects.get(id=office_id)
-            else:
-                contest_office_on_stage = ContestOffice.objects.get(id=self.contest_office_id)
-            if contest_office_on_stage.we_vote_id:
-                return contest_office_on_stage.we_vote_id
-        except ContestOffice.DoesNotExist:
-            logger.error("position.contest_office fetch_contest_office_we_vote_id did not find we_vote_id")
-            pass
-        return
-
-    def fetch_contest_office_id_from_we_vote_id(self, office_we_vote_id=''):
-        try:
-            if positive_value_exists(office_we_vote_id):
-                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=office_we_vote_id)
-            else:
-                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
-            if contest_office_on_stage.id:
-                return contest_office_on_stage.id
-        except ContestOffice.DoesNotExist:
-            logger.error("position.contest_office fetch_contest_office_id_from_we_vote_id did not find id")
-            pass
-        return
-
-    def fetch_candidate_campaign_we_vote_id(self, candidate_campaign_id=0):
-        try:
-            if positive_value_exists(candidate_campaign_id):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(id=candidate_campaign_id)
-            else:
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(id=self.candidate_campaign_id)
-            if candidate_campaign_on_stage.we_vote_id:
-                return candidate_campaign_on_stage.we_vote_id
-        except CandidateCampaign.DoesNotExist:
-            logger.error("position.candidate_campaign fetch_candidate_campaign_we_vote_id did not find we_vote_id")
-            return
-        return
-
-    def fetch_candidate_campaign_id_from_we_vote_id(self, candidate_campaign_we_vote_id=''):
-        try:
-            if positive_value_exists(candidate_campaign_we_vote_id):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(we_vote_id=candidate_campaign_we_vote_id)
-            else:
-                candidate_campaign_on_stage = \
-                    CandidateCampaign.objects.get(we_vote_id=self.candidate_campaign_we_vote_id)
-            if candidate_campaign_on_stage.id:
-                return candidate_campaign_on_stage.id
-        except CandidateCampaign.DoesNotExist:
-            logger.error("position.candidate_campaign fetch_candidate_campaign_id_from_we_vote_id did not find id")
-            return
-        return
-
-    def fetch_contest_measure_we_vote_id(self, contest_measure_id=0):
-        try:
-            if positive_value_exists(contest_measure_id):
-                measure_campaign_on_stage = ContestMeasure.objects.get(id=contest_measure_id)
-            else:
-                measure_campaign_on_stage = ContestMeasure.objects.get(id=self.contest_measure_id)
-            if measure_campaign_on_stage.we_vote_id:
-                return measure_campaign_on_stage.we_vote_id
-        except ContestMeasure.DoesNotExist:
-            logger.error("position.measure_campaign fetch_contest_measure_we_vote_id did not find we_vote_id")
-            pass
-        return
-
-    def fetch_contest_measure_id_from_we_vote_id(self, contest_measure_we_vote_id=''):
-        try:
-            if positive_value_exists(contest_measure_we_vote_id):
-                contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
-            else:
-                contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=self.contest_measure_we_vote_id)
-            if contest_measure_on_stage.id:
-                return contest_measure_on_stage.id
-        except ContestMeasure.DoesNotExist:
-            logger.error("position.contest_measure fetch_contest_measure_id_from_we_vote_id did not find id")
-            pass
-        return
 
 
 class PositionForFriends(models.Model):
@@ -720,112 +615,6 @@ class PositionForFriends(models.Model):
         except Organization.DoesNotExist:
             return
         return organization
-
-    def fetch_organization_we_vote_id(self, organization_id=0):
-        try:
-            if positive_value_exists(organization_id):
-                organization_on_stage = Organization.objects.get(id=organization_id)
-            else:
-                organization_on_stage = Organization.objects.get(id=self.organization_id)
-            if organization_on_stage.we_vote_id:
-                return organization_on_stage.we_vote_id
-        except Organization.DoesNotExist:
-            logger.error("position.organization fetch_organization_we_vote_id did not find we_vote_id")
-            return
-        return
-
-    def fetch_organization_id_from_we_vote_id(self, organization_we_vote_id=''):
-        try:
-            if positive_value_exists(organization_we_vote_id):
-                organization_on_stage = Organization.objects.get(we_vote_id=organization_we_vote_id)
-            else:
-                organization_on_stage = Organization.objects.get(we_vote_id=self.organization_we_vote_id)
-            if organization_on_stage.id:
-                return organization_on_stage.id
-        except Organization.DoesNotExist:
-            logger.error("position.organization fetch_organization_id_from_we_vote_id did not find id")
-            return
-        return
-
-    def fetch_contest_office_we_vote_id(self, office_id=0):
-        try:
-            if positive_value_exists(office_id):
-                contest_office_on_stage = ContestOffice.objects.get(id=office_id)
-            else:
-                contest_office_on_stage = ContestOffice.objects.get(id=self.contest_office_id)
-            if contest_office_on_stage.we_vote_id:
-                return contest_office_on_stage.we_vote_id
-        except ContestOffice.DoesNotExist:
-            logger.error("position.contest_office fetch_contest_office_we_vote_id did not find we_vote_id")
-            pass
-        return
-
-    def fetch_contest_office_id_from_we_vote_id(self, office_we_vote_id=''):
-        try:
-            if positive_value_exists(office_we_vote_id):
-                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=office_we_vote_id)
-            else:
-                contest_office_on_stage = ContestOffice.objects.get(we_vote_id=self.contest_office_we_vote_id)
-            if contest_office_on_stage.id:
-                return contest_office_on_stage.id
-        except ContestOffice.DoesNotExist:
-            logger.error("position.contest_office fetch_contest_office_id_from_we_vote_id did not find id")
-            pass
-        return
-
-    def fetch_candidate_campaign_we_vote_id(self, candidate_campaign_id=0):
-        try:
-            if positive_value_exists(candidate_campaign_id):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(id=candidate_campaign_id)
-            else:
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(id=self.candidate_campaign_id)
-            if candidate_campaign_on_stage.we_vote_id:
-                return candidate_campaign_on_stage.we_vote_id
-        except CandidateCampaign.DoesNotExist:
-            logger.error("position.candidate_campaign fetch_candidate_campaign_we_vote_id did not find we_vote_id")
-            return
-        return
-
-    def fetch_candidate_campaign_id_from_we_vote_id(self, candidate_campaign_we_vote_id=''):
-        try:
-            if positive_value_exists(candidate_campaign_we_vote_id):
-                candidate_campaign_on_stage = CandidateCampaign.objects.get(
-                    we_vote_id=candidate_campaign_we_vote_id)
-            else:
-                candidate_campaign_on_stage = \
-                    CandidateCampaign.objects.get(we_vote_id=self.candidate_campaign_we_vote_id)
-            if candidate_campaign_on_stage.id:
-                return candidate_campaign_on_stage.id
-        except CandidateCampaign.DoesNotExist:
-            logger.error("position.candidate_campaign fetch_candidate_campaign_id_from_we_vote_id did not find id")
-            return
-        return
-
-    def fetch_contest_measure_we_vote_id(self, contest_measure_id=0):
-        try:
-            if positive_value_exists(contest_measure_id):
-                measure_campaign_on_stage = ContestMeasure.objects.get(id=contest_measure_id)
-            else:
-                measure_campaign_on_stage = ContestMeasure.objects.get(id=self.contest_measure_id)
-            if measure_campaign_on_stage.we_vote_id:
-                return measure_campaign_on_stage.we_vote_id
-        except ContestMeasure.DoesNotExist:
-            logger.error("position.measure_campaign fetch_contest_measure_we_vote_id did not find we_vote_id")
-            pass
-        return
-
-    def fetch_contest_measure_id_from_we_vote_id(self, contest_measure_we_vote_id=''):
-        try:
-            if positive_value_exists(contest_measure_we_vote_id):
-                contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
-            else:
-                contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=self.contest_measure_we_vote_id)
-            if contest_measure_on_stage.id:
-                return contest_measure_on_stage.id
-        except ContestMeasure.DoesNotExist:
-            logger.error("position.contest_measure fetch_contest_measure_id_from_we_vote_id did not find id")
-            pass
-        return
 
 
 # NOTE: 2015-11 We are still using PositionEntered and PositionForFriends instead of Position
@@ -1760,9 +1549,9 @@ class PositionEnteredManager(models.Model):
     def __unicode__(self):
         return "PositionEnteredManager"
 
-    def fetch_we_vote_id_from_local_id(self, position_id):
+    def fetch_we_vote_id_from_local_id(self, position_id, retrieve_position_for_friends=False):
         if positive_value_exists(position_id):
-            results = self.retrieve_organization_from_id(position_id)
+            results = self.retrieve_position_from_id(position_id, retrieve_position_for_friends)
             if results['position_found']:
                 position = results['position']
                 return position.we_vote_id
@@ -2167,14 +1956,16 @@ class PositionEnteredManager(models.Model):
                 if voter_position_on_stage.candidate_campaign_id:
                     if not positive_value_exists(voter_position_on_stage.candidate_campaign_we_vote_id):
                         # Heal the data, and fill in the candidate_campaign_we_vote_id
+                        candidate_campaign_manager = CandidateCampaignManager()
                         voter_position_on_stage.candidate_campaign_we_vote_id = \
-                            voter_position_on_stage.fetch_candidate_campaign_we_vote_id(
+                            candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(
                                 voter_position_on_stage.candidate_campaign_id)
                 if voter_position_on_stage.contest_measure_id:
                     if not positive_value_exists(voter_position_on_stage.contest_measure_we_vote_id):
                         # Heal the data, and fill in the contest_measure_we_vote_id
+                        contest_measure_manager = ContestMeasureManager()
                         voter_position_on_stage.contest_measure_we_vote_id = \
-                            voter_position_on_stage.fetch_contest_measure_we_vote_id(
+                            contest_measure_manager.fetch_contest_measure_we_vote_id_from_id(
                                 voter_position_on_stage.contest_measure_id)
                 voter_position_on_stage.save()
                 position_id = voter_position_on_stage.id
@@ -2187,14 +1978,16 @@ class PositionEnteredManager(models.Model):
             try:
                 # Create new
                 if candidate_campaign_id:
+                    candidate_campaign_manager = CandidateCampaignManager()
                     candidate_campaign_we_vote_id = \
-                            voter_position_on_stage.fetch_candidate_campaign_we_vote_id(candidate_campaign_id)
+                        candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_campaign_id)
                 else:
                     candidate_campaign_we_vote_id = None
 
                 if contest_measure_id:
+                    contest_measure_manager = ContestMeasureManager()
                     contest_measure_we_vote_id = \
-                            voter_position_on_stage.fetch_contest_measure_we_vote_id(contest_measure_id)
+                        contest_measure_manager.fetch_contest_measure_we_vote_id_from_id(contest_measure_id)
                 else:
                     contest_measure_we_vote_id = None
 
@@ -2335,14 +2128,16 @@ class PositionEnteredManager(models.Model):
                 if voter_position_on_stage.candidate_campaign_we_vote_id:
                     if not positive_value_exists(voter_position_on_stage.candidate_campaign_id):
                         # Heal the data, and fill in the candidate_campaign_id
+                        candidate_campaign_manager = CandidateCampaignManager()
                         voter_position_on_stage.candidate_campaign_id = \
-                            voter_position_on_stage.fetch_candidate_campaign_id_from_we_vote_id(
+                            candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(
                                 voter_position_on_stage.candidate_campaign_we_vote_id)
                 if voter_position_on_stage.contest_measure_we_vote_id:
                     if not positive_value_exists(voter_position_on_stage.contest_measure_id):
                         # Heal the data, and fill in the contest_measure_id
+                        contest_measure_manager = ContestMeasureManager()
                         voter_position_on_stage.contest_measure_id = \
-                            voter_position_on_stage.fetch_contest_measure_id_from_we_vote_id(
+                            contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(
                                 voter_position_on_stage.contest_measure_we_vote_id)
                 voter_position_on_stage.save()
                 position_id = voter_position_on_stage.id
@@ -2354,14 +2149,16 @@ class PositionEnteredManager(models.Model):
             try:
                 # Create new
                 if candidate_we_vote_id:
+                    candidate_campaign_manager = CandidateCampaignManager()
                     candidate_campaign_id = \
-                        voter_position_on_stage.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+                        candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
                 else:
                     candidate_campaign_id = None
 
                 if measure_we_vote_id:
+                    contest_measure_manager = ContestMeasureManager()
                     contest_measure_id = \
-                        voter_position_on_stage.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
+                        contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
                 else:
                     contest_measure_id = None
 
@@ -2478,8 +2275,9 @@ class PositionEnteredManager(models.Model):
                 if organization_we_vote_id:
                     position_on_stage.organization_we_vote_id = organization_we_vote_id
                     # Lookup organization_id based on organization_we_vote_id and update
+                    organization_manager = OrganizationManager()
                     position_on_stage.organization_id = \
-                        position_on_stage.fetch_organization_id_from_we_vote_id(organization_we_vote_id)
+                        organization_manager.fetch_organization_id(organization_we_vote_id)
                 if google_civic_election_id:
                     position_on_stage.google_civic_election_id = google_civic_election_id
                 if state_code:
@@ -2489,18 +2287,21 @@ class PositionEnteredManager(models.Model):
                 if office_we_vote_id:
                     position_on_stage.contest_office_we_vote_id = office_we_vote_id
                     # Lookup contest_office_id based on office_we_vote_id and update
+                    contest_office_manager = ContestOfficeManager()
                     position_on_stage.contest_office_id = \
-                        position_on_stage.fetch_contest_office_id_from_we_vote_id(office_we_vote_id)
+                        contest_office_manager.fetch_contest_office_id_from_we_vote_id(office_we_vote_id)
                 if candidate_we_vote_id:
                     position_on_stage.candidate_campaign_we_vote_id = candidate_we_vote_id
                     # Lookup candidate_campaign_id based on candidate_campaign_we_vote_id and update
+                    candidate_campaign_manager = CandidateCampaignManager()
                     position_on_stage.candidate_campaign_id = \
-                        position_on_stage.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+                        candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
                 if measure_we_vote_id:
                     position_on_stage.contest_measure_we_vote_id = measure_we_vote_id
                     # Lookup contest_measure_id based on contest_measure_we_vote_id and update
+                    contest_measure_manager = ContestMeasureManager()
                     position_on_stage.contest_measure_id = \
-                        position_on_stage.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
+                        contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
                 # if positive_value_exists(stance):
                 if stance:
                     # TODO Verify that "stance" contains a legal value
@@ -2836,8 +2637,8 @@ class PositionEnteredManager(models.Model):
                 # Some functions pass in these values with "False" if we don't want to update the value. Because of
                 # this we want to change the value away from "False" when we create a new entry.
                 if organization_we_vote_id:
-                    organization_id = \
-                        position_on_stage.fetch_organization_id_from_we_vote_id(organization_we_vote_id)
+                    organization_manager = OrganizationManager()
+                    organization_id = organization_manager.fetch_organization_id(organization_we_vote_id)
                 else:
                     # We don't need to ever look up the organization_we_vote_id from the organization_id
                     organization_id = 0
@@ -2862,24 +2663,27 @@ class PositionEnteredManager(models.Model):
                     ballot_item_display_name = None
 
                 if office_we_vote_id:
+                    contest_office_manager = ContestOfficeManager()
                     contest_office_id = \
-                        position_on_stage.fetch_contest_office_id_from_we_vote_id(office_we_vote_id)
+                        contest_office_manager.fetch_contest_office_id_from_we_vote_id(office_we_vote_id)
                 else:
                     # We don't need to ever look up the office_we_vote_id from the contest_office_id
                     contest_office_id = 0
                     office_we_vote_id = None
 
                 if candidate_we_vote_id:
+                    candidate_campaign_manager = CandidateCampaignManager()
                     candidate_campaign_id = \
-                        position_on_stage.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+                        candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
                 else:
                     # We don't need to ever look up the candidate_we_vote_id from the candidate_campaign_id
                     candidate_campaign_id = 0
                     candidate_we_vote_id = None
 
                 if measure_we_vote_id:
+                    contest_measure_manager = ContestMeasureManager()
                     contest_measure_id = \
-                        position_on_stage.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
+                        contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
                 else:
                     # We don't need to ever look up the measure_we_vote_id from the contest_measure_id
                     contest_measure_id = 0
