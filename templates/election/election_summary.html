@@ -38,13 +38,12 @@
             See Offices for this Election</a>,
         <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ election.google_civic_election_id }}">
             See Candidates for this Election</a><br />
+        <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}">
+            Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)<br />
     </p>
 
 {% if election.google_civic_election_id|convert_to_int >= 1000000 %}
     <p>
-        <a href="{% url 'ballot:ballot_item_list_edit' 0 %}?google_civic_election_id={{ election.google_civic_election_id }}">
-            Create Ballot for this Election for one Location</a> (so voters can find a ballot before Google Civic data is live)<br />
-        <br />
         <a href="{% url 'election:election_migration' %}?we_vote_election_id={{ election.google_civic_election_id }}">
             Migrate this Data into Google Civic Election</a> (after data is available from Google Civic)<br />
     </p>

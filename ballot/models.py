@@ -201,12 +201,22 @@ class BallotItemManager(models.Model):
             contest_office_manager = ContestOfficeManager()
             contest_office_id = contest_office_manager.fetch_contest_office_id_from_we_vote_id(
                 contest_office_we_vote_id)
+        elif positive_value_exists(contest_office_id) and not positive_value_exists(contest_office_we_vote_id):
+            # Look up contest_office_we_vote_id
+            contest_office_manager = ContestOfficeManager()
+            contest_office_we_vote_id = contest_office_manager.fetch_contest_office_we_vote_id_from_id(
+                contest_office_id)
 
         if positive_value_exists(contest_measure_we_vote_id) and not positive_value_exists(contest_measure_id):
             # Look up contest_measure_id
             contest_measure_manager = ContestMeasureManager()
             contest_measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(
                 contest_measure_we_vote_id)
+        elif positive_value_exists(contest_measure_id) and not positive_value_exists(contest_measure_we_vote_id):
+            # Look up contest_measure_id
+            contest_measure_manager = ContestMeasureManager()
+            contest_measure_we_vote_id = contest_measure_manager.fetch_contest_measure_we_vote_id_from_id(
+                contest_measure_id)
 
         # We require both contest_office_id and contest_office_we_vote_id
         #  OR both contest_measure_id and contest_measure_we_vote_id
@@ -901,7 +911,8 @@ class BallotReturnedManager(models.Model):
             state = address.split(', ')[-2][:2]
             ballot = BallotReturned.objects.\
                 filter(normalized_state=state).\
-                annotate(distance=(F('latitude') - location.latitude) ** 2 + (F('longitude') - location.longitude) ** 2).\
+                annotate(distance=(F('latitude') - location.latitude) ** 2 +
+                                  (F('longitude') - location.longitude) ** 2).\
                 order_by('distance').first()
 
             if ballot is not None:

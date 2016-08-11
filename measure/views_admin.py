@@ -96,9 +96,22 @@ def measure_new_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
+    try:
+        measure_list = ContestMeasure.objects.order_by('measure_title')
+        if positive_value_exists(google_civic_election_id):
+            measure_list = measure_list.filter(google_civic_election_id=google_civic_election_id)
+    except ContestMeasure.DoesNotExist:
+        # This is fine
+        measure_list = ContestMeasure()
+        pass
+
     messages_on_stage = get_messages(request)
     template_values = {
-        'messages_on_stage': messages_on_stage,
+        'messages_on_stage':        messages_on_stage,
+        'google_civic_election_id': google_civic_election_id,
+        'measure_list':             measure_list,
     }
     return render(request, 'measure/measure_edit.html', template_values)
 
@@ -125,12 +138,12 @@ def measure_edit_view(request, measure_id):
 
     if measure_on_stage_found:
         template_values = {
-            'messages_on_stage': messages_on_stage,
-            'measure': measure_on_stage,
+            'messages_on_stage':    messages_on_stage,
+            'measure':              measure_on_stage,
         }
     else:
         template_values = {
-            'messages_on_stage': messages_on_stage,
+            'messages_on_stage':    messages_on_stage,
         }
     return render(request, 'measure/measure_edit.html', template_values)
 
@@ -147,43 +160,71 @@ def measure_edit_process_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     measure_id = convert_to_int(request.POST['measure_id'])
-    measure_name = request.POST['measure_name']
-    twitter_handle = request.POST['twitter_handle']
-    measure_website = request.POST['measure_website']
+    measure_title = request.POST.get('measure_title', False)
+    google_civic_measure_title = request.POST.get('google_civic_measure_title', False)
+    measure_subtitle = request.POST.get('measure_subtitle', False)
+    measure_text = request.POST.get('measure_text', False)
+    measure_url = request.POST.get('measure_url', False)
+    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    maplight_id = request.POST.get('maplight_id', False)
+    state_code = request.POST.get('state_code', False)
 
-    # Check to see if this measure is already being used anywhere
+    # Check to see if this measure exists
     measure_on_stage_found = False
     measure_on_stage = ContestMeasure()
+    error = False
     try:
-        measure_query = ContestMeasure.objects.filter(id=measure_id)
-        if len(measure_query):
-            measure_on_stage = measure_query[0]
-            measure_on_stage_found = True
+        if positive_value_exists(measure_id):
+            measure_query = ContestMeasure.objects.filter(id=measure_id)
+            if len(measure_query):
+                measure_on_stage = measure_query[0]
+                measure_on_stage_found = True
     except Exception as e:
-        handle_record_not_found_exception(e, logger=logger)
+        messages.add_message(request, messages.ERROR, 'There was an error trying to find this measure.')
+        error = True
 
-    try:
-        if measure_on_stage_found:
-            # Update
-            measure_on_stage.measure_name = measure_name
-            measure_on_stage.twitter_handle = twitter_handle
-            measure_on_stage.measure_website = measure_website
-            measure_on_stage.save()
-            messages.add_message(request, messages.INFO, 'ContestMeasure updated.')
-        else:
-            # Create new
-            measure_on_stage = ContestMeasure(
-                measure_name=measure_name,
-                twitter_handle=twitter_handle,
-                measure_website=measure_website,
-            )
-            measure_on_stage.save()
-            messages.add_message(request, messages.INFO, 'New measure saved.')
-    except Exception as e:
-        handle_record_not_saved_exception(e, logger=logger)
-        messages.add_message(request, messages.ERROR, 'Could not save measure.')
+    if not error:
+        try:
+            if measure_on_stage_found:
+                # Update
+                if measure_title is not False:
+                    measure_on_stage.measure_title = measure_title
+                if google_civic_measure_title is not False:
+                    measure_on_stage.google_civic_measure_title = google_civic_measure_title
+                if measure_subtitle is not False:
+                    measure_on_stage.measure_subtitle = measure_subtitle
+                if measure_text is not False:
+                    measure_on_stage.measure_text = measure_text
+                if measure_url is not False:
+                    measure_on_stage.measure_url = measure_url
+                if google_civic_election_id is not False:
+                    measure_on_stage.google_civic_election_id = google_civic_election_id
+                if maplight_id is not False:
+                    measure_on_stage.maplight_id = maplight_id
+                if state_code is not False:
+                    measure_on_stage.state_code = state_code
 
-    return HttpResponseRedirect(reverse('measure:measure_list', args=()))
+                measure_on_stage.save()
+                messages.add_message(request, messages.INFO, 'ContestMeasure updated.')
+            else:
+                # Create new
+                measure_on_stage = ContestMeasure(
+                    measure_title=measure_title,
+                    google_civic_measure_title=google_civic_measure_title,
+                    measure_subtitle=measure_subtitle,
+                    measure_text=measure_text,
+                    measure_url=measure_url,
+                    google_civic_election_id=google_civic_election_id,
+                    state_code=state_code,
+                    maplight_id=maplight_id,
+                )
+                measure_on_stage.save()
+                messages.add_message(request, messages.INFO, 'New measure saved.')
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, 'Could not save measure.')
+
+    return HttpResponseRedirect(reverse('measure:measure_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))
 
 
 @login_required

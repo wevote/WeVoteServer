@@ -212,6 +212,17 @@ class PollingLocationManager(models.Model):
         # Retrieve a list of polling_location entries
         polling_location_list_found = False
         polling_location_list = []
+
+        if not positive_value_exists(state) and not positive_value_exists(city) \
+                and not positive_value_exists(polling_location_zip):
+            results = {
+                'status': "NO_CRITERIA_FOR_FINDING_POLLING_LOCATIONS-NONE_RETURNED",
+                'success': True,
+                'polling_location_list_found': False,
+                'polling_location_list': [],
+            }
+            return results
+
         try:
             polling_location_list = PollingLocation.objects.all()
             if positive_value_exists(state):

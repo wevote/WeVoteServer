@@ -52,7 +52,7 @@
     <p>(no measures found)</p>
 {% endif %}
 
-<p><a href="{% url 'measure:measure_new' %}">Add New Measure</a></p>
+<p><a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Measure</a></p>
 
     <script>
         $(function() {

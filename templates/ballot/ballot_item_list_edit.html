@@ -29,8 +29,15 @@
 
     <h4>Existing Ballot Items</h4>
     {% for ballot_item in ballot_item_list %}
-        {% if ballot_item.contest_office_we_vote_id %}{# kind_of_ballot_item (contest_office or contest_measure) #}
+        {% if ballot_item.contest_office_we_vote_id %}
             {{ ballot_item.local_ballot_order }}: {{ ballot_item.ballot_item_display_name }} ({{ ballot_item.contest_office_we_vote_id }})
+            {% if ballot_item.google_civic_election_id|convert_to_int >= 1000000 %}
+            {# If here, this is a We Vote #}
+                - Delete
+            {% endif %}
+            <br />
+        {% elif ballot_item.contest_measure_we_vote_id %}
+            {{ ballot_item.local_ballot_order }}: {{ ballot_item.ballot_item_display_name }} ({{ ballot_item.contest_measure_we_vote_id }})
             {% if ballot_item.google_civic_election_id|convert_to_int >= 1000000 %}
             {# If here, this is a We Vote #}
                 - Delete
@@ -77,12 +84,13 @@
 {% endif %}
 
 {% if google_civic_election_id|convert_to_int >= 1000000 %}
-{# If here, we are looking at a We Vote election #}
-    {# ################################### #}
+{# If here, we are looking at a We Vote election - 2016-08-10 This filter turned off for now #}
+ {% endif %}
+   {# ################################### #}
     {% if office_list %}
-        <h4>Add New Office</h4>
+        <h5>Add New Office</h5>
         {# Office Option 1 #}
-        <label for="contest_office1_id_id">New Office 1</label>
+        <label for="contest_office1_id_id">New Office</label>
         <select id="contest_office1_id_id" name="contest_office1_id">
             <option value="0" >-- Choose Office --</option>
         {% for office in office_list %}
@@ -91,17 +99,17 @@
         </select>
 
     {% else %}
-        (no offices exist -- you need to
+        (no offices exist for this election yet -- you need to
         <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-            add offices first</a> (in new window))
+            add offices to the election first</a> (in new window))
     {% endif %}
     <br />
 
     {# ################################### #}
     {% if measure_list %}
-        <h4>Add New Measure</h4>
+        <h5>Add New Measure</h5>
         {# Measure Option 1 #}
-        <label for="contest_measure1_id_id">New Measure 1</label>
+        <label for="contest_measure1_id_id">New Measure</label>
         <select id="contest_measure1_id_id" name="contest_measure1_id">
             <option value="0">-- Choose Measure --</option>
         {% for measure in measure_list %}
@@ -110,18 +118,19 @@
         </select>
 
     {% else %}
-        (no measures exist -- you need to
+        (no measures exist for this election yet -- you need to
         <a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
-            add measures first</a> (in new window))
+            add measures to the election first</a> (in new window))
     {% endif %}
     <br />
-{% endif %}
 
 {% if google_civic_election_id|convert_to_int >= 1000000 or google_civic_election_id|convert_to_int == 0 %}
+{# If here, we are looking at a We Vote election (or new election) - 2016-08-10 This filter turned off for now #}
+{% endif %}
+
     <br />
     <p><a href="{% url 'election:election_summary' election.id %}">cancel</a>
     <input type="submit" value="{% if ballot_returned %}Update Ballot{% else %}Save New Ballot{% endif %}" /></p>
-{% endif %}
 </form>
 <br />
 

@@ -14,7 +14,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from election.models import Election, ElectionManager
-from measure.models import ContestMeasureManager
+from geopy.geocoders import get_geocoder_for_service
+from measure.models import ContestMeasure, ContestMeasureManager
 from polling_location.models import PollingLocation, PollingLocationManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -117,8 +118,6 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
 
     ballot_returned_found = False
     ballot_returned = BallotReturned()
-    contest_office_id = 0
-    contest_office_list = []
 
     ballot_returned_manager = BallotReturnedManager()
     results = ballot_returned_manager.retrieve_existing_ballot_returned_by_identifier(ballot_returned_id)
@@ -132,6 +131,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
 
     election = Election()
     election_state = ''
+    contest_measure_list = []
     contest_office_list = []
     if google_civic_election_id:
         election_manager = ElectionManager()
@@ -146,6 +146,13 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
             contest_office_list = contest_office_list.filter(google_civic_election_id=google_civic_election_id)
         except Exception as e:
             contest_office_list = []
+
+        # Get a list of measures for this election so we can create drop downs
+        try:
+            contest_measure_list = ContestMeasure.objects.order_by('measure_title')
+            contest_measure_list = contest_measure_list.filter(google_civic_election_id=google_civic_election_id)
+        except Exception as e:
+            contest_measure_list = []
     else:
         messages.add_message(request, messages.ERROR, 'In order to create a \'ballot_returned\' entry, '
                                                       'a google_civic_election_id is required.')
@@ -187,6 +194,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
         'ballot_returned':              ballot_returned,
         'ballot_returned_id':           ballot_returned_id,
         'election':                     election,
+        'measure_list':                 contest_measure_list,
         'office_list':                  contest_office_list,
         'polling_location_we_vote_id':  polling_location_we_vote_id,
         'polling_location_found':       polling_location_found,
@@ -237,6 +245,7 @@ def ballot_item_list_edit_process_view(request):
     election_manager = ElectionManager()
     polling_location_manager = PollingLocationManager()
     polling_location = PollingLocation()
+    polling_location_found = False
     try:
         if ballot_returned_found:
             # Update
@@ -307,7 +316,21 @@ def ballot_item_list_edit_process_view(request):
             )
             ballot_returned.save()
             ballot_returned_id = ballot_returned.id
+            ballot_returned_found = True
             messages.add_message(request, messages.INFO, 'New ballot_returned saved.')
+
+        # #######################################
+        # Make sure we have saved a latitude and longitude for the ballot_returned entry
+        if ballot_returned_found and positive_value_exists(ballot_returned.text_for_map_search):
+            if not ballot_returned.latitude or not ballot_returned.longitude:
+                google_client = get_geocoder_for_service('google')()
+                location = google_client.geocode(ballot_returned.text_for_map_search)
+                if location is None:
+                    status = 'Could not find location matching "{}"'.format(ballot_returned.text_for_map_search)
+                else:
+                    ballot_returned.latitude = location.latitude
+                    ballot_returned.longitude = location.longitude
+                    ballot_returned.save()
 
         # #######################################
         # Now create new ballot_item entries
