@@ -345,13 +345,31 @@ class PoliticianManager(models.Model):
                         vote_smart_id=vote_smart_id,
                         defaults=updated_politician_values)
                 politician_found = True
+            elif positive_value_exists(candidate_twitter_handle):
+                politician, new_politician_created = \
+                    Politician.objects.update_or_create(
+                        politician_twitter_handle=candidate_twitter_handle,
+                        defaults=updated_politician_values)
+                politician_found = True
+            elif positive_value_exists(first_name) and positive_value_exists(last_name) \
+                    and positive_value_exists(state_code):
+                politician, new_politician_created = \
+                    Politician.objects.update_or_create(
+                        first_name=first_name,
+                        last_name=last_name,
+                        state_code=state_code,
+                        defaults=updated_politician_values)
+                politician_found = True
             else:
-                # To be created
+                # If here we have exhausted our set of unique identifiers
                 politician_found = False
                 pass
 
             success = True
-            status = 'POLITICIAN_SAVED'
+            if politician_found:
+                status = 'POLITICIAN_SAVED'
+            else:
+                status = 'POLITICIAN_NOT_SAVED'
         except Exception as e:
             success = False
             status = 'UNABLE_TO_UPDATE_OR_CREATE_POLITICIAN'

@@ -374,14 +374,16 @@ def candidate_edit_process_view(request):
         election_found = election_results['election_found']
         state_code_from_election = election.get_election_state()
 
+    best_state_code = state_code_from_election if positive_value_exists(state_code_from_election) \
+        else state_code
+
     if positive_value_exists(look_for_politician):
         # If here, we specifically want to see if a politician exists, given the information submitted
-        state_code_for_search = state_code_from_election if positive_value_exists(state_code_from_election) \
-            else state_code
         match_results = retrieve_candidate_politician_match_options(vote_smart_id, maplight_id,
                                                                     candidate_twitter_handle,
-                                                                    candidate_name, state_code_for_search)
+                                                                    candidate_name, best_state_code)
         if match_results['politician_found']:
+            messages.add_message(request, messages.INFO, 'Politician found! Information filled into this form.')
             matching_politician = match_results['politician']
             politician_we_vote_id = matching_politician.we_vote_id
             politician_twitter_handle = matching_politician.politician_twitter_handle \
@@ -396,6 +398,11 @@ def candidate_edit_process_view(request):
             google_civic_candidate_name = matching_politician.google_civic_candidate_name
             candidate_name = candidate_name if positive_value_exists(candidate_name) \
                 else matching_politician.politician_name
+        else:
+            messages.add_message(request, messages.INFO, 'No politician found. Please make sure you have entered '
+                                                         '1) Candidate Name & State Code, '
+                                                         '2) Twitter Handle, or '
+                                                         '3) Vote Smart Id')
 
         url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                         "&candidate_name=" + str(candidate_name) + \
@@ -431,7 +438,8 @@ def candidate_edit_process_view(request):
 
             if at_least_one_filter:
                 candidate_duplicates_query = CandidateCampaign.objects.filter(filter_list)
-                candidate_duplicates_query.filter(google_civic_election_id=google_civic_election_id)
+                candidate_duplicates_query = candidate_duplicates_query.filter(
+                    google_civic_election_id=google_civic_election_id)
 
                 if len(candidate_duplicates_query):
                     existing_candidate_found = True
@@ -492,7 +500,7 @@ def candidate_edit_process_view(request):
                     google_civic_election_id=google_civic_election_id,
                     contest_office_id=contest_office_id,
                     contest_office_we_vote_id=contest_office_we_vote_id,
-                    state_code=state_code_from_election,
+                    state_code=best_state_code,
                 )
                 if google_civic_candidate_name is not False:
                     candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name

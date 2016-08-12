@@ -33,7 +33,7 @@
 
         {% else %}
             {{ we_vote_id }}
-            {% if politician_we_vote_id %}
+            {% if politician_we_vote_id and politician_we_vote_id != "False" and politician_we_vote_id != False %}
                 &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id FOUND: {{ politician_we_vote_id }}
                 <input type="hidden" name="politician_we_vote_id" value="{{ politician_we_vote_id }}">
             {% else %}
