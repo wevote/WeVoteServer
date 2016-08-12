@@ -104,7 +104,11 @@
                 ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
             <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
             <td>{{ candidate.id }}</td>
-            <td>{{ candidate.we_vote_id }}</td>
+            <td>{{ candidate.we_vote_id }}
+                {% if candidate.politician_we_vote_id %}
+                    {{ candidate.politician_we_vote_id }}
+                {% endif %}
+            </td>
             <td>{{ candidate.vote_smart_id }}</td>
         </tr>
     {% endfor %}

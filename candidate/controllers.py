@@ -527,3 +527,59 @@ def candidate_politician_match(we_vote_candidate):
     }
 
     return results
+
+
+def retrieve_candidate_politician_match_options(vote_smart_id, maplight_id, candidate_twitter_handle,
+                                                candidate_name, state_code):
+    politician_manager = PoliticianManager()
+    politician_created = False
+    politician_found = False
+    politician_list_found = False
+    politician_list = []
+
+    # Search the politician table for a match
+    results = politician_manager.retrieve_all_politicians_that_might_match_candidate(
+        vote_smart_id, maplight_id, candidate_twitter_handle,
+        candidate_name, state_code)
+    if results['politician_list_found']:
+        # If here, return
+        politician_list = results['politician_list']
+
+        results = {
+            'success':                  results['success'],
+            'status':                   results['status'],
+            'politician_list_found':    True,
+            'politician_list':          politician_list,
+            'politician_found':         False,
+            'politician_created':       False,
+            'politician':               None,
+        }
+        return results
+    elif results['politician_found']:
+        # Return this politician entry
+        politician = results['politician']
+
+        results = {
+            'success':                  results['success'],
+            'status':                   results['status'],
+            'politician_list_found':    False,
+            'politician_list':          [],
+            'politician_found':         True,
+            'politician_created':       False,
+            'politician':               politician,
+        }
+        return results
+
+    success = False
+    status = "TO_BE_IMPLEMENTED"
+    results = {
+        'success':                  success,
+        'status':                   status,
+        'politician_list_found':    politician_list_found,
+        'politician_list':          politician_list,
+        'politician_found':         politician_found,
+        'politician_created':       politician_created,
+        'politician':               None,
+    }
+
+    return results

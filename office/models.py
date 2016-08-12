@@ -23,7 +23,11 @@ class ContestOffice(models.Model):
         verbose_name="we vote permanent id for this contest office", max_length=255, default=None, null=True,
         blank=True, unique=True)
     # The name of the office for this contest.
-    office_name = models.CharField(verbose_name="google civic office", max_length=255, null=False, blank=False)
+    office_name = models.CharField(verbose_name="name of the office", max_length=255, null=False, blank=False)
+    # The offices' name as passed over by Google Civic. We save this so we can match to this office even
+    # if we edit the office's name locally.
+    google_civic_office_name = models.CharField(verbose_name="office name exactly as received from google civic",
+                                                max_length=255, null=True, blank=True)
     # The unique ID of the election containing this contest. (Provided by Google Civic)
     google_civic_election_id = models.CharField(verbose_name="google civic election id",
                                                 max_length=255, null=False, blank=False)

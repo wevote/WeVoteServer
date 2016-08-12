@@ -49,18 +49,22 @@ def refresh_twitter_organization_details_view(request, organization_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
     organization_manager = OrganizationManager()
     results = organization_manager.retrieve_organization(organization_id)
 
     if not results['organization_found']:
         messages.add_message(request, messages.INFO, results['status'])
-        return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)))
+        return HttpResponseRedirect(reverse('organization:organization_edit', args=(organization_id,)) +
+                                    '?google_civic_election_id=' + str(google_civic_election_id))
 
     organization = results['organization']
 
     results = refresh_twitter_organization_details(organization)
 
-    return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)))
+    return HttpResponseRedirect(reverse('organization:organization_position_list', args=(organization_id,)) +
+                                '?google_civic_election_id=' + str(google_civic_election_id))
 
 
 @login_required

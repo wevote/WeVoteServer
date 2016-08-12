@@ -167,9 +167,12 @@ def office_edit_process_view(request):
     office_name = request.POST.get('office_name', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     primary_party = request.POST.get('primary_party', False)
+    state_code = request.POST.get('state_code', False)
 
     election_state = ''
-    if google_civic_election_id:
+    if state_code is not False:
+        election_state = state_code
+    elif google_civic_election_id:
         election_manager = ElectionManager()
         results = election_manager.retrieve_election(google_civic_election_id)
         if results['election_found']:
@@ -189,9 +192,10 @@ def office_edit_process_view(request):
     try:
         if office_on_stage_found:
             # Update
-            if convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and office_name is not False:
+            # Removed for now: convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and
+            if office_name is not False:
                 office_on_stage.office_name = office_name
-            if convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and primary_party is not False:
+            if primary_party is not False:
                 office_on_stage.primary_party = primary_party
             if positive_value_exists(election_state):
                 office_on_stage.state_code = election_state
@@ -208,13 +212,13 @@ def office_edit_process_view(request):
                 google_civic_election_id=google_civic_election_id,
                 state_code=election_state,
             )
-            if convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and primary_party is not False:
+            # Removing this limitation: convert_to_int(office_on_stage.google_civic_election_id) >= 1000000 and
+            if primary_party is not False:
                 office_on_stage.primary_party = primary_party
             office_on_stage.save()
             messages.add_message(request, messages.INFO, 'New office saved.')
 
             # Come back to the "Create New Office" page
-            new_office_id = 0
             return HttpResponseRedirect(reverse('office:office_new', args=()) +
                                         "?google_civic_election_id=" + google_civic_election_id)
     except Exception as e:

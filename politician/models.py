@@ -240,7 +240,13 @@ class PoliticianManager(models.Model):
                 politician_queryset = politician_queryset.filter(maplight_id=maplight_id)
             elif positive_value_exists(candidate_twitter_handle):
                 filter_set = True
-                politician_queryset = politician_queryset.filter(politician_twitter_handle=candidate_twitter_handle)
+                politician_queryset = politician_queryset.filter(
+                    politician_twitter_handle__iexact=candidate_twitter_handle)
+            elif positive_value_exists(candidate_name) and positive_value_exists(state_code):
+                filter_set = True
+                # Note, this won't catch Presidential candidates
+                politician_queryset = politician_queryset.filter(politician_name__iexact=candidate_name)
+                politician_queryset = politician_queryset.filter(state_code__iexact=state_code)
 
             if filter_set:
                 politician_list = politician_queryset
@@ -250,6 +256,7 @@ class PoliticianManager(models.Model):
             if len(politician_list) is 1:
                 politician_found = True
                 politician_list_found = False
+                politician = politician_list[0]
                 status = 'ONE_POLITICIAN_RETRIEVED'
             elif len(politician_list):
                 politician_found = False
@@ -262,6 +269,11 @@ class PoliticianManager(models.Model):
             status = 'FAILED retrieve_all_politicians_for_office ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
+
+        # If nothing found, look for a national entry for this candidate -- i.e. Presidential candidates
+        if not politician_found and not politician_list_found:
+            # TODO DALE
+            pass
 
         results = {
             'success':                  success,
