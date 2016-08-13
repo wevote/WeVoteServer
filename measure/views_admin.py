@@ -167,6 +167,7 @@ def measure_edit_process_view(request):
     measure_url = request.POST.get('measure_url', False)
     google_civic_election_id = request.POST.get('google_civic_election_id', 0)
     maplight_id = request.POST.get('maplight_id', False)
+    vote_smart_id = request.POST.get('vote_smart_id', False)
     state_code = request.POST.get('state_code', False)
 
     # Check to see if this measure exists
@@ -201,6 +202,8 @@ def measure_edit_process_view(request):
                     measure_on_stage.google_civic_election_id = google_civic_election_id
                 if maplight_id is not False:
                     measure_on_stage.maplight_id = maplight_id
+                if vote_smart_id is not False:
+                    measure_on_stage.vote_smart_id = vote_smart_id
                 if state_code is not False:
                     measure_on_stage.state_code = state_code
 
@@ -217,6 +220,7 @@ def measure_edit_process_view(request):
                     google_civic_election_id=google_civic_election_id,
                     state_code=state_code,
                     maplight_id=maplight_id,
+                    vote_smart_id=vote_smart_id,
                 )
                 measure_on_stage.save()
                 messages.add_message(request, messages.INFO, 'New measure saved.')

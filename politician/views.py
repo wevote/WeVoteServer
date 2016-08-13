@@ -14,16 +14,6 @@ from .models import Politician, PoliticianTagLink
 from tag.models import Tag
 from voter.models import voter_has_authority
 
-
-class PoliticianIndexView(generic.ListView):
-    template_name = 'politician/politician_list.html'
-    context_object_name = 'politician_list'
-
-    def get_queryset(self):
-        """"""
-        return Politician.objects.order_by('last_name')
-
-
 # TODO Next step is to get Twitter vacuum working so we can pull in Tweets automatically based on tags/handles
 @login_required
 def politician_detail_view(request, politician_id):

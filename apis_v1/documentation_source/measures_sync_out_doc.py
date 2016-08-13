@@ -32,6 +32,7 @@ def measures_sync_out_doc_template_values(url_root):
     api_response = '[{\n' \
                    '  "we_vote_id": string,\n' \
                    '  "maplight_id": integer,\n' \
+                   '  "vote_smart_id": integer,\n' \
                    '  "ballotpedia_page_title": string,\n' \
                    '  "ballotpedia_photo_url": string,\n' \
                    '  "district_id": string,\n' \

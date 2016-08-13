@@ -40,7 +40,7 @@ class Politician(models.Model):
     last_name = models.CharField(verbose_name="last name",
                                  max_length=255, default=None, null=True, blank=True)
     politician_name = models.CharField(verbose_name="official full name",
-                                          max_length=255, default=None, null=True, blank=True)
+                                       max_length=255, default=None, null=True, blank=True)
     # This is the politician's name from GoogleCivicCandidateCampaign
     google_civic_candidate_name = models.CharField(verbose_name="full name from google civic",
                                                    max_length=255, default=None, null=True, blank=True)
@@ -76,7 +76,7 @@ class Politician(models.Model):
     opensecrets_id = models.CharField(verbose_name="opensecrets unique identifier",
                                       max_length=200, null=True, unique=False)
     vote_smart_id = models.CharField(verbose_name="votesmart unique identifier",
-                                    max_length=200, null=True, unique=False)
+                                     max_length=200, null=True, unique=False)
     fec_id = models.CharField(verbose_name="fec unique identifier",
                               max_length=200, null=True, unique=True, blank=True)
     cspan_id = models.CharField(verbose_name="cspan unique identifier",

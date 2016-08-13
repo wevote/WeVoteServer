@@ -25,6 +25,8 @@ class ContestMeasure(models.Model):
         verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
     maplight_id = models.CharField(verbose_name="maplight unique identifier",
                                    max_length=255, null=True, blank=True, unique=True)
+    vote_smart_id = models.CharField(verbose_name="votesmart unique identifier",
+                                     max_length=200, null=True, unique=False)
     # The title of the measure (e.g. 'Proposition 42').
     measure_title = models.CharField(verbose_name="measure title", max_length=255, null=False, blank=False)
     # The measure's title as passed over by Google Civic. We save this so we can match to this measure even
@@ -410,6 +412,7 @@ class ContestMeasureList(models.Model):
         return results
 
     def retrieve_possible_duplicate_measures(self, measure_title, google_civic_election_id, measure_url, maplight_id,
+                                             vote_smart_id,
                                              we_vote_id_from_master=''):
         measure_list_objects = []
         filters = []
@@ -437,6 +440,10 @@ class ContestMeasureList(models.Model):
 
             if positive_value_exists(maplight_id):
                 new_filter = Q(maplight_id=maplight_id)
+                filters.append(new_filter)
+
+            if positive_value_exists(vote_smart_id):
+                new_filter = Q(vote_smart_id=vote_smart_id)
                 filters.append(new_filter)
 
             # Add the first query

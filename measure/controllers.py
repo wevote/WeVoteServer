@@ -73,6 +73,7 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):
             'ballot_item_display_name': contest_measure.measure_title,
             'measure_subtitle':         contest_measure.measure_subtitle,
             'maplight_id':              contest_measure.maplight_id,
+            'vote_smart_id':            contest_measure.vote_smart_id,
             'measure_text':             contest_measure.measure_text,
             'measure_url':              contest_measure.measure_url,
             'ocd_division_id':          contest_measure.ocd_division_id,
@@ -133,12 +134,13 @@ def filter_measures_structured_json_for_local_duplicates(structured_json):
             one_measure['google_civic_election_id'] if 'google_civic_election_id' in one_measure else ''
         measure_url = one_measure['measure_url'] if 'measure_url' in one_measure else ''
         maplight_id = one_measure['maplight_id'] if 'maplight_id' in one_measure else ''
+        vote_smart_id = one_measure['vote_smart_id'] if 'vote_smart_id' in one_measure else ''
 
         # Check to see if there is an entry that matches in all critical ways, minus the we_vote_id
         we_vote_id_from_master = we_vote_id
 
         results = measure_list_manager.retrieve_possible_duplicate_measures(
-            measure_title, google_civic_election_id, measure_url, maplight_id,
+            measure_title, google_civic_election_id, measure_url, maplight_id, vote_smart_id,
             we_vote_id_from_master)
 
         if results['measure_list_found']:
@@ -195,6 +197,7 @@ def measures_import_from_structured_json(structured_json):
                 'district_name': district_name,
                 'district_scope': one_measure['district_scope'] if 'district_scope' in one_measure else '',
                 'maplight_id': one_measure['maplight_id'] if 'maplight_id' in one_measure else None,
+                'vote_smart_id': one_measure['vote_smart_id'] if 'vote_smart_id' in one_measure else None,
                 'measure_subtitle': one_measure['measure_subtitle'] if 'measure_subtitle' in one_measure else '',
                 'measure_text': one_measure['measure_text'] if 'measure_text' in one_measure else '',
                 'measure_url': one_measure['measure_url'] if 'measure_url' in one_measure else '',
