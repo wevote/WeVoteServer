@@ -324,6 +324,11 @@ def retrieve_vote_smart_position_categories_into_local_db(state_code='NA'):
 
 
 def retrieve_vote_smart_ratings_for_candidate_into_local_db(vote_smart_candidate_id):
+    """
+    This function can be used for either We Vote candidate or politician
+    :param vote_smart_candidate_id:
+    :return:
+    """
     rating_one_candidate_exists = False
     rating_one_candidate_created = False
 
@@ -603,6 +608,16 @@ def make_request(cls, method, **kwargs):
 
 
 def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id):
+    politician_id = 0
+    return transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_id)
+
+
+def transfer_vote_smart_ratings_to_positions_for_politician(politician_id):
+    candidate_campaign_id = 0
+    return transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_id)
+
+
+def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_id):  # TODO DALE Update for politician
     we_vote_organizations_created = 0
     organization_positions_that_exist = 0
     organization_positions_created = 0

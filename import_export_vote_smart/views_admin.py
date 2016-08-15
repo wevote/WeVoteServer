@@ -11,7 +11,7 @@ from .controllers import retrieve_and_match_candidate_from_vote_smart, \
     retrieve_vote_smart_special_interest_group_into_local_db, \
     retrieve_vote_smart_special_interest_groups_into_local_db, \
     transfer_vote_smart_special_interest_groups_to_we_vote_organizations, \
-    transfer_vote_smart_ratings_to_positions_for_candidate
+    transfer_vote_smart_ratings_to_positions_for_candidate, transfer_vote_smart_ratings_to_positions_for_politician
 from .models import VoteSmartCandidate, VoteSmartCategory, VoteSmartRating, VoteSmartRatingOneCandidate, \
     VoteSmartSpecialInterestGroup, VoteSmartState
 from .votesmart_local import VotesmartApiError
@@ -37,6 +37,33 @@ def import_one_candidate_ratings_view(request, vote_smart_candidate_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    # retrieve_vote_smart_ratings_for_candidate_into_local_db can be used for both We Vote candidate or politician
+    one_group_results = retrieve_vote_smart_ratings_for_candidate_into_local_db(vote_smart_candidate_id)
+
+    if one_group_results['success']:
+        messages.add_message(request, messages.INFO, "Ratings for one candidate retrieved. ")
+    else:
+        messages.add_message(request, messages.ERROR, "Ratings for one candidate NOT retrieved. "
+                                                      "(error: {error_message})"
+                                                      "".format(error_message=one_group_results['status']))
+
+    candidate_manager = CandidateCampaignManager()
+    results = candidate_manager.retrieve_candidate_campaign_from_vote_smart_id(vote_smart_candidate_id)
+    if results['candidate_campaign_found']:
+        candidate = results['candidate_campaign']
+        candidate_campaign_id = candidate.id
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
+    else:
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()))
+
+
+@login_required
+def import_one_politician_ratings_view(request, vote_smart_candidate_id):  # TODO DALE update to politician
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    # retrieve_vote_smart_ratings_for_candidate_into_local_db can be used for both We Vote candidate or politician
     one_group_results = retrieve_vote_smart_ratings_for_candidate_into_local_db(vote_smart_candidate_id)
 
     if one_group_results['success']:
@@ -482,6 +509,22 @@ def transfer_vote_smart_ratings_to_positions_for_candidate_view(request, candida
         messages.add_message(request, messages.ERROR, results['status'])
 
     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_campaign_id,)))
+
+
+@login_required
+def transfer_vote_smart_ratings_to_positions_for_politician_view(request, politician_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    results = transfer_vote_smart_ratings_to_positions_for_politician(politician_id)
+
+    if results['success']:
+        messages.add_message(request, messages.INFO, results['status'])
+    else:
+        messages.add_message(request, messages.ERROR, results['status'])
+
+    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(politician_id,)))
 
 
 @login_required

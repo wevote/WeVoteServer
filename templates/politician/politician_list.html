@@ -9,120 +9,76 @@
 
 <h1>Politicians</h1>
 
-<form name="candidate_choose_election" method="get" action="{% url 'candidate:candidate_list' %}">
+<form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
     {% csrf_token %}
-    {% if election_list %}
-    <select id="google_civic_election_id" name="google_civic_election_id">
-        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
-            -- Filter by Election --</option>
-        {% for election in election_list %}
-        <option value="{{ election.google_civic_election_id }}"
-                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
-            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
-        {% endfor %}
+{% if state_list %}
+    <select id="state_code_id" name="state_code">
+        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+            -- Filter by State Served --</option>
+    {% for key, state in state_list %}
+        <option value="{{ key }}"
+                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+            {{ state }}</option>
+    {% endfor %}
     </select>
-    {% endif %}{# End of if election_list #}
+{% endif %}{# End of if state_list #}
 
-{% if candidate_list %}
-    {% if google_civic_election_id %}
-    <p>
-        Prepare: <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
-            Find and Remove Duplicate Politicians for this Election</a> (about 1 minute)<br />
-        Prepare: <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
-            Generate One Sample Ballot</a> (about 1 minute)<br />
-        Prepare: <a href="{% url 'candidate:candidate_politician_match_for_this_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
-            Match Politicians to Politicians (and Create Politicians)</a> (about 1 minute)<br />
-
-        1. <a href="{% url 'candidate:photos_for_election' google_civic_election_id %}" target="_blank" >
-            Retrieve Politician Photos from Vote Smart for this Election</a> (3-10 minutes - Open in New Window)<br />
-
-        2. <a href="{% url 'import_export_twitter:transfer_candidate_twitter_handles_from_google_civic' %}?google_civic_election_id={{ google_civic_election_id }}" >
-            Transfer Twitter handles from Google Civic Data</a> (30 seconds)<br />
-
-        3. <a href="{% url 'import_export_twitter:scrape_social_media_for_candidates_in_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
-            Go to Politician Sites and get Twitter Handles for this Election</a> (1-2 minutes)<br />
-
-        4. <a href="{% url 'import_export_twitter:refresh_twitter_candidate_details_for_election' google_civic_election_id %}" >
-            Retrieve/Refresh Politician Twitter Info for this Election</a> (1-2 minutes)<br />
-
-        5. <a href="{% url 'import_export_vote_smart:retrieve_positions_from_vote_smart_for_election' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank" >
-            Retrieve Positions from Vote Smart for this Election</a> (5-15 minutes - Open in New Window)<br />
-
-        6. <a href="{% url 'voter_guide:generate_voter_guides_one_election' %}?google_civic_election_id={{ google_civic_election_id }}" >
-            Generate Voter Guides for this Election</a> (about 1 minute)<br />
-    </p>
-    {% endif %}
-{% endif %}
-    <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Politician</a><br />
+    <a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a><br />
 
     <br />
-    {% if candidate_search %}
-    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&organization_state={{ organization_state }}">
+    {% if politician_search %}
+    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">
          clear search</a>&nbsp;
     {% endif %}
-    <input type="text" name="candidate_search" id="candidate_search_id" value="{{ candidate_search }}" />
+    <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
     <input type="submit" value="Search for Politician" />
 </form>
 
-{% if candidate_list %}
+{% if politician_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>Politician Name</td>
             <td>State</td>
-            <td>Election</td>
-            <td>Office</td>
             <td>Twitter Handle</td>
             <td>Website</td>
             <td>Id</td>
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
         </tr>
-    {% for candidate in candidate_list %}
+    {% for politician in politician_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>
-                {% if candidate.candidate_photo_url %}
-                <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}">
-                    <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                {% if politician.politician_photo_url %}
+                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                    <img src='{{ politician.politician_photo_url }}' height="25px" />
                 </a>
                 {% endif %}
             </td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ candidate.candidate_name }}</a></td>
-            <td>{{ candidate.get_candidate_state }}</td>
-            <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}</td>
-            <td>
-        {% if candidate.office %}
-                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
-        {% else %}
-            (office missing)
-        {% endif %}
-            </td>
-            <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
-                    target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
-                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
-            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
-            <td>{{ candidate.id }}</td>
-            <td>{{ candidate.we_vote_id }}
-                {% if candidate.politician_we_vote_id %}
-                    {{ candidate.politician_we_vote_id }}
-                {% endif %}
-            </td>
-            <td>{{ candidate.vote_smart_id }}</td>
+            <td><a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ politician.politician_name }}</a></td>
+            <td>{{ politician.state_code }}</td>
+            <td>{% if politician.politician_twitter_handle %}<a href="https://twitter.com/{{ politician.politician_twitter_handle }}"
+                    target="_blank">{{ politician.politician_twitter_handle }}</a><br />
+                ({{ politician.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}</td>
+            <td>{{ politician.id }}</td>
+            <td>{{ politician.we_vote_id }}</td>
+            <td>{{ politician.vote_smart_id }}</td>
         </tr>
     {% endfor %}
     </table>
 
     <p>
-        <a href="{% url 'candidate:candidates_export' %}?format=json" target="_blank" >Export Politicians</a><br />
+        <a href="{% url 'politician:politicians_export' %}?format=json" target="_blank" >Export Politicians</a><br />
     </p>
 
     <p></p>
 {% else %}
-    <p>(no candidates found)</p>
+    <p>(no politicians found)</p>
     <p>
-        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Politician</a><br />
+        <a href="{% url 'politician:politician_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Politician</a><br />
     </p>
 {% endif %}
 

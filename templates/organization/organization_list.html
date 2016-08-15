@@ -31,7 +31,7 @@
             -- Filter by State Served --</option>
     {% for key, state in state_list %}
         <option value="{{ key }}"
-                {% if key|lower == polling_location_state|lower %} selected="selected"{% endif %}>
+                {% if key|lower == organization_state|lower %} selected="selected"{% endif %}>
             {{ state }}</option>
     {% endfor %}
     </select>

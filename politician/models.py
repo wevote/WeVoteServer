@@ -97,6 +97,7 @@ class Politician(models.Model):
     # The full name of the party the official belongs to.
     political_party = models.CharField(verbose_name="politician political party", max_length=255, null=True)
     state_code = models.CharField(verbose_name="politician home state", max_length=2, null=True)
+    politician_url = models.URLField(verbose_name='latest website url of politician', blank=True, null=True)
 
     politician_twitter_handle = models.CharField(
         verbose_name='politician twitter screen_name', max_length=255, null=True, unique=False)
@@ -176,19 +177,22 @@ class PoliticianManager(models.Model):
             return politician.politician_photo_url()
         return ""
 
-    def retrieve_politician(self, politician_id):  # , we_vote_id=None
+    def retrieve_politician(self, politician_id, we_vote_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         politician_on_stage = Politician()
         politician_on_stage_id = 0
+        politician_we_vote_id = ""
         try:
             if politician_id > 0:
                 politician_on_stage = Politician.objects.get(id=politician_id)
                 politician_on_stage_id = politician_on_stage.id
-            # elif len(we_vote_id) > 0:
-            #     politician_on_stage = Politician.objects.get(we_vote_id=we_vote_id)
-            #     politician_on_stage_id = politician_on_stage.id
+                politician_we_vote_id = politician_on_stage.we_vote_id
+            elif positive_value_exists(we_vote_id):
+                politician_on_stage = Politician.objects.get(we_vote_id=we_vote_id)
+                politician_on_stage_id = politician_on_stage.id
+                politician_we_vote_id = politician_on_stage.we_vote_id
         except Politician.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
@@ -203,6 +207,7 @@ class PoliticianManager(models.Model):
             'success':                      True if politician_on_stage_found else False,
             'politician_found':             politician_on_stage_found,
             'politician_id':                politician_on_stage_id,
+            'politician_we_vote_id':        politician_we_vote_id,
             'politician':                   politician_on_stage,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
@@ -382,6 +387,22 @@ class PoliticianManager(models.Model):
             'politician':           politician,
         }
         return results
+
+    def fetch_politician_id_from_we_vote_id(self, we_vote_id):
+        politician_id = 0
+        politician_manager = PoliticianManager()
+        results = politician_manager.retrieve_politician(politician_id, we_vote_id)
+        if results['success']:
+            return results['politician_id']
+        return 0
+
+    def fetch_politician_we_vote_id_from_id(self, politician_id):
+        we_vote_id = ''
+        politician_manager = PoliticianManager()
+        results = politician_manager.retrieve_politician(politician_id, we_vote_id)
+        if results['success']:
+            return results['politician_we_vote_id']
+        return ''
 
 
 # def delete_all_politician_data():
