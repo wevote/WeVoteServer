@@ -647,7 +647,7 @@ class VoterGuideListManager(models.Model):
     A set of methods to retrieve a list of voter_guides
     """
 
-    # NOTE: This is extremely simple way to retrieve voter guides. Being replaced by:
+    # NOTE: This is extremely simple way to retrieve voter guides, used by admin tools. Being replaced by:
     #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND
     #  retrieve_voter_guides_by_election(google_civic_election_id)
     def retrieve_voter_guides_for_election(self, google_civic_election_id):
@@ -655,7 +655,8 @@ class VoterGuideListManager(models.Model):
         voter_guide_list_found = False
 
         try:
-            voter_guide_queryset = VoterGuide.objects.order_by('-twitter_followers_count')
+            # voter_guide_queryset = VoterGuide.objects.order_by('-twitter_followers_count')
+            voter_guide_queryset = VoterGuide.objects.order_by('display_name')
             voter_guide_list = voter_guide_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
 

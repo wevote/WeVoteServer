@@ -685,12 +685,17 @@ def retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string,
     # Start with orgs followed and ignored by this voter
     return_we_vote_id = True
     follow_organization_list_manager = FollowOrganizationList()
-    organization_we_vote_ids_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id,
-                                                                                                  return_we_vote_id)
-    organization_we_vote_ids_ignored_by_voter = \
-        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(voter_id,
-                                                                                                  return_we_vote_id)
+    if positive_value_exists(search_string):
+        # If we are searching for organizations, we don't want to limit the search
+        organization_we_vote_ids_followed_by_voter = []
+        organization_we_vote_ids_ignored_by_voter = []
+    else:
+        organization_we_vote_ids_followed_by_voter = \
+            follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id,
+                                                                                                      return_we_vote_id)
+        organization_we_vote_ids_ignored_by_voter = \
+            follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(
+                voter_id, return_we_vote_id)
 
     # This is a list of orgs that the voter is already following or ignoring
     organization_we_vote_ids_followed_or_ignored_by_voter = list(chain(organization_we_vote_ids_followed_by_voter,

@@ -24,9 +24,9 @@ class ContestMeasure(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
     maplight_id = models.CharField(verbose_name="maplight unique identifier",
-                                   max_length=255, null=True, blank=True, unique=True)
+                                   max_length=255, null=True, blank=True, unique=False)
     vote_smart_id = models.CharField(verbose_name="votesmart unique identifier",
-                                     max_length=200, null=True, unique=False)
+                                     max_length=200, null=True, blank=True, unique=False)
     # The title of the measure (e.g. 'Proposition 42').
     measure_title = models.CharField(verbose_name="measure title", max_length=255, null=False, blank=False)
     # The measure's title as passed over by Google Civic. We save this so we can match to this measure even
