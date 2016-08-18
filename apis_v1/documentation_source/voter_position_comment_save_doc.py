@@ -95,6 +95,7 @@ def voter_position_comment_save_doc_template_values(url_root):
                    '  "measure_we_vote_id": string,\n' \
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \
+                   '  "is_public_position": boolean,\n' \
                    '  "last_updated": string,\n' \
                    '}'
 

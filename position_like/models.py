@@ -29,16 +29,6 @@ class PositionLike(models.Model):
     # The date the voter liked this position
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
-    # This is used when we want to export the positions that a voter is following
-    def voter_we_vote_id(self):
-        voter_manager = VoterManager()
-        return voter_manager.fetch_we_vote_id_from_local_id(self.voter_id)
-
-    def position_we_vote_id(self):
-        position_manager = PositionEnteredManager()
-        retrieve_position_for_friends = False  # Revisit this
-        return position_manager.fetch_we_vote_id_from_local_id(self.voter_id, retrieve_position_for_friends)
-
 
 class PositionLikeManager(models.Model):
 

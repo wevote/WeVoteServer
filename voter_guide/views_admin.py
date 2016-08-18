@@ -15,7 +15,7 @@ from django.shortcuts import render
 from election.models import Election, ElectionManager, TIME_SPAN_LIST
 from organization.models import Organization, OrganizationListManager
 from organization.views_admin import organization_edit_process_view
-from position.models import PositionEntered
+from position.models import PositionEntered, PositionForFriends, PositionListManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter.models import voter_has_authority
@@ -261,12 +261,28 @@ def voter_guide_list_view(request):
 
         if results['success']:
             voter_guide_list = results['voter_guide_list']
+
     else:
         order_by = "google_civic_election_id"
         results = voter_guide_list_object.retrieve_all_voter_guides(order_by)
 
         if results['success']:
             voter_guide_list = results['voter_guide_list']
+
+    modified_voter_guide_list = []
+    position_list_manager = PositionListManager()
+    for one_voter_guide in voter_guide_list:
+        # How many Publicly visible positions are there in this election on this voter guide?
+        retrieve_public_positions = True
+        one_voter_guide.number_of_public_positions = position_list_manager.fetch_positions_count_for_voter_guide(
+            one_voter_guide.organization_we_vote_id, one_voter_guide.google_civic_election_id,
+            retrieve_public_positions)
+        # How many Friends-only visible positions are there in this election on this voter guide?
+        retrieve_public_positions = False
+        one_voter_guide.number_of_friends_only_positions = position_list_manager.fetch_positions_count_for_voter_guide(
+            one_voter_guide.organization_we_vote_id, one_voter_guide.google_civic_election_id,
+            retrieve_public_positions)
+        modified_voter_guide_list.append(one_voter_guide)
 
     election_list = Election.objects.order_by('-election_day_text')
 
@@ -275,7 +291,7 @@ def voter_guide_list_view(request):
         'election_list': election_list,
         'google_civic_election_id': google_civic_election_id,
         'messages_on_stage': messages_on_stage,
-        'voter_guide_list': voter_guide_list,
+        'voter_guide_list': modified_voter_guide_list,
     }
     return render(request, 'voter_guide/voter_guide_list.html', template_values)
 
