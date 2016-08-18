@@ -1972,7 +1972,20 @@ class PositionEnteredManager(models.Model):
             }
             return results
 
-        # TODO DALE Make sure we have an organization_id and organization_we_vote_id stored before we try to copy
+        if not existing_position.organization_we_vote_id:
+            # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
+            # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
+            voter_we_vote_id = existing_position.voter_we_vote_id
+
+            voter_manager = VoterManager()
+            results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id)
+            if results['voter_found']:
+                voter = results['voter']
+                existing_position.organization_we_vote_id = voter.linked_organization_we_vote_id
+                # Look up the organization_id
+                organization_manager = OrganizationManager()
+                existing_position.organization_id = organization_manager.fetch_organization_id(
+                    voter.linked_organization_we_vote_id)
 
         switch_to_public_position = True
         return self.switch_position_visibility(existing_position, switch_to_public_position)
