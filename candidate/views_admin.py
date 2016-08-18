@@ -636,11 +636,10 @@ def candidate_politician_match_for_this_election_view(request):
     # Loop through all of the candidates in this election
     for we_vote_candidate in candidate_list:
         num_candidates_reviewed += 1
+        match_results = candidate_politician_match(we_vote_candidate)
         if we_vote_candidate.politician_we_vote_id:
             num_that_already_have_politician_we_vote_id += 1
-            continue
-        match_results = candidate_politician_match(we_vote_candidate)
-        if match_results['politician_created']:
+        elif match_results['politician_created']:
             new_politician_created += 1
         elif match_results['politician_found']:
             existing_politician_found += 1

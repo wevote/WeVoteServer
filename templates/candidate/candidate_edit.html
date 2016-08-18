@@ -26,7 +26,11 @@
             {{ candidate.we_vote_id }}
             (<a href="{% url 'candidate:candidate_delete_process' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">delete candidate</a>)
 
-            &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id: {{ candidate.politician_we_vote_id }}
+            {% if candidate.politician_id %}
+                &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id:
+                <a href="{% url 'politician:politician_edit' candidate.politician_id %}?google_civic_election_id={{ google_civic_election_id }}">
+                {{ candidate.politician_we_vote_id }}</a>
+            {% endif %}
             {% if not candidate.politician_we_vote_id %}
                 (<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">match to politician</a>)
             {% endif %}

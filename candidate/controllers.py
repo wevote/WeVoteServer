@@ -447,6 +447,13 @@ def candidate_politician_match(we_vote_candidate):
         # Synchronize data and exit
         update_results = politician_manager.update_or_create_politician_from_candidate(we_vote_candidate)
 
+        if update_results['politician_found']:
+            politician = update_results['politician']
+            # Save politician_we_vote_id in we_vote_candidate
+            we_vote_candidate.politician_we_vote_id = politician.we_vote_id
+            we_vote_candidate.politician_id = politician.id
+            we_vote_candidate.save()
+
         results = {
             'success': update_results['success'],
             'status': update_results['status'],
@@ -481,6 +488,7 @@ def candidate_politician_match(we_vote_candidate):
             politician = results['politician']
             # Save politician_we_vote_id in we_vote_candidate
             we_vote_candidate.politician_we_vote_id = politician.we_vote_id
+            we_vote_candidate.politician_id = politician.id
             we_vote_candidate.save()
 
             results = {
@@ -501,6 +509,7 @@ def candidate_politician_match(we_vote_candidate):
                 politician = create_results['politician']
                 # Save politician_we_vote_id in we_vote_candidate
                 we_vote_candidate.politician_we_vote_id = politician.we_vote_id
+                we_vote_candidate.politician_id = politician.id
                 we_vote_candidate.save()
 
             results = {

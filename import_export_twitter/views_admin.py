@@ -68,6 +68,27 @@ def refresh_twitter_organization_details_view(request, organization_id):
 
 
 @login_required
+def refresh_twitter_politician_details_view(request, politician_id):
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    # TODO DALE To update
+    # candidate_manager = CandidateCampaignManager()
+    # results = candidate_manager.retrieve_candidate_campaign(candidate_id)
+    #
+    # if not results['candidate_campaign_found']:
+    #     messages.add_message(request, messages.INFO, results['status'])
+    #     return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+    #
+    # candidate_campaign = results['candidate_campaign']
+    #
+    # results = refresh_twitter_candidate_details(candidate_campaign)
+
+    return HttpResponseRedirect(reverse('politician:politician_edit', args=(politician_id,)))
+
+
+@login_required
 def scrape_website_for_social_media_view(request, organization_id, force_retrieve=False):
     authority_required = {'admin'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):

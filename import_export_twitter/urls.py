@@ -19,6 +19,8 @@ urlpatterns = [
         name='refresh_twitter_candidate_details_for_election',),
     url(r'^(?P<organization_id>[0-9]+)/refresh_twitter_organization_details/$',
         views_admin.refresh_twitter_organization_details_view, name='refresh_twitter_organization_details',),
+    url(r'^(?P<politician_id>[0-9]+)/refresh_twitter_politician_details/$',
+        views_admin.refresh_twitter_politician_details_view, name='refresh_twitter_politician_details',),
     url(r'^(?P<organization_id>[0-9]+)/scrape_website_for_social_media/$',
         views_admin.scrape_website_for_social_media_view, name='scrape_website_for_social_media',),
     url(r'^retrieve_twitter_data_for_all_organizations/$',
