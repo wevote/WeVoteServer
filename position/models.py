@@ -672,6 +672,13 @@ class Position(models.Model):
 
 
 class PositionListManager(models.Model):
+    def add_is_public_position(self, incoming_position_list, is_public_position):
+        outgoing_position_list = []
+        for one_position in incoming_position_list:
+            one_position.is_public_position = is_public_position
+            outgoing_position_list.append(one_position)
+
+        return outgoing_position_list
 
     def calculate_positions_followed_by_voter(
             self, voter_id, all_positions_list, organizations_followed_by_voter):
@@ -2015,6 +2022,32 @@ class PositionEnteredManager(models.Model):
         else:
             new_position = PositionForFriends
         try:
+            # Make sure a google_civic_election_id is stored
+            if not positive_value_exists(existing_position.google_civic_election_id):
+                # We want to retrieve the google_civic_election_id from the ballot item object
+                if positive_value_exists(existing_position.candidate_campaign_we_vote_id):
+                    candidate_campaign_manager = CandidateCampaignManager()
+                    results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                        existing_position.candidate_campaign_we_vote_id)
+                    if results['candidate_campaign_found']:
+                        candidate_campaign = results['candidate_campaign']
+                        existing_position.google_civic_election_id = \
+                            candidate_campaign.google_civic_election_id
+                elif positive_value_exists(existing_position.contest_measure_we_vote_id):
+                    contest_measure_manager = ContestMeasureManager()
+                    results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+                        existing_position.contest_measure_we_vote_id)
+                    if results['contest_measure_found']:
+                        contest_measure = results['contest_measure']
+                        existing_position.google_civic_election_id = contest_measure.google_civic_election_id
+                elif positive_value_exists(existing_position.contest_office_we_vote_id):
+                    contest_office_manager = ContestOfficeManager()
+                    results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
+                        existing_position.contest_office_we_vote_id)
+                    if results['contest_office_found']:
+                        contest_office = results['contest_office']
+                        existing_position.google_civic_election_id = contest_office.google_civic_election_id
+
             new_position = new_position.objects.create(
                 we_vote_id=existing_position.we_vote_id,
                 date_entered=existing_position.date_entered,
@@ -2321,6 +2354,33 @@ class PositionEnteredManager(models.Model):
             # Update this position with new values
             try:
                 voter_position_on_stage.statement_text = statement_text
+
+                # Make sure a google_civic_election_id is stored
+                if not positive_value_exists(voter_position_on_stage.google_civic_election_id):
+                    # We want to retrieve the google_civic_election_id from the ballot item object
+                    if positive_value_exists(voter_position_on_stage.candidate_campaign_we_vote_id):
+                        candidate_campaign_manager = CandidateCampaignManager()
+                        results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                            voter_position_on_stage.candidate_campaign_we_vote_id)
+                        if results['candidate_campaign_found']:
+                            candidate_campaign = results['candidate_campaign']
+                            voter_position_on_stage.google_civic_election_id = \
+                                candidate_campaign.google_civic_election_id
+                    elif positive_value_exists(voter_position_on_stage.contest_measure_we_vote_id):
+                        contest_measure_manager = ContestMeasureManager()
+                        results = contest_measure_manager.retrieve_contest_measure_from_we_vote_id(
+                            voter_position_on_stage.contest_measure_we_vote_id)
+                        if results['contest_measure_found']:
+                            contest_measure = results['contest_measure']
+                            voter_position_on_stage.google_civic_election_id = contest_measure.google_civic_election_id
+                    elif positive_value_exists(voter_position_on_stage.contest_office_we_vote_id):
+                        contest_office_manager = ContestOfficeManager()
+                        results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
+                            voter_position_on_stage.contest_office_we_vote_id)
+                        if results['contest_office_found']:
+                            contest_office = results['contest_office']
+                            voter_position_on_stage.google_civic_election_id = contest_office.google_civic_election_id
+
                 if voter_position_on_stage.candidate_campaign_we_vote_id:
                     if not positive_value_exists(voter_position_on_stage.candidate_campaign_id):
                         # Heal the data, and fill in the candidate_campaign_id
@@ -2328,7 +2388,7 @@ class PositionEnteredManager(models.Model):
                         voter_position_on_stage.candidate_campaign_id = \
                             candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(
                                 voter_position_on_stage.candidate_campaign_we_vote_id)
-                if voter_position_on_stage.contest_measure_we_vote_id:
+                elif voter_position_on_stage.contest_measure_we_vote_id:
                     if not positive_value_exists(voter_position_on_stage.contest_measure_id):
                         # Heal the data, and fill in the contest_measure_id
                         contest_measure_manager = ContestMeasureManager()
