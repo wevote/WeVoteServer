@@ -153,7 +153,7 @@
         <p>(no positions found)</p>
     {% endif %}
 
-    {% if politician.vote_smart_id %}
+    {% if politician.vote_smart_id and politician.vote_smart_id != False and politician.vote_smart_id != 'False' and politician.vote_smart_id != None and politician.vote_smart_id != 'None' %}
         <h4>Vote Smart Ratings</h4>
         <p><a href="{% url 'import_export_vote_smart:import_one_politician_ratings' politician.vote_smart_id %}">Import Vote Smart Ratings for this Politician</a></p>
 
