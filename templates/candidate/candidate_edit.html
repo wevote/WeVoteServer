@@ -223,10 +223,7 @@
         <p>(no positions found)</p>
     {% endif %}
 
-    {% if candidate.vote_smart_id and candidate.vote_smart_id != False and candidate.vote_smart_id != 'False' %}
-        {{ candidate.vote_smart_id }}
-    {% endif %}
-    {% if candidate.vote_smart_id and candidate.vote_smart_id == 1234 and candidate.vote_smart_id != 'False' %}
+    {% if candidate.vote_smart_id and candidate.vote_smart_id != False and candidate.vote_smart_id != 'False' and candidate.vote_smart_id != None and candidate.vote_smart_id != 'None' %}
         <h4>Vote Smart Ratings</h4>
         <p><a href="{% url 'import_export_vote_smart:import_one_candidate_ratings' candidate.vote_smart_id %}">Import Vote Smart Ratings for this Candidate</a></p>
 
