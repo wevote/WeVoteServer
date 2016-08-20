@@ -467,6 +467,10 @@ class PositionForFriends(models.Model):
     contest_measure_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_measure", max_length=255, null=True,
         blank=True, unique=False)
+    # The measure's title as passed over by Google Civic. We save this so we can match to this measure if an import
+    # doesn't include a we_vote_id we recognize.
+    google_civic_measure_title = models.CharField(verbose_name="measure title exactly as received from google civic",
+                                                  max_length=255, null=True, blank=True)
 
     # Strategic denormalization - this is redundant but will make generating the voter guide easier.
     # geo = models.ForeignKey(Geo, null=True, related_name='pos_geo')
@@ -2157,6 +2161,7 @@ class PositionEnteredManager(models.Model):
                 politician_id=existing_position.politician_id,
                 contest_measure_we_vote_id=existing_position.contest_measure_we_vote_id,
                 contest_measure_id=existing_position.contest_measure_id,
+                google_civic_measure_title=existing_position.google_civic_measure_title,
                 stance=existing_position.stance,
                 statement_text=existing_position.statement_text,
                 statement_html=existing_position.statement_html,
