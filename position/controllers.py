@@ -29,22 +29,18 @@ POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
 
 
 # We retrieve from only one of the two possible variables
-def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id):  # positionRetrieve
-    position_id = convert_to_int(position_id)
+def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # positionRetrieve
     position_we_vote_id = position_we_vote_id.strip().lower()
-
-    # TODO DALE 2016-8-16 Now that we have split positions across two tables, we can't look them up based on position_id
 
     # TODO for certain positions (voter positions), we need to restrict the retrieve based on voter_device_id / voter_id
     if voter_device_id:
         pass
 
     we_vote_id = position_we_vote_id.strip().lower()
-    if not positive_value_exists(position_id) and not positive_value_exists(position_we_vote_id):
+    if not positive_value_exists(position_we_vote_id):
         json_data = {
             'status':                   "POSITION_RETRIEVE_BOTH_IDS_MISSING",
             'success':                  False,
-            'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
@@ -75,19 +71,20 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
 
     position_manager = PositionEnteredManager()
     organization_id = 0
+    organization_we_vote_id = ''
     contest_office_id = 0
     candidate_campaign_id = 0
     contest_measure_id = 0
     position_voter_id = 0
-    results = position_manager.retrieve_position(position_id, position_we_vote_id, organization_id, position_voter_id,
-                                                 contest_office_id, candidate_campaign_id, contest_measure_id)
+    results = position_manager.retrieve_position_table_unknown(
+        position_we_vote_id, organization_id, organization_we_vote_id, position_voter_id,
+        contest_office_id, candidate_campaign_id, contest_measure_id)
 
     if results['position_found']:
         position = results['position']
         json_data = {
             'success':                  True,
             'status':                   results['status'],
-            'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
             'ballot_item_display_name': position.ballot_item_display_name,
             'speaker_display_name':     position.speaker_display_name,
@@ -119,7 +116,6 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
         json_data = {
             'status':                   results['status'],
             'success':                  results['success'],
-            'position_id':              position_id,
             'position_we_vote_id':      we_vote_id,
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
@@ -150,7 +146,7 @@ def position_retrieve_for_api(position_id, position_we_vote_id, voter_device_id)
 
 
 def position_save_for_api(  # positionSave
-        voter_device_id, position_id, position_we_vote_id,
+        voter_device_id, position_we_vote_id,
         organization_we_vote_id,
         public_figure_we_vote_id,
         voter_we_vote_id,
@@ -165,11 +161,9 @@ def position_save_for_api(  # positionSave
         statement_html,
         more_info_url
         ):
-    position_id = convert_to_int(position_id)
     position_we_vote_id = position_we_vote_id.strip().lower()
 
-    existing_unique_identifier_found = positive_value_exists(position_id) \
-        or positive_value_exists(position_we_vote_id)
+    existing_unique_identifier_found = positive_value_exists(position_we_vote_id)
     new_unique_identifier_found = positive_value_exists(organization_we_vote_id) \
         and positive_value_exists(google_civic_election_id) and (
         positive_value_exists(office_we_vote_id) or
@@ -189,7 +183,6 @@ def position_save_for_api(  # positionSave
             'status':                   "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
             'success':                  False,
             'voter_device_id':          voter_device_id,
-            'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
             'ballot_item_display_name': ballot_item_display_name,
@@ -203,6 +196,7 @@ def position_save_for_api(  # positionSave
             'is_negative_rating':               False,
             'is_oppose_or_negative_rating':     False,
             'is_information_only':      False,
+            'is_public_position':       False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
             'state_code':               '',
@@ -222,7 +216,6 @@ def position_save_for_api(  # positionSave
             'status':                   "NEW_POSITION_REQUIRED_VARIABLES_MISSING",
             'success':                  False,
             'voter_device_id':          voter_device_id,
-            'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
             'ballot_item_display_name': ballot_item_display_name,
@@ -236,6 +229,7 @@ def position_save_for_api(  # positionSave
             'is_negative_rating':               False,
             'is_oppose_or_negative_rating':     False,
             'is_information_only':      False,
+            'is_public_position':       False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
             'state_code':               '',
@@ -256,7 +250,6 @@ def position_save_for_api(  # positionSave
 
     position_manager = PositionEnteredManager()
     save_results = position_manager.update_or_create_position(
-        position_id=position_id,
         position_we_vote_id=position_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
         public_figure_we_vote_id=public_figure_we_vote_id,
@@ -280,7 +273,6 @@ def position_save_for_api(  # positionSave
             'success':                  save_results['success'],
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
-            'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
             'new_position_created':     save_results['new_position_created'],
             'ballot_item_display_name': position.ballot_item_display_name,
@@ -294,6 +286,7 @@ def position_save_for_api(  # positionSave
             'is_negative_rating':               position.is_negative_rating(),
             'is_oppose_or_negative_rating':     position.is_oppose_or_negative_rating(),
             'is_information_only':      position.is_information_only(),
+            'is_public_position':       position.is_public_position,
             'organization_we_vote_id':  position.organization_we_vote_id,
             'google_civic_election_id': position.google_civic_election_id,
             'state_code':               position.state_code,
@@ -313,7 +306,6 @@ def position_save_for_api(  # positionSave
             'success':                  False,
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
-            'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'new_position_created':     False,
             'ballot_item_display_name': '',
@@ -327,6 +319,7 @@ def position_save_for_api(  # positionSave
             'is_negative_rating':               False,
             'is_oppose_or_negative_rating':     False,
             'is_information_only':      False,
+            'is_public_position':       False,
             'organization_we_vote_id':  organization_we_vote_id,
             'google_civic_election_id': google_civic_election_id,
             'voter_id':                 0,
@@ -612,7 +605,6 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
 
         if one_position_success:
             one_position_dict_for_api = {
-                'position_id':                      one_position.id,
                 'position_we_vote_id':              one_position.we_vote_id,
                 'ballot_item_display_name':         one_position.ballot_item_display_name,
                 'speaker_display_name':             speaker_display_name,
@@ -868,7 +860,6 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                     or not positive_value_exists(one_position.state_code):
                 one_position = position_manager.refresh_cached_position_info(one_position)
             one_position_dict_for_api = {
-                'position_id':                  one_position.id,
                 'position_we_vote_id':          one_position.we_vote_id,
                 'ballot_item_display_name':     one_position.ballot_item_display_name,  # Candidate name or Measure
                 'ballot_item_image_url_https':  one_position.ballot_item_image_url_https,
@@ -1202,7 +1193,6 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
         json_data = {
             'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
             'success':                  False,
-            'position_id':              0,
             'position_we_vote_id':      '',
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
@@ -1238,7 +1228,6 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
         json_data = {
             'status':                   "POSITION_RETRIEVE_MISSING_AT_LEAST_ONE_BALLOT_ITEM_ID",
             'success':                  False,
-            'position_id':              0,
             'position_we_vote_id':      '',
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
@@ -1283,7 +1272,6 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
         json_data = {
             'success':                  True,
             'status':                   results['status'],
-            'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
             'ballot_item_display_name': position.ballot_item_display_name,
             'speaker_display_name':     position.speaker_display_name,
@@ -1312,7 +1300,6 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
         json_data = {
             'status':                   results['status'],
             'success':                  True,
-            'position_id':              0,
             'position_we_vote_id':      '',
             'ballot_item_display_name': '',
             'speaker_display_name':     '',
@@ -1386,7 +1373,7 @@ def voter_all_positions_retrieve_for_api(voter_device_id, google_civic_election_
 
 
 def voter_position_comment_save_for_api(  # voterPositionCommentSave
-        voter_device_id, position_id, position_we_vote_id,
+        voter_device_id, position_we_vote_id,
         office_we_vote_id,
         candidate_we_vote_id,
         measure_we_vote_id,
@@ -1415,7 +1402,6 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
             'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID-VOTER_POSITION_COMMENT",
             'success':                  False,
             'voter_device_id':          voter_device_id,
-            'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
@@ -1426,11 +1412,9 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
         return json_data
 
     voter = voter_results['voter']
-    position_id = convert_to_int(position_id)
     position_we_vote_id = position_we_vote_id.strip().lower()
 
-    existing_unique_identifier_found = positive_value_exists(position_id) \
-        or positive_value_exists(position_we_vote_id)
+    existing_unique_identifier_found = positive_value_exists(position_we_vote_id)
     new_unique_identifier_found = positive_value_exists(voter_id) \
         and (
         positive_value_exists(office_we_vote_id) or
@@ -1450,7 +1434,6 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
             'status':                   "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
             'success':                  False,
             'voter_device_id':          voter_device_id,
-            'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
@@ -1466,7 +1449,6 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
             'status':                   "NEW_POSITION_REQUIRED_VARIABLES_MISSING",
             'success':                  False,
             'voter_device_id':          voter_device_id,
-            'position_id':              position_id,
             'position_we_vote_id':      position_we_vote_id,
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   '',
@@ -1478,7 +1460,6 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
 
     position_manager = PositionEnteredManager()
     save_results = position_manager.update_or_create_position_comment(
-        position_id=position_id,
         position_we_vote_id=position_we_vote_id,
         voter_id=voter_id,
         voter_we_vote_id=voter.we_vote_id,
@@ -1515,7 +1496,6 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
             'success':                  save_results['success'],
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
-            'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
             'ballot_item_id':           ballot_item_id,
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
@@ -1530,7 +1510,6 @@ def voter_position_comment_save_for_api(  # voterPositionCommentSave
             'success':                  False,
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
-            'position_id':              0,
             'position_we_vote_id':      '',
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   "",
@@ -1678,7 +1657,6 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
             'success':                  success,
             'status':                   status,
             'voter_device_id':          voter_device_id,
-            'position_id':              position.id,
             'position_we_vote_id':      position.we_vote_id,
             'ballot_item_id':           ballot_item_id,
             'ballot_item_we_vote_id':   ballot_item_we_vote_id,
@@ -1692,7 +1670,6 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
             'success':                  success,
             'status':                   status,
             'voter_device_id':          voter_device_id,
-            'position_id':              0,
             'position_we_vote_id':      '',
             'ballot_item_id':           0,
             'ballot_item_we_vote_id':   "",

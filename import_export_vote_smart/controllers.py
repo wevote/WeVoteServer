@@ -701,7 +701,6 @@ def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_i
                 continue
             else:
                 position_results = position_manager.update_or_create_position(
-                    position_id=0,
                     position_we_vote_id=False,
                     organization_we_vote_id=we_vote_organization.we_vote_id,
                     public_figure_we_vote_id=False,

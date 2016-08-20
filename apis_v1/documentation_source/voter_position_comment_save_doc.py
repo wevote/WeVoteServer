@@ -47,11 +47,6 @@ def voter_position_comment_save_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
-            'name':         'position_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'Internal database unique identifier for a position.',
-        },
-        {
             'name':         'position_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'We Vote unique identifier for this position.',
@@ -86,7 +81,6 @@ def voter_position_comment_save_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "position_id": integer (the internal id of the position found),\n' \
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "new_position_created": boolean,\n' \
                    '  "google_civic_election_id": integer,\n' \

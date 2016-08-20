@@ -103,7 +103,6 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '  "ballot_item_we_vote_id": string,\n' \
                    '  "position_list": list\n' \
                    '   [\n' \
-                   '     "position_id": integer,\n' \
                    '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
                    '     "speaker_display_name": string,\n' \

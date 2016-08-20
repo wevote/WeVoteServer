@@ -26,18 +26,9 @@ def position_save_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
-            'name':         'position_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The internal database id for this position. '
-                            '(One of these is required to update existing record: '
-                            'position_id, position_we_vote_id)',
-        },
-        {
             'name':         'position_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for this position across all networks. '
-                            '(One of these is required to update existing record: '
-                            'position_id, position_we_vote_id)',
+            'description':  'The unique identifier for this position across all networks. ',
         },
         {
             'name':         'ballot_item_display_name',
@@ -181,7 +172,6 @@ def position_save_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "position_id": integer (the internal id of the position found),\n' \
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "new_position_created": boolean,\n' \
                    '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
@@ -195,6 +185,7 @@ def position_save_doc_template_values(url_root):
                    '  "is_negative_rating": boolean,\n' \
                    '  "is_oppose_or_negative_rating": boolean,\n' \
                    '  "is_information_only": boolean,\n' \
+                   '  "is_public_position": boolean,\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
                    '  "public_figure_we_vote_id": string,\n' \
                    '  "voter_we_vote_id": string,\n' \

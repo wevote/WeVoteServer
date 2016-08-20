@@ -68,8 +68,13 @@
 
     {% for organization_position in organization_position_list %}
     <tr>
-        <td><a href="{% url 'organization:organization_position_edit' organization.id organization_position.id %}">
-            {{ organization_position.candidate_campaign.candidate_name }}</a></td>
+        <td><a href="{% url 'organization:organization_position_edit' organization.id organization_position.we_vote_id %}">
+            {% if organization_position.ballot_item_display_name %}
+                {{ organization_position.ballot_item_display_name }}
+            {% else %}
+                (missing ballot_item_display_name)
+            {% endif %}
+        </a></td>
         <td>{{ organization_position.get_stance_display }}
             {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
         <td>{{ organization_position.election.google_civic_election_id }}</td>

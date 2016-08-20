@@ -275,9 +275,8 @@ class PoliticianManager(models.Model):
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
-        # If nothing found, look for a national entry for this candidate -- i.e. Presidential candidates
+        # TODO DALE If nothing found, look for a national entry for this candidate -- i.e. Presidential candidates
         if not politician_found and not politician_list_found:
-            # TODO DALE
             pass
 
         results = {

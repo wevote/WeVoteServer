@@ -203,7 +203,7 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 {% if candidate_position.organization_id %}
-                <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.id %}">
+                <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.we_vote_id %}">
                 {{ candidate_position.organization.organization_name }}</a>
                 {% else %}
                     (not an org)

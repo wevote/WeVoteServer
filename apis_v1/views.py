@@ -457,10 +457,8 @@ def position_retrieve_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_id = request.GET.get('position_id', 0)
     position_we_vote_id = request.GET.get('position_we_vote_id', '')
     return position_retrieve_for_api(
-        position_id=position_id,
         position_we_vote_id=position_we_vote_id,
         voter_device_id=voter_device_id
     )
@@ -475,7 +473,6 @@ def position_save_view(request):  # positionSave
     # We set values that aren't passed in, to False so we know to treat them as null or unchanged. This allows us to
     #  only change the values we want to
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_id = request.GET.get('position_id', False)
     position_we_vote_id = request.GET.get('position_we_vote_id', False)
     organization_we_vote_id = request.GET.get('organization_we_vote_id', False)
     public_figure_we_vote_id = request.GET.get('public_figure_we_vote_id', False)
@@ -493,7 +490,6 @@ def position_save_view(request):  # positionSave
 
     results = position_save_for_api(
         voter_device_id=voter_device_id,
-        position_id=position_id,
         position_we_vote_id=position_we_vote_id,
         organization_we_vote_id=organization_we_vote_id,
         public_figure_we_vote_id=public_figure_we_vote_id,
@@ -1456,8 +1452,6 @@ def voter_position_visibility_save_view(request):  # voterPositionVisibilitySave
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    # position_id = request.GET.get('position_id', 0)
-    # position_we_vote_id = request.GET.get('position_we_vote_id', "")
 
     visibility_setting = request.GET.get('visibility_setting', False)
 
@@ -1566,7 +1560,6 @@ def voter_position_comment_save_view(request):  # voterPositionCommentSave
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    position_id = request.GET.get('position_id', 0)
     position_we_vote_id = request.GET.get('position_we_vote_id', "")
 
     statement_text = request.GET.get('statement_text', False)
@@ -1594,7 +1587,6 @@ def voter_position_comment_save_view(request):  # voterPositionCommentSave
 
     results = voter_position_comment_save_for_api(
         voter_device_id=voter_device_id,
-        position_id=position_id,
         position_we_vote_id=position_we_vote_id,
         office_we_vote_id=office_we_vote_id,
         candidate_we_vote_id=candidate_we_vote_id,

@@ -126,7 +126,6 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '  "is_ignoring": boolean (Is this voter ignoring this org/public_figure?),\n' \
                    '  "position_list": list\n' \
                    '   [\n' \
-                   '     "position_id": integer,\n' \
                    '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
                    '     "ballot_item_id": integer,\n' \

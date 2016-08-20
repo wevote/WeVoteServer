@@ -68,12 +68,11 @@ def refresh_twitter_organization_details_view(request, organization_id):
 
 
 @login_required
-def refresh_twitter_politician_details_view(request, politician_id):
+def refresh_twitter_politician_details_view(request, politician_id):  # TODO DALE Get this working for politicians
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    # TODO DALE To update
     # candidate_manager = CandidateCampaignManager()
     # results = candidate_manager.retrieve_candidate_campaign(candidate_id)
     #

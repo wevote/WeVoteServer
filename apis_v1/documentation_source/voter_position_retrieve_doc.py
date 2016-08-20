@@ -48,7 +48,6 @@ def voter_position_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
                    '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
-                   '  "position_id": integer (the internal id of the position found),\n' \
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "is_support": boolean,\n' \
                    '  "is_oppose": boolean,\n' \

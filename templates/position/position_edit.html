@@ -10,7 +10,7 @@
 
 <form action="{% url "position:position_edit_process" %}" method="post">
 {% csrf_token %}
-    <input type="hidden" name="position_id" value="{% if position %}{{ position.id }}{% else %}0{% endif %}">
+    <input type="hidden" name="position_we_vote_id" value="{% if position %}{{ position.we_vote_id }}{% else %}{% endif %}">
 
 {% if position %}
 <p><strong>Values from Google Civic API (do not edit)</strong></p>

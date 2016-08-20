@@ -21,11 +21,6 @@ def position_retrieve_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
-            'name':         'position_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'Internal database unique identifier.',
-        },
-        {
             'name':         'position_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'We Vote unique identifier so we can move positions from server-to-server.',
@@ -81,7 +76,6 @@ def position_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
                    '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
-                   '  "position_id": integer (the internal id of the position found),\n' \
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "speaker_display_name": string,\n' \
                    '  "speaker_image_url_https": string,\n' \
@@ -112,7 +106,7 @@ def position_retrieve_doc_template_values(url_root):
         'api_name': 'positionRetrieve',
         'api_slug': 'positionRetrieve',
         'api_introduction':
-            "Retrieve the position using position_id (first choice) or we_vote_id. (In the future we will add the"
+            "Retrieve the position using we_vote_id. (In the future we will add the"
             "ability to retrieve via a set of variables like "
             "(organization_we_vote_id, google_civic_election_id, candidate_we_vote_id)",
         'try_now_link': 'apis_v1:positionRetrieveView',

@@ -11,25 +11,42 @@
         < Back to Organization Positions</a></p>
 
 <h1>{% if not organization_position %}Enter Position for {% endif %}{{ organization.organization_name }}{% if organization_position %}<br />
-Position on {{ organization_position.candidate_campaign.candidate_name }}{% endif %}</h1>
+Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 <form action="{% url "organization:organization_position_edit_process" %}" method="post">
 {% csrf_token %}
     <input type="hidden" name="organization_id" value="{{ organization.id }}">
-    <input type="hidden" name="position_id" value="{% if organization_position %}{{ organization_position.id }}{% else %}0{% endif %}">
+    <input type="hidden" name="position_we_vote_id" value="{% if organization_position %}{{ organization_position.we_vote_id }}{% endif %}">
 
-{% if not is_in_edit_mode %}Interface needed to switch between "select candidate" and "select measure"<br />{% endif %}
 
 {# Candidate Campaign #}
 {% if is_in_edit_mode %}
     {# EDIT EXISTING: There is no need to display anything here #}
+    {% if organization_position.candidate_campaign %}
     <input type="hidden" name="candidate_campaign_id" value="{{ organization_position.candidate_campaign.id }}">
-    <input type="hidden" name="google_civic_election_id" value="{{ organization_position.google_civic_election_id }}">
-    (<a href="{% url 'position:position_delete_process' %}?position_id={{ organization_position.id }}&google_civic_election_id={% if organization_position %}{{ organization_position.google_civic_election_id }}{% endif %}">delete position</a>)
+    {% elif organization_position.contest_measure %}
+    <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">
+    {% endif %}
+    (<a href="{% url 'position:position_delete_process' %}?position_we_vote_id={{ organization_position.we_vote_id }}&google_civic_election_id={% if organization_position %}{{ organization_position.google_civic_election_id }}{% endif %}">delete position</a>)
+
+    {# Election #}
+    <div class="form-group">
+        <label for="election_id" class="col-sm-3 control-label">Election</label>
+        <div class="col-sm-9">
+            <input type="text" name="google_civic_election_id" id="election_id"
+                   value="{% if organization_position.google_civic_election_id %}{{ organization_position.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}"
+                   class="form-control" />
+            {% if organization_position.election %}
+                {{ organization_position.election.election_name }} -
+                {{ organization_position.election.google_civic_election_id }} -
+                {{ organization_position.election.election_day_text }}
+            {% endif %}
+        </div>
+    </div>
 
 {% else %}
-
+    {# NEW ENTRY #}
 
     {% if election_list %}
 <div class="form-group">
@@ -47,10 +64,10 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
     {% endif %}
 
     {# ADD NEW: Show the drop-down of campaigns this org can have enter a position for #}
-<div class="form-group{% if candidate_not_found %} has-error{% endif %}">
+<div class="form-group{% if candidate_and_measure_not_found %} has-error{% endif %}">
     <label for="candidate_campaign_id" class="col-sm-3 control-label">Candidate</label>
     <div class="col-sm-9">
-        {% if candidate_not_found %}
+        {% if candidate_and_measure_not_found %}
             <div class="text-danger bg-danger">A candidate must be chosen</div>
         {% endif %}
         <select type="text" name="candidate_campaign_id" id="candidate_campaign_id" class="form-control" >
@@ -66,30 +83,41 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
         {% endif %}
         </select>
         {% if voter_authority.is_verified_volunteer or voter_authority.is_admin %}
-            <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">Add new candidate</a> (open in new window)
+            <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}"
+               target="_blank">Add new candidate</a> (open in new window)
+            <br />
+        {% endif %}
+    </div>
+</div>
+
+    {# ADD NEW: Show the drop-down of measures this org can have enter a position for #}
+<div class="form-group{% if candidate_and_measure_not_found %} has-error{% endif %}">
+    <label for="contest_measure_id" class="col-sm-3 control-label">...or Measure</label>
+    <div class="col-sm-9">
+        {% if candidate_and_measure_not_found %}
+            <div class="text-danger bg-danger">...or a measure must be chosen</div>
+        {% endif %}
+        <select type="text" name="contest_measure_id" id="contest_measure_id" class="form-control" >
+        {% if contest_measures_for_this_election_list %}
+            <option value="0">-- select measure --</option>
+            {% for contest_measure_from_loop in contest_measures_for_this_election_list %}
+            <option value="{{ contest_measure_from_loop.id }}"
+                    {% if contest_measure_from_loop.id == contest_measure_id %} selected="selected"
+                    {% endif %}>{{ contest_measure_from_loop.measure_title }}</option>
+            {% endfor %}
+        {% else %}
+        <option value="0">-- no measures found --</option>
+        {% endif %}
+        </select>
+        {% if voter_authority.is_verified_volunteer or voter_authority.is_admin %}
+            <a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}"
+               target="_blank">Add new measure</a> (open in new window)
             <br />
         {% endif %}
     </div>
 </div>
 {% endif %}
 
-
-{# Measure Campaign #}
-{#{% if is_in_edit_mode %}#}
-    {# EDIT EXISTING: There is no need to display anything here #}
-{#    <input type="hidden" name="contest_measure_id" value="{{ organization_position.contest_measure.id }}">#}
-{#{% else %}#}
-    {# ADD NEW: Show the drop-down of campaigns this org can have enter a position for #}
-{#    <label for="contest_measure_id_id">Measure (ID for now)</label>#}
-{#    {% if organization_position %}#}
-{#    Existing organization_position selected#}
-{#    <input type="text" name="contest_measure_name" id="contest_measure_id" value="{{ organization_position.contest_measure.id }}" />#}
-{#    {% else %}#}
-{#    <input type="text" name="contest_measure_id" id="contest_measure_id_id" value="" />#}
-{#    {% endif %}#}
-{##}
-{#    <br />#}
-{#{% endif %}#}
 
 {# Stance #}
 <div class="form-group">
@@ -108,6 +136,7 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
     </div>
 </div>
 
+
 {# Stance Text #}
 <div class="form-group">
     <label for="statement_text_id" class="col-sm-3 control-label">Please Explain Stance</label>
@@ -125,7 +154,6 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
                class="form-control" placeholder="http://www..." />
     </div>
 </div>
-
 
 <div class="form-group">
     <label for="find_voter_guide_button_id" class="col-sm-3 control-label">
@@ -147,9 +175,15 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
 {% if organization_position %}
 <p>&nbsp;</p>
 <p>
+    {% if organization_position.candidate_campaign %}
     <a href="{% url 'candidate:candidate_edit' organization_position.candidate_campaign.id %}" target="_blank">
         Jump to {{ organization_position.candidate_campaign.candidate_name }}</a>
         (open in new window)
+    {% elif organization_position.contest_measure %}
+    <a href="{% url 'measure:measure_edit' organization_position.contest_measure.id %}" target="_blank">
+        Jump to {{ organization_position.contest_measure.measure_title }}</a>
+        (open in new window)
+    {% endif %}
 </p>
 {% endif %}
 
@@ -169,7 +203,7 @@ Position on {{ organization_position.candidate_campaign.candidate_name }}{% endi
     <tr>
         <td>{{ organization_position.get_stance_display }}
             {% if organization_position.vote_smart_rating %} {{ organization_position.vote_smart_rating }}%{% endif %}</td>
-        <td><a href="{% url 'organization:organization_position_edit' organization.id organization_position.id %}">
+        <td><a href="{% url 'organization:organization_position_edit' organization.id organization_position.we_vote_id %}">
             {{ organization_position.candidate_campaign.candidate_name }}</a></td>
         <td>{{ organization_position.election.google_civic_election_id }}</td>
         <td>{{ organization_position.election.election_day_text }}</td>
