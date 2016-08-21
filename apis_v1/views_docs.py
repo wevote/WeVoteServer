@@ -18,7 +18,7 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     position_public_oppose_count_for_ballot_item_doc, position_retrieve_doc, position_save_doc, \
     positions_sync_out_doc, \
     position_public_support_count_for_ballot_item_doc, position_support_count_for_ballot_item_doc, \
-    positions_count_for_all_ballot_items_doc, \
+    positions_count_for_all_ballot_items_doc, positions_count_for_one_ballot_item_doc, \
     quick_info_retrieve_doc, search_all_doc, twitter_identity_retrieve_doc, \
     twitter_sign_in_start_doc, twitter_sign_in_request_access_token_doc, twitter_sign_in_request_voter_info_doc, \
     voter_address_retrieve_doc, \
@@ -382,10 +382,21 @@ def position_public_support_count_for_ballot_item_doc_view(request):
 
 def positions_count_for_all_ballot_items_doc_view(request):
     """
-    Show documentation about positionSave
+    Show documentation about positionsCountForAllBallotItems
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = positions_count_for_all_ballot_items_doc.positions_count_for_all_ballot_items_doc_template_values(
+        url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def positions_count_for_one_ballot_item_doc_view(request):
+    """
+    Show documentation about positionsCountForOneBallotItem
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = positions_count_for_one_ballot_item_doc.positions_count_for_one_ballot_item_doc_template_values(
         url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)

@@ -765,7 +765,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
 
     :param voter_device_id:
     :param voter_id:
-    :param google_civic_election_id: This variable either was stored in a cookie, or passed in explicitly so we can
+    :param google_civic_election_id: This variable was passed in explicitly so we can
     get the ballot items related to that election.
     :return:
     """

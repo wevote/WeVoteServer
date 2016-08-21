@@ -38,7 +38,7 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
     position_support_count_for_ballot_item_for_api, \
     position_public_oppose_count_for_ballot_item_for_api, \
     position_public_support_count_for_ballot_item_for_api, positions_count_for_all_ballot_items_for_api, \
-    positions_count_for_all_ballot_items_for_api_original, \
+    positions_count_for_one_ballot_item_for_api, positions_count_for_all_ballot_items_for_api_original, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
 from twitter.controllers import twitter_identity_retrieve_for_api
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, \
@@ -649,9 +649,9 @@ def positions_count_for_all_ballot_items_original_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def positions_count_for_all_ballot_items_view(request):
+def positions_count_for_all_ballot_items_view(request):  # positionsCountForAllBallotItems
     """
-    Retrieve the number of support/oppose positions from the voter's network (positionsCountForAllBallotItems)
+    Retrieve the number of support/oppose positions from the voter's network
     :param request:
     :return:
     """
@@ -661,6 +661,27 @@ def positions_count_for_all_ballot_items_view(request):
     results = positions_count_for_all_ballot_items_for_api(
         voter_device_id=voter_device_id,
         google_civic_election_id=google_civic_election_id)
+    json_data = {
+        'status':               results['status'],
+        'success':              results['success'],
+        'position_counts_list': results['position_counts_list'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def positions_count_for_one_ballot_item_view(request):  # positionsCountForOneBallotItem
+    """
+    Retrieve the number of support/oppose positions from the voter's network for one ballot item
+    We return results in the same format as positions_count_for_all_ballot_items_view
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', "")
+
+    results = positions_count_for_one_ballot_item_for_api(
+        voter_device_id=voter_device_id,
+        ballot_item_we_vote_id=ballot_item_we_vote_id)
     json_data = {
         'status':               results['status'],
         'success':              results['success'],
