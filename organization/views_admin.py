@@ -479,24 +479,16 @@ def organization_position_new_view(request, organization_id):
     # Prepare a drop down of candidates competing in this election
     candidate_campaign_list = CandidateCampaignListManager()
     candidate_campaigns_for_this_election_list = []
-    if positive_value_exists(google_civic_election_id):
-        results = candidate_campaign_list.retrieve_all_candidates_for_upcoming_election(google_civic_election_id, True)
-        if results['candidate_list_found']:
-            candidate_campaigns_for_this_election_list = results['candidate_list_objects']
-    else:
-        candidate_campaigns_for_this_election_list \
-            = candidate_campaign_list.retrieve_candidate_campaigns_from_all_elections_list()
+    results = candidate_campaign_list.retrieve_all_candidates_for_upcoming_election(google_civic_election_id, True)
+    if results['candidate_list_found']:
+        candidate_campaigns_for_this_election_list = results['candidate_list_objects']
 
     # Prepare a drop down of measures in this election
     contest_measure_list = ContestMeasureList()
     contest_measures_for_this_election_list = []
-    if positive_value_exists(google_civic_election_id):
-        results = contest_measure_list.retrieve_all_measures_for_upcoming_election(google_civic_election_id, True)
-        if results['measure_list_found']:
-            contest_measures_for_this_election_list = results['measure_list_objects']
-    else:
-        contest_measures_for_this_election_list \
-            = contest_measure_list.retrieve_contest_measures_from_all_elections_list()
+    results = contest_measure_list.retrieve_all_measures_for_upcoming_election(google_civic_election_id, True)
+    if results['measure_list_found']:
+        contest_measures_for_this_election_list = results['measure_list_objects']
 
     try:
         organization_position_list = PositionEntered.objects.order_by('stance')

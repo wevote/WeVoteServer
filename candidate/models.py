@@ -86,7 +86,10 @@ class CandidateCampaignListManager(models.Model):
                 # TODO Limit this search to upcoming_elections only
                 pass
             candidate_queryset = candidate_queryset.order_by("candidate_name")
-            candidate_list_objects = candidate_queryset
+            if positive_value_exists(google_civic_election_id):
+                candidate_list_objects = candidate_queryset
+            else:
+                candidate_list_objects = candidate_queryset[:300]
 
             if len(candidate_list_objects):
                 candidate_list_found = True
@@ -220,7 +223,7 @@ class CandidateCampaignListManager(models.Model):
         candidates_list_temp = CandidateCampaign.objects.all()
         # Order by candidate_name.
         # To order by last name we will need to make some guesses in some case about what the last name is.
-        candidates_list_temp = candidates_list_temp.order_by('candidate_name')
+        candidates_list_temp = candidates_list_temp.order_by('candidate_name')[:300]
         return candidates_list_temp
 
     def remove_duplicate_candidate(self, candidate_id, google_civic_election_id):
