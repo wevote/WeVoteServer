@@ -752,7 +752,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
 
     json_data = {
         'success':                  success,
-        'status':                   "POSITIONS_COUNT_FOR_ALL_BALLOT_ITEMS",
+        'status':                   "POSITIONS_COUNT_FOR_ONE_BALLOT_ITEM",
         'ballot_item_we_vote_id':   ballot_item_we_vote_id,
         'position_counts_list':     position_counts_list_results,
     }
