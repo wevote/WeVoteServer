@@ -90,7 +90,7 @@ def position_list_view(request):
         position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
                                                                                   public_only)
     else:
-        position_list = PositionEntered.objects.order_by('position_we_vote_id')[:300]  # This order_by is temp
+        position_list = PositionEntered.objects.order_by('we_vote_id')[:300]  # This order_by is temp
 
     election_list = Election.objects.order_by('-election_day_text')
 

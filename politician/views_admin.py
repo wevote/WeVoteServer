@@ -84,6 +84,7 @@ def politician_list_view(request):
     messages_on_stage = get_messages(request)
     state_code = request.GET.get('state_code', '')
     politician_search = request.GET.get('politician_search', '')
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     politician_list = []
 
     try:
@@ -124,6 +125,7 @@ def politician_list_view(request):
 
     template_values = {
         'messages_on_stage':    messages_on_stage,
+        'google_civic_election_id':    google_civic_election_id,
         'politician_list':      politician_list,
         'politician_search':    politician_search,
         'election_list':        election_list,

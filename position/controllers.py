@@ -836,15 +836,15 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             ballot_item_id = one_position.candidate_campaign_id
             ballot_item_we_vote_id = one_position.candidate_campaign_we_vote_id
             one_position_success = True
-        elif positive_value_exists(one_position.public_figure_we_vote_id):
+        elif positive_value_exists(one_position.contest_measure_we_vote_id):
             kind_of_ballot_item = MEASURE
-            ballot_item_id = one_position.public_figure_id
-            ballot_item_we_vote_id = one_position.public_figure_we_vote_id
+            ballot_item_id = one_position.contest_measure_id
+            ballot_item_we_vote_id = one_position.contest_measure_we_vote_id
             one_position_success = True
-        elif positive_value_exists(one_position.public_figure_we_vote_id):
+        elif positive_value_exists(one_position.contest_office_we_vote_id):
             kind_of_ballot_item = OFFICE
-            ballot_item_id = one_position.public_figure_id
-            ballot_item_we_vote_id = one_position.public_figure_we_vote_id
+            ballot_item_id = one_position.contest_office_id
+            ballot_item_we_vote_id = one_position.contest_office_we_vote_id
             one_position_success = True
         else:
             kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"

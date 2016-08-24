@@ -20,7 +20,7 @@ from organization.controllers import organizations_import_from_sample_file
 from polling_location.controllers import import_and_save_all_polling_locations_data
 from position.controllers import positions_import_from_sample_file
 from voter.models import Voter, VoterDeviceLinkManager, VoterManager, voter_has_authority, voter_setup
-from wevote_functions.functions import delete_voter_api_device_id_cookie, generate_voter_device_id, \
+from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
 
 BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
@@ -45,7 +45,11 @@ def admin_home_view(request):
     results = voter_setup(request)
     voter_api_device_id = results['voter_api_device_id']
     store_new_voter_api_device_id_in_cookie = results['store_new_voter_api_device_id_in_cookie']
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
     template_values = {
+        'google_civic_election_id': google_civic_election_id,
     }
     response = render(request, 'admin_tools/index.html', template_values)
 

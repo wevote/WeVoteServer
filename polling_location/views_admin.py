@@ -230,6 +230,7 @@ def polling_location_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     polling_location_state = request.GET.get('polling_location_state')
     no_limit = False
 
@@ -256,6 +257,7 @@ def polling_location_list_view(request):
 
     template_values = {
         'messages_on_stage':        messages_on_stage,
+        'google_civic_election_id': google_civic_election_id,
         'polling_location_list':    polling_location_list,
         'polling_location_count':   polling_location_count,
         'polling_location_state':   polling_location_state,
