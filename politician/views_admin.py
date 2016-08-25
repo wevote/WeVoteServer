@@ -5,6 +5,7 @@
 from .models import Politician, PoliticianManager
 from .serializers import PoliticianSerializer
 from admin_tools.views import redirect_to_sign_in_page
+from candidate.models import CandidateCampaign
 from office.models import ContestOffice, ContestOfficeManager
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -118,8 +119,47 @@ def politician_list_view(request):
 
         politician_list = politician_list.order_by('politician_name')[:200]
     except ObjectDoesNotExist:
-        # This is fine, create new
+        # This is fine
         pass
+
+    # Cycle through all Politicians and find unlinked Candidates that *might* be "children" of this politician
+    temp_politician_list = []
+    for one_politician in politician_list:
+        try:
+            related_candidate_list = CandidateCampaign.objects.all()
+            related_candidate_list = related_candidate_list.exclude(politician_id=one_politician.id)
+
+            filters = []
+            new_filter = Q(candidate_name__icontains=one_politician.first_name) & \
+                Q(candidate_name__icontains=one_politician.last_name)
+            filters.append(new_filter)
+
+            if positive_value_exists(one_politician.politician_twitter_handle):
+                new_filter = Q(candidate_twitter_handle__iexact=one_politician.politician_twitter_handle)
+                filters.append(new_filter)
+
+            if positive_value_exists(one_politician.vote_smart_id):
+                new_filter = Q(vote_smart_id=one_politician.vote_smart_id)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                related_candidate_list = related_candidate_list.filter(final_filters)
+
+            related_candidate_list_count = related_candidate_list.count()
+        except Exception as e:
+            related_candidate_list_count = 0
+
+        one_politician.related_candidate_list_count = related_candidate_list_count
+        temp_politician_list.append(one_politician)
+
+    politician_list = temp_politician_list
 
     election_list = Election.objects.order_by('-election_day_text')
 
@@ -135,7 +175,7 @@ def politician_list_view(request):
 
 
 @login_required
-def politician_new_view(request):  # TODO DALE Transition fully to politician
+def politician_new_view(request):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -206,7 +246,7 @@ def politician_edit_by_we_vote_id_view(request, politician_we_vote_id):
 
 
 @login_required
-def politician_edit_view(request, politician_id):  # TODO DALE Transition fully to politician
+def politician_edit_view(request, politician_id):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
@@ -255,11 +295,91 @@ def politician_edit_view(request, politician_id):  # TODO DALE Transition fully 
         except Exception as e:
             politician_position_list = []
 
+        # Working with Candidate "children" of this politician
+        try:
+            linked_candidate_list = CandidateCampaign.objects.all()
+            linked_candidate_list = linked_candidate_list.filter(politician_id=politician_on_stage.id)
+        except Exception as e:
+            linked_candidate_list = []
+
+        # Finding Candidates that *might* be "children" of this politician
+        try:
+            related_candidate_list = CandidateCampaign.objects.all()
+            related_candidate_list = related_candidate_list.exclude(politician_id=politician_on_stage.id)
+
+            filters = []
+            new_filter = Q(candidate_name__icontains=politician_on_stage.first_name) & \
+                Q(candidate_name__icontains=politician_on_stage.last_name)
+            filters.append(new_filter)
+
+            if positive_value_exists(politician_on_stage.politician_twitter_handle):
+                new_filter = Q(candidate_twitter_handle__iexact=politician_on_stage.politician_twitter_handle)
+                filters.append(new_filter)
+
+            if positive_value_exists(politician_on_stage.vote_smart_id):
+                new_filter = Q(vote_smart_id=politician_on_stage.vote_smart_id)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                related_candidate_list = related_candidate_list.filter(final_filters)
+
+            related_candidate_list = related_candidate_list.order_by('candidate_name')[:20]
+        except Exception as e:
+            related_candidate_list = []
+
+        # Find possible duplicate politicians
+        try:
+            duplicate_politician_list = Politician.objects.all()
+            duplicate_politician_list = duplicate_politician_list.exclude(id=politician_on_stage.id)
+
+            filters = []
+            new_filter = Q(politician_name__icontains=politician_on_stage.politician_name)
+            filters.append(new_filter)
+
+            if positive_value_exists(politician_on_stage.first_name) or \
+                    positive_value_exists(politician_on_stage.last_name):
+                new_filter = Q(first_name__icontains=politician_on_stage.first_name) & \
+                    Q(last_name__icontains=politician_on_stage.last_name)
+                filters.append(new_filter)
+
+            if positive_value_exists(politician_on_stage.politician_twitter_handle):
+                new_filter = Q(politician_twitter_handle__icontains=politician_on_stage.politician_twitter_handle)
+                filters.append(new_filter)
+
+            if positive_value_exists(politician_on_stage.vote_smart_id):
+                new_filter = Q(vote_smart_id=politician_on_stage.vote_smart_id)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                duplicate_politician_list = duplicate_politician_list.filter(final_filters)
+
+            duplicate_politician_list = duplicate_politician_list.order_by('politician_name')[:20]
+        except ObjectDoesNotExist:
+            # This is fine, create new
+            pass
+
         template_values = {
             'messages_on_stage':            messages_on_stage,
             'politician':                   politician_on_stage,
             'rating_list':                  rating_list,
             'politician_position_list':     politician_position_list,
+            'linked_candidate_list':        linked_candidate_list,
+            'related_candidate_list':       related_candidate_list,
+            'duplicate_politician_list':    duplicate_politician_list,
             # Incoming variables, not saved yet
             'politician_name':              politician_name,
             'state_code':                   state_code,
@@ -280,7 +400,7 @@ def politician_edit_view(request, politician_id):  # TODO DALE Transition fully 
 
 
 @login_required
-def politician_edit_process_view(request):  # TODO DALE Transition fully to politician
+def politician_edit_process_view(request):
     """
     Process the new or edit politician forms
     :param request:

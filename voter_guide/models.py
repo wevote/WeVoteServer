@@ -796,6 +796,16 @@ class VoterGuideListManager(models.Model):
         if not positive_value_exists(maximum_number_to_retrieve):
             maximum_number_to_retrieve = 30
 
+        if not len(orgs_we_need_found_by_position_and_time_span_list_of_dicts):
+            status = "NO_VOTER_GUIDES_FOUND_BY_TIME_SPAN"
+            results = {
+                'success': True,
+                'status': status,
+                'voter_guide_list_found': voter_guide_list_found,
+                'voter_guide_list': voter_guide_list,
+            }
+            return results
+
         try:
             voter_guide_queryset = VoterGuide.objects.all()
 

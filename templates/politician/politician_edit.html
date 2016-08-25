@@ -8,7 +8,7 @@
 <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">
     < Back to Politicians</a>
 
-<h1>{% if politician %}Edit {{ politician.politician_name }}{% else %}New Politician{% endif %}</h1>
+<h1>{% if politician %}Edit Politician "{{ politician.politician_name }}"{% else %}New Politician{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
@@ -101,6 +101,165 @@
 
 <br />
 {% if politician %}
+
+
+{% if linked_candidate_list %}
+    <h4>Candidates Linked to this Politician</h4>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Candidate Name</td>
+            <td>State</td>
+            <td>Election</td>
+            <td>Office</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
+        </tr>
+    {% for candidate in linked_candidate_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if candidate.candidate_photo_url %}
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                    <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ candidate.candidate_name }}</a></td>
+            <td>{{ candidate.get_candidate_state }}</td>
+            <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}</td>
+            <td>
+        {% if candidate.office %}
+                <a href="{% url 'office:office_summary' candidate.office.id %}" target="_blank">{{ candidate.office.office_name }}</a>
+        {% else %}
+            (office missing)
+        {% endif %}
+            </td>
+            <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
+                    target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
+                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
+            <td>{{ candidate.id }}</td>
+            <td>{{ candidate.we_vote_id }}
+                {% if candidate.politician_we_vote_id %}
+                    {{ candidate.politician_we_vote_id }}
+                {% endif %}
+            </td>
+            <td>{{ candidate.vote_smart_id }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    <p>(no linked candidates found)</p>
+{% endif %}
+
+
+
+{% if related_candidate_list %}
+    <h4>Candidates That Might Match This Politician</h4>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Candidate Name</td>
+            <td>State</td>
+            <td>Election</td>
+            <td>Office</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
+        </tr>
+    {% for candidate in related_candidate_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if candidate.candidate_photo_url %}
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                    <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ candidate.candidate_name }}</a>
+            &nbsp;
+                (<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}" target="_blank">match to politician</a>)
+            </td>
+            <td>{{ candidate.get_candidate_state }}</td>
+            <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}</td>
+            <td>
+        {% if candidate.office %}
+                <a href="{% url 'office:office_summary' candidate.office.id %}" target="_blank">{{ candidate.office.office_name }}</a>
+        {% else %}
+            (office missing)
+        {% endif %}
+            </td>
+            <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
+                    target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
+                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
+            <td>{{ candidate.id }}</td>
+            <td>{{ candidate.we_vote_id }}
+                {% if candidate.politician_we_vote_id %}
+                    {{ candidate.politician_we_vote_id }}
+                {% endif %}
+            </td>
+            <td>{{ candidate.vote_smart_id }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+{% endif %}
+
+
+
+{% if duplicate_politician_list %}
+    <h4>Possible Duplicate Politicians</h4>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Politician Name</td>
+            <td>State</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
+        </tr>
+    {% for politician in duplicate_politician_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if politician.politician_photo_url %}
+                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+                    <img src='{{ politician.politician_photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">{{ politician.politician_name }}</a></td>
+            <td>{{ politician.state_code }}</td>
+            <td>{% if politician.politician_twitter_handle %}<a href="https://twitter.com/{{ politician.politician_twitter_handle }}"
+                    target="_blank">{{ politician.politician_twitter_handle }}</a><br />
+                ({{ politician.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}</td>
+            <td>{{ politician.id }}</td>
+            <td>{{ politician.we_vote_id }}</td>
+            <td>{{ politician.vote_smart_id }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+
+
+
 <a href="{% url 'politician:politician_retrieve_photos' politician.id %}">Retrieve photos</a><br />
     {% if politician.politician_photo_url %}
     <img src='{{ politician.politician_photo_url }}' />

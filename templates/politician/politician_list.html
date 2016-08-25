@@ -59,6 +59,7 @@
             <td>Id</td>
             <td>We Vote Id</td>
             <td>Vote Smart Id</td>
+            <td>Unlinked Related Candidates?</td>
         </tr>
     {% for politician in politician_list %}
         <tr>
@@ -79,6 +80,7 @@
             <td>{{ politician.id }}</td>
             <td>{{ politician.we_vote_id }}</td>
             <td>{{ politician.vote_smart_id }}</td>
+            <td>{{ politician.related_candidate_list_count }}</td>
         </tr>
     {% endfor %}
     </table>

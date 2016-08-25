@@ -1627,6 +1627,106 @@ class PositionEnteredManager(models.Model):
     def __unicode__(self):
         return "PositionEnteredManager"
 
+    def create_position_for_visibility_change(self, voter_id, office_we_vote_id, candidate_we_vote_id,
+                                              measure_we_vote_id, visibility_setting):
+
+        position_we_vote_id = ""
+        position_found = False
+        one_unique_ballot_item_variable_received = positive_value_exists(office_we_vote_id) or \
+            positive_value_exists(candidate_we_vote_id) or \
+            positive_value_exists(measure_we_vote_id)
+        if visibility_setting in FRIENDS_ONLY:
+            position_on_stage = PositionForFriends
+            is_public_position = False
+        else:
+            position_on_stage = PositionEntered
+            is_public_position = True
+
+        if not voter_id \
+                or not one_unique_ballot_item_variable_received \
+                or visibility_setting not in (FRIENDS_ONLY, SHOW_PUBLIC):
+            status = "CREATE_POSITION_FOR_VISIBILITY_CHANGE-MISSING_REQUIRED_VARIABLE"
+            success = False
+            results = {
+                'success':              success,
+                'status':               status,
+                'position_we_vote_id':  position_we_vote_id,
+                'position':             position_on_stage,
+                'position_found':       position_found,
+                'is_public_position':   is_public_position
+            }
+            return results
+
+        try:
+            # Create new
+            if candidate_we_vote_id:
+                candidate_campaign_manager = CandidateCampaignManager()
+                candidate_campaign_id = \
+                    candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
+            else:
+                candidate_campaign_id = None
+
+            if measure_we_vote_id:
+                contest_measure_manager = ContestMeasureManager()
+                contest_measure_id = \
+                    contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
+            else:
+                contest_measure_id = None
+
+            if office_we_vote_id:
+                contest_office_manager = ContestOfficeManager()
+                contest_office_id = \
+                    contest_office_manager.fetch_contest_office_id_from_we_vote_id(office_we_vote_id)
+            else:
+                contest_office_id = 0
+                office_we_vote_id = None
+
+            # In order to show a position publicly we need to tie the position to either organization_we_vote_id,
+            # public_figure_we_vote_id or candidate_we_vote_id. For now (2016-8-17) we assume organization
+            voter_manager = VoterManager()
+            results = voter_manager.retrieve_voter_by_id(voter_id)
+            organization_id = 0
+            organization_we_vote_id = ""
+            if results['voter_found']:
+                voter = results['voter']
+                organization_we_vote_id = voter.linked_organization_we_vote_id
+                if positive_value_exists(organization_we_vote_id):
+                    # Look up the organization_id
+                    organization_manager = OrganizationManager()
+                    organization_id = organization_manager.fetch_organization_id(
+                        voter.linked_organization_we_vote_id)
+
+            position_on_stage = position_on_stage(
+                voter_id=voter_id,
+                candidate_campaign_id=candidate_campaign_id,
+                candidate_campaign_we_vote_id=candidate_we_vote_id,
+                contest_measure_id=contest_measure_id,
+                contest_measure_we_vote_id=measure_we_vote_id,
+                contest_office_id=contest_office_id,
+                contest_office_we_vote_id=office_we_vote_id,
+                organization_id=organization_id,
+                organization_we_vote_id=organization_we_vote_id,
+            )
+
+            position_on_stage.save()
+            position_we_vote_id = position_on_stage.we_vote_id
+            position_found = True
+            success = True
+            status = 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-NEW_POSITION_SAVED'
+        except Exception as e:
+            success = False
+            status = 'CREATE_POSITION_FOR_VISIBILITY_CHANGE-NEW_POSITION_COULD_NOT_BE_SAVED'
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'position_we_vote_id':  position_we_vote_id,
+            'position':             position_on_stage,
+            'position_found':       position_found,
+            'is_public_position':   is_public_position
+        }
+        return results
+
     def retrieve_organization_candidate_campaign_position(self, organization_id, candidate_campaign_id,
                                                           google_civic_election_id=False):
         """

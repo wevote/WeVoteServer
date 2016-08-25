@@ -1600,11 +1600,29 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
     success = False
     position_entered_manager = PositionEnteredManager()
     if positive_value_exists(candidate_we_vote_id):
-        candidate_campaign_we_vote_id = candidate_we_vote_id
         results = position_entered_manager.retrieve_voter_candidate_campaign_position_with_we_vote_id(
-            voter_id, candidate_campaign_we_vote_id)
+            voter_id, candidate_we_vote_id)
+    elif positive_value_exists(measure_we_vote_id):
+        results = position_entered_manager.retrieve_voter_contest_measure_position_with_we_vote_id(
+            voter_id, measure_we_vote_id)
+    elif positive_value_exists(office_we_vote_id):
+        results = position_entered_manager.retrieve_voter_contest_office_position_with_we_vote_id(
+            voter_id, office_we_vote_id)
 
-    if results['position_found']:
+    if not results['position_found']:
+        # If here, an existing position does not exist and a new position needs to be created
+        results = position_entered_manager.create_position_for_visibility_change(
+            voter_id, office_we_vote_id, candidate_we_vote_id, measure_we_vote_id, visibility_setting)
+        if results['position_found']:
+            is_public_position = results['is_public_position']
+            position = results['position']
+            status = results['status']
+            success = results['success']
+        else:
+            status = "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND_AND_NOT_CREATED"
+            success = False
+
+    elif results['position_found']:
         is_public_position = results['is_public_position']
         position = results['position']
 
@@ -1633,18 +1651,20 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
                 status = "VOTER_POSITION_VISIBILITY-ALREADY_FRIENDS_ONLY_POSITION"
                 success = True
     else:
-        status = "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND"
+        status = "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND-COULD_NOT_BE_CREATED"
+        # If here, an existing position could not be created
+        position_entered_manager.create_position_for_visibility_change()
 
     if success:
-        if positive_value_exists(position.candidate_campaign_we_vote_id):
+        if positive_value_exists(candidate_we_vote_id):
             kind_of_ballot_item = CANDIDATE
             ballot_item_id = position.candidate_campaign_id
             ballot_item_we_vote_id = position.candidate_campaign_we_vote_id
-        elif positive_value_exists(position.contest_measure_we_vote_id):
+        elif positive_value_exists(measure_we_vote_id):
             kind_of_ballot_item = MEASURE
             ballot_item_id = position.contest_measure_id
-            ballot_item_we_vote_id = position.contest_measure_we_vote_id
-        elif positive_value_exists(position.contest_office_we_vote_id):
+            ballot_item_we_vote_id = measure_we_vote_id
+        elif positive_value_exists(office_we_vote_id):
             kind_of_ballot_item = OFFICE
             ballot_item_id = position.contest_office_id
             ballot_item_we_vote_id = position.contest_office_we_vote_id
@@ -1666,14 +1686,31 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         }
         return json_data
     else:
+        if positive_value_exists(candidate_we_vote_id):
+            kind_of_ballot_item = CANDIDATE
+            ballot_item_id = 0
+            ballot_item_we_vote_id = candidate_we_vote_id
+        elif positive_value_exists(measure_we_vote_id):
+            kind_of_ballot_item = MEASURE
+            ballot_item_id = 0
+            ballot_item_we_vote_id = measure_we_vote_id
+        elif positive_value_exists(office_we_vote_id):
+            kind_of_ballot_item = OFFICE
+            ballot_item_id = 0
+            ballot_item_we_vote_id = office_we_vote_id
+        else:
+            kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
+            ballot_item_id = None
+            ballot_item_we_vote_id = None
+
         json_data = {
             'success':                  success,
             'status':                   status,
             'voter_device_id':          voter_device_id,
             'position_we_vote_id':      '',
-            'ballot_item_id':           0,
-            'ballot_item_we_vote_id':   "",
-            'kind_of_ballot_item':      "",
+            'ballot_item_id':           ballot_item_id,
+            'ballot_item_we_vote_id':   ballot_item_we_vote_id,
+            'kind_of_ballot_item':      kind_of_ballot_item,
             'visibility_setting':       visibility_setting,
             'is_public_position':       is_public_position,
         }

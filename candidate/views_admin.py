@@ -20,6 +20,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception, print_to_log
 from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
+from politician.models import PoliticianManager
 from position.models import PositionEntered, PositionListManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -358,6 +359,21 @@ def candidate_edit_process_view(request):
         except Exception as e:
             pass
 
+    # If linked to a Politician, make sure that both politician_id and politician_we_vote_id exist
+    if candidate_on_stage_found:
+        if positive_value_exists(candidate_on_stage.politician_we_vote_id) \
+                and not positive_value_exists(candidate_on_stage.politician_id):
+            try:
+                politician_manager = PoliticianManager()
+                results = politician_manager.retrieve_politician(0, candidate_on_stage.politician_we_vote_id)
+                if results['politician_found']:
+                    politician = results['politician']
+                    candidate_on_stage.politician_id = politician.id
+                    candidate_on_stage.save()
+                pass
+            except Exception as e:
+                messages.add_message(request, messages.ERROR, 'Could not save candidate.')
+
     contest_office_we_vote_id = ''
     if positive_value_exists(contest_office_id):
         contest_office_manager = ContestOfficeManager()
@@ -544,7 +560,6 @@ def candidate_edit_process_view(request):
                                                 url_variables)
 
     except Exception as e:
-        handle_record_not_saved_exception(e, logger=logger)
         messages.add_message(request, messages.ERROR, 'Could not save candidate.')
         return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
 
