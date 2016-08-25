@@ -358,7 +358,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             if positive_value_exists(ballot_item_we_vote_id):
-                if kind_of_ballot_item == CANDIDATE:
+                if kind_of_ballot_item == CANDIDATE or kind_of_ballot_item == MEASURE:
                     organization_manager = OrganizationManager()
                     organization_id = organization_manager.fetch_organization_id(
                         voter_guide.organization_we_vote_id)

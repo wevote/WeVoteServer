@@ -42,6 +42,9 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # This page does not need to be protected.
 class OrganizationsSyncOutView(APIView):
+    def __str__(self):
+        return str("")
+
     def get(self, request, format=None):
         state_served_code = request.GET.get('state_served_code', '')
 

@@ -961,6 +961,9 @@ class Organization(models.Model):
     organization_type = models.CharField(
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
+    def __unicode__(self):
+        return str(self.organization_name)
+
     def organization_photo_url(self):
         if positive_value_exists(self.organization_image):
             return self.organization_image
@@ -981,9 +984,6 @@ class Organization(models.Model):
             return self.twitter_profile_image_url_https.replace("_normal", "")
         else:
             return ''
-
-    def __unicode__(self):
-        return self.organization_name
 
     class Meta:
         ordering = ('organization_name',)
