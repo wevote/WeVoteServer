@@ -46,13 +46,13 @@ class OrganizationsSyncOutView(APIView):
         return str("")
 
     # TODO DALE testing allow_null
-    def get(self, request, format=None, allow_null=True):
+    def get(self, request, format=None):
         state_served_code = request.GET.get('state_served_code', '')
 
         organization_list = Organization.objects.all()
         if positive_value_exists(state_served_code):
             organization_list = organization_list.filter(state_served_code__iexact=state_served_code)
-        serializer = OrganizationSerializer(organization_list, many=True)
+        serializer = OrganizationSerializer(organization_list, many=True, allow_null=True)
         return Response(serializer.data)
 
 
