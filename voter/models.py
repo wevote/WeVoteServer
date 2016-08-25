@@ -600,7 +600,7 @@ class Voter(AbstractBaseUser):
 
     def __str__(self):              # __unicode__ on Python 2
         # return self.get_full_name(self)
-        return self.email
+        return str(self.email)
 
     def has_perm(self, perm, obj=None):
         """
