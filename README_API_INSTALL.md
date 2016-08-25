@@ -200,6 +200,35 @@ Start up the webserver:
 Find admin tools here:
 
     http://localhost:8000/admin
+    
+Now you will need to authenticate as an admin. For now, this will require that you log in with your Twitter account.
+
+    Click "Sign in with Twitter" and use your Twitter credentials to Sign-In. 
+    
+After you have signed in, you will see an error message in red that states "You must sign in with account that has
+Verified Volunteer rights to see that page." Just below the error message, there will be a field "id" with a number next
+to it, note the id number.
+
+Open PG Admin III and navigate to:
+
+    Server Groups > Servers > WeVoteServerDB 
+
+Double click on WeVoteServerDB (there may be a red x thru it). It will prompt you for a password; leave it blank and click
+OK. You may see an additional warning screen about saving passwords, if so, click ok. Once you are connected, navigate to:
+
+    WeVoteServerDB > Schemas > public > Tables > voter_voter
+
+Then, right click, and in the menu that appears, select:
+
+    View Data > View Top 100 rows
+
+In the new window that opens, scroll down and find the id number, noted above. Scroll to the right to locate the box
+"is_adminboolean" click on it once, and a box will appear, click it and change it to TRUE. Then, go back to your browser, 
+and click on:
+
+    Back to Admin Home
+    
+Now, you can access the admin tools. 
 
 Find documentation for all of the APIs here:
 
