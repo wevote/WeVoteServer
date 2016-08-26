@@ -927,10 +927,11 @@ class VoterGuideListManager(models.Model):
         voter_guide_list_filtered = []
         for one_voter_guide in voter_guide_list:
             if one_voter_guide.organization_we_vote_id in organization_with_multiple_voter_guides:
-                first_four_digits = convert_to_int(one_voter_guide.vote_smart_time_span[:4])
-                if newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id] == first_four_digits:
-                    # If this voter guide is the newest from among the organization's voter guides, include in results
-                    voter_guide_list_filtered.append(one_voter_guide)
+                if positive_value_exists(one_voter_guide.vote_smart_time_span):
+                    first_four_digits = convert_to_int(one_voter_guide.vote_smart_time_span[:4])
+                    if newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id] == first_four_digits:
+                        # If this voter guide is the newest from among the org's voter guides, include in results
+                        voter_guide_list_filtered.append(one_voter_guide)
             else:
                 voter_guide_list_filtered.append(one_voter_guide)
 

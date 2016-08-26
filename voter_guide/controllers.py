@@ -358,11 +358,20 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             if positive_value_exists(ballot_item_we_vote_id):
-                if kind_of_ballot_item == CANDIDATE or kind_of_ballot_item == MEASURE:
+                if kind_of_ballot_item == CANDIDATE:
                     organization_manager = OrganizationManager()
                     organization_id = organization_manager.fetch_organization_id(
                         voter_guide.organization_we_vote_id)
                     results = position_manager.retrieve_organization_candidate_campaign_position_with_we_vote_id(
+                        organization_id, ballot_item_we_vote_id)
+                    if results['position_found']:
+                        position = results['position']
+                        position_found = True
+                elif kind_of_ballot_item == MEASURE:
+                    organization_manager = OrganizationManager()
+                    organization_id = organization_manager.fetch_organization_id(
+                        voter_guide.organization_we_vote_id)
+                    results = position_manager.retrieve_organization_contest_measure_position_with_we_vote_id(
                         organization_id, ballot_item_we_vote_id)
                     if results['position_found']:
                         position = results['position']
@@ -376,7 +385,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                     one_voter_guide['is_negative_rating'] = position.is_negative_rating()
                     one_voter_guide['is_oppose_or_negative_rating'] = position.is_oppose_or_negative_rating()
                     one_voter_guide['is_information_only'] = position.is_information_only()
-                    one_voter_guide['candidate_display_name'] = position.ballot_item_display_name
+                    one_voter_guide['ballot_item_display_name'] = position.ballot_item_display_name
                     one_voter_guide['speaker_display_name'] = position.speaker_display_name
                     one_voter_guide['statement_text'] = position.statement_text
                     one_voter_guide['more_info_url'] = position.more_info_url
