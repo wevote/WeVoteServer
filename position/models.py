@@ -1638,9 +1638,11 @@ class PositionEnteredManager(models.Model):
             positive_value_exists(candidate_we_vote_id) or \
             positive_value_exists(measure_we_vote_id)
         if visibility_setting in FRIENDS_ONLY:
+            position_on_stage_starter = PositionForFriends
             position_on_stage = PositionForFriends()
             is_public_position = False
         else:
+            position_on_stage_starter = PositionEntered
             position_on_stage = PositionEntered()
             is_public_position = True
 
@@ -1698,7 +1700,7 @@ class PositionEnteredManager(models.Model):
                     organization_id = organization_manager.fetch_organization_id(
                         voter.linked_organization_we_vote_id)
 
-            position_on_stage = position_on_stage(
+            position_on_stage = position_on_stage_starter(
                 voter_id=voter_id,
                 candidate_campaign_id=candidate_campaign_id,
                 candidate_campaign_we_vote_id=candidate_we_vote_id,

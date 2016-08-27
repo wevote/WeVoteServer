@@ -363,7 +363,7 @@ class BallotItemListManager(models.Model):
         ballot_item_list = []
         ballot_item_list_found = False
         try:
-            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order')
+            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_list = ballot_item_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
 
@@ -394,7 +394,7 @@ class BallotItemListManager(models.Model):
         ballot_item_list = []
         ballot_item_list_found = False
         try:
-            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order')
+            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(voter_id=voter_id)
             if positive_value_exists(google_civic_election_id):
                 ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
@@ -430,7 +430,7 @@ class BallotItemListManager(models.Model):
         ballot_item_list = []
         ballot_item_list_found = False
         try:
-            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order')
+            ballot_item_queryset = BallotItem.objects.order_by('local_ballot_order', 'google_ballot_placement')
             ballot_item_queryset = ballot_item_queryset.filter(polling_location_we_vote_id=polling_location_we_vote_id)
             if positive_value_exists(google_civic_election_id):
                 ballot_item_queryset = ballot_item_queryset.filter(google_civic_election_id=google_civic_election_id)
