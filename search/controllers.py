@@ -70,12 +70,13 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                                           timeout=2, max_retries=1, retry_on_timeout=True)
 
     # query = {"query": {"match": {"candidate_name": text_from_search_field}}}
+    # 2016-08-27 No longer searching politician table -- candidate only
     query = {"query": {"multi_match": {"type": "phrase_prefix",
                                        "query": text_from_search_field,
                                        "fields": ["candidate_name",
                                                   "candidate_twitter_handle", "twitter_name",
                                                   "measure_subtitle", "measure_text", "measure_title",
-                                                  "office_name", "first_name", "middle_name", "last_name",
+                                                  "office_name",
                                                   "party", "organization_name", "organization_twitter_handle",
                                                   "twitter_description"]}}}
 
@@ -133,10 +134,7 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                 search_results.append(one_search_result)
                 search_count += 1
             elif one_search_result_type == "measure":
-                if positive_value_exists(one_search_result_dict['measure_twitter_handle']):
-                    link_internal = "/" + one_search_result_dict['measure_twitter_handle']
-                else:
-                    link_internal = "/measure/" + one_search_result_dict['we_vote_id']
+                link_internal = "/measure/" + one_search_result_dict['we_vote_id']
 
                 one_search_result = {
                     'result_title':             one_search_result_dict['measure_title'],
@@ -148,7 +146,7 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                     'kind_of_owner':            "MEASURE",
                     'google_civic_election_id': one_search_result_dict['google_civic_election_id'],
                     'state_code':               one_search_result_dict['state_code'],
-                    'twitter_handle':           one_search_result_dict['measure_twitter_handle'],
+                    'twitter_handle':           "",
                     'we_vote_id':               one_search_result_dict['we_vote_id'],
                     'local_id':                 one_search_result_id,
                 }
@@ -178,29 +176,8 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                 search_results.append(one_search_result)
                 search_count += 1
             elif one_search_result_type == "politician":
-                # If we are here, then we should skip out. We can't display politicians w/o twitter_handle yet
+                # If we are here, then we should skip out. We aren't displaying politicians
                 break
-                # if positive_value_exists(one_search_result_dict['politician_twitter_handle']):
-                #     link_internal = "/" + one_search_result_dict['politician_twitter_handle']
-                # else:
-                #     link_internal = "/candidate/" + one_search_result_dict['we_vote_id']
-                #
-                # one_search_result = {
-                #     'result_title': one_search_result_dict['name'],
-                #     'result_image':             "",
-                #     'result_subtitle':          "",
-                #     'result_summary':           "",
-                #     'result_score':             one_search_result_score,
-                #     'link_internal':            link_internal,
-                #     'kind_of_owner':            "POLITICIAN",
-                #     'google_civic_election_id': 0,
-                #     'state_code':               one_search_result_dict['state_served_code'],
-                #     'twitter_handle':           one_search_result_dict['politician_twitter_handle,'],
-                #     'we_vote_id':               one_search_result_dict['we_vote_id'],
-                #     'local_id':                 one_search_result_id,
-                # }
-                # search_results.append(one_search_result)
-                # search_count += 1
         status = "SEARCH_ALL_COMPLETE"
         success = True
 
