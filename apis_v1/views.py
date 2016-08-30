@@ -38,7 +38,7 @@ from voter.controllers import voter_retrieve_for_api, voter_address_retrieve_for
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
-from wevote_functions.functions import generate_voter_device_id, get_ip_from_headers, get_voter_device_id, \
+from wevote_functions.functions import generate_voter_device_id, get_voter_device_id, \
     get_google_civic_election_id_from_cookie, set_google_civic_election_id_cookie, positive_value_exists, convert_to_int
 import wevote_functions.admin
 
@@ -518,10 +518,148 @@ def voter_address_retrieve_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We look in the cookies for voter_device_id
-    return voter_address_retrieve_for_api(voter_device_id)
+    guess_if_no_address_saved = request.GET.get('guess_if_no_address_saved', True)
+    if guess_if_no_address_saved == 'false':
+        guess_if_no_address_saved = False
+    elif guess_if_no_address_saved == 'False':
+        guess_if_no_address_saved = False
+    elif guess_if_no_address_saved == '0':
+        guess_if_no_address_saved = False
+    status = ''
+
+    voter_address_retrieve_results = voter_address_retrieve_for_api(voter_device_id)
+
+    if voter_address_retrieve_results['address_found']:
+        json_data = {
+            'voter_device_id': voter_address_retrieve_results['voter_device_id'],
+            'address_type': voter_address_retrieve_results['address_type'],
+            'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
+            'latitude': voter_address_retrieve_results['latitude'],
+            'longitude': voter_address_retrieve_results['longitude'],
+            'normalized_line1': voter_address_retrieve_results['normalized_line1'],
+            'normalized_line2': voter_address_retrieve_results['normalized_line2'],
+            'normalized_city': voter_address_retrieve_results['normalized_city'],
+            'normalized_state': voter_address_retrieve_results['normalized_state'],
+            'normalized_zip': voter_address_retrieve_results['normalized_zip'],
+            'success': voter_address_retrieve_results['success'],
+            'status': voter_address_retrieve_results['status'],
+            'address_found': voter_address_retrieve_results['address_found'],
+            'guess_if_no_address_saved': guess_if_no_address_saved,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    status += voter_address_retrieve_results['status'] + ", "
+
+    # If we are here, then an address wasn't found, and we either want to return that info, or take a guess
+    #  at the voter's location by looking it up by IP address
+    if not positive_value_exists(guess_if_no_address_saved):
+        # Do not guess at an address
+        status += 'DO_NOT_GUESS_IF_NO_ADDRESS_SAVED'
+        json_data = {
+            'voter_device_id': voter_address_retrieve_results['voter_device_id'],
+            'address_type': voter_address_retrieve_results['address_type'],
+            'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
+            'latitude': voter_address_retrieve_results['latitude'],
+            'longitude': voter_address_retrieve_results['longitude'],
+            'normalized_line1': voter_address_retrieve_results['normalized_line1'],
+            'normalized_line2': voter_address_retrieve_results['normalized_line2'],
+            'normalized_city': voter_address_retrieve_results['normalized_city'],
+            'normalized_state': voter_address_retrieve_results['normalized_state'],
+            'normalized_zip': voter_address_retrieve_results['normalized_zip'],
+            'success': voter_address_retrieve_results['success'],
+            'status': voter_address_retrieve_results['status'],
+            'address_found': voter_address_retrieve_results['address_found'],
+            'guess_if_no_address_saved': guess_if_no_address_saved,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    else:
+        status += 'GUESS_IF_NO_ADDRESS_SAVED' + ", "
+        voter_location_results = voter_location_retrieve_from_ip_for_api(request)
+
+        if voter_location_results['voter_location_found']:
+            status += 'VOTER_ADDRESS_RETRIEVE-VOTER_LOCATION_FOUND_FROM_IP '
+            # Since a new location was found, we need to save the address and then reach out to Google Civic
+            address_variable_exists = True
+            text_for_map_search = voter_location_results['voter_location']
+            status += '*** ' + text_for_map_search + ' ***, '
+            voter_address_save_results = voter_address_save_for_api(voter_device_id, text_for_map_search,
+                                                                    address_variable_exists)
+            voter_address_saved = True if voter_address_save_results['success'] else False
+
+            status += voter_address_save_results['status'] + ", "
+
+            if voter_address_saved:
+                # If here, we saved a valid address and need to refresh ballot data from Google
+                google_civic_election_id = get_google_civic_election_id_from_cookie(request)
+
+                if positive_value_exists(google_civic_election_id):
+                    google_civic_election_id = convert_to_int(google_civic_election_id)
+                    if google_civic_election_id == 2000:
+                        use_test_election = True
+                    else:
+                        use_test_election = False
+                else:
+                    use_test_election = False
+
+                results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,
+                                                                                use_test_election)
+
+                status += results['status'] + ", "
+                google_civic_election_id = results['google_civic_election_id']
+
+            voter_address_retrieve_results = voter_address_retrieve_for_api(voter_device_id)
+
+            status += voter_address_retrieve_results['status']
+
+            json_data = {
+                'voter_device_id': voter_device_id,
+                'address_type': voter_address_retrieve_results['address_type'],
+                'text_for_map_search': voter_address_retrieve_results['text_for_map_search'],
+                'latitude': voter_address_retrieve_results['latitude'],
+                'longitude': voter_address_retrieve_results['longitude'],
+                'normalized_line1': voter_address_retrieve_results['normalized_line1'],
+                'normalized_line2': voter_address_retrieve_results['normalized_line2'],
+                'normalized_city': voter_address_retrieve_results['normalized_city'],
+                'normalized_state': voter_address_retrieve_results['normalized_state'],
+                'normalized_zip': voter_address_retrieve_results['normalized_zip'],
+                'success': voter_address_retrieve_results['success'],
+                'status': status,
+                'address_found': voter_address_retrieve_results['address_found'],
+                'guess_if_no_address_saved': guess_if_no_address_saved,
+            }
+
+            response = HttpResponse(json.dumps(json_data), content_type='application/json')
+
+            if voter_address_saved:
+                # Reset google_civic_election_id to the new election whenever we save a new address
+                set_google_civic_election_id_cookie(request, response, google_civic_election_id)
+
+            return response
+        else:
+            status += 'VOTER_ADDRESS_RETRIEVE-VOTER_LOCATION_NOT_FOUND_FROM_IP: '
+            status += voter_location_results['status']
+
+            json_data = {
+                'voter_device_id': voter_device_id,
+                'address_type': '',
+                'text_for_map_search': '',
+                'latitude': '',
+                'longitude': '',
+                'normalized_line1': '',
+                'normalized_line2': '',
+                'normalized_city': '',
+                'normalized_state': '',
+                'normalized_zip': '',
+                'success': False,
+                'status': status,
+                'address_found': False,
+                'guess_if_no_address_saved': guess_if_no_address_saved,
+            }
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_address_save_view(request):
+def voter_address_save_view(request):  # voterAddressSave
     """
     Save or update an address for this voter
     :param request:
@@ -559,9 +697,9 @@ def voter_address_save_view(request):
 
         return response
 
-    status += results['status'] + ", "
-    # If here, we saved a valid address
+    status += results['status'] + ' *** ' + text_for_map_search + ' ***, '
 
+    # If here, we saved an address
     google_civic_election_id = get_google_civic_election_id_from_cookie(request)
 
     if positive_value_exists(google_civic_election_id):
@@ -732,25 +870,19 @@ def voter_location_retrieve_from_ip_view(request):  # GeoIP geo location
     :param request:
     :return:
     """
-    x_forwarded_for = request.META.get('X-Forwarded-For')
-    http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    voter_location_results = voter_location_retrieve_from_ip_for_api(request)
 
-    ip_address = request.GET.get('ip_address') or get_ip_from_headers(request)
-    if ip_address is None:
-        # return HttpResponse('missing ip_address request parameter', status=400)
-        response_content = {
-            'success': False,
-            'status': 'missing ip_address request parameter',
-            'voter_location_found': False,
-            'voter_location': '',
-            'ip_address': ip_address,
-            'x_forwarded_for': x_forwarded_for,
-            'http_x_forwarded_for': http_x_forwarded_for,
-        }
+    json_data = {
+        'success': voter_location_results['success'],
+        'status': voter_location_results['success'],
+        'voter_location_found': voter_location_results['success'],
+        'voter_location': voter_location_results['success'],
+        'ip_address': voter_location_results['success'],
+        'x_forwarded_for': voter_location_results['success'],
+        'http_x_forwarded_for': voter_location_results['success'],
+    }
 
-        return HttpResponse(json.dumps(response_content), content_type='application/json')
-
-    return voter_location_retrieve_from_ip_for_api(request, ip_address=ip_address)
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_photo_save_view(request):
@@ -888,7 +1020,7 @@ def position_like_count_view(request):
                                        limit_to_voters_network=limit_to_voters_network)
 
 
-def voter_position_comment_save_view(request):
+def voter_position_comment_save_view(request):  # voterPositionCommentSave
     """
     Save a single position
     :param request:

@@ -3,8 +3,6 @@
 # -*- coding: UTF-8 -*-
 
 from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, VoterManager
-from django.http import HttpResponse
-import json
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
 
@@ -16,16 +14,23 @@ logger = wevote_functions.admin.get_logger(__name__)
 def voter_address_retrieve_for_api(voter_device_id):
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
-        return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+        voter_address_retrieve_results = {
+            'status': results['status'],
+            'success': False,
+            'address_found': False,
+            'voter_device_id': voter_device_id,
+        }
+        return voter_address_retrieve_results
 
     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
     if not positive_value_exists(voter_id):
-        json_data = {
+        voter_address_retrieve_results = {
             'status': "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
             'success': False,
+            'address_found': False,
             'voter_device_id': voter_device_id,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return voter_address_retrieve_results
 
     # ##################
     # Temp code to test authentication
@@ -38,7 +43,8 @@ def voter_address_retrieve_for_api(voter_device_id):
 
     if results['voter_address_found']:
         voter_address = results['voter_address']
-        json_data = {
+        status = "VOTER_ADDRESS_RETRIEVE-ADDRESS_FOUND"
+        voter_address_retrieve_results = {
             'voter_device_id': voter_device_id,
             'address_type': voter_address.address_type if voter_address.address_type else '',
             'text_for_map_search': voter_address.text_for_map_search if voter_address.text_for_map_search else '',
@@ -49,16 +55,28 @@ def voter_address_retrieve_for_api(voter_device_id):
             'normalized_city': voter_address.normalized_city if voter_address.normalized_city else '',
             'normalized_state': voter_address.normalized_state if voter_address.normalized_state else '',
             'normalized_zip': voter_address.normalized_zip if voter_address.normalized_zip else '',
+            'address_found': True,
             'success': True,
+            'status': status,
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return voter_address_retrieve_results
     else:
-        json_data = {
-            'status': "VOTER_ADDRESS_NOT_RETRIEVED",
+        voter_address_retrieve_results = {
+            'status': "VOTER_ADDRESS_NOT_FOUND",
             'success': False,
+            'address_found': False,
             'voter_device_id': voter_device_id,
+            'address_type': '',
+            'text_for_map_search': '',
+            'latitude': '',
+            'longitude': '',
+            'normalized_line1': '',
+            'normalized_line2': '',
+            'normalized_city': '',
+            'normalized_state': '',
+            'normalized_zip': '',
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return voter_address_retrieve_results
 
 
 def voter_address_save_for_api(voter_device_id, address_raw_text, address_variable_exists):

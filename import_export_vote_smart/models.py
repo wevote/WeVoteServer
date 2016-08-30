@@ -773,8 +773,10 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
                 sigId=vote_smart_special_interest_group_id)
             vote_smart_organization_found = True
         except VoteSmartSpecialInterestGroup.MultipleObjectsReturned as e:
+            vote_smart_organization = VoteSmartSpecialInterestGroup()
             vote_smart_organization_found = False
         except VoteSmartSpecialInterestGroup.DoesNotExist as e:
+            vote_smart_organization = VoteSmartSpecialInterestGroup()
             # An organization matching this Vote Smart ID wasn't found
             vote_smart_organization_found = False
 
@@ -793,6 +795,7 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
         organization_we_vote_id = None
         we_vote_organization_found = False
         we_vote_organization_created = False
+        we_vote_organization_updated = False
         results = we_vote_organization_manager.retrieve_organization(organization_id, organization_we_vote_id,
                                                                      vote_smart_special_interest_group_id)
 
@@ -801,7 +804,35 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
             status = "NOT UPDATING RIGHT NOW"
             we_vote_organization_found = True
             we_vote_organization = results['organization']
-            # Update existing organization entry
+            # Update existing organization entry if email or website is missing
+            try:
+                organization_email_updated = False
+                organization_website_updated = False
+                if not positive_value_exists(we_vote_organization.organization_email) and \
+                        positive_value_exists(vote_smart_organization.email):
+                    we_vote_organization.organization_email = vote_smart_organization.email
+                    organization_email_updated = True
+                if not positive_value_exists(we_vote_organization.organization_website) and \
+                        positive_value_exists(vote_smart_organization.url):
+                    we_vote_organization.organization_website = vote_smart_organization.url
+                    organization_website_updated = True
+
+                if positive_value_exists(organization_email_updated) or \
+                        positive_value_exists(organization_website_updated):
+                    we_vote_organization.save()
+                    success = True
+                    status = "UPDATE_ORGANIZATION_FROM_VOTE_SMART_SUCCESS"
+                    we_vote_organization_updated = True
+                else:
+                    success = True
+                    status = "UPDATE_ORGANIZATION_FROM_VOTE_SMART_NOT_REQUIRED"
+                    we_vote_organization_updated = False
+            except Exception as error_instance:
+                error_message = error_instance.args
+                status = "UPDATE_ORGANIZATION_FROM_VOTE_SMART_ID_FAILED: " \
+                         "{error_message}".format(error_message=error_message)
+                success = False
+                we_vote_organization = Organization()
         else:
             # Create new organization, or find existing org via other fields
             try:
@@ -846,6 +877,7 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
             'status':               status,
             'organization_found':   we_vote_organization_found,
             'organization_created': we_vote_organization_created,
+            'organization_updated': we_vote_organization_updated,
             'organization':         we_vote_organization,
         }
         return results

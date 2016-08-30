@@ -594,6 +594,7 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
 def transfer_vote_smart_special_interest_groups_to_we_vote_organizations():
     organizations_errors = ''
     number_of_we_vote_organizations_created = 0
+    number_of_we_vote_organizations_updated = 0
 
     special_interest_group_query = VoteSmartSpecialInterestGroup.objects.order_by('sigId')
     special_interest_group_list = special_interest_group_query
@@ -602,7 +603,8 @@ def transfer_vote_smart_special_interest_groups_to_we_vote_organizations():
 
     # process_count = 0
     for special_interest_group in special_interest_group_list:
-        # NOTE As of 2016-01-24 We are not updating -- only creating
+        # NOTE As of 2016-02-13 We are creating new org entries with all data, and updating email and url
+        #  only if the fields are empty updating
         update_results = special_interest_group_manager.update_or_create_we_vote_organization(
             special_interest_group.sigId)
 
@@ -613,15 +615,18 @@ def transfer_vote_smart_special_interest_groups_to_we_vote_organizations():
 
         if update_results['organization_created']:
             number_of_we_vote_organizations_created += 1
+        if update_results['organization_updated']:
+            number_of_we_vote_organizations_updated += 1
         # process_count += 1
         # if process_count > 50:  # TODO DALE Temp limit
         #     break
 
     success = True
-    status = "SIG_TRANSFER_PROCESS_COMPLETED, for {number_of_sigs} orgs. {organizations_errors}".format(
-        number_of_sigs=number_of_we_vote_organizations_created,
-        organizations_errors=organizations_errors
-    )
+    status = "SIG_TRANSFER_PROCESS_COMPLETED, {number_created} orgs created, " \
+             " {number_updated} orgs updated. {organizations_errors}" \
+             "".format(number_created=number_of_we_vote_organizations_created,
+                       number_updated=number_of_we_vote_organizations_updated,
+                       organizations_errors=organizations_errors)
 
     results = {
         'status':   status,

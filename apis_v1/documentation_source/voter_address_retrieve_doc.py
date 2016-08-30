@@ -22,11 +22,13 @@ def voter_address_retrieve_doc_template_values(url_root):
     ]
 
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
+        {
+            'name':         'guess_if_no_address_saved',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Default = True. If True and the address is blank, make a guess at the voter\'s address '
+                            'based on IP address, save it, then reach out to Google Civic to get the fresh ballot, and'
+                            'finally, return the address.',
+        },
     ]
 
     potential_status_codes_list = [

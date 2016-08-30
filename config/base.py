@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 import json
-##import logging
+# import logging
 import os
 from django.core.exceptions import ImproperlyConfigured
 # Consider switching to the way that Two Scoops of Django 1.8 suggests file path handling, section 5.6
@@ -73,7 +73,7 @@ INSTALLED_APPS = (
 
     # third party
     'bootstrap3',
-    'corsheaders', # cross origin requests
+    'corsheaders',  # cross origin requests
     'social.apps.django_app.default',
 
     # project specific
@@ -244,8 +244,13 @@ BOOTSTRAP3 = {
     },
 }
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True  # CORS_ORIGIN_ALLOW_ALL: if True, the whitelist will not be used & all origins accepted
 CORS_ALLOW_CREDENTIALS = True
+
+# CORS_ORIGIN_WHITELIST = (
+#     'google.com',
+#     'hostname.example.com'
+# )
 
 SOCIAL_AUTH_FACEBOOK_KEY = get_environment_variable("SOCIAL_AUTH_FACEBOOK_KEY")
 SOCIAL_AUTH_FACEBOOK_SECRET = get_environment_variable("SOCIAL_AUTH_FACEBOOK_SECRET")
@@ -328,6 +333,6 @@ LOG_FILE_LEVEL = lookup_logging_level(get_environment_variable("LOG_FILE_LEVEL")
 GEOIP_PATH = os.path.join(BASE_DIR, 'geoip', 'import_data')
 GEOIP_COUNTRY = 'GeoIP.dat'
 if os.path.exists(os.path.join(GEOIP_PATH, 'GeoIPCity.dat')):
-    GEOIP_CITY = 'GeoIPCity.dat' # use the paid db
+    GEOIP_CITY = 'GeoIPCity.dat'  # use the paid db
 else:
-    GEOIP_CITY = 'GeoLiteCity.dat' # use the free db
+    GEOIP_CITY = 'GeoLiteCity.dat'  # use the free db

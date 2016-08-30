@@ -580,6 +580,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'statement_html':           '',
             'more_info_url':            '',
             'last_updated':             '',
+            'voter_device_id':          voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -631,6 +632,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'statement_html':           position.statement_html,
             'more_info_url':            position.more_info_url,
             'last_updated':             '',
+            'voter_device_id':          voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
@@ -651,6 +653,7 @@ def voter_position_retrieve_for_api(voter_device_id, office_we_vote_id, candidat
             'statement_html':           '',
             'more_info_url':            '',
             'last_updated':             '',
+            'voter_device_id':          voter_device_id,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -685,7 +688,7 @@ def voter_position_comment_save_for_api(
             'statement_html':           statement_html,
             'last_updated':             '',
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     voter_manager = VoterManager()
     voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
@@ -709,7 +712,7 @@ def voter_position_comment_save_for_api(
             'statement_html':           statement_html,
             'last_updated':             '',
         }
-        return HttpResponse(json.dumps(json_data), content_type='application/json')
+        return json_data
 
     voter = voter_results['voter']
     position_id = convert_to_int(position_id)
@@ -732,7 +735,7 @@ def voter_position_comment_save_for_api(
         positive_value_exists(measure_we_vote_id)
     )
     if not unique_identifier_found:
-        results = {
+        json_data = {
             'status':                   "POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING",
             'success':                  False,
             'voter_device_id':          voter_device_id,
@@ -750,9 +753,9 @@ def voter_position_comment_save_for_api(
             'statement_html':           statement_html,
             'last_updated':             '',
         }
-        return results
+        return json_data
     elif not existing_unique_identifier_found and not required_variables_for_new_entry:
-        results = {
+        json_data = {
             'status':                   "NEW_POSITION_REQUIRED_VARIABLES_MISSING",
             'success':                  False,
             'voter_device_id':          voter_device_id,
@@ -770,7 +773,7 @@ def voter_position_comment_save_for_api(
             'statement_html':           statement_html,
             'last_updated':             '',
         }
-        return results
+        return json_data
 
     position_manager = PositionEnteredManager()
     save_results = position_manager.update_or_create_position(
@@ -787,7 +790,7 @@ def voter_position_comment_save_for_api(
 
     if save_results['success']:
         position = save_results['position']
-        results = {
+        json_data = {
             'success':                  save_results['success'],
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
@@ -805,9 +808,9 @@ def voter_position_comment_save_for_api(
             'statement_html':           position.statement_html,
             'last_updated':             '',
         }
-        return results
+        return json_data
     else:
-        results = {
+        json_data = {
             'success':                  False,
             'status':                   save_results['status'],
             'voter_device_id':          voter_device_id,
@@ -825,4 +828,4 @@ def voter_position_comment_save_for_api(
             'statement_html':           statement_html,
             'last_updated':             '',
         }
-        return results
+        return json_data

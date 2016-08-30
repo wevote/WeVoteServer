@@ -1,18 +1,17 @@
 # geoip/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-import json
 
-from django.http import HttpResponse
 # requires an installation of the C library at https://github.com/maxmind/geoip-api-c
 from django.contrib.gis.geoip import GeoIP
 
 import wevote_functions.admin
+from wevote_functions.functions import get_ip_from_headers
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
-def voter_location_retrieve_from_ip_for_api(request, ip_address):
+def voter_location_retrieve_from_ip_for_api(request):
     """
     Used by the api
     :param ip_address:
@@ -20,6 +19,21 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address):
     """
     x_forwarded_for = request.META.get('X-Forwarded-For')
     http_x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+    ip_address = get_ip_from_headers(request)
+    if ip_address is None:
+        # return HttpResponse('missing ip_address request parameter', status=400)
+        response_content = {
+            'success': False,
+            'status': 'LOCATION_RETRIEVE_IP_ADDRESS_REQUEST_PARAMETER_MISSING',
+            'voter_location_found': False,
+            'voter_location': '',
+            'ip_address': ip_address,
+            'x_forwarded_for': x_forwarded_for,
+            'http_x_forwarded_for': http_x_forwarded_for,
+        }
+
+        return response_content
 
     g = GeoIP()
     location = g.city(ip_address)
@@ -46,4 +60,4 @@ def voter_location_retrieve_from_ip_for_api(request, ip_address):
             'http_x_forwarded_for': http_x_forwarded_for,
         }
 
-    return HttpResponse(json.dumps(response_content), content_type='application/json')
+    return response_content
