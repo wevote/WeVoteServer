@@ -11,7 +11,8 @@ from django.http import HttpResponse
 from follow.models import FollowOrganizationList
 import json
 from position.models import SUPPORT, OPPOSE, PositionEnteredManager, PositionListManager
-from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager, VoterDeviceLinkManager
+from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager, VoterDeviceLinkManager, \
+    VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists
 
@@ -119,9 +120,19 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, candidate_we_
 
         ##################################
         # Now retrieve friend's positions
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_by_id(voter_id)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+            voter_we_vote_id = voter.we_vote_id
+        else:
+            voter_we_vote_id = ""
+
         retrieve_public_positions_now = False  # Retrieve positions intended for friends-only
         most_recent_only = False
         friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
+        # Add yourself as a friend so your opinions show up
+        friends_we_vote_id_list.append(voter_we_vote_id)
         friends_positions_list_for_candidate_campaign = \
             position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 retrieve_public_positions_now, candidate_id, candidate_we_vote_id,
@@ -206,9 +217,19 @@ def positions_count_for_contest_measure(voter_id, measure_id, measure_we_vote_id
 
         ##################################
         # Now retrieve friend's positions
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_by_id(voter_id)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+            voter_we_vote_id = voter.we_vote_id
+        else:
+            voter_we_vote_id = ""
+
         retrieve_public_positions_now = False  # Retrieve positions intended for friends-only
         most_recent_only = False
         friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
+        # Add yourself as a friend so your opinions show up
+        friends_we_vote_id_list.append(voter_we_vote_id)
         friends_positions_list_for_contest_measure = \
             position_list_manager.retrieve_all_positions_for_contest_measure(
                 retrieve_public_positions_now, measure_id, measure_we_vote_id,
@@ -273,184 +294,6 @@ def position_public_support_count_for_ballot_item_for_api(candidate_id, candidat
                                           measure_id, measure_we_vote_id, stance_we_are_looking_for)
 
 
-def positions_count_for_all_ballot_items_for_api_original(voter_device_id, google_civic_election_id=0,
-                                                          show_positions_this_voter_follows=True):
-    """
-    We want to return a JSON file with the a list of the support and oppose counts from the orgs, friends and
-    public figures the voter follows
-    """
-    # Get voter_id from the voter_device_id so we can know whose stars to retrieve
-    results = is_voter_device_id_valid(voter_device_id)
-    if not results['success']:
-        json_data = {
-            'status':                   "VALID_VOTER_DEVICE_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS",
-            'success':                  False,
-            'google_civic_election_id': google_civic_election_id,
-            'ballot_item_list':         [],
-        }
-        return json_data
-
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        json_data = {
-            'status':                   "VALID_VOTER_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS",
-            'success':                  False,
-            'google_civic_election_id': google_civic_election_id,
-            'ballot_item_list':         [],
-        }
-        return json_data
-
-    if not positive_value_exists(google_civic_election_id):
-        # We must have an election id to proceed -- otherwise we don't know what ballot items to work with
-        voter_device_link_manager = VoterDeviceLinkManager()
-        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
-        if voter_device_link_results['voter_device_link_found']:
-            voter_device_link = voter_device_link_results['voter_device_link']
-            if positive_value_exists(voter_device_link.google_civic_election_id):
-                google_civic_election_id = voter_device_link.google_civic_election_id
-        if not positive_value_exists(google_civic_election_id):
-            voter_address_manager = VoterAddressManager()
-            voter_address_results = voter_address_manager.retrieve_address(0, voter_id)
-            if voter_address_results['voter_address_found']:
-                voter_address = voter_address_results['voter_address']
-                if positive_value_exists(voter_address.google_civic_election_id):
-                    google_civic_election_id = voter_address.google_civic_election_id
-        google_civic_election_id = convert_to_int(google_civic_election_id)
-
-    if not positive_value_exists(google_civic_election_id):
-        json_data = {
-            'status':                   "GOOGLE_CIVIC_ELECTION_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS",
-            'success':                  False,
-            'google_civic_election_id': google_civic_election_id,
-            'ballot_item_list':         [],
-        }
-        return json_data
-
-    position_list_manager = PositionListManager()
-    candidate_list_object = CandidateCampaignListManager()
-
-    follow_organization_list_manager = FollowOrganizationList()
-    organizations_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
-
-    # Get a list of all candidates and measures from this election (in the active election)
-    ballot_item_results = voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id,
-                                                                               google_civic_election_id)
-
-    ballot_item_list = ballot_item_results['ballot_item_list']
-
-    # The list where we capture results
-    ballot_item_list_results = []
-
-    # ballot_item_list is populated with contest_office and contest_measure entries
-    for one_ballot_item in ballot_item_list:
-        # Retrieve all positions for each ballot item
-        if one_ballot_item['kind_of_ballot_item'] == OFFICE:
-            results = candidate_list_object.retrieve_all_candidates_for_office(0, one_ballot_item['we_vote_id'])
-            success = results['success']
-            candidate_list = results['candidate_list']
-
-            if success:
-                for candidate in candidate_list:
-                    # Loop through all candidates under this office
-
-                    # Public Positions
-                    retrieve_public_positions_now = True  # The alternate is positions for friends-only
-                    most_recent_only = True
-                    public_support_positions_list_for_one_ballot_item = \
-                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                            retrieve_public_positions_now, 0, candidate.we_vote_id,
-                            SUPPORT, most_recent_only)
-                    public_oppose_positions_list_for_one_ballot_item = \
-                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                            retrieve_public_positions_now, 0, candidate.we_vote_id,
-                            OPPOSE, most_recent_only)
-
-                    # Friend's-only Positions
-                    retrieve_public_positions_now = False  # Return friends-only positions counts
-                    most_recent_only = True
-                    friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends
-                    friends_only_support_positions_list_for_one_ballot_item = \
-                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                            retrieve_public_positions_now, 0, candidate.we_vote_id,
-                            SUPPORT, most_recent_only, friends_we_vote_id_list)
-                    friends_only_oppose_positions_list_for_one_ballot_item = \
-                        position_list_manager.retrieve_all_positions_for_candidate_campaign(
-                            retrieve_public_positions_now, 0, candidate.we_vote_id,
-                            OPPOSE, most_recent_only, friends_we_vote_id_list)
-
-                    support_positions_list_for_one_ballot_item = public_support_positions_list_for_one_ballot_item + \
-                        friends_only_support_positions_list_for_one_ballot_item
-                    oppose_positions_list_for_one_ballot_item = public_oppose_positions_list_for_one_ballot_item + \
-                        friends_only_oppose_positions_list_for_one_ballot_item
-
-                    finalize_results = finalize_support_and_oppose_positions_count(
-                        voter_id, show_positions_this_voter_follows,
-                        organizations_followed_by_voter,
-                        support_positions_list_for_one_ballot_item,
-                        oppose_positions_list_for_one_ballot_item)
-
-                    one_ballot_item_results = {
-                        'ballot_item_we_vote_id': candidate.we_vote_id,
-                        'support_count': finalize_results['support_positions_count'],
-                        'oppose_count': finalize_results['oppose_positions_count'],
-                    }
-                    ballot_item_list_results.append(one_ballot_item_results)
-        elif one_ballot_item['kind_of_ballot_item'] == MEASURE:
-            # Public Positions
-            retrieve_public_positions_now = True  # The alternate is positions for friends-only
-            most_recent_only = True
-            public_support_positions_list_for_one_ballot_item = \
-                position_list_manager.retrieve_all_positions_for_contest_measure(
-                    retrieve_public_positions_now, 0, one_ballot_item['we_vote_id'],
-                    SUPPORT, most_recent_only)
-            public_oppose_positions_list_for_one_ballot_item = \
-                position_list_manager.retrieve_all_positions_for_contest_measure(
-                    retrieve_public_positions_now, 0, one_ballot_item['we_vote_id'],
-                    OPPOSE, most_recent_only)
-
-            # Friend's-only Positions
-            retrieve_public_positions_now = False  # Return friends-only positions counts
-            most_recent_only = True
-            friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends
-            friends_support_positions_list_for_one_ballot_item = \
-                position_list_manager.retrieve_all_positions_for_contest_measure(
-                    retrieve_public_positions_now, 0, one_ballot_item['we_vote_id'],
-                    SUPPORT, most_recent_only, friends_we_vote_id_list)
-            friends_oppose_positions_list_for_one_ballot_item = \
-                position_list_manager.retrieve_all_positions_for_contest_measure(
-                    retrieve_public_positions_now, 0, one_ballot_item['we_vote_id'],
-                    OPPOSE, most_recent_only, friends_we_vote_id_list)
-
-            support_positions_list_for_one_ballot_item = public_support_positions_list_for_one_ballot_item + \
-                friends_support_positions_list_for_one_ballot_item
-            oppose_positions_list_for_one_ballot_item = public_oppose_positions_list_for_one_ballot_item + \
-                friends_oppose_positions_list_for_one_ballot_item
-
-            finalize_results = finalize_support_and_oppose_positions_count(
-                voter_id, show_positions_this_voter_follows,
-                organizations_followed_by_voter,
-                support_positions_list_for_one_ballot_item,
-                oppose_positions_list_for_one_ballot_item)
-            one_ballot_item_results = {
-                'ballot_item_we_vote_id': one_ballot_item['we_vote_id'],
-                'support_count': finalize_results['support_positions_count'],
-                'oppose_count': finalize_results['oppose_positions_count'],
-            }
-            ballot_item_list_results.append(one_ballot_item_results)
-        else:
-            # Skip the rest of this loop
-            continue
-
-    json_data = {
-        'success':                  True,
-        'status':                   "POSITIONS_COUNT_FOR_ALL_BALLOT_ITEMS",
-        'google_civic_election_id': google_civic_election_id,
-        'ballot_item_list':         ballot_item_list_results,
-    }
-    return json_data
-
-
 def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_election_id=0,
                                                  show_positions_this_voter_follows=True):
     """
@@ -468,7 +311,15 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
         }
         return json_data
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
     if not positive_value_exists(voter_id):
         json_data = {
             'status':                   "VALID_VOTER_ID_MISSING-COUNT_FOR_ALL_BALLOT_ITEMS",
@@ -502,6 +353,10 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
     # The list where we capture results
     position_counts_list_results = []
 
+    friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
+    # Add yourself as a friend so your opinions show up
+    friends_we_vote_id_list.append(voter_we_vote_id)
+
     # ballot_item_list is populated with contest_office and contest_measure entries
     for one_ballot_item in ballot_item_list:
         # Retrieve all positions for each ballot item
@@ -529,7 +384,6 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
                     # Friend's-only Positions
                     retrieve_public_positions_now = False  # Return friends-only positions counts
                     most_recent_only = True
-                    friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends
                     friends_only_support_positions_list_for_one_ballot_item = \
                         position_list_manager.retrieve_all_positions_for_candidate_campaign(
                             retrieve_public_positions_now, 0, candidate.we_vote_id,
@@ -572,7 +426,6 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
             # Friend's-only Positions
             retrieve_public_positions_now = False  # Return friends-only positions counts
             most_recent_only = True
-            friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends
             friends_support_positions_list_for_one_ballot_item = \
                 position_list_manager.retrieve_all_positions_for_contest_measure(
                     retrieve_public_positions_now, 0, one_ballot_item['we_vote_id'],
@@ -627,7 +480,15 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
         }
         return json_data
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
     if not positive_value_exists(voter_id):
         json_data = {
             'status':                   "VALID_VOTER_ID_MISSING-COUNT_FOR_ONE_BALLOT_ITEM",
@@ -654,6 +515,10 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
     organizations_followed_by_voter = \
         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
+    friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
+    # Add yourself as a friend so your opinions show up
+    friends_we_vote_id_list.append(voter_we_vote_id)
+
     # Figure out if this ballot_item is a candidate or measure
     if "cand" in ballot_item_we_vote_id:  # Is a Candidate
         # We don't need to retrieve the candidate
@@ -673,7 +538,6 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
         # Friend's-only Positions
         retrieve_public_positions_now = False  # Return friends-only positions counts
         most_recent_only = True
-        friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends
         friends_only_support_positions_list_for_one_ballot_item = \
             position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,
@@ -719,7 +583,6 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
         # Friend's-only Positions
         retrieve_public_positions_now = False  # Return friends-only positions counts
         most_recent_only = True
-        friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends
         friends_support_positions_list_for_one_ballot_item = \
             position_list_manager.retrieve_all_positions_for_contest_measure(
                 retrieve_public_positions_now, 0, ballot_item_we_vote_id,

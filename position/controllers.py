@@ -363,7 +363,15 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter = voter_results['voter']
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+    else:
+        voter_id = 0
+        voter_we_vote_id = ""
     if not positive_value_exists(voter_id):
         position_list = []
         json_data = {
@@ -381,6 +389,10 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
     retrieve_friends_positions = friends_vs_public in (FRIENDS_ONLY, FRIENDS_AND_PUBLIC) \
         and show_positions_this_voter_follows
     retrieve_public_positions = friends_vs_public in (PUBLIC_ONLY, FRIENDS_AND_PUBLIC)
+
+    friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends
+    # Add yourself as a friend so your opinions show up
+    friends_we_vote_id_list.append(voter_we_vote_id)
 
     position_list_manager = PositionListManager()
     ballot_item_found = False
@@ -407,7 +419,6 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
         if retrieve_friends_positions:
             retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
             return_only_latest_position_per_speaker = True
-            friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
             friends_positions_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
                 retrieve_public_positions_now, candidate_id, candidate_we_vote_id, stance_we_are_looking_for,
                 return_only_latest_position_per_speaker, friends_we_vote_id_list)
@@ -459,7 +470,6 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
         if retrieve_friends_positions:
             retrieve_public_positions_now = False  # This being False means: "Positions from friends-only"
             return_only_latest_position_per_speaker = True
-            friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
             friends_positions_list = position_list_manager.retrieve_all_positions_for_contest_measure(
                 retrieve_public_positions_now,
                 measure_id, measure_we_vote_id, stance_we_are_looking_for,
