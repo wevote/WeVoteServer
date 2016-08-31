@@ -558,10 +558,33 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
 
     positions_count = len(position_objects)
 
+    # We need the linked_organization_we_vote_id so we can remove the viewer's positions from the list.
+    linked_organization_we_vote_id = ""
+    if positive_value_exists(positions_count):
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_id(voter_id)
+        if results['voter_found']:
+            voter = results['voter']
+            linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+
     position_list = []
     for one_position in position_objects:
+        # Is there sufficient information in the position to display it?
+        some_data_exists = True if one_position.is_support() \
+                           or one_position.is_oppose() \
+                           or one_position.is_information_only() \
+                           or positive_value_exists(one_position.vote_smart_rating) \
+                           or positive_value_exists(one_position.statement_text) \
+                           or positive_value_exists(one_position.more_info_url) else False
+        if not some_data_exists:
+            # Skip this position if there isn't any data to display
+            continue
+
         # Whose position is it?
         if positive_value_exists(one_position.organization_we_vote_id):
+            if linked_organization_we_vote_id == one_position.organization_we_vote_id:
+                # Do not show your own position on the position list, since it will be in the edit spot already
+                continue
             speaker_type = ORGANIZATION
             speaker_id = one_position.organization_id
             speaker_we_vote_id = one_position.organization_we_vote_id
@@ -573,6 +596,9 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 one_position = position_manager.refresh_cached_position_info(one_position)
             speaker_display_name = one_position.speaker_display_name
         elif positive_value_exists(one_position.voter_id):
+            if voter_id == one_position.voter_id:
+                # Do not show your own position on the position list, since it will be in the edit spot already
+                continue
             speaker_type = VOTER
             speaker_id = one_position.voter_id
             speaker_we_vote_id = one_position.voter_we_vote_id
@@ -1629,11 +1655,13 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
         if positive_value_exists(switch_to_show_position_to_public):
             if positive_value_exists(is_public_position):
                 status = "VOTER_POSITION_VISIBILITY-ALREADY_PUBLIC_POSITION"
-                success = True
+                merge_results = position_entered_manager.merge_into_public_position(position)
+                success = merge_results['success']
+                status += " " + merge_results['status']
             else:
                 # If here, copy the position from the PositionForFriends table to the PositionEntered table
                 status = "VOTER_POSITION_VISIBILITY-SWITCHING_TO_PUBLIC_POSITION"
-                change_results = position_entered_manager.switch_to_public_position(position)
+                change_results = position_entered_manager.transfer_to_public_position(position)
                 success = change_results['success']
                 status += " " + change_results['status']
                 if success:
@@ -1642,20 +1670,23 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
             if positive_value_exists(is_public_position):
                 # If here, copy the position from the PositionEntered to the PositionForFriends table
                 status = "VOTER_POSITION_VISIBILITY-SWITCHING_TO_FRIENDS_ONLY_POSITION"
-                change_results = position_entered_manager.switch_to_friends_only_position(position)
+                change_results = position_entered_manager.transfer_to_friends_only_position(position)
                 success = change_results['success']
                 status += " " + change_results['status']
                 if success:
                     is_public_position = False
             else:
                 status = "VOTER_POSITION_VISIBILITY-ALREADY_FRIENDS_ONLY_POSITION"
-                success = True
+                merge_results = position_entered_manager.merge_into_friends_only_position(position)
+                success = merge_results['success']
+                status += " " + merge_results['status']
     else:
         status = "VOTER_POSITION_VISIBILITY-POSITION_NOT_FOUND-COULD_NOT_BE_CREATED"
         # If here, an existing position could not be created
         position_entered_manager.create_position_for_visibility_change()
 
     if success:
+        # Prepare return values
         if positive_value_exists(candidate_we_vote_id):
             kind_of_ballot_item = CANDIDATE
             ballot_item_id = position.candidate_campaign_id

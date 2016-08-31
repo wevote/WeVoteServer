@@ -45,7 +45,6 @@ class OrganizationsSyncOutView(APIView):
     def __str__(self):
         return str("")
 
-    # TODO DALE testing allow_null
     def get(self, request, format=None):
         state_served_code = request.GET.get('state_served_code', '')
 

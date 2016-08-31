@@ -247,6 +247,19 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
+    def voter_guide_exists(self, organization_we_vote_id, google_civic_election_id):
+        voter_guide_found = False
+        try:
+            if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
+                voter_guide_on_stage = VoterGuide.objects.filter(google_civic_election_id=google_civic_election_id,
+                                                                 organization_we_vote_id=organization_we_vote_id)
+                voter_guide_found = True if voter_guide_on_stage.count() > 0 else False
+        except VoterGuide.MultipleObjectsReturned as e:
+            voter_guide_found = True
+        except VoterGuide.DoesNotExist:
+            voter_guide_found = False
+        return voter_guide_found
+
     def retrieve_voter_guide(self, voter_guide_id=0, google_civic_election_id=0, vote_smart_time_span=None,
                              organization_we_vote_id=None, public_figure_we_vote_id=None, owner_we_vote_id=None):
         voter_guide_id = convert_to_int(voter_guide_id)

@@ -12,7 +12,7 @@ import json
 from organization.models import OrganizationManager
 from position.models import ANY_STANCE, PositionEntered, PositionEnteredManager, PositionListManager
 import requests
-from voter.models import fetch_voter_id_from_voter_device_link
+from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
@@ -337,10 +337,22 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         success = False
 
     if success:
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_id(voter_id)
+        linked_organization_we_vote_id = ""
+        if results['voter_found']:
+            voter = results['voter']
+            linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+
         number_added_to_list = 0
         position_manager = PositionEnteredManager()
         position = PositionEntered()
         for voter_guide in voter_guide_list:
+            if positive_value_exists(voter_guide.organization_we_vote_id) \
+                    and linked_organization_we_vote_id == voter_guide.organization_we_vote_id:
+                # Do not return your own voter guide to follow
+                continue
+
             position_found = False
             one_voter_guide = {
                 'we_vote_id': voter_guide.we_vote_id,
