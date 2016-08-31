@@ -570,8 +570,9 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
         # This method finds all ballot_items in this election, and then retrieves *all* positions by any org or person
         # about each ballot_item. This will pick up We Vote positions or Vote Smart ratings, regardless of what time
         # period they were entered for.
+        public_only = True  # Do not return positions that are from friends only since we only want public positions
         all_positions_list_for_election = position_list_manager.retrieve_all_positions_for_election(
-            google_civic_election_id, ANY_STANCE)
+            google_civic_election_id, ANY_STANCE, public_only)
     else:
         voter_guide_list = []
         results = {

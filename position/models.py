@@ -1124,7 +1124,9 @@ class PositionListManager(models.Model):
 
                 # And finally, make sure there is a stance, or text commentary -- exclude these cases
                 public_positions_list = public_positions_list.exclude(
-                    Q(stance__iexact=NO_STANCE) & Q(statement_text__isnull=True) & Q(statement_html__isnull=True)
+                    Q(stance__iexact=NO_STANCE) &
+                    (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
+                    (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
                 )
             except Exception as e:
                 handle_record_not_found_exception(e, logger=logger)
@@ -1233,7 +1235,9 @@ class PositionListManager(models.Model):
 
                     # And finally, make sure there is a stance, or text commentary -- exclude these cases
                     friends_positions_list = friends_positions_list.exclude(
-                        Q(stance__iexact=NO_STANCE) & Q(statement_text__isnull=True) & Q(statement_html__isnull=True)
+                        Q(stance__iexact=NO_STANCE) &
+                        (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
+                        (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
                     )
             except Exception as e:
                 handle_record_not_found_exception(e, logger=logger)
@@ -1415,7 +1419,7 @@ class PositionListManager(models.Model):
         then return all positions that are about any of those candidates or measures.
         :param google_civic_election_id:
         :param stance_we_are_looking_for:
-        :param public_only:
+        :param public_only: Do we care about public positions? Or friend's only positions?
         :return:
         """
         position_list = []
@@ -1460,6 +1464,7 @@ class PositionListManager(models.Model):
         position_list_found = False
         try:
             if public_only:
+                # Only return public positions
                 position_list = PositionEntered.objects.order_by('date_entered')
                 # TODO DALE 2016-08-30 I believe this is out of date because I *think* we have public positions
                 # with a value in voter_id
@@ -1468,6 +1473,7 @@ class PositionListManager(models.Model):
                 #     Q(voter_id__isnull=True) |
                 #     Q(voter_id__exact=0))
             else:
+                # Only return PositionForFriends entries
                 position_list = PositionForFriends.objects.order_by('date_entered')
             position_list = position_list.filter(
                 Q(candidate_campaign_we_vote_id__in=candidate_campaign_we_vote_ids) |
