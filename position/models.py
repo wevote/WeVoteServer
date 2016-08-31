@@ -1123,9 +1123,9 @@ class PositionListManager(models.Model):
                     public_positions_list = public_positions_list.filter(state_code__iexact=state_code)
 
                 # And finally, make sure there is a stance, or text commentary -- exclude these cases
-                    public_positions_list = public_positions_list.exclude(
-                        Q(stance__iexact=NO_STANCE) & Q(statement_text__isnull=True) & Q(statement_html__isnull=True)
-                    )
+                public_positions_list = public_positions_list.exclude(
+                    Q(stance__iexact=NO_STANCE) & Q(statement_text__isnull=True) & Q(statement_html__isnull=True)
+                )
             except Exception as e:
                 handle_record_not_found_exception(e, logger=logger)
 
