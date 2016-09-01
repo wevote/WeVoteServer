@@ -1,2 +1,3 @@
-import signals.elasticsearch
-print("### signals/elasticsearch init")
+# import signals.elasticsearch
+# print("### signals/elasticsearch init")
+#
