@@ -102,12 +102,10 @@ In pgadmin add a server. You can use your sign in name as the server name.
 
 ## Setup - Environment Variables Configuration - config/environment_variables.json
 
-WeVoteServer is currently configured (in manage.py) to look for a "config/local.py" file (configured in the
-"config/settings.py" file). When we run this on a production server, we will startup with a production settings
-file like "production_heroku.py".
+Copy "config/environment_variables-template.json" to "config/environment_variables.json". 
+You will configure many variables for your local environment in this file. 
 
-Copy "environment_variables-template.json" to "environment_variables.json". You will configure many variables for your
-local environment in this file. New variables needed by WeVoteServer will be added to
+New variables needed by WeVoteServer will be added to
 "environment_variables-template.json" from time to time, so please check for updates by comparing your local version
 with the template file.
 
@@ -170,7 +168,7 @@ Then run:
 
     $ ./manage.py update_geoip_data
     
-### On Amazon Web Services
+### On Amazon Web Services - NOT for local install
 
 Buy the latest database ("GEO-133	GeoIP Legacy City with DMA/Area Codes") at http://www.maxmind.com
 
@@ -187,52 +185,6 @@ Transfer it to the live API server:
     $ tar zxvf GeoIP-133_DATE_HERE.tar.gz
     $ cp GeoIP-133_20160202/GeoIPCity.dat .
     $ chmod 0777 *.*
-
-## Test that WeVoteServer is running
-
-Start up the webserver:
-
-    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
-    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
-    $ pip install -r requirements.txt
-    $ python manage.py runserver
-
-Find admin tools here:
-
-    http://localhost:8000/admin
-    
-Now you will need to authenticate as an admin. For now, this will require that you log in with your Twitter account.
-
-    Click "Sign in with Twitter" and use your Twitter credentials to Sign-In. 
-    
-After you have signed in, you will see an error message in red that states "You must sign in with account that has
-Verified Volunteer rights to see that page." Just below the error message, there will be a field "id" with a number next
-to it, note the id number.
-
-Open PG Admin III and navigate to:
-
-    Server Groups > Servers > WeVoteServerDB 
-
-Double click on WeVoteServerDB (there may be a red x thru it). It will prompt you for a password; leave it blank and click
-OK. You may see an additional warning screen about saving passwords, if so, click ok. Once you are connected, navigate to:
-
-    WeVoteServerDB > Schemas > public > Tables > voter_voter
-
-Then, right click, and in the menu that appears, select:
-
-    View Data > View Top 100 rows
-
-In the new window that opens, scroll down and find the id number, noted above. Scroll to the right to locate the box
-"is_adminboolean" click on it once, and a box will appear, click it and change it to TRUE. Then, go back to your browser, 
-and click on:
-
-    Back to Admin Home
-    
-Now, you can access the admin tools. 
-
-Find documentation for all of the APIs here:
-
-    http://localhost:8000/apis/v1/docs
 
 ## Setup - Database Creation
 
@@ -256,12 +208,74 @@ If you are not prompted to create a superuser, run the following command:
 
     python manage.py createsuperuser
     
+## Test that WeVoteServer is running
+
+Start up the webserver:
+
+    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    $ pip install -r requirements.txt
+    $ python manage.py runserver
+
+## Grant yourself Admin rights
+
+Find admin tools here:
+
+    http://localhost:8000/admin
+    
+Now you will need to authenticate as an admin. For now, this will require that you log in with your Twitter account. 
+Please contact Dale.McGrew@WeVoteUSA.org for configuration settings you can add to your local 
+config/environment_variables.json file.
+
+    Click "Sign in with Twitter" and use your Twitter credentials to Sign-In. 
+    
+After you have signed in, you will see an error message in red that states "You must sign in with account that has
+Verified Volunteer rights to see that page." Just below the error message, there will be a field "we_vote_id" with a 
+text string like "wv01voter1234" next to it, note the we_vote_id number.
+
+### Give yourself Admin rights via PGAdmin
+
+Open PG Admin III and navigate to:
+
+    Server Groups > Servers > WeVoteServerDB 
+
+Double click on WeVoteServerDB (there may be a red x thru it). It will prompt you for a password; leave it blank and click
+OK. You may see an additional warning screen about saving passwords, if so, click ok. Once you are connected, navigate to:
+
+    WeVoteServerDB > Schemas > public > Tables > voter_voter
+
+Then, right click, and in the menu that appears, select:
+
+    View Data > View Top 100 rows
+
+In the new window that opens, scroll down and find the we_vote_id number, noted above. Scroll to the right to locate the box
+"is_admin" click on it once, and a box will appear, click it and change it to TRUE. Then, go back to your browser, 
+and click on:
+
+    Back to Admin Home
+    
+### Give yourself Admin rights via command line
+
+Run this command from your Postgres command line. Replace WE_VOTE_ID_HERE with the actual we_vote_id found above:
+
+    UPDATE voter_voter SET is_admin=true WHERE we_vote_id='WE_VOTE_ID_HERE';
+
+## Test your access
+
+Now, you should be able to access the admin tools. 
+
+Find documentation for all of the APIs here:
+
+    http://localhost:8000/apis/v1/docs
+
 ## Sample data
 Sample data is provided. Go here:
 
     http://localhost:8000/admin
     
-Find the "Import Test Data" link (in the "Maintenance" section), and click it. This initial import can take 2-3 minutes.
+Find the "Sync Data with Master We Vote Servers" link, and click it: http://localhost:8000/admin/sync_dashboard/
+
+Choose 1) an upcoming election from the drop down, and 2) your local state, and then run all scripts from top to bottom.
  
 ### Google Civic
 In order to retrieve fresh ballot data, you will need to sign up for a Google Civic API key:
@@ -283,40 +297,7 @@ Dale.McGrew@WeVoteUSA.org to discuss using our organizational account.
   
 ### Twitter
 Instructions coming soon.
-  
-### Running import scripts
-Although we keep https://api.wevoteusa.org up-to-date with the latest data from Google Civic, Vote Smart & Twitter, you
-may need to pull data into your local development environment in order to work on certain areas of WebApp. These are
-the steps.
-
-Save an address:
-
-    1. Go here: http://localhost:8000/apis/v1/docs/
-    2. Go here, and enter a full address near an upcoming election (ex: "2208 Ebb Tide Rd, Virginia Beach, VA 23451"): http://localhost:8000/apis/v1/docs/voterAddressSave/
-    3. You should get a status back equal to something like "VOTER_ADDRESS_SAVED"
-
-Verify you have the candidates you expect:
-
-    1. Go to "Candidates" here: http://localhost:8000/c/
-    2. Filter by Election
-    3. Click "Retrieve Candidate Photos for this Election"
-
-Import some positions:
-
-    1. Go to "Positions / Public Opinions" here: http://localhost:8000/pos/
-    2. Filter by Election
-    3. Click "Retrieve Positions from Vote Smart for this Election". This process can take 4-5 minutes.
-    4. Click "Generate Voter Guides"
     
 [Working with WeVoteServer day-to-day](README_WORKING_WITH_WE_VOTE_SERVER.md)
-
-## Setup - Heroku Configuration
-
-NOTE: These instructions are in progress and currently out-of-date.
-
-We use Heroku for publishing a public version anyone can play with , and you can publish a public version too. Here are the instructions:
-https://devcenter.heroku.com/articles/getting-started-with-django
-
-In the config/setting.py file, search for "Heroku". There are comments that tell you which parts of the settings file to comment or uncomment to get a version running on Heroku.
 
 [Back to root README](README.md)
