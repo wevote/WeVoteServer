@@ -7,7 +7,9 @@ from .models import BallotItemListManager, BallotItemManager, BallotReturnedList
     VoterBallotSaved, VoterBallotSavedManager
 from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
+from datetime import datetime
 from django.contrib import messages
+from election.models import ElectionManager
 from exception.models import handle_exception
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 import json
@@ -494,6 +496,22 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
         results = voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id,
                                                                        google_civic_election_id)
 
+        if not positive_value_exists(voter_ballot_saved.election_description_text) \
+                or not positive_value_exists(voter_ballot_saved.election_date_text()):
+            try:
+                election_manager = ElectionManager()
+                election_results = election_manager.retrieve_election(google_civic_election_id)
+                if election_results['election_found']:
+                    election = election_results['election']
+                    if not positive_value_exists(voter_ballot_saved.election_description_text):
+                        voter_ballot_saved.election_description_text = election.election_name
+                    if not positive_value_exists(voter_ballot_saved.election_date_text()):
+                        voter_ballot_saved.election_date = \
+                            datetime.strptime(election.election_day_text, "%Y-%m-%d").date()
+                    voter_ballot_saved.save()
+            except Exception as e:
+                status += "Failed to update election_name"
+
         status += " " + results['status']
         json_data = {
             'status':                       status,
@@ -502,6 +520,8 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
             'ballot_found':                 True,
             'ballot_item_list':             results['ballot_item_list'],
             'google_civic_election_id':     google_civic_election_id,
+            'election_name':                voter_ballot_saved.election_description_text,
+            'election_date':                voter_ballot_saved.election_date_text(),
             'text_for_map_search':          voter_ballot_saved.original_text_for_map_search,
             'substituted_address_nearby':   voter_ballot_saved.substituted_address_nearby,
             'ballot_caveat':                voter_ballot_saved.ballot_caveat(),
@@ -804,7 +824,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                                 'we_vote_id':                   candidate.we_vote_id,
                                 'ballot_item_display_name':     candidate.display_candidate_name(),
                                 'candidate_photo_url':          candidate.candidate_photo_url(),
-                                'party':                        candidate.party_display(),
+                                'party':                        candidate.political_party_display(),
                                 'order_on_ballot':              candidate.order_on_ballot,
                                 'kind_of_ballot_item':          CANDIDATE,
                                 'twitter_handle':               candidate.candidate_twitter_handle,

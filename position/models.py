@@ -4137,7 +4137,7 @@ class PositionEnteredManager(models.Model):
                             position_change = True
                         if not positive_value_exists(position_object.political_party):
                             # political_party is missing so look it up from source
-                            position_object.political_party = candidate.party_display()
+                            position_object.political_party = candidate.political_party_display()
                             position_change = True
                         if not positive_value_exists(position_object.politician_id):
                             # politician_id is missing so look it up from source

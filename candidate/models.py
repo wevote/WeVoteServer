@@ -558,7 +558,7 @@ class CandidateCampaign(models.Model):
         full_name = self.display_candidate_name
         return extract_last_name_from_full_name(full_name)
 
-    def party_display(self):
+    def political_party_display(self):
         return candidate_party_display(self.party)
 
     # We override the save function so we can auto-generate we_vote_id
@@ -613,6 +613,8 @@ def candidate_party_display(raw_party):
         return 'Republican'
     if raw_party == 'Party Preference: Republican':
         return 'Republican'
+    if raw_party.lower() == 'none':
+        return ''
     else:
         return raw_party
 

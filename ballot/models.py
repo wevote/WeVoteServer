@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from candidate.models import CandidateCampaign
+import datetime  # Note this is importing the module. "from datetime import datetime" imports the class
 from django.db import models
 from django.db.models import F, Q
 from election.models import ElectionManager
@@ -1109,6 +1110,14 @@ class VoterBallotSaved(models.Model):
 
     is_from_substituted_address = models.BooleanField(default=False)
     is_from_test_ballot = models.BooleanField(default=False)
+
+    def election_date_text(self):
+        if isinstance(self.election_date, datetime.date):
+            return self.election_date.strftime('%Y-%m-%d')
+        elif self.election_date:
+            return self.election_date
+        else:
+            return ""
 
     def ballot_caveat(self):
         message = ''

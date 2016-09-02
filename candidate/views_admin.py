@@ -375,12 +375,14 @@ def candidate_edit_process_view(request):
                 messages.add_message(request, messages.ERROR, 'Could not save candidate.')
 
     contest_office_we_vote_id = ''
+    contest_office_name = ''
     if positive_value_exists(contest_office_id):
         contest_office_manager = ContestOfficeManager()
         results = contest_office_manager.retrieve_contest_office_from_id(contest_office_id)
         if results['contest_office_found']:
             contest_office = results['contest_office']
             contest_office_we_vote_id = contest_office.we_vote_id
+            contest_office_name = contest_office.office_name
 
     election_manager = ElectionManager()
     election_results = election_manager.retrieve_election(google_civic_election_id)
@@ -464,6 +466,7 @@ def candidate_edit_process_view(request):
 
     try:
         if existing_candidate_found:
+            # We have found a duplicate for this election
             messages.add_message(request, messages.ERROR, 'This candidate is already saved for this election.')
             url_variables = "?google_civic_election_id=" + str(google_civic_election_id) + \
                             "&candidate_name=" + str(candidate_name) + \
@@ -498,7 +501,11 @@ def candidate_edit_process_view(request):
                 # We only allow updating of candidates within the We Vote Admin in
                 candidate_on_stage.contest_office_id = contest_office_id
                 candidate_on_stage.contest_office_we_vote_id = contest_office_we_vote_id
+                candidate_on_stage.contest_office_name = contest_office_name
             candidate_on_stage.save()
+
+            # Now refresh the cache entries for this candidate
+
             messages.add_message(request, messages.INFO, 'Candidate Campaign updated.')
         else:
             # Create new
