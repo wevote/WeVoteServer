@@ -867,10 +867,17 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     position_list = []
     for one_position in position_list_raw:
         # Whose position is it?
+        missing_ballot_item_image = False
+        missing_office_information = False
         if positive_value_exists(one_position.candidate_campaign_we_vote_id):
             kind_of_ballot_item = CANDIDATE
             ballot_item_id = one_position.candidate_campaign_id
             ballot_item_we_vote_id = one_position.candidate_campaign_we_vote_id
+            if not positive_value_exists(one_position.contest_office_we_vote_id) \
+                    or not positive_value_exists(one_position.contest_office_name):
+                missing_office_information = True
+            if not positive_value_exists(one_position.ballot_item_image_url_https):
+                missing_ballot_item_image = True
             one_position_success = True
         elif positive_value_exists(one_position.contest_measure_we_vote_id):
             kind_of_ballot_item = MEASURE
@@ -891,19 +898,24 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         if one_position_success:
             # Make sure we have this data to display. If we don't, refresh PositionEntered table from other tables.
             if not positive_value_exists(one_position.ballot_item_display_name) \
-                    or not positive_value_exists(one_position.ballot_item_image_url_https) \
-                    or not positive_value_exists(one_position.ballot_item_twitter_handle) \
-                    or not positive_value_exists(one_position.state_code):
+                    or not positive_value_exists(one_position.state_code) \
+                    or not positive_value_exists(one_position.speaker_image_url_https) \
+                    or missing_ballot_item_image \
+                    or missing_office_information:
                 one_position = position_manager.refresh_cached_position_info(one_position)
             one_position_dict_for_api = {
                 'position_we_vote_id':          one_position.we_vote_id,
                 'ballot_item_display_name':     one_position.ballot_item_display_name,  # Candidate name or Measure
                 'ballot_item_image_url_https':  one_position.ballot_item_image_url_https,
                 'ballot_item_twitter_handle':   one_position.ballot_item_twitter_handle,
+                'ballot_item_political_party':  one_position.political_party,
                 'kind_of_ballot_item':          kind_of_ballot_item,
                 'ballot_item_id':               ballot_item_id,
                 'ballot_item_we_vote_id':       ballot_item_we_vote_id,
                 'ballot_item_state_code':       one_position.state_code,
+                'contest_office_id':            one_position.contest_office_id,
+                'contest_office_we_vote_id':    one_position.contest_office_we_vote_id,
+                'contest_office_name':          one_position.contest_office_name,
                 'is_support':                       one_position.is_support(),
                 'is_positive_rating':               one_position.is_positive_rating(),
                 'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),

@@ -221,7 +221,7 @@ def candidates_import_from_structured_json(structured_json):
     return candidates_results
 
 
-def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
+def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidateRetrieve
     """
     Used by the api
     :param candidate_id:
@@ -266,6 +266,8 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
 
     if success:
         candidate_campaign = results['candidate_campaign']
+        if not positive_value_exists(candidate_campaign.contest_office_name):
+            candidate_campaign = candidate_manager.refresh_cached_candidate_info(candidate_campaign)
         json_data = {
             'status':                       status,
             'success':                      True,
@@ -279,6 +281,7 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):
             'maplight_id':                  candidate_campaign.maplight_id,
             'contest_office_id':            candidate_campaign.contest_office_id,
             'contest_office_we_vote_id':    candidate_campaign.contest_office_we_vote_id,
+            'contest_office_name':          candidate_campaign.contest_office_name,
             'politician_id':                candidate_campaign.politician_id,
             'politician_we_vote_id':        candidate_campaign.politician_we_vote_id,
             # 'google_civic_candidate_name': candidate_campaign.google_civic_candidate_name,

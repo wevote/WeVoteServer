@@ -132,7 +132,10 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "ballot_item_image_url_https": string,\n' \
                    '     "ballot_item_twitter_handle": string,\n' \
                    '     "ballot_item_we_vote_id": string,\n' \
-                   '     "office_display_name": string (The name of the office if kind_of_ballot_item is CANDIDATE),\n' \
+                   '     "ballot_item_political_party": string,\n' \
+                   '     "contest_office_id": integer,\n' \
+                   '     "contest_office_we_vote_id": string,\n' \
+                   '     "contest_office_name": string (The name of the office if kind_of_ballot_item is CANDIDATE),\n' \
                    '     "kind_of_ballot_item": string, ' \
                    '      (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\')\n' \
                    '     "is_support": boolean,\n' \

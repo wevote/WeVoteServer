@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import Q
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
-from office.models import ContestOffice
+from office.models import ContestOffice, ContestOfficeManager
 import re
 from wevote_settings.models import fetch_next_we_vote_id_last_candidate_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
@@ -385,6 +385,7 @@ class CandidateCampaign(models.Model):
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the office this candidate is running for", max_length=255, default=None,
         null=True, blank=True, unique=False)
+    contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
     # politician (internal) link to local We Vote Politician entry. During setup we need to allow this to be null.
     politician_id = models.BigIntegerField(verbose_name="politician unique identifier", null=True, blank=True)
     # The persistent We Vote unique ID of the Politician, so we can export and import into other databases.
@@ -989,3 +990,42 @@ class CandidateCampaignManager(models.Model):
             'candidate':    candidate,
         }
         return results
+
+    def refresh_cached_candidate_info(self, candidate_object):
+        """
+        The candidate tables cache information from other tables. This function reaches out to the source tables
+        and copies over the latest information to the candidate table.
+        :param candidate_object:
+        :return:
+        """
+        candidate_change = False
+
+        if not positive_value_exists(candidate_object.contest_office_id) \
+                or not positive_value_exists(candidate_object.contest_office_we_vote_id) \
+                or not positive_value_exists(candidate_object.contest_office_name):
+            office_found = False
+            contest_office_manager = ContestOfficeManager()
+            if positive_value_exists(candidate_object.contest_office_id):
+                results = contest_office_manager.retrieve_contest_office_from_id(candidate_object.contest_office_id)
+                office_found = results['contest_office_found']
+            elif positive_value_exists(candidate_object.contest_office_we_vote_id):
+                results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
+                    candidate_object.contest_office_we_vote_id)
+                office_found = results['contest_office_found']
+
+            if office_found:
+                office_object = results['contest_office']
+                if not positive_value_exists(candidate_object.contest_office_id):
+                    candidate_object.contest_office_id = office_object.id
+                    candidate_change = True
+                if not positive_value_exists(candidate_object.contest_office_we_vote_id):
+                    candidate_object.contest_office_we_vote_id = office_object.we_vote_id
+                    candidate_change = True
+                if not positive_value_exists(candidate_object.contest_office_name):
+                    candidate_object.contest_office_name = office_object.office_name
+                    candidate_change = True
+
+        if candidate_change:
+            candidate_object.save()
+
+        return candidate_object

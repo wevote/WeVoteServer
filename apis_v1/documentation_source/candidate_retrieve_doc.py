@@ -65,6 +65,7 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "maplight_id": integer,\n' \
                    '  "contest_office_id": integer,\n' \
                    '  "contest_office_we_vote_id": string,\n' \
+                   '  "contest_office_name": string,\n' \
                    '  "politician_id": integer,\n' \
                    '  "politician_we_vote_id": string,\n' \
                    '  "party": string,\n' \

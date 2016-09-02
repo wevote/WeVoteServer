@@ -145,6 +145,7 @@ class PositionEntered(models.Model):
     contest_office_id = models.BigIntegerField(verbose_name='id of contest_office', null=True, blank=True)
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_office", max_length=255, null=True, blank=True, unique=False)
+    contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
 
     # This is the candidate/politician that the position refers to.
     #  Either candidate_campaign is filled, contest_office OR contest_measure, but not all three
@@ -165,6 +166,7 @@ class PositionEntered(models.Model):
     politician_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for politician", max_length=255, null=True,
         blank=True, unique=False)
+    political_party = models.CharField(verbose_name="political party", max_length=255, null=True)
 
     # This is the measure/initiative/proposition that the position refers to.
     #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
@@ -458,6 +460,7 @@ class PositionForFriends(models.Model):
     contest_office_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for the contest_office", max_length=255, null=True, blank=True,
         unique=False)
+    contest_office_name = models.CharField(verbose_name="name of the office", max_length=255, null=True, blank=True)
 
     # This is the candidate/politician that the position refers to.
     #  Either candidate_campaign is filled, contest_office OR contest_measure, but not all three
@@ -475,6 +478,7 @@ class PositionForFriends(models.Model):
     politician_we_vote_id = models.CharField(
         verbose_name="we vote permanent id for politician", max_length=255, null=True,
         blank=True, unique=False)
+    political_party = models.CharField(verbose_name="candidate political party", max_length=255, null=True)
 
     # This is the measure/initiative/proposition that the position refers to.
     #  Either contest_measure is filled, contest_office OR candidate_campaign, but not all three
@@ -4052,10 +4056,10 @@ class PositionEnteredManager(models.Model):
                 except Exception as e:
                     pass
         elif positive_value_exists(position_object.voter_id):
-            if not positive_value_exists(position_object.speaker_display_name) or \
-                    not positive_value_exists(position_object.voter_we_vote_id) or \
-                    not positive_value_exists(position_object.speaker_image_url_https) or \
-                    not positive_value_exists(position_object.speaker_twitter_handle):
+            if not positive_value_exists(position_object.speaker_display_name) \
+                    or not positive_value_exists(position_object.voter_we_vote_id) \
+                    or not positive_value_exists(position_object.speaker_image_url_https) \
+                    or not positive_value_exists(position_object.speaker_twitter_handle):
                 try:
                     # We need to look in the voter table for speaker_display_name
                     voter_manager = VoterManager()
@@ -4086,21 +4090,35 @@ class PositionEnteredManager(models.Model):
 
         # Now move onto "ballot_item" information
         # Candidate
+        check_for_missing_office_data = False
+        candidate_campaign_manager = CandidateCampaignManager()
+        contest_office_id = 0
+        contest_office_we_vote_id = ""
         if positive_value_exists(position_object.candidate_campaign_id) or \
                 positive_value_exists(position_object.candidate_campaign_we_vote_id):
+            check_for_missing_office_data = True  # We check separately
             if not positive_value_exists(position_object.ballot_item_display_name) \
                     or not positive_value_exists(position_object.ballot_item_image_url_https) \
                     or not positive_value_exists(position_object.ballot_item_twitter_handle) \
                     or not positive_value_exists(position_object.state_code) \
+                    or not positive_value_exists(position_object.political_party) \
                     or not positive_value_exists(position_object.politician_id) \
                     or not positive_value_exists(position_object.politician_we_vote_id):
                 try:
                     # We need to look in the voter table for speaker_display_name
-                    candidate_campaign_manager = CandidateCampaignManager()
                     results = candidate_campaign_manager.retrieve_candidate_campaign(
                         position_object.candidate_campaign_id, position_object.candidate_campaign_we_vote_id)
                     if results['candidate_campaign_found']:
                         candidate = results['candidate_campaign']
+                        # Cache for further down
+                        contest_office_id = candidate.contest_office_id
+                        contest_office_we_vote_id = candidate.contest_office_we_vote_id
+                        if not positive_value_exists(position_object.contest_office_id):
+                            position_object.contest_office_id = contest_office_id
+                            position_change = True
+                        if not positive_value_exists(position_object.contest_office_we_vote_id):
+                            position_object.contest_office_we_vote_id = contest_office_we_vote_id
+                            position_change = True
                         if not positive_value_exists(position_object.ballot_item_display_name):
                             # ballot_item_display_name is missing so look it up from source
                             position_object.ballot_item_display_name = candidate.display_candidate_name()
@@ -4116,6 +4134,10 @@ class PositionEnteredManager(models.Model):
                         if not positive_value_exists(position_object.state_code):
                             # state_code is missing so look it up from source
                             position_object.state_code = candidate.get_candidate_state()
+                            position_change = True
+                        if not positive_value_exists(position_object.political_party):
+                            # political_party is missing so look it up from source
+                            position_object.political_party = candidate.party_display()
                             position_change = True
                         if not positive_value_exists(position_object.politician_id):
                             # politician_id is missing so look it up from source
@@ -4161,10 +4183,51 @@ class PositionEnteredManager(models.Model):
                             position_change = True
                 except Exception as e:
                     pass
-        # Office
+        # Office - We are only here if NOT a candidate and NOT a measure
         elif positive_value_exists(position_object.contest_office_id) or \
                 positive_value_exists(position_object.contest_office_we_vote_id):
-            pass
+            check_for_missing_office_data = True
+
+        if check_for_missing_office_data:
+            if not positive_value_exists(position_object.contest_office_id) \
+                    or not positive_value_exists(position_object.contest_office_we_vote_id) \
+                    or not positive_value_exists(position_object.contest_office_name):
+                if not positive_value_exists(position_object.contest_office_id) \
+                        and not positive_value_exists(position_object.contest_office_we_vote_id):
+                    if not contest_office_id or not contest_office_we_vote_id:
+                        # If here we need to get the contest_office identifier from the candidate
+                        candidate_results = candidate_campaign_manager.retrieve_candidate_campaign_from_we_vote_id(
+                            position_object.candidate_campaign_we_vote_id)
+                        if candidate_results['candidate_campaign_found']:
+                            candidate = candidate_results['candidate_campaign']
+                            position_object.contest_office_id = candidate.contest_office_id
+                            position_object.contest_office_we_vote_id = candidate.contest_office_we_vote_id
+                            position_change = True
+                    else:
+                        position_object.contest_office_id = contest_office_id
+                        position_object.contest_office_we_vote_id = contest_office_we_vote_id
+                        position_change = True
+                office_found = False
+                contest_office_manager = ContestOfficeManager()
+                if positive_value_exists(position_object.contest_office_id):
+                    results = contest_office_manager.retrieve_contest_office_from_id(position_object.contest_office_id)
+                    office_found = results['contest_office_found']
+                elif positive_value_exists(position_object.contest_office_we_vote_id):
+                    results = contest_office_manager.retrieve_contest_office_from_we_vote_id(
+                        position_object.contest_office_we_vote_id)
+                    office_found = results['contest_office_found']
+
+                if office_found:
+                    office_object = results['contest_office']
+                    if not positive_value_exists(position_object.contest_office_id):
+                        position_object.contest_office_id = office_object.id
+                        position_change = True
+                    if not positive_value_exists(position_object.contest_office_we_vote_id):
+                        position_object.contest_office_we_vote_id = office_object.we_vote_id
+                        position_change = True
+                    if not positive_value_exists(position_object.contest_office_name):
+                        position_object.contest_office_name = office_object.office_name
+                        position_change = True
 
         if position_change:
             position_object.save()
