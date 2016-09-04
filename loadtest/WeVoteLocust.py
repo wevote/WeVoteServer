@@ -12,7 +12,7 @@ class WeVoteTasks(TaskSet):
             print("Cant find test_variables.json, generating new voter_device_id")
             response = self.client.get("/apis/v1/deviceIdGenerate/")
             self.voter_device_id = response.json()["voter_device_id"]
-        print("voter_device_id = %s" % self.voter_device_id)
+        #print("voter_device_id = %s" % self.voter_device_id)
 
     @task(1)
     def homepage(self):
