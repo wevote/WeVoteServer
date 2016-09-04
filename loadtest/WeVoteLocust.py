@@ -1,10 +1,18 @@
+import os
+import json
 from locust import HttpLocust, TaskSet, task
 
 class WeVoteTasks(TaskSet):
 
     def on_start(self):
-        response = self.client.get("/apis/v1/deviceIdGenerate/")
-        self.voter_device_id = response.json()["voter_device_id"]
+        try:
+            with open(os.path.join(os.path.dirname(__file__), "test_variables.json")) as f:
+                self.voter_device_id = json.loads(f.read())["voter_device_id"]
+        except Exception as e:
+            print("Cant find test_variables.json, generating new voter_device_id")
+            response = self.client.get("/apis/v1/deviceIdGenerate/")
+            self.voter_device_id = response.json()["voter_device_id"]
+        print("voter_device_id = %s" % self.voter_device_id)
 
     @task(1)
     def homepage(self):
