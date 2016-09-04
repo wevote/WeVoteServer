@@ -5,6 +5,10 @@ from locust import HttpLocust, TaskSet, task
 class WeVoteTasks(TaskSet):
 
     def on_start(self):
+        '''
+        read voter_device_id from a property file (./loadtest/test_variables.json) if exists
+        otherwise generate a new one via the API
+        '''
         try:
             with open(os.path.join(os.path.dirname(__file__), "test_variables.json")) as f:
                 self.voter_device_id = json.loads(f.read())["voter_device_id"]
