@@ -28,6 +28,8 @@
         <a href="{{ organization.generate_facebook_link }}" target="_blank">{{ organization.organization_facebook }}</a>{% endif %}<br />
     Wikipedia Page: {% if organization.wikipedia_page_title %}
         <a href="{{ organization.generate_wikipedia_link }}" target="_blank">{{ organization.wikipedia_page_title }}</a>{% endif %}<br />
+    Endorsements importer: {% if organization.organization_endorsements_api_url %}
+        <a href="{{ organization.organization_endorsements_api_url }}" target="_blank">{{ organization.organization_endorsements_api_url }}</a>{% endif %}<br />
     <a href="{% url 'organization:organization_edit' organization.id %}">edit</a>
     </p>
 <p>

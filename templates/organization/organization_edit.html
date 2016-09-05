@@ -122,6 +122,14 @@
                value="{% if organization %}{{ organization.wikipedia_photo_url|default_if_none:"" }}{% else %}{{ wikipedia_photo_url }}{% endif %}" />
     </div>
 </div>
+
+<div class="form-group">
+    <label for="organization_endorsements_api_url" class="col-sm-3 control-label">Endorsements Importer URL</label>
+    <div class="col-sm-8">
+        <input type="text" name="organization_endorsements_api_url" id="organization_endorsements_api_url" class="form-control"
+               value="{% if organization %}{{ organization.organization_endorsements_api_url|default_if_none:"" }}{% else %}{{ organization_endorsements_api_url }}{% endif %}" />
+    </div>
+</div>
 {% endif %}
 
 {% if upcoming_election_list %}
