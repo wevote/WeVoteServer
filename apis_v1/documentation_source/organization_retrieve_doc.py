@@ -74,6 +74,7 @@ def organization_retrieve_doc_template_values(url_root):
                    '  "organization_twitter_handle": string (twitter address),\n' \
                    '  "twitter_followers_count": integer,\n' \
                    '  "twitter_description": string,\n' \
+                   '  "facebook_id": integer,\n' \
                    '}'
 
     template_values = {

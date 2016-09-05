@@ -19,7 +19,7 @@ from exception.models import handle_record_found_more_than_one_exception,\
 from election.models import Election, ElectionManager
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
 from organization.models import OrganizationListManager, OrganizationManager
-from position.models import PositionEntered, PositionEnteredManager, INFORMATION_ONLY, OPPOSE, \
+from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -400,7 +400,7 @@ def organization_position_list_view(request, organization_id):
             organization_position_list = []
 
         for one_position in organization_position_list:
-            position_manager = PositionEnteredManager()
+            position_manager = PositionManager()
             one_position = position_manager.refresh_cached_position_info(one_position)
 
         election_list = Election.objects.order_by('-election_day_text')
@@ -551,8 +551,8 @@ def organization_delete_existing_position_process_form_view(request, organizatio
     if positive_value_exists(position_we_vote_id):
         organization_position_on_stage = PositionEntered()
         organization_position_on_stage_found = False
-        position_entered_manager = PositionEnteredManager()
-        results = position_entered_manager.retrieve_position_from_we_vote_id(position_we_vote_id)
+        position_manager = PositionManager()
+        results = position_manager.retrieve_position_from_we_vote_id(position_we_vote_id)
         if results['position_found']:
             organization_position_on_stage_found = True
             organization_position_on_stage = results['position']
@@ -610,8 +610,8 @@ def organization_position_edit_view(request, organization_id, position_we_vote_i
     # Get the existing position
     organization_position_on_stage = PositionEntered()
     organization_position_on_stage_found = False
-    position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.retrieve_position_from_we_vote_id(position_we_vote_id)
+    position_manager = PositionManager()
+    results = position_manager.retrieve_position_from_we_vote_id(position_we_vote_id)
     if results['position_found']:
         organization_position_on_stage_found = True
         organization_position_on_stage = results['position']
@@ -672,7 +672,7 @@ def organization_position_edit_process_view(request):
     candidate_campaign_on_stage = CandidateCampaign()
     contest_measure_on_stage = ContestMeasure()
     state_code = ""
-    position_entered_manager = PositionEnteredManager()
+    position_manager = PositionManager()
 
     # Make sure this is a valid organization before we try to save a position
     organization_on_stage_found = False
@@ -782,7 +782,7 @@ def organization_position_edit_process_view(request):
 
     # Retrieve position from position_we_vote_id if it exists already
     if positive_value_exists(position_we_vote_id):
-        results = position_entered_manager.retrieve_position_from_we_vote_id(position_we_vote_id)
+        results = position_manager.retrieve_position_from_we_vote_id(position_we_vote_id)
         if results['position_found']:
             organization_position_on_stage_found = True
             organization_position_on_stage = results['position']
@@ -792,10 +792,10 @@ def organization_position_edit_process_view(request):
         # If a position_we_vote_id hasn't been passed in, then we are trying to create a new position.
         # Check to make sure a position for this org, candidate and election doesn't already exist
         if candidate_campaign_id:
-            results = position_entered_manager.retrieve_organization_candidate_campaign_position(
+            results = position_manager.retrieve_organization_candidate_campaign_position(
                 organization_id, candidate_campaign_id, google_civic_election_id)
         elif contest_measure_id:
-            results = position_entered_manager.retrieve_organization_contest_measure_position(
+            results = position_manager.retrieve_organization_contest_measure_position(
                 organization_id, contest_measure_id, google_civic_election_id)
         else:
             messages.add_message(
@@ -841,7 +841,7 @@ def organization_position_edit_process_view(request):
             organization_position_on_stage.state_code = state_code
             organization_position_on_stage.save()
 
-            organization_position_on_stage = position_entered_manager.refresh_cached_position_info(
+            organization_position_on_stage = position_manager.refresh_cached_position_info(
                 organization_position_on_stage)
 
             success = True
@@ -858,7 +858,7 @@ def organization_position_edit_process_view(request):
                         measure_title=contest_measure_on_stage.measure_title))
         else:
             # Create new
-            # Note that since we are processing a volunteer/admin entry tool, we can always save to the PositionEntered
+            # Note that since we are processing a volunteer/admin entry tool, we can always save the PositionEntered
             # table, and don't need to worry about PositionForFriends
             organization_position_on_stage = PositionEntered(
                 organization_id=organization_id,
@@ -877,7 +877,7 @@ def organization_position_edit_process_view(request):
             )
             organization_position_on_stage.save()
 
-            organization_position_on_stage = position_entered_manager.refresh_cached_position_info(
+            organization_position_on_stage = position_manager.refresh_cached_position_info(
                 organization_position_on_stage)
             success = True
 

@@ -16,7 +16,7 @@ from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 import copy
 from exception.models import handle_record_found_more_than_one_exception
-from position.models import PositionEnteredManager, PERCENT_RATING
+from position.models import PositionManager, PERCENT_RATING
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -658,7 +658,7 @@ def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_i
                 return results
 
         ratings_status = ""
-        position_manager = PositionEnteredManager()
+        position_manager = PositionManager()
         special_interest_group_manager = VoteSmartSpecialInterestGroupManager()
         for one_candidate_rating in rating_list:
             # Make sure we have all of the required variables

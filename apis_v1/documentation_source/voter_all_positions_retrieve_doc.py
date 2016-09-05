@@ -50,7 +50,8 @@ def voter_all_positions_retrieve_doc_template_values(url_root):
         'api_name': 'voterAllPositionsRetrieve',
         'api_slug': 'voterAllPositionsRetrieve',
         'api_introduction':
-            "Retrieve all positions held by this voter in one list.",
+            "Retrieve all support/oppose stances held by this voter in one list. For a list of positions with full "
+            "data, use positionListForVoter.",
         'try_now_link': 'apis_v1:voterAllPositionsRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

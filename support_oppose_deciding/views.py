@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.http import JsonResponse
-from position.models import PositionEnteredManager
+from position.models import PositionManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import get_voter_api_device_id
@@ -19,8 +19,8 @@ def voter_supporting_candidate_campaign_view(request, candidate_campaign_id):
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
-    position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id)
+    position_manager = PositionManager()
+    results = position_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -34,8 +34,8 @@ def voter_stop_supporting_candidate_campaign_view(request, candidate_campaign_id
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
-    position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id)
+    position_manager = PositionManager()
+    results = position_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_campaign_id)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -49,8 +49,8 @@ def voter_opposing_candidate_campaign_view(request, candidate_campaign_id):
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
-    position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id)
+    position_manager = PositionManager()
+    results = position_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -64,8 +64,8 @@ def voter_stop_opposing_candidate_campaign_view(request, candidate_campaign_id):
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
-    position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id)
+    position_manager = PositionManager()
+    results = position_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_campaign_id)
     if results['success']:
         return JsonResponse({0: "success"})
     else:
@@ -105,8 +105,8 @@ def voter_stance_for_candidate_campaign_view(request, candidate_campaign_id):
     voter_api_device_id = get_voter_api_device_id(request)
     voter_id = fetch_voter_id_from_voter_device_link(voter_api_device_id)
 
-    position_entered_manager = PositionEnteredManager()
-    results = position_entered_manager.retrieve_voter_candidate_campaign_position(voter_id, candidate_campaign_id)
+    position_manager = PositionManager()
+    results = position_manager.retrieve_voter_candidate_campaign_position(voter_id, candidate_campaign_id)
     if results['position_found']:
         if results['is_support']:
             return JsonResponse({0: "support"})

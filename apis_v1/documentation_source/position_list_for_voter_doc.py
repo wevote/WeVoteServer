@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/position_list_for_opinion_maker_doc.py
+# apis_v1/documentation_source/position_list_for_voter_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def position_list_for_opinion_maker_doc_template_values(url_root):
+def position_list_for_voter_doc_template_values(url_root):
     """
-    Show documentation about positionListForOpinionMaker
+    Show documentation about positionListForVoter
     """
     required_query_parameter_list = [
         {
@@ -17,26 +17,6 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
             'name':         'api_key',
             'value':        'string (from post, cookie, or get (in that order))',  # boolean, integer, long, string
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
-        },
-        {
-            'name':         'kind_of_opinion_maker',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'The kind of ballot item we want positions for. '
-                            ' (One of these: \'ORGANIZATION\', \'PUBLIC_FIGURE\')\n'
-        },
-        {
-            'name':         'opinion_maker_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique internal identifier of the ballot item we want positions for. '
-                            '(either opinion_maker_id OR opinion_maker_we_vote_id required -- not both. '
-                            'If it exists, opinion_maker_id is used instead of opinion_maker_we_vote_id)',
-        },
-        {
-            'name':         'opinion_maker_we_vote_id',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for this opinion_maker across all networks '
-                            '(either opinion_maker_id OR opinion_maker_we_vote_id required -- not both. '
-                            'NOTE: In the future we might support other identifiers used in the industry.',
         },
     ]
     optional_query_parameter_list = [
@@ -65,14 +45,12 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
             'description':  'The us state we want ballot item positions for. '
         },
         {
-            'name':         'filter_for_voter',
+            'name':         'show_only_this_election',
             'value':        'boolean',  # boolean, integer, long, string
-            'description':  'The default is \'True\'. If we can figure out (on API server) what the current '
-                            'google_civic_election_id is, only show positions about things on the current ballot. '
-                            'If not, figure out the state_code and only show positions about items in this state.',
+            'description':  'The default is \'True\'. Only show positions about things on the current ballot. ',
         },
         {
-            'name':         'filter_out_voter',
+            'name':         'show_all_other_elections',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'The default is \'False\'. Show the positions for this ballot item that are NOT on this '
                             'voter\'s ballot.',
@@ -103,9 +81,6 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        'kind_of_opinion_maker': 'ORGANIZATION',
-        'opinion_maker_id': '145',
-        'opinion_maker_we_vote_id': '',
         'stance': 'ANY_STANCE',
         'friends_vs_public': 'FRIENDS_AND_PUBLIC',
     }
@@ -114,17 +89,16 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "count": integer,\n' \
-                   '  "kind_of_opinion_maker": string ' \
-                   '   (One of these: \'ORGANIZATION\', \'PUBLIC_FIGURE\', \'UNKNOWN\'),\n' \
                    '  "friends_vs_public": string ' \
                    '   (One of these: \'FRIENDS_ONLY\', \'PUBLIC_ONLY\', \'FRIENDS_AND_PUBLIC\'),\n' \
-                   '  "opinion_maker_id": integer,\n' \
-                   '  "opinion_maker_we_vote_id": string,\n' \
-                   '  "opinion_maker_display_name": string,\n' \
-                   '  "opinion_maker_image_url_https": string,\n' \
-                   '  "is_following": boolean (Is this voter following this org/public_figure?),\n' \
-                   '  "is_ignoring": boolean (Is this voter ignoring this org/public_figure?),\n' \
+                   '  "voter_we_vote_id": string,\n' \
+                   '  "voter_display_name": string,\n' \
+                   '  "voter_image_url_https": string,\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "state_code": string,\n' \
                    '  "position_list": list\n' \
+                   '  "show_only_this_election": boolean (True if only returning positions for voter\'s ballot),\n' \
+                   '  "show_all_other_elections": boolean (True if returning positions NOT on voter\'s ballot,\n' \
                    '   [\n' \
                    '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
@@ -150,21 +124,16 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "statement_text": string,\n' \
                    '     "statement_html": string,\n' \
                    '     "google_civic_election_id": integer,\n' \
-                   '     "vote_smart_rating": string,\n' \
-                   '     "vote_smart_time_span": string,\n' \
                    '     "last_updated": string,\n' \
                    '   ],\n' \
-                   '  "filter_for_voter": boolean (True if only returning positions for voter\'s ballot),\n' \
-                   '  "filter_out_voter": boolean (True if returning positions NOT on voter\'s ballot,\n' \
                    '}'
 
     template_values = {
-        'api_name': 'positionListForOpinionMaker',
-        'api_slug': 'positionListForOpinionMaker',
+        'api_name': 'positionListForVoter',
+        'api_slug': 'positionListForVoter',
         'api_introduction':
-            "A list of all positions (support/oppose/info) held by this opinion maker  "
-            "(an organization, friend, or public figure). ",
-        'try_now_link': 'apis_v1:positionListForOpinionMakerView',
+            "A list of all positions (support/oppose/info) held by this voter. ",
+        'try_now_link': 'apis_v1:positionListForVoterView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

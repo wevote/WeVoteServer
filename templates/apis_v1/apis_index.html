@@ -246,6 +246,12 @@
             relating to Candidates, Measures or Offices.</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:positionListForVoterDocs' %}">positionListForVoter</a></td>
+        <td></td>
+        <td>A list of all positions (support/oppose/info) for this voter
+            relating to Candidates, Measures or Offices.</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:positionsCountForAllBallotItemsDocs' %}">positionsCountForAllBallotItems</a></td>
         <td></td>
         <td>A list of the support and oppose counts for all Ballot Items (Candidate or Measure) from organizations,
@@ -297,7 +303,7 @@
     <tr>
         <td><a href="{% url 'apis_v1:voterAllPositionsRetrieveDocs' %}">voterAllPositionsRetrieve</a></td>
         <td></td>
-        <td>Retrieve all of the voter's support/oppose positions.</td>
+        <td>Retrieve all support/oppose stances held by this voter in one list. For a list of positions with full data, use positionListForVoter.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterAllStarsStatusRetrieveDocs' %}">voterAllStarsStatusRetrieve</a></td>

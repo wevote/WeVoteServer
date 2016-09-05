@@ -10,7 +10,7 @@ from measure.models import ContestMeasureManager
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList
 import json
-from position.models import SUPPORT, OPPOSE, PositionEnteredManager, PositionListManager
+from position.models import SUPPORT, OPPOSE, PositionManager, PositionListManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager, VoterDeviceLinkManager, \
     VoterManager
 import wevote_functions.admin
@@ -772,7 +772,7 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    position_entered_manager = PositionEnteredManager()
+    position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
         candidate_campaign_manager = CandidateCampaignManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
@@ -781,7 +781,7 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
         elif positive_value_exists(candidate_we_vote_id):
             candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_entered_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_id)
+        results = position_manager.toggle_on_voter_oppose_for_candidate_campaign(voter_id, candidate_id)
         # toggle_off_voter_support_for_candidate_campaign
         status = "OPPOSING_CANDIDATE " + results['status']
         success = results['success']
@@ -802,7 +802,7 @@ def voter_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id,  # 
         elif positive_value_exists(measure_we_vote_id):
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
-        results = position_entered_manager.toggle_on_voter_oppose_for_contest_measure(voter_id, measure_id)
+        results = position_manager.toggle_on_voter_oppose_for_contest_measure(voter_id, measure_id)
         status = "OPPOSING_MEASURE " + results['status']
         success = results['success']
 
@@ -853,7 +853,7 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    position_entered_manager = PositionEnteredManager()
+    position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
         candidate_campaign_manager = CandidateCampaignManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
@@ -862,7 +862,7 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
         elif positive_value_exists(candidate_we_vote_id):
             candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_entered_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_id)
+        results = position_manager.toggle_off_voter_oppose_for_candidate_campaign(voter_id, candidate_id)
         status = "STOP_OPPOSING_CANDIDATE " + results['status']
         success = results['success']
 
@@ -882,7 +882,7 @@ def voter_stop_opposing_save(voter_device_id, candidate_id, candidate_we_vote_id
         elif positive_value_exists(measure_we_vote_id):
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
-        results = position_entered_manager.toggle_off_voter_oppose_for_contest_measure(voter_id, measure_id)
+        results = position_manager.toggle_off_voter_oppose_for_contest_measure(voter_id, measure_id)
         status = "STOP_OPPOSING_MEASURE" + results['status']
         success = results['success']
 
@@ -933,7 +933,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    position_entered_manager = PositionEnteredManager()
+    position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
         candidate_campaign_manager = CandidateCampaignManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
@@ -942,7 +942,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
         elif positive_value_exists(candidate_we_vote_id):
             candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_entered_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_id)
+        results = position_manager.toggle_off_voter_support_for_candidate_campaign(voter_id, candidate_id)
         status = "STOP_SUPPORTING_CANDIDATE " + results['status']
         success = results['success']
 
@@ -962,7 +962,7 @@ def voter_stop_supporting_save(voter_device_id, candidate_id, candidate_we_vote_
         elif positive_value_exists(measure_we_vote_id):
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
-        results = position_entered_manager.toggle_off_voter_support_for_contest_measure(voter_id, measure_id)
+        results = position_manager.toggle_off_voter_support_for_contest_measure(voter_id, measure_id)
         status = "STOP_SUPPORTING_MEASURE" + results['status']
         success = results['success']
 
@@ -1023,7 +1023,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    position_entered_manager = PositionEnteredManager()
+    position_manager = PositionManager()
     if positive_value_exists(candidate_id) or positive_value_exists(candidate_we_vote_id):
         candidate_campaign_manager = CandidateCampaignManager()
         # Since we can take in either candidate_id or candidate_we_vote_id, we need to retrieve the value we don't have
@@ -1032,7 +1032,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
         elif positive_value_exists(candidate_we_vote_id):
             candidate_id = candidate_campaign_manager.fetch_candidate_campaign_id_from_we_vote_id(candidate_we_vote_id)
 
-        results = position_entered_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_id)
+        results = position_manager.toggle_on_voter_support_for_candidate_campaign(voter_id, candidate_id)
         status = "SUPPORTING_CANDIDATE " + results['status']
         success = results['success']
 
@@ -1052,7 +1052,7 @@ def voter_supporting_save_for_api(voter_device_id,  # voterSupportingSave
         elif positive_value_exists(measure_we_vote_id):
             measure_id = contest_measure_manager.fetch_contest_measure_id_from_we_vote_id(measure_we_vote_id)
 
-        results = position_entered_manager.toggle_on_voter_support_for_contest_measure(voter_id, measure_id)
+        results = position_manager.toggle_on_voter_support_for_contest_measure(voter_id, measure_id)
         status = "SUPPORTING_MEASURE " + results['status']
         success = results['success']
 
