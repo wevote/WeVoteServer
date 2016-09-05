@@ -5,7 +5,7 @@
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
     organization_stop_following, voter_count
 from ballot.controllers import ballot_item_options_retrieve_for_api, choose_election_from_existing_data, \
-    voter_ballot_items_retrieve_for_api
+    figure_out_google_civic_election_id_voter_is_watching, voter_ballot_items_retrieve_for_api
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
@@ -20,6 +20,7 @@ from office.controllers import office_retrieve_for_api
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api, organizations_followed_retrieve_for_api
 from position.controllers import position_list_for_ballot_item_for_api, position_list_for_opinion_maker_for_api, \
+    position_list_for_voter_for_api, \
     position_retrieve_for_api, position_save_for_api, voter_all_positions_retrieve_for_api, \
     voter_position_retrieve_for_api, voter_position_comment_save_for_api, voter_position_visibility_save_for_api
 from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING, \
@@ -241,13 +242,24 @@ def organization_save_view(request):  # organizationSave
     organization_name = request.GET.get('organization_name', False)
     organization_email = request.GET.get('organization_email', False)
     organization_website = request.GET.get('organization_website', False)
-    organization_twitter_handle = request.GET.get('organization_twitter_handle', False)
     organization_facebook = request.GET.get('organization_facebook', False)
     organization_image = request.GET.get('organization_image', False)
-    refresh_from_twitter = request.GET.get('refresh_from_twitter', False)
 
     # We only want to allow save if either this is your organization (i.e., you have the Twitter handle)
     voter_owns_twitter_handle = False
+    voter_owns_facebook_id = False
+
+    # Twitter specific
+    organization_twitter_handle = request.GET.get('organization_twitter_handle', False)
+    refresh_from_twitter = request.GET.get('refresh_from_twitter', False)
+
+    # Facebook specific
+    facebook_id = request.GET.get('facebook_id', False)
+    if facebook_id is not False:
+        facebook_id = convert_to_int(facebook_id)
+    facebook_email = request.GET.get('facebook_email', False)
+    facebook_profile_image_url_https = request.GET.get('facebook_profile_image_url_https', False)
+
     #  or if you are a verified volunteer or admin
     authority_required = {'admin', 'verified_volunteer'}  # admin, verified_volunteer
     voter_is_admin_or_verified_volunteer = False
@@ -261,12 +273,20 @@ def organization_save_view(request):  # organizationSave
 
             # Does this voter have the same Twitter handle as this organization? If so, link this organization to
             #  this particular voter
-            if voter.twitter_screen_name.lower() == organization_twitter_handle.lower():
+            if positive_value_exists(voter.facebook_id) \
+                    and voter.facebook_id == facebook_id:
+                # This will fail if the organization's facebook_id isn't passed in as a variable
+                voter_owns_facebook_id = True
+
+            # Does this voter have the same Twitter handle as this organization? If so, link this organization to
+            #  this particular voter
+            if positive_value_exists(voter.twitter_screen_name) \
+                    and voter.twitter_screen_name.lower() == organization_twitter_handle.lower():
                 # This will fail if the organization's twitter handle isn't passed in as a variable
                 voter_owns_twitter_handle = True
 
     if not voter_is_admin_or_verified_volunteer:
-        if not voter_owns_twitter_handle:
+        if not voter_owns_twitter_handle and not voter_owns_facebook_id:
             # Only refuse entry if *both* conditions are not met
             results = {
                 'status': "VOTER_LACKS_AUTHORITY_TO_SAVE_ORGANIZATION",
@@ -283,6 +303,9 @@ def organization_save_view(request):  # organizationSave
                 'refresh_from_twitter': refresh_from_twitter,
                 'twitter_followers_count': 0,
                 'twitter_description': "",
+                'facebook_id': facebook_id,
+                'facebook_email': facebook_email,
+                'facebook_profile_image_url_https': facebook_profile_image_url_https,
             }
             return HttpResponse(json.dumps(results), content_type='application/json')
 
@@ -292,7 +315,10 @@ def organization_save_view(request):  # organizationSave
         organization_name=organization_name, organization_email=organization_email,
         organization_website=organization_website, organization_twitter_handle=organization_twitter_handle,
         organization_facebook=organization_facebook, organization_image=organization_image,
-        refresh_from_twitter=refresh_from_twitter)
+        refresh_from_twitter=refresh_from_twitter,
+        facebook_id=facebook_id, facebook_email=facebook_email,
+        facebook_profile_image_url_https=facebook_profile_image_url_https,
+    )
 
     return HttpResponse(json.dumps(results), content_type='application/json')
 
@@ -448,6 +474,42 @@ def position_list_for_opinion_maker_view(request):  # positionListForOpinionMake
                                                    filter_out_voter=filter_out_voter,
                                                    google_civic_election_id=google_civic_election_id,
                                                    state_code=state_code)
+
+
+def position_list_for_voter_view(request):  # positionListForVoter
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    stance = request.GET.get('stance', ANY_STANCE)
+    if stance in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+        stance_we_are_looking_for = stance
+    else:
+        stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public_incoming = request.GET.get('friends_vs_public', ANY_STANCE)
+    if friends_vs_public_incoming in (FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC):
+        friends_vs_public = friends_vs_public_incoming
+    else:
+        friends_vs_public = FRIENDS_AND_PUBLIC
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', "")
+    show_only_this_election = request.GET.get('show_only_this_election', True)
+    show_only_this_election = convert_to_bool(show_only_this_election)
+    show_all_other_elections = request.GET.get('show_all_other_elections', False)
+    show_all_other_elections = convert_to_bool(show_all_other_elections)
+    # Make sure show_only_this_election is reset to False if filter_out_voter is true
+    show_only_this_election = False if show_all_other_elections else show_only_this_election
+    if show_only_this_election or show_all_other_elections and not positive_value_exists(google_civic_election_id):
+        results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
+        google_civic_election_id = results['google_civic_election_id']
+    return position_list_for_voter_for_api(voter_device_id=voter_device_id,
+                                           friends_vs_public=friends_vs_public,
+                                           stance_we_are_looking_for=stance_we_are_looking_for,
+                                           show_only_this_election=show_only_this_election,
+                                           show_all_other_elections=show_all_other_elections,
+                                           google_civic_election_id=google_civic_election_id,
+                                           state_code=state_code)
 
 
 def position_retrieve_view(request):

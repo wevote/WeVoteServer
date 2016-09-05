@@ -2,9 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q
-
 from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
 from import_export_twitter.functions import retrieve_twitter_user_info
@@ -145,7 +145,10 @@ class OrganizationManager(models.Manager):
                                       organization_name=False, organization_website=False,
                                       organization_twitter_handle=False, organization_email=False,
                                       organization_facebook=False, organization_image=False,
-                                      refresh_from_twitter=False):
+                                      refresh_from_twitter=False,
+                                      facebook_id=False, facebook_email=False,
+                                      facebook_profile_image_url_https=False
+                                      ):
         """
         Either update or create an organization entry.
         """
@@ -178,11 +181,15 @@ class OrganizationManager(models.Manager):
         twitter_location = False
         twitter_url = False
 
+        # Facebook values
+        facebook_email = facebook_email.strip() if facebook_email else False
+
         # In order of authority
         # 1) organization_id exists? Find it with organization_id or fail
         # 2) we_vote_id exists? Find it with we_vote_id or fail
-        # 3) organization_website_search exists? Try to find it. If not, go to step 4
-        # 4) organization_twitter_search exists? Try to find it. If not, exit
+        # 3) facebook_id exists? Try to find it. If not, go to step 4
+        # 4) organization_website_search exists? Try to find it. If not, go to step 5
+        # 5) organization_twitter_search exists? Try to find it. If not, exit
 
         success = False
         if positive_value_exists(organization_id) or positive_value_exists(we_vote_id):
@@ -274,40 +281,67 @@ class OrganizationManager(models.Manager):
         else:
             try:
                 found_with_status = ''
+                organization_on_stage_found = False
 
-                # 3) organization_website_search exists? Try to find it. If not, go to step 4
-                if positive_value_exists(organization_website_search):
+                # 3) facebook_id exists? Try to find it. If not, go to step 4
+                if not organization_on_stage_found and positive_value_exists(facebook_id):
                     try:
                         organization_on_stage = Organization.objects.get(
-                            organization_website=organization_website_search)
+                            facebook_id=facebook_id)
+                        organization_on_stage_found = True
+                        found_with_status = "FOUND_WITH_FACEBOOK_ID"
+                    except Organization.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        logger.warn("Organization.MultipleObjectsReturned facebook_id")
+                    except Organization.DoesNotExist as e:
+                        # Not a problem -- an organization matching this facebook_id wasn't found
+                        exception_does_not_exist = True
+
+                # 4) organization_website_search exists? Try to find it. If not, go to step 5
+                if not organization_on_stage_found and positive_value_exists(organization_website_search):
+                    try:
+                        organization_on_stage = Organization.objects.get(
+                            organization_website__iexact=organization_website_search)
                         organization_on_stage_found = True
                         found_with_status = "FOUND_WITH_WEBSITE"
                     except Organization.MultipleObjectsReturned as e:
                         handle_record_found_more_than_one_exception(e, logger)
                         exception_multiple_object_returned = True
-                        logger.warn("Organization.MultipleObjectsReturned")
+                        logger.warn("Organization.MultipleObjectsReturned organization_website")
+                    except Organization.DoesNotExist as e:
+                        # Not a problem -- an organization matching this organization_website wasn't found
+                        exception_does_not_exist = True
+
+                # 5) organization_twitter_search exists? Try to find it. If not, exit
+                if not organization_on_stage_found and positive_value_exists(organization_twitter_search):
+                    try:
+                        organization_on_stage = Organization.objects.get(
+                            organization_twitter_handle__iexact=organization_twitter_search)
+                        organization_on_stage_found = True
+                        found_with_status = "FOUND_WITH_TWITTER"
+                    except Organization.MultipleObjectsReturned as e:
+                        handle_record_found_more_than_one_exception(e, logger)
+                        exception_multiple_object_returned = True
+                        logger.warn("Organization.MultipleObjectsReturned organization_twitter_handle")
                     except Organization.DoesNotExist as e:
                         # Not a problem -- an organization matching this twitter handle wasn't found
                         exception_does_not_exist = True
 
-                # 4) organization_twitter_search exists? Try to find it. If not, exit
-                if not organization_on_stage_found:
-                    if positive_value_exists(organization_twitter_search):
-                        try:
-                            organization_on_stage = Organization.objects.get(
-                                organization_twitter_handle=organization_twitter_search)
-                            organization_on_stage_found = True
-                            found_with_status = "FOUND_WITH_TWITTER"
-                        except Organization.MultipleObjectsReturned as e:
-                            handle_record_found_more_than_one_exception(e, logger)
-                            exception_multiple_object_returned = True
-                            logger.warn("Organization.MultipleObjectsReturned")
-                        except Organization.DoesNotExist as e:
-                            # Not a problem -- an organization matching this twitter handle wasn't found
-                            exception_does_not_exist = True
-
-                # 3 & 4) Save values entered in steps 3 & 4
                 if organization_on_stage_found:
+                    value_changed = False
+
+                    # 3) Save based on facebook_id
+                    if facebook_id or facebook_email or facebook_profile_image_url_https:
+                        value_changed = True
+                        if facebook_id:
+                            organization_on_stage.facebook_id = facebook_id
+                        if facebook_email:
+                            organization_on_stage.facebook_email = facebook_email
+                        if facebook_profile_image_url_https:
+                            organization_on_stage.facebook_profile_image_url_https = facebook_profile_image_url_https
+
+                    # 4 & 5) Save values entered in steps 4 & 5
                     # Now that we have an organization to update, get supplemental data from Twitter if
                     # refresh_from_twitter is true
                     if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
@@ -331,7 +365,6 @@ class OrganizationManager(models.Manager):
                             twitter_description = twitter_json['description']
                             twitter_location = twitter_json['location']
 
-                    value_changed = False
                     if organization_name or organization_website or organization_twitter_handle \
                             or organization_email or organization_facebook or organization_image:
                         value_changed = True
@@ -413,12 +446,16 @@ class OrganizationManager(models.Manager):
                 if results['success']:
                     new_organization_created = True
                     success = True
+                    value_changed = False
                     status = "NEW_ORGANIZATION_CREATED_IN_UPDATE_OR_CREATE"
                     organization_on_stage = results['organization']
 
                     if twitter_user_id or twitter_name or twitter_followers_count or twitter_profile_image_url_https \
                             or twitter_profile_banner_url_https or twitter_profile_background_image_url_https \
                             or twitter_description or twitter_location:
+                        value_changed = True
+                        status += " TWITTER_VALUES_RETRIEVED"
+
                         # Values that can only be added by a refresh_from_twitter
                         if twitter_user_id:
                             organization_on_stage.twitter_user_id = twitter_user_id
@@ -438,8 +475,21 @@ class OrganizationManager(models.Manager):
                         if twitter_location:
                             organization_on_stage.twitter_location = twitter_location
 
+                    if facebook_id or facebook_email or facebook_profile_image_url_https:
+                        value_changed = True
+                        status += " FACEBOOK_VALUES_TO_BE_ADDED"
+                        if facebook_id:
+                            organization_on_stage.facebook_id = facebook_id
+                        if facebook_email:
+                            organization_on_stage.facebook_email = facebook_email
+                        if facebook_profile_image_url_https:
+                            organization_on_stage.facebook_profile_image_url_https = facebook_profile_image_url_https
+
+                    if value_changed:
                         organization_on_stage.save()
-                        status += " TWITTER_VALUES_RETRIEVED_AND_SAVED"
+                        status += " EXTRA_VALUES_SAVED"
+                    else:
+                        status += " EXTRA_VALUES_NOT_SAVED"
 
                 else:
                     success = False
@@ -449,7 +499,7 @@ class OrganizationManager(models.Manager):
             except Exception as e:
                 handle_record_not_saved_exception(e, logger=logger)
                 success = False
-                status = "NEW_ORGANIZATION_COULD_NOT_BE_CREATED"
+                status = "NEW_ORGANIZATION_COULD_NOT_BE_CREATED_OR_EXTRA_VALUES_ADDED"
                 organization_on_stage = Organization
 
         results = {
@@ -881,6 +931,7 @@ class OrganizationListManager(models.Manager):
 
 class Organization(models.Model):
     # We are relying on built-in Python id field
+    alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
 
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our org info with other
     # organizations
@@ -913,6 +964,14 @@ class Organization(models.Model):
     organization_phone2 = models.CharField(max_length=255, null=True, blank=True)
     organization_fax = models.CharField(max_length=255, null=True, blank=True)
 
+    # Facebook session information
+    facebook_id = models.BigIntegerField(verbose_name="facebook big integer id", null=True, blank=True)
+    facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
+                                       null=True, blank=True)
+    fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
+    facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook', blank=True, null=True)
+
+    # Twitter information
     twitter_user_id = models.BigIntegerField(verbose_name="twitter id", null=True, blank=True)
     organization_twitter_handle = models.CharField(
         verbose_name='organization twitter screen_name', max_length=255, null=True, unique=False)

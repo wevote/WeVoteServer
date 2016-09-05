@@ -10,7 +10,7 @@ from follow.models import FollowOrganizationList
 from itertools import chain
 import json
 from organization.models import OrganizationManager
-from position.models import ANY_STANCE, PositionEntered, PositionEnteredManager, PositionListManager
+from position.models import ANY_STANCE, PositionEntered, PositionManager, PositionListManager
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
@@ -345,7 +345,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
             linked_organization_we_vote_id = voter.linked_organization_we_vote_id
 
         number_added_to_list = 0
-        position_manager = PositionEnteredManager()
+        position_manager = PositionManager()
         position = PositionEntered()
         for voter_guide in voter_guide_list:
             if positive_value_exists(voter_guide.organization_we_vote_id) \
