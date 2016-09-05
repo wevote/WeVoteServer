@@ -961,6 +961,8 @@ class Organization(models.Model):
     organization_type = models.CharField(
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
 
+    organization_endorsements_api_url = models.URLField(verbose_name='url of endorsements importer', blank=True, null=True)
+
     def __unicode__(self):
         return str(self.organization_name)
 
