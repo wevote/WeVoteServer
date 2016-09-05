@@ -2,9 +2,12 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, VoterManager
+from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, \
+    VoterDeviceLinkManager, VoterManager
+from django.http import HttpResponse
+import json
 import wevote_functions.admin
-from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
+from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -32,22 +35,19 @@ def voter_address_retrieve_for_api(voter_device_id):
         }
         return voter_address_retrieve_results
 
-    # ##################
-    # Temp code to test authentication
-    # user = PasswordlessAuthBackend.authenticate(username=user.username)
-    # login(request, user)
-    # ##################
-
     voter_address_manager = VoterAddressManager()
     results = voter_address_manager.retrieve_ballot_address_from_voter_id(voter_id)
 
     if results['voter_address_found']:
         voter_address = results['voter_address']
         status = "VOTER_ADDRESS_RETRIEVE-ADDRESS_FOUND"
+
         voter_address_retrieve_results = {
             'voter_device_id': voter_device_id,
             'address_type': voter_address.address_type if voter_address.address_type else '',
             'text_for_map_search': voter_address.text_for_map_search if voter_address.text_for_map_search else '',
+            'google_civic_election_id': voter_address.google_civic_election_id if voter_address.google_civic_election_id
+            else 0,
             'latitude': voter_address.latitude if voter_address.latitude else '',
             'longitude': voter_address.longitude if voter_address.longitude else '',
             'normalized_line1': voter_address.normalized_line1 if voter_address.normalized_line1 else '',
@@ -68,6 +68,7 @@ def voter_address_retrieve_for_api(voter_device_id):
             'voter_device_id': voter_device_id,
             'address_type': '',
             'text_for_map_search': '',
+            'google_civic_election_id': 0,
             'latitude': '',
             'longitude': '',
             'normalized_line1': '',
@@ -79,33 +80,7 @@ def voter_address_retrieve_for_api(voter_device_id):
         return voter_address_retrieve_results
 
 
-def voter_address_save_for_api(voter_device_id, address_raw_text, address_variable_exists):
-    device_id_results = is_voter_device_id_valid(voter_device_id)
-    if not device_id_results['success']:
-        results = {
-                'status': device_id_results['status'],
-                'success': False,
-                'voter_device_id': voter_device_id,
-            }
-        return results
-
-    if not address_variable_exists:
-        results = {
-                'status': "MISSING_POST_VARIABLE-ADDRESS",
-                'success': False,
-                'voter_device_id': voter_device_id,
-            }
-        return results
-
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        results = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return results
-
+def voter_address_save_for_api(voter_device_id, voter_id, address_raw_text):
     # At this point, we have a valid voter
 
     voter_address_manager = VoterAddressManager()
@@ -126,7 +101,6 @@ def voter_address_save_for_api(voter_device_id, address_raw_text, address_variab
                 'voter_device_id': voter_device_id,
                 'text_for_map_search': address_raw_text,
             }
-
     # elif results['status'] == 'MULTIPLE_MATCHING_ADDRESSES_FOUND':
         # delete all currently matching addresses and save again
     else:
@@ -134,8 +108,77 @@ def voter_address_save_for_api(voter_device_id, address_raw_text, address_variab
                 'status': results['status'],
                 'success': False,
                 'voter_device_id': voter_device_id,
+                'text_for_map_search': address_raw_text,
             }
     return results
+
+
+def voter_create_for_api(voter_device_id):  # voterCreate
+    # If a voter_device_id isn't passed in, automatically create a new voter_device_id
+    if not positive_value_exists(voter_device_id):
+        voter_device_id = generate_voter_device_id()
+    else:
+        # If a voter_device_id is passed in that isn't valid, we want to throw an error
+        results = is_voter_device_id_valid(voter_device_id)
+        if not results['success']:
+            return HttpResponse(json.dumps(results['json_data']), content_type='application/json')
+
+    voter_id = 0
+    voter_we_vote_id = ''
+    # Make sure a voter record hasn't already been created for this
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if results['voter_found']:
+        voter = results['voter']
+        voter_id = voter.id
+        voter_we_vote_id = voter.we_vote_id
+        json_data = {
+            'status': "VOTER_ALREADY_EXISTS",
+            'success': True,
+            'voter_device_id': voter_device_id,
+            'voter_id':         voter_id,
+            'voter_we_vote_id': voter_we_vote_id,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    # Create a new voter and return the voter_device_id
+    voter_manager = VoterManager()
+    results = voter_manager.create_voter()
+
+    if results['voter_created']:
+        voter = results['voter']
+
+        # Now save the voter_device_link
+        voter_device_link_manager = VoterDeviceLinkManager()
+        results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter.id)
+
+        if results['voter_device_link_created']:
+            voter_device_link = results['voter_device_link']
+            voter_id_found = True if voter_device_link.voter_id > 0 else False
+
+            if voter_id_found:
+                voter_id = voter.id
+                voter_we_vote_id = voter.we_vote_id
+
+    if voter_id:
+        json_data = {
+            'status':           "VOTER_CREATED",
+            'success':          True,
+            'voter_device_id':  voter_device_id,
+            'voter_id':         voter_id,
+            'voter_we_vote_id': voter_we_vote_id,
+
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        json_data = {
+            'status':           "VOTER_NOT_CREATED",
+            'success':          False,
+            'voter_device_id':  voter_device_id,
+            'voter_id':         0,
+            'voter_we_vote_id': '',
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, facebook_photo_variable_exists):
@@ -199,54 +242,113 @@ def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, 
     return results
 
 
-def voter_retrieve_for_api(voter_device_id):
+def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
     """
     Used by the api
     :param voter_device_id:
     :return:
     """
-    device_id_results = is_voter_device_id_valid(voter_device_id)
-    if not device_id_results['success']:
-        json_data = {
-                'status': device_id_results['status'],
-                'success': False,
-                'voter_device_id': voter_device_id,
-            }
-        return json_data
-
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if not positive_value_exists(voter_id):
-        json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-        }
-        return json_data
-
-    # At this point, we have a valid voter_id
-
     voter_manager = VoterManager()
+    voter_id = 0
+    voter_created = False
+
+    if positive_value_exists(voter_device_id):
+        # If a voter_device_id is passed in that isn't valid, we want to throw an error
+        device_id_results = is_voter_device_id_valid(voter_device_id)
+        if not device_id_results['success']:
+            json_data = {
+                    'status':           device_id_results['status'],
+                    'success':          False,
+                    'voter_device_id':  voter_device_id,
+                    'voter_created':    False,
+                    'voter_found':      False,
+                }
+            return json_data
+
+        voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+        if not positive_value_exists(voter_id):
+            json_data = {
+                'status':           "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+                'success':          False,
+                'voter_device_id':  voter_device_id,
+                'voter_created':    False,
+                'voter_found':      False,
+            }
+            return json_data
+    else:
+        # If a voter_device_id isn't passed in, automatically create a new voter_device_id and voter
+        voter_device_id = generate_voter_device_id()
+
+        # We make sure a voter record hasn't already been created for this new voter_device_id, so we don't create a
+        # security hole by giving a new person access to an existing account. This should never happen because it is
+        # so unlikely that we will ever generate an existing voter_device_id with generate_voter_device_id.
+        existing_voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+        if existing_voter_id:
+            json_data = {
+                'status':           "VOTER_ALREADY_EXISTS_BUT_ACCESS_RESTRICTED",
+                'success':          False,
+                'voter_device_id':  voter_device_id,
+                'voter_created':    False,
+                'voter_found':      False,
+            }
+            return json_data
+
+        results = voter_manager.create_voter()
+
+        if results['voter_created']:
+            voter = results['voter']
+
+            # Now save the voter_device_link
+            voter_device_link_manager = VoterDeviceLinkManager()
+            results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter.id)
+
+            if results['voter_device_link_created']:
+                voter_device_link = results['voter_device_link']
+                voter_id_found = True if voter_device_link.voter_id > 0 else False
+
+                if voter_id_found:
+                    voter_id = voter_device_link.voter_id
+                    voter_created = True
+
+        if not positive_value_exists(voter_id):
+            json_data = {
+                'status':           "VOTER_NOT_FOUND_AFTER_BEING_CREATED",
+                'success':          False,
+                'voter_device_id':  voter_device_id,
+                'voter_created':    False,
+                'voter_found':      False,
+            }
+            return json_data
+
+    # At this point, we should have a valid voter_id
     results = voter_manager.retrieve_voter_by_id(voter_id)
     if results['voter_found']:
         voter = results['voter']
 
-        status = 'VOTER_FOUND'
+        if voter_created:
+            status = 'VOTER_CREATED'
+        else:
+            status = 'VOTER_FOUND'
         json_data = {
             'status':                           status,
             'success':                          True,
             'voter_device_id':                  voter_device_id,
+            'voter_created':                    voter_created,
             'voter_found':                      True,
             'we_vote_id':                       voter.we_vote_id,
             'facebook_id':                      voter.facebook_id,
             'email':                            voter.email,
             'facebook_email':                   voter.facebook_email,
             'facebook_profile_image_url_https': voter.facebook_profile_image_url_https,
+            'full_name':                        voter.get_full_name(),
             'first_name':                       voter.first_name,
             'last_name':                        voter.last_name,
+            'twitter_screen_name':              voter.twitter_screen_name,
             'signed_in_personal':               voter.signed_in_personal(),
             'signed_in_facebook':               voter.signed_in_facebook(),
             'signed_in_google':                 voter.signed_in_google(),
             'signed_in_twitter':                voter.signed_in_twitter(),
+            'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
             'voter_photo_url':                  voter.voter_photo_url(),
         }
         return json_data
@@ -257,18 +359,22 @@ def voter_retrieve_for_api(voter_device_id):
             'status':                           status,
             'success':                          False,
             'voter_device_id':                  voter_device_id,
+            'voter_created':                    False,
             'voter_found':                      False,
             'we_vote_id':                       '',
             'facebook_id':                      '',
             'email':                            '',
             'facebook_email':                   '',
             'facebook_profile_image_url_https': '',
+            'full_name':                        '',
             'first_name':                       '',
             'last_name':                        '',
+            'twitter_screen_name':              '',
             'signed_in_personal':               False,
             'signed_in_facebook':               False,
             'signed_in_google':                 False,
             'signed_in_twitter':                False,
+            'linked_organization_we_vote_id':   '',
             'voter_photo_url':                  '',
         }
         return json_data
@@ -342,5 +448,19 @@ def voter_retrieve_list_for_api(voter_device_id):
     results = {
         'success': False,
         'json_data': json_data,
+    }
+    return results
+
+
+def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # voterSignOut
+    voter_device_link_manager = VoterDeviceLinkManager()
+    if sign_out_all_devices:
+        results = voter_device_link_manager.delete_all_voter_device_links(voter_device_id)
+    else:
+        results = voter_device_link_manager.delete_voter_device_link(voter_device_id)
+
+    results = {
+        'success':  results['success'],
+        'status':   results['status'],
     }
     return results

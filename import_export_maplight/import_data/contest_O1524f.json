@@ -1,0 +1,92 @@
+{
+    "5746": {
+        "bio": "",
+        "candidate_flags": "",
+        "candidate_id": "5746",
+        "contest": {
+            "election_date": "2014-11-04",
+            "id": "O1524",
+            "jurisdiction": {
+                "id": "1",
+                "level": "S",
+                "name": "California",
+                "region_name": "California",
+                "state": "California",
+                "statecode": "CA"
+            },
+            "office": {
+                "body": "",
+                "class": "",
+                "district": "0",
+                "flags": "",
+                "region_name": "California",
+                "state": "California",
+                "statecode": "CA",
+                "title": "Governor"
+            },
+            "title": "Governor - California",
+            "type": "office",
+            "url": "http://votersedge.org/california/2014/november/state/candidates/governor"
+        },
+        "display_name": "Jerry Brown",
+        "first_name": "",
+        "gender": "M",
+        "last_funding_update": "2014-09-03",
+        "last_name": "Brown",
+        "middle_name": "",
+        "name_prefix": "",
+        "name_suffix": "",
+        "original_name": "Edmund G Brown",
+        "party": "Democratic",
+        "photo": "http://votersedge.org/sites/all/modules/map/modules/map_proposition/images/politicians/2633.jpg?v",
+        "politician_id": "2633",
+        "roster_name": "Jerry Brown",
+        "type": "",
+        "url": "http://votersedge.org/california/2014/november/state/candidates/governor/2633-jerry-brown"
+    },
+    "5752": {
+        "bio": "",
+        "candidate_flags": "",
+        "candidate_id": "5752",
+        "contest": {
+            "election_date": "2014-11-04",
+            "id": "O1524",
+            "jurisdiction": {
+                "id": "1",
+                "level": "S",
+                "name": "California",
+                "region_name": "California",
+                "state": "California",
+                "statecode": "CA"
+            },
+            "office": {
+                "body": "",
+                "class": "",
+                "district": "0",
+                "flags": "",
+                "region_name": "California",
+                "state": "California",
+                "statecode": "CA",
+                "title": "Governor"
+            },
+            "title": "Governor - California",
+            "type": "office",
+            "url": "http://votersedge.org/california/2014/november/state/candidates/governor"
+        },
+        "display_name": "Neel Kashkari",
+        "first_name": "",
+        "gender": "M",
+        "last_funding_update": "2014-09-03",
+        "last_name": "Kashkari",
+        "middle_name": "",
+        "name_prefix": "",
+        "name_suffix": "",
+        "original_name": "Neel  Kashkari",
+        "party": "Republican",
+        "photo": "http://votersedge.org/sites/all/modules/map/modules/map_proposition/images/politicians/2650.jpg?v",
+        "politician_id": "2650",
+        "roster_name": "Neel Kashkari",
+        "type": "",
+        "url": "http://votersedge.org/california/2014/november/state/candidates/governor/2650-neel-kashkari"
+    }
+}

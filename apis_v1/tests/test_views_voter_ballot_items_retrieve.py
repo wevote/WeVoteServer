@@ -3,8 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.core.urlresolvers import reverse
-from django.test import Client, TestCase
-from django.http import SimpleCookie
+from django.test import TestCase
 import json
 
 
@@ -16,7 +15,7 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         self.voter_create_url = reverse("apis_v1:voterCreateView")
         self.voter_ballot_items_retrieve_url = reverse("apis_v1:voterBallotItemsRetrieveView")
 
-    def test_retrieve_with_no_cookie(self):
+    def test_retrieve_with_no_voter_device_id(self):
         #######################################
         # Without a cookie, we don't expect valid response
         response = self.client.get(self.voter_ballot_items_retrieve_url)
@@ -27,12 +26,12 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
                          "voter_device_id expected in the voterBallotItemsRetrieve json response, and not found")
 
         self.assertEqual(
-            json_data['status'], 'VALID_VOTER_DEVICE_ID_MISSING',
+            json_data['status'], 'VALID_VOTER_DEVICE_ID_MISSING ',  # Space needed
             "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data['status'], voter_device_id=json_data['voter_device_id']))
 
-    def test_retrieve_with_cookie(self):
+    def test_retrieve_with_voter_device_id(self):
         """
         Test the various cookie states
         :return:
@@ -47,14 +46,13 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         self.assertEqual('voter_device_id' in json_data01, True,
                          "voter_device_id expected in the deviceIdGenerateView json response")
 
-        # Now save the retrieved voter_device_id in a mock cookie
-        cookies = SimpleCookie()
-        cookies["voter_device_id"] = json_data01['voter_device_id']
-        self.client = Client(HTTP_COOKIE=cookies.output(header='', sep='; '))
+        # Now put the voter_device_id in a variable we can use below
+        voter_device_id = json_data01['voter_device_id'] if 'voter_device_id' in json_data01 else ''
 
         #######################################
-        # With a cookie, but without a voter_id in the database, we don't expect valid response
-        response02 = self.client.get(self.voter_ballot_items_retrieve_url)
+        # With a voter_device_id, but without a voter_id (or voter_device_link) in the database,
+        # we don't expect valid response
+        response02 = self.client.get(self.voter_ballot_items_retrieve_url, {'voter_device_id': voter_device_id})
         json_data02 = json.loads(response02.content.decode())
 
         self.assertEqual('status' in json_data02, True, "status expected in the json response, and not found")
@@ -62,14 +60,14 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
                          "voter_device_id expected in the voterBallotItemsRetrieve json response, and not found")
 
         self.assertEqual(
-            json_data02['status'], 'VALID_VOTER_ID_MISSING',
-            "status: {status} (VALID_VOTER_ID_MISSING expected), "
+            json_data02['status'], 'VALID_VOTER_DEVICE_ID_MISSING ',  # Space needed
+            "status: {status} (VALID_VOTER_DEVICE_ID_MISSING expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data02['status'], voter_device_id=json_data02['voter_device_id']))
 
         #######################################
         # Create a voter so we can test retrieve
-        response03 = self.client.get(self.voter_create_url)
+        response03 = self.client.get(self.voter_create_url, {'voter_device_id': voter_device_id})
         json_data03 = json.loads(response03.content.decode())
 
         self.assertEqual('status' in json_data03, True,
@@ -84,13 +82,8 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
                 status=json_data03['status'], voter_device_id=json_data03['voter_device_id']))
 
         #######################################
-        # Test the response with google_civic_election_id in cookie
-        cookies["google_civic_election_id"] = 4162
-        self.client = Client(HTTP_COOKIE=cookies.output(header='', sep='; '))
-
-        #######################################
         # Test the response before any ballot_items exist
-        response05 = self.client.get(self.voter_ballot_items_retrieve_url)
+        response05 = self.client.get(self.voter_ballot_items_retrieve_url, {'voter_device_id': voter_device_id})
         json_data05 = json.loads(response05.content.decode())
 
         self.assertEqual('status' in json_data05, True,
@@ -102,8 +95,8 @@ class WeVoteAPIsV1TestsVoterBallotItemsRetrieve(TestCase):
         self.assertEqual('ballot_item_list' in json_data05, True,
                          "ballot_item_list expected in the voterBallotItemsRetrieve json response but not found")
         self.assertEqual(
-            json_data05['status'], 'NO_BALLOT_ITEMS_FOUND_0',
-            "status: {status} (NO_BALLOT_ITEMS_FOUND_0 expected), voter_device_id: {voter_device_id}".format(
+            json_data05['status'], ' VOTER_ADDRESS_DOES_NOT_EXIST',  # The extra space needs to be there
+            "status: {status} (VOTER_ADDRESS_DOES_NOT_EXIST expected), voter_device_id: {voter_device_id}".format(
                 status=json_data05['status'], voter_device_id=json_data05['voter_device_id']))
 
         # Test the response with google_civic_election_id in voter record  # TODO

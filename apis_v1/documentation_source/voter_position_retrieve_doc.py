@@ -10,7 +10,7 @@ def voter_position_retrieve_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -26,57 +26,16 @@ def voter_position_retrieve_doc_template_values(url_root):
         },
         {
             'name':         'ballot_item_we_vote_id',
-            'value':        'integer',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'The unique we_vote identifier for this ballot_item '
                             '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
                             'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
-        # {
-        #     'name':         'office_we_vote_id',
-        #     'value':        'string',  # boolean, integer, long, string
-        #     'description':  'Office We Vote unique identifier. '
-        #                     '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
-        #                     'measure_we_vote_id',
-        # },
-        # {
-        #     'name':         'candidate_we_vote_id',
-        #     'value':        'string',  # boolean, integer, long, string
-        #     'description':  'Candidate We Vote unique identifier. '
-        #                     '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
-        #                     'measure_we_vote_id',
-        # },
-        # {
-        #     'name':         'measure_we_vote_id',
-        #     'value':        'string',  # boolean, integer, long, string
-        #     'description':  'Measure We Vote unique identifier. '
-        #                     '(We need one of these three identifiers: office_we_vote_id, candidate_we_vote_id, '
-        #                     'measure_we_vote_id',
-        # },
     ]
     optional_query_parameter_list = [
     ]
 
     potential_status_codes_list = [
-        # {
-        #     'code':         'RETRIEVE_POSITION_FOUND_WITH_POSITION_ID',
-        #     'description':  'The position was found using the internal id',
-        # },
-        # {
-        #     'code':         'RETRIEVE_POSITION_FOUND_WITH_WE_VOTE_ID',
-        #     'description':  'The position was found using the we_vote_id',
-        # },
-        # {
-        #     'code':         'POSITION_RETRIEVE_BOTH_IDS_MISSING',
-        #     'description':  'One identifier required. Neither provided.',
-        # },
-        # {
-        #     'code':         'POSITION_NOT_FOUND_WITH_ID',
-        #     'description':  'The position was not found with internal id.',
-        # },
-        # {
-        #     'code':         'ERROR_<specifics here>',
-        #     'description':  'An internal description of what error prevented the retrieve of the position.',
-        # },
     ]
 
     try_now_link_variables_dict = {
@@ -84,11 +43,11 @@ def voter_position_retrieve_doc_template_values(url_root):
         'ballot_item_we_vote_id': 'wv01cand1755',
     }
 
+    # Don't need is_positive_rating, is_support_or_positive_rating, is_negative_rating or is_oppose_or_negative_rating
     api_response = '{\n' \
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
                    '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
-                   '  "position_id": integer (the internal id of the position found),\n' \
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "is_support": boolean,\n' \
                    '  "is_oppose": boolean,\n' \
@@ -97,6 +56,8 @@ def voter_position_retrieve_doc_template_values(url_root):
                    '  "office_we_vote_id": string,\n' \
                    '  "candidate_we_vote_id": string,\n' \
                    '  "measure_we_vote_id": string,\n' \
+                   '  "kind_of_ballot_item": string (OFFICE, CANDIDATE, MEASURE),\n' \
+                   '  "ballot_item_we_vote_id": string,\n' \
                    '  "stance": string (SUPPORT, OPPOSE, INFO_ONLY, or NO_STANCE),\n' \
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \

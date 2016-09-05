@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-10-07T07:49:48</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="60">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-10-20</registration_deadline>
+  <absentee_request_deadline>2014-11-04</absentee_request_deadline>
+</election>
+<locality id="11">
+  <name>Glenn County Elections</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="120000001898">
+  <name>CONSOLIDATED PRECINCT 2</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001689</polling_location_id>
+</precinct>
+<precinct id="120000001899">
+  <name>CONSOLIDATED PRECINCT 1</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001689</polling_location_id>
+</precinct>
+<precinct id="120000001900">
+  <name>VBM PRECINCT 10031</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001901">
+  <name>VBM PRECINCT 10050</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001902">
+  <name>VBM PRECINCT 10060</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001903">
+  <name>VBM PRECINCT 12150</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001904">
+  <name>CONSOLIDATED PRECINCT 5</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001691</polling_location_id>
+</precinct>
+<precinct id="120000001905">
+  <name>CONSOLIDATED PRECINCT 4</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001689</polling_location_id>
+</precinct>
+<precinct id="120000001906">
+  <name>CONSOLIDATED PRECINCT 3</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001689</polling_location_id>
+</precinct>
+<precinct id="120000001907">
+  <name>VBM PRECINCT 30011</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001908">
+  <name>VBM PRECINCT 30042</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001909">
+  <name>VBM PRECINCT 30014</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001910">
+  <name>VBM PRECINCT 30020</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001911">
+  <name>VBM PRECINCT 30120</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001912">
+  <name>VBM PRECINCT 30072</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001913">
+  <name>CONSOLIDATED PRECINCT 6</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001698</polling_location_id>
+</precinct>
+<precinct id="120000001914">
+  <name>VBM PRECINCT 30081</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001915">
+  <name>VBM PRECINCT 30070</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001916">
+  <name>VBM PRECINCT 30082</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001917">
+  <name>VBM PRECINCT 31070</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001918">
+  <name>CONSOLIDATED PRECINCT 7</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001698</polling_location_id>
+</precinct>
+<precinct id="120000001919">
+  <name>CONSOLIDATED PRECINCT 9</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001698</polling_location_id>
+</precinct>
+<precinct id="120000001920">
+  <name>CONSOLIDATED PRECINCT 8</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001702</polling_location_id>
+</precinct>
+<precinct id="120000001921">
+  <name>VBM PRECINCT 50010</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001922">
+  <name>VBM PRECINCT 50022</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001923">
+  <name>VBM PRECINCT 50030</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001924">
+  <name>CONSOLIDATED PRECINCT 10</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001711</polling_location_id>
+</precinct>
+<precinct id="120000001925">
+  <name>VBM PRECINCT 50052</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001926">
+  <name>VBM PRECINCT 50061</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001927">
+  <name>VBM PRECINCT 50081</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001928">
+  <name>VBM PRECINCT 50082</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001929">
+  <name>VBM PRECINCT 50083</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001930">
+  <name>VBM PRECINCT 50084</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001931">
+  <name>VBM PRECINCT 50085</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001932">
+  <name>VBM PRECINCT 41150</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001933">
+  <name>VBM PRECINCT 30083</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001934">
+  <name>VBM PRECINCT 30084</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<precinct id="120000001935">
+  <name>VBM PRECINCT 50087</name>
+  <locality_id>11</locality_id>
+  <polling_location_id>130000001708</polling_location_id>
+</precinct>
+<polling_location id="130000001689">
+  <address>
+    <line2>221 E YOLO ST</line2>
+    <city>ORLAND</city>
+    <line1>221 E. YOLO ST, ORLAND</line1>
+    <state>CA</state>
+    <location_name>COUNTY FAIRGROUNDS, ARTS AND CRAFTS BLDG.</location_name>
+    <zip>95963</zip>
+  </address>
+</polling_location>
+<polling_location id="130000001691">
+  <address>
+    <line2>810 FIFTH ST</line2>
+    <city>ORLAND</city>
+    <line1>810 FIFTH STREET, ORLAND</line1>
+    <state>CA</state>
+    <location_name>ORLAND FIRE HALL</location_name>
+    <zip>95963</zip>
+  </address>
+</polling_location>
+<polling_location id="130000001698">
+  <address>
+    <line2>525 W SYCAMORE ST</line2>
+    <city>WILLOWS</city>
+    <line1>525 W SYCAMORE ST, WILLOWS</line1>
+    <state>CA</state>
+    <location_name>WILLOWS VETERANS MEMORIAL HALL</location_name>
+    <zip>95988</zip>
+  </address>
+</polling_location>
+<polling_location id="130000001702">
+  <address>
+    <line2>1129 W WOOD ST</line2>
+    <city>WILLOWS</city>
+    <line1>PARISH HALL, 1129 W WOOD ST, WILLOWS</line1>
+    <state>CA</state>
+    <location_name>ST MONICA'S CATHOLIC CHURCH</location_name>
+    <zip>95988</zip>
+  </address>
+</polling_location>
+<polling_location id="130000001708">
+  <address>
+    <line1>THIS POLL VOTES BY MAIL</line1>
+    <state>CA</state>
+    <location_name>VOTE BY MAIL</location_name>
+  </address>
+</polling_location>
+<polling_location id="130000001711">
+  <address>
+    <line2>490 LOS ROBLES AVE</line2>
+    <city>HAMILTON CITY</city>
+    <line1>490 LOS ROBLES AVE, HAMILTON CITY</line1>
+    <state>CA</state>
+    <location_name>HAMILTON CITY EVANGELICAL FREE CHRCH</location_name>
+    <zip>95951</zip>
+  </address>
+</polling_location>
+</vip_object>

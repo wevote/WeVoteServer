@@ -68,11 +68,13 @@ def organization_retrieve_doc_template_values(url_root):
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
                    '  "organization_name": string (value from Google),\n' \
                    '  "organization_website": string (website address),\n' \
-                   '  "organization_twitter_handle": string (twitter address),\n' \
-                   '  "twitter_followers_count": integer,\n' \
                    '  "organization_email": string,\n' \
                    '  "organization_facebook": string,\n' \
                    '  "organization_photo_url": string,\n' \
+                   '  "organization_twitter_handle": string (twitter address),\n' \
+                   '  "twitter_followers_count": integer,\n' \
+                   '  "twitter_description": string,\n' \
+                   '  "facebook_id": integer,\n' \
                    '}'
 
     template_values = {

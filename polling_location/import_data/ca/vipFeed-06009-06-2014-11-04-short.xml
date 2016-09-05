@@ -1,0 +1,1912 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>Calaveras County</name>
+  <vip_id>6009</vip_id>
+  <datetime>2014-09-29T20:00:41.388491</datetime>
+  <feed_contact_id>3</feed_contact_id>
+</source>
+<state id="1">
+  <name>California</name>
+  <election_administration_id>4</election_administration_id>
+</state>
+<election id="100000025">
+  <date>2014-11-04</date>
+  <election_type>General</election_type>
+  <state_id>1</state_id>
+  <polling_hours>07:00-20:00</polling_hours>
+</election>
+<locality id="2">
+  <name>Calaveras</name>
+  <state_id>1</state_id>
+  <type>county</type>
+  <election_administration_id>4</election_administration_id>
+</locality>
+<precinct id="300000931">
+  <name>San Andreas Proper</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000932">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000933">
+  <name>Valley Springs North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000002</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000934">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000936">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000937">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000938">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000939">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000940">
+  <name>Valley Springs North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000002</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000941">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000942">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300000943">
+  <name>Valley Springs South</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000002</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300000944">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000945">
+  <name>Valley Springs North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000002</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000956">
+  <name>Mountain Ranch SE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000957">
+  <name>Rail Road Flat</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000005</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000935">
+  <name>Valley Springs North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000002</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000960">
+  <name>Mountain Ranch North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000961">
+  <name>Mountain Ranch SE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000962">
+  <name>Mokelumne Hill Rim</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000027</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000963">
+  <name>Mountain Ranch SE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+</precinct>
+<precinct id="300000964">
+  <name>Mountain Ranch SE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+</precinct>
+<precinct id="300000965">
+  <name>Mountain Ranch SE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000966">
+  <name>Mountain Ranch SE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000967">
+  <name>Mokelumne Hill Center</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000027</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000968">
+  <name>Mokelumne Hill Rim</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000027</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000969">
+  <name>Mountain Ranch SE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000970">
+  <name>Mountain Ranch SE</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000971">
+  <name>Mokelumne Hill Center</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000027</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000972">
+  <name>Mokelumne Hill Rim</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000027</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000973">
+  <name>Mokelumne Hill Center</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000027</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000974">
+  <name>Mokelumne Hill Rim</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000027</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000975">
+  <name>Mokelumne Hill Rim</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000027</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000976">
+  <name>Arnold West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+  <polling_location_id>400000007</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+</precinct>
+<precinct id="300000977">
+  <name>Central Arnold</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+  <polling_location_id>400000007</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+</precinct>
+<precinct id="300000978">
+  <name>Arnold East</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+  <polling_location_id>400000007</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+</precinct>
+<precinct id="300000979">
+  <name>Forest Meadows</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+  <polling_location_id>400000021</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+</precinct>
+<precinct id="300000980">
+  <name>Murphys West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+  <polling_location_id>400000012</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+</precinct>
+<precinct id="300000981">
+  <name>Murphys East</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+  <polling_location_id>400000012</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+</precinct>
+<precinct id="300000982">
+  <name>Forest Meadows</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+  <polling_location_id>400000021</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002343</electoral_district_id>
+</precinct>
+<precinct id="300000983">
+  <name>Murphys West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000012</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000984">
+  <name>Murphys West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000012</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000985">
+  <name>Murphys East</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000012</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000986">
+  <name>Murphys West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000012</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000987">
+  <name>Murphys East</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000012</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002279</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000988">
+  <name>Rural Angels</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000025</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000992">
+  <name>Rural Angels</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000025</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000995">
+  <name>Angels City North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002282</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000018</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002282</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000996">
+  <name>Angels City South</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002282</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000018</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002282</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000997">
+  <name>Copperopolis West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300001009">
+  <name>Jenny Lind</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000014</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300001010">
+  <name>Rancho-La Contenta</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000015</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300001011">
+  <name>Rancho-La Contenta</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000015</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300001012">
+  <name>Rancho-La Contenta</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000015</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300001013">
+  <name>Rancho-Berkesey</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000015</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300001014">
+  <name>West Point East</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000032</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000946">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000947">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000948">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000949">
+  <name>Rural San Andreas</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000017</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000950">
+  <name>Valley Springs North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000002</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000951">
+  <name>Valley Springs North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000002</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000952">
+  <name>Burson North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000049</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000953">
+  <name>Burson South</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+  <polling_location_id>400000049</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002341</electoral_district_id>
+</precinct>
+<precinct id="300000954">
+  <name>Burson South</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000049</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002268</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300000955">
+  <name>Mountain Ranch North</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000020</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000958">
+  <name>West Point West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000032</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000959">
+  <name>Mokelumne Hill Rim</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000027</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002271</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000989">
+  <name>Copperopolis East</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000990">
+  <name>Copperopolis West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000991">
+  <name>Copperopolis South</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300000993">
+  <name>Rural Angels</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000025</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002276</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000994">
+  <name>Rural Angels</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+  <polling_location_id>400000025</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002342</electoral_district_id>
+</precinct>
+<precinct id="300000998">
+  <name>Copperopolis West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300000999">
+  <name>Copperopolis West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300001000">
+  <name>Copperopolis South</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300001001">
+  <name>Copperopollis West</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300001002">
+  <name>Copperopolis South</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002304</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+  <polling_location_id>400000013</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002304</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002344</electoral_district_id>
+</precinct>
+<precinct id="300001003">
+  <name>Jenny Lind</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000014</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300001004">
+  <name>Rancho-La Contenta</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000015</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300001005">
+  <name>Rancho-Berkesey</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000015</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300001006">
+  <name>Rancho-Garner</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000015</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300001007">
+  <name>Rancho-Jenny Lind</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000015</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002272</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002318</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<precinct id="300001008">
+  <name>Jenny Lind</name>
+  <locality_id>2</locality_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+  <polling_location_id>400000014</polling_location_id>
+  <electoral_district_id>200002255</electoral_district_id>
+  <electoral_district_id>200002256</electoral_district_id>
+  <electoral_district_id>200002258</electoral_district_id>
+  <electoral_district_id>200002259</electoral_district_id>
+  <electoral_district_id>200002275</electoral_district_id>
+  <electoral_district_id>200002281</electoral_district_id>
+  <electoral_district_id>200002319</electoral_district_id>
+  <electoral_district_id>200002336</electoral_district_id>
+</precinct>
+<election_administration id="4">
+  <eo_id>3</eo_id>
+  <physical_address>
+    <state>CA</state>
+    <city>San Andreas</city>
+    <line1>891 Mountain Ranch Road</line1>
+    <zip>95249</zip>
+  </physical_address>
+</election_administration>
+<election_official id="3">
+  <name>Madaline Krska</name>
+  <phone>(209)754-6376</phone>
+</election_official>
+<polling_location id="400000002">
+  <address>
+    <city>Valley Springs</city>
+    <line1>189 Pine St</line1>
+    <state>CA</state>
+    <zip>95252</zip>
+  </address>
+</polling_location>
+<polling_location id="400000005">
+  <address>
+    <city>Rail Road Flat</city>
+    <line1>250 Railroad Flat Rd</line1>
+    <state>CA</state>
+    <zip>95248</zip>
+  </address>
+</polling_location>
+<polling_location id="400000007">
+  <address>
+    <city>Arnold</city>
+    <line1>1445 Blagen Rd</line1>
+    <state>CA</state>
+    <zip>95223</zip>
+  </address>
+</polling_location>
+<polling_location id="400000012">
+  <address>
+    <city>Murphys</city>
+    <line1>384 Church St</line1>
+    <state>CA</state>
+    <zip>95247</zip>
+  </address>
+</polling_location>
+<polling_location id="400000013">
+  <address>
+    <city>Copperopolis</city>
+    <line1>920 Black Creek Dr</line1>
+    <state>CA</state>
+    <zip>95228</zip>
+  </address>
+</polling_location>
+<polling_location id="400000014">
+  <address>
+    <city>Valley Springs</city>
+    <line1>6501 Jenny Lind Rd</line1>
+    <state>CA</state>
+    <zip>95252</zip>
+  </address>
+</polling_location>
+<polling_location id="400000015">
+  <address>
+    <city>Valley Springs</city>
+    <line1>4684 Baldwin St</line1>
+    <state>CA</state>
+    <zip>95252</zip>
+  </address>
+</polling_location>
+<polling_location id="400000017">
+  <address>
+    <city>San Andreas</city>
+    <line1>1299 Gold Hunter Rd</line1>
+    <state>CA</state>
+    <zip>95249</zip>
+  </address>
+</polling_location>
+<polling_location id="400000018">
+  <address>
+    <city>Angels Camp</city>
+    <line1>323 S Main St</line1>
+    <state>CA</state>
+    <zip>95222</zip>
+  </address>
+</polling_location>
+<polling_location id="400000020">
+  <address>
+    <city>Mountain Ranch</city>
+    <line1>8049 Washington St</line1>
+    <state>CA</state>
+    <zip>95246</zip>
+  </address>
+</polling_location>
+<polling_location id="400000021">
+  <address>
+    <city>Murphys</city>
+    <line1>3488 E Hwy 4</line1>
+    <state>CA</state>
+    <zip>95247</zip>
+  </address>
+</polling_location>
+<polling_location id="400000025">
+  <address>
+    <city>Angels Camp</city>
+    <line1>101 Frogtown Rd</line1>
+    <state>CA</state>
+    <zip>95222</zip>
+  </address>
+</polling_location>
+<polling_location id="400000027">
+  <address>
+    <city>Mokelumne Hill</city>
+    <line1>8283 Main St</line1>
+    <state>CA</state>
+    <zip>95245</zip>
+  </address>
+</polling_location>
+<polling_location id="400000032">
+  <address>
+    <city>West Point</city>
+    <line1>202 Spink Rd</line1>
+    <state>CA</state>
+    <zip>95255</zip>
+  </address>
+</polling_location>
+<polling_location id="400000049">
+  <address>
+    <city>Burson</city>
+    <line1>3061 Hwy 12</line1>
+    <state>CA</state>
+    <zip>95225</zip>
+  </address>
+</polling_location>
+</vip_object>

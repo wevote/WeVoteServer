@@ -1,15 +1,108 @@
-{% load staticfiles %}
+{# templates/politician/politician_list.html #}
+{% extends "template_base.html" %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'politician/style.css' %}" />
-<h1>Politicians Imported</h1>
+{% block title %}Politicians{% endblock %}
 
+{%  block content %}
+{% load template_filters %}
+<a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
+
+<h1>Politicians</h1>
+
+    <p>Jump to:
+
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">Candidates</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}">Politicians</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">Public Opinions / Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}">Polling Locations</a></p>
+
+    </p>
+
+<form name="state_code_form" method="get" action="{% url 'politician:politician_list' %}">
+    {% csrf_token %}
+{% if state_list %}
+    <select id="state_code_id" name="state_code">
+        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+            -- Filter by State Served --</option>
+    {% for key, state in state_list %}
+        <option value="{{ key }}"
+                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+            {{ state }}</option>
+    {% endfor %}
+    </select>
+{% endif %}{# End of if state_list #}
+
+    <a href="{% url 'politician:politician_new' %}?state_code={{ state_code }}">Add New Politician</a><br />
+
+    <br />
+    {% if politician_search %}
+    <a href="{% url 'politician:politician_list' %}?state_code={{ state_code }}">
+         clear search</a>&nbsp;
+    {% endif %}
+    <input type="text" name="politician_search" id="politician_search_id" value="{{ politician_search }}" />
+    <input type="submit" value="Search for Politician" />
+</form>
 
 {% if politician_list %}
-    <ul>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Politician Name</td>
+            <td>State</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
+            <td>Unlinked Related Candidates?</td>
+        </tr>
     {% for politician in politician_list %}
-        <li><a href="{% url 'politician:politician_detail' politician.id %}">{{ politician.display_full_name }}</a></li>
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if politician.politician_photo_url %}
+                <a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                    <img src='{{ politician.politician_photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'politician:politician_edit' politician.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ politician.politician_name }}</a></td>
+            <td>{{ politician.state_code }}</td>
+            <td>{% if politician.politician_twitter_handle %}<a href="https://twitter.com/{{ politician.politician_twitter_handle }}"
+                    target="_blank">{{ politician.politician_twitter_handle }}</a><br />
+                ({{ politician.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if politician.politician_url %}<a href="{{ politician.politician_url }}" target="_blank">{{ politician.politician_url }}</a>{% endif %}</td>
+            <td>{{ politician.id }}</td>
+            <td>{{ politician.we_vote_id }}</td>
+            <td>{{ politician.vote_smart_id }}</td>
+            <td>{{ politician.related_candidate_list_count }}</td>
+        </tr>
     {% endfor %}
-    </ul>
+    </table>
+
+    <p>
+        <a href="{% url 'politician:politicians_export' %}?format=json" target="_blank" >Export Politicians</a><br />
+    </p>
+
+    <p></p>
 {% else %}
-    <p>No politicians are available.</p>
+    <p>(no politicians found)</p>
+    <p>
+        <a href="{% url 'politician:politician_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Politician</a><br />
+    </p>
 {% endif %}
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

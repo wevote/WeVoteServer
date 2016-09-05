@@ -200,13 +200,37 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id)
 
-    def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=''):
+    def retrieve_voter_by_twitter_id(self, twitter_id):
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
+        twitter_request_token = ''
+        facebook_id = 0
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
+                                            twitter_id)
+
+    def retrieve_voter_from_organization_we_vote_id(self, organization_we_vote_id):
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
+        twitter_request_token = ''
+        facebook_id = 0
+        twitter_id = 0
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
+                                            twitter_id, organization_we_vote_id)
+
+    def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=0,
+                       twitter_id=0, organization_we_vote_id=''):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
             email = None
         if positive_value_exists(voter_we_vote_id):
-            voter_we_vote_id = voter_we_vote_id.strip()
+            voter_we_vote_id = voter_we_vote_id.strip().lower()
+        if positive_value_exists(organization_we_vote_id):
+            organization_we_vote_id = organization_we_vote_id.strip().lower()
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -235,6 +259,16 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(facebook_id):
                 voter_on_stage = Voter.objects.get(
                     facebook_id=facebook_id)
+                # If still here, we found an existing voter
+                voter_id = voter_on_stage.id
+            elif positive_value_exists(twitter_id):
+                voter_on_stage = Voter.objects.get(
+                    twitter_id=twitter_id)
+                # If still here, we found an existing voter
+                voter_id = voter_on_stage.id
+            elif positive_value_exists(organization_we_vote_id):
+                voter_on_stage = Voter.objects.get(
+                    linked_organization_we_vote_id=organization_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             else:
@@ -296,15 +330,52 @@ class VoterManager(BaseUserManager):
     def save_twitter_user_values(self, voter, twitter_user_object):
         try:
             # 'id': 132728535,
-            voter.twitter_id = twitter_user_object.id
+            if positive_value_exists(twitter_user_object.id):
+                voter.twitter_id = twitter_user_object.id
             # 'id_str': '132728535',
             # 'utc_offset': 32400,
             # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
-            voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+            if positive_value_exists(twitter_user_object.profile_image_url_https):
+                voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
             # 'screen_name': 'jaeeeee',
-            voter.twitter_screen_name = twitter_user_object.screen_name
+            if positive_value_exists(twitter_user_object.screen_name):
+                voter.twitter_screen_name = twitter_user_object.screen_name
+            # 'lang': 'en',
+            # 'name': 'Jae Jung Chung',
+            # 'url': 'http://www.carbonize.co.kr',
+            # 'time_zone': 'Seoul',
+            voter.save()
+            success = True
+            status = "SAVED_VOTER_TWITTER_VALUES"
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES"
+            success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':   status,
+            'success':  success,
+            'voter':    voter,
+        }
+        return results
+
+    def save_twitter_user_values_from_dict(self, voter, twitter_user_dict):
+        try:
+            # 'id': 132728535,
+            if 'id' in twitter_user_dict:
+                voter.twitter_id = twitter_user_dict['id']
+            # 'id_str': '132728535',
+            # 'utc_offset': 32400,
+            # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
+            # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
+            if 'profile_image_url_https' in twitter_user_dict:
+                voter.twitter_profile_image_url_https = twitter_user_dict['profile_image_url_https']
+            # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
+            # 'screen_name': 'jaeeeee',
+            if 'screen_name' in twitter_user_dict:
+                voter.twitter_screen_name = twitter_user_dict['screen_name']
             # 'lang': 'en',
             # 'name': 'Jae Jung Chung',
             # 'url': 'http://www.carbonize.co.kr',
@@ -354,6 +425,60 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def update_voter(self, voter_id, facebook_email, facebook_profile_image_url_https,
+                     first_name, middle_name, last_name,
+                     twitter_profile_image_url_https):
+        voter_updated = False
+        results = self.retrieve_voter(voter_id)
+
+        if results['voter_found']:
+            voter = results['voter']
+
+            try:
+                should_save_voter = False
+                if facebook_email is not False:
+                    voter.facebook_email = facebook_email
+                    should_save_voter = True
+                if facebook_profile_image_url_https is not False:
+                    voter.facebook_profile_image_url_https = facebook_profile_image_url_https
+                    should_save_voter = True
+                if first_name is not False:
+                    voter.first_name = first_name
+                    should_save_voter = True
+                if middle_name is not False:
+                    voter.middle_name = middle_name
+                    should_save_voter = True
+                if last_name is not False:
+                    voter.last_name = last_name
+                    should_save_voter = True
+                if twitter_profile_image_url_https is not False:
+                    voter.last_name = last_name
+                    should_save_voter = True
+                if should_save_voter:
+                    voter.save()
+                    voter_updated = True
+                status = "UPDATED_VOTER"
+                success = True
+            except Exception as e:
+                status = "UNABLE_TO_UPDATE_VOTER"
+                success = False
+                voter_updated = False
+
+        else:
+            # If here, we were unable to find pre-existing Voter
+            status = "UNABLE_TO_FIND_VOTER_FOR_UPDATE_VOTER"
+            voter = Voter()
+            success = False
+            voter_updated = False
+
+        results = {
+            'status':           status,
+            'success':          success,
+            'voter':            voter,
+            'voter_updated':    voter_updated,
+        }
+        return results
+
 
 class Voter(AbstractBaseUser):
     """
@@ -371,11 +496,16 @@ class Voter(AbstractBaseUser):
     # We keep the last value in WeVoteSetting.we_vote_id_last_org_integer
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=True)
+    # When a person using an organization's Twitter handle signs in, we create a voter account. This is how
+    #  we link the voter account to the organization.
+    linked_organization_we_vote_id = models.CharField(
+        verbose_name="we vote id for linked organization", max_length=255, null=True, blank=True, unique=True)
 
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=20, validators=[alphanumeric])  # Increase max_length to 255
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True, null=True, blank=True)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
+    middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
     is_active = models.BooleanField(default=True)
@@ -402,7 +532,6 @@ class Voter(AbstractBaseUser):
     twitter_connection_active = models.BooleanField(default=False)
 
     # Custom We Vote fields
-    middle_name = models.CharField(max_length=255, null=True, blank=True)
 #     image_displayed
 #     image_twitter
 #     image_facebook
@@ -428,12 +557,15 @@ class Voter(AbstractBaseUser):
     # We also want to auto-generate we_vote_id
     def save(self, *args, **kwargs):
         if self.email:
-            self.email = self.email.lower().strip()
-            if not validate_email(self.email):  # ...make sure it is a valid email
-                # If it isn't a valid email, don't save the value as an email -- just save a blank field
-                self.email = None
+            self.email = self.email.lower().strip()  # Hopefully reduces junk to ""
+            if self.email != "":  # If it's not blank
+                if not validate_email(self.email):  # ...make sure it is a valid email
+                    # If it isn't a valid email, don't save the value as an email -- just save a blank field
+                    self.email = None
+        if self.email == "":
+            self.email = None
         if self.we_vote_id:
-            self.we_vote_id = self.we_vote_id.strip()
+            self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
@@ -468,7 +600,7 @@ class Voter(AbstractBaseUser):
 
     def __str__(self):              # __unicode__ on Python 2
         # return self.get_full_name(self)
-        return self.email
+        return str(self.email)
 
     def has_perm(self, perm, obj=None):
         """
@@ -500,8 +632,8 @@ class Voter(AbstractBaseUser):
         return ''
 
     def signed_in_personal(self):
-        if positive_value_exists(self.email) or positive_value_exists(self.facebook_id) or \
-                positive_value_exists(self.twitter_access_token) or positive_value_exists(self.is_authenticated()):
+        if positive_value_exists(self.email) or self.signed_in_facebook() or self.signed_in_twitter():
+            # or positive_value_exists(self.is_authenticated()):
             return True
         return False
 
@@ -529,7 +661,11 @@ class VoterDeviceLink(models.Model):
     voter_device_id = models.CharField(verbose_name='voter device id',
                                        max_length=255, null=False, blank=False, unique=True)
     # The voter_id associated with voter_device_id
-    voter_id = models.IntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
+    voter_id = models.BigIntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
+
+    # The unique ID of the election (provided by Google Civic) that the voter is looking at on this device
+    google_civic_election_id = models.PositiveIntegerField(
+        verbose_name="google civic election id", default=0, null=False)
 
     def generate_voter_device_id(self):
         # A simple mapping to this function
@@ -550,6 +686,46 @@ class VoterDeviceLinkManager(models.Model):
     def __str__(self):              # __unicode__ on Python 2
         return "Voter Device Id Manager"
 
+    def delete_all_voter_device_links(self, voter_device_id):
+        voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+
+        try:
+            if positive_value_exists(voter_id):
+                VoterDeviceLink.objects.filter(voter_id=voter_id).delete()
+                status = "DELETE_ALL_VOTER_DEVICE_LINKS_SUCCESSFUL"
+                success = True
+            else:
+                status = "DELETE_ALL_VOTER_DEVICE_LINKS-MISSING_VARIABLES"
+                success = False
+        except Exception as e:
+            status = "DELETE_ALL_VOTER_DEVICE_LINKS-DATABASE_DELETE_EXCEPTION"
+            success = False
+
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+
+    def delete_voter_device_link(self, voter_device_id):
+        try:
+            if positive_value_exists(voter_device_id):
+                VoterDeviceLink.objects.filter(voter_device_id=voter_device_id).delete()
+                status = "DELETE_VOTER_DEVICE_LINK_SUCCESSFUL"
+                success = True
+            else:
+                status = "DELETE_VOTER_DEVICE_LINK-MISSING_VARIABLES"
+                success = False
+        except Exception as e:
+            status = "DELETE_VOTER_DEVICE_LINK-DATABASE_DELETE_EXCEPTION"
+            success = False
+
+        results = {
+            'success':  success,
+            'status':   status,
+        }
+        return results
+
     def retrieve_voter_device_link_from_voter_device_id(self, voter_device_id):
         voter_id = 0
         voter_device_link_id = 0
@@ -558,21 +734,21 @@ class VoterDeviceLinkManager(models.Model):
 
         return results
 
-    def retrieve_voter_device_link(self, voter_device_id, voter_id, voter_device_link_id):
+    def retrieve_voter_device_link(self, voter_device_id, voter_id=0, voter_device_link_id=0):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         voter_device_link_on_stage = VoterDeviceLink()
 
         try:
-            if voter_device_id is not '':
+            if positive_value_exists(voter_device_id):
                 voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_device_id=voter_device_id)
                 voter_device_link_id = voter_device_link_on_stage.id
-            elif voter_id > 0:
+            elif positive_value_exists(voter_id):
                 voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_id=voter_id)
                 # If still here, we found an existing position
                 voter_device_link_id = voter_device_link_on_stage.id
-            elif voter_device_link_id > 0:
+            elif positive_value_exists(voter_device_link_id):
                 voter_device_link_on_stage = VoterDeviceLink.objects.get(id=voter_device_link_id)
                 # If still here, we found an existing position
                 voter_device_link_id = voter_device_link_on_stage.id
@@ -603,7 +779,7 @@ class VoterDeviceLinkManager(models.Model):
         voter_device_link_id = 0
 
         try:
-            if voter_device_id is not '' and voter_id > 0:
+            if positive_value_exists(voter_device_id) and positive_value_exists(voter_id):
                 voter_device_link_on_stage.voter_device_id = voter_device_id
                 voter_device_link_on_stage.voter_id = voter_id
                 voter_device_link_on_stage.save()
@@ -626,6 +802,48 @@ class VoterDeviceLinkManager(models.Model):
         }
         return results
 
+    def update_voter_device_link_with_election_id(self, voter_device_link, google_civic_election_id):
+        voter_object = None
+        return self.update_voter_device_link(voter_device_link, voter_object, google_civic_election_id)
+
+    def update_voter_device_link(self, voter_device_link, voter_object=None, google_civic_election_id=0):
+        """
+        Update existing voter_device_link with a new voter_id or google_civic_election_id
+        """
+        error_result = False
+        exception_record_not_saved = False
+        missing_required_variables = False
+        voter_device_link_id = 0
+
+        try:
+            if positive_value_exists(voter_device_link.voter_device_id):
+                if voter_object and positive_value_exists(voter_object.id):
+                    voter_device_link.voter_id = voter_object.id
+                if positive_value_exists(google_civic_election_id):
+                    voter_device_link.google_civic_election_id = google_civic_election_id
+                elif google_civic_election_id == 0:
+                    # If set literally to 0, save it
+                    voter_device_link.google_civic_election_id = 0
+                voter_device_link.save()
+
+                voter_device_link_id = voter_device_link.id
+            else:
+                missing_required_variables = True
+                voter_device_link_id = 0
+        except Exception as e:
+            handle_record_not_saved_exception(e, logger=logger)
+            error_result = True
+            exception_record_not_saved = True
+
+        results = {
+            'error_result':                 error_result,
+            'missing_required_variables':   missing_required_variables,
+            'RecordNotSaved':               exception_record_not_saved,
+            'voter_device_link_updated':    True if voter_device_link_id > 0 else False,
+            'voter_device_link':            voter_device_link,
+        }
+        return results
+
 
 # This method *just* returns the voter_id or 0
 def fetch_voter_id_from_voter_device_link(voter_device_id):
@@ -637,11 +855,30 @@ def fetch_voter_id_from_voter_device_link(voter_device_id):
     return 0
 
 
-def retrieve_voter_authority(request):
-    voter_device_id = get_voter_device_id(request)
-    # voter_api_device_id = get_voter_api_device_id(request)
+# This method *just* returns the voter_id or 0
+def fetch_voter_id_from_voter_we_vote_id(we_vote_id):
     voter_manager = VoterManager()
-    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    results = voter_manager.retrieve_voter_by_we_vote_id(we_vote_id)
+    if results['voter_found']:
+        voter = results['voter']
+        return voter.id
+    return 0
+
+
+# This method *just* returns the voter_we_vote_id or ""
+def fetch_voter_we_vote_id_from_voter_id(voter_id):
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_by_id(voter_id)
+    if results['voter_found']:
+        voter = results['voter']
+        return voter.we_vote_id
+    return ""
+
+
+def retrieve_voter_authority(request):
+    voter_api_device_id = get_voter_api_device_id(request)
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
     if results['voter_found']:
         voter = results['voter']
         authority_results = {
@@ -661,8 +898,9 @@ def retrieve_voter_authority(request):
     return authority_results
 
 
-def voter_has_authority(request, authority_required):
-    authority_results = retrieve_voter_authority(request)
+def voter_has_authority(request, authority_required, authority_results=None):
+    if not authority_results:
+        authority_results = retrieve_voter_authority(request)
     if not positive_value_exists(authority_results['is_active']):
         return False
     if 'admin' in authority_required:
@@ -700,7 +938,7 @@ class VoterAddress(models.Model):
     # We are relying on built-in Python id field
 
     # The voter_id that owns this address
-    voter_id = models.IntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
+    voter_id = models.BigIntegerField(verbose_name="voter unique identifier", null=False, blank=False, unique=False)
     address_type = models.CharField(
         verbose_name="type of address", max_length=1, choices=ADDRESS_TYPE_CHOICES, default=BALLOT_ADDRESS)
 
@@ -769,38 +1007,62 @@ class VoterAddressManager(models.Model):
                 ballot_map_text += voter_address.text_for_map_search
         return ballot_map_text
 
-    def retrieve_address(self, voter_address_id, voter_id, address_type):
+    def retrieve_address(self, voter_address_id, voter_id=0, address_type=''):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
-        voter_address_found = False
         voter_address_on_stage = VoterAddress()
+        voter_address_has_value = False
+
+        if not positive_value_exists(address_type):
+            # Provide a default
+            address_type = BALLOT_ADDRESS
 
         try:
             if positive_value_exists(voter_address_id):
                 voter_address_on_stage = VoterAddress.objects.get(id=voter_address_id)
                 voter_address_id = voter_address_on_stage.id
+                voter_address_found = True
+                status = "VOTER_ADDRESS_FOUND_BY_ID"
+                success = True
+                voter_address_has_value = True if positive_value_exists(voter_address_on_stage.text_for_map_search) \
+                    else False
             elif positive_value_exists(voter_id) and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS,
                                                                       FORMER_BALLOT_ADDRESS):
                 voter_address_on_stage = VoterAddress.objects.get(voter_id=voter_id, address_type=address_type)
                 # If still here, we found an existing address
                 voter_address_id = voter_address_on_stage.id
-                voter_address_found = True if positive_value_exists(voter_address_on_stage.text_for_map_search) \
+                voter_address_found = True
+                status = "VOTER_ADDRESS_FOUND_BY_VOTER_ID_AND_ADDRESS_TYPE"
+                success = True
+                voter_address_has_value = True if positive_value_exists(voter_address_on_stage.text_for_map_search) \
                     else False
+            else:
+                voter_address_found = False
+                status = "VOTER_ADDRESS_NOT_FOUND-MISSING_REQUIRED_VARIABLES"
+                success = False
         except VoterAddress.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
+            status = "VOTER_ADDRESS_MULTIPLE_OBJECTS_RETURNED"
             exception_multiple_object_returned = True
+            success = False
+            voter_address_found = False
         except VoterAddress.DoesNotExist:
             error_result = True
+            status = "VOTER_ADDRESS_DOES_NOT_EXIST"
             exception_does_not_exist = True
+            success = True
+            voter_address_found = False
 
         results = {
-            'success':                  True if voter_address_id > 0 else False,
+            'success':                  success,
+            'status':                   status,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
             'voter_address_found':      voter_address_found,
+            'voter_address_has_value':  voter_address_has_value,
             'voter_address_id':         voter_address_id,
             'voter_address':            voter_address_on_stage,
         }
@@ -841,27 +1103,33 @@ class VoterAddressManager(models.Model):
         status = ''
         exception_multiple_object_returned = False
         new_address_created = False
+        voter_address_on_stage = None
+        voter_address_on_stage_found = False
 
-        if voter_id > 0 and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
+        if positive_value_exists(voter_id) and address_type in (BALLOT_ADDRESS, MAILING_ADDRESS, FORMER_BALLOT_ADDRESS):
             try:
                 updated_values = {
                     # Values we search against
                     'voter_id': voter_id,
                     'address_type': address_type,
-                    # The rest of the values
-                    'text_for_map_search': raw_address_text,
-                    'latitude': None,
-                    'longitude': None,
-                    'normalized_line1': None,
-                    'normalized_line2': None,
-                    'normalized_city': None,
-                    'normalized_state': None,
-                    'normalized_zip': None,
-                    'refreshed_from_google': False,
+                    # The rest of the values are to be saved
+                    'text_for_map_search':      raw_address_text,
+                    'latitude':                 None,
+                    'longitude':                None,
+                    'normalized_line1':         None,
+                    'normalized_line2':         None,
+                    'normalized_city':          None,
+                    'normalized_state':         None,
+                    'normalized_zip':           None,
+                    # We clear out former values for these so voter_ballot_items_retrieve_for_api resets them
+                    'refreshed_from_google':    False,
+                    'google_civic_election_id': 0,
+                    'election_day_text':        '',
                 }
 
                 voter_address_on_stage, new_address_created = VoterAddress.objects.update_or_create(
                     voter_id__exact=voter_id, address_type=address_type, defaults=updated_values)
+                voter_address_on_stage_found = voter_address_on_stage.id
                 success = True
             except VoterAddress.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
@@ -879,6 +1147,8 @@ class VoterAddressManager(models.Model):
             'voter_address_saved':      success,
             'address_type':             address_type,
             'new_address_created':      new_address_created,
+            'voter_address_found':      voter_address_on_stage_found,
+            'voter_address':            voter_address_on_stage,
         }
         return results
 
@@ -917,21 +1187,56 @@ class VoterAddressManager(models.Model):
         }
         return results
 
+    def update_existing_voter_address_object(self, voter_address_object):
+        results = self.retrieve_address(voter_address_object.id)
+
+        if results['success']:
+            try:
+                voter_address_object.save()  # Save the incoming object
+                status = "UPDATED_EXISTING_VOTER_ADDRESS"
+                success = True
+                voter_address_found = True
+            except Exception as e:
+                status = "UNABLE_TO_UPDATE_EXISTING_VOTER_ADDRESS"
+                success = False
+                voter_address_found = False
+                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+        else:
+            # If here, we were unable to find pre-existing VoterAddress
+            status = "UNABLE_TO_FIND_AND_UPDATE_VOTER_ADDRESS"
+            voter_address_object = None
+            success = False
+            voter_address_found = False
+
+        results = {
+            'status':               status,
+            'success':              success,
+            'voter_address':        voter_address_object,
+            'voter_address_found':  voter_address_found,
+        }
+        return results
+
 
 def voter_setup(request):
-    generate_voter_device_id_if_needed = True
-    voter_device_id = get_voter_device_id(request, generate_voter_device_id_if_needed)
+    """
+    This is only used for sign in on the API server, and is not used for WebApp
+    :param request:
+    :return:
+    """
+    generate_voter_api_device_id_if_needed = True
+    voter_api_device_id = get_voter_api_device_id(request, generate_voter_api_device_id_if_needed)
+
     voter_id = 0
     voter_id_found = False
-    store_new_voter_device_id_in_cookie = True
+    store_new_voter_api_device_id_in_cookie = True
 
     voter_device_link_manager = VoterDeviceLinkManager()
-    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_api_device_id)
     if results['voter_device_link_found']:
         voter_device_link = results['voter_device_link']
         voter_id = voter_device_link.voter_id
         voter_id_found = True if positive_value_exists(voter_id) else False
-        store_new_voter_device_id_in_cookie = False if positive_value_exists(voter_id_found) else True
+        store_new_voter_api_device_id_in_cookie = False if positive_value_exists(voter_id_found) else True
 
     # If existing voter not found, create a new voter
     if not voter_id_found:
@@ -944,21 +1249,21 @@ def voter_setup(request):
             voter_id = voter.id
 
             # Now save the voter_device_link
-            results = voter_device_link_manager.save_new_voter_device_link(voter_device_id, voter_id)
+            results = voter_device_link_manager.save_new_voter_device_link(voter_api_device_id, voter_id)
 
             if results['voter_device_link_created']:
                 voter_device_link = results['voter_device_link']
                 voter_id = voter_device_link.voter_id
                 voter_id_found = True if voter_id > 0 else False
-                store_new_voter_device_id_in_cookie = True
+                store_new_voter_api_device_id_in_cookie = True
             else:
                 voter_id = 0
                 voter_id_found = False
 
     final_results = {
-        'voter_id':                 voter_id,
-        'voter_device_id':          voter_device_id,
-        'voter_id_found':           voter_id_found,
-        'store_new_voter_device_id_in_cookie':   store_new_voter_device_id_in_cookie,
+        'voter_id':                                 voter_id,
+        'voter_api_device_id':                      voter_api_device_id,
+        'voter_id_found':                           voter_id_found,
+        'store_new_voter_api_device_id_in_cookie':  store_new_voter_api_device_id_in_cookie,
     }
     return final_results

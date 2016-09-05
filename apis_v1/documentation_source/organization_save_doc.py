@@ -10,7 +10,7 @@ def organization_save_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -21,14 +21,18 @@ def organization_save_doc_template_values(url_root):
         {
             'name':         'organization_id',
             'value':        'integer',  # boolean, integer, long, string
-            'description':  'The internal database id for this organization. (One of these is required: '
-                            'organization_id, organization_we_vote_id, '
+            'description':  'The internal database id for this organization. '
+                            '(One of these is required to update data: '
+                            'organization_id, organization_we_vote_id, facebook_id, '
                             'organization_website or organization_twitter_handle)',
         },
         {
             'name':         'organization_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for this organization across all networks.',
+            'description':  'The unique identifier for this organization across all networks. '
+                            '(One of these is required to update data: '
+                            'organization_id, organization_we_vote_id, facebook_id, '
+                            'organization_website or organization_twitter_handle)',
         },
     ]
     optional_query_parameter_list = [
@@ -50,7 +54,26 @@ def organization_save_doc_template_values(url_root):
         {
             'name':         'organization_twitter_handle',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'Twitter handle of the organization.',
+            'description':  'Twitter handle of the organization. '
+                            '(NOTE: In order to create a new organization, you may pass in '
+                            'either organization_twitter_handle OR facebook_id)',
+        },
+        {
+            'name':         'facebook_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Facebook identifier of the voter who wants to share a voter guide. '
+                            '(NOTE: In order to create a new organization, you may pass in '
+                            'either organization_twitter_handle OR facebook_id)',
+        },
+        {
+            'name':         'facebook_email',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Personal email returned upon Facebook sign in.',
+        },
+        {
+            'name':         'facebook_profile_image_url_https',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Personal photo returned upon Facebook sign in.',
         },
         {
             'name':         'organization_facebook',
@@ -61,6 +84,15 @@ def organization_save_doc_template_values(url_root):
             'name':         'organization_image',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Logo of the organization that is displayed.',
+        },
+        {
+            'name':         'refresh_from_twitter',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Augment the data passed in with information from Twitter. Do not replace data passed in '
+                            'as a variable with the data from Twitter, but if a variable is not passed in via the API, '
+                            'then fill in that variable with data from Twitter. One use-case is to save an '
+                            'organization with only a Twitter handle, and fill in the rest of the data with a call '
+                            'to Twitter.',
         },
     ]
 
@@ -94,14 +126,19 @@ def organization_save_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
-                   '  "voter_device_id": string (88 characters long),\n' \
                    '  "organization_id": integer,\n' \
                    '  "organization_we_vote_id": string,\n' \
                    '  "new_organization_created": boolean,\n' \
                    '  "organization_name": string,\n' \
                    '  "organization_email": string,\n' \
                    '  "organization_website": string,\n' \
+                   '  "organization_facebook": string,\n' \
+                   '  "organization_photo_url": string,\n' \
                    '  "organization_twitter_handle": string,\n' \
+                   '  "twitter_followers_count": integer,\n' \
+                   '  "twitter_description": string,\n' \
+                   '  "refresh_from_twitter": boolean,\n' \
+                   '  "facebook_id": integer,\n' \
                    '}'
 
     template_values = {
@@ -113,7 +150,7 @@ def organization_save_doc_template_values(url_root):
         'try_now_link': 'apis_v1:organizationSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
-        'get_or_post': 'POST',
+        'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,

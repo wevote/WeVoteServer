@@ -8,6 +8,8 @@
 
 <h1>Voters</h1>
 
+<a href="{% url 'voter:voter_edit' 0 %}">Create New Voter Account</a>
+
 {% if voter_list %}
     <table border="1" cellpadding="10">
         <tr>
@@ -18,19 +20,24 @@
             <td>Where</td>
             <td>FB?</td>
             <td>Tw?</td>
+            <td>Email</td>
             <td>Admin</td>
             <td>Verified Volunteer</td>
         </tr>
     {% for voter in voter_list %}
         <tr>
             <td>{{ voter.id }}</td>
-            <td>{{ voter.we_vote_id }}</td>
-            <td><a href="{% url 'voter:voter_summary' voter.id %}">
-            {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }}{% endif %}</a>
+            <td>
+                <a href="{% url 'voter:voter_edit' voter.id %}">
+                    {{ voter.we_vote_id }}
+                </a>
+            </td>
+            <td>
+            {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }}{% endif %}
             </td>
             <!-- Is this you? //-->
             <td>
-            {% if voter.id == voter_id_signed_in %}*{% else %}{% endif %}
+            {% if voter.id == voter_id_signed_in %}*ME*{% else %}{% endif %}
             </td>
             <td>
                 &nbsp;
@@ -41,7 +48,13 @@
             </td>
             <!-- Twitter? //-->
             <td>
-            {% if voter.twitter_id %}@{{ voter.twitter_screen_name }}{% else %}{% endif %}
+            {% if voter.twitter_id %}@{{ voter.twitter_screen_name }}<br />
+                {{ voter.twitter_id }}
+            {% else %}{% endif %}
+            </td>
+            <!-- Email //-->
+            <td>
+            {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
             </td>
             <!-- Is site administrator? //-->
             <td>

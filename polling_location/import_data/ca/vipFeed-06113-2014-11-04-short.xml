@@ -1,0 +1,1591 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <vip_id>6113</vip_id>
+  <datetime>2014-09-23T11:50:05</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>http://www.yoloelections.org</organization_url>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="69">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>http://www.yoloelections.org</registration_info>
+  <absentee_ballot_info>http://www.yoloelections.org</absentee_ballot_info>
+  <results_url>http://www.yoloelections.org</results_url>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-10-20</registration_deadline>
+  <absentee_request_deadline>2014-10-28</absentee_request_deadline>
+</election>
+<locality id="57">
+  <name>YOLO</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1200000010752">
+  <name>WEST SACRAMENTO 14 - 19</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018301</polling_location_id>
+</precinct>
+<precinct id="1200000010753">
+  <name>WEST SACRAMENTO 29, 32, 33, 34</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018291</polling_location_id>
+</precinct>
+<precinct id="1200000010754">
+  <name>WEST SACRAMENTO 6, 7, 8, 13</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018243</polling_location_id>
+</precinct>
+<precinct id="1200000010755">
+  <name>WEST SACRAMENTO 47, 48, 52</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018336</polling_location_id>
+</precinct>
+<precinct id="1200000010756">
+  <name>WEST SACRAMENTO 23, 24, 25, 27, 28, 35</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018352</polling_location_id>
+</precinct>
+<precinct id="1200000010757">
+  <name>WEST SACRAMENTO 12, 20, 21, 22, 36</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018307</polling_location_id>
+</precinct>
+<precinct id="1200000010758">
+  <name>WEST SACRAMENTO 39, 43, 46, 53</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018328</polling_location_id>
+</precinct>
+<precinct id="1200000010759">
+  <name>WEST SACRAMENTO 40, 41, 51</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018287</polling_location_id>
+</precinct>
+<precinct id="1200000010760">
+  <name>WEST SACRAMENTO 37, 38, 42, 58</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018355</polling_location_id>
+</precinct>
+<precinct id="1200000010761">
+  <name>WEST SACRAMENTO 26, 30, 31</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018334</polling_location_id>
+</precinct>
+<precinct id="1200000010762">
+  <name>WEST SACRAMENTO 44, 45</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018351</polling_location_id>
+</precinct>
+<precinct id="1200000010763">
+  <name>WEST SACRAMENTO 49, 54, 56, 57</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018349</polling_location_id>
+</precinct>
+<precinct id="1200000010764">
+  <name>WEST SACRAMENTO 50, 55</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018356</polling_location_id>
+</precinct>
+<precinct id="1200000010765">
+  <name>WEST SACRAMENTO 1, 2, 9</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018253</polling_location_id>
+</precinct>
+<precinct id="1200000010766">
+  <name>WEST SACRAMENTO 3, 4</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018326</polling_location_id>
+</precinct>
+<precinct id="1200000010767">
+  <name>WEST SACRAMENTO 5, 10, 11</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018244</polling_location_id>
+</precinct>
+<precinct id="1200000010768">
+  <name>DAVIS 4, 6, 92, 93</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018313</polling_location_id>
+</precinct>
+<precinct id="1200000010769">
+  <name>DAVIS 5, 7</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018249</polling_location_id>
+</precinct>
+<precinct id="1200000010770">
+  <name>DAVIS 8, 9, 13, 14</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018297</polling_location_id>
+</precinct>
+<precinct id="1200000010771">
+  <name>DAVIS 19, 20, 23, 35-37, 60</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018322</polling_location_id>
+</precinct>
+<precinct id="1200000010772">
+  <name>DAVIS 10, 11, 18, 26</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018332</polling_location_id>
+</precinct>
+<precinct id="1200000010773">
+  <name>DAVIS 12, 15, 21, 24</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018250</polling_location_id>
+</precinct>
+<precinct id="1200000010774">
+  <name>DAVIS 22, 25, 61</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018338</polling_location_id>
+</precinct>
+<precinct id="1200000010775">
+  <name>DAVIS 38, 52, 74, 100</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018296</polling_location_id>
+</precinct>
+<precinct id="1200000010776">
+  <name>DAVIS 39, 57, 89</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018288</polling_location_id>
+</precinct>
+<precinct id="1200000010777">
+  <name>DAVIS 51, 59</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018343</polling_location_id>
+</precinct>
+<precinct id="1200000010778">
+  <name>DAVIS 53, 54, 55</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018339</polling_location_id>
+</precinct>
+<precinct id="1200000010779">
+  <name>DAVIS 56, 58, 80</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018252</polling_location_id>
+</precinct>
+<precinct id="1200000010780">
+  <name>DAVIS 87, 98</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018290</polling_location_id>
+</precinct>
+<precinct id="1200000010781">
+  <name>WEST DAVIS 2</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018246</polling_location_id>
+</precinct>
+<precinct id="1200000010782">
+  <name>WEST DAVIS 3, 4, 6, 7</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018251</polling_location_id>
+</precinct>
+<precinct id="1200000010783">
+  <name>WEST DAVIS 5, 9, 13, 14</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018289</polling_location_id>
+</precinct>
+<precinct id="1200000010784">
+  <name>DAVIS 1, 2, 3, 16</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018262</polling_location_id>
+</precinct>
+<precinct id="1200000010785">
+  <name>DAVIS 17, 29, 68</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018325</polling_location_id>
+</precinct>
+<precinct id="1200000010786">
+  <name>DAVIS 27, 28, 40, 64</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018282</polling_location_id>
+</precinct>
+<precinct id="1200000010787">
+  <name>DAVIS 30, 69, 70</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018305</polling_location_id>
+</precinct>
+<precinct id="1200000010788">
+  <name>DAVIS 31, 49, 62</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018300</polling_location_id>
+</precinct>
+<precinct id="1200000010789">
+  <name>DAVIS 32, 44, 94</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018242</polling_location_id>
+</precinct>
+<precinct id="1200000010790">
+  <name>DAVIS 33, 41</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018286</polling_location_id>
+</precinct>
+<precinct id="1200000010791">
+  <name>DAVIS 34, 88</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018264</polling_location_id>
+</precinct>
+<precinct id="1200000010792">
+  <name>DAVIS 42, 97</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018308</polling_location_id>
+</precinct>
+<precinct id="1200000010793">
+  <name>DAVIS 43, 67, 76, 82</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018327</polling_location_id>
+</precinct>
+<precinct id="1200000010794">
+  <name>DAVIS 45, 84, 101</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018330</polling_location_id>
+</precinct>
+<precinct id="1200000010795">
+  <name>DAVIS 46, 103</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018267</polling_location_id>
+</precinct>
+<precinct id="1200000010796">
+  <name>DAVIS 47, 77</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018266</polling_location_id>
+</precinct>
+<precinct id="1200000010797">
+  <name>DAVIS 48, 63, 78</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018268</polling_location_id>
+</precinct>
+<precinct id="1200000010798">
+  <name>DAVIS 50, 72, 83</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018310</polling_location_id>
+</precinct>
+<precinct id="1200000010799">
+  <name>DAVIS 65, 81, 91</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018317</polling_location_id>
+</precinct>
+<precinct id="1200000010800">
+  <name>DAVIS 66</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018265</polling_location_id>
+</precinct>
+<precinct id="1200000010801">
+  <name>DAVIS 71, 99</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018304</polling_location_id>
+</precinct>
+<precinct id="1200000010802">
+  <name>DAVIS 73, 79, 85, 86</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018263</polling_location_id>
+</precinct>
+<precinct id="1200000010803">
+  <name>DAVIS 75, 95</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018302</polling_location_id>
+</precinct>
+<precinct id="1200000010804">
+  <name>DAVIS 90, 96, 102</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018345</polling_location_id>
+</precinct>
+<precinct id="1200000010805">
+  <name>EAST DAVIS 1, 4, 5</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018306</polling_location_id>
+</precinct>
+<precinct id="1200000010806">
+  <name>WOODLAND 11, 67, 77</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018340</polling_location_id>
+</precinct>
+<precinct id="1200000010807">
+  <name>WOODLAND 12, 17</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018333</polling_location_id>
+</precinct>
+<precinct id="1200000010808">
+  <name>WOODLAND 13, 26, 27, 30</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018294</polling_location_id>
+</precinct>
+<precinct id="1200000010809">
+  <name>WOODLAND 14, 16, 22</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018293</polling_location_id>
+</precinct>
+<precinct id="1200000010810">
+  <name>WOODLAND 18, 33</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018278</polling_location_id>
+</precinct>
+<precinct id="1200000010811">
+  <name>WOODLAND 19, 23, 34</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018245</polling_location_id>
+</precinct>
+<precinct id="1200000010812">
+  <name>WOODLAND 20, 21, 66, 76</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018316</polling_location_id>
+</precinct>
+<precinct id="1200000010813">
+  <name>WOODLAND 24, 25, 65</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018269</polling_location_id>
+</precinct>
+<precinct id="1200000010814">
+  <name>WOODLAND 28, 54</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018276</polling_location_id>
+</precinct>
+<precinct id="1200000010815">
+  <name>WOODLAND 31, 59</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018277</polling_location_id>
+</precinct>
+<precinct id="1200000010816">
+  <name>WOODLAND 32, 40, 63, 64</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018279</polling_location_id>
+</precinct>
+<precinct id="1200000010817">
+  <name>WOODLAND 35, 49</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018280</polling_location_id>
+</precinct>
+<precinct id="1200000010818">
+  <name>WOODLAND 41, 62</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018348</polling_location_id>
+</precinct>
+<precinct id="1200000010819">
+  <name>WOODLAND 44</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018261</polling_location_id>
+</precinct>
+<precinct id="1200000010820">
+  <name>WOODLAND 53, 68, 74, 75</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018320</polling_location_id>
+</precinct>
+<precinct id="1200000010821">
+  <name>WOODLAND 2, 57</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018254</polling_location_id>
+</precinct>
+<precinct id="1200000010822">
+  <name>WOODLAND 3, 39, 47, 50</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018255</polling_location_id>
+</precinct>
+<precinct id="1200000010823">
+  <name>WOODLAND 4, 5</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018260</polling_location_id>
+</precinct>
+<precinct id="1200000010824">
+  <name>WOODLAND 7, 55</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018274</polling_location_id>
+</precinct>
+<precinct id="1200000010825">
+  <name>WOODLAND 8</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018315</polling_location_id>
+</precinct>
+<precinct id="1200000010826">
+  <name>WOODLAND 9, 42, 48, 58, 72</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018258</polling_location_id>
+</precinct>
+<precinct id="1200000010827">
+  <name>WOODLAND 10, 38</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018256</polling_location_id>
+</precinct>
+<precinct id="1200000010828">
+  <name>WOODLAND 15, 36, 37</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018295</polling_location_id>
+</precinct>
+<precinct id="1200000010829">
+  <name>WOODLAND 6, 29, 46, 56</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018257</polling_location_id>
+</precinct>
+<precinct id="1200000010830">
+  <name>WOODLAND 60, 61</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018309</polling_location_id>
+</precinct>
+<precinct id="1200000010831">
+  <name>WOODLAND 70, 71, 73</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018324</polling_location_id>
+</precinct>
+<precinct id="1200000010832">
+  <name>BATES, CLARKSBURG 1-4</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018241</polling_location_id>
+</precinct>
+<precinct id="1200000010833">
+  <name>EAST WINTERS</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018247</polling_location_id>
+</precinct>
+<precinct id="1200000010834">
+  <name>WINTERS 1</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018281</polling_location_id>
+</precinct>
+<precinct id="1200000010835">
+  <name>WINTERS 2, 5, 7</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018303</polling_location_id>
+</precinct>
+<precinct id="1200000010836">
+  <name>WINTERS 3</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018353</polling_location_id>
+</precinct>
+<precinct id="1200000010837">
+  <name>WINTERS 4, 8</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018321</polling_location_id>
+</precinct>
+<precinct id="1200000010838">
+  <name>AIRPORT 2, PLNFLD 1, 2, W WDLD 3, 11</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018273</polling_location_id>
+</precinct>
+<precinct id="1200000010839">
+  <name>BLACKS</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018270</polling_location_id>
+</precinct>
+<precinct id="1200000010840">
+  <name>CACHEVILLE, YOLO, YUBA</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018298</polling_location_id>
+</precinct>
+<precinct id="1200000010841">
+  <name>CAPAY</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018271</polling_location_id>
+</precinct>
+<precinct id="1200000010842">
+  <name>CAPAY 3, ESPARTO 3</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018341</polling_location_id>
+</precinct>
+<precinct id="1200000010843">
+  <name>DUNNIGAN</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018292</polling_location_id>
+</precinct>
+<precinct id="1200000010844">
+  <name>ESPARTO 2</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018272</polling_location_id>
+</precinct>
+<precinct id="1200000010845">
+  <name>GUINDA</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018299</polling_location_id>
+</precinct>
+<precinct id="1200000010846">
+  <name>KNIGHTS LANDING 1-4</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018319</polling_location_id>
+</precinct>
+<precinct id="1200000010853">
+  <name>BYPASS 3</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010854">
+  <name>BYPASS 2, CHILES, CHILES 2</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010856">
+  <name>EAST DAVIS 7, 8</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010857">
+  <name>WEST WINTERS 2</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010859">
+  <name>AIRPORT 3, WDVS 8, 11, 12, 16</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010862">
+  <name>WILD WINGS 2</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010864">
+  <name>WOODLAND 78</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010865">
+  <name>WILD WINGS 1, BP 1, 4, 6, 7, EWDLD 2-5, 11</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010866">
+  <name>COVELL, EDVS 2,3,6,9, HSLR, HSLR2</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010867">
+  <name>BYPASS 5</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010868">
+  <name>W WINTERS, W WINTERS 3</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010873">
+  <name>WDLD 1, 3, 45, 51, 52, 69</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010874">
+  <name>AIRPORT 1, W DVS 1, 15, 20</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010875">
+  <name>EUCALYPTUS, MADISON 3, 8, WILLOW 1</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010876">
+  <name>COLUSA</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010877">
+  <name>CHVLE2,EWDLD6,9,10,KL5,LEVEE/2,PLNFLD7</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010878">
+  <name>E WDLD 1, 7, 8, GRFTN, 2, W WDLD 2, 10, 12</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010879">
+  <name>WEST SACRAMENTO 59</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010880">
+  <name>WINTERS 6</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010881">
+  <name>E WDLD 12, ELKHRN, PLNFLD 3-6, W WDLD 4, 5, 8, 9</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010882">
+  <name>KL6, MDSN 1, 2, 4-7, 9, 10, UNION 1, 2</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010883">
+  <name>ROBINSON 1-10, WILLOW 2</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010884">
+  <name>WLD WINGS3, BLKS2,CCRK1-3,CVILLE3,CAPAY2,4,CLVR,EWNTRS 2</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010885">
+  <name>W DAVIS 17-19, 21, 22</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010886">
+  <name>W WDLD 6</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010887">
+  <name>ESPARTO 1</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<precinct id="1200000010888">
+  <name>W WDLD 1</name>
+  <locality_id>57</locality_id>
+  <polling_location_id>1300000018240</polling_location_id>
+</precinct>
+<polling_location id="1300000018240">
+  <address>
+    <line1>BALLOT WILL BE SENT-VOTE BY MAIL</line1>
+    <state>CA</state>
+    <location_name>THIS IS A MAIL BALLOT PRECINCT</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018241">
+  <address>
+    <line2>52910 NETHERLANDS AVE</line2>
+    <city>CLARKSBURG</city>
+    <line1>52910 NETHERLANDS AVE., CLARKSBURG</line1>
+    <state>CA</state>
+    <location_name>CLARKSBURG COMMUNITY CHURCH-HALL</location_name>
+    <zip>95612</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018242">
+  <address>
+    <line2>1919 F ST</line2>
+    <city>DAVIS</city>
+    <line1>1919 F ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS ARTS CENTER-ATRIUM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018243">
+  <address>
+    <line2>110 6TH ST</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>604 ANDREW ST., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>BRODERICK CHRISTIAN CNTR-LIBRARY</location_name>
+    <zip>95605</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018244">
+  <address>
+    <line2>905 FREMONT BLVD</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>905 FREMONT BLVD., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>FIRE STATION #44-APPARATUS ROOM</location_name>
+    <zip>95605</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018245">
+  <address>
+    <line2>1619 WEST ST</line2>
+    <city>WOODLAND</city>
+    <line1>1619 WEST ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>WDLD FIRE DEPT #2-APPARATUS RM</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018246">
+  <address>
+    <line2>39960 BARRY RD</line2>
+    <city>DAVIS</city>
+    <line1>39960 BARRY RD., DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS CHURCH OF CHRIST-AUDITORM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018247">
+  <address>
+    <line2>62 SHAMS WAY</line2>
+    <city>WINTERS</city>
+    <line1>62 SHAMS WAY, WINTERS</line1>
+    <state>CA</state>
+    <location_name>YOLO COUNTY HOUSING-MULTI PURPSE</location_name>
+    <zip>95694</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018249">
+  <address>
+    <line2>412 C ST</line2>
+    <city>DAVIS</city>
+    <line1>412 C ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS COMMUNITY CHURCH-MUSIC ROOM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018250">
+  <address>
+    <line2>203 E FOURTEENTH ST</line2>
+    <city>DAVIS</city>
+    <line1>203 E FOURTEENTH ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>VETERAN'S MEMORIAL CENTER-GAME ROOM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018251">
+  <address>
+    <line2>912822 ASUCD MU</line2>
+    <city>DAVIS</city>
+    <line1>MEMORIAL UNION, UCD, DAVIS</line1>
+    <state>CA</state>
+    <location_name>ASUCD-2ND FLOOR-EVENTS ROOM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018252">
+  <address>
+    <line2>919 LAKE BLVD</line2>
+    <city>DAVIS</city>
+    <line1>919 LAKE BLVD., DAVIS</line1>
+    <state>CA</state>
+    <location_name>STONEGATE CNTRY CLUB-MEETING RM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018253">
+  <address>
+    <line2>1708 LISBON AVE</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>1708 LISBON AVE., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>BRYTE MEMORIAL VETERAN'S HALL</location_name>
+    <zip>95605</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018254">
+  <address>
+    <line2>228 PALM AVE</line2>
+    <city>WOODLAND</city>
+    <line1>228 PALM AVE., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>WOODLAND MASONIC CENTER-DINING HALL</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018255">
+  <address>
+    <line2>135 WOODLAND AVE</line2>
+    <city>WOODLAND</city>
+    <line1>135 WOODLAND AVE., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>ST JOHN'S RETIREMENT VILLAGE</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018256">
+  <address>
+    <line2>120 COURT ST</line2>
+    <city>WOODLAND</city>
+    <line1>120 COURT ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>AMERICAN RED CROSS BUILDING</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018257">
+  <address>
+    <line2>292 W BEAMER ST</line2>
+    <city>WOODLAND</city>
+    <line1>292 W BEAMER ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>YOLO CO PUBLIC WORKS DEPT-CONF RM</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018258">
+  <address>
+    <line2>840 BOURN DR</line2>
+    <city>WOODLAND</city>
+    <line1>840 BOURN DR., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>ROYAL PALMS - REC ROOM</location_name>
+    <zip>95776</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018260">
+  <address>
+    <line2>250 FIRST ST</line2>
+    <city>WOODLAND</city>
+    <line1>250 FIRST ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>CITY LIBRARY-LEAKE COMMUNITY RM</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018261">
+  <address>
+    <line2>907 BOURN DR</line2>
+    <city>WOODLAND</city>
+    <line1>907 BOURN DR., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>IDLE WHEEL ESTATES-REC HALL</location_name>
+    <zip>95776</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018262">
+  <address>
+    <line2>1020 CHESTNUT LN</line2>
+    <city>DAVIS</city>
+    <line1>1020 CHESTNUT LN., DAVIS</line1>
+    <state>CA</state>
+    <location_name>ROUNDHOUSE-TABLE A</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018263">
+  <address>
+    <line2>1111 ALVARADO AVE</line2>
+    <city>DAVIS</city>
+    <line1>1111 ALVARADO AVE., DAVIS</line1>
+    <state>CA</state>
+    <location_name>COVELL GARDENS-ARTS AND CRAFTS RM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018264">
+  <address>
+    <line2>992019 TEMPLE and SLIDE HILL</line2>
+    <city>DAVIS</city>
+    <line1>SLIDE HILL PARK, DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS GIRL SCOUT CABIN</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018265">
+  <address>
+    <line2>1009 LOS ROBLES ST</line2>
+    <city>DAVIS</city>
+    <line1>1009 LOS ROBLES ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>JOHNSON'S GARAGE</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018266">
+  <address>
+    <line2>5215 HAMEL ST</line2>
+    <city>DAVIS</city>
+    <line1>5215 HAMEL ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>PIONEER ELEM SCHOOL-RM B8</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018267">
+  <address>
+    <line2>770 POLE LINE RD</line2>
+    <city>DAVIS</city>
+    <line1>770 POLE LINE RD., DAVIS</line1>
+    <state>CA</state>
+    <location_name>POLE LINE RD BAPTIST CHURCH-MPR</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018268">
+  <address>
+    <line2>2033 F ST</line2>
+    <city>DAVIS</city>
+    <line1>2033 F ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>SUNTREE APTS-OFFICE AREA</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018269">
+  <address>
+    <line2>312 GIBSON RD</line2>
+    <city>WOODLAND</city>
+    <line1>312 GIBSON RD., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>GIBSON SCHOOL-STAGE</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018270">
+  <address>
+    <line2>999992 BLACKS ST</line2>
+    <city>ZAMORA</city>
+    <line1>BLACKS ST., ZAMORA</line1>
+    <state>CA</state>
+    <location_name>ZAMORA TOWN HALL</location_name>
+    <zip>95698</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018271">
+  <address>
+    <line2>26479 GRAFTON ST</line2>
+    <city>ESPARTO</city>
+    <line1>26479 GRAFTON ST., ESPARTO</line1>
+    <state>CA</state>
+    <location_name>COUNTRYSIDE COM CHURCH-SOCIAL HALL</location_name>
+    <zip>95627</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018272">
+  <address>
+    <line2>16960 YOLO AVE</line2>
+    <city>ESPARTO</city>
+    <line1>16960 YOLO AVE., ESPARTO</line1>
+    <state>CA</state>
+    <location_name>ESPARTO FIREHOUSE</location_name>
+    <zip>95627</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018273">
+  <address>
+    <line2>20450 COUNTY ROAD 97</line2>
+    <city>WOODLAND</city>
+    <line1>20450 COUNTY ROAD 97, WOODLAND</line1>
+    <state>CA</state>
+    <location_name>PLAINFIELD SCHOOL-MAIN HALL</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018274">
+  <address>
+    <line2>70 COTTONWOOD ST</line2>
+    <city>WOODLAND</city>
+    <line1>70 COTTONWOOD ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>YOLO CO CO-OP EXT-NORTON HALL</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018276">
+  <address>
+    <line2>506 COTTONWOOD ST</line2>
+    <city>WOODLAND</city>
+    <line1>506 COTTONWOOD ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>CALVARY BAPTIST CHURCH-FELLOWSHP HALL</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018277">
+  <address>
+    <line2>1224 COTTONWOOD ST</line2>
+    <city>WOODLAND</city>
+    <line1>1224 COTTONWOOD ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>THE CALIFORNIAN-MAIN OFFICE</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018278">
+  <address>
+    <line2>625 W GIBSON RD</line2>
+    <city>WOODLAND</city>
+    <line1>625 W GIBSON RD., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>ST PAULS LUTHERAN CHURCH-FELLOWSHIP HALL</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018279">
+  <address>
+    <line2>520 WEST ST</line2>
+    <city>WOODLAND</city>
+    <line1>520 WEST ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>LEE JR HIGH SCHOOL-GYM FOYER</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018280">
+  <address>
+    <line2>1125 EAST ST</line2>
+    <city>WOODLAND</city>
+    <line1>YOLO COUNTY FAIRGROUNDS, WOODLAND</line1>
+    <state>CA</state>
+    <location_name>JOHN ROGERS HALL</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018281">
+  <address>
+    <line2>201 RAILROAD AVE</line2>
+    <city>WINTERS</city>
+    <line1>201 RAILROAD AVE., WINTERS</line1>
+    <state>CA</state>
+    <location_name>WINTERS COMMUNITY CENTER</location_name>
+    <zip>95694</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018282">
+  <address>
+    <line2>801 J ST</line2>
+    <city>DAVIS</city>
+    <line1>801 J ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>COLLEGE SQUARE APTS</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018286">
+  <address>
+    <line2>1600 BIRCH LN</line2>
+    <city>DAVIS</city>
+    <line1>1600 BIRCH LN., DAVIS</line1>
+    <state>CA</state>
+    <location_name>BIRCH LANE ELEMENTARY SCHOOL-MPR</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018287">
+  <address>
+    <line2>2972 JANET DR</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>2972 JANET DR., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>GILLINGS GARAGE (SUMMERFIELD TO BETTY)</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018288">
+  <address>
+    <line2>1350 ARLINGTON BLVD</line2>
+    <city>DAVIS</city>
+    <line1>1350 ARLINGTON BLVD., DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS FIRE STATION #2-APPARATUS RM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018289">
+  <address>
+    <line2>400 RUSSELL PARK</line2>
+    <city>DAVIS</city>
+    <line1>400 RUSSELL PK., UCD, DAVIS</line1>
+    <state>CA</state>
+    <location_name>RUSSELL PRK COM CTR-STUDY LOUNGE</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018290">
+  <address>
+    <line2>1515 SHASTA DR</line2>
+    <city>DAVIS</city>
+    <line1>1515 SHASTA DR., DAVIS</line1>
+    <state>CA</state>
+    <location_name>UNIV RETIREMENT COM-ACTIVITY RM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018291">
+  <address>
+    <line2>1500 PARK BLVD</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>1500 PARK BLVD., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>TRINITY CHURCH-FELLOWSHIP HALL</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018292">
+  <address>
+    <line2>29145 MAIN ST</line2>
+    <city>DUNNIGAN</city>
+    <line1>29145 MAIN ST., DUNNIGAN</line1>
+    <state>CA</state>
+    <location_name>DUNNIGAN FIREHOUSE</location_name>
+    <zip>95937</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018293">
+  <address>
+    <line2>515 SECOND ST</line2>
+    <city>WOODLAND</city>
+    <line1>515 SECOND ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>EPISCOPAL CHURCH OF ST LUKE-GUILD RM</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018294">
+  <address>
+    <line2>1716 COTTONWOOD ST</line2>
+    <city>WOODLAND</city>
+    <line1>1716 COTTONWOOD ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>ZAMORA ELEMENTARY SCHOOL-LIBRARY</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018295">
+  <address>
+    <line2>1125 EAST ST</line2>
+    <city>WOODLAND</city>
+    <line1>YOLO COUNTY FAIRGROUNDS, WOODLAND</line1>
+    <state>CA</state>
+    <location_name>HOME ARTS BUILDING</location_name>
+    <zip>95776</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018296">
+  <address>
+    <line2>2222 SHASTA DR</line2>
+    <city>DAVIS</city>
+    <line1>2222 SHASTA DR., DAVIS</line1>
+    <state>CA</state>
+    <location_name>PATWIN ELEM SCHOOL-MPR</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018297">
+  <address>
+    <line2>646 A ST</line2>
+    <city>DAVIS</city>
+    <line1>646 A ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS SENIOR CENTER-GAME ROOM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018298">
+  <address>
+    <line2>14189 MAIN ST</line2>
+    <city>YOLO</city>
+    <line1>14189 FIRST ST., YOLO</line1>
+    <state>CA</state>
+    <location_name>YOLO COMMUNITY CENTER-DINING RM</location_name>
+    <zip>95697</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018299">
+  <address>
+    <line2>16787 FOREST AVE</line2>
+    <city>GUINDA</city>
+    <line1>16787 FOREST AVE., GUINDA</line1>
+    <state>CA</state>
+    <location_name>WESTERN YOLO GRANGE HALL #423</location_name>
+    <zip>95637</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018300">
+  <address>
+    <line2>644 ALVARADO AVE</line2>
+    <city>DAVIS</city>
+    <line1>644 ALVARADO AVE., DAVIS</line1>
+    <state>CA</state>
+    <location_name>AGGIE SQUARE APTS-CLUBHOUSE</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018301">
+  <address>
+    <line2>2101 STONE BLVD</line2>
+    <line1>1110 W CAPITOL AVE., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>WEST SACRAMENTO CITY HALL-GALLERIA</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018302">
+  <address>
+    <line2>3500 ANDERSON RD</line2>
+    <line1>3500 ANDERSON RD., DAVIS</line1>
+    <state>CA</state>
+    <location_name>TANDEM PROPERTIES-CONF ROOM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018303">
+  <address>
+    <line2>502 NIEMANN ST</line2>
+    <line1>502 NIEMANN ST., WINTERS</line1>
+    <state>CA</state>
+    <location_name>ROMINGER INTERMEDIATE SCHOOL-LIBRARY</location_name>
+    <zip>95694</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018304">
+  <address>
+    <line2>2323 ROCKWELL DR</line2>
+    <city>DAVIS</city>
+    <line1>2323 ROCKWELL DR., DAVIS</line1>
+    <state>CA</state>
+    <location_name>WILDHORSE GOLF COURSE-BANQUET RM-TABLE B</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018305">
+  <address>
+    <line2>2323 ROCKWELL DR</line2>
+    <city>DAVIS</city>
+    <line1>2323 ROCKWELL DR., DAVIS</line1>
+    <state>CA</state>
+    <location_name>WILDHORSE GOLF COURSE-BANQUET RM-TABLE A</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018306">
+  <address>
+    <line2>44571 CLUBHOUSE DR</line2>
+    <city>EL MACERO</city>
+    <line1>44571 CLUBHOUSE DR., EL MACERO</line1>
+    <state>CA</state>
+    <location_name>EL MACERO CNTRY CLUB-BANQUET RM</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018307">
+  <address>
+    <line2>1212 MERKLEY AVE</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>1212 MERKLEY AV., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>ARTHUR TURNER LIBRARY-COM RM</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018308">
+  <address>
+    <line2>3023 ALBANY AVE</line2>
+    <city>DAVIS</city>
+    <line1>3023 ALBANY AVE., DAVIS</line1>
+    <state>CA</state>
+    <location_name>OWENDALE COMMUNITY-ACTIVITY ROOM</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018309">
+  <address>
+    <line2>1550 SPRINGLAKE CT</line2>
+    <city>WOODLAND</city>
+    <line1>1550 SPRINGLAKE CT., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>SPRINGLAKE FIRE STATION #3</location_name>
+    <zip>95776</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018310">
+  <address>
+    <line2>3030 SYCAMORE LN</line2>
+    <city>DAVIS</city>
+    <line1>3030 SYCAMORE LN., DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS CHRISTIAN ASSEMBLY</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018313">
+  <address>
+    <line2>1717 FIFTH ST</line2>
+    <city>DAVIS</city>
+    <line1>1717 FIFTH ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS PUBLIC WORKS DEPT-DAY ROOM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018315">
+  <address>
+    <line2>137 N COTTONWOOD ST</line2>
+    <city>WOODLAND</city>
+    <line1>137 N COTTONWOOD ST, WOODLAND</line1>
+    <state>CA</state>
+    <location_name>YOLO CO HEALTH DEPT-WALKER ROOM</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018316">
+  <address>
+    <line2>2001 EAST ST</line2>
+    <line1>2001 EAST ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>WDLD COM AND SENIOR CENTER-TABLE A</location_name>
+    <zip>95776</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018317">
+  <address>
+    <line2>1441 DANBURY ST</line2>
+    <city>DAVIS</city>
+    <line1>1441 DANBURY ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>MONTGOMERY SCHOOL--MPR</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018319">
+  <address>
+    <line2>42115 SIXTH ST</line2>
+    <city>KNIGHTS LANDING</city>
+    <line1>42115 SIXTH ST., KNIGHTS LANDING</line1>
+    <state>CA</state>
+    <location_name>KNIGHTS LANDING FIRE HOUSE</location_name>
+    <zip>95645</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018320">
+  <address>
+    <line2>2300 E GIBSON RD</line2>
+    <city>WOODLAND</city>
+    <line1>2300 GIBSON RD., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>WDLD COM COLLEGE-700 BLDG-TABLE A</location_name>
+    <zip>95776</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018321">
+  <address>
+    <line2>425 ANDERSON AVE</line2>
+    <city>WINTERS</city>
+    <line1>425 ANDERSON AVE., WINTERS</line1>
+    <state>CA</state>
+    <location_name>WINTERS MIDDLE SCHOOL-LIBRARY</location_name>
+    <zip>95694</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018322">
+  <address>
+    <line2>640 HAWTHORN LN</line2>
+    <city>DAVIS</city>
+    <line1>640 HAWTHORN LN., DAVIS</line1>
+    <state>CA</state>
+    <location_name>EPISCOPAL CHURCH-ROOM 6/7</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018324">
+  <address>
+    <line2>2300 E GIBSON RD</line2>
+    <city>WOODLAND</city>
+    <line1>2300 E GIBSON RD., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>WDLD COM COLLEGE 700 BLDG-TABLE B</location_name>
+    <zip>95776</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018325">
+  <address>
+    <line2>1020 CHESTNUT LN</line2>
+    <city>DAVIS</city>
+    <line1>1020 CHESTNUT LN., DAVIS</line1>
+    <state>CA</state>
+    <location_name>ROUNDHOUSE-TABLE B</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018326">
+  <address>
+    <line2>637 TODHUNTER AVE</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>637 TODHUNTER AVE., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>BRYTE ELEMENTARY SCHOOL-CLASSROOM</location_name>
+    <zip>95605</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018327">
+  <address>
+    <line2>425 MACE BLVD</line2>
+    <city>DAVIS</city>
+    <line1>425 MACE BLVD., DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS FIRE STATION #3-APPARATUS RM</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018328">
+  <address>
+    <line2>2040 LAKE WASHINGTON BLVD</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>2040 LAKE WASHINGTON BLVD., WEST SAC</line1>
+    <state>CA</state>
+    <location_name>W SAC FIRE STATION #45-APPARATUS</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018330">
+  <address>
+    <line2>3141 FIFTH ST</line2>
+    <city>DAVIS</city>
+    <line1>3141 FIFTH ST., DAVIS</line1>
+    <state>CA</state>
+    <location_name>EXPLORIT SCIENCE CENTER-DISCOVERY DEN</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018332">
+  <address>
+    <line2>315 E FOURTEENTH ST</line2>
+    <city>DAVIS</city>
+    <line1>315 E. FOURTEENTH ST, DAVIS</line1>
+    <state>CA</state>
+    <location_name>DAVIS LIBRARY-BLANCHARD ROOM</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018333">
+  <address>
+    <line2>525 GRANADA DR</line2>
+    <city>WOODLAND</city>
+    <line1>525 GRANADA DR., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>DOUGLASS JR HIGH SCHOOL-AG DEPT</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018334">
+  <address>
+    <line2>920 WESTACRE RD</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>920 WESTACRE RD., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>WASHINGTON USD AUDITORIUM-TABLE B</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018336">
+  <address>
+    <line2>3650 SOUTHPORTPARKWAY</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>3650 SOUTHPORT PKWY., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>THE BOATHOUSE AT BRIDGEWAY LAKES-TABLE A</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018338">
+  <address>
+    <line2>1111 ANDERSON RD</line2>
+    <city>DAVIS</city>
+    <line1>1111 ANDERSON RD., DAVIS</line1>
+    <state>CA</state>
+    <location_name>REDWOOD PARK</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018339">
+  <address>
+    <line2>1175 LAKE BLVD</line2>
+    <city>DAVIS</city>
+    <line1>1175 LAKE BLVD., DAVIS</line1>
+    <state>CA</state>
+    <location_name>LAKE SHORE APTS</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018340">
+  <address>
+    <line2>179 W MAIN ST</line2>
+    <city>WOODLAND</city>
+    <line1>179 W MAIN ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>VALLEY TIRE CENTER-SHOWROOM</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018341">
+  <address>
+    <line2>17065 YOLO AVE</line2>
+    <city>ESPARTO</city>
+    <line1>17065 YOLO AVE., ESPARTO</line1>
+    <state>CA</state>
+    <location_name>ESPARTO LIBRARY</location_name>
+    <zip>95627</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018343">
+  <address>
+    <line2>2121 CALAVERAS AVE</line2>
+    <city>DAVIS</city>
+    <line1>2121 CALAVERAS AVE., DAVIS</line1>
+    <state>CA</state>
+    <location_name>EMERSON JR HIGH SCHOOL</location_name>
+    <zip>95616</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018345">
+  <address>
+    <line2>4500 ALHAMBRA DR</line2>
+    <city>DAVIS</city>
+    <line1>4500 ALHAMBRA DR., DAVIS</line1>
+    <state>CA</state>
+    <location_name>THE ALHAMBRA-COMPUTER ROOM</location_name>
+    <zip>95618</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018348">
+  <address>
+    <line2>2001 EAST ST</line2>
+    <line1>2001 EAST ST., WOODLAND</line1>
+    <state>CA</state>
+    <location_name>WDLD COM AND SENIOR CENTER-TABLE B</location_name>
+    <zip>95695</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018349">
+  <address>
+    <line2>3250 SOUTHPORT PKWY</line2>
+    <line1>3650 SOUTHPORT PKWY., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>THE BOATHOUSE AT BRIDGEWAY LAKES-TABLE B</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018351">
+  <address>
+    <line2>1 RAIDER LN</line2>
+    <line1>1 RAIDER LN., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>RIVER CITY HIGH-GYM FOYER</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018352">
+  <address>
+    <line2>920 WESTACRE RD</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>920 WESTACRE RD., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>WASHINGTON USD AUDITORIUM-TABLE A</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018353">
+  <address>
+    <line2>700 MAIN ST</line2>
+    <city>WINTERS</city>
+    <line1>700 MAIN ST., WINTERS</line1>
+    <state>CA</state>
+    <location_name>WINTERS FIRE AND POLICE BUILDING-EOC ROOM</location_name>
+    <zip>95694</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018355">
+  <address>
+    <line2>2801 JEFFERSON BLVD</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>2801 JEFFERSON BLVD., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>WEST SACRAMENTO REC CENTER TABLE A</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000018356">
+  <address>
+    <line2>2801 JEFFERSON BLVD</line2>
+    <city>WEST SACRAMENTO</city>
+    <line1>2801 JEFFERSON BLVD., WEST SACRAMENTO</line1>
+    <state>CA</state>
+    <location_name>WEST SACRAMENTO REC CENTER TABLE B</location_name>
+    <zip>95691</zip>
+  </address>
+</polling_location>
+</vip_object>

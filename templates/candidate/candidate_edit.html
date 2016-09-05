@@ -4,51 +4,178 @@
 {% block title %}{% if candidate %}{{ candidate.candidate_name  }}{% else %}New Candidate{% endif %}{% endblock %}
 
 {%  block content %}
-<a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
+{% load template_filters %}
+<a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">
+    < Back to Candidates</a>
 
-<h1>{% if candidate %}Edit {{ candidate.candidate_name }}{% else %}New Candidate{% endif %}</h1>
+<h1>{% if candidate %}Edit Candidate "{{ candidate.candidate_name }}"{% else %}New Candidate{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
 
-<form action="{% url "candidate:candidate_edit_process" %}" method="post">
+<form action="{% url "candidate:candidate_edit_process" %}" method="post" class="form-horizontal">
 {% csrf_token %}
-    <input type="hidden" name="candidate_id" value="{% if candidate %}{{ candidate.id }}{% else %}0{% endif %}">
 
-{% if candidate %}
-<p><strong>Values from Google Civic API (do not edit)</strong></p>
-<p>Candidate Name: {{ candidate.candidate_name }}</p>
-<p>Candidate We Vote ID: {{ candidate.we_vote_id }}</p>
-<p>Vote Smart ID: {{ candidate.vote_smart_id }}</p>
-<p>Twitter URL: {{ candidate.twitter_url }}</p>
-<p>Website: {{ candidate.candidate_url }}</p>
+<input type="hidden" name="candidate_id" value="{% if candidate %}{{ candidate.id }}{% else %}0{% endif %}">
 
-{% else %}
-{#    <label for="candidate_name_id">Candidate Name</label>#}
-{#    <input type="text" name="candidate_name" id="candidate_name_id" value="{% if candidate %}{{ candidate.candidate_name }}{% endif %}" /><br />#}
-{##}
-{#    <label for="twitter_handle_id">Twitter </label>#}
-{#    <input type="text" name="twitter_handle" id="twitter_handle_id" value="{% if candidate %}{{ candidate.twitter_handle }}{% endif %}" /><br />#}
-{##}
-{#    <label for="candidate_website_id">Candidate Website</label>#}
-{#    <input type="text" name="candidate_website" id="candidate_website_id" value="{% if candidate %}{{ candidate.candidate_website }}{% endif %}" /><br />#}
+<div class="form-group">
+    <label for="candidate_name_id" class="col-sm-3 control-label">Candidate Name</label>
+    <div class="col-sm-8">
+        <input type="text" name="candidate_name" id="candidate_name_id" class="form-control"
+               value="{% if candidate %}{{ candidate.candidate_name|default_if_none:"" }}{% else %}{{ candidate_name|default_if_none:"" }}{% endif %}" />
+        {% if candidate %}
+            {{ candidate.we_vote_id }}
+            (<a href="{% url 'candidate:candidate_delete_process' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">delete candidate</a>)
+
+            {% if candidate.politician_id %}
+                &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id:
+                <a href="{% url 'politician:politician_edit' candidate.politician_id %}?google_civic_election_id={{ google_civic_election_id }}">
+                {{ candidate.politician_we_vote_id }}</a>
+            {% endif %}
+            {% if not candidate.politician_we_vote_id %}
+                (<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">match to politician</a>)
+            {% endif %}
+
+        {% else %}
+            {{ we_vote_id }}
+            {% if politician_we_vote_id and politician_we_vote_id != "False" and politician_we_vote_id != False %}
+                &nbsp;&nbsp;&nbsp;&nbsp;Politician We Vote Id FOUND: {{ politician_we_vote_id }}
+                <input type="hidden" name="politician_we_vote_id" value="{{ politician_we_vote_id }}">
+            {% else %}
+                <input name="look_for_politician" type="submit" value="Look for Politician" />
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<input type="hidden" name="google_civic_election_id" value="{% if candidate %}{{ candidate.google_civic_election_id }}{% else %}{{ google_civic_election_id }}{% endif %}">
+<div class="form-group">
+    <label for="google_civic_election_id_id" class="col-sm-3 control-label">Google Civic Election Id</label>
+    <div class="col-sm-8">
+    {% if candidate %}
+        {# We don't currently offer a way to edit the google_civic_election_id once a candidate is saved. #}
+        {{ candidate.google_civic_election_id }}{% if candidate.election %} ({{ candidate.election.election_name }}){% endif %}
+    {% else %}
+        <input type="text" name="google_civic_election_id" id="google_civic_election_id_id" class="form-control"
+               value="{{ google_civic_election_id|default_if_none:"" }}" />
+    {% endif %}
+    </div>
+</div>
+
+{% if state_code_from_election == "" %}
+<div class="form-group">
+    <label for="state_code_id" class="col-sm-3 control-label">State Code</label>
+    <div class="col-sm-8">
+        <input type="text" name="state_code" id="state_code_id" class="form-control"
+               value="{{ state_code|default_if_none:"" }}" />
+    </div>
+</div>
 {% endif %}
-<p><a href="{% url 'candidate:candidate_list' %}">cancel</a>
-<input type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
+
+<div class="form-group">
+    <label for="google_civic_candidate_name_id" class="col-sm-3 control-label">Candidate Name (for Google Civic matching)</label>
+    <div class="col-sm-8">
+        <input type="text" name="google_civic_candidate_name" id="google_civic_candidate_name_id" class="form-control"
+               value="{% if candidate %}{{ candidate.google_civic_candidate_name|default_if_none:"" }}{% else %}{{ google_civic_candidate_name|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="office_id" class="col-sm-3 control-label">Office</label>
+    <div class="col-sm-8">
+        {% if office_list %}
+            <select id="contest_office_id" name="contest_office_id" class="form-control">
+                <option value="0" {% if 0 == contest_office_id|convert_to_int %} selected="selected"{% endif %}>
+                    -- Offices --</option>
+            {% for office in office_list %}
+                <option value="{{ office.id }}"
+                        {% if office.id|convert_to_int == contest_office_id|convert_to_int %} selected="selected"{% endif %}>
+                    {{ office.office_name }}</option>
+            {% endfor %}
+            </select>
+        {% else %}
+            (no offices found)
+        {% endif %}
+        <a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}" target="_blank">
+            Add New Office</a> (in new window)
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="candidate_twitter_handle_id" class="col-sm-3 control-label">Twitter Handle</label>
+    <div class="col-sm-8">
+        <input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" class="form-control"
+               value="{% if candidate %}{{ candidate.candidate_twitter_handle|default_if_none:"" }}{% else %}{{ candidate_twitter_handle|default_if_none:"" }}{% endif %}" />
+    {% if candidate.candidate_twitter_handle %}
+        (<a href="{% url 'import_export_twitter:refresh_twitter_candidate_details' candidate.id %}">refresh Twitter details</a>)<br />
+        Twitter Name: {{ candidate.twitter_name }}<br />
+        Twitter Description: {{ candidate.twitter_description }}<br />
+        Twitter Location: {{ candidate.twitter_location }}<br />
+        Twitter Followers: {{ candidate.twitter_followers_count }}<br />
+    {% endif %}
+    {% if candidate.twitter_url %}Twitter URL (from Google Civic): {{ candidate.twitter_url }}{% endif %}
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="candidate_url_id" class="col-sm-3 control-label">Candidate Website</label>
+    <div class="col-sm-8">
+        <input type="text" name="candidate_url" id="candidate_url_id" class="form-control"
+               value="{% if candidate %}{{ candidate.candidate_url|default_if_none:"" }}{% else %}{{ candidate_url|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="party_id" class="col-sm-3 control-label">Candidate Party</label>
+    <div class="col-sm-8">
+        <input type="text" name="party" id="party_id" class="form-control"
+               value="{% if candidate %}{{ candidate.party|default_if_none:"" }}{% else %}{{ party|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="measure_text_id" class="col-sm-3 control-label">Official Candidate Statement</label>
+    <div class="col-sm-8">
+        <textarea name="ballot_guide_official_statement"
+                  class="form-control animated"
+                  placeholder="Enter official candidate statement">{% if candidate %}{{ candidate.ballot_guide_official_statement|default_if_none:"" }}{% else %}{{ ballot_guide_official_statement|default_if_none:"" }}{% endif %}</textarea>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="vote_smart_id_id" class="col-sm-3 control-label">Vote Smart Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="vote_smart_id" id="vote_smart_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.vote_smart_id|default_if_none:"" }}{% else %}{{ vote_smart_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="maplight_id_id" class="col-sm-3 control-label">MapLight Id</label>
+    <div class="col-sm-8">
+        <input type="text" name="maplight_id" id="maplight_id_id" class="form-control"
+               value="{% if candidate %}{{ candidate.maplight_id|default_if_none:"" }}{% else %}{{ maplight_id|default_if_none:"" }}{% endif %}" />
+    </div>
+</div>
+
+<p><a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+<input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 </form>
 
 <br />
 {% if candidate %}
 <a href="{% url 'candidate:candidate_retrieve_photos' candidate.id %}">Retrieve photos</a><br />
-    {% if candidate.fetch_photo_url %}
-    <img src='{{ candidate.fetch_photo_url }}' />
+    {% if candidate.candidate_photo_url %}
+    <img src='{{ candidate.candidate_photo_url }}' />
     {% endif %}
-{% endif %}
 
-{% if candidate %}
     <h4>We Vote Positions Related to {{ candidate.candidate_name  }}</h4>
     {% if candidate.vote_smart_id %}
         <p><a href="{% url 'import_export_vote_smart:transfer_vote_smart_ratings_to_positions_for_candidate' candidate.id %}">Transfer Vote Smart Ratings to We Vote Positions</a></p>
     {% endif %}
+
+        <p><a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate.we_vote_id }}" target="_blank">
+            Add Position (start with Organization taking the Position)</a> (open in new window)</p>
+
     {% if candidate_position_list %}
         <table border="1">
         <tr>
@@ -56,6 +183,8 @@
             <td>Organization</td>
             <td>Stance</td>
             <td>Election</td>
+            <td>Election Date</td>
+            <td>Rating Time Span</td>
         </tr>
 
         {% for candidate_position in candidate_position_list %}
@@ -70,7 +199,7 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 {% if candidate_position.organization_id %}
-                <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.id %}">
+                <a href="{% url 'organization:organization_position_edit' candidate_position.organization_id candidate_position.we_vote_id %}">
                 {{ candidate_position.organization.organization_name }}</a>
                 {% else %}
                     (not an org)
@@ -78,7 +207,9 @@
             </td>
             <td>{{ candidate_position.get_stance_display }}
                 {% if candidate_position.vote_smart_rating %} {{ candidate_position.vote_smart_rating }}%{% endif %}</td>
+            <td>{{ candidate_position.election.google_civic_election_id }}</td>
             <td>{{ candidate_position.election.election_day_text }}</td>
+            <td>{{ candidate_position.vote_smart_time_span|default_if_none:"" }}</td>
         </tr>
         {% endif %}
         {% endfor %}
@@ -88,7 +219,7 @@
         <p>(no positions found)</p>
     {% endif %}
 
-    {% if candidate.vote_smart_id %}
+    {% if candidate.vote_smart_id and candidate.vote_smart_id != False and candidate.vote_smart_id != 'False' and candidate.vote_smart_id != None and candidate.vote_smart_id != 'None' %}
         <h4>Vote Smart Ratings</h4>
         <p><a href="{% url 'import_export_vote_smart:import_one_candidate_ratings' candidate.vote_smart_id %}">Import Vote Smart Ratings for this Candidate</a></p>
 
@@ -122,6 +253,353 @@
             <p>(no special interest group ratings found)</p>
         {% endif %}
     {% endif %}{# End of if candidate.vote_smart_id #}
+    <br />
+
+    {% if candidate.twitter_profile_image_url_https_original %}
+        <img src="{{ candidate.twitter_profile_image_url_https_original }}"><br />
+        Twitter Image (Original)<br />
+    {% endif %}
+
+    {% if candidate.twitter_profile_banner_url_https %}
+        <img src="{{ candidate.twitter_profile_banner_url_https }}"><br />
+        Twitter Banner<br />
+    {% endif %}
+{% else %}
+
+{# Only show other candidates running for this office when we are entering a new candidate #}
+{% if candidate_list %}
+<h5>Existing Candidates</h5>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Candidate Name</td>
+            <td>State</td>
+            <td>Election</td>
+            <td>Office</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
+            <td>&nbsp;</td>
+        </tr>
+    {% for candidate in candidate_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if candidate.candidate_photo_url %}
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}">
+                    <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a></td>
+            <td>{{ candidate.get_candidate_state }}</td>
+            <td>{{ candidate.election.election_name }}</td>
+            <td>
+        {% if candidate.office %}
+                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
+        {% else %}
+            (office missing)
+        {% endif %}
+            </td>
+            <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
+                    target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
+                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
+            <td>{{ candidate.id }}</td>
+            <td>{{ candidate.we_vote_id }}
+                {% if candidate.politician_we_vote_id %}
+                    {{ candidate.politician_we_vote_id }}
+                {% endif %}
+            </td>
+            <td>{{ candidate.vote_smart_id }}</td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+{% else %}
+    {# Don't display anything if there aren't any other candidates captured for this office yet #}
+{% endif %}
+
 {% endif %}{# End of if candidate #}
+
+<script>
+    $(function() {
+        $('#contest_office_id').change(function() {
+            this.form.submit();
+        });
+    });
+</script>
+
+<style>
+    .animated {
+        -webkit-transition: height 0.2s;
+        -moz-transition: height 0.2s;
+        transition: height 0.2s;
+    }
+</style>
+<script>
+    $(function(){
+        $('.normal').autosize();
+        $('.animated').autosize({append: "\n"});
+    });
+/* TODO This is kludgy to put the full javascript library here, but I couldn't figure out how
+to get Django static files set up. */
+/*!
+Autosize v1.18.1 - 2013-11-05
+Automatically adjust textarea height based on user input.
+(c) 2013 Jack Moore - http://www.jacklmoore.com/autosize
+license: http://www.opensource.org/licenses/mit-license.php
+*/
+(function ($) {
+	var
+	defaults = {
+		className: 'autosizejs',
+		append: '',
+		callback: false,
+		resizeDelay: 10
+	},
+
+	// border:0 is unnecessary, but avoids a bug in Firefox on OSX
+	copy = '<textarea tabindex="-1" style="position:absolute; top:-999px; left:0; right:auto; bottom:auto; border:0; padding: 0; -moz-box-sizing:content-box; -webkit-box-sizing:content-box; box-sizing:content-box; word-wrap:break-word; height:0 !important; min-height:0 !important; overflow:hidden; transition:none; -webkit-transition:none; -moz-transition:none;"/>',
+
+	// line-height is conditionally included because IE7/IE8/old Opera do not return the correct value.
+	typographyStyles = [
+		'fontFamily',
+		'fontSize',
+		'fontWeight',
+		'fontStyle',
+		'letterSpacing',
+		'textTransform',
+		'wordSpacing',
+		'textIndent'
+	],
+
+	// to keep track which textarea is being mirrored when adjust() is called.
+	mirrored,
+
+	// the mirror element, which is used to calculate what size the mirrored element should be.
+	mirror = $(copy).data('autosize', true)[0];
+
+	// test that line-height can be accurately copied.
+	mirror.style.lineHeight = '99px';
+	if ($(mirror).css('lineHeight') === '99px') {
+		typographyStyles.push('lineHeight');
+	}
+	mirror.style.lineHeight = '';
+
+	$.fn.autosize = function (options) {
+		if (!this.length) {
+			return this;
+		}
+
+		options = $.extend({}, defaults, options || {});
+
+		if (mirror.parentNode !== document.body) {
+			$(document.body).append(mirror);
+		}
+
+		return this.each(function () {
+			var
+			ta = this,
+			$ta = $(ta),
+			maxHeight,
+			minHeight,
+			boxOffset = 0,
+			callback = $.isFunction(options.callback),
+			originalStyles = {
+				height: ta.style.height,
+				overflow: ta.style.overflow,
+				overflowY: ta.style.overflowY,
+				wordWrap: ta.style.wordWrap,
+				resize: ta.style.resize
+			},
+			timeout,
+			width = $ta.width();
+
+			if ($ta.data('autosize')) {
+				// exit if autosize has already been applied, or if the textarea is the mirror element.
+				return;
+			}
+			$ta.data('autosize', true);
+
+			if ($ta.css('box-sizing') === 'border-box' || $ta.css('-moz-box-sizing') === 'border-box' || $ta.css('-webkit-box-sizing') === 'border-box'){
+				boxOffset = $ta.outerHeight() - $ta.height();
+			}
+
+			// IE8 and lower return 'auto', which parses to NaN, if no min-height is set.
+			minHeight = Math.max(parseInt($ta.css('minHeight'), 10) - boxOffset || 0, $ta.height());
+
+			$ta.css({
+				overflow: 'hidden',
+				overflowY: 'hidden',
+				wordWrap: 'break-word', // horizontal overflow is hidden, so break-word is necessary for handling words longer than the textarea width
+				resize: ($ta.css('resize') === 'none' || $ta.css('resize') === 'vertical') ? 'none' : 'horizontal'
+			});
+
+			// The mirror width must exactly match the textarea width, so using getBoundingClientRect because it doesn't round the sub-pixel value.
+			function setWidth() {
+				var style, width;
+
+				if ('getComputedStyle' in window) {
+					style = window.getComputedStyle(ta, null);
+					width = ta.getBoundingClientRect().width;
+
+					$.each(['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'], function(i,val){
+						width -= parseInt(style[val],10);
+					});
+
+					mirror.style.width = width + 'px';
+				}
+				else {
+					// window.getComputedStyle, getBoundingClientRect returning a width are unsupported and unneeded in IE8 and lower.
+					mirror.style.width = Math.max($ta.width(), 0) + 'px';
+				}
+			}
+
+			function initMirror() {
+				var styles = {};
+
+				mirrored = ta;
+				mirror.className = options.className;
+				maxHeight = parseInt($ta.css('maxHeight'), 10);
+
+				// mirror is a duplicate textarea located off-screen that
+				// is automatically updated to contain the same text as the
+				// original textarea.  mirror always has a height of 0.
+				// This gives a cross-browser supported way getting the actual
+				// height of the text, through the scrollTop property.
+				$.each(typographyStyles, function(i,val){
+					styles[val] = $ta.css(val);
+				});
+				$(mirror).css(styles);
+
+				setWidth();
+
+				// Chrome-specific fix:
+				// When the textarea y-overflow is hidden, Chrome doesn't reflow the text to account for the space
+				// made available by removing the scrollbar. This workaround triggers the reflow for Chrome.
+				if (window.chrome) {
+					var width = ta.style.width;
+					ta.style.width = '0px';
+					var ignore = ta.offsetWidth;
+					ta.style.width = width;
+				}
+			}
+
+			// Using mainly bare JS in this function because it is going
+			// to fire very often while typing, and needs to very efficient.
+			function adjust() {
+				var height, original;
+
+				if (mirrored !== ta) {
+					initMirror();
+				} else {
+					setWidth();
+				}
+
+				mirror.value = ta.value + options.append;
+				mirror.style.overflowY = ta.style.overflowY;
+				original = parseInt(ta.style.height,10);
+
+				// Setting scrollTop to zero is needed in IE8 and lower for the next step to be accurately applied
+				mirror.scrollTop = 0;
+
+				mirror.scrollTop = 9e4;
+
+				// Using scrollTop rather than scrollHeight because scrollHeight is non-standard and includes padding.
+				height = mirror.scrollTop;
+
+				if (maxHeight && height > maxHeight) {
+					ta.style.overflowY = 'scroll';
+					height = maxHeight;
+				} else {
+					ta.style.overflowY = 'hidden';
+					if (height < minHeight) {
+						height = minHeight;
+					}
+				}
+
+				height += boxOffset;
+
+				if (original !== height) {
+					ta.style.height = height + 'px';
+					if (callback) {
+						options.callback.call(ta,ta);
+					}
+				}
+			}
+
+			function resize () {
+				clearTimeout(timeout);
+				timeout = setTimeout(function(){
+					var newWidth = $ta.width();
+
+					if (newWidth !== width) {
+						width = newWidth;
+						adjust();
+					}
+				}, parseInt(options.resizeDelay,10));
+			}
+
+			if ('onpropertychange' in ta) {
+				if ('oninput' in ta) {
+					// Detects IE9.  IE9 does not fire onpropertychange or oninput for deletions,
+					// so binding to onkeyup to catch most of those occasions.  There is no way that I
+					// know of to detect something like 'cut' in IE9.
+					$ta.on('input.autosize keyup.autosize', adjust);
+				} else {
+					// IE7 / IE8
+					$ta.on('propertychange.autosize', function(){
+						if(event.propertyName === 'value'){
+							adjust();
+						}
+					});
+				}
+			} else {
+				// Modern Browsers
+				$ta.on('input.autosize', adjust);
+			}
+
+			// Set options.resizeDelay to false if using fixed-width textarea elements.
+			// Uses a timeout and width check to reduce the amount of times adjust needs to be called after window resize.
+
+			if (options.resizeDelay !== false) {
+				$(window).on('resize.autosize', resize);
+			}
+
+			// Event for manual triggering if needed.
+			// Should only be needed when the value of the textarea is changed through JavaScript rather than user input.
+			$ta.on('autosize.resize', adjust);
+
+			// Event for manual triggering that also forces the styles to update as well.
+			// Should only be needed if one of typography styles of the textarea change, and the textarea is already the target of the adjust method.
+			$ta.on('autosize.resizeIncludeStyle', function() {
+				mirrored = null;
+				adjust();
+			});
+
+			$ta.on('autosize.destroy', function(){
+				mirrored = null;
+				clearTimeout(timeout);
+				$(window).off('resize', resize);
+				$ta
+					.off('autosize')
+					.off('.autosize')
+					.css(originalStyles)
+					.removeData('autosize');
+			});
+
+			// Call adjust in case the textarea already contains text.
+			adjust();
+		});
+	};
+}(window.jQuery || window.$)); // jQuery or jQuery-like library, such as Zepto
+</script>
+
 
 {% endblock %}

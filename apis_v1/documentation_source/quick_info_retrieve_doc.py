@@ -16,7 +16,7 @@ def quick_info_retrieve_doc_template_values(url_root):
         },
         {
             'name':         'ballot_item_we_vote_id',
-            'value':        'integer',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'The we_vote_id for the ballot item we want quick information for. ',
         },
     ]
@@ -45,7 +45,7 @@ def quick_info_retrieve_doc_template_values(url_root):
                    '  "quick_info_found": boolean,\n' \
                    '  "quick_info_id": integer,\n' \
                    '  "quick_info_we_vote_id": string,\n' \
-                   '  "kind_of_ballot_item": string,\n' \
+                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
                    '  "incoming_ballot_item_we_vote_id": string,\n' \
                    '  "language": string,\n' \
                    '  "info_text": string,\n' \

@@ -4,9 +4,23 @@
 {% block title %}Positions / Public Opinions{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+<a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
 
 <h1>Positions / Public Opinions</h1>
+
+    <p>Jump to:
+
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">Candidates</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}">Politicians</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">Public Opinions / Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}">Polling Locations</a></p>
+
+    </p>
+
 <p>Also see positions listed under <a href="{% url 'organization:organization_list' %}">Organizations</a>.
     Vote Smart ratings <a href="{% url 'import_export_vote_smart:vote_smart_rating_list' %}">here</a>.<br/>
 
@@ -26,8 +40,8 @@
             -- Filter by Election --</option>
     {% for election in election_list %}
         <option value="{{ election.google_civic_election_id }}"
-                {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
-            {{ election.election_name }} - {{ election.election_day_text }}</option>
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
     {% endfor %}
     </select>
     </form>
@@ -47,12 +61,31 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ position.we_vote_id }}</td>
-            <td>{% if position.organization %}{{ position.organization.organization_name }}{% endif %}</td>
             <td>{% if position.organization %}
-                <a href="{% url 'organization:organization_position_edit' position.organization.id position.id %}">
+                <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ position.organization.organization_name }}
+                </a>
+            {% else %}
+                (organization name missing)
+            {% endif %}</td>
+            <td>
+            {% if position.organization %}
+                <a href="{% url 'organization:organization_position_edit' position.organization.id position.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ position.get_stance_display }}</a>
+            {% else %}
+                {{ position.get_stance_display }}
             {% endif %}
-                {{ position.get_stance_display }}</a></td>
-            <td>{{ position.candidate_campaign.candidate_name }}</td>
+            </td>
+            <td>
+                {% if position.candidate_campaign %}
+                {{ position.candidate_campaign.candidate_name }}
+                {% elif position.contest_measure %}
+                {{ position.contest_measure.measure_title }}
+                {% else %}
+                    (name unknown)
+                {% endif %}
+            </td>
             <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% endif %}
                 {% if position.vote_smart_time_span %}{{ position.vote_smart_time_span }}{% endif %}</td>
         </tr>

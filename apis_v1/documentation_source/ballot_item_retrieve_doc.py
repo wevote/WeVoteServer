@@ -28,18 +28,13 @@ def ballot_item_retrieve_doc_template_values(url_root):
         },
         {
             'name':         'ballot_item_we_vote_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'The unique identifier for this candidate across all networks '
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this ballot_item across all networks '
                             '(either ballot_item_id OR ballot_item_we_vote_id required -- not both.) '
                             'NOTE: In the future we might support other identifiers used in the industry.',
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
     ]
 
     potential_status_codes_list = [
@@ -51,10 +46,6 @@ def ballot_item_retrieve_doc_template_values(url_root):
             'code':         'VALID_VOTER_ID_MISSING',
             'description':  'Cannot proceed. A valid voter_id was not found.',
         },
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
@@ -62,6 +53,7 @@ def ballot_item_retrieve_doc_template_values(url_root):
         'ballot_item_we_vote_id': 'wv01cand1755',
     }
 
+    # See api_response_notes below. This is a wrapper for candidateRetrieve, measureRetrieve and officeRetrieve.
     api_response = ""
 
     template_values = {

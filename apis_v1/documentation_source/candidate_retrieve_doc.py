@@ -10,7 +10,7 @@ def candidate_retrieve_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -27,18 +27,13 @@ def candidate_retrieve_doc_template_values(url_root):
         },
         {
             'name':         'candidate_we_vote_id',
-            'value':        'integer',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for this candidate across all networks '
                             '(either candidate_id OR candidate_we_vote_id required -- not both.) '
                             'NOTE: In the future we might support other identifiers used in the industry.',
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
     ]
 
     potential_status_codes_list = [
@@ -50,10 +45,6 @@ def candidate_retrieve_doc_template_values(url_root):
             'code':         'VALID_VOTER_ID_MISSING',
             'description':  'Cannot proceed. A valid voter_id was not found.',
         },
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
@@ -64,7 +55,7 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "kind_of_ballot_item": string,\n' \
+                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
                    '  "id": integer,\n' \
                    '  "we_vote_id": string,\n' \
                    '  "ballot_item_display_name": string,\n' \
@@ -74,6 +65,7 @@ def candidate_retrieve_doc_template_values(url_root):
                    '  "maplight_id": integer,\n' \
                    '  "contest_office_id": integer,\n' \
                    '  "contest_office_we_vote_id": string,\n' \
+                   '  "contest_office_name": string,\n' \
                    '  "politician_id": integer,\n' \
                    '  "politician_we_vote_id": string,\n' \
                    '  "party": string,\n' \

@@ -11,7 +11,10 @@ urlpatterns = [
     url(r'^authenticate_manually/$', views_admin.voter_authenticate_manually_view, name='authenticate_manually'),
     url(r'^authenticate_manually_process/$',
         views_admin.voter_authenticate_manually_process_view, name='authenticate_manually_process'),
-    url(r'^edit_process/$', views_admin.voter_edit_process_view, name='candidate_edit_process'),
+    url(r'^voter_change_authority/$',
+        views_admin.voter_change_authority_process_view, name='voter_change_authority_process'),
+    url(r'^edit_process/$', views_admin.voter_edit_process_view, name='voter_edit_process'),
+    url(r'^login_complete/$', views_admin.login_complete_view, name='login_complete_view'),
     url(r'^(?P<voter_id>[0-9]+)/edit/$', views_admin.voter_edit_view, name='voter_edit'),
     url(r'^(?P<voter_id>[0-9]+)/summary/$', views_admin.voter_summary_view, name='voter_summary'),
 ]

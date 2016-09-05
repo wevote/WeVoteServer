@@ -10,7 +10,7 @@ def voter_guides_followed_retrieve_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -60,7 +60,9 @@ def voter_guides_followed_retrieve_doc_template_values(url_root):
                    '     "voter_guide_image_url": string (We Vote ID for the person that owns the voter guide),\n' \
                    '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
                    '     "google_civic_election_id": integer,\n' \
+                   '     "twitter_description": string,\n' \
                    '     "twitter_followers_count": integer,\n' \
+                   '     "twitter_handle": integer,\n' \
                    '     "owner_voter_id": integer TO BE DEPRECATED,\n' \
                    '   ],\n' \
                    '  "google_civic_election_id": integer,\n' \

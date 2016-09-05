@@ -10,7 +10,7 @@ def position_support_count_for_ballot_item_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -31,19 +31,13 @@ def position_support_count_for_ballot_item_doc_template_values(url_root):
                             '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
                             'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
-        # {
-        #     'name':         'candidate_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The candidate we want the support count for. '
-        #                     '(Either measure_id or candidate_id must exist)',
-        # },
-        # {
-        #     'name':         'measure_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The measure we want the support count for. '
-        #                     ' (Either measure_id or candidate_id must exist. '
-        #                     'We ignore measure_id if candidate_id exists.)',
-        # },
+        {
+            'name':         'ballot_item_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this ballot_item across all networks '
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both.) '
+                            'NOTE: In the future we might support other identifiers used in the industry.',
+        },
     ]
     optional_query_parameter_list = [
         # {
@@ -85,6 +79,9 @@ def position_support_count_for_ballot_item_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "count": integer,\n' \
+                   '  "ballot_item_id": integer,\n' \
+                   '  "ballot_item_we_vote_id": string,\n' \
+                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
                    '}'
 
     template_values = {

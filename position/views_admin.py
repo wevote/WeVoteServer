@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PositionEntered
+from .controllers import positions_import_from_master_server
+from .models import ANY_STANCE, PositionEntered
 from .serializers import PositionSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
@@ -28,28 +29,68 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # This page does not need to be protected.
 # NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.
-class ExportPositionDataView(APIView):
+class PositionsSyncOutView(APIView):
     def get(self, request, format=None):
-        position_list = PositionEntered.objects.all()
+        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
+        position_list_manager = PositionListManager()
+        public_only = True
+        position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
+                                                                                  public_only)
         serializer = PositionSerializer(position_list, many=True)
         return Response(serializer.data)
 
 
 @login_required
+def positions_import_from_master_server_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.INFO, 'Google civic election id is required for Positions import.')
+        return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                    str(google_civic_election_id) + "&state_code=" + str(state_code))
+
+    results = positions_import_from_master_server(request, google_civic_election_id)
+
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'Positions import completed. '
+                                                     'Saved: {saved}, Updated: {updated}, '
+                                                     'Master data not imported (local duplicates found): '
+                                                     '{duplicates_removed}, '
+                                                     'Not processed: {not_processed}'
+                                                     ''.format(saved=results['saved'],
+                                                               updated=results['updated'],
+                                                               duplicates_removed=results['duplicates_removed'],
+                                                               not_processed=results['not_processed']))
+    return HttpResponseRedirect(reverse('admin_tools:sync_dashboard', args=()) + "?google_civic_election_id=" +
+                                str(google_civic_election_id) + "&state_code=" + str(state_code))
+
+
+@login_required
 def position_list_view(request):
+    """
+    We actually don't want to see PositionForFriends entries in this view
+    :param request:
+    :return:
+    """
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     messages_on_stage = get_messages(request)
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
     position_list_manager = PositionListManager()
 
     if positive_value_exists(google_civic_election_id):
-        position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id)
+        public_only = True
+        position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
+                                                                                  public_only)
     else:
-        position_list = PositionEntered.objects.order_by('position_id')  # This order_by is temp
+        position_list = PositionEntered.objects.order_by('we_vote_id')[:300]  # This order_by is temp
 
     election_list = Election.objects.order_by('-election_day_text')
 
@@ -76,20 +117,19 @@ def position_new_view(request):
 
 
 @login_required
-def position_edit_view(request, position_id):
+def position_edit_view(request, position_we_vote_id):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     messages_on_stage = get_messages(request)
-    position_id = convert_to_int(position_id)
     position_on_stage_found = False
     try:
-        position_on_stage = CandidateCampaign.objects.get(id=position_id)
+        position_on_stage = PositionEntered.objects.get(we_vote_id=position_we_vote_id)
         position_on_stage_found = True
-    except CandidateCampaign.MultipleObjectsReturned as e:
-        handle_record_found_more_than_one_exception(e, logger=logger)
-    except CandidateCampaign.DoesNotExist:
+    except PositionEntered.MultipleObjectsReturned as e:
+        pass
+    except PositionEntered.DoesNotExist:
         # This is fine, create new
         pass
 
@@ -106,7 +146,7 @@ def position_edit_view(request, position_id):
 
 
 @login_required
-def position_edit_process_view(request):
+def position_edit_process_view(request):  # TODO DALE I don't think this is in use, but needs to be updated
     """
     Process the new or edit position forms
     :param request:
@@ -116,7 +156,7 @@ def position_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    position_id = convert_to_int(request.POST['position_id'])
+    position_we_vote_id = request.POST.get('position_we_vote_id')
     position_name = request.POST['position_name']
     twitter_handle = request.POST['twitter_handle']
     position_website = request.POST['position_website']
@@ -124,7 +164,7 @@ def position_edit_process_view(request):
     # Check to see if this position is already being used anywhere
     position_on_stage_found = False
     try:
-        position_query = CandidateCampaign.objects.filter(id=position_id)
+        position_query = PositionEntered.objects.filter(we_vote_id=position_we_vote_id)
         if len(position_query):
             position_on_stage = position_query[0]
             position_on_stage_found = True
@@ -138,7 +178,7 @@ def position_edit_process_view(request):
             position_on_stage.twitter_handle = twitter_handle
             position_on_stage.position_website = position_website
             position_on_stage.save()
-            messages.add_message(request, messages.INFO, 'CandidateCampaign updated.')
+            messages.add_message(request, messages.INFO, 'PositionEntered updated.')
         else:
             # Create new
             position_on_stage = CandidateCampaign(
@@ -156,20 +196,20 @@ def position_edit_process_view(request):
 
 
 @login_required
-def position_summary_view(request, position_id):
+def position_summary_view(request, position_we_vote_id):
     authority_required = {'verified_volunteer'}  # admin, verified_volunteer
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
     messages_on_stage = get_messages(request)
-    position_id = convert_to_int(position_id)
     position_on_stage_found = False
+    position_on_stage = PositionEntered()
     try:
-        position_on_stage = CandidateCampaign.objects.get(id=position_id)
+        position_on_stage = PositionEntered.objects.get(we_vote_id=position_we_vote_id)
         position_on_stage_found = True
-    except CandidateCampaign.MultipleObjectsReturned as e:
+    except PositionEntered.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
-    except CandidateCampaign.DoesNotExist:
+    except PositionEntered.DoesNotExist:
         # This is fine, create new
         pass
 
@@ -194,76 +234,53 @@ def relink_candidates_measures_view(request):
     messages.add_message(request, messages.INFO, 'TO BE BUILT: relink_candidates_measures_view')
     return HttpResponseRedirect(reverse('position:position_list', args=()))
 
-# @login_required
-# def positions_display_list_related_to_candidate_campaign_any_position_view(request, candidate_campaign_id):
-#     stance_we_are_looking_for = ANY
-#     return positions_display_list_related_to_candidate_campaign(
-#         request, candidate_campaign_id, stance_we_are_looking_for)
 
+@login_required
+def position_delete_process_view(request):
+    """
+    Delete a position
+    :param request:
+    :return:
+    """
+    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
 
-# @login_required
-# def positions_display_list_related_to_candidate_campaign_supporters_view(request, candidate_campaign_id):
-#     stance_we_are_looking_for = SUPPORT
-#     return positions_display_list_related_to_candidate_campaign(
-#         request, candidate_campaign_id, stance_we_are_looking_for)
+    position_we_vote_id = request.GET.get('position_we_vote_id', '')
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
 
+    # Retrieve this position
+    position_on_stage_found = False
+    position_on_stage = PositionEntered()
+    organization_id = 0
+    try:
+        position_query = PositionEntered.objects.filter(we_vote_id=position_we_vote_id)
+        if len(position_query):
+            position_on_stage = position_query[0]
+            organization_id = position_on_stage.organization_id
+            position_on_stage_found = True
+    except Exception as e:
+        messages.add_message(request, messages.ERROR, 'Could not find position -- exception.')
 
-# @login_required
-# def positions_display_list_related_to_candidate_campaign_opposers_view(request, candidate_campaign_id):
-#     stance_we_are_looking_for = OPPOSE
-#     return positions_display_list_related_to_candidate_campaign(
-#         request, candidate_campaign_id, stance_we_are_looking_for)
+    if not position_on_stage_found:
+        messages.add_message(request, messages.ERROR, 'Could not find position.')
+        return HttpResponseRedirect(reverse('position:position_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
 
+    try:
+        if position_on_stage_found:
+            # Delete
+            position_on_stage.delete()
+            messages.add_message(request, messages.INFO, 'Position deleted.')
+            if positive_value_exists(organization_id):
+                return HttpResponseRedirect(reverse('organization:organization_position_list',
+                                                    args=([organization_id])) +
+                                            "?google_civic_election_id=" + str(google_civic_election_id))
+        else:
+            messages.add_message(request, messages.ERROR, 'Could not find position.')
+    except Exception as e:
+        handle_record_not_saved_exception(e, logger=logger)
+        messages.add_message(request, messages.ERROR, 'Could not save position.')
 
-# @login_required
-# def positions_display_list_related_to_candidate_campaign_information_only_view(request, candidate_campaign_id):
-#     stance_we_are_looking_for = INFORMATION_ONLY
-#     return positions_display_list_related_to_candidate_campaign(
-#         request, candidate_campaign_id, stance_we_are_looking_for)
-
-
-# @login_required
-# def positions_display_list_related_to_candidate_campaign_deciders_view(request, candidate_campaign_id):
-#     stance_we_are_looking_for = STILL_DECIDING
-#     return positions_display_list_related_to_candidate_campaign(
-#         request, candidate_campaign_id, stance_we_are_looking_for)
-
-
-# @login_required
-# def positions_display_list_related_to_candidate_campaign(request, candidate_campaign_id, stance_we_are_looking_for):
-#     show_only_followed_positions = convert_to_int(request.GET.get('f', 0))
-#     show_only_not_followed_positions = convert_to_int(request.GET.get('nf', 0))
-#
-#     messages_on_stage = get_messages(request)
-#     candidate_campaign_id = convert_to_int(candidate_campaign_id)
-#
-#     position_list_manager = PositionListManager()
-#     all_positions_list_for_candidate_campaign = \
-#         position_list_manager.retrieve_all_positions_for_candidate_campaign(
-#             candidate_campaign_id, stance_we_are_looking_for)
-#
-#     voter_device_id = get_voter_device_id(request)
-#     voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-#
-#     follow_organization_list_manager = FollowOrganizationList()
-#     organizations_followed_by_voter = \
-#         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
-#
-#     if show_only_followed_positions == 1:
-#         logger.debug("positions_display_list: show only followed positions")
-#         list_to_display = position_list_manager.calculate_positions_followed_by_voter(
-#             voter_id, all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
-#     elif show_only_not_followed_positions == 1:
-#         logger.debug("positions_display_list: show only NOT followed positions")
-#         list_to_display = position_list_manager.calculate_positions_not_followed_by_voter(
-#             all_positions_list_for_candidate_campaign, organizations_followed_by_voter)
-#     else:
-#         list_to_display = all_positions_list_for_candidate_campaign
-#
-#     template_values = {
-#         'error':                            True,
-#         'messages_on_stage':                messages_on_stage,
-#         'position_list':                    list_to_display,
-#         'organizations_followed_by_voter':  organizations_followed_by_voter,
-#     }
-#     return render(request, 'position/voter_position_list.html', template_values)
+    return HttpResponseRedirect(reverse('position:position_list', args=()) +
+                                "?google_civic_election_id=" + str(google_civic_election_id))

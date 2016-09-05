@@ -16,6 +16,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 def retrieve_google_civic_election_id_for_voter(voter_id):
     """
     Grab the first ballot_item we can find for this voter and return the google_civic_election_id
+    This is a rough way to do this and the preferred method is ballot/controllers.py choose_election_from_existing_data
     """
     google_civic_election_id = 0
     success = False
@@ -41,7 +42,12 @@ def retrieve_google_civic_election_id_for_voter(voter_id):
 
 
 def fetch_google_civic_election_id_for_voter_id(voter_id):
-    # Look to see if we have ballot_items stored for this voter and pull google_civic_election_id from that
+    """
+    Look to see if we have ballot_items stored for this voter and pull google_civic_election_id from that. This is a
+    rough way to do this and the preferred method is ballot/controllers.py choose_election_from_existing_data
+    :param voter_id:
+    :return:
+    """
     results = retrieve_google_civic_election_id_for_voter(voter_id)
     if results['success']:
         google_civic_election_id = results['google_civic_election_id']

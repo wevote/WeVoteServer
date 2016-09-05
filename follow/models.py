@@ -72,28 +72,29 @@ class FollowOrganizationManager(models.Model):
     def __unicode__(self):
         return "FollowOrganizationManager"
 
-    def toggle_on_voter_following_organization(self, voter_id, organization_id):
+    def toggle_on_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id):
         following_status = FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, following_status)
 
-    def toggle_off_voter_following_organization(self, voter_id, organization_id):
+    def toggle_off_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id):
         following_status = STOP_FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, following_status)
 
-    def toggle_ignore_voter_following_organization(self, voter_id, organization_id):
+    def toggle_ignore_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id):
         following_status = FOLLOW_IGNORE
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, following_status)
 
-    def toggle_voter_following_organization(self, voter_id, organization_id, following_status):
+    def toggle_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id, following_status):
         # Does a follow_organization entry exist from this voter already exist?
         follow_organization_manager = FollowOrganizationManager()
-        results = follow_organization_manager.retrieve_follow_organization(0, voter_id, organization_id)
+        results = follow_organization_manager.retrieve_follow_organization(0, voter_id,
+                                                                           organization_id, organization_we_vote_id)
 
         follow_organization_on_stage_found = False
         follow_organization_on_stage_id = 0
@@ -121,12 +122,15 @@ class FollowOrganizationManager(models.Model):
                 # Create new follow_organization entry
                 # First make sure that organization_id is for a valid organization
                 organization_manager = OrganizationManager()
-                results = organization_manager.retrieve_organization(organization_id)
+                if positive_value_exists(organization_id):
+                    results = organization_manager.retrieve_organization(organization_id)
+                else:
+                    results = organization_manager.retrieve_organization(0, organization_we_vote_id)
                 if results['organization_found']:
                     organization = results['organization']
                     follow_organization_on_stage = FollowOrganization(
                         voter_id=voter_id,
-                        organization_id=organization_id,
+                        organization_id=organization.id,
                         organization_we_vote_id=organization.we_vote_id,
                         following_status=following_status,
                         # We don't need to update here because set set auto_now=True in the field
@@ -153,7 +157,10 @@ class FollowOrganizationManager(models.Model):
         }
         return results
 
-    def retrieve_follow_organization(self, follow_organization_id, voter_id, organization_id):
+    def retrieve_follow_organization(self, follow_organization_id, voter_id, organization_id, organization_we_vote_id):
+        """
+        follow_organization_id is the identifier for records stored in this table (it is NOT the organization_id)
+        """
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -164,37 +171,89 @@ class FollowOrganizationManager(models.Model):
             if positive_value_exists(follow_organization_id):
                 follow_organization_on_stage = FollowOrganization.objects.get(id=follow_organization_id)
                 follow_organization_on_stage_id = organization_id.id
+                success = True
                 status = 'FOLLOW_ORGANIZATION_FOUND_WITH_ID'
-            elif voter_id > 0 and organization_id > 0:
+            elif positive_value_exists(voter_id) and positive_value_exists(organization_id):
                 follow_organization_on_stage = FollowOrganization.objects.get(
                     voter_id=voter_id, organization_id=organization_id)
                 follow_organization_on_stage_id = follow_organization_on_stage.id
+                success = True
                 status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_ID'
+            elif positive_value_exists(voter_id) and positive_value_exists(organization_we_vote_id):
+                follow_organization_on_stage = FollowOrganization.objects.get(
+                    voter_id=voter_id, organization_we_vote_id=organization_we_vote_id)
+                follow_organization_on_stage_id = follow_organization_on_stage.id
+                success = True
+                status = 'FOLLOW_ORGANIZATION_FOUND_WITH_VOTER_ID_AND_ORGANIZATION_WE_VOTE_ID'
+            else:
+                success = False
+                status = 'FOLLOW_ORGANIZATION_MISSING_REQUIRED_VARIABLES'
         except FollowOrganization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
             exception_multiple_object_returned = True
+            success = False
             status = 'FOLLOW_ORGANIZATION_NOT_FOUND_MultipleObjectsReturned'
         except FollowOrganization.DoesNotExist:
-            error_result = True
+            error_result = False
             exception_does_not_exist = True
+            success = True
             status = 'FOLLOW_ORGANIZATION_NOT_FOUND_DoesNotExist'
 
-        follow_organization_on_stage_found = True if follow_organization_on_stage_id > 0 else False
+        if positive_value_exists(follow_organization_on_stage_id):
+            follow_organization_on_stage_found = True
+            is_following = follow_organization_on_stage.is_following()
+            is_not_following = follow_organization_on_stage.is_not_following()
+            is_ignoring = follow_organization_on_stage.is_ignoring()
+        else:
+            follow_organization_on_stage_found = False
+            is_following = False
+            is_not_following = True
+            is_ignoring = False
         results = {
             'status':                       status,
-            'success':                      True if follow_organization_on_stage_found else False,
+            'success':                      success,
             'follow_organization_found':    follow_organization_on_stage_found,
             'follow_organization_id':       follow_organization_on_stage_id,
             'follow_organization':          follow_organization_on_stage,
-            'is_following':                 follow_organization_on_stage.is_following(),
-            'is_not_following':             follow_organization_on_stage.is_not_following(),
-            'is_ignoring':                  follow_organization_on_stage.is_ignoring(),
+            'is_following':                 is_following,
+            'is_not_following':             is_not_following,
+            'is_ignoring':                  is_ignoring,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
         }
         return results
+
+    def retrieve_voter_following_org_status(self, voter_id, voter_we_vote_id,
+                                            organization_id, organization_we_vote_id):
+        """
+        Retrieve one follow entry so we can see if a voter is following or ignoring a particular org
+        """
+
+        if not positive_value_exists(voter_id) and positive_value_exists(voter_we_vote_id):
+            # We need voter_id to call retrieve_follow_organization
+            voter_manager = VoterManager()
+            voter_id = voter_manager.fetch_local_id_from_we_vote_id(voter_we_vote_id)
+
+        if not positive_value_exists(voter_id) and \
+                not (positive_value_exists(organization_id) or positive_value_exists(organization_we_vote_id)):
+            results = {
+                'status':                       'RETRIEVE_VOTER_FOLLOWING_MISSING_VARIABLES',
+                'success':                      False,
+                'follow_organization_found':    False,
+                'follow_organization_id':       0,
+                'follow_organization':          FollowOrganization(),
+                'is_following':                 False,
+                'is_not_following':             True,
+                'is_ignoring':                  False,
+                'error_result':                 True,
+                'DoesNotExist':                 False,
+                'MultipleObjectsReturned':      False,
+            }
+            return results
+
+        return self.retrieve_follow_organization(0, voter_id, organization_id, organization_we_vote_id)
 
 
 class FollowOrganizationList(models.Model):
@@ -241,35 +300,31 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = {}
             return follow_organization_list
 
-    def retrieve_follow_organization_by_voter_id_simple_id_array(self, voter_id):
+    def retrieve_follow_organization_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False):
         follow_organization_list_manager = FollowOrganizationList()
         follow_organization_list = \
             follow_organization_list_manager.retrieve_follow_organization_by_voter_id(voter_id)
         follow_organization_list_simple_array = []
         if len(follow_organization_list):
             for follow_organization in follow_organization_list:
-                follow_organization_list_simple_array.append(follow_organization.organization_id)
+                if return_we_vote_id:
+                    follow_organization_list_simple_array.append(follow_organization.organization_we_vote_id)
+                else:
+                    follow_organization_list_simple_array.append(follow_organization.organization_id)
         return follow_organization_list_simple_array
 
-    def retrieve_ignore_organization_by_voter_id_simple_id_array(self, voter_id):
+    def retrieve_ignore_organization_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False):
         follow_organization_list_manager = FollowOrganizationList()
         ignore_organization_list = \
             follow_organization_list_manager.retrieve_ignore_organization_by_voter_id(voter_id)
         ignore_organization_list_simple_array = []
         if len(ignore_organization_list):
             for ignore_organization in ignore_organization_list:
-                ignore_organization_list_simple_array.append(ignore_organization.organization_id)
+                if return_we_vote_id:
+                    ignore_organization_list_simple_array.append(ignore_organization.organization_we_vote_id)
+                else:
+                    ignore_organization_list_simple_array.append(ignore_organization.organization_id)
         return ignore_organization_list_simple_array
-
-    def retrieve_follow_organization_by_voter_id_simple_we_vote_id_array(self, voter_id):
-        follow_organization_list_manager = FollowOrganizationList()
-        follow_organization_list = \
-            follow_organization_list_manager.retrieve_follow_organization_by_voter_id(voter_id)
-        follow_organization_list_simple_array = []
-        if len(follow_organization_list):
-            for follow_organization in follow_organization_list:
-                follow_organization_list_simple_array.append(follow_organization.organization_we_vote_id)
-        return follow_organization_list_simple_array
 
     def retrieve_follow_organization_by_organization_id(self, organization_id):
         # Retrieve a list of follow_organization entries for this organization

@@ -15,12 +15,9 @@
 
     <h1>Authenticate Manually
         {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }} {% endif %}</h1>
+    voter.id: {{ voter.id }}, voter_api_device_id: {{ voter_api_device_id }}<br />
+
     <table border="1">
-    <tr>
-        <td>ID</td>
-        <td>{{ voter.id }}</td>
-        <td>&nbsp;</td>
-    </tr>
     <tr>
         <td>Admin?</td>
         <td>{% if voter.is_admin %}Yes{% else %}No{% endif %}</td>

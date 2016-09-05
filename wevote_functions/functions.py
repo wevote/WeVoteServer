@@ -74,6 +74,20 @@ STATE_CODE_MAP = {
     'WY': 'Wyoming'
 }
 
+AMERICAN_INDEPENDENT = 'AMERICAN_INDEPENDENT'
+DEMOCRAT = 'DEMOCRAT'
+D_R = 'D_R'
+ECONOMIC_GROWTH = 'ECONOMIC_GROWTH'
+GREEN = 'GREEN'
+INDEPENDENT = 'INDEPENDENT'
+INDEPENDENT_GREEN = 'INDEPENDENT_GREEN'
+LIBERTARIAN = 'LIBERTARIAN'
+NO_PARTY_PREFERENCE = 'NO_PARTY_PREFERENCE'
+NON_PARTISAN = 'NON_PARTISAN'
+PEACE_AND_FREEDOM = 'PEACE_AND_FREEDOM'
+REFORM = 'REFORM'
+REPUBLICAN = 'REPUBLICAN'
+
 
 class LocalSwitch(object):
     def __init__(self, value):
@@ -96,6 +110,25 @@ class LocalSwitch(object):
             return False
 
 
+# This is how we make sure a variable is a boolean
+def convert_to_bool(value):
+    if value is True:
+        return True
+    elif value is 1:
+        return True
+    elif value is False:
+        return False
+    elif value is 0:
+        return True
+
+    value = value.lower()
+    if value in ['true', '1']:
+        return True
+    elif value in ['false', '0']:
+        return False
+    return False
+
+
 # This is how we make sure a variable is an integer
 def convert_to_int(value):
     try:
@@ -112,6 +145,65 @@ def convert_to_str(value):
     except ValueError:
         new_value = ''
     return new_value
+
+
+# See also 'candidate_party_display' in candidate/models.py
+def convert_to_political_party_constant(raw_party_incoming):
+    raw_party = raw_party_incoming.lower()
+    raw_party = raw_party.replace("Party Preference: ", "")
+
+    if raw_party == 'amer. ind.':
+        return AMERICAN_INDEPENDENT
+    if raw_party == 'american independent':
+        return AMERICAN_INDEPENDENT
+    if raw_party == 'dem':
+        return DEMOCRAT
+    if raw_party == 'democrat':
+        return DEMOCRAT
+    if raw_party == 'democratic':
+        return DEMOCRAT
+    if raw_party == 'democratic party':
+        return DEMOCRAT
+    if raw_party == 'd-r party':
+        return D_R
+    if raw_party == 'economic growth':
+        return ECONOMIC_GROWTH
+    if raw_party == 'grn':
+        return GREEN
+    if raw_party == 'green':
+        return GREEN
+    if raw_party == 'green party':
+        return GREEN
+    if raw_party == 'independent':
+        return INDEPENDENT
+    if raw_party == 'independent green':
+        return INDEPENDENT_GREEN
+    if raw_party == 'lib':
+        return LIBERTARIAN
+    if raw_party == 'Libertarian':
+        return LIBERTARIAN
+    if raw_party == 'npp':
+        return NO_PARTY_PREFERENCE
+    if raw_party == 'no party preference':
+        return NO_PARTY_PREFERENCE
+    if raw_party == 'non-partisan':
+        return NON_PARTISAN
+    if raw_party == 'nonpartisan':
+        return NON_PARTISAN
+    if raw_party == 'pf':
+        return PEACE_AND_FREEDOM
+    if raw_party == 'peace and freedom':
+        return PEACE_AND_FREEDOM
+    if raw_party == 'reform':
+        return REFORM
+    if raw_party == 'rep':
+        return REPUBLICAN
+    if raw_party == 'republican':
+        return REPUBLICAN
+    if raw_party == 'republican party':
+        return REPUBLICAN
+    else:
+        return raw_party_incoming
 
 
 def extract_state_from_ocd_division_id(ocd_division_id):
@@ -168,6 +260,19 @@ def extract_zip_formatted_from_zip9(zip9):
     return formatted_zip_text
 
 
+def display_full_name_with_correct_capitalization(full_name):
+    """
+    See documentation here: https://github.com/derek73/python-nameparser
+    :param full_name:
+    :return:
+    """
+    full_name.strip()
+    full_name_parsed = HumanName(full_name)
+    full_name_parsed.capitalize()
+    full_name_capitalized = str(full_name_parsed)
+    return full_name_capitalized
+
+
 def extract_first_name_from_full_name(full_name):
     """
     See documentation here: https://github.com/derek73/python-nameparser
@@ -180,6 +285,18 @@ def extract_first_name_from_full_name(full_name):
     return first_name
 
 
+def extract_middle_name_from_full_name(full_name):
+    """
+    See documentation here: https://github.com/derek73/python-nameparser
+    :param full_name:
+    :return:
+    """
+    full_name.strip()
+    full_name_parsed = HumanName(full_name)
+    middle_name = full_name_parsed.middle
+    return middle_name
+
+
 def extract_last_name_from_full_name(full_name):
     """
     See documentation here: https://github.com/derek73/python-nameparser
@@ -190,6 +307,30 @@ def extract_last_name_from_full_name(full_name):
     full_name_parsed = HumanName(full_name)
     last_name = full_name_parsed.last
     return last_name
+
+
+def extract_twitter_handle_from_text_string(twitter_text_string):
+    """
+
+    :param twitter_text_string:
+    :return:
+    """
+    if not twitter_text_string:
+        return ""
+    if not positive_value_exists(twitter_text_string):
+        return ""
+    twitter_text_string = str(twitter_text_string)
+    twitter_text_string.strip()
+    twitter_text_string = twitter_text_string.lower()
+    twitter_text_string = twitter_text_string.replace("http://twitter.com", "")
+    twitter_text_string = twitter_text_string.replace("http://www.twitter.com", "")
+    twitter_text_string = twitter_text_string.replace("https://twitter.com", "")
+    twitter_text_string = twitter_text_string.replace("https://www.twitter.com", "")
+    twitter_text_string = twitter_text_string.replace("www.twitter.com", "")
+    twitter_text_string = twitter_text_string.replace("twitter.com", "")
+    twitter_text_string = twitter_text_string.replace("@", "")
+    twitter_text_string = twitter_text_string.replace("/", "")
+    return twitter_text_string
 
 
 def get_ip_from_headers(request):
@@ -211,12 +352,16 @@ def set_cookie(response, cookie_name, cookie_value, days_expire=None):
         max_age = days_expire * 24 * 60 * 60
     expires = datetime.datetime.strftime(datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age),
                                          "%a, %d-%b-%Y %H:%M:%S GMT")
-    response.set_cookie(cookie_name, cookie_value, max_age=max_age, expires=expires)
+    response.set_cookie(cookie_name, cookie_value, max_age=max_age, expires=expires, path="/")
+
+
+def delete_cookie(response, cookie_name):
+    response.delete_cookie(cookie_name, path="/")
 
 
 def get_voter_api_device_id(request, generate_if_no_cookie=False):
     """
-    This function retrieves the voter_api_device_id from the API server
+    This function retrieves the voter_api_device_id from the cookies on API server
     :param request:
     :param generate_if_no_cookie:
     :return:
@@ -229,35 +374,37 @@ def get_voter_api_device_id(request, generate_if_no_cookie=False):
         ))
     if voter_api_device_id == '' and generate_if_no_cookie:
         voter_api_device_id = generate_voter_device_id()  # Stored in cookie below
-        # If we set this here, we won't know whether we need to store the cookie in set_voter_api_device_id
-        # request.COOKIES['voter_api_device_id'] = voter_api_device_id  # Set it here for use in remainder of page load
         logger.debug("generate_voter_device_id, voter_api_device_id: {voter_api_device_id}".format(
             voter_api_device_id=voter_api_device_id
         ))
     return voter_api_device_id
 
 
-def get_voter_device_id(request, generate_if_no_cookie=False):
+def get_voter_device_id(request, generate_if_no_value=False):
     """
-    This function retrieves the voter_device_id from the client
+    This function retrieves the voter_device_id from the GET values coming from a client
     :param request:
-    :param generate_if_no_cookie:
+    :param generate_if_no_value:
     :return:
     """
-    voter_device_id = ''
-    if 'voter_device_id' in request.COOKIES:
-        voter_device_id = request.COOKIES['voter_device_id']
-        logger.debug("from cookie, voter_device_id: {voter_device_id}".format(
-            voter_device_id=voter_device_id
-        ))
-    if voter_device_id == '' and generate_if_no_cookie:
-        voter_device_id = generate_voter_device_id()  # Stored in cookie below
-        # If we set this here, we won't know whether we need to store the cookie in set_voter_device_id
-        # request.COOKIES['voter_device_id'] = voter_device_id  # Set it here for use in the remainder of this page load
+    # First check the headers
+    voter_device_id = request.META.get('HTTP_X_HEADER_DEVICEID', '')
+    if positive_value_exists(voter_device_id):
+        return voter_device_id
+
+    # Then check for incoming GET value
+    voter_device_id = request.GET.get('voter_device_id', '')
+    if positive_value_exists(voter_device_id):
+        return voter_device_id
+
+    if generate_if_no_value:
+        voter_device_id = generate_voter_device_id()
         logger.debug("generate_voter_device_id, voter_device_id: {voter_device_id}".format(
             voter_device_id=voter_device_id
         ))
-    return voter_device_id
+        return voter_device_id
+    else:
+        return ''
 
 
 def is_voter_device_id_valid(voter_device_id):
@@ -288,9 +435,19 @@ def is_voter_device_id_valid(voter_device_id):
     return results
 
 
+# TODO: To be deprecated since we don't want to set voter_device_id locally to the API server
+def set_voter_device_id(request, response, voter_device_id):
+    if 'voter_device_id' not in request.COOKIES:
+        set_cookie(response, 'voter_device_id', voter_device_id)
+
+
 def set_voter_api_device_id(request, response, voter_api_device_id):
     if 'voter_api_device_id' not in request.COOKIES:
         set_cookie(response, 'voter_api_device_id', voter_api_device_id)
+
+
+def delete_voter_api_device_id_cookie(response):
+    delete_cookie(response, 'voter_api_device_id')
 
 
 def generate_random_string(string_length=88, chars=string.ascii_lowercase + string.ascii_uppercase + string.digits):
@@ -341,7 +498,7 @@ def positive_value_exists(value):
     :return: bool
     """
     try:
-        if value in [None, '', 'None']:
+        if value in [None, '', 'None', False, 'False', 'false']:
             return False
         if sys.version_info > (3, 0):
             # Python 3 code in this block
@@ -349,12 +506,15 @@ def positive_value_exists(value):
                 return bool(len(value))
             if isinstance(value, dict):
                 return bool(len(value))
+            if isinstance(value, datetime.date):
+                return bool(value is not None)
         else:
             # Python 2 code in this block
             if isinstance(value, types.ListType):
                 return bool(len(value))
             if isinstance(value, types.DictType):
                 return bool(len(value))
+            # TODO We aren't checking for datetime format and need to
 
         value = float(value)
         if value < 0:
@@ -362,21 +522,6 @@ def positive_value_exists(value):
     except ValueError:
         pass
     return bool(value)
-
-
-def get_google_civic_election_id_from_cookie(request):
-    google_civic_election_id = 0
-    if 'google_civic_election_id' in request.COOKIES:
-        google_civic_election_id = request.COOKIES['google_civic_election_id']
-        logger.debug("from cookie, google_civic_election_id: {google_civic_election_id}".format(
-            google_civic_election_id=google_civic_election_id
-        ))
-    return google_civic_election_id
-
-
-def set_google_civic_election_id_cookie(request, response, google_civic_election_id):
-    # We are leaving request as an incoming variable in case we need to use it in the future.
-    set_cookie(response, 'google_civic_election_id', google_civic_election_id)
 
 
 def convert_state_text_to_state_code(state_text):

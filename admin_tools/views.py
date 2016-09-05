@@ -3,20 +3,36 @@
 # -*- coding: UTF-8 -*-
 
 from candidate.controllers import candidates_import_from_sample_file
-from config.base import LOGIN_URL
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from config.base import get_environment_variable, LOGIN_URL
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.messages import get_messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from election.models import Election
 from election.controllers import elections_import_from_sample_file
 from import_export_google_civic.models import GoogleCivicApiCounterManager
+from import_export_vote_smart.models import VoteSmartApiCounterManager
 from office.controllers import offices_import_from_sample_file
 from organization.controllers import organizations_import_from_sample_file
 from polling_location.controllers import import_and_save_all_polling_locations_data
 from position.controllers import positions_import_from_sample_file
-from voter.models import Voter, voter_has_authority, voter_setup
-from wevote_functions.functions import positive_value_exists, set_voter_device_id
+from voter.models import Voter, VoterDeviceLinkManager, VoterManager, voter_has_authority, voter_setup
+from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
+    get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
+
+BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
+BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")
+ELECTIONS_SYNC_URL = get_environment_variable("ELECTIONS_SYNC_URL")
+ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
+OFFICES_SYNC_URL = get_environment_variable("OFFICES_SYNC_URL")
+CANDIDATES_SYNC_URL = get_environment_variable("CANDIDATES_SYNC_URL")
+MEASURES_SYNC_URL = get_environment_variable("MEASURES_SYNC_URL")
+POLLING_LOCATIONS_SYNC_URL = get_environment_variable("POLLING_LOCATIONS_SYNC_URL")
+POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
+VOTER_GUIDES_SYNC_URL = get_environment_variable("VOTER_GUIDES_SYNC_URL")
 
 
 @login_required
@@ -27,15 +43,19 @@ def admin_home_view(request):
 
     # Create a voter_device_id and voter in the database if one doesn't exist yet
     results = voter_setup(request)
-    voter_device_id = results['voter_device_id']
-    store_new_voter_device_id_in_cookie = results['store_new_voter_device_id_in_cookie']
+    voter_api_device_id = results['voter_api_device_id']
+    store_new_voter_api_device_id_in_cookie = results['store_new_voter_api_device_id_in_cookie']
+
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+
     template_values = {
+        'google_civic_election_id': google_civic_election_id,
     }
     response = render(request, 'admin_tools/index.html', template_values)
 
-    # We want to store the voter_device_id cookie if it is new
-    if positive_value_exists(voter_device_id) and positive_value_exists(store_new_voter_device_id_in_cookie):
-        set_voter_device_id(request, response, voter_device_id)
+    # We want to store the voter_api_device_id cookie if it is new
+    if positive_value_exists(voter_api_device_id) and positive_value_exists(store_new_voter_api_device_id_in_cookie):
+        set_voter_api_device_id(request, response, voter_api_device_id)
 
     return response
 
@@ -141,6 +161,131 @@ def delete_test_data_view(request):
     return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
 
 
+def login_user(request):
+    """
+    This method is called when you login from the /login/ form
+    :param request:
+    :return:
+    """
+    voter_api_device_id = get_voter_api_device_id(request)  # We look in the cookies for voter_api_device_id
+    store_new_voter_api_device_id_in_cookie = False
+    voter_signed_in = False
+
+    voter_manager = VoterManager()
+    voter_device_link_manager = VoterDeviceLinkManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_api_device_id)
+    if results['voter_found']:
+        voter_on_stage = results['voter']
+        voter_on_stage_id = voter_on_stage.id
+        # Just because a We Vote voter is found doesn't mean they are authenticated for Django
+    else:
+        voter_on_stage_id = 0
+
+    info_message = ''
+    error_message = ''
+    username = ''
+
+    # Does Django think user is already signed in?
+    if request.user.is_authenticated():
+        # If so, make sure user and voter_on_stage are the same.
+        if request.user.id != voter_on_stage_id:
+            # Delete the prior voter_api_device_id from database
+            voter_device_link_manager.delete_voter_device_link(voter_api_device_id)
+
+            # Create a new voter_api_device_id and voter_device_link
+            voter_api_device_id = generate_voter_device_id()
+            results = voter_device_link_manager.save_new_voter_device_link(voter_api_device_id, request.user.id)
+            store_new_voter_api_device_id_in_cookie = results['voter_device_link_created']
+            voter_on_stage = request.user
+            voter_on_stage_id = voter_on_stage.id
+    elif request.POST:
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                info_message = "You're successfully logged in!"
+
+                # Delete the prior voter_api_device_id from database
+                voter_device_link_manager.delete_voter_device_link(voter_api_device_id)
+
+                # Create a new voter_api_device_id and voter_device_link
+                voter_api_device_id = generate_voter_device_id()
+                results = voter_device_link_manager.save_new_voter_device_link(voter_api_device_id, user.id)
+                store_new_voter_api_device_id_in_cookie = results['voter_device_link_created']
+            else:
+                error_message = "Your account is not active, please contact the site admin."
+
+            if user.id != voter_on_stage_id:
+                # Eventually we want to merge voter_on_stage into user account
+                pass
+        else:
+            error_message = "Your username and/or password were incorrect."
+    elif not positive_value_exists(voter_on_stage_id):
+        # If here, delete the prior voter_api_device_id from database
+        voter_device_link_manager.delete_voter_device_link(voter_api_device_id)
+
+        # We then need to set a voter_api_device_id cookie and create a new voter (even though not signed in)
+        results = voter_setup(request)
+        voter_api_device_id = results['voter_api_device_id']
+        store_new_voter_api_device_id_in_cookie = results['store_new_voter_api_device_id_in_cookie']
+
+    # Does Django think user is signed in?
+    if request.user.is_authenticated():
+        voter_signed_in = True
+    else:
+        info_message = "Please log in below..."
+
+    if positive_value_exists(error_message):
+        messages.add_message(request, messages.ERROR, error_message)
+    if positive_value_exists(info_message):
+        messages.add_message(request, messages.INFO, info_message)
+
+    messages_on_stage = get_messages(request)
+    template_values = {
+        'request':              request,
+        'username':             username,
+        'next':                 next,
+        'voter_signed_in':      voter_signed_in,
+        'messages_on_stage':    messages_on_stage,
+    }
+    response = render(request, 'registration/login_user.html', template_values)
+
+    # We want to store the voter_api_device_id cookie if it is new
+    if positive_value_exists(voter_api_device_id) and positive_value_exists(store_new_voter_api_device_id_in_cookie):
+        set_voter_api_device_id(request, response, voter_api_device_id)
+
+    return response
+
+
+def logout_user(request):
+    logout(request)
+
+    info_message = "You are now signed out."
+    messages.add_message(request, messages.INFO, info_message)
+
+    messages_on_stage = get_messages(request)
+    template_values = {
+        'request':              request,
+        'next':                 '/admin/',
+        'messages_on_stage':    messages_on_stage,
+    }
+    response = render(request, 'registration/login_user.html', template_values)
+
+    # Find current voter_api_device_id
+    voter_api_device_id = get_voter_api_device_id(request)
+
+    delete_voter_api_device_id_cookie(response)
+
+    # Now delete voter_api_device_id from database
+    voter_device_link_manager = VoterDeviceLinkManager()
+    voter_device_link_manager.delete_voter_device_link(voter_api_device_id)
+
+    return response
+
+
 def redirect_to_sign_in_page(request, authority_required={}):
     authority_required_text = ''
     for each_authority in authority_required:
@@ -169,10 +314,49 @@ def statistics_summary_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
-    daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
+    google_civic_daily_summary_list = google_civic_api_counter_manager.retrieve_daily_summaries()
+    vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+    vote_smart_daily_summary_list = vote_smart_api_counter_manager.retrieve_daily_summaries()
     template_values = {
-        'daily_summary_list':   daily_summary_list,
+        'google_civic_daily_summary_list':  google_civic_daily_summary_list,
+        'vote_smart_daily_summary_list':    vote_smart_daily_summary_list,
     }
     response = render(request, 'admin_tools/statistics_summary.html', template_values)
+
+    return response
+
+
+@login_required
+def sync_data_with_master_servers_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    google_civic_election_id = request.GET.get('google_civic_election_id', '')
+    state_code = request.GET.get('state_code', '')
+
+    election_list = Election.objects.order_by('-election_day_text')
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    template_values = {
+        'election_list':                election_list,
+        'google_civic_election_id':     google_civic_election_id,
+        'state_list':                   sorted_state_list,
+        'state_code':                   state_code,
+
+        'ballot_items_sync_url':        BALLOT_ITEMS_SYNC_URL,
+        'ballot_returned_sync_url':     BALLOT_RETURNED_SYNC_URL,
+        'candidates_sync_url':          CANDIDATES_SYNC_URL,
+        'elections_sync_url':           ELECTIONS_SYNC_URL,
+        'measures_sync_url':            MEASURES_SYNC_URL,
+        'offices_sync_url':             OFFICES_SYNC_URL,
+        'organizations_sync_url':       ORGANIZATIONS_SYNC_URL,
+        'polling_locations_sync_url':   POLLING_LOCATIONS_SYNC_URL,
+        'positions_sync_url':           POSITIONS_SYNC_URL,
+        'voter_guides_sync_url':        VOTER_GUIDES_SYNC_URL,
+    }
+    response = render(request, 'admin_tools/sync_data_with_master_dashboard.html', template_values)
 
     return response

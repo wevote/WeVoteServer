@@ -4,34 +4,62 @@
 {% block title %}Organizations{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+<a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
 
 <h1>Organizations</h1>
-<p><a href="{% url 'organization:organization_new' %}">Add New Organization</a>.
+
+    <p>Jump to:
+
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">Candidates</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}">Politicians</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">Public Opinions / Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}">Polling Locations</a></p>
+
+    </p>
+
+<p><a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">
+    Add New Organization / Voter Guide</a>.
     Vote Smart special interest groups
     <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.</p>
 
 <p>
-    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ organization_state }}">Retrieve photos from Wikipedia</a>,
     <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ organization_state }}">
-        Scrape social media for these orgs</a>
+        Scrape org website for social media handles (only when data missing)</a>,
+
+    <a href="{% url 'import_export_twitter:retrieve_twitter_data_for_all_organizations' %}?organization_state={{ organization_state }}&first_retrieve_only=1">
+        Retrieve all twitter data (only when data missing)</a>,
+
+    <a href="{% url 'import_export_wikipedia:import_all_organizations_logos' %}?organization_state={{ organization_state }}">Retrieve photos from Wikipedia</a>
 </p>
 
-{% if state_list %}
-    <form name="organization_state_form" method="get" action="{% url 'organization:organization_list' %}">
-        {% csrf_token %}
+<form name="organization_state_form" method="get" action="{% url 'organization:organization_list' %}">
+    {% csrf_token %}
 
+{% if state_list %}
     <select id="organization_state_id" name="organization_state">
         <option value="" {% if '' == organization_state %} selected="selected"{% endif %}>
             -- Filter by State Served --</option>
-    {% for key, state in state_list.items %}
+    {% for key, state in state_list %}
         <option value="{{ key }}"
-                {% if key == organization_state %} selected="selected"{% endif %}>
+                {% if key|lower == organization_state|lower %} selected="selected"{% endif %}>
             {{ state }}</option>
     {% endfor %}
     </select>
-    </form>
 {% endif %}{# End of if state_list #}
+
+    <br />
+{% if organization_search %}
+    <a href="{% url 'organization:organization_list' %}?organization_state={{ organization_state }}">
+         clear search</a>&nbsp;
+{% endif %}
+    <input type="text" name="organization_search" id="organization_search_id" value="{{ organization_search }}" />
+    <input type="submit" value="Search for Organization" />
+
+</form>
 
 {% if organization_list %}
     <table cellpadding="5" cellspacing="5" border="1">
@@ -48,21 +76,24 @@
     {% for organization in organization_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{% if organization.organization_photo_url %}<a href="{% url 'organization:organization_position_list' organization.id %}"><img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
-            <td><a href="{% url 'organization:organization_position_list' organization.id %}">{{ organization.organization_name }}</a></td>
+            <td>{% if organization.organization_photo_url %}
+                <a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
+                    <img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
+            <td><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}&candidate_we_vote_id={{ candidate_we_vote_id }}">
+                {{ organization.organization_name }}</a></td>
             <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
                 ({{ organization.twitter_followers_count }} followers){% endif %}</td>
             <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
             <td>{{ organization.state_served_code }}</td>
             <td>{% if organization.wikipedia_page_id %}
                 <a href="{{ organization.generate_wikipedia_link }}" target="_blank">W yes</a>{% endif %}</td>
-            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">edit</a></td>
+            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>
         </tr>
     {% endfor %}
     </table>
     <p></p>
     <p>
-        <a href="{% url 'organization:organizations_export' %}?format=json" target="_blank" >Export Organizations</a>
+        <a href="{% url 'apis_v1:organizationsSyncOutView' %}?format=json" target="_blank" >Export Organizations</a>
     </p>
 {% else %}
     <p>(no organizations found)</p>
@@ -70,7 +101,7 @@
 
     <p></p>
 {#    <p>#}
-{#        <a href="{% url 'organization:organizations_import' %}" >Import Organizations</a>#}
+{#        <a href="{% url 'organization:organizations_import' %}" >Import Organizations From Master Server</a>#}
 {#    </p>#}
 
     <script>

@@ -88,6 +88,7 @@ INSTALLED_APPS = (
     'geoip',
     'import_export_facebook',
     'import_export_google_civic',
+    'import_export_maplight',
     'import_export_twitter',  # See also twitter (below)
     'import_export_vote_smart',
     'import_export_wikipedia',
@@ -101,6 +102,8 @@ INSTALLED_APPS = (
     'quick_info',
     'rest_framework',
     'support_oppose_deciding',
+    'search',
+    'signals',
     'star',
     'tag',
     'twitter',  # See also import_export_twitter
@@ -115,6 +118,7 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -123,6 +127,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'wevote_social.middleware.SocialMiddleware',
+    'wevote_social.middleware.WeVoteSocialAuthExceptionMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -246,6 +251,9 @@ BOOTSTRAP3 = {
 
 CORS_ORIGIN_ALLOW_ALL = True  # CORS_ORIGIN_ALLOW_ALL: if True, the whitelist will not be used & all origins accepted
 CORS_ALLOW_CREDENTIALS = True
+# specify whether to replace the HTTP_REFERER header if CORS checks pass so that CSRF django middleware checks
+# will work with https
+CORS_REPLACE_HTTPS_REFERER = True
 
 # CORS_ORIGIN_WHITELIST = (
 #     'google.com',
@@ -258,25 +266,30 @@ SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'user_friends']
 SOCIAL_AUTH_TWITTER_KEY = get_environment_variable("SOCIAL_AUTH_TWITTER_KEY")
 SOCIAL_AUTH_TWITTER_SECRET = get_environment_variable("SOCIAL_AUTH_TWITTER_SECRET")
 
-SOCIAL_AUTH_LOGIN_ERROR_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
+SOCIAL_AUTH_LOGIN_ERROR_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_ERROR_URL")
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
-SOCIAL_AUTH_LOGIN_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
+SOCIAL_AUTH_LOGIN_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_URL")
 
-LOGIN_REDIRECT_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
-LOGIN_ERROR_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
-LOGIN_URL = get_environment_variable("SOCIAL_AUTH_LOGIN_REDIRECT_URL")
+LOGIN_REDIRECT_URL = get_environment_variable("LOGIN_REDIRECT_URL")
+LOGIN_ERROR_URL = get_environment_variable("LOGIN_ERROR_URL")
+LOGIN_URL = get_environment_variable("LOGIN_URL")
 
+# See description of authentication pipeline:
+# https://github.com/omab/python-social-auth/blob/master/docs/pipeline.rst
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',
     'social.pipeline.social_auth.auth_allowed',
-    'social.pipeline.social_auth.social_user',
+    # 'social.pipeline.social_auth.social_user',
+    'wevote_social.utils.social_user',  # Order in this pipeline matters
+    'wevote_social.utils.authenticate_associate_by_email',  # Order in this pipeline matters
     'social.pipeline.user.get_username',
     'social.pipeline.social_auth.associate_by_email',
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
-    'social.pipeline.user.user_details'
+    'social.pipeline.user.user_details',
+    'wevote_social.utils.switch_user'  # Order in this pipeline matters
 )
 
 

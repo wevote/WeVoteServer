@@ -15,32 +15,6 @@ from tag.models import Tag
 from voter.models import voter_has_authority
 
 
-class PoliticianIndexView(generic.ListView):
-    template_name = 'politician/politician_list.html'
-    context_object_name = 'politician_list'
-
-    def get_queryset(self):
-        """"""
-        return Politician.objects.order_by('last_name')
-
-
-# TODO Next step is to get Twitter vacuum working so we can pull in Tweets automatically based on tags/handles
-@login_required
-def politician_detail_view(request, politician_id):
-    authority_required = {'verified_volunteer'}  # admin, verified_volunteer
-    if not voter_has_authority(request, authority_required):
-        return redirect_to_sign_in_page(request, authority_required)
-
-    politician_on_stage = get_object_or_404(Politician, id=politician_id)
-    # post_list = Post.objects.filter
-    template_values = {
-        'politician_on_stage': politician_on_stage,
-        # 'post_list': tag_list,  # This is for prototyping only -- we want to move very quickly to
-        # posts being pulled onto the page via javascript
-    }
-    return render(request, 'politician/politician_detail.html', template_values)
-
-
 @login_required
 def politician_tag_new_view(request, politician_id):
     """

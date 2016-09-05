@@ -3,11 +3,12 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from wevote_settings.models import fetch_next_we_vote_id_last_contest_measure_integer, \
     fetch_next_we_vote_id_last_measure_campaign_integer, fetch_site_unique_id_prefix
 import wevote_functions.admin
-from wevote_functions.functions import extract_state_from_ocd_division_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_state_from_ocd_division_id, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -23,12 +24,18 @@ class ContestMeasure(models.Model):
     we_vote_id = models.CharField(
         verbose_name="we vote permanent id", max_length=255, default=None, null=True, blank=True, unique=True)
     maplight_id = models.CharField(verbose_name="maplight unique identifier",
-                                   max_length=255, null=True, blank=True, unique=True)
+                                   max_length=255, null=True, blank=True, unique=False)
+    vote_smart_id = models.CharField(verbose_name="votesmart unique identifier",
+                                     max_length=200, null=True, blank=True, unique=False)
     # The title of the measure (e.g. 'Proposition 42').
     measure_title = models.CharField(verbose_name="measure title", max_length=255, null=False, blank=False)
+    # The measure's title as passed over by Google Civic. We save this so we can match to this measure even
+    # if we edit the measure's name locally.
+    google_civic_measure_title = models.CharField(verbose_name="measure name exactly as received from google civic",
+                                                  max_length=255, null=True, blank=True)
     # A brief description of the referendum. This field is only populated for contests of type 'Referendum'.
-    measure_subtitle = models.CharField(verbose_name="google civic referendum subtitle",
-                                        max_length=255, null=False, blank=False)
+    measure_subtitle = models.TextField(verbose_name="google civic referendum subtitle",
+                                        null=True, blank=True, default="")
     # The text of the measure. This field is only populated for contests of type 'Referendum'.
     measure_text = models.TextField(verbose_name="measure text", null=True, blank=False)
     # A link to the referendum. This field is only populated for contests of type 'Referendum'.
@@ -54,7 +61,7 @@ class ContestMeasure(models.Model):
     # State code
     state_code = models.CharField(verbose_name="state this measure affects", max_length=2, null=True, blank=True)
 
-    wikipedia_page_id = models.IntegerField(verbose_name="pageid", null=True, blank=True)
+    wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(
         verbose_name="Page title on Wikipedia", max_length=255, null=True, blank=True)
     wikipedia_photo_url = models.URLField(verbose_name='url of wikipedia logo', blank=True, null=True)
@@ -74,7 +81,7 @@ class ContestMeasure(models.Model):
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:
-            self.we_vote_id = self.we_vote_id.strip()
+            self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
@@ -140,7 +147,7 @@ class MeasureCampaign(models.Model):
     def save(self, *args, **kwargs):
         # Even if this data came from another source we still need a unique we_vote_id
         if self.we_vote_id:
-            self.we_vote_id = self.we_vote_id.strip()
+            self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
@@ -187,29 +194,53 @@ class ContestMeasureManager(models.Model):
             return results['contest_measure_id']
         return 0
 
-    def update_or_create_contest_measure(self, we_vote_id, google_civic_election_id, district_id, district_name,
-                                         measure_title, state_code,
-                                         update_contest_measure_values):  # , create_contest_measure_values
+    def fetch_contest_measure_we_vote_id_from_id(self, contest_measure_id):
+        contest_measure_we_vote_id = ''
+        maplight_id = ''
+        contest_measure_manager = ContestMeasureManager()
+        results = contest_measure_manager.retrieve_contest_measure(
+            contest_measure_id, contest_measure_we_vote_id, maplight_id)
+        if results['success']:
+            return results['contest_measure_we_vote_id']
+        return 0
+
+    def update_or_create_contest_measure(self, we_vote_id, google_civic_election_id, measure_title,
+                                         district_id, district_name, state_code,
+                                         update_contest_measure_values):
         """
         Either update or create an office entry.
         """
         exception_multiple_object_returned = False
         new_measure_created = False
+        proceed_to_update_or_save = True
+        success = False
+        status = 'ENTERING update_or_create_contest_measure'
+
         contest_measure_on_stage = ContestMeasure()
+        if positive_value_exists(we_vote_id):
+            # If here we are dealing with an existing measure
+            pass
+        else:
+            # If here, we are dealing with a measure that is new to We Vote
+            if not (district_id or district_name):
+                success = False
+                status = 'MISSING_DISTRICT_ID-MEASURE_UPDATE_OR_CREATE'
+                proceed_to_update_or_save = False
+            elif not state_code:
+                success = False
+                status = 'MISSING_STATE_CODE-MEASURE_UPDATE_OR_CREATE'
+                proceed_to_update_or_save = False
+            elif not measure_title:
+                success = False
+                status = 'MISSING_MEASURE_TITLE-MEASURE_UPDATE_OR_CREATE'
+                proceed_to_update_or_save = False
 
         if not google_civic_election_id:
             success = False
-            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
-        elif not (district_id or district_name):
-            success = False
-            status = 'MISSING_DISTRICT_ID'
-        elif not state_code:
-            success = False
-            status = 'MISSING_STATE_CODE'
-        elif not measure_title:
-            success = False
-            status = 'MISSING_MEASURE_TITLE'
-        else:
+            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID-MEASURE_UPDATE_OR_CREATE'
+            proceed_to_update_or_save = False
+
+        if proceed_to_update_or_save:
             # We need to use one set of values when we are creating an entry, and another set of values when we
             #  are updating an entry
             try:
@@ -221,7 +252,7 @@ class ContestMeasureManager(models.Model):
                 if positive_value_exists(we_vote_id):
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        we_vote_id__exact=we_vote_id,
+                        we_vote_id__iexact=we_vote_id,
                         defaults=update_contest_measure_values)
                 else:
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
@@ -231,6 +262,7 @@ class ContestMeasureManager(models.Model):
                         measure_title__iexact=measure_title,  # Case doesn't matter
                         state_code__iexact=state_code,  # Case doesn't matter
                         defaults=update_contest_measure_values)
+
                 success = True
                 status = 'CONTEST_MEASURE_SAVED'
             except ContestMeasure.MultipleObjectsReturned as e:
@@ -262,14 +294,17 @@ class ContestMeasureManager(models.Model):
             if positive_value_exists(contest_measure_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(id=contest_measure_id)
                 contest_measure_id = contest_measure_on_stage.id
+                contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
                 status = "RETRIEVE_MEASURE_FOUND_BY_ID"
             elif positive_value_exists(contest_measure_we_vote_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
                 contest_measure_id = contest_measure_on_stage.id
+                contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
                 status = "RETRIEVE_MEASURE_FOUND_BY_WE_VOTE_ID"
             elif positive_value_exists(maplight_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(maplight_id=maplight_id)
                 contest_measure_id = contest_measure_on_stage.id
+                contest_measure_we_vote_id = contest_measure_on_stage.we_vote_id
                 status = "RETRIEVE_MEASURE_FOUND_BY_MAPLIGHT_ID"
             else:
                 status = "RETRIEVE_MEASURE_SEARCH_INDEX_MISSING"
@@ -282,19 +317,19 @@ class ContestMeasureManager(models.Model):
             status = "RETRIEVE_MEASURE_NOT_FOUND"
 
         results = {
-            'success':                      True if contest_measure_id > 0 else False,
+            'success':                      True if convert_to_int(contest_measure_id) > 0 else False,
             'status':                       status,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
-            'contest_measure_found':         True if contest_measure_id > 0 else False,
-            'contest_measure_id':            contest_measure_id,
-            'contest_measure_we_vote_id':    contest_measure_we_vote_id,
-            'contest_measure':               contest_measure_on_stage,
+            'contest_measure_found':        True if convert_to_int(contest_measure_id) > 0 else False,
+            'contest_measure_id':           convert_to_int(contest_measure_id),
+            'contest_measure_we_vote_id':   contest_measure_we_vote_id,
+            'contest_measure':              contest_measure_on_stage,
         }
         return results
 
-    def fetch_contest_measure_id_from_contest_measure_we_vote_id(self, contest_measure_we_vote_id):
+    def fetch_contest_measure_id_from_we_vote_id(self, contest_measure_we_vote_id):
         """
         Take in contest_measure_we_vote_id and return internal/local-to-this-database contest_measure_id
         :param contest_measure_we_vote_id:
@@ -305,16 +340,12 @@ class ContestMeasureManager(models.Model):
             if positive_value_exists(contest_measure_we_vote_id):
                 contest_measure_on_stage = ContestMeasure.objects.get(we_vote_id=contest_measure_we_vote_id)
                 contest_measure_id = contest_measure_on_stage.id
-            # else:
-            #     logger.warn("fetch_contest_measure_id_from_contest_measure_we_vote_id no contest_measure_we_vote_id")
 
         except ContestMeasure.MultipleObjectsReturned as e:
-            # logger.warn("fetch_contest_measure_id_from_we_vote_id ContestMeasure.MultipleObjectsReturned")
             handle_record_found_more_than_one_exception(e, logger=logger)
 
         except ContestMeasure.DoesNotExist:
             contest_measure_id = 0
-            # logger.warn("fetch_contest_measure_id_from_contest_measure_we_vote_id ContestMeasure.DoesNotExist")
 
         return contest_measure_id
 
@@ -340,7 +371,8 @@ class ContestMeasureList(models.Model):
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
-            measure_list_objects = measure_queryset
+            # We never expect more than 300 measures for one election
+            measure_list_objects = measure_queryset[:300]
 
             if len(measure_list_objects):
                 measure_list_found = True
@@ -377,5 +409,79 @@ class ContestMeasureList(models.Model):
             'measure_list_found':       measure_list_found,
             'measure_list_objects':     measure_list_objects if return_list_of_objects else [],
             'measure_list_light':       measure_list_light,
+        }
+        return results
+
+    def retrieve_possible_duplicate_measures(self, measure_title, google_civic_election_id, measure_url, maplight_id,
+                                             vote_smart_id,
+                                             we_vote_id_from_master=''):
+        measure_list_objects = []
+        filters = []
+        measure_list_found = False
+
+        try:
+            measure_queryset = ContestMeasure.objects.all()
+            measure_queryset = measure_queryset.filter(google_civic_election_id=google_civic_election_id)
+            # We don't look for office_we_vote_id because of the chance that locally we are using a
+            # different we_vote_id
+            # measure_queryset = measure_queryset.filter(contest_office_we_vote_id__iexact=office_we_vote_id)
+
+            # Ignore entries with we_vote_id coming in from master server
+            if positive_value_exists(we_vote_id_from_master):
+                measure_queryset = measure_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+
+            # We want to find candidates with *any* of these values
+            if positive_value_exists(measure_title):
+                new_filter = Q(measure_title__iexact=measure_title)
+                filters.append(new_filter)
+
+            if positive_value_exists(measure_url):
+                new_filter = Q(measure_url__iexact=measure_url)
+                filters.append(new_filter)
+
+            if positive_value_exists(maplight_id):
+                new_filter = Q(maplight_id=maplight_id)
+                filters.append(new_filter)
+
+            if positive_value_exists(vote_smart_id):
+                new_filter = Q(vote_smart_id=vote_smart_id)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                measure_queryset = measure_queryset.filter(final_filters)
+
+            measure_list_objects = measure_queryset
+
+            if len(measure_list_objects):
+                measure_list_found = True
+                status = 'DUPLICATE_MEASURES_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_DUPLICATE_MEASURES_RETRIEVED'
+                success = True
+        except ContestMeasure.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_DUPLICATE_MEASURES_FOUND_DoesNotExist'
+            measure_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_possible_duplicate_measures ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'measure_list_found':       measure_list_found,
+            'measure_list':             measure_list_objects,
         }
         return results

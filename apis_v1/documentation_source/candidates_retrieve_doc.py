@@ -17,7 +17,7 @@ def candidates_retrieve_doc_template_values(url_root):
         },
         {
             'name':         'office_we_vote_id',
-            'value':        'integer',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for this office across all networks '
                             '(either office_id OR office_we_vote_id required -- not both.) NOTE: In the future we '
                             'might support other identifiers used in the industry.',
@@ -58,6 +58,7 @@ def candidates_retrieve_doc_template_values(url_root):
                    '     "we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string,\n' \
                    '     "candidate_photo_url": string,\n' \
+                   '     "party": string,\n' \
                    '     "order_on_ballot": integer,\n' \
                    '   ],\n' \
                    '}'
