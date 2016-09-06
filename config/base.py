@@ -92,6 +92,7 @@ INSTALLED_APPS = (
     'import_export_twitter',  # See also twitter (below)
     'import_export_vote_smart',
     'import_export_wikipedia',
+    'import_export_endorsements',
     'measure',
     'office',
     'organization',
