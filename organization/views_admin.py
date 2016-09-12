@@ -232,6 +232,7 @@ def organization_edit_process_view(request):
     organization_website = request.POST.get('organization_website', False)
     wikipedia_page_title = request.POST.get('wikipedia_page_title', False)
     wikipedia_photo_url = request.POST.get('wikipedia_photo_url', False)
+    organization_endorsements_api_url = request.POST.get('organization_endorsements_api_url', False)
     state_served_code = request.POST.get('state_served_code', False)
 
     # A positive value in google_civic_election_id or add_organization_button means we want to create a voter guide
@@ -267,6 +268,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.wikipedia_page_title = wikipedia_page_title
             if wikipedia_photo_url is not False:
                 organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
+            if organization_endorsements_api_url is not False:
+                organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url
             if state_served_code is not False:
                 organization_on_stage.state_served_code = state_served_code
             organization_on_stage.save()
@@ -329,6 +332,8 @@ def organization_edit_process_view(request):
                 organization_on_stage.wikipedia_page_title = wikipedia_page_title
             if wikipedia_photo_url is not False:
                 organization_on_stage.wikipedia_photo_url = wikipedia_photo_url
+            if organization_endorsements_api_url is not False:
+                organization_on_stage.organization_endorsements_api_url = organization_endorsements_api_url
             if state_served_code is not False:
                 organization_on_stage.state_served_code = state_served_code
             organization_on_stage.save()
