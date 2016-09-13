@@ -16,6 +16,7 @@ from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vo
 logger = wevote_functions.admin.get_logger(__name__)
 
 ORGANIZATION = 'O'
+ORGANIZATION_WORD = 'ORGANIZATION'
 PUBLIC_FIGURE = 'P'
 VOTER = 'V'
 UNKNOWN_VOTER_GUIDE = 'U'

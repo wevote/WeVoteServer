@@ -1,0 +1,137 @@
+{# templates/import_export_batches/batch_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}List of Batches{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Import Batches Index</a></p>
+
+
+{% if not kind_of_batch %}
+<h1>Import Batches</h1>
+    To import, you must choose the kind of data you are importing:
+
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
+        Measure</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+        Office</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}">
+        Candidate</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
+        Organization</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}">
+        Position</a>
+
+{% else %}
+    <h1>
+    {% if kind_of_batch == "MEASURE" %}
+        Import Measure Data in Bulk
+    {% elif kind_of_batch == "OFFICE" %}
+        Import Office Data in Bulk
+    {% elif kind_of_batch == "CANDIDATE" %}
+        Import Candidate Data in Bulk
+    {% elif kind_of_batch == "ORGANIZATION" %}
+        Import Organization Data in Bulk
+    {% elif kind_of_batch == "POSITION" %}
+        Import Position Data in Bulk
+    {% else %}
+        Kind of data not recognized: Please STOP
+    {% endif %}
+    </h1>
+    <form action="{% url "import_export_batches:batch_list_process" %}" method="post" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
+
+        {% if election_list %}
+        <div class="form-group">
+            <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
+            <div class="col-sm-8">
+                <select id="google_civic_election_id" name="google_civic_election_id" class="form-control">
+                    <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+                        -- Election --</option>
+                {% for election in election_list %}
+                    <option value="{{ election.google_civic_election_id }}"
+                            {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+                        {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% endif %}{# End of if election_list #}
+
+        <div class="form-group">
+            <label for="batch_uri_id" class="col-sm-3 control-label">Web Address of Batch to Import</label>
+            <div class="col-sm-8">
+                <input type="text" name="batch_uri" id="batch_uri_id" class="form-control"
+                       value="{{ batch_uri }}" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="import_batch_button_id" class="col-sm-3 control-label"></label>
+            <div class="col-sm-8">
+                <button type="submit" id="import_batch_button_id" name="import_batch_button" class="btn btn-default" value="button_pressed">Import New Batch</button>
+            </div>
+        </div>
+    </form>
+{% endif %}
+
+
+
+
+{% if batch_list %}
+    <table border="1" cellpadding="5" cellspacing="5" class="table">
+        <tr>
+            <th>#</th>
+            <th>Batch Name</th>
+            <th>Action</th>
+            <th>Election</th>
+            <th>Processed</th>
+            <th>Total Records</th>
+            <th>Date Created</th>
+        </tr>
+    {% for one_batch in batch_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ one_batch.batch_name }}</td>
+            <td><a href="{% url 'import_export_batches:batch_action_list' %}?batch_header_id={{ one_batch.batch_header_id }}&kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
+            review</a></td>
+            <td>
+                {% for election in election_list %}
+                    {% if election.google_civic_election_id|slugify == one_batch.google_civic_election_id|slugify %}
+                        {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ one_batch.rows_processed }}</td>
+            <td>{{ one_batch.total_rows }}</td>
+            <td>{{ one_batch.date_created }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    <p></p>
+
+{% else %}
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <div>
+        <p>(no batches found)</p>
+    </div>
+{% endif %}
+
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}
