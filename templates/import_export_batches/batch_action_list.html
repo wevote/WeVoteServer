@@ -1,0 +1,137 @@
+{# templates/import_export_batches/batch_action_list.html #}
+{% extends "template_base.html" %}
+
+{% block title %}List of Batches{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch={{ kind_of_batch }}&google_civic_election_id={{ google_civic_election_id }}">< Back to Batch List</a></p>
+
+
+{% if not kind_of_batch %}
+<h1>Import Batches</h1>
+    To import, you must choose the kind of data you are importing:
+
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=MEASURE&google_civic_election_id={{ google_civic_election_id }}">
+        Measure</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=OFFICE&google_civic_election_id={{ google_civic_election_id }}">
+        Office</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=CANDIDATE&google_civic_election_id={{ google_civic_election_id }}">
+        Candidate</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
+        Organization</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}">
+        Position</a>
+
+{% else %}
+    <h1>
+    {% if kind_of_batch == "MEASURE" %}
+        Process Measure Data
+    {% elif kind_of_batch == "OFFICE" %}
+        Process Office Data
+    {% elif kind_of_batch == "CANDIDATE" %}
+        Process Candidate Data
+    {% elif kind_of_batch == "ORGANIZATION" %}
+        Process Organization Data
+    {% elif kind_of_batch == "POSITION" %}
+        Process Position Data
+    {% else %}
+        Kind of data not recognized: Please STOP
+    {% endif %}
+    : {{ batch_description.batch_name }}
+    </h1>
+    <form action="{% url "import_export_batches:batch_action_list_process" %}" method="post" class="form-horizontal">
+        {% csrf_token %}
+        <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
+        <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
+
+        {% if election_list %}
+        <div class="form-group">
+            <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
+            <div class="col-sm-8">
+                {% for election in election_list %}
+                    {% if election.google_civic_election_id|slugify == batch_description.google_civic_election_id|slugify %}
+                        {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}{# End of if election_list #}
+        <div class="form-group">
+            <label for="create_actions_button_id" class="col-sm-3 control-label"></label>
+            <div class="col-sm-8">
+                <button type="submit" id="create_actions_button_id" name="create_actions_button" class="btn btn-default" value={{ kind_of_batch }}>Analyze Data</button>
+            </div>
+        </div>
+    </form>
+{% endif %}
+
+
+
+
+{% if batch_row_list %}
+    <table class="table table-condensed">
+        <tr>
+            <th>{{ batch_header_map.batch_header_map_000 }}</th>
+            <th>{{ batch_header_map.batch_header_map_001 }}</th>
+            <th>{{ batch_header_map.batch_header_map_002 }}</th>
+            {% if batch_header_map.batch_header_map_003 %}<th>{{ batch_header_map.batch_header_map_003 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_004 %}<th>{{ batch_header_map.batch_header_map_004 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_005 %}<th>{{ batch_header_map.batch_header_map_005 }}</th>{% endif %}
+        </tr>
+    {% for one_batch_row in batch_row_list %}
+        <tr>
+            <td>{{ one_batch_row.batch_row_000 }}</td>
+            <td>{{ one_batch_row.batch_row_001 }}</td>
+            <td>{{ one_batch_row.batch_row_002 }}</td>
+            {% if batch_header_map.batch_header_map_003 %}<td>{{ one_batch_row.batch_row_003 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_004 %}<td>{{ one_batch_row.batch_row_004 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_005 %}<td>{{ one_batch_row.batch_row_005 }}</td>{% endif %}
+        </tr>
+        {% if one_batch_row.batch_row_action_exists %}
+        <tr>
+            <td colspan="51"><table border="1" cellpadding="5" cellspacing="5">
+            {% if one_batch_row.kind_of_batch == "ORGANIZATION" %}
+            {# ### ORGANIZATION ### #}
+                <tr>
+                    <th></th>
+                    <th>organization_name</th>
+                    <th>state_served_code</th>
+                    <th>ALERTS</th>
+                    <th>ACTIONS</th>
+                </tr>
+                <tr>
+                    <td>analysis:</td>
+                    <td>{{ one_batch_row.batch_row_action.organization_name }}</td>
+                    <td>{{ one_batch_row.batch_row_action.state_served_code }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            {% endif %}
+            </table></td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+    </table>
+
+    <p></p>
+
+{% else %}
+    <br />
+    <br />
+    <br />
+    <div>
+        <p>(no batches found)</p>
+    </div>
+{% endif %}
+
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

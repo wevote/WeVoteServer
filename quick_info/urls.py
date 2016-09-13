@@ -6,7 +6,7 @@ from django.conf.urls import url
 from . import views, views_admin
 
 urlpatterns = [
-    # admin_views.py
+    # views_admin.py
     url(r'^$', views_admin.quick_info_list_view, name='quick_info_list',),
     url(r'^edit_process/$', views_admin.quick_info_edit_process_view, name='quick_info_edit_process'),
     url(r'^export/', views_admin.ExportQuickInfoDataView.as_view(), name='quick_info_export'),

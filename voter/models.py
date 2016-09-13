@@ -650,6 +650,11 @@ class Voter(AbstractBaseUser):
             return True
         return False
 
+    def has_valid_email(self):
+        if positive_value_exists(self.email) or positive_value_exists(self.facebook_email):
+            return True
+        return False
+
 
 class VoterDeviceLink(models.Model):
     """

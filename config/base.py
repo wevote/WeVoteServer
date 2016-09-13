@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'exception',
     'follow',
     'geoip',
+    'import_export_batches',
     'import_export_facebook',
     'import_export_google_civic',
     'import_export_maplight',
