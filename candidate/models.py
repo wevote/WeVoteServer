@@ -179,7 +179,9 @@ class CandidateCampaignListManager(models.Model):
         if candidate_option1.candidate_name != candidate_option2.candidate_name:
             automatic_merge_ok = False
             status += " candidate_name:"
-        if candidate_option1.candidate_twitter_handle != candidate_option2.candidate_twitter_handle:
+        candidate1_twitter_handle = str(candidate_option1.candidate_twitter_handle)
+        candidate2_twitter_handle = str(candidate_option2.candidate_twitter_handle)
+        if candidate1_twitter_handle.lower() != candidate2_twitter_handle.lower():
             automatic_merge_ok = False
             status += " candidate_twitter_handle:"
         if candidate_option1.candidate_url != candidate_option2.candidate_url:

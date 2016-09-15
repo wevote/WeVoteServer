@@ -9,6 +9,7 @@ from ballot.controllers import ballot_item_options_retrieve_for_api, choose_elec
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
+from friend.controllers import friend_invitation_by_email_send_for_api
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_facebook.controllers import facebook_disconnect_for_api, facebook_sign_in_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
@@ -174,6 +175,24 @@ def facebook_sign_in_view(request):  # facebookSignIn
         'voter_device_id': voter_device_id,
         'facebook_id': results['facebook_id'],
         'facebook_email': results['facebook_email'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_invitation_by_email_send_view(request):  # friendInvitationByEmailSend
+    """
+
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    email_addresses_raw = request.GET.get('email_addresses_raw', "")
+    invitation_message = request.GET.get('invitation_message', "")
+    results = friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw, invitation_message)
+    json_data = {
+        'status': results['status'],
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

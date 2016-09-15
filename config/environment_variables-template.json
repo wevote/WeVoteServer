@@ -24,6 +24,13 @@
   "_comment":                       "*** LOG_FILE_LEVEL is the level of logging written to the log file",
   "LOG_FILE_LEVEL":                 "ERROR",
 
+  "_comment":                       "Email server settings",
+  "EMAIL_HOST":                     "smtp.sendgrid.net",
+  "EMAIL_HOST_USER":                "sendgrid_username",
+  "EMAIL_HOST_PASSWORD":            "sendgrid_password",
+  "EMAIL_PORT":                     "587",
+  "EMAIL_USE_TLS":                  "True",
+
   "_comment":                       "import_export",
   "WE_VOTE_API_KEY":                "",
   "BALLOT_ITEMS_SYNC_URL":          "https://api.wevoteusa.org/apis/v1/ballotItemsSyncOut/",
