@@ -179,6 +179,11 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
 
+    def retrieve_voter_by_email(self, email):
+        voter_id = ''
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email)
+
     def retrieve_voter_by_we_vote_id(self, voter_we_vote_id):
         voter_id = ''
         email = ''
@@ -242,13 +247,14 @@ class VoterManager(BaseUserManager):
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             elif email is not '' and email is not None:
+                # TODO DALE Convert to look in facebook_email field as well
                 voter_on_stage = Voter.objects.get(
-                    email=email)
+                    email__iexact=email)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             elif positive_value_exists(voter_we_vote_id):
                 voter_on_stage = Voter.objects.get(
-                    we_vote_id=voter_we_vote_id)
+                    we_vote_id__iexact=voter_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             elif positive_value_exists(twitter_request_token):
@@ -268,7 +274,7 @@ class VoterManager(BaseUserManager):
                 voter_id = voter_on_stage.id
             elif positive_value_exists(organization_we_vote_id):
                 voter_on_stage = Voter.objects.get(
-                    linked_organization_we_vote_id=organization_we_vote_id)
+                    linked_organization_we_vote_id__iexact=organization_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
             else:

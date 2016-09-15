@@ -546,7 +546,9 @@ class OrganizationManager(models.Manager):
 
         if organization:
             if organization_twitter_handle:
-                if organization_twitter_handle != organization.organization_twitter_handle:
+                organization_twitter_handle = str(organization_twitter_handle)
+                object_organization_twitter_handle = str(organization.organization_twitter_handle)
+                if organization_twitter_handle.lower() != object_organization_twitter_handle.lower():
                     organization.organization_twitter_handle = organization_twitter_handle
                     values_changed = True
             if organization_facebook:
@@ -585,7 +587,9 @@ class OrganizationManager(models.Manager):
                     organization.twitter_user_id = convert_to_int(twitter_json['id'])
                     values_changed = True
             if positive_value_exists(twitter_json['screen_name']):
-                if twitter_json['screen_name'] != organization.organization_twitter_handle:
+                incoming_twitter_screen_name = str(twitter_json['screen_name'])
+                organization_twitter_handle = str(organization.organization_twitter_handle)
+                if incoming_twitter_screen_name.lower() != organization_twitter_handle.lower():
                     organization.organization_twitter_handle = twitter_json['screen_name']
                     values_changed = True
             if positive_value_exists(twitter_json['name']):
