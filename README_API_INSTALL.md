@@ -1,4 +1,4 @@
-# README for API Installation Troubleshooting
+# README for API Installation
 
 [Back to root README](README.md)
 
