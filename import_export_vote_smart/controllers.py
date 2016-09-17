@@ -2,8 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import VoteSmartCandidate, VoteSmartCandidateManager, vote_smart_candidate_object_filter, \
-    VoteSmartCandidateBio, vote_smart_candidate_bio_object_filter, \
+from .models import VoteSmartApiCounterManager, VoteSmartCandidate, VoteSmartCandidateManager, \
+    vote_smart_candidate_object_filter, VoteSmartCandidateBio, vote_smart_candidate_bio_object_filter, \
     VoteSmartCategory, vote_smart_category_filter, \
     VoteSmartOfficial, VoteSmartOfficialManager, vote_smart_official_object_filter, \
     VoteSmartRating, VoteSmartRatingCategoryLink, vote_smart_candidate_rating_filter, vote_smart_rating_list_filter, \
@@ -15,7 +15,8 @@ from .votesmart_local import votesmart, VotesmartApiError
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 import copy
-from position.models import PositionEnteredManager, PERCENT_RATING
+from exception.models import handle_record_found_more_than_one_exception
+from position.models import PositionManager, PERCENT_RATING
 import requests
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -30,18 +31,21 @@ votesmart.apikey = VOTE_SMART_API_KEY
 
 def retrieve_and_match_candidate_from_vote_smart(we_vote_candidate, force_retrieve=False):
     status = ""
+    vote_smart_candidate_just_retrieved = False
+
     # Has this candidate already been linked to a Vote Smart candidate?
     if positive_value_exists(we_vote_candidate.vote_smart_id) and not force_retrieve:
         vote_smart_candidate_id = we_vote_candidate.vote_smart_id
         status += 'VOTE_SMART_CANDIDATE_ID_PREVIOUSLY_RETRIEVED '
         results = {
-            'success':                  True,
-            'status':                   status,
-            'message_type':             'INFO',
-            'message':                  'Vote Smart candidate id already retrieved previously.',
-            'we_vote_candidate_id':     we_vote_candidate.id,
-            'we_vote_candidate':        we_vote_candidate,
-            'vote_smart_candidate_id':  vote_smart_candidate_id,
+            'success':                              True,
+            'status':                               status,
+            'message_type':                         'INFO',
+            'message':                              'Vote Smart candidate id already retrieved previously.',
+            'we_vote_candidate_id':                 we_vote_candidate.id,
+            'we_vote_candidate':                    we_vote_candidate,
+            'vote_smart_candidate_id':              vote_smart_candidate_id,
+            'vote_smart_candidate_just_retrieved':  vote_smart_candidate_just_retrieved,
         }
         return results
 
@@ -64,19 +68,21 @@ def retrieve_and_match_candidate_from_vote_smart(we_vote_candidate, force_retrie
             vote_smart_candidate_id = convert_to_int(vote_smart_candidate.candidateId)
             we_vote_candidate.vote_smart_id = vote_smart_candidate_id
             we_vote_candidate.save()
+            vote_smart_candidate_just_retrieved = True
             # messages.add_message(request, messages.INFO,
             #                      "Vote Smart Candidate db entry found for '{first_name} {last_name}'.".format(
             #                          first_name=first_name, last_name=last_name))
             # If here, we were able to match this candidate from the We Vote database to a candidate
             # from the Vote Smart database with this last name
             results = {
-                'success':                  True,
-                'status':                   status,
-                'message_type':             'INFO',
-                'message':                  candidate_results['status'],
-                'we_vote_candidate_id':     we_vote_candidate.id,
-                'we_vote_candidate':        we_vote_candidate,
-                'vote_smart_candidate_id':  vote_smart_candidate_id,
+                'success':                              True,
+                'status':                               status,
+                'message_type':                         'INFO',
+                'message':                              candidate_results['status'],
+                'we_vote_candidate_id':                 we_vote_candidate.id,
+                'we_vote_candidate':                    we_vote_candidate,
+                'vote_smart_candidate_id':              vote_smart_candidate_id,
+                'vote_smart_candidate_just_retrieved':  vote_smart_candidate_just_retrieved,
             }
             return results
         else:
@@ -105,6 +111,7 @@ def retrieve_and_match_candidate_from_vote_smart(we_vote_candidate, force_retrie
             we_vote_candidate.save()
             success = True
             status += 'VOTE_SMART_OFFICIAL_MATCHED '
+            vote_smart_candidate_just_retrieved = True
         else:
             vote_smart_candidate_id = 0
             success = False
@@ -112,13 +119,14 @@ def retrieve_and_match_candidate_from_vote_smart(we_vote_candidate, force_retrie
                       'last_name: {last_name}) '.format(first_name=first_name, last_name=last_name)
 
     results = {
-        'success':                  success,
-        'status':                   status,
-        'message_type':             'INFO',
-        'message':                  candidate_results['status'],
-        'we_vote_candidate_id':     we_vote_candidate.id,
-        'vote_smart_candidate_id':  vote_smart_candidate_id,
-        'we_vote_candidate':        we_vote_candidate,
+        'success':                              success,
+        'status':                               status,
+        'message_type':                         'INFO',
+        'message':                              candidate_results['status'],
+        'we_vote_candidate_id':                 we_vote_candidate.id,
+        'vote_smart_candidate_id':              vote_smart_candidate_id,
+        'we_vote_candidate':                    we_vote_candidate,
+        'vote_smart_candidate_just_retrieved':  vote_smart_candidate_just_retrieved,
     }
     return results
 
@@ -126,23 +134,29 @@ def retrieve_and_match_candidate_from_vote_smart(we_vote_candidate, force_retrie
 def retrieve_candidate_photo_from_vote_smart(we_vote_candidate, force_retrieve=False):
     status = ""
     vote_smart_candidate_id = we_vote_candidate.vote_smart_id
+    vote_smart_candidate_photo_exists = False
+    vote_smart_candidate_photo_just_retrieved = False
+
     # Has this candidate been linked to a Vote Smart candidate? If not, error out
     if not positive_value_exists(vote_smart_candidate_id):
         status += 'VOTE_SMART_CANDIDATE_ID_REQUIRED '
         results = {
-            'success':                  False,
-            'status':                   status,
-            'message_type':             'INFO',
-            'message':                  'Vote Smart candidate id needs to be retrieved before the photo '
-                                        'can be retrieved.',
-            'we_vote_candidate_id':     we_vote_candidate.id,
-            'vote_smart_candidate_id':  vote_smart_candidate_id,
+            'success':                                      False,
+            'status':                                       status,
+            'message_type':                                 'INFO',
+            'message':                                      'Vote Smart candidate id needs to be retrieved before '
+                                                            'the photo can be retrieved.',
+            'we_vote_candidate_id':                         we_vote_candidate.id,
+            'vote_smart_candidate_id':                      vote_smart_candidate_id,
+            'vote_smart_candidate_photo_exists':            vote_smart_candidate_photo_exists,
+            'vote_smart_candidate_photo_just_retrieved':    vote_smart_candidate_photo_just_retrieved,
         }
         return results
 
     # Have we already retrieved a Vote Smart photo?
     if positive_value_exists(we_vote_candidate.photo_url_from_vote_smart) and not force_retrieve:
         status += 'VOTE_SMART_CANDIDATE_ID_PREVIOUSLY_RETRIEVED '
+        vote_smart_candidate_photo_exists = True
         results = {
             'success':                      True,
             'status':                       status,
@@ -151,6 +165,8 @@ def retrieve_candidate_photo_from_vote_smart(we_vote_candidate, force_retrieve=F
             'we_vote_candidate_id':         we_vote_candidate.id,
             'vote_smart_candidate_id':      vote_smart_candidate_id,
             'photo_url_from_vote_smart':    we_vote_candidate.photo_url_from_vote_smart,
+            'vote_smart_candidate_photo_exists':            vote_smart_candidate_photo_exists,
+            'vote_smart_candidate_photo_just_retrieved':    vote_smart_candidate_photo_just_retrieved,
         }
         return results
 
@@ -173,6 +189,8 @@ def retrieve_candidate_photo_from_vote_smart(we_vote_candidate, force_retrieve=F
             # If here, we were able to match this candidate from the We Vote database to a candidate
             # from the Vote Smart database
             photo_url_from_vote_smart = vote_smart_candidate_bio.photo
+            vote_smart_candidate_photo_exists = True if positive_value_exists(vote_smart_candidate_bio.photo) else False
+            vote_smart_candidate_photo_just_retrieved = vote_smart_candidate_photo_exists
             success = True
         else:
             # If here, we were NOT able to find any possible candidates from the Vote Smart database,
@@ -190,6 +208,8 @@ def retrieve_candidate_photo_from_vote_smart(we_vote_candidate, force_retrieve=F
         'we_vote_candidate_id':         we_vote_candidate.id,
         'vote_smart_candidate_id':      vote_smart_candidate_id,
         'photo_url_from_vote_smart':    photo_url_from_vote_smart,
+        'vote_smart_candidate_photo_exists':            vote_smart_candidate_photo_exists,
+        'vote_smart_candidate_photo_just_retrieved':    vote_smart_candidate_photo_just_retrieved,
     }
     return results
 
@@ -197,6 +217,11 @@ def retrieve_candidate_photo_from_vote_smart(we_vote_candidate, force_retrieve=F
 def retrieve_vote_smart_candidates_into_local_db(last_name):
     try:
         last_name = last_name.replace("`", "'")  # Vote Smart doesn't like this kind of apostrophe: `
+
+        # Use Vote Smart API call counter to track the number of queries we are doing each day
+        vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+        vote_smart_api_counter_manager.create_counter_entry('Candidates.getByLastname')
+
         candidates_list = votesmart.candidates.getByLastname(last_name)
         for one_candidate in candidates_list:
             one_candidate_filtered = vote_smart_candidate_object_filter(one_candidate)
@@ -220,6 +245,10 @@ def retrieve_vote_smart_candidates_into_local_db(last_name):
 
 def retrieve_vote_smart_candidate_bio_into_local_db(candidate_id):
     try:
+        # Use Vote Smart API call counter to track the number of queries we are doing each day
+        vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+        vote_smart_api_counter_manager.create_counter_entry('CandidateBio.getBio')
+
         one_candidate_bio = votesmart.candidatebio.getBio(candidate_id)
         candidate_bio_filtered = vote_smart_candidate_bio_object_filter(one_candidate_bio)
         candidate_bio, created = VoteSmartCandidateBio.objects.update_or_create(
@@ -242,6 +271,10 @@ def retrieve_vote_smart_candidate_bio_into_local_db(candidate_id):
 
 def retrieve_vote_smart_officials_into_local_db(last_name):
     try:
+        # Use Vote Smart API call counter to track the number of queries we are doing each day
+        vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+        vote_smart_api_counter_manager.create_counter_entry('Officials.getByLastname')
+
         officials_list = votesmart.officials.getByLastname(last_name)
         for one_official in officials_list:
             one_official_filtered = vote_smart_official_object_filter(one_official)
@@ -265,6 +298,10 @@ def retrieve_vote_smart_officials_into_local_db(last_name):
 
 def retrieve_vote_smart_position_categories_into_local_db(state_code='NA'):
     try:
+        # Use Vote Smart API call counter to track the number of queries we are doing each day
+        vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+        vote_smart_api_counter_manager.create_counter_entry('Rating.getCategories')
+
         position_categories_list = votesmart.rating.getCategories(state_code)
         for vote_smart_category in position_categories_list:
             vote_smart_category_filtered = vote_smart_category_filter(vote_smart_category)
@@ -286,8 +323,20 @@ def retrieve_vote_smart_position_categories_into_local_db(state_code='NA'):
     return results
 
 
-def retrieve_vote_smart_ratings_by_candidate_into_local_db(vote_smart_candidate_id):
+def retrieve_vote_smart_ratings_for_candidate_into_local_db(vote_smart_candidate_id):
+    """
+    This function can be used for either We Vote candidate or politician
+    :param vote_smart_candidate_id:
+    :return:
+    """
+    rating_one_candidate_exists = False
+    rating_one_candidate_created = False
+
     try:
+        # Use Vote Smart API call counter to track the number of queries we are doing each day
+        vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+        vote_smart_api_counter_manager.create_counter_entry('Rating.getCandidateRating')
+
         ratings_list = votesmart.rating.getCandidateRating(vote_smart_candidate_id)
 
         # A Vote Smart "rating" is like a the voter guide for that group for that election. It contains multiple
@@ -296,35 +345,74 @@ def retrieve_vote_smart_ratings_by_candidate_into_local_db(vote_smart_candidate_
             # Note that this filter is specific to the getCandidateRating call
             one_rating_filtered = vote_smart_candidate_rating_filter(one_rating)
             one_rating_filtered['candidateId'] = vote_smart_candidate_id
-            vote_smart_rating_one_candidate, rating_one_candidate_created = \
-                VoteSmartRatingOneCandidate.objects.update_or_create(
-                    ratingId=one_rating_filtered['ratingId'],
-                    sigId=one_rating_filtered['sigId'],
-                    candidateId=one_rating_filtered['candidateId'],
-                    timeSpan=one_rating_filtered['timeSpan'],
-                    defaults=one_rating_filtered)
-
-            # We start with one_rating_filtered, and add additional data with each loop below
-            category_branch = one_rating.categories['category']
-            if type(category_branch) is list:
-                category_list = category_branch
-            else:
-                category_list = [category_branch]
-            for one_category in category_list:
-                # Now save the category/categories for this rating
-                rating_values_for_category_save = copy.deepcopy(one_rating_filtered)
-                rating_values_for_category_save['categoryId'] = one_category['categoryId']
-                rating_values_for_category_save['categoryName'] = one_category['name']  # Changed to "categoryName"
-                del rating_values_for_category_save['ratingText']
-                del rating_values_for_category_save['ratingName']
-                del rating_values_for_category_save['rating']
-                vote_smart_category_link, category_link_created = VoteSmartRatingCategoryLink.objects.update_or_create(
+            try:
+                vote_smart_rating_one_candidate, rating_one_candidate_created_temp = \
+                    VoteSmartRatingOneCandidate.objects.update_or_create(
                         ratingId=one_rating_filtered['ratingId'],
                         sigId=one_rating_filtered['sigId'],
                         candidateId=one_rating_filtered['candidateId'],
                         timeSpan=one_rating_filtered['timeSpan'],
-                        categoryId=one_category['categoryId'],
-                        defaults=rating_values_for_category_save)
+                        defaults=one_rating_filtered)
+
+                if not rating_one_candidate_exists:
+                    # Once set to True, this stays true
+                    rating_one_candidate_exists = True if vote_smart_rating_one_candidate.candidateId else False
+
+                if not rating_one_candidate_created:
+                    # Once set to True, this stays true
+                    rating_one_candidate_created = True if rating_one_candidate_created_temp else False
+
+                if vote_smart_rating_one_candidate.candidateId:
+                    # We start with one_rating_filtered, and add additional data with each loop below
+                    category_branch = one_rating.categories['category']
+                    if type(category_branch) is list:
+                        category_list = category_branch
+                    else:
+                        category_list = [category_branch]
+                    for one_category in category_list:
+                        # Now save the category/categories for this rating
+                        rating_values_for_category_save = copy.deepcopy(one_rating_filtered)
+                        rating_values_for_category_save['categoryId'] = one_category['categoryId']
+                        rating_values_for_category_save['categoryName'] = one_category['name']
+                        del rating_values_for_category_save['ratingText']
+                        del rating_values_for_category_save['ratingName']
+                        del rating_values_for_category_save['rating']
+                        try:
+                            vote_smart_category_link, created = VoteSmartRatingCategoryLink.objects.update_or_create(
+                                    ratingId=one_rating_filtered['ratingId'],
+                                    sigId=one_rating_filtered['sigId'],
+                                    candidateId=one_rating_filtered['candidateId'],
+                                    timeSpan=one_rating_filtered['timeSpan'],
+                                    categoryId=one_category['categoryId'],
+                                    defaults=rating_values_for_category_save)
+                        except VoteSmartRatingCategoryLink.MultipleObjectsReturned as e:
+                            exception_message_optional = "retrieve_vote_smart_ratings_for_candidate_into_local_db, " \
+                                                         "VoteSmartRatingCategoryLink.objects.update_or_create: " \
+                                                         "ratingId: {ratingId}, " \
+                                                         "sigId: {sigId}, " \
+                                                         "candidateId: {candidateId}, " \
+                                                         "timeSpan: {timeSpan}, " \
+                                                         "categoryId: {categoryId}, " \
+                                                         "".format(ratingId=one_rating_filtered['ratingId'],
+                                                                   sigId=one_rating_filtered['sigId'],
+                                                                   candidateId=one_rating_filtered['candidateId'],
+                                                                   timeSpan=one_rating_filtered['timeSpan'],
+                                                                   categoryId=one_category['categoryId'])
+                            handle_record_found_more_than_one_exception(
+                                e, logger=logger, exception_message_optional=exception_message_optional)
+            except VoteSmartRatingOneCandidate.MultipleObjectsReturned as e:
+                exception_message_optional = "retrieve_vote_smart_ratings_for_candidate_into_local_db, " \
+                                             "VoteSmartRatingOneCandidate.objects.update_or_create: " \
+                                             "ratingId: {ratingId}, " \
+                                             "sigId: {sigId}, " \
+                                             "candidateId: {candidateId}, " \
+                                             "timeSpan: {timeSpan}, " \
+                                             "".format(ratingId=one_rating_filtered['ratingId'],
+                                                       sigId=one_rating_filtered['sigId'],
+                                                       candidateId=one_rating_filtered['candidateId'],
+                                                       timeSpan=one_rating_filtered['timeSpan'])
+                handle_record_found_more_than_one_exception(
+                    e, logger=logger, exception_message_optional=exception_message_optional)
             status = "VOTE_SMART_RATINGS_BY_CANDIDATE_PROCESSED"
         success = True
     except VotesmartApiError as error_instance:
@@ -334,14 +422,20 @@ def retrieve_vote_smart_ratings_by_candidate_into_local_db(vote_smart_candidate_
         success = False
 
     results = {
-        'status': status,
-        'success': success,
+        'status':                       status,
+        'success':                      success,
+        'rating_one_candidate_exists':  rating_one_candidate_exists,
+        'rating_one_candidate_created': rating_one_candidate_created,
     }
     return results
 
 
 def retrieve_vote_smart_ratings_by_group_into_local_db(special_interest_group_id):
     try:
+        # Use Vote Smart API call counter to track the number of queries we are doing each day
+        vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+        vote_smart_api_counter_manager.create_counter_entry('Rating.getSigRatings')
+
         ratings_list = votesmart.rating.getSigRatings(special_interest_group_id)
         # A Vote Smart "rating" is like a the voter guide for that group for that election. It contains multiple
         # positions about a variety of candidates.
@@ -352,6 +446,10 @@ def retrieve_vote_smart_ratings_by_group_into_local_db(special_interest_group_id
             vote_smart_rating, rating_created = VoteSmartRating.objects.update_or_create(
                 ratingId=one_rating.ratingId, defaults=one_rating_filtered)
 
+            # Use Vote Smart API call counter to track the number of queries we are doing each day
+            vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+            vote_smart_api_counter_manager.create_counter_entry('Rating.getRating')
+
             rating_candidates_list = votesmart.rating.getRating(one_rating.ratingId)
             for rating_one_candidate in rating_candidates_list:
                 # Note that this filter is specific to the getRating call
@@ -361,13 +459,27 @@ def retrieve_vote_smart_ratings_by_group_into_local_db(special_interest_group_id
                 rating_one_candidate_filtered['timeSpan'] = one_rating.timespan
                 rating_one_candidate_filtered['ratingName'] = one_rating.ratingName
                 rating_one_candidate_filtered['ratingText'] = one_rating.ratingText
-                vote_smart_rating_one_candidate, rating_one_candidate_created = \
-                    VoteSmartRatingOneCandidate.objects.update_or_create(
-                        ratingId=one_rating.ratingId,
-                        sigId=special_interest_group_id,
-                        candidateId=rating_one_candidate_filtered['candidateId'],
-                        timeSpan=one_rating.timespan,
-                        defaults=rating_one_candidate_filtered)
+                try:
+                    vote_smart_rating_one_candidate, rating_one_candidate_created = \
+                        VoteSmartRatingOneCandidate.objects.update_or_create(
+                            ratingId=one_rating.ratingId,
+                            sigId=special_interest_group_id,
+                            candidateId=rating_one_candidate_filtered['candidateId'],
+                            timeSpan=one_rating.timespan,
+                            defaults=rating_one_candidate_filtered)
+                except VoteSmartRatingOneCandidate.MultipleObjectsReturned as e:
+                    exception_message_optional = "retrieve_vote_smart_ratings_for_candidate_into_local_db, " \
+                                                 "VoteSmartRatingOneCandidate.objects.update_or_create: " \
+                                                 "ratingId: {ratingId}, " \
+                                                 "sigId: {sigId}, " \
+                                                 "candidateId: {candidateId}, " \
+                                                 "timeSpan: {timeSpan}, " \
+                                                 "".format(ratingId=one_rating_filtered['ratingId'],
+                                                           sigId=one_rating_filtered['sigId'],
+                                                           candidateId=one_rating_filtered['candidateId'],
+                                                           timeSpan=one_rating_filtered['timeSpan'])
+                    handle_record_found_more_than_one_exception(
+                        e, logger=logger, exception_message_optional=exception_message_optional)
         status = "VOTE_SMART_RATINGS_BY_GROUP_PROCESSED"
         success = True
     except VotesmartApiError as error_instance:
@@ -386,6 +498,10 @@ def retrieve_vote_smart_ratings_by_group_into_local_db(special_interest_group_id
 # Retrieve the details about one group
 def retrieve_vote_smart_special_interest_group_into_local_db(special_interest_group_id):
     try:
+        # Use Vote Smart API call counter to track the number of queries we are doing each day
+        vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+        vote_smart_api_counter_manager.create_counter_entry('Rating.getSig')
+
         vote_smart_special_interest_group = votesmart.rating.getSig(special_interest_group_id)
         # Note that we use a different filter function when retrieving one group, than when we retrieve a list of groups
         vote_smart_special_interest_group_filtered = vote_smart_special_interest_group_filter(
@@ -412,6 +528,10 @@ def retrieve_vote_smart_special_interest_group_into_local_db(special_interest_gr
 # Retrieve list of groups
 def retrieve_vote_smart_special_interest_groups_into_local_db(category_id, state_code='NA'):
     try:
+        # Use Vote Smart API call counter to track the number of queries we are doing each day
+        vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+        vote_smart_api_counter_manager.create_counter_entry('Rating.getSigList')
+
         special_interest_group_list = votesmart.rating.getSigList(category_id, state_code)
         for vote_smart_special_interest_group in special_interest_group_list:
             # Note that we use a different filter function when retrieving a list of groups vs. one group
@@ -443,6 +563,10 @@ def _get_state_by_id_as_dict(state_id):
 
 def _get_state_names():
     """Access Vote Smart API and return generator of all stateIds."""
+    # Use Vote Smart API call counter to track the number of queries we are doing each day
+    vote_smart_api_counter_manager = VoteSmartApiCounterManager()
+    vote_smart_api_counter_manager.create_counter_entry('State.getStateIDs')
+
     state_ids_dict = votesmart.state.getStateIDs()
     return (state.stateId for state in state_ids_dict)
 
@@ -484,6 +608,19 @@ def make_request(cls, method, **kwargs):
 
 
 def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id):
+    politician_id = 0
+    return transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_id)
+
+
+def transfer_vote_smart_ratings_to_positions_for_politician(politician_id):
+    candidate_campaign_id = 0
+    return transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_id)
+
+
+def transfer_vote_smart_ratings_to_positions(candidate_campaign_id, politician_id):  # TODO DALE Update for politician
+    we_vote_organizations_created = 0
+    organization_positions_that_exist = 0
+    organization_positions_created = 0
     candidate_manager = CandidateCampaignManager()
     candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(candidate_campaign_id)
 
@@ -497,6 +634,9 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
             results = {
                 'status':   status,
                 'success':  success,
+                'we_vote_organizations_created':        we_vote_organizations_created,
+                'organization_positions_that_exist':    organization_positions_that_exist,
+                'organization_positions_created':       organization_positions_created,
             }
             return results
         else:
@@ -511,11 +651,14 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
                 results = {
                     'status':   status,
                     'success':  success,
+                    'we_vote_organizations_created':        we_vote_organizations_created,
+                    'organization_positions_that_exist':    organization_positions_that_exist,
+                    'organization_positions_created':       organization_positions_created,
                 }
                 return results
 
         ratings_status = ""
-        position_manager = PositionEnteredManager()
+        position_manager = PositionManager()
         special_interest_group_manager = VoteSmartSpecialInterestGroupManager()
         for one_candidate_rating in rating_list:
             # Make sure we have all of the required variables
@@ -541,6 +684,8 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
                 continue
             else:
                 we_vote_organization = update_results['organization']
+                if update_results['organization_created']:
+                    we_vote_organizations_created += 1
 
             # Check to see if a position already exists
             # TODO DALE Note: we need to consider searching with a time span variable
@@ -552,20 +697,21 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
 
             if positive_value_exists(organization_position_results['position_found']):
                 # For now, we only want to create positions that don't exist
+                organization_positions_that_exist += 1
                 continue
             else:
                 position_results = position_manager.update_or_create_position(
-                    position_id=0,
                     position_we_vote_id=False,
                     organization_we_vote_id=we_vote_organization.we_vote_id,
                     public_figure_we_vote_id=False,
                     voter_we_vote_id=False,
                     google_civic_election_id=False,
-                    ballot_item_display_name=candidate_campaign.candidate_name,
+                    ballot_item_display_name=candidate_campaign.display_candidate_name(),
                     office_we_vote_id=False,
                     candidate_we_vote_id=candidate_campaign.we_vote_id,
                     measure_we_vote_id=False,
                     stance=PERCENT_RATING,
+                    set_as_public_position=True,
                     statement_text=one_candidate_rating.ratingText,
                     statement_html=False,
                     more_info_url=False,
@@ -575,7 +721,9 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
                     vote_smart_rating_name=one_candidate_rating.ratingName,
                 )
 
-                if not positive_value_exists(position_results['success']):
+                if positive_value_exists(position_results['success']):
+                    organization_positions_created += 1
+                else:
                     ratings_status += "COULD_NOT_CREATE_POSITION-{sigId}-{status} * " \
                                       "".format(sigId=one_candidate_rating.sigId,
                                                 status=position_results['status'])
@@ -586,6 +734,9 @@ def transfer_vote_smart_ratings_to_positions_for_candidate(candidate_campaign_id
     results = {
         'status':   status,
         'success':  success,
+        'we_vote_organizations_created':        we_vote_organizations_created,
+        'organization_positions_that_exist':    organization_positions_that_exist,
+        'organization_positions_created':       organization_positions_created,
     }
 
     return results
@@ -618,7 +769,7 @@ def transfer_vote_smart_special_interest_groups_to_we_vote_organizations():
         if update_results['organization_updated']:
             number_of_we_vote_organizations_updated += 1
         # process_count += 1
-        # if process_count > 50:  # TODO DALE Temp limit
+        # if process_count > 50:  # Temp limit
         #     break
 
     success = True

@@ -4,9 +4,24 @@
 {% block title %}Offices{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+<a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
 
 <h1>Offices</h1>
+
+    <p>Jump to:
+
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">Candidates</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}">Politicians</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">Public Opinions / Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}">Polling Locations</a></p>
+
+    </p>
+
+<p><a href="{% url 'office:office_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Office</a></p>
 
 {% if election_list %}
     <form name="organization_position_choose_election" method="get" action="{% url 'office:office_list' %}">
@@ -17,8 +32,8 @@
             -- Filter by Election --</option>
     {% for election in election_list %}
         <option value="{{ election.google_civic_election_id }}"
-                {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
-            {{ election.election_name }} - {{ election.election_day_text }}</option>
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
     {% endfor %}
     </select>
     </form>
@@ -28,15 +43,21 @@
 {% if office_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
+            <td>&nbsp;</td>
+            <td>ID</td>
+            <td>We Vote ID</td>
             <td>Office Name</td>
             <td>State</td>
-            <td>&nbsp;</td>
+            <td># of Candidates</td>
         </tr>
     {% for office in office_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ office.id }}</td>
+            <td>{{ office.we_vote_id }}</td>
             <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
             <td>{{ office.state_code }}</td>
-            <td><a href="{% url 'office:office_edit' office.id %}" style="font-size: .65em">edit</a></td>
+            <td>{{ office.candidate_count }}</td>
         </tr>
     {% endfor %}
     </table>
@@ -44,13 +65,10 @@
     <p></p>
     <p>
         <a href="{% url 'office:offices_export' %}?format=json" target="_blank" >Export Offices</a>
-{#        <a href="{% url 'office:offices_import' %}" >Import Offices</a>#}
     </p>
 {% else %}
     <p>(no offices found)</p>
 {% endif %}
-
-<p><a href="{% url 'office:office_new' %}">Add New Office</a></p>
 
     <script>
         $(function() {

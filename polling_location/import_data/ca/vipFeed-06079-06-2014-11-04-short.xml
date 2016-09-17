@@ -1,0 +1,1633 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>California</name>
+  <datetime>2014-09-19T11:54:22</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>http://www.slovote.com</organization_url>
+</source>
+<state id="5">
+  <name>California</name>
+</state>
+<election id="66">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>http://www.slovote.com</registration_info>
+  <absentee_ballot_info>http://www.slovote.com</absentee_ballot_info>
+  <results_url>http://www.slovote.com</results_url>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-10-20</registration_deadline>
+  <absentee_request_deadline>2014-11-04</absentee_request_deadline>
+</election>
+<locality id="40">
+  <name>County of San Luis Obispo</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1200000010698">
+  <name>CON 102-02L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006741</polling_location_id>
+</precinct>
+<precinct id="1200000010699">
+  <name>CON 521-72L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006719</polling_location_id>
+</precinct>
+<precinct id="1200000010700">
+  <name>CON 111-08L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006738</polling_location_id>
+</precinct>
+<precinct id="1200000010701">
+  <name>CON 112-08</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006738</polling_location_id>
+</precinct>
+<precinct id="1200000010702">
+  <name>CON 113-09L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006712</polling_location_id>
+</precinct>
+<precinct id="1200000010703">
+  <name>CON 117-12L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006778</polling_location_id>
+</precinct>
+<precinct id="1200000010704">
+  <name>CON 120-12</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006778</polling_location_id>
+</precinct>
+<precinct id="1200000010705">
+  <name>CON 123-14L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006812</polling_location_id>
+</precinct>
+<precinct id="1200000010706">
+  <name>CON 124-14</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006812</polling_location_id>
+</precinct>
+<precinct id="1200000010707">
+  <name>CON 125-14</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006812</polling_location_id>
+</precinct>
+<precinct id="1200000010708">
+  <name>CON 126-15L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006814</polling_location_id>
+</precinct>
+<precinct id="1200000010709">
+  <name>CON 518-15</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006814</polling_location_id>
+</precinct>
+<precinct id="1200000010710">
+  <name>CON 202-16</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006709</polling_location_id>
+</precinct>
+<precinct id="1200000010711">
+  <name>CON 205-16</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006709</polling_location_id>
+</precinct>
+<precinct id="1200000010712">
+  <name>CON 201-16L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006709</polling_location_id>
+</precinct>
+<precinct id="1200000010713">
+  <name>CON 203-16</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006709</polling_location_id>
+</precinct>
+<precinct id="1200000010714">
+  <name>CON 204-16</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006709</polling_location_id>
+</precinct>
+<precinct id="1200000010715">
+  <name>CON 206-17L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006711</polling_location_id>
+</precinct>
+<precinct id="1200000010716">
+  <name>CON 207-17</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006711</polling_location_id>
+</precinct>
+<precinct id="1200000010717">
+  <name>CON 208-18L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006721</polling_location_id>
+</precinct>
+<precinct id="1200000010718">
+  <name>CON 209-18</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006721</polling_location_id>
+</precinct>
+<precinct id="1200000010719">
+  <name>CON 211-19</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006734</polling_location_id>
+</precinct>
+<precinct id="1200000010720">
+  <name>CON 210-19L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006734</polling_location_id>
+</precinct>
+<precinct id="1200000010721">
+  <name>CON 212-20L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006756</polling_location_id>
+</precinct>
+<precinct id="1200000010722">
+  <name>CON 213-20</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006756</polling_location_id>
+</precinct>
+<precinct id="1200000010723">
+  <name>CON 214-20</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006756</polling_location_id>
+</precinct>
+<precinct id="1200000010724">
+  <name>CON 218-23</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006703</polling_location_id>
+</precinct>
+<precinct id="1200000010725">
+  <name>CON 217-23L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006703</polling_location_id>
+</precinct>
+<precinct id="1200000010726">
+  <name>CON 216-22L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006745</polling_location_id>
+</precinct>
+<precinct id="1200000010727">
+  <name>CON 222-26</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006807</polling_location_id>
+</precinct>
+<precinct id="1200000010728">
+  <name>CON 221-26L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006807</polling_location_id>
+</precinct>
+<precinct id="1200000010729">
+  <name>CON 220-25L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006733</polling_location_id>
+</precinct>
+<precinct id="1200000010730">
+  <name>CON 219-24L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006820</polling_location_id>
+</precinct>
+<precinct id="1200000010731">
+  <name>CON 223-27L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006754</polling_location_id>
+</precinct>
+<precinct id="1200000010732">
+  <name>CON 527-76L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006827</polling_location_id>
+</precinct>
+<precinct id="1200000010733">
+  <name>CON 528-76</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006827</polling_location_id>
+</precinct>
+<precinct id="1200000010734">
+  <name>CON 529-76</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006827</polling_location_id>
+</precinct>
+<precinct id="1200000010735">
+  <name>CON 227-30L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006705</polling_location_id>
+</precinct>
+<precinct id="1200000010736">
+  <name>CON 226-29L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006823</polling_location_id>
+</precinct>
+<precinct id="1200000010737">
+  <name>CON 303-34L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006715</polling_location_id>
+</precinct>
+<precinct id="1200000010738">
+  <name>CON 306-37L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006796</polling_location_id>
+</precinct>
+<precinct id="1200000010739">
+  <name>CON 311-37</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006796</polling_location_id>
+</precinct>
+<precinct id="1200000010740">
+  <name>CON 308-38L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006761</polling_location_id>
+</precinct>
+<precinct id="1200000010741">
+  <name>CON 309-38</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006761</polling_location_id>
+</precinct>
+<precinct id="1200000010742">
+  <name>CON 310-38</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006761</polling_location_id>
+</precinct>
+<precinct id="1200000010743">
+  <name>CON 314-40L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006739</polling_location_id>
+</precinct>
+<precinct id="1200000010744">
+  <name>CON 315-40</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006739</polling_location_id>
+</precinct>
+<precinct id="1200000010745">
+  <name>CON 524-74L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006797</polling_location_id>
+</precinct>
+<precinct id="1200000010746">
+  <name>CON 530-74</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006797</polling_location_id>
+</precinct>
+<precinct id="1200000010747">
+  <name>CON 317-42L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006702</polling_location_id>
+</precinct>
+<precinct id="1200000010748">
+  <name>CON 318-43L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006959</polling_location_id>
+</precinct>
+<precinct id="1200000010749">
+  <name>CON 319-43</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006959</polling_location_id>
+</precinct>
+<precinct id="1200000010750">
+  <name>CON 320-44L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006762</polling_location_id>
+</precinct>
+<precinct id="1200000010751">
+  <name>CON 321-44</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006762</polling_location_id>
+</precinct>
+<precinct id="1200000010752">
+  <name>CON 322-44</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006762</polling_location_id>
+</precinct>
+<precinct id="1200000010753">
+  <name>CON 324-46L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006792</polling_location_id>
+</precinct>
+<precinct id="1200000010754">
+  <name>CON 325-46</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006792</polling_location_id>
+</precinct>
+<precinct id="1200000010755">
+  <name>CON 326-47L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006770</polling_location_id>
+</precinct>
+<precinct id="1200000010756">
+  <name>CON 323-45L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006714</polling_location_id>
+</precinct>
+<precinct id="1200000010757">
+  <name>CON 327-45</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006714</polling_location_id>
+</precinct>
+<precinct id="1200000010758">
+  <name>CON 328-48L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006740</polling_location_id>
+</precinct>
+<precinct id="1200000010759">
+  <name>CON 401-50</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006805</polling_location_id>
+</precinct>
+<precinct id="1200000010760">
+  <name>CON 402-50</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006805</polling_location_id>
+</precinct>
+<precinct id="1200000010761">
+  <name>CON 403-50</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006805</polling_location_id>
+</precinct>
+<precinct id="1200000010762">
+  <name>CON 331-50</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006805</polling_location_id>
+</precinct>
+<precinct id="1200000010763">
+  <name>CON 413-50</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006805</polling_location_id>
+</precinct>
+<precinct id="1200000010764">
+  <name>CON 330-50L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006805</polling_location_id>
+</precinct>
+<precinct id="1200000010765">
+  <name>CON 406-53L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006810</polling_location_id>
+</precinct>
+<precinct id="1200000010766">
+  <name>CON 414-53</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006810</polling_location_id>
+</precinct>
+<precinct id="1200000010767">
+  <name>CON 404-51L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006697</polling_location_id>
+</precinct>
+<precinct id="1200000010768">
+  <name>CON 416-56</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006720</polling_location_id>
+</precinct>
+<precinct id="1200000010769">
+  <name>CON 417-56</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006720</polling_location_id>
+</precinct>
+<precinct id="1200000010770">
+  <name>CON 415-56L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006720</polling_location_id>
+</precinct>
+<precinct id="1200000010771">
+  <name>CON 418-57L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006767</polling_location_id>
+</precinct>
+<precinct id="1200000010772">
+  <name>CON 422-60L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006766</polling_location_id>
+</precinct>
+<precinct id="1200000010773">
+  <name>CON 423-60</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006766</polling_location_id>
+</precinct>
+<precinct id="1200000010774">
+  <name>CON 421-58</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006764</polling_location_id>
+</precinct>
+<precinct id="1200000010775">
+  <name>CON 419-58L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006764</polling_location_id>
+</precinct>
+<precinct id="1200000010776">
+  <name>CON 424-61L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006763</polling_location_id>
+</precinct>
+<precinct id="1200000010777">
+  <name>CON 425-61</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006763</polling_location_id>
+</precinct>
+<precinct id="1200000010778">
+  <name>CON 428-63L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006772</polling_location_id>
+</precinct>
+<precinct id="1200000010779">
+  <name>CON 510-68L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006811</polling_location_id>
+</precinct>
+<precinct id="1200000010780">
+  <name>CON 511-68</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006811</polling_location_id>
+</precinct>
+<precinct id="1200000010781">
+  <name>CON 504-66</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006701</polling_location_id>
+</precinct>
+<precinct id="1200000010782">
+  <name>CON 505-66</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006701</polling_location_id>
+</precinct>
+<precinct id="1200000010783">
+  <name>CON 506-66</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006701</polling_location_id>
+</precinct>
+<precinct id="1200000010784">
+  <name>CON 503-66L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006701</polling_location_id>
+</precinct>
+<precinct id="1200000010785">
+  <name>CON 507-67L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006700</polling_location_id>
+</precinct>
+<precinct id="1200000010786">
+  <name>CON 514-67</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006700</polling_location_id>
+</precinct>
+<precinct id="1200000010787">
+  <name>CON 512-69L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006716</polling_location_id>
+</precinct>
+<precinct id="1200000010788">
+  <name>CON 513-69</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006716</polling_location_id>
+</precinct>
+<precinct id="1200000010789">
+  <name>CON 516-71L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006728</polling_location_id>
+</precinct>
+<precinct id="1200000010790">
+  <name>CON 517-71</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006728</polling_location_id>
+</precinct>
+<precinct id="1200000010791">
+  <name>CON 523-73</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006799</polling_location_id>
+</precinct>
+<precinct id="1200000010792">
+  <name>CON 522-73L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006931</polling_location_id>
+</precinct>
+<precinct id="1200000010793">
+  <name>CON 525-75L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006749</polling_location_id>
+</precinct>
+<precinct id="1200000010794">
+  <name>CON 526-75</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006749</polling_location_id>
+</precinct>
+<precinct id="1200000010795">
+  <name>CON 104-04L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006781</polling_location_id>
+</precinct>
+<precinct id="1200000010796">
+  <name>CON 109-04</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006781</polling_location_id>
+</precinct>
+<precinct id="1200000010797">
+  <name>CON 110-04</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006781</polling_location_id>
+</precinct>
+<precinct id="1200000010798">
+  <name>CON 312-39L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006822</polling_location_id>
+</precinct>
+<precinct id="1200000010799">
+  <name>CON 313-39</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006822</polling_location_id>
+</precinct>
+<precinct id="1200000010800">
+  <name>CON 101-01L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006798</polling_location_id>
+</precinct>
+<precinct id="1200000010801">
+  <name>CON 103-03L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006731</polling_location_id>
+</precinct>
+<precinct id="1200000010802">
+  <name>CON 519-03</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006731</polling_location_id>
+</precinct>
+<precinct id="1200000010803">
+  <name>CON 304-35L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006718</polling_location_id>
+</precinct>
+<precinct id="1200000010804">
+  <name>CON 515-70L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006704</polling_location_id>
+</precinct>
+<precinct id="1200000010805">
+  <name>MB 34</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010806">
+  <name>MB 11</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010808">
+  <name>MB 41</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010809">
+  <name>MB 35</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010811">
+  <name>CON 224-28L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006794</polling_location_id>
+</precinct>
+<precinct id="1200000010812">
+  <name>CON 225-28</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006794</polling_location_id>
+</precinct>
+<precinct id="1200000010813">
+  <name>CON 405-52L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006737</polling_location_id>
+</precinct>
+<precinct id="1200000010814">
+  <name>CON 407-52</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006737</polling_location_id>
+</precinct>
+<precinct id="1200000010815">
+  <name>CON 427-62L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006818</polling_location_id>
+</precinct>
+<precinct id="1200000010816">
+  <name>CON 215-21L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006746</polling_location_id>
+</precinct>
+<precinct id="1200000010817">
+  <name>CON 420-59L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006815</polling_location_id>
+</precinct>
+<precinct id="1200000010818">
+  <name>CON 426-59</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006815</polling_location_id>
+</precinct>
+<precinct id="1200000010819">
+  <name>CON 121-13L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006742</polling_location_id>
+</precinct>
+<precinct id="1200000010820">
+  <name>CON 122-13</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006742</polling_location_id>
+</precinct>
+<precinct id="1200000010821">
+  <name>CON 107-07L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006802</polling_location_id>
+</precinct>
+<precinct id="1200000010822">
+  <name>CON 105-05L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006775</polling_location_id>
+</precinct>
+<precinct id="1200000010823">
+  <name>CON 108-05</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006775</polling_location_id>
+</precinct>
+<precinct id="1200000010824">
+  <name>CON 412-49</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006735</polling_location_id>
+</precinct>
+<precinct id="1200000010825">
+  <name>CON 329-49L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006735</polling_location_id>
+</precinct>
+<precinct id="1200000010826">
+  <name>CON 501-65L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006699</polling_location_id>
+</precinct>
+<precinct id="1200000010827">
+  <name>CON 502-65</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006699</polling_location_id>
+</precinct>
+<precinct id="1200000010828">
+  <name>CON 508-65</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006699</polling_location_id>
+</precinct>
+<precinct id="1200000010829">
+  <name>CON 509-65</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006699</polling_location_id>
+</precinct>
+<precinct id="1200000010830">
+  <name>CON 106-06L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006777</polling_location_id>
+</precinct>
+<precinct id="1200000010831">
+  <name>CON 118-06</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006777</polling_location_id>
+</precinct>
+<precinct id="1200000010832">
+  <name>CON 520-06</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006777</polling_location_id>
+</precinct>
+<precinct id="1200000010833">
+  <name>CON 115-06</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006777</polling_location_id>
+</precinct>
+<precinct id="1200000010834">
+  <name>CON 119-06</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006777</polling_location_id>
+</precinct>
+<precinct id="1200000010835">
+  <name>CON 114-10L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006713</polling_location_id>
+</precinct>
+<precinct id="1200000010836">
+  <name>CON 409-55L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006708</polling_location_id>
+</precinct>
+<precinct id="1200000010837">
+  <name>CON 410-55</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006708</polling_location_id>
+</precinct>
+<precinct id="1200000010838">
+  <name>CON 411-55</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006708</polling_location_id>
+</precinct>
+<precinct id="1200000010839">
+  <name>CON 301-32L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006743</polling_location_id>
+</precinct>
+<precinct id="1200000010840">
+  <name>CON 302-33L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006759</polling_location_id>
+</precinct>
+<precinct id="1200000010841">
+  <name>CON 408-54L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006736</polling_location_id>
+</precinct>
+<precinct id="1200000010842">
+  <name>CON 430-64</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006793</polling_location_id>
+</precinct>
+<precinct id="1200000010843">
+  <name>CON 429-64L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006793</polling_location_id>
+</precinct>
+<precinct id="1200000010844">
+  <name>CON 116-11L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006821</polling_location_id>
+</precinct>
+<precinct id="1200000010845">
+  <name>CON 316-41L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006747</polling_location_id>
+</precinct>
+<precinct id="1200000010846">
+  <name>CON 305-36L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006779</polling_location_id>
+</precinct>
+<precinct id="1200000010847">
+  <name>CON 307-36</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006779</polling_location_id>
+</precinct>
+<precinct id="1200000010848">
+  <name>CON 228-31L</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006707</polling_location_id>
+</precinct>
+<precinct id="1200000010849">
+  <name>MB 29</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006957</polling_location_id>
+</precinct>
+<precinct id="1200000010853">
+  <name>MB 1</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010854">
+  <name>MB 19</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010855">
+  <name>MB 10</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010858">
+  <name>MB 27</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010862">
+  <name>MB 33</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010863">
+  <name>MB 36</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010867">
+  <name>MB 4</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010868">
+  <name>MB 40</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010869">
+  <name>MB 38</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010870">
+  <name>MB 39</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010871">
+  <name>MB 18</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010872">
+  <name>MB 17</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<precinct id="1200000010873">
+  <name>MB 30</name>
+  <locality_id>40</locality_id>
+  <polling_location_id>130000006826</polling_location_id>
+</precinct>
+<polling_location id="130000006697">
+  <address>
+    <line2>417 ORCHARD ST</line2>
+    <city>ARROYO GRANDE</city>
+    <line1>417 ORCHARD ST - ARROYO GRANDE</line1>
+    <state>CA</state>
+    <location_name>AMERICAN LEGION HALL</location_name>
+    <zip>93420</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006699">
+  <address>
+    <line2>1516 EL CAMINO REAL</line2>
+    <city>ATASCADERO</city>
+    <line1>1516 EL CAMINO REAL, ATASCADER</line1>
+    <state>CA</state>
+    <location_name>ATASCADERO ELKS LODGE</location_name>
+    <zip>93422</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006700">
+  <address>
+    <line2>8205 CURBARIL AVE</line2>
+    <city>ATASCADERO</city>
+    <line1>8205 CURBARIL AVE- ATASCADERO</line1>
+    <state>CA</state>
+    <location_name>ATASCADERO GOSPEL CHAPEL</location_name>
+    <zip>93422</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006701">
+  <address>
+    <line2>9315 PISMO AVE</line2>
+    <city>ATASCADERO</city>
+    <line1>9315 PISMO AVE - ATASCADERO</line1>
+    <state>CA</state>
+    <location_name>ATASCADERO PAVILION ON THE LAKE</location_name>
+    <zip>93422</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006702">
+  <address>
+    <line2>191 SAN MIGUEL ST -</line2>
+    <city>AVILA BEACH</city>
+    <line1>191 SAN MIGUEL ST - AVILA BEACH</line1>
+    <state>CA</state>
+    <location_name>AVILA BEACH COMMUNITY CENTER</location_name>
+    <zip>93424</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006703">
+  <address>
+    <line2>1330 9TH ST</line2>
+    <city>LOS OSOS</city>
+    <line1>LIBRARY - LOS OSOS</line1>
+    <state>CA</state>
+    <location_name>BAYWOOD ELEM SCHOOL</location_name>
+    <zip>93402</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006704">
+  <address>
+    <line2>9325 EL BORDO AVE</line2>
+    <city>ATASCADERO</city>
+    <line1>9325 EL BORDO AVE - ATASCADERO</line1>
+    <state>CA</state>
+    <location_name>BEREAN BIBLE FELLOWSHIP</location_name>
+    <zip>93422</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006705">
+  <address>
+    <line2>1375 BALBOA ST</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>1375 BALBOA ST - SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>C L SMITH SCHOOL SCIENCE ROOM</location_name>
+    <zip>93405</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006707">
+  <address>
+    <line2>1 GRAND AVE</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>CAL POLY CAMPUS-GRAND AVE- SN LUIS OBSPO</line1>
+    <state>CA</state>
+    <location_name>CAL POLY CHUMASH AUDITORIUM</location_name>
+    <zip>93410</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006708">
+  <address>
+    <line2>1133 MAPLE ST</line2>
+    <city>ARROYO GRANDE</city>
+    <line1>1133 MAPLE ST - ARROYO GRANDE</line1>
+    <state>CA</state>
+    <location_name>CALVARY CHAPEL</location_name>
+    <zip>93420</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006709">
+  <address>
+    <line2>1000 MAIN ST</line2>
+    <city>CAMBRIA</city>
+    <line1>1000 MAIN ST - CAMBRIA</line1>
+    <state>CA</state>
+    <location_name>CAMBRIA VETERANS BLDG</location_name>
+    <zip>93428</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006711">
+  <address>
+    <line2>10 CAYUCOS DR -</line2>
+    <city>CAYUCOS</city>
+    <line1>C ST AND N. OCEAN AVE - CAYUCOS</line1>
+    <state>CA</state>
+    <location_name>CAYUCOS VETERANS BLDG</location_name>
+    <zip>93430</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006712">
+  <address>
+    <line2>600 NICKERSON DR</line2>
+    <city>PASO ROBLES</city>
+    <line1>600 NICKERSON DR - PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>CENTENNIAL PARK LIVE OAK ROOM</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006713">
+  <address>
+    <line2>600 NICKERSON DR</line2>
+    <city>PASO ROBLES</city>
+    <line1>600 NICKERSON DR PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>CENTENNIAL PARK WHITE OAK ROOM</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006714">
+  <address>
+    <line2>192 S 9TH ST -</line2>
+    <city>GROVER BEACH</city>
+    <line1>153 S 9TH ST - GROVER BEACH</line1>
+    <state>CA</state>
+    <location_name>CENTRAL COAST BAPTIST CHURCH</location_name>
+    <zip>93433</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006715">
+  <address>
+    <line2>3057 S HIGUERA ST 1</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>3057 S HIGUERA ST- SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>CHUMASH VILLAGE MHP REC ROOM</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006716">
+  <address>
+    <line2>5850 ROSARIO AVE</line2>
+    <city>ATASCADERO</city>
+    <line1>5850 ROSARIO AVE - ATASCADERO</line1>
+    <state>CA</state>
+    <location_name>COMMUNITY CHURCH OF ATASCADERO</location_name>
+    <zip>93422</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006718">
+  <address>
+    <line2>3960 S HIGUERA ST</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>3960 SOUTH HIGUERA-SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>CREEKSIDE MH COMMUNITY ROOM</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006719">
+  <address>
+    <line2>6055 WEBSTER RD</line2>
+    <city>CRESTON</city>
+    <line1>6055 WEBSTER RD, HWY 229, CRESTON</line1>
+    <state>CA</state>
+    <location_name>CRESTON FIRE STATION</location_name>
+    <zip>93432</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006720">
+  <address>
+    <line2>1050 CYPRESS RIDGE PKWY</line2>
+    <city>ARROYO GRANDE</city>
+    <line1>1050 CYPRESS RIDGE PKWAY - ARROYO GRANDE</line1>
+    <state>CA</state>
+    <location_name>CYPRESS RIDGE PAVILION</location_name>
+    <zip>93420</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006721">
+  <address>
+    <line2>501 SEQUOIA ST</line2>
+    <city>MORRO BAY</city>
+    <line1>501 SEQUOIA ST - MORRO BAY</line1>
+    <state>CA</state>
+    <location_name>DEL MAR ELEMENTARY SCHOOL</location_name>
+    <zip>93442</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006728">
+  <address>
+    <line2>9333 SANTA BARBARA RD</line2>
+    <city>ATASCADERO</city>
+    <line1>9333 SANTA BARBARA RD - ATASCADERO</line1>
+    <state>CA</state>
+    <location_name>DOVE CREEK CHURCH</location_name>
+    <zip>93422</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006731">
+  <address>
+    <line2>4251 DRY CREEK RD</line2>
+    <city>PASO ROBLES</city>
+    <line1>4251 DRY CREEK RD   PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>ESTRELLA  WARBIRDS MUSEUM</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006733">
+  <address>
+    <line2>1900 LOS OSOS VALLEY RD</line2>
+    <city>LOS OSOS</city>
+    <line1>1900 LOS OSOS VALLEY RD- LOS OSOS</line1>
+    <state>CA</state>
+    <location_name>FIRST BAPTIST CHURCH</location_name>
+    <zip>93402</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006734">
+  <address>
+    <line2>2050 IRONWOOD AVE</line2>
+    <city>MORRO BAY</city>
+    <line1>2050 IRONWOOD AVE - MORRO BAY</line1>
+    <state>CA</state>
+    <location_name>FIRST CHRISTIAN CHURCH</location_name>
+    <zip>93442</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006735">
+  <address>
+    <line2>1830 FARROLL RD</line2>
+    <line1>1830 FARROLL RD, GROVER BEACH</line1>
+    <state>CA</state>
+    <location_name>FIRST PRESBYTERIAN CHURCH</location_name>
+    <zip>93433</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006736">
+  <address>
+    <line2>275 N HALCYON RD</line2>
+    <city>ARROYO GRANDE</city>
+    <line1>275 N. HALCYON RD ARROYO GRANDE</line1>
+    <state>CA</state>
+    <location_name>FIRST UNITED METHODIST CHURCH</location_name>
+    <zip>93420</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006737">
+  <address>
+    <line2>497 FAIR OAKS AVE</line2>
+    <city>ARROYO GRANDE</city>
+    <line1>497 FAIR OAKS AVE, ARROYO GRANDE</line1>
+    <state>CA</state>
+    <location_name>GOSPEL LIGHTHOUSE OF ARROYO GRANDE</location_name>
+    <zip>93420</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006738">
+  <address>
+    <line2>535 CRESTON RD</line2>
+    <city>PASO ROBLES</city>
+    <line1>535 CRESTON RD - PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>GRACE BAPTIST CHURCH</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006739">
+  <address>
+    <line2>1036 PISMO ST</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>1036 PISMO STREET - SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>GRACE CHURCH</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006740">
+  <address>
+    <line2>1230 TROUVILLE AVE</line2>
+    <city>GROVER BEACH</city>
+    <line1>1230 TROUVILLE AVE- GROVER BEACH</line1>
+    <state>CA</state>
+    <location_name>GROVER BEACH COMMUNITY CENTER</location_name>
+    <zip>93433</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006741">
+  <address>
+    <line2>4880 HERITAGE RANCH RD</line2>
+    <city>PASO ROBLES</city>
+    <line1>4880 HERITAGE RCH RD - PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>HERITAGE VILLAGE SENIOR CENTER</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006742">
+  <address>
+    <line2>215 OAK HILL RD</line2>
+    <city>PASO ROBLES</city>
+    <line1>215 OAK HILL RD, PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>HIGHLANDS CHURCH</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006743">
+  <address>
+    <line2>1801 PREFUMO CANYON RD</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>1801 PREFUMO CANYON RD, SLO</line1>
+    <state>CA</state>
+    <location_name>LAGUNA LAKE MOBILE ESTATES</location_name>
+    <zip>93405</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006745">
+  <address>
+    <line2>1335 7TH ST -</line2>
+    <city>LOS OSOS</city>
+    <line1>1335 7TH ST - LOS OSOS</line1>
+    <state>CA</state>
+    <location_name>LOS OSOS CHRISTIAN FELLOWSHIP</location_name>
+    <zip>93402</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006746">
+  <address>
+    <line2>1555 EL MORRO AVE</line2>
+    <city>LOS OSOS</city>
+    <line1>1555 EL MORRO AVE, LOS OSOS</line1>
+    <state>CA</state>
+    <location_name>LOS OSOS MIDDLE SCHOOL</location_name>
+    <zip>93402</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006747">
+  <address>
+    <line2>5785 LOS RANCHOS RD</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>5785 LOS RANCHOS RD - SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>LOS RANCHOS ELEMENTARY SCHOOL</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006749">
+  <address>
+    <line2>864 SANTA ROSA ST</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>864 SANTA ROSA ST - OFF MILL ST - SLO</line1>
+    <state>CA</state>
+    <location_name>LUDWICK COMMUNITY CENTER</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006754">
+  <address>
+    <line2>348 LOS OSOS VALLEY RD -</line2>
+    <city>LOS OSOS</city>
+    <line1>348 LOS OSOS VALLEY RD - LOS OSOS</line1>
+    <state>CA</state>
+    <location_name>MONARCH GROVE SCHOOL</location_name>
+    <zip>93402</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006756">
+  <address>
+    <line2>209 SURF ST</line2>
+    <city>MORRO BAY</city>
+    <line1>209 SURF ST - MORRO BAY</line1>
+    <state>CA</state>
+    <location_name>MORRO BAY VETERANS BLDG</location_name>
+    <zip>93442</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006759">
+  <address>
+    <line2>1775 CALLE JOAQUIN</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>1775 CALLE JOAQUIN, SLO</line1>
+    <state>CA</state>
+    <location_name>MOUNTAINBROOK COMMUNITY CHURCH</location_name>
+    <zip>93405</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006761">
+  <address>
+    <line2>3396 JOHNSON AVE</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>3396 JOHNSON AVE-STUDENT UNION RM</line1>
+    <state>CA</state>
+    <location_name>NAZARENE CHURCH- SAN LUIS OBISPO</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006762">
+  <address>
+    <line2>990 JAMES WAY</line2>
+    <city>PISMO BEACH</city>
+    <line1>990 JAMES WAY - PISMO BEACH</line1>
+    <state>CA</state>
+    <location_name>NEW LIFE COMMUNITY CHURCH LIFE CENTER</location_name>
+    <zip>93449</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006763">
+  <address>
+    <line2>918 W TEFFT ST</line2>
+    <city>NIPOMO</city>
+    <line1>918 W TEFFT ST - NIPOMO</line1>
+    <state>CA</state>
+    <location_name>NIPOMO BRANCH LIBRARY</location_name>
+    <zip>93444</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006764">
+  <address>
+    <line2>148 S WILSON ST</line2>
+    <city>NIPOMO</city>
+    <line1>148 S WILSON ST - NIPOMO</line1>
+    <state>CA</state>
+    <location_name>NIPOMO CSD OFFICE</location_name>
+    <zip>93444</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006766">
+  <address>
+    <line2>200 E DANA ST</line2>
+    <city>NIPOMO</city>
+    <line1>200 E DANA ST - NIPOMO</line1>
+    <state>CA</state>
+    <location_name>NIPOMO SENIOR CENTER</location_name>
+    <zip>93444</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006767">
+  <address>
+    <line2>525 N THOMPSON AVE</line2>
+    <city>NIPOMO</city>
+    <line1>525 N THOMPSON AVE - NIPOMO</line1>
+    <state>CA</state>
+    <location_name>NIPOMO SENIOR HIGH SCHOOL</location_name>
+    <zip>93444</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006770">
+  <address>
+    <line2>386 N OAK PARK BLVD -</line2>
+    <city>GROVER BEACH</city>
+    <line1>386 N OAK PARK BLVD - GROVER BEACH</line1>
+    <state>CA</state>
+    <location_name>OAK PARK CHRISTIAN CHURCH</location_name>
+    <zip>93433</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006772">
+  <address>
+    <line2>1655 FRONT ST</line2>
+    <city>OCEANO</city>
+    <line1>1655 FRONT ST - OCEANO</line1>
+    <state>CA</state>
+    <location_name>OCEANO CSD OFFICE</location_name>
+    <zip>93445</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006775">
+  <address>
+    <line2>2706 SPRING ST</line2>
+    <city>PASO ROBLES</city>
+    <line1>2706 SPRING ST., PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>PASO ROBLES COMMUNITY CHURCH</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006777">
+  <address>
+    <line2>320 SHERWOOD RD</line2>
+    <city>PASO ROBLES</city>
+    <line1>320 SHERWOOD RD, PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>PASO ROBLES TEMPLE ASSOCIATION</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006778">
+  <address>
+    <line2>240 SCOTT ST</line2>
+    <city>PASO ROBLES</city>
+    <line1>240 SCOTT ST - PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>PASO ROBLES VETERANS HALL</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006779">
+  <address>
+    <line2>4484 BROAD ST</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>4484 BROAD ST., SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>PERFORMANCE ATHLETICS</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006781">
+  <address>
+    <line2>1301 OAK ST</line2>
+    <city>PASO ROBLES</city>
+    <line1>1301 OAK ST - PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>PLYMOUTH CONGREGATIONAL CHURCH HALL</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006792">
+  <address>
+    <line2>993 RAMONA AVE</line2>
+    <city>GROVER BEACH</city>
+    <line1>993 RAMONA AVE - GROVER BEACH</line1>
+    <state>CA</state>
+    <location_name>RAMONA GARDEN PARK CENTER</location_name>
+    <zip>93433</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006793">
+  <address>
+    <line2>2700 CIENAGA ST</line2>
+    <city>OCEANO</city>
+    <line1>2700 CIENAGA ST OCEANO CA 93445</line1>
+    <state>CA</state>
+    <location_name>RANCHO DEL ARROYO MHP</location_name>
+    <zip>93445</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006794">
+  <address>
+    <line2>525 CERRO ROMAULDO AVE</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>525 CERRO ROMAULDO, SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>SAN LUIS ASSEMBLY</location_name>
+    <zip>93405</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006796">
+  <address>
+    <line2>2880 BROAD ST</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>2880 BROAD ST- SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>SAN LUIS OBISPO GRANGE HALL</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006797">
+  <address>
+    <line2>801 GRAND AVE</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>801 GRAND AVE - SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>SAN LUIS OBISPO VETERANS BLDG</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006798">
+  <address>
+    <line2>256 13TH ST</line2>
+    <city>SAN MIGUEL</city>
+    <line1>256 13TH ST. SAN MIGUEL</line1>
+    <state>CA</state>
+    <location_name>SAN MIGUEL COMMUNITY BLDG.</location_name>
+    <zip>93451</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006799">
+  <address>
+    <line2>9610 MURPHY AVE</line2>
+    <city>SANTA MARGARITA</city>
+    <line1>9610 MURPHY  STREET - SANTA MARGARITA</line1>
+    <state>CA</state>
+    <location_name>SANTA MARGARITA COMMUNITY HALL</location_name>
+    <zip>93453</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006802">
+  <address>
+    <line2>195 N 2ND ST</line2>
+    <city>SHANDON</city>
+    <line1>195 N SECOND ST., SHANDON</line1>
+    <state>CA</state>
+    <location_name>SHANDON COMMUNITY BUILDING</location_name>
+    <zip>93461</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006805">
+  <address>
+    <line2>800 W BRANCH ST</line2>
+    <city>ARROYO GRANDE</city>
+    <line1>800 W BRANCH ST - ARROYO GRANDE</line1>
+    <state>CA</state>
+    <location_name>SOUTH COUNTY REGIONAL CENTER</location_name>
+    <zip>93420</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006807">
+  <address>
+    <line2>2050 PALISADES AVE</line2>
+    <city>LOS OSOS</city>
+    <line1>2050 PALISADES AVE - LOS OSOS</line1>
+    <state>CA</state>
+    <location_name>ST ELIZABETH ANN SETON PARISH</location_name>
+    <zip>93402</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006810">
+  <address>
+    <line2>959 VALLEY RD</line2>
+    <city>ARROYO GRANDE</city>
+    <line1>959 VALLEY RD - ARROYO GRANDE</line1>
+    <state>CA</state>
+    <location_name>ST. JOHN'S LUTHERAN CHURCH</location_name>
+    <zip>93420</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006811">
+  <address>
+    <line2>5318 PALMA AVE</line2>
+    <city>ATASCADERO</city>
+    <line1>5318 PALMA AVE- ATASCADERO</line1>
+    <state>CA</state>
+    <location_name>ST. LUKE'S EPISCOPAL CHURCH</location_name>
+    <zip>93422</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006812">
+  <address>
+    <line2>930 TEMPLETON HILLS RD</line2>
+    <city>TEMPLETON</city>
+    <line1>930 TEMPLETON HILLS - TEMPLETON</line1>
+    <state>CA</state>
+    <location_name>TEMP HILLS 7TH DAY ADVNTST CHR</location_name>
+    <zip>93465</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006814">
+  <address>
+    <line2>601 MAIN ST</line2>
+    <city>TEMPLETON</city>
+    <line1>601 MAIN STREET- TEMPLETON</line1>
+    <state>CA</state>
+    <location_name>TEMPLETON COMMUNITY BLDG</location_name>
+    <zip>93465</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006815">
+  <address>
+    <line2>1095 POMEROY RD</line2>
+    <city>NIPOMO</city>
+    <line1>1095 POMEROY RD, NIPOMO</line1>
+    <state>CA</state>
+    <location_name>THE EDWARDS BARN</location_name>
+    <zip>93444</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006818">
+  <address>
+    <line2>1645 TRILOGY PKWY</line2>
+    <city>NIPOMO</city>
+    <line1>1645 TRILOGY PARKWAY, NIPOMO</line1>
+    <state>CA</state>
+    <location_name>THE MONARCH CLUB - ART ROOM</location_name>
+    <zip>93444</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006820">
+  <address>
+    <line2>490 LOS OSOS VALLEY RD -</line2>
+    <city>LOS OSOS</city>
+    <line1>490 LOS OSOS VALLEY RD - LOS OSOS</line1>
+    <state>CA</state>
+    <location_name>TRINITY METHODIST CHURCH</location_name>
+    <zip>93402</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006821">
+  <address>
+    <line2>915 CRESTON RD</line2>
+    <city>PASO ROBLES</city>
+    <line1>915 CRESTON RD PASO ROBLES</line1>
+    <state>CA</state>
+    <location_name>TRUTH TABERNACLE</location_name>
+    <zip>93446</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006822">
+  <address>
+    <line2>2201 LAWTON ST</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>2201 LAWTON ST - SAN LUIS OBISPO</line1>
+    <state>CA</state>
+    <location_name>UNITARIAN UNIVERSALIST FELLOWSHIP</location_name>
+    <zip>93401</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006823">
+  <address>
+    <line2>11245 LOS OSOS VALLEY RD -</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>11245 LOS OSOS VALLEY RD - SAN LUIS OBIS</line1>
+    <state>CA</state>
+    <location_name>UNITED CHURCH OF CHRIST CONGREGATIONAL</location_name>
+    <zip>93405</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006826">
+  <address>
+    <line2>NO STREET ENTERED</line2>
+    <city>NO CITY ENTERED</city>
+    <line1>YOUR BALLOT WILL BE SENT TO YOU.</line1>
+    <state>CA</state>
+    <location_name>YOU ARE IN A MAIL BALLOT PRECINCT.</location_name>
+    <zip>NONE</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006827">
+  <address>
+    <line2>1010 E FOOTHILL BLVD</line2>
+    <city>SAN LUIS OBISPO</city>
+    <line1>1010 FOOTHILL BLVD - SAN LUIS OBIS</line1>
+    <state>CA</state>
+    <location_name>ZION LUTHERAN FELLOWSHIP HALL</location_name>
+    <zip>93405</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006931">
+  <address>
+    <line2>9610 MURPHY AVE</line2>
+    <city>SANTA MARGARITA</city>
+    <line1>9610 MURPHY  STREET - SANTA MARGARITA</line1>
+    <state>CA</state>
+    <location_name>SANTA MARGARITA COMMUNITY HALL</location_name>
+    <zip>93453</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006957">
+  <address>
+    <line2>NO STREET ENTERED</line2>
+    <city>NO CITY ENTERED</city>
+    <line1>YOUR BALLOT WILL BE SENT TO YOU.</line1>
+    <state>CA</state>
+    <location_name>YOU ARE IN A MAIL BALLOT PRECINCT.</location_name>
+    <zip>NONE</zip>
+  </address>
+</polling_location>
+<polling_location id="130000006959">
+  <address>
+    <line2>2100 SHELL BEACH RD</line2>
+    <city>PISMO BEACH</city>
+    <line1>2100 SHELL BEACH RD, SHELL BEACH CA</line1>
+    <state>CA</state>
+    <location_name>SHELL BEACH ELEMENTARY SCHOOL</location_name>
+    <zip>93449</zip>
+  </address>
+</polling_location>
+</vip_object>

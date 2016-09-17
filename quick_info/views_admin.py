@@ -17,8 +17,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
 from election.models import Election
-from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception
+from exception.models import handle_record_found_more_than_one_exception
 from measure.models import ContestMeasure, ContestMeasureManager
 from office.models import ContestOffice, ContestOfficeManager
 from rest_framework.views import APIView
@@ -54,7 +53,7 @@ def quick_info_list_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     messages_on_stage = get_messages(request)
-    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     kind_of_ballot_item = request.GET.get('kind_of_ballot_item', '')
     language = request.GET.get('language', '')
 
@@ -109,7 +108,7 @@ def quick_info_new_view(request):
     contest_measure_we_vote_id = request.POST.get('contest_measure_we_vote_id', "")
 
     quick_info_master_we_vote_id = request.POST.get('quick_info_master_we_vote_id', "")
-    google_civic_election_id = request.POST.get('google_civic_election_id', 0)
+    google_civic_election_id = convert_to_int(request.POST.get('google_civic_election_id', 0))
     if positive_value_exists(google_civic_election_id):
         election_found = True
     else:
@@ -470,7 +469,7 @@ def quick_info_edit_process_view(request):
                 candidate_campaign_we_vote_id)
             if results['success']:
                 candidate_campaign = results['candidate_campaign']
-                ballot_item_display_name = candidate_campaign.candidate_name
+                ballot_item_display_name = candidate_campaign.display_candidate_name()
             else:
                 ballot_item_display_name = ''
         # if positive_value_exists(politician_we_vote_id):

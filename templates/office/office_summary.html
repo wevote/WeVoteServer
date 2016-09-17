@@ -5,47 +5,66 @@
 
 {%  block content %}
 
-<a href="{% url 'office:office_list' %}">< Back to Offices</a>
+<a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Offices</a>
 
 {% if office %}
 
     <h1>{{ office.office_name }}</h1>
-    <p>Office Website: <strong>{{ office.office_url }}</strong><br />
-    <a href="{% url 'office:office_edit' office.id %}">edit</a>
+    <p>
+        Office Website: <strong>{{ office.office_url }}</strong><br />
+        Google Civic Election ID: <strong>{{ office.google_civic_election_id }}</strong><br />
+        Office We Vote ID: <strong>{{ office.we_vote_id }}</strong>
+            (<a href="{% url 'office:office_delete_process' %}?office_id={{ office.id }}&google_civic_election_id={{ google_civic_election_id }}">delete office</a>)
+        <br />
+        <a href="{% url 'office:office_edit' office.id %}">edit</a><br />
+        <br />
+        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}&contest_office_id={{ office.id }}">
+            Add New Candidate</a><br />
     </p>
 
 
-{% if election_list %}
-    <form name="office_choose_election" method="get" action="{% url 'office:office_summary' office.id %}">
-        {% csrf_token %}
-
-    <select id="google_civic_election_id" name="google_civic_election_id">
-        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
-            -- Filter by Election --</option>
-    {% for election in election_list %}
-        <option value="{{ election.google_civic_election_id }}"
-                {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
-            {{ election.election_name }}, {{ election.election_day_text }}</option>
-    {% endfor %}
-    </select>
-    </form>
-{% endif %}{# End of if election_list #}
-
-
-{% if candidate_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
             <td>Candidate Name</td>
             <td>State</td>
-            <td colspan="2">Election</td>
+            <td>Election</td>
+            <td>Office</td>
+            <td>Twitter Handle</td>
+            <td>Website</td>
+            <td>Id</td>
+            <td>We Vote Id</td>
+            <td>Vote Smart Id</td>
             <td>&nbsp;</td>
         </tr>
     {% for candidate in candidate_list %}
         <tr>
-            <td><a href="{% url 'candidate:candidate_summary' candidate.id %}">{{ candidate.candidate_name }}</a></td>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if candidate.candidate_photo_url %}
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}">
+                    <img src='{{ candidate.candidate_photo_url }}' height="25px" />
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}">{{ candidate.candidate_name }}</a></td>
             <td>{{ candidate.get_candidate_state }}</td>
             <td>{{ candidate.election.election_name }}</td>
-            <td>{{ candidate.election.election_day_text }}</td>
+            <td>
+        {% if candidate.office %}
+                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
+        {% else %}
+            (office missing)
+        {% endif %}
+            </td>
+            <td>{% if candidate.candidate_twitter_handle %}<a href="https://twitter.com/{{ candidate.candidate_twitter_handle }}"
+                    target="_blank">{{ candidate.candidate_twitter_handle }}</a><br />
+                ({{ candidate.twitter_followers_count }} followers){% endif %}</td>
+            <td>{% if candidate.candidate_url %}<a href="{{ candidate.candidate_url }}" target="_blank">{{ candidate.candidate_url }}</a>{% endif %}</td>
+            <td>{{ candidate.id }}</td>
+            <td>{{ candidate.we_vote_id }}</td>
+            <td>{{ candidate.vote_smart_id }}</td>
             <td><a href="{% url 'candidate:candidate_edit' candidate.id %}" style="font-size: .65em">(edit)</a></td>
         </tr>
     {% endfor %}
@@ -54,21 +73,9 @@
     <p></p>
 {% else %}
     <p>(no candidates found)</p>
+    <p>
+        <a href="{% url 'candidate:candidate_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Candidate</a><br />
+    </p>
 {% endif %}
 
-
-{% else %}
-
-    <h1>No Office Found</h1>
-    Please visit the <a href="{% url 'office:office_list' %}">Office List</a> page.
-
-{% endif %}
-
-    <script>
-        $(function() {
-            $('#google_civic_election_id').change(function() {
-                this.form.submit();
-            });
-        });
-    </script>
 {% endblock %}

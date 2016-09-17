@@ -3,14 +3,10 @@
 # -*- coding: UTF-8 -*-
 
 from django.core.urlresolvers import reverse
-from django.test import Client, TestCase
-from django.http import SimpleCookie
+from django.test import TestCase
 import json
 from voter.models import VoterManager
 from future.standard_library import install_aliases
-# from urllib.parse import urlparse, urlencode
-# from urllib.request import urlopen, Request, build_opener, ProxyHandler
-# from urllib.error import HTTPError
 install_aliases()
 
 
@@ -23,7 +19,7 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
         # self.voter_create_url = "http://localhost:8000%s" % reverse("apis_v1:voterCreateView")  # Python3?
         self.voter_create_url = reverse("apis_v1:voterCreateView")
 
-    def test_count_with_no_cookie(self):
+    def test_count_with_no_voter_device_id(self):
         """
         This API should work even if person isn't signed in
         :return:
@@ -97,7 +93,7 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
             "success: {success} (voter_count '0' expected - 2nd pass), voter_count: {voter_count}".format(
                 success=json_data3['success'], voter_count=json_data3['voter_count']))
 
-    def test_count_with_cookie(self):
+    def test_count_with_voter_device_id(self):
         """
         Test the various cookie states
         :return:
@@ -112,10 +108,8 @@ class WeVoteAPIsV1TestsVoterCount(TestCase):
         self.assertEqual('voter_device_id' in json_data0, True,
                          "voter_device_id expected in the deviceIdGenerateView json response")
 
-        # Now save the retrieved voter_device_id in a mock cookie
-        cookies = SimpleCookie()
-        cookies["voter_device_id"] = json_data0['voter_device_id']
-        self.client = Client(HTTP_COOKIE=cookies.output(header='', sep='; '))
+        # Now put the voter_device_id in a variable we can use below
+        voter_device_id = json_data0['voter_device_id'] if 'voter_device_id' in json_data0 else ''
 
         #######################################
         # Test for status: VOTER_CREATED

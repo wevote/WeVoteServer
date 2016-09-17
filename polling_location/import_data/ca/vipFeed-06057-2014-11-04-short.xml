@@ -1,0 +1,977 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-09-20T02:00:26</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>www.mynevadacounty.com/nc/elections</organization_url>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="101">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>www.mynevadacounty.com/nc/elections</registration_info>
+  <absentee_ballot_info>www.mynevadacounty.com/nc/elections</absentee_ballot_info>
+  <results_url>www.mynevadacounty.com/nc/elections</results_url>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-10-20</registration_deadline>
+  <absentee_request_deadline>2014-10-28</absentee_request_deadline>
+</election>
+<locality id="29">
+  <name>NEVADA COUNTY</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1200000015007">
+  <name>ORANGE</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015008">
+  <name>AURORAL STAR</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014140</polling_location_id>
+</precinct>
+<precinct id="1200000015009">
+  <name>SEBASTIAN</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014034</polling_location_id>
+</precinct>
+<precinct id="1200000015010">
+  <name>CHAPMAN</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015011">
+  <name>GOLD FLAT</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014027</polling_location_id>
+</precinct>
+<precinct id="1200000015012">
+  <name>ONYX</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014132</polling_location_id>
+</precinct>
+<precinct id="1200000015013">
+  <name>WOODVILLE</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015014">
+  <name>NEVADA CITY</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014103</polling_location_id>
+</precinct>
+<precinct id="1200000015015">
+  <name>FIREHOUSE NO 1</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015016">
+  <name>LAKE VERA</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014075</polling_location_id>
+</precinct>
+<precinct id="1200000015017">
+  <name>SILVER LEAF</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014050</polling_location_id>
+</precinct>
+<precinct id="1200000015018">
+  <name>LAVA CAP MINE</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014007</polling_location_id>
+</precinct>
+<precinct id="1200000015019">
+  <name>HAWTHORN</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014087</polling_location_id>
+</precinct>
+<precinct id="1200000015020">
+  <name>MINE ROCK</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015021">
+  <name>NORTHERN BELLE</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014162</polling_location_id>
+</precinct>
+<precinct id="1200000015022">
+  <name>LITTLE TURK</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014128</polling_location_id>
+</precinct>
+<precinct id="1200000015023">
+  <name>LITTLE NELL</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015024">
+  <name>EMMA NEVADA</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014088</polling_location_id>
+</precinct>
+<precinct id="1200000015025">
+  <name>CHERRY CREEK</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015026">
+  <name>LAMAR FLAT</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014008</polling_location_id>
+</precinct>
+<precinct id="1200000015027">
+  <name>EMPIRE</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014160</polling_location_id>
+</precinct>
+<precinct id="1200000015028">
+  <name>LIME KILN</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014037</polling_location_id>
+</precinct>
+<precinct id="1200000015029">
+  <name>OPHIR</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014044</polling_location_id>
+</precinct>
+<precinct id="1200000015030">
+  <name>GENERAL GRANT</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014085</polling_location_id>
+</precinct>
+<precinct id="1200000015031">
+  <name>COTTAGE HILL</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014105</polling_location_id>
+</precinct>
+<precinct id="1200000015032">
+  <name>EMIGRANT TRAIL</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015033">
+  <name>FOREST SPRINGS</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014141</polling_location_id>
+</precinct>
+<precinct id="1200000015034">
+  <name>ALTA HILL</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014106</polling_location_id>
+</precinct>
+<precinct id="1200000015035">
+  <name>STOCKTON HILL</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014133</polling_location_id>
+</precinct>
+<precinct id="1200000015036">
+  <name>QUON YIN</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014010</polling_location_id>
+</precinct>
+<precinct id="1200000015037">
+  <name>GOLD HILL</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014023</polling_location_id>
+</precinct>
+<precinct id="1200000015038">
+  <name>MAIDU</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015039">
+  <name>STAMP MILL</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014048</polling_location_id>
+</precinct>
+<precinct id="1200000015040">
+  <name>OAK TREE</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015041">
+  <name>WOLF CREEK</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014159</polling_location_id>
+</precinct>
+<precinct id="1200000015042">
+  <name>RACETRACK</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015043">
+  <name>BANNER</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014107</polling_location_id>
+</precinct>
+<precinct id="1200000015044">
+  <name>MORGAN RANCH</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014123</polling_location_id>
+</precinct>
+<precinct id="1200000015045">
+  <name>BANJO BAR</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014100</polling_location_id>
+</precinct>
+<precinct id="1200000015046">
+  <name>BRIDGEPORT</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014161</polling_location_id>
+</precinct>
+<precinct id="1200000015047">
+  <name>ROSES CORRAL</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014021</polling_location_id>
+</precinct>
+<precinct id="1200000015048">
+  <name>CLEAR CREEK</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014054</polling_location_id>
+</precinct>
+<precinct id="1200000015049">
+  <name>PENN VALLEY</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014053</polling_location_id>
+</precinct>
+<precinct id="1200000015050">
+  <name>FIREFLY</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015051">
+  <name>TOWHEE</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015052">
+  <name>REWARD</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015053">
+  <name>PONDEROSA PINES</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014045</polling_location_id>
+</precinct>
+<precinct id="1200000015054">
+  <name>IRON MOUNTAIN</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014092</polling_location_id>
+</precinct>
+<precinct id="1200000015055">
+  <name>BLACK BEAR</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014022</polling_location_id>
+</precinct>
+<precinct id="1200000015056">
+  <name>KENTUCKY FLAT</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014086</polling_location_id>
+</precinct>
+<precinct id="1200000015057">
+  <name>YUKON</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015058">
+  <name>DAVEY</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014124</polling_location_id>
+</precinct>
+<precinct id="1200000015059">
+  <name>BADGER HILL</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014165</polling_location_id>
+</precinct>
+<precinct id="1200000015060">
+  <name>CHEROKEE</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014025</polling_location_id>
+</precinct>
+<precinct id="1200000015061">
+  <name>HOPEFUL</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015062">
+  <name>FELDPAR</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015063">
+  <name>PLEASANT VALLEY</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014070</polling_location_id>
+</precinct>
+<precinct id="1200000015064">
+  <name>NORTH SAN JUAN</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015065">
+  <name>LOST RIVER</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015066">
+  <name>ROUGH RIDER</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015067">
+  <name>CHINA COVE</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014059</polling_location_id>
+</precinct>
+<precinct id="1200000015068">
+  <name>INDIAN SPRINGS</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014036</polling_location_id>
+</precinct>
+<precinct id="1200000015069">
+  <name>BENNETT FLAT</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014030</polling_location_id>
+</precinct>
+<precinct id="1200000015070">
+  <name>BLUE SKY</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015071">
+  <name>ROUNDHOUSE</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015072">
+  <name>FLORISTON</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015073">
+  <name>WHITE HORSE</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015074">
+  <name>GLENSHIRE</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014097</polling_location_id>
+</precinct>
+<precinct id="1200000015075">
+  <name>JUNIPER FLATS</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014096</polling_location_id>
+</precinct>
+<precinct id="1200000015076">
+  <name>TRUCKEE</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014063</polling_location_id>
+</precinct>
+<precinct id="1200000015077">
+  <name>BLUE TENT</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014064</polling_location_id>
+</precinct>
+<precinct id="1200000015078">
+  <name>ROCKING STONE</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014079</polling_location_id>
+</precinct>
+<precinct id="1200000015079">
+  <name>EUREKA</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015080">
+  <name>FOREST SERVICE</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015081">
+  <name>JULIUS APPERSON</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015082">
+  <name>YOU BET</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015083">
+  <name>PELTON WHEEL</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015084">
+  <name>TAHOE-DONNER</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014071</polling_location_id>
+</precinct>
+<precinct id="1200000015085">
+  <name>SARGENT JACOBS</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015086">
+  <name>FALCON</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015087">
+  <name>SHERIFF DOUGLASS</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014033</polling_location_id>
+</precinct>
+<precinct id="1200000015088">
+  <name>LOLA MONTEZ</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014068</polling_location_id>
+</precinct>
+<precinct id="1200000015089">
+  <name>SIMON SAYS</name>
+  <locality_id>29</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="1200000015090">
+  <name>MOONEY FLAT</name>
+  <locality_id>29</locality_id>
+  <polling_location_id>1300000014055</polling_location_id>
+</precinct>
+<polling_location id="1300000014007">
+  <address>
+    <line2>10600 BUBBLING WELLS RD</line2>
+    <city>GRASS VALLEY</city>
+    <line1>10600 BUBBLING WELLS AND BRUNSWICK, GV</line1>
+    <state>CA</state>
+    <location_name>NEVADA CO HORSEMENS CLUB</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014008">
+  <address>
+    <line2>22490 E E HACIENDA DR</line2>
+    <city>GRASS VALLEY</city>
+    <line1>22490 E HACIENDA DR AND MAGNOLIA, GV</line1>
+    <state>CA</state>
+    <location_name>HIGGINS LIONS COMMUNITY CTR</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014010">
+  <address>
+    <line2>10106 COMBIE RD</line2>
+    <city>AUBURN</city>
+    <line1>10106 COMBIE RD AND HWY 49, BOARD RM, AUB</line1>
+    <state>CA</state>
+    <location_name>HIGGINS CORNER FIREHOUSE</location_name>
+    <zip>95602</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014021">
+  <address>
+    <line2>18955 WILDFLOWER DR</line2>
+    <city>PENN VALLEY</city>
+    <line1>18955 WILDFLOWER DR, AT NORTH GATE, PV</line1>
+    <state>CA</state>
+    <location_name>LAKE WILDWOOD COMM CTR OAK RM BD A</location_name>
+    <zip>95946</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014022">
+  <address>
+    <line2>10513 SPENCEVILLE RD</line2>
+    <city>PENN VALLEY</city>
+    <line1>10513 SPENCEVILLE RD, PV</line1>
+    <state>CA</state>
+    <location_name>PENN VALLEY FIREHOUSE BD A</location_name>
+    <zip>95946</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014023">
+  <address>
+    <line2>10840 GILMORE WAY</line2>
+    <city>GRASS VALLEY</city>
+    <line1>10840 GILMORE WAY, ADMIN OFFICE, GV</line1>
+    <state>CA</state>
+    <location_name>GRASS VALLEY SCHOOL DISTRICT</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014025">
+  <address>
+    <line2>13281 NEWTOWN RD</line2>
+    <city>NEVADA CITY</city>
+    <line1>13281 NEWTOWN RD, NC</line1>
+    <state>CA</state>
+    <location_name>KENTUCKY FLAT COMMUNITY CENTER</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014027">
+  <address>
+    <line2>518 STATE HIGHWAY 49 N</line2>
+    <city>NEVADA CITY</city>
+    <line1>518 HWY 49 NORTH, NC</line1>
+    <state>CA</state>
+    <location_name>NEVADA CITY ELKS LODGE 518 BD A</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014030">
+  <address>
+    <line2>12593 DONNER PASS RD</line2>
+    <city>TRUCKEE</city>
+    <line1>12593 DONNER PASS, DONNER MEM ST PK, TR</line1>
+    <state>CA</state>
+    <location_name>EMIGRANT TRAIL MUSEUM</location_name>
+    <zip>96161</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014033">
+  <address>
+    <line2>15726 GLENSHIRE DR</line2>
+    <city>TRUCKEE</city>
+    <line1>15726 GLENSHIRE DR, TR</line1>
+    <state>CA</state>
+    <location_name>GLENSHIRE SWIM AND TENNIS CLUB</location_name>
+    <zip>96161</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014034">
+  <address>
+    <line2>12668 STATE HIGHWAY 174</line2>
+    <city>GRASS VALLEY</city>
+    <line1>12668 COLFAX HWY, CEDAR RIDGE</line1>
+    <state>CA</state>
+    <location_name>OPHIR HILL FIREHOUSE 28</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014035">
+  <address>
+    <line1>YOUR BALLOT WILL BE MAILED TO YOU</line1>
+    <state>CA</state>
+    <location_name>YOUR PRECINCT VOTES BY MAIL ONLY</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014036">
+  <address>
+    <line2>29190 STATE HIGHWAY 49</line2>
+    <city>NORTH SAN JUAN</city>
+    <line1>29190 HWY 49, NSJ</line1>
+    <state>CA</state>
+    <location_name>NORTH SAN JUAN CENTER</location_name>
+    <zip>95960</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014037">
+  <address>
+    <line2>11665 LAKESHORE NORTH 95602</line2>
+    <city>AUBURN</city>
+    <line1>11665 LAKESHORE NORTH, AUB</line1>
+    <state>CA</state>
+    <location_name>LOP CLUBHOUSE</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014044">
+  <address>
+    <line2>11897 TAMMY WAY</line2>
+    <city>GRASS VALLEY</city>
+    <line1>11897 TAMMY WAY, IN ALTA SIERRA, GV</line1>
+    <state>CA</state>
+    <location_name>ALTA SIERRA C/C BD A</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014045">
+  <address>
+    <line2>12629 MCCOURTNEY RD</line2>
+    <city>GRASS VALLEY</city>
+    <line1>12629 MCCOURTNEY, 1-1/4 MI S OF FAIR, GV</line1>
+    <state>CA</state>
+    <location_name>BANNER GRANGE 627</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014048">
+  <address>
+    <line2>1979 RIDGE RD</line2>
+    <line1>1979 RIDGE RD, FIRESIDE ROOM, GV</line1>
+    <city>GRASS VALLEY</city>
+    <state>CA</state>
+    <location_name>GRACE LUTHERAN CHURCH</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014050">
+  <address>
+    <line2>13376 QUAKER HILL CROSS RD</line2>
+    <city>NEVADA CITY</city>
+    <line1>13376 QKR HILL X-RD AND CRYSTAL WELLS, NC</line1>
+    <state>CA</state>
+    <location_name>NEVCO CONS FIREHOUSE 80</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014053">
+  <address>
+    <line2>14811 MCCOURTNEY RD</line2>
+    <city>GRASS VALLEY</city>
+    <line1>14811 MCCOURTNEY RD, BY LANDFILL, GV</line1>
+    <state>CA</state>
+    <location_name>NEVCO CONS FIREHOUSE 92</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014054">
+  <address>
+    <line2>18955 WILDFLOWER DR</line2>
+    <city>PENN VALLEY</city>
+    <line1>18955 WILDFLOWER DR, AT NORTH GATE, PV</line1>
+    <state>CA</state>
+    <location_name>LAKE WILDWOOD COMM CTR OAK RM BD B</location_name>
+    <zip>95946</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014055">
+  <address>
+    <line2>10513 SPENCEVILLE RD</line2>
+    <city>PENN VALLEY</city>
+    <line1>10513 SPENCEVILLE RD, PV</line1>
+    <state>CA</state>
+    <location_name>PENN VALLEY FIREHOUSE BD B</location_name>
+    <zip>95946</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014059">
+  <address>
+    <line2>17894 TYLER FOOTE CROSSING RD</line2>
+    <city>NEVADA CITY</city>
+    <line1>17894 TYLER FOOTE RD, NC</line1>
+    <state>CA</state>
+    <location_name>NORTH COLUMBIA SCHOOL HOUSE</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014063">
+  <address>
+    <line2>11509 NORTHWOODS BLVD</line2>
+    <city>TRUCKEE</city>
+    <line1>11509 NORTHWOODS BL, RESTAURANT, TR</line1>
+    <state>CA</state>
+    <location_name>NORTHWOODS CLUBHOUSE BD A</location_name>
+    <zip>96161</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014064">
+  <address>
+    <line2>10990 DORCHESTER DR</line2>
+    <city>TRUCKEE</city>
+    <line1>10990 DORCHESTER DR, DIST OFC GYM TRKE</line1>
+    <state>CA</state>
+    <location_name>GLENSHIRE ELEM SCHOOL</location_name>
+    <zip>96161</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014068">
+  <address>
+    <line2>11481 STATE HIGHWAY 174</line2>
+    <city>GRASS VALLEY</city>
+    <line1>11481 COLFAX HWY, FAMILY CENTER, GV</line1>
+    <state>CA</state>
+    <location_name>CALVARY BIBLE CHURCH BD B</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014070">
+  <address>
+    <line2>20604 MCCOURTNEY RD</line2>
+    <city>GRASS VALLEY</city>
+    <line1>20604 MCCOURTNEY RD, GV</line1>
+    <state>CA</state>
+    <location_name>HIGGINS FIREHOUSE 23</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014071">
+  <address>
+    <line2>10135 COYOTE ST</line2>
+    <city>NEVADA CITY</city>
+    <line1>10135 COYOTE ST AND HWY 49, NC</line1>
+    <state>CA</state>
+    <location_name>NEVCO CONS FIREHOUSE 84</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014075">
+  <address>
+    <line2>518 STATE HIGHWAY 49 WAY N</line2>
+    <city>NEVADA CITY</city>
+    <line1>518 HWY 49 NORTH, NC</line1>
+    <state>CA</state>
+    <location_name>NEVADA CITY ELKS LODGE 518 BD B</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014079">
+  <address>
+    <line2>11509 NORTHWOODS BLVD</line2>
+    <city>TRUCKEE</city>
+    <line1>11509 NORTHWOODS BL, RESTAURANT, TR</line1>
+    <state>CA</state>
+    <location_name>NORTHWOODS CLUBHOUSE BD B</location_name>
+    <zip>96161</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014085">
+  <address>
+    <line2>11897 TAMMY WAY</line2>
+    <city>GRASS VALLEY</city>
+    <line1>11897 TAMMY WAY, IN ALTA SIERRA, GV</line1>
+    <state>CA</state>
+    <location_name>ALTA SIERRA C/C  BD B</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014086">
+  <address>
+    <line2>14685 PLEASANT VALLEY RD</line2>
+    <city>PENN VALLEY</city>
+    <line1>14804 PLEASANT VALLEY RD</line1>
+    <state>CA</state>
+    <location_name>WILLIAMS RANCH SCHOOL LIBRARY</location_name>
+    <zip>95946</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014087">
+  <address>
+    <line2>425 NIMROD ST A</line2>
+    <city>NEVADA CITY</city>
+    <line1>425-A NIMROD ST, NC</line1>
+    <state>CA</state>
+    <location_name>SEAMANS LODGE PIONEER PARK BD B</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014088">
+  <address>
+    <line2>112 NEVADA CITY HIGHWAY BUS</line2>
+    <city>NEVADA CITY</city>
+    <line1>112 NEVADA CITY HWY AND RIDGE RD, NC</line1>
+    <state>CA</state>
+    <location_name>NEVADA CO SUPT OF SCHOOLS</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014092">
+  <address>
+    <line2>18955 WILDFLOWER DR</line2>
+    <city>PENN VALLEY</city>
+    <line1>18955 WILDFLOWER DR, AT NORTH GATE, PV</line1>
+    <state>CA</state>
+    <location_name>LAKE WILDWOOD COMM CTR OAK RM BD C</location_name>
+    <zip>95946</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014096">
+  <address>
+    <line2>10214 HIGH ST</line2>
+    <city>TRUCKEE</city>
+    <line1>10214 HIGH STREET, TR</line1>
+    <state>CA</state>
+    <location_name>TRUCKEE VETERANS HALL BD A</location_name>
+    <zip>96161</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014097">
+  <address>
+    <line2>10214 HIGH ST</line2>
+    <city>TRUCKEE</city>
+    <line1>10214 HIGH STREET, TR</line1>
+    <state>CA</state>
+    <location_name>TRUCKEE VETERANS HALL BD B</location_name>
+    <zip>96161</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014100">
+  <address>
+    <line2>255 S AUBURN ST</line2>
+    <city>GRASS VALLEY</city>
+    <line1>255 S AUBURN ST, AUDITORIUM, GV</line1>
+    <state>CA</state>
+    <location_name>GRASS VALLEY VETERANS BLDG BD B</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014103">
+  <address>
+    <line2>415 N PINE ST</line2>
+    <city>NEVADA CITY</city>
+    <line1>415 N PINE ST, DOWNSTAIRS, NC</line1>
+    <state>CA</state>
+    <location_name>NEVADA CITY VETERANS BLDG</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014105">
+  <address>
+    <line2>11897 TAMMY WAY</line2>
+    <city>GRASS VALLEY</city>
+    <line1>11897 TAMMY WAY, IN ALTA SIERRA, GV</line1>
+    <state>CA</state>
+    <location_name>ALTA SIERRA C/C  BD C</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014106">
+  <address>
+    <line2>16607 ANNIE DR</line2>
+    <city>GRASS VALLEY</city>
+    <line1>16607 ANNIE DR, GV</line1>
+    <state>CA</state>
+    <location_name>ALTA SIERRA ELEM SCHOOL - MP ROOM</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014107">
+  <address>
+    <line2>255 S AUBURN ST</line2>
+    <city>GRASS VALLEY</city>
+    <line1>255 S AUBURN ST, AUDITORIUM, GV</line1>
+    <state>CA</state>
+    <location_name>GRASS VALLEY VETERANS BLDG BD A</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014123">
+  <address>
+    <line2>13010 STATE HIGHWAY 49</line2>
+    <city>GRASS VALLEY</city>
+    <line1>13010 STATE HIGHWAY 49, GRASS VALLEY</line1>
+    <state>CA</state>
+    <location_name>BETHEL CHURCH BD B</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014124">
+  <address>
+    <line2>14506 ROUGH AND READY HWY</line2>
+    <city>ROUGH AND READY</city>
+    <line1>14506 ROUGH AND READY HWY,NR CHAPEL,RANDR</line1>
+    <state>CA</state>
+    <location_name>ROUGH AND READY FIREHOUSE</location_name>
+    <zip>95975</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014128">
+  <address>
+    <line2>980 HELLING WAY</line2>
+    <city>NEVADA CITY</city>
+    <line1>980 HELLING WAY NEVADA CITY</line1>
+    <state>CA</state>
+    <location_name>MADELYN HELLING LIBRARY COMM ROOM</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014132">
+  <address>
+    <line2>425 NIMROD ST A</line2>
+    <city>NEVADA CITY</city>
+    <line1>425-A NIMROD ST, NC</line1>
+    <state>CA</state>
+    <location_name>SEAMANS LODGE PIONEER PARK BD A</location_name>
+    <zip>95959</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014133">
+  <address>
+    <line2>16229 DUGGANS RD</line2>
+    <city>GRASS VALLEY</city>
+    <line1>16229 DUGGANS RD, GV</line1>
+    <state>CA</state>
+    <location_name>SIERRA MONTESSORI ACADEMY BD A</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014140">
+  <address>
+    <line2>16282 MOUNT OLIVE RD</line2>
+    <city>GRASS VALLEY</city>
+    <line1>16282 MT OLIVE RD. CHICAGO PARK, GV</line1>
+    <state>CA</state>
+    <location_name>ELEGANT SALVAGE</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014141">
+  <address>
+    <line2>13010 STATE HIGHWAY 49</line2>
+    <city>GRASS VALLEY</city>
+    <line1>13010 STATE HIGHWAY 49, GRASS VALLEY</line1>
+    <state>CA</state>
+    <location_name>BETHEL CHURCH BD A</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014159">
+  <address>
+    <line2>400 IDAHO MARYLAND RD</line2>
+    <city>GRASS VALLEY</city>
+    <line1>400 IDAHO MARYLAND RD</line1>
+    <state>CA</state>
+    <location_name>FOOTHILL EVENT CENTER</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014160">
+  <address>
+    <line2>16229 DUGGANS RD</line2>
+    <city>GRASS VALLEY</city>
+    <line1>16229 DUGGANS RD, GV</line1>
+    <state>CA</state>
+    <location_name>SIERRA MONTESSORI ACADEMY BD B</location_name>
+    <zip>95949</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014161">
+  <address>
+    <line2>109 S SCHOOL ST</line2>
+    <city>GRASS VALLEY</city>
+    <line1>109 S. SCHOOL ST</line1>
+    <state>CA</state>
+    <location_name>GRASS VALLEY ELKS LODGE</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014162">
+  <address>
+    <line2>11481 STATE HIGHWAY 174</line2>
+    <city>GRASS VALLEY</city>
+    <line1>11481 COLFAX HWY, FAMILY CENTER, GV</line1>
+    <state>CA</state>
+    <location_name>CALVARY BIBLE CHURCH BD A</location_name>
+    <zip>95945</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000014165">
+  <address>
+    <line2>10528 SPENCEVILLE RD</line2>
+    <city>PENN VALLEY</city>
+    <line1>10528 SPENCEVILLE RD</line1>
+    <state>CA</state>
+    <location_name>WORD-A-LIVE CHURCH</location_name>
+    <zip>95946</zip>
+  </address>
+</polling_location>
+</vip_object>

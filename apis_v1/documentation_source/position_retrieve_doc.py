@@ -10,7 +10,7 @@ def position_retrieve_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -20,11 +20,6 @@ def position_retrieve_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        {
-            'name':         'position_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'Internal database unique identifier.',
-        },
         {
             'name':         'position_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
@@ -81,15 +76,25 @@ def position_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
                    '  "ballot_item_display_name": string (either measure name or candidate name),\n' \
-                   '  "position_id": integer (the internal id of the position found),\n' \
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
+                   '  "speaker_display_name": string,\n' \
+                   '  "speaker_image_url_https": string,\n' \
+                   '  "speaker_twitter_handle": string,\n' \
                    '  "is_support": boolean,\n' \
+                   '  "is_positive_rating": boolean,\n' \
+                   '  "is_support_or_positive_rating": boolean,\n' \
                    '  "is_oppose": boolean,\n' \
+                   '  "is_negative_rating": boolean,\n' \
+                   '  "is_oppose_or_negative_rating": boolean,\n' \
                    '  "is_information_only": boolean,\n' \
                    '  "organization_we_vote_id": string (the organization identifier that moves server-to-server),\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "voter_id": integer,\n' \
+                   '  "vote_smart_rating": string,\n' \
+                   '  "vote_smart_time_span": string,\n' \
                    '  "candidate_we_vote_id": string,\n' \
                    '  "measure_we_vote_id": string,\n' \
+                   '  "office_we_vote_id": string,\n' \
                    '  "stance": string (support/oppose/info only),\n' \
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \
@@ -101,7 +106,7 @@ def position_retrieve_doc_template_values(url_root):
         'api_name': 'positionRetrieve',
         'api_slug': 'positionRetrieve',
         'api_introduction':
-            "Retrieve the position using position_id (first choice) or we_vote_id. (In the future we will add the"
+            "Retrieve the position using we_vote_id. (In the future we will add the"
             "ability to retrieve via a set of variables like "
             "(organization_we_vote_id, google_civic_election_id, candidate_we_vote_id)",
         'try_now_link': 'apis_v1:positionRetrieveView',

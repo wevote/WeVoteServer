@@ -5,7 +5,7 @@
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception
-from position.models import PositionEnteredManager
+from position.models import PositionManager
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
@@ -28,15 +28,6 @@ class PositionLike(models.Model):
 
     # The date the voter liked this position
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
-
-    # This is used when we want to export the positions that a voter is following
-    def voter_we_vote_id(self):
-        voter_manager = VoterManager()
-        return voter_manager.fetch_we_vote_id_from_local_id(self.voter_id)
-
-    def position_we_vote_id(self):
-        position_manager = PositionEnteredManager()
-        return position_manager.fetch_we_vote_id_from_local_id(self.voter_id)
 
 
 class PositionLikeManager(models.Model):

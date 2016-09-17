@@ -14,7 +14,7 @@ import json
 #         self.generate_voter_device_id_url = reverse("apis_v1:deviceIdGenerateView")
 #         self.voter_create_url = reverse("apis_v1:voterCreateView")
 #
-#     def test_create_with_no_cookie(self):
+#     def test_create_with_no_voter_device_id(self):
 #         """
 #         If there isn't a voter_device_id cookie, do we get the expected error?
 #         :return:
@@ -33,7 +33,7 @@ import json
 #             "Instead, this status was returned: {status}".format(
 #                 status=json_data['status'], voter_device_id=json_data['voter_device_id']))
 #
-#     def test_create_with_cookie(self):
+#     def test_create_with_voter_device_id(self):
 #         """
 #         Test the various cookie states
 #         :return:
@@ -48,10 +48,8 @@ import json
 #         self.assertEqual('voter_device_id' in json_data, True,
 #                          "voter_device_id expected in the deviceIdGenerateView json response")
 #
-#         # Now save the retrieved voter_device_id in a mock cookie
-#         cookies = SimpleCookie()
-#         cookies["voter_device_id"] = json_data['voter_device_id']
-#         self.client = Client(HTTP_COOKIE=cookies.output(header='', sep='; '))
+#        # Now put the voter_device_id in a variable we can use below
+#        voter_device_id = json_data10['voter_device_id'] if 'voter_device_id' in json_data10 else ''
 #
 #         #######################################
 #         # Test for status: VOTER_CREATED

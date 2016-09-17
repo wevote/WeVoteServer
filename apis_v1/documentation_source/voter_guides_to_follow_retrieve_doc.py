@@ -10,7 +10,7 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -38,6 +38,11 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
             'value':        'integer',  # boolean, integer, long, string
             'description':  'The unique identifier for a particular election. If not provided, use the most recent '
                             'ballot for the voter\'s address.',
+        },
+        {
+            'name':         'search_string',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'A string of keyword(s) to search for (to find twitter handle or org name).',
         },
         {
             'name':         'use_test_election',
@@ -78,9 +83,10 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "search_string": string,\n' \
                    '  "maximum_number_to_retrieve": integer,\n' \
                    '  "voter_guides": list\n' \
-                   '   [\n' \
+                   '   [{\n' \
                    '     "voter_guide_display_name": string (Name of this org or person),\n' \
                    '     "voter_guide_owner_type": ORGANIZATION, PUBLIC_FIGURE, VOTER),\n' \
                    '     "we_vote_id": string (We Vote ID of the voter guide),\n' \
@@ -89,9 +95,24 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
                    '     "voter_guide_image_url": string (We Vote ID for the person that owns the voter guide),\n' \
                    '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
                    '     "google_civic_election_id": integer,\n' \
+                   '     "twitter_description": string,\n' \
                    '     "twitter_followers_count": integer,\n' \
+                   '     "twitter_handle": integer,\n' \
                    '     "owner_voter_id": integer TO BE DEPRECATED,\n' \
-                   '   ],\n' \
+                   '     "is_support": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "is_positive_rating": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "is_support_or_positive_rating": boolean (Exists if looking at one ballot_item),\n' \
+                   '     "is_oppose": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "is_negative_rating": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "is_oppose_or_negative_rating": boolean (Exists if looking at one ballot_item),\n' \
+                   '     "is_information_only": boolean (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "vote_smart_rating": integer (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "vote_smart_time_span": string (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "candidate_name": string (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "speaker_display_name": string (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "statement_text": string (Exists if looking at voter guides for one ballot_item),\n' \
+                   '     "more_info_url": string (Exists if looking at voter guides for one ballot_item),\n' \
+                   '   },],\n' \
                    '}\n'
 
     template_values = {
@@ -101,7 +122,11 @@ def voter_guides_to_follow_retrieve_doc_template_values(url_root):
             "Look up the election and ballot items that this person is focused on. Return the organizations, "
             "public figures, and voters that have shared voter guides available to follow. Take into consideration "
             "which voter guides the voter has previously ignored. "
-            "Do not show voter guides the voter is already following.",
+            "Do not show voter guides the voter is already following."
+            "If neither ballot_item_we_vote_id (paired with kind_of_ballot_item) nor google_civic_election_id are"
+            "passed in, and google_civic_election_id is set to '0', then simply return a list of voter guides "
+            "that haven't been followed yet. If google_civic_election_id is NOT set to 0, the routine tries to"
+            "figure out which election is being looked at in the voter_device_link or the voter_address.",
         'try_now_link': 'apis_v1:voterGuidesToFollowRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

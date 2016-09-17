@@ -1,0 +1,1390 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-09-17T04:48:54</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>HTTP://WWW.COUNTYOFKINGS.COM</organization_url>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="79">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>HTTP://WWW.COUNTYOFKINGS.COM</registration_info>
+  <absentee_ballot_info>HTTP://WWW.COUNTYOFKINGS.COM</absentee_ballot_info>
+  <results_url>HTTP://WWW.COUNTYOFKINGS.COM</results_url>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-11-02</registration_deadline>
+</election>
+<locality id="16">
+  <name>COUNTY OF KINGS</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1200000019601">
+  <name>CONSOLIDATED 202</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003699</polling_location_id>
+</precinct>
+<precinct id="1200000019602">
+  <name>CONSOLIDATED 405</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003719</polling_location_id>
+</precinct>
+<precinct id="1200000019603">
+  <name>CONSOLIDATED 504</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003703</polling_location_id>
+</precinct>
+<precinct id="1200000019605">
+  <name>CONSOLIDATED 204</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003688</polling_location_id>
+</precinct>
+<precinct id="1200000019606">
+  <name>CONSOLIDATED 201</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003694</polling_location_id>
+</precinct>
+<precinct id="1200000019607">
+  <name>CONSOLIDATED 203</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003707</polling_location_id>
+</precinct>
+<precinct id="1200000019609">
+  <name>CONSOLIDATED 303</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003730</polling_location_id>
+</precinct>
+<precinct id="1200000019610">
+  <name>CONSOLIDATED 307</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003721</polling_location_id>
+</precinct>
+<precinct id="1200000019611">
+  <name>CONSOLIDATED 404</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003712</polling_location_id>
+</precinct>
+<precinct id="1200000019612">
+  <name>CONSOLIDATED 506</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003700</polling_location_id>
+</precinct>
+<precinct id="1200000019613">
+  <name>CONSOLIDATED 304</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003706</polling_location_id>
+</precinct>
+<precinct id="1200000019615">
+  <name>CONSOLIDATED 101</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003715</polling_location_id>
+</precinct>
+<precinct id="1200000019616">
+  <name>CONSOLIDATED 104</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003716</polling_location_id>
+</precinct>
+<precinct id="1200000019617">
+  <name>CONSOLIDATED 309</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003705</polling_location_id>
+</precinct>
+<precinct id="1200000019618">
+  <name>CONSOLIDATED 106</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003690</polling_location_id>
+</precinct>
+<precinct id="1200000019619">
+  <name>CONSOLIDATED 103</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003717</polling_location_id>
+</precinct>
+<precinct id="1200000019620">
+  <name>CONSOLIDATED 403</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003698</polling_location_id>
+</precinct>
+<precinct id="1200000019621">
+  <name>CONSOLIDATED 301</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003736</polling_location_id>
+</precinct>
+<precinct id="1200000019622">
+  <name>CONSOLIDATED 401</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003724</polling_location_id>
+</precinct>
+<precinct id="1200000019623">
+  <name>CONSOLIDATED 102</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003702</polling_location_id>
+</precinct>
+<precinct id="1200000019624">
+  <name>CONSOLIDATED 1435</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019625">
+  <name>CONSOLIDATED 1437</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019626">
+  <name>CONSOLIDATED 1532</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019627">
+  <name>CONSOLIDATED 1438</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019628">
+  <name>CONSOLIDATED 1431</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019629">
+  <name>CONSOLIDATED 1436</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019630">
+  <name>CONSOLIDATED 1237</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019631">
+  <name>CONSOLIDATED 1329</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019632">
+  <name>CONSOLIDATED 1428</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019633">
+  <name>CONSOLIDATED 1324</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019634">
+  <name>CONSOLIDATED 1326</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019635">
+  <name>CONSOLIDATED 1236</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019638">
+  <name>CONSOLIDATED 1109</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019639">
+  <name>CONSOLIDATED 1111</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019640">
+  <name>CONSOLIDATED 1104</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019641">
+  <name>CONSOLIDATED 1101</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019642">
+  <name>CONSOLIDATED 1547</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019643">
+  <name>CONSOLIDATED 1519</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019644">
+  <name>CONSOLIDATED 1544</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019645">
+  <name>CONSOLIDATED 1514</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019646">
+  <name>CONSOLIDATED 1525</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019647">
+  <name>CONSOLIDATED 1515</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019648">
+  <name>CONSOLIDATED 1543</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019649">
+  <name>CONSOLIDATED 1511</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019650">
+  <name>CONSOLIDATED 1512</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019651">
+  <name>CONSOLIDATED 1521</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019652">
+  <name>CONSOLIDATED 1509</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019653">
+  <name>CONSOLIDATED 1506</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019654">
+  <name>CONSOLIDATED 1508</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019655">
+  <name>CONSOLIDATED 1231</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019656">
+  <name>CONSOLIDATED 1302</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019657">
+  <name>CONSOLIDATED 1526</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019658">
+  <name>CONSOLIDATED 1505</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019659">
+  <name>CONSOLIDATED 1523</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019660">
+  <name>CONSOLIDATED 1513</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019661">
+  <name>CONSOLIDATED 1402</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019662">
+  <name>CONSOLIDATED 1510</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019663">
+  <name>CONSOLIDATED 1215</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019664">
+  <name>CONSOLIDATED 1216</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019665">
+  <name>CONSOLIDATED 1503</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019666">
+  <name>CONSOLIDATED 1222</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019667">
+  <name>CONSOLIDATED 1223</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019668">
+  <name>CONSOLIDATED 1417</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019669">
+  <name>CONSOLIDATED 1209</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019670">
+  <name>CONSOLIDATED 1212</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019671">
+  <name>CONSOLIDATED 1208</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019672">
+  <name>CONSOLIDATED 1546</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019673">
+  <name>CONSOLIDATED 1113</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019674">
+  <name>CONSOLIDATED 1214</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019675">
+  <name>CONSOLIDATED 1545</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019676">
+  <name>CONSOLIDATED 1434</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019677">
+  <name>CONSOLIDATED 1440</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019678">
+  <name>CONSOLIDATED 1432</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019679">
+  <name>CONSOLIDATED 1433</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019680">
+  <name>CONSOLIDATED 1325</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019681">
+  <name>CONSOLIDATED 1327</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019682">
+  <name>CONSOLIDATED 1234</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019683">
+  <name>CONSOLIDATED 1203</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019684">
+  <name>CONSOLIDATED 1235</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019685">
+  <name>CONSOLIDATED 1230</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019686">
+  <name>CONSOLIDATED 1232</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019687">
+  <name>CONSOLIDATED 1233</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019688">
+  <name>CONSOLIDATED 1219</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019689">
+  <name>CONSOLIDATED 1213</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019690">
+  <name>CONSOLIDATED 1106</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019691">
+  <name>CONSOLIDATED 1309</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019692">
+  <name>CONSOLIDATED 1310</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019693">
+  <name>CONSOLIDATED 1318</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019694">
+  <name>CONSOLIDATED 1103</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019695">
+  <name>CONSOLIDATED 1317</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019696">
+  <name>CONSOLIDATED 1314</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019697">
+  <name>CONSOLIDATED 1316</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019698">
+  <name>CONSOLIDATED 1406</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019699">
+  <name>CONSOLIDATED 1313</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019700">
+  <name>CONSOLIDATED 1323</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019701">
+  <name>CONSOLIDATED 1542</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019702">
+  <name>CONSOLIDATED 1307</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019703">
+  <name>CONSOLIDATED 1319</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019704">
+  <name>CONSOLIDATED 1315</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019705">
+  <name>CONSOLIDATED 1422</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019706">
+  <name>CONSOLIDATED 1530</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019707">
+  <name>CONSOLIDATED 1306</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019708">
+  <name>CONSOLIDATED 1420</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019709">
+  <name>CONSOLIDATED 1108</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019710">
+  <name>CONSOLIDATED 1308</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019711">
+  <name>CONSOLIDATED 1418</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019712">
+  <name>CONSOLIDATED 1423</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019713">
+  <name>CONSOLIDATED 1419</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019714">
+  <name>CONSOLIDATED 1407</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019715">
+  <name>CONSOLIDATED 1415</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019716">
+  <name>CONSOLIDATED 1305</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019717">
+  <name>CONSOLIDATED 1201</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019718">
+  <name>CONSOLIDATED 1210</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019719">
+  <name>CONSOLIDATED 1424</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019720">
+  <name>CONSOLIDATED 1224</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019722">
+  <name>CONSOLIDATED 1107</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019723">
+  <name>CONSOLIDATED 1110</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019724">
+  <name>CONSOLIDATED 1403</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019725">
+  <name>CONSOLIDATED 1206</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019726">
+  <name>CONSOLIDATED 1312</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019727">
+  <name>CONSOLIDATED 1410</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019728">
+  <name>CONSOLIDATED 1414</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019729">
+  <name>CONSOLIDATED 1408</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019730">
+  <name>CONSOLIDATED 1429</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019731">
+  <name>CONSOLIDATED 1409</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019732">
+  <name>CONSOLIDATED 1303</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019733">
+  <name>CONSOLIDATED 1304</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019734">
+  <name>CONSOLIDATED 1401</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019735">
+  <name>CONSOLIDATED 1541</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019736">
+  <name>CONSOLIDATED 1112</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019737">
+  <name>CONSOLIDATED 1311</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019738">
+  <name>CONSOLIDATED 1533</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019739">
+  <name>CONSOLIDATED 1539</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019740">
+  <name>CONSOLIDATED 1540</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019741">
+  <name>CONSOLIDATED 1205</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019742">
+  <name>CONSOLIDATED 1207</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019743">
+  <name>CONSOLIDATED 1538</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019744">
+  <name>CONSOLIDATED 1322</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019745">
+  <name>CONSOLIDATED 1535</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019746">
+  <name>CONSOLIDATED 1536</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019747">
+  <name>CONSOLIDATED 1537</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019748">
+  <name>CONSOLIDATED 1528</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019749">
+  <name>CONSOLIDATED 1529</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019750">
+  <name>CONSOLIDATED 1430</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019751">
+  <name>CONSOLIDATED 1534</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019752">
+  <name>CONSOLIDATED 1204</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019753">
+  <name>CONSOLIDATED 1227</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019754">
+  <name>CONSOLIDATED 1527</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019755">
+  <name>CONSOLIDATED 1426</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019756">
+  <name>CONSOLIDATED 1221</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019757">
+  <name>CONSOLIDATED 1320</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019758">
+  <name>CONSOLIDATED 1321</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019759">
+  <name>CONSOLIDATED 1220</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019760">
+  <name>CONSOLIDATED 1228</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019761">
+  <name>CONSOLIDATED 1229</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019762">
+  <name>CONSOLIDATED 1218</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019763">
+  <name>CONSOLIDATED 1225</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019764">
+  <name>CONSOLIDATED 1226</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019765">
+  <name>CONSOLIDATED 1548</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019766">
+  <name>CONSOLIDATED 1301</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019767">
+  <name>CONSOLIDATED 1217</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019768">
+  <name>CONSOLIDATED 1524</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019770">
+  <name>CONSOLIDATED 1502</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019771">
+  <name>CONSOLIDATED 1518</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019772">
+  <name>CONSOLIDATED 1520</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019773">
+  <name>CONSOLIDATED 1522</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019774">
+  <name>CONSOLIDATED 1501</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019775">
+  <name>CONSOLIDATED 1507</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019776">
+  <name>CONSOLIDATED 1504</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019777">
+  <name>CONSOLIDATED 1330</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019778">
+  <name>CONSOLIDATED 501</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003738</polling_location_id>
+</precinct>
+<precinct id="1200000019779">
+  <name>CONSOLIDATED 1516</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019780">
+  <name>CONSOLIDATED 105</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003714</polling_location_id>
+</precinct>
+<precinct id="1200000019781">
+  <name>CONSOLIDATED 502</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003734</polling_location_id>
+</precinct>
+<precinct id="1200000019782">
+  <name>CONSOLIDATED 402</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003733</polling_location_id>
+</precinct>
+<precinct id="1200000019783">
+  <name>CONSOLIDATED 308</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003718</polling_location_id>
+</precinct>
+<precinct id="1200000019784">
+  <name>CONSOLIDATED 406</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003684</polling_location_id>
+</precinct>
+<precinct id="1200000019785">
+  <name>CONSOLIDATED 407</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003686</polling_location_id>
+</precinct>
+<precinct id="1200000019786">
+  <name>CONSOLIDATED 306</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003691</polling_location_id>
+</precinct>
+<precinct id="1200000019788">
+  <name>CONSOLIDATED 505</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003731</polling_location_id>
+</precinct>
+<precinct id="1200000019789">
+  <name>CONSOLIDATED 302</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003713</polling_location_id>
+</precinct>
+<precinct id="1200000019790">
+  <name>CONSOLIDATED 503</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003697</polling_location_id>
+</precinct>
+<precinct id="1200000019791">
+  <name>CONSOLIDATED 305</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003727</polling_location_id>
+</precinct>
+<precinct id="1200000019793">
+  <name>CONSOLIDATED 107</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003732</polling_location_id>
+</precinct>
+<precinct id="1200000019794">
+  <name>CONSOLIDATED 1404</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019795">
+  <name>CONSOLIDATED 1416</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019796">
+  <name>CONSOLIDATED 1405</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019797">
+  <name>CONSOLIDATED 1421</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019798">
+  <name>CONSOLIDATED 1413</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019799">
+  <name>CONSOLIDATED 1202</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019800">
+  <name>CONSOLIDATED 1425</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019801">
+  <name>CONSOLIDATED 1427</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019803">
+  <name>CONSOLIDATED 1102</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019804">
+  <name>CONSOLIDATED 1105</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019805">
+  <name>CONSOLIDATED 1328</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019806">
+  <name>CONSOLIDATED 1439</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019807">
+  <name>CONSOLIDATED 1531</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019808">
+  <name>CONSOLIDATED 205</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003739</polling_location_id>
+</precinct>
+<precinct id="1200000019809">
+  <name>CONSOLIDATED 1412</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019810">
+  <name>CONSOLIDATED 1411</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019811">
+  <name>CONSOLIDATED 1517</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019812">
+  <name>CONSOLIDATED 1211</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="1200000019813">
+  <name>CONSOLIDATED 1441</name>
+  <locality_id>16</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<polling_location id="130000003684">
+  <address>
+    <line2>11115 C ST</line2>
+    <city>ARMONA</city>
+    <line1>11115 C STREET</line1>
+    <state>CA</state>
+    <location_name>ARMONA COMMUNITY CENTER</location_name>
+    <zip>93202</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003686">
+  <address>
+    <line2>14013 HANFORD-ARMONA RD</line2>
+    <city>ARMONA</city>
+    <line1>14013 HANFORD-ARMONA RD ARMONA CA 93202</line1>
+    <state>CA</state>
+    <location_name>ARMONA UNITED METHODIST CHURCH</location_name>
+    <zip>93202</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003688">
+  <address>
+    <line2>501 E KINGS ST</line2>
+    <city>AVENAL</city>
+    <line1>501 E KINGS ST., AVENAL, CA  93204</line1>
+    <state>CA</state>
+    <location_name>AVENAL SUPERIOR  COURT</location_name>
+    <zip>93204</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003690">
+  <address>
+    <line2>15783 18TH AVE</line2>
+    <city>LEMOORE</city>
+    <line1>15783 18TH AVE., LEMOORE, CA  93245</line1>
+    <state>CA</state>
+    <location_name>CENTRAL UNION SCHOOL DISTRICT</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003691">
+  <address>
+    <line2>740 N 19TH AVE</line2>
+    <city>LEMOORE</city>
+    <line1>740 N. 19TH AVENUE, LEMOORE, CA 93245</line1>
+    <state>CA</state>
+    <location_name>CHRIST CHURCH - PARISH HALL</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003694">
+  <address>
+    <line2>1015 CHITTENDEN AVE</line2>
+    <city>CORCORAN</city>
+    <line1>1015 CHITTENDEN AVE, CORCORAN, CA  93212</line1>
+    <state>CA</state>
+    <location_name>CORCORAN CITY COUNCIL CHAMBERS</location_name>
+    <zip>93212</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003697">
+  <address>
+    <line2>2175 LEONI DR</line2>
+    <city>HANFORD</city>
+    <line1>2175 LEONI DRIVE, HANFORD, CA 93230</line1>
+    <state>CA</state>
+    <location_name>FIRST CHRISTIAN REF CHURCH, SOCIAL HALL</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003698">
+  <address>
+    <line2>340 N IRWIN ST</line2>
+    <city>HANFORD</city>
+    <line1>340 N. IRWIN ST., HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>FIRST PRESBYTERIAN CHURCH OF HANFORD</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003699">
+  <address>
+    <line2>WHITLEY and LETTS AVE</line2>
+    <city>CORCORAN</city>
+    <line1>WHITLEY AND LETTS AVES,CORCORAN, CA  93212</line1>
+    <state>CA</state>
+    <location_name>FIRST UNITED METHODIST CHURCH</location_name>
+    <zip>93212</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003700">
+  <address>
+    <line2>1015 N 10TH AVE</line2>
+    <city>HANFORD</city>
+    <line1>1015 N 10TH AVE, HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>FRATERNAL HALL</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003702">
+  <address>
+    <line2>946 DAPHNE LN</line2>
+    <city>LEMOORE</city>
+    <line1>946 DAPHNE LN., LEMOORE, CA  93245</line1>
+    <state>CA</state>
+    <location_name>GRACE BAPTIST CHURCH</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003703">
+  <address>
+    <line2>1269 LELAND WAY</line2>
+    <city>HANFORD</city>
+    <line1>1269 LELAND WAY</line1>
+    <state>CA</state>
+    <location_name>HAMILTON ELEMENTARY SCHOOL</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003705">
+  <address>
+    <line2>7735 21ST AVE</line2>
+    <city>LEMOORE</city>
+    <line1>7735 21ST AVE., LEMOORE, CA  93245</line1>
+    <state>CA</state>
+    <location_name>ISLAND FIRE STATION</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003706">
+  <address>
+    <line2>1875 N FITZGERALD LN</line2>
+    <city>HANFORD</city>
+    <line1>1875 N FITZGERALD LN  HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>JOSEPH SIMAS ELEMENTARY SCHOOL</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003707">
+  <address>
+    <line2>800 DAIRY AVE</line2>
+    <city>CORCORAN</city>
+    <line1>800 DAIRY AVE, CORCORAN, CA 93212</line1>
+    <state>CA</state>
+    <location_name>KATE BOSWELL SENIOR CENTER</location_name>
+    <zip>93212</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003712">
+  <address>
+    <line2>700 S HARRIS ST</line2>
+    <city>HANFORD</city>
+    <line1>700 S HARRIS ST., HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>LATIN AMERICAN ASSEMBLY OF GOD CHURCH</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003713">
+  <address>
+    <line2>2400 N 11TH AVE</line2>
+    <city>HANFORD</city>
+    <line1>2400 N 11TH AVE., HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>LATTER DAY SAINTS CHURCH</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003714">
+  <address>
+    <line2>647 W BUSH ST</line2>
+    <city>LEMOORE</city>
+    <line1>647 W BUSH ST., LEMOORE, CA  93245</line1>
+    <state>CA</state>
+    <location_name>LEMOORE MASONIC TEMPLE</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003715">
+  <address>
+    <line2>260 B ST</line2>
+    <city>LEMOORE</city>
+    <line1>260 B ST., LEMOORE, CA  93245</line1>
+    <state>CA</state>
+    <location_name>LEMOORE PRESBYTERIAN CHURCH</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003716">
+  <address>
+    <line2>789 S LEMOORE AVE</line2>
+    <city>LEMOORE</city>
+    <line1>789 S. LEMOORE AVE., LEMOORE, CA  93245</line1>
+    <state>CA</state>
+    <location_name>LEMOORE SENIOR CENTER</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003717">
+  <address>
+    <line2>470 CHAMPION ST</line2>
+    <city>LEMOORE</city>
+    <line1>470 CHAMPION ST., LEMOORE, CA  93245</line1>
+    <state>CA</state>
+    <location_name>LEMOORE TRINITY ASSOCIATION</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003718">
+  <address>
+    <line2>1200 W CINNAMON DR</line2>
+    <city>LEMOORE</city>
+    <line1>1200 W CINNAMON DRIVE</line1>
+    <state>CA</state>
+    <location_name>LEMOORE UNION ELEMENTARY DISTRICT</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003719">
+  <address>
+    <line2>820 HUME AVE</line2>
+    <city>HANFORD</city>
+    <line1>820 HUME AVE., HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>MARTIN LUTHER KING ELEMENTARY SCHOOL</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003721">
+  <address>
+    <line2>325 E MEADOW LN</line2>
+    <city>LEMOORE</city>
+    <line1>325 MEADOW LANE, LEMOORE,CA 93245</line1>
+    <state>CA</state>
+    <location_name>MEADOW LANE SCHOOL</location_name>
+    <zip>93245</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003724">
+  <address>
+    <line2>680 N CAMPUS DR</line2>
+    <city>HANFORD</city>
+    <line1>680 N CAMPUS DR., HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>NEW AG BUILDING, MULTI-PURPOSE ROOM</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003727">
+  <address>
+    <line2>1888 N MUSTANG DR</line2>
+    <city>HANFORD</city>
+    <line1>1888 N MUSTANG DR, HANFORD CA 93230</line1>
+    <state>CA</state>
+    <location_name>PIONEER DISTRICT OFFICE (FRONTIER)</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003730">
+  <address>
+    <line2>1780 EMMA LEE LN</line2>
+    <city>HANFORD</city>
+    <line1>1780 EMMA LEE LN., HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>SAINT JAMES LUTHERAN CHURCH</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003731">
+  <address>
+    <line2>852 E GRANGEVILLE BLVD</line2>
+    <city>HANFORD</city>
+    <line1>852 E GRANGEVILLE BLVD HANFORD, CA 93230</line1>
+    <state>CA</state>
+    <location_name>SIERRA VISTA MOBILE ESTATES</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003732">
+  <address>
+    <line2>20200 MAIN ST</line2>
+    <city>STRATFORD</city>
+    <line1>20200 MAIN ST. STRATFORD, CA  93266</line1>
+    <state>CA</state>
+    <location_name>STRATFORD FIRE STATION</location_name>
+    <zip>93266</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003733">
+  <address>
+    <line2>1255 W GRANGEVILLE BLVD 8</line2>
+    <city>HANFORD</city>
+    <line1>1255 W GRANGEVILLE BLVDHANFORD, CA 93230</line1>
+    <state>CA</state>
+    <location_name>TARA ESTATES</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003734">
+  <address>
+    <line2>2400 N 11TH AVE</line2>
+    <city>HANFORD</city>
+    <line1>2400 N 11TH AVE.,HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>THE LATTER DAY SAINTS CHURCH</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003736">
+  <address>
+    <line2>2727 N 11TH AVE</line2>
+    <city>HANFORD</city>
+    <line1>2727 N. 11TH AVE., HANFORD, CA  93230</line1>
+    <state>CA</state>
+    <location_name>THE REMINGTON</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003737">
+  <address>
+    <line1>VOTE AND RETURN YOUR BALLOT BY MAIL</line1>
+    <state>CA</state>
+    <location_name>YOUR PRECINCT HAS NO POLL</location_name>
+  </address>
+</polling_location>
+<polling_location id="130000003738">
+  <address>
+    <line2>101 W PIONEER WAY</line2>
+    <city>HANFORD</city>
+    <line1>101 W PIONEER WAY</line1>
+    <state>CA</state>
+    <location_name>PIONEER MIDDLE SCHOOL</location_name>
+    <zip>93230</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003739">
+  <address>
+    <line2>1000 UNION AVE</line2>
+    <city>AVENAL</city>
+    <line1>1000 SOUTH UNION, AVENAL CA 93204</line1>
+    <state>CA</state>
+    <location_name>TAMARACK ELEMENTARY SCHOOL LIBRARY</location_name>
+    <zip>93204</zip>
+  </address>
+</polling_location>
+</vip_object>

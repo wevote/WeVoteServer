@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from datetime import date, timedelta
 from django.db import models
 from django.db.models import Q
 from organization.models import OrganizationManager, Organization
@@ -10,6 +11,116 @@ from wevote_functions.functions import convert_to_int, positive_value_exists
 
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+class VoteSmartApiCounter(models.Model):
+    # The data and time we reached out to the Google Civic API
+    datetime_of_action = models.DateTimeField(verbose_name='date and time of action', null=False, auto_now=True)
+    kind_of_action = models.CharField(verbose_name="kind of call to vote smart", max_length=50, null=True, blank=True)
+    # Store the election this is for
+    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+
+
+# This table contains summary entries generated from individual entries stored in the VoteSmartApiCounter table
+class VoteSmartApiCounterDailySummary(models.Model):
+    # The date (without time) we are summarizing
+    date_of_action = models.DateField(verbose_name='date of action', null=False, auto_now=False)
+    # For each day we will have an "all" entry, as well as one entry with the total number (per day)
+    #  of each kind of call to Google
+    kind_of_action = models.CharField(verbose_name="kind of call to vote smart", max_length=50, null=True, blank=True)
+    # Store the election this is for
+    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+
+
+# This table contains summary entries generated from individual entries stored in the VoteSmartApiCounter table
+class VoteSmartApiCounterWeeklySummary(models.Model):
+    # The year as a 4 digit integer
+    year_of_action = models.SmallIntegerField(verbose_name='year of action', null=False)
+    # The week in this year as a number between 1-52
+    # For each week we will have an "all" entry, as well as one entry with the total number (per day)
+    #  of each kind of call to Google
+    week_of_action = models.SmallIntegerField(verbose_name='number of the week', null=False)
+    kind_of_action = models.CharField(verbose_name="kind of call to vote smart", max_length=50, null=True, blank=True)
+    # Store the election this is for
+    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+
+
+# This table contains summary entries generated from individual entries stored in the VoteSmartApiCounter table
+class VoteSmartApiCounterMonthlySummary(models.Model):
+    # The year as a 4 digit integer
+    year_of_action = models.SmallIntegerField(verbose_name='year of action', null=False)
+    # The week in this year as a number between 1-52
+    # For each month we will have an "all" entry, as well as one entry with the total number (per day)
+    #  of each kind of call to Google
+    month_of_action = models.SmallIntegerField(verbose_name='number of the month', null=False)
+    kind_of_action = models.CharField(verbose_name="kind of call to vote smart", max_length=50, null=True, blank=True)
+    # Store the election this is for
+    google_civic_election_id = models.PositiveIntegerField(verbose_name="google civic election id", null=True)
+
+
+# noinspection PyBroadException
+class VoteSmartApiCounterManager(models.Model):
+    def create_counter_entry(self, kind_of_action, google_civic_election_id=0):
+        """
+        Create an entry that records that a call to the Vote Smart Api was made.
+        """
+        try:
+            google_civic_election_id = convert_to_int(google_civic_election_id)
+
+            # TODO: We need to work out the timezone questions
+            VoteSmartApiCounter.objects.create(
+                kind_of_action=kind_of_action,
+                google_civic_election_id=google_civic_election_id,
+            )
+            success = True
+            status = 'ENTRY_SAVED'
+        except Exception:
+            success = False
+            status = 'SOME_ERROR'
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+        }
+        return results
+
+    def retrieve_daily_summaries(self, kind_of_action='', google_civic_election_id=0):
+        # Start with today and cycle backwards in time
+        daily_summaries = []
+        day_on_stage = date.today()  # TODO: We need to work out the timezone questions
+        number_found = 0
+        maximum_attempts = 30
+        attempt_count = 0
+
+        try:
+            # Limit the number of times this runs to EITHER 1) 5 positive numbers
+            #  OR 2) 30 days in the past, whichever comes first
+            while number_found <= 5 and attempt_count <= maximum_attempts:
+                attempt_count += 1
+                counter_queryset = VoteSmartApiCounter.objects.all()
+                if positive_value_exists(kind_of_action):
+                    counter_queryset = counter_queryset.filter(kind_of_action=kind_of_action)
+                if positive_value_exists(google_civic_election_id):
+                    counter_queryset = counter_queryset.filter(google_civic_election_id=google_civic_election_id)
+
+                # Find the number of these entries on that particular day
+                counter_queryset = counter_queryset.filter(datetime_of_action__contains=day_on_stage)
+                api_call_count = len(counter_queryset)
+
+                # If any api calls were found on that date, pass it out for display
+                if positive_value_exists(api_call_count):
+                    daily_summary = {
+                        'date_string': day_on_stage,
+                        'count': api_call_count,
+                    }
+                    daily_summaries.append(daily_summary)
+                    number_found += 1
+
+                day_on_stage -= timedelta(days=1)
+        except Exception:
+            pass
+
+        return daily_summaries
 
 
 class VoteSmartCandidateManager(models.Model):
@@ -32,23 +143,23 @@ class VoteSmartCandidateManager(models.Model):
         if results['success']:
             return results['vote_smart_candidate_id']
         return 0
-
-    def retrieve_vote_smart_candidate_from_we_vote_local_id(self, local_candidate_id):
-        vote_smart_candidate_id = 0
-        we_vote_id = ''
-        vote_smart_candidate_manager = VoteSmartCandidateManager()
-        return vote_smart_candidate_manager.retrieve_vote_smart_candidate(
-            vote_smart_candidate_id, we_vote_id, candidate_maplight_id)
-
-    def retrieve_vote_smart_candidate_from_full_name(self, candidate_name, state_code=None):
-        vote_smart_candidate_id = 0
-        we_vote_id = ''
-        candidate_maplight_id = ''
-        vote_smart_candidate_manager = VoteSmartCandidateManager()
-
-        results = vote_smart_candidate_manager.retrieve_vote_smart_candidate(
-            vote_smart_candidate_id, first_name, last_name, state_code)
-        return results
+    #
+    # def retrieve_vote_smart_candidate_from_we_vote_local_id(self, local_candidate_id):
+    #     vote_smart_candidate_id = 0
+    #     we_vote_id = ''
+    #     vote_smart_candidate_manager = VoteSmartCandidateManager()
+    #     return vote_smart_candidate_manager.retrieve_vote_smart_candidate(
+    #         vote_smart_candidate_id, we_vote_id, candidate_maplight_id)
+    #
+    # def retrieve_vote_smart_candidate_from_full_name(self, candidate_name, state_code=None):
+    #     vote_smart_candidate_id = 0
+    #     we_vote_id = ''
+    #     candidate_maplight_id = ''
+    #     vote_smart_candidate_manager = VoteSmartCandidateManager()
+    #
+    #     results = vote_smart_candidate_manager.retrieve_vote_smart_candidate(
+    #         vote_smart_candidate_id, first_name, last_name, state_code)
+    #     return results
 
     def retrieve_vote_smart_candidate_from_name_components(self, first_name=None, last_name=None, state_code=None):
         vote_smart_candidate_id = 0
@@ -339,23 +450,23 @@ class VoteSmartOfficialManager(models.Model):
         if results['success']:
             return results['vote_smart_candidate_id']
         return 0
-
-    def retrieve_vote_smart_official_from_we_vote_local_id(self, local_official_id):
-        vote_smart_candidate_id = 0
-        we_vote_id = ''
-        vote_smart_official_manager = VoteSmartOfficialManager()
-        return vote_smart_official_manager.retrieve_vote_smart_official(
-            vote_smart_candidate_id, we_vote_id, official_maplight_id)
-
-    def retrieve_vote_smart_official_from_full_name(self, official_name, state_code=None):
-        vote_smart_candidate_id = 0
-        we_vote_id = ''
-        official_maplight_id = ''
-        vote_smart_official_manager = VoteSmartOfficialManager()
-
-        results = vote_smart_official_manager.retrieve_vote_smart_official(
-            vote_smart_candidate_id, first_name, last_name, state_code)
-        return results
+    #
+    # def retrieve_vote_smart_official_from_we_vote_local_id(self, local_official_id):
+    #     vote_smart_candidate_id = 0
+    #     we_vote_id = ''
+    #     vote_smart_official_manager = VoteSmartOfficialManager()
+    #     return vote_smart_official_manager.retrieve_vote_smart_official(
+    #         vote_smart_candidate_id, we_vote_id, official_maplight_id)
+    #
+    # def retrieve_vote_smart_official_from_full_name(self, official_name, state_code=None):
+    #     vote_smart_candidate_id = 0
+    #     we_vote_id = ''
+    #     official_maplight_id = ''
+    #     vote_smart_official_manager = VoteSmartOfficialManager()
+    #
+    #     results = vote_smart_official_manager.retrieve_vote_smart_official(
+    #         vote_smart_candidate_id, first_name, last_name, state_code)
+    #     return results
 
     def retrieve_vote_smart_official_from_name_components(self, first_name=None, last_name=None, state_code=None):
         vote_smart_candidate_id = 0
@@ -763,6 +874,7 @@ class VoteSmartSpecialInterestGroupManager(models.Model):
                 'success':              False,
                 'status':               "SPECIAL_INTEREST_GROUP_ID_MISSING",
                 'organization_found':   False,
+                'organization_created': False,
                 'organization':         Organization(),
             }
             return results

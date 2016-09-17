@@ -4,36 +4,56 @@
 {% block title %}Voter Guides{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+{% load template_filters %}
+<a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
 
 <h1>Voter Guides</h1>
+
+    <p>Jump to:
+
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">Candidates</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}">Politicians</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">Public Opinions / Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}">Polling Locations</a></p>
+
+    </p>
+
+    <p><strong>Create Voter Guide</strong>. Don't see a voter guide for this election?
+    <a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">Find Voter Guide</a></p>
 
     <form name="voter_guide_choose_election" method="get" action="{% url 'voter_guide:voter_guide_list' %}">
         {% csrf_token %}
 {% if election_list %}
     <select id="google_civic_election_id" name="google_civic_election_id">
-    <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+    <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
         -- Filter by Election --</option>
 {% for election in election_list %}
     <option value="{{ election.google_civic_election_id }}"
-            {% if election.google_civic_election_id == google_civic_election_id %} selected="selected"{% endif %}>
-        {{ election.election_name }} - {{ election.election_day_text }}</option>
+            {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+        {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
 {% endfor %}
     </select>
     </form>
 
-
 {% else %}
     <p>(no elections found)</p>
-{% endif %}{# End of if election_list #}
+{% endif %}
 <p></p>
 {% if voter_guide_list %}
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td></td>
-            <td>Owner Type</td>
+            <td>&nbsp;</td>
             <td>Election</td>
             <td>Time Span</td>
+            <td>Public<br />
+                Positions</td>
+            <td>Friends-only<br />
+                Positions</td>
             <td>Last Updated</td>
         </tr>
     {% for voter_guide in voter_guide_list %}
@@ -42,8 +62,10 @@
         {% if voter_guide.voter_guide_owner_type == voter_guide.ORGANIZATION %}
             <td>
             {% if voter_guide.organization %}
-                <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}">
-                {{ voter_guide.organization.organization_name }}</a>
+                <a href="{% url 'organization:organization_position_list' voter_guide.organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                {% if voter_guide.organization.organization_name %}
+                    {{ voter_guide.organization.organization_name }}
+                {% else %}(name missing){% endif %}</a>
             {% else %}
                 (no org found)
             {% endif %}
@@ -52,11 +74,13 @@
             <td><a href="#">Public Figure</a></td>
         {% elif voter_guide.voter_guide_owner_type == voter_guide.VOTER %}
             <td><a href="#">Voter</a></td>
-            {% else %}
+        {% else %}
             <td><a href="#">?Owner Type?</a></td>
         {% endif %}
-            <td>{{ voter_guide.google_civic_election_id }}</td>
-            <td>{{ voter_guide.vote_smart_time_span }}</td>
+            <td>{{ voter_guide.google_civic_election_id|default_if_none:"" }}</td>
+            <td>{{ voter_guide.vote_smart_time_span|default_if_none:"" }}</td>
+            <td>{{ voter_guide.number_of_public_positions|default_if_none:"" }}</td>
+            <td>{{ voter_guide.number_of_friends_only_positions|default_if_none:"" }}</td>
             <td>{{ voter_guide.last_updated }}</td>
         </tr>
     {% endfor %}
@@ -68,6 +92,9 @@
     <p></p>
     <p>
         <a href="{% url 'voter_guide:generate_voter_guides' %}" >Generate Voter Guides</a>
+    </p>
+    <p>
+        <a href="{% url 'voter_guide:refresh_existing_voter_guides' %}" >Refresh Voter Guides</a>
     </p>
     <script>
         $(function() {

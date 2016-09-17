@@ -12,4 +12,4 @@ class ContestOfficeSerializer(serializers.ModelSerializer):
         fields = ('we_vote_id', 'office_name', 'google_civic_election_id', 'ocd_division_id', 'maplight_id',
                   'ballotpedia_id', 'wikipedia_id', 'number_voting_for', 'number_elected', 'state_code',
                   'primary_party', 'district_name', 'district_scope', 'district_id', 'contest_level0',
-                  'contest_level1', 'contest_level2', 'electorate_specifications', 'special')
+                  'contest_level1', 'contest_level2', 'electorate_specifications', 'special', 'state_code')

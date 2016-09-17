@@ -4,27 +4,42 @@
 {% block title %}Polling Locations{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+<a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a>
 
 <h1>Polling Locations</h1>
 
-    <p><a href="{% url 'polling_location:import_polling_locations_process' %}">Import Polling Locations File Now</a> (this can take 60-90 seconds)</p>
+    <p>Jump to:
 
-    {% if state_list %}
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">Candidates</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}">Politicians</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">Public Opinions / Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}">Polling Locations</a></p>
+
+    </p>
+
+    <p><a href="{% url 'polling_location:import_polling_locations_process' %}?polling_location_state={{ polling_location_state }}">
+        Import Polling Locations File{% if polling_location_state %} (for "{{ polling_location_state }}"){% endif %}</a>
+        (this can take 60-90 seconds)</p>
+
+{% if state_list %}
     <form name="polling_location_state_form" method="get" action="{% url 'polling_location:polling_location_list' %}">
         {% csrf_token %}
 
     <select id="polling_location_state" name="polling_location_state">
         <option value="" {% if '' == polling_location_state %} selected="selected"{% endif %}>
             -- Filter by State --</option>
-    {% for key, state in state_list.items %}
+    {% for key, state in state_list %}
         <option value="{{ key }}"
-                {% if key == polling_location_state %} selected="selected"{% endif %}>
+                {% if key|lower == polling_location_state|lower %} selected="selected"{% endif %}>
             {{ state }}</option>
     {% endfor %}
     </select>
     </form>
-    {% endif %}{# End of if state_list #}
+{% endif %}{# End of if state_list #}
 
 
 {% if polling_location_list %}
@@ -41,6 +56,9 @@
             </td>
             <td>
             {% if polling_location.zip_long %}{{ polling_location.get_formatted_zip }}{% else %}{% endif %}
+            </td>
+            <td>
+                {% if polling_location.we_vote_id %}&nbsp;&nbsp;&nbsp;{{ polling_location.we_vote_id }}{% endif %}
             </td>
 {#            <td><a href="{% url 'polling_location:polling_location_edit' polling_location.id %}" style="font-size: .65em">(edit)</a></td>#}
         </tr>

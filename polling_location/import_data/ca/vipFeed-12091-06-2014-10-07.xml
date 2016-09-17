@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <datetime>2014-10-07T18:17:56</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+  <organization_url>http://votinginfoproject.org</organization_url>
+</source>
+<state id="6">
+  <name>California</name>
+</state>
+<election id="100000564950">
+  <date>2014-10-07</date>
+  <election_type>General</election_type>
+  <state_id>6</state_id>
+</election>
+<locality id="91">
+  <name>sierra county</name>
+  <state_id>6</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1110001">
+  <name>All of Sierra Co is VBM</name>
+  <number>091</number>
+  <mail_only>YES</mail_only>
+</precinct>
+<street_segment id="2220001">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220002">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220003">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>CAMPTONVILLE</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220004">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>INDIAN WELLS</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220005">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220006">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220007">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>CALPINE</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220008">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>SATTLEY</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220009">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220010">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220011">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220012">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>VERDI</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="2220013">
+  <start_house_number>1</start_house_number>
+  <end_house_number>999999</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>1110001</precinct_id>
+  <non_house_address>
+    <address_direction>*</address_direction>
+    <street_name>*</street_name>
+    <city>LA PORTE</city>
+    <street_suffix>*</street_suffix>
+    <state>CA</state>
+    <street_direction>*</street_direction>
+    <zip>*</zip>
+  </non_house_address>
+</street_segment>
+</vip_object>

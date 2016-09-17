@@ -10,20 +10,25 @@
 {# ################## #}
 <h2>Election Data</h2>
     <p><a href="{% url 'election:election_list' %}">Elections</a></p>
-    <p><a href="{% url 'measure:measure_list' %}">Measures</a></p> {# NOTE: Move text into <a> tag when we have the page built #}
-    <p><a href="{% url 'office:office_list' %}">Offices</a></p>
-    <p><a href="{% url 'candidate:candidate_list' %}">Candidates</a></p>
-    <p><a href="{% url 'organization:organization_list' %}">Organizations</a></p>
-    <p><a href="{% url 'position:position_list' %}">Public Opinions / Positions</a></p>
+    <p><a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">Measures</a></p>
+    <p><a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">Offices</a></p>
+    <p><a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">Candidates</a>
+        and <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}">Politicians</a></p>
+    <p><a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">Organizations</a></p>
+    <p><a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">Public Opinions / Positions</a></p>
     <p><a href="{% url 'quick_info:quick_info_list' %}">Quick Info</a></p>
-    <p><a href="{% url 'voter_guide:voter_guide_list' %}">Voter Guides</a></p>
-    <p><a href=""></a>One Ballot</p>
-    <p><a href="{% url 'polling_location:polling_location_list' %}">Polling Locations</a></p>
+    <p><a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">Voter Guides</a></p>
+    <p><a href="https://developers.google.com/civic-information/docs/v2/elections/voterInfoQuery#try-it"
+          target="_blank">One Ballot (Retrieve)</a></p>
+    <p><a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}">Polling Locations</a></p>
 
 {# ################## #}
 <h2>Maintenance</h2>
-    <p><a href="{% url 'admin_tools:import_sample_data' %}">Import Test Data</a></p>
+    <p><a href="{% url 'admin_tools:import_sample_data' %}"></a>
+        <a href="{% url 'admin_tools:sync_dashboard' %}">Sync Data with Master We Vote Servers</a></p>
     <p><a href="{% url 'voter:voter_list' %}">Voters</a></p>
+    <p><a href="{% url 'import_export_batches:batches_home' %}?google_civic_election_id={{ google_civic_election_id }}">
+        Import Data in Batches</a></p>
     <p><a href=""></a>Regions</p>
     <p><a href=""></a>Translation Needed</p>
     <p><a href="{% url 'admin_tools:statistics_summary' %}">Quick Statistics</a></p>

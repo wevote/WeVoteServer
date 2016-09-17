@@ -15,6 +15,9 @@ urlpatterns = [
     url(r'^(?P<election_local_id>[0-9]+)/election_all_ballots_retrieve/$',
         views_admin.election_all_ballots_retrieve_view,
         name='election_all_ballots_retrieve'),
+    url(r'^election_migration/$', views_admin.election_migration_view, name='election_migration'),
     url(r'^election_remote_retrieve/$', views_admin.election_remote_retrieve_view, name='election_remote_retrieve'),
     url(r'^export/', views_admin.ExportElectionDataView.as_view(), name='election_export'),
+    url(r'^import/$',
+        views_admin.elections_import_from_master_server_view, name='elections_import_from_master_server'),
 ]

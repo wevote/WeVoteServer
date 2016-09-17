@@ -1,0 +1,78 @@
+{% extends "template_base.html" %}
+{# See admin_tools.views.login_user for the view that controls this #}
+
+{% block content %}
+{% if request.user.is_authenticated %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+{% endif %}
+
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+{% if next %}
+    {% if request.user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+    {% else %}
+    <p>Please login to see this page.</p>
+    {% endif %}
+{% endif %}
+
+{% if not voter_signed_in %}
+<h1>Sign-In</h1>
+
+<form method="post" action="{% url 'auth:login' %}">
+{% csrf_token %}
+{% if next %}
+    <input type="hidden" name="next" value="{{ next }}" />
+{% endif %}
+<div class="control-group">
+    <label class="control-label" for="username">Email</label>
+    <div class="controls">
+        <input type="text" id="username" name="username"  placeholder="Email">
+    </div>
+</div>
+<div class="control-group">
+    <label class="control-label" for="password">Password</label>
+    <div class="controls">
+        <input type="password" name="password" id="password" placeholder="Password">
+    </div>
+</div>
+<div class="control-group">
+    <div class="controls">
+        <button type="submit" class="btn">Sign In</button>
+    </div>
+</div>
+
+</form>
+
+{# Assumes you setup the password_reset view in your URLconf #}
+{#  <p><a href="{% url 'auth:password_reset' %}">Lost password?</a></p> #}
+<br />
+<br />
+
+{# <p><a href="{% url 'social:begin' 'facebook' %}?next={{ next }}">Sign in with Facebook</a></p> #}
+<p><a href="{% url 'social:begin' 'twitter' %}?next={{ next }}">Sign in with Twitter</a></p>
+
+
+<p> <a href="{% url 'voter:authenticate_manually' %}"></a>
+    {% if not request.user.is_authenticated %}
+    {% endif %}
+</p>
+
+
+{% else %}
+<h1>Welcome {{ request.user.first_name }} {{ request.user.last_name }}</h1>
+we_vote_id: {{ request.user.we_vote_id }}<br />
+id: {{ request.user.id }}<br />
+email: {{ request.user.email }}<br />
+twitter: {{ request.user.twitter_screen_name }}<br />
+admin: {{ request.user.is_admin }}<br />
+verified_volunteer: {{ request.user.is_verified_volunteer }}<br />
+
+<p><br />
+    <a href="{% url 'auth:logout' %}">Sign Out</a></p>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,1114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-04-14T10:15:08</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>http://www.edcgov.us/elections</organization_url>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="95">
+  <date>2014-06-03</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>http://www.edcgov.us/elections</registration_info>
+  <absentee_ballot_info>http://www.edcgov.us/elections</absentee_ballot_info>
+  <results_url>http://www.edcgov.us/elections</results_url>
+  <polling_hours>6/3/2014 7:00:00 AM-6/3/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-05-19</registration_deadline>
+  <absentee_request_deadline>2014-05-27</absentee_request_deadline>
+</election>
+<locality id="9">
+  <name>EL DORADO COUNTY ELECTIONS DEPARTMENT</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1200000014874">
+  <name>MB 96U101.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014875">
+  <name>CP 100023.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021125</polling_location_id>
+</precinct>
+<precinct id="1200000014876">
+  <name>CP 100009.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021172</polling_location_id>
+</precinct>
+<precinct id="1200000014877">
+  <name>CP 100008.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021172</polling_location_id>
+</precinct>
+<precinct id="1200000014878">
+  <name>CP 200010.10</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021151</polling_location_id>
+</precinct>
+<precinct id="1200000014879">
+  <name>CP 100003.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021166</polling_location_id>
+</precinct>
+<precinct id="1200000014880">
+  <name>CP 100005.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021137</polling_location_id>
+</precinct>
+<precinct id="1200000014881">
+  <name>CP 100002.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021039</polling_location_id>
+</precinct>
+<precinct id="1200000014882">
+  <name>CP 100022.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021103</polling_location_id>
+</precinct>
+<precinct id="1200000014883">
+  <name>CP 100014.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021103</polling_location_id>
+</precinct>
+<precinct id="1200000014884">
+  <name>CP 100004.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021041</polling_location_id>
+</precinct>
+<precinct id="1200000014885">
+  <name>CP 100006.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021164</polling_location_id>
+</precinct>
+<precinct id="1200000014886">
+  <name>CP 100013.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021160</polling_location_id>
+</precinct>
+<precinct id="1200000014887">
+  <name>CP 100012.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021189</polling_location_id>
+</precinct>
+<precinct id="1200000014888">
+  <name>CP 100001.09</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021189</polling_location_id>
+</precinct>
+<precinct id="1200000014889">
+  <name>CP 200004.10</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021136</polling_location_id>
+</precinct>
+<precinct id="1200000014890">
+  <name>CP 200012.10</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021112</polling_location_id>
+</precinct>
+<precinct id="1200000014891">
+  <name>CP 200008.10</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021184</polling_location_id>
+</precinct>
+<precinct id="1200000014892">
+  <name>CP 200014.10</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021184</polling_location_id>
+</precinct>
+<precinct id="1200000014893">
+  <name>CP 200013.10</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021045</polling_location_id>
+</precinct>
+<precinct id="1200000014894">
+  <name>CP 200003.10</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021143</polling_location_id>
+</precinct>
+<precinct id="1200000014895">
+  <name>CP 200016.10</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021190</polling_location_id>
+</precinct>
+<precinct id="1200000014896">
+  <name>CP 200006.10</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021047</polling_location_id>
+</precinct>
+<precinct id="1200000014897">
+  <name>MB 95U204.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014898">
+  <name>CP 200021.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021192</polling_location_id>
+</precinct>
+<precinct id="1200000014899">
+  <name>MB 95U201.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014900">
+  <name>CP 200018.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021182</polling_location_id>
+</precinct>
+<precinct id="1200000014901">
+  <name>MB 95U202.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014902">
+  <name>CP 200015.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021161</polling_location_id>
+</precinct>
+<precinct id="1200000014903">
+  <name>CP 200005.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021050</polling_location_id>
+</precinct>
+<precinct id="1200000014904">
+  <name>CP 200024.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021064</polling_location_id>
+</precinct>
+<precinct id="1200000014905">
+  <name>MB 95U203.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014906">
+  <name>CP 200017.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021165</polling_location_id>
+</precinct>
+<precinct id="1200000014907">
+  <name>CP 200020.01</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021146</polling_location_id>
+</precinct>
+<precinct id="1200000014908">
+  <name>CP 300023.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021082</polling_location_id>
+</precinct>
+<precinct id="1200000014909">
+  <name>CP 300021.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021176</polling_location_id>
+</precinct>
+<precinct id="1200000014910">
+  <name>CP 300020.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021114</polling_location_id>
+</precinct>
+<precinct id="1200000014911">
+  <name>MB 95U301.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014912">
+  <name>CP 300015.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021191</polling_location_id>
+</precinct>
+<precinct id="1200000014913">
+  <name>CP 300010.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021070</polling_location_id>
+</precinct>
+<precinct id="1200000014914">
+  <name>CP 300013.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021070</polling_location_id>
+</precinct>
+<precinct id="1200000014915">
+  <name>CP 300018.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021070</polling_location_id>
+</precinct>
+<precinct id="1200000014916">
+  <name>CP 300011.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021056</polling_location_id>
+</precinct>
+<precinct id="1200000014917">
+  <name>CP 300009.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021060</polling_location_id>
+</precinct>
+<precinct id="1200000014918">
+  <name>MB 95U303.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014919">
+  <name>CP 300008.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021062</polling_location_id>
+</precinct>
+<precinct id="1200000014920">
+  <name>MB 95U302.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014921">
+  <name>CP 300017.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021175</polling_location_id>
+</precinct>
+<precinct id="1200000014922">
+  <name>CP 300001.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021191</polling_location_id>
+</precinct>
+<precinct id="1200000014923">
+  <name>CP 300003.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021187</polling_location_id>
+</precinct>
+<precinct id="1200000014924">
+  <name>CP 300005.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021194</polling_location_id>
+</precinct>
+<precinct id="1200000014925">
+  <name>CP 300004.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021077</polling_location_id>
+</precinct>
+<precinct id="1200000014926">
+  <name>CP 300022.02</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021176</polling_location_id>
+</precinct>
+<precinct id="1200000014928">
+  <name>CP 400017.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021142</polling_location_id>
+</precinct>
+<precinct id="1200000014929">
+  <name>CP 400002.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021138</polling_location_id>
+</precinct>
+<precinct id="1200000014930">
+  <name>CP 400001.11</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021158</polling_location_id>
+</precinct>
+<precinct id="1200000014931">
+  <name>CP 400004.11</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021120</polling_location_id>
+</precinct>
+<precinct id="1200000014932">
+  <name>CP 400021.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021187</polling_location_id>
+</precinct>
+<precinct id="1200000014933">
+  <name>MB 95U403.04</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014934">
+  <name>CP 400012.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021076</polling_location_id>
+</precinct>
+<precinct id="1200000014935">
+  <name>CP 400014.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021109</polling_location_id>
+</precinct>
+<precinct id="1200000014936">
+  <name>MB 95U402.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014937">
+  <name>CP 400013.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021131</polling_location_id>
+</precinct>
+<precinct id="1200000014938">
+  <name>MB 95U401.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014939">
+  <name>MB 95U401.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014940">
+  <name>CP 400018.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021120</polling_location_id>
+</precinct>
+<precinct id="1200000014941">
+  <name>CP 400003.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021071</polling_location_id>
+</precinct>
+<precinct id="1200000014942">
+  <name>CP 400005.04</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021197</polling_location_id>
+</precinct>
+<precinct id="1200000014943">
+  <name>CP 400006.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021115</polling_location_id>
+</precinct>
+<precinct id="1200000014944">
+  <name>CP 400007.04</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021177</polling_location_id>
+</precinct>
+<precinct id="1200000014945">
+  <name>CP 400010.04</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021080</polling_location_id>
+</precinct>
+<precinct id="1200000014946">
+  <name>CP 400020.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021085</polling_location_id>
+</precinct>
+<precinct id="1200000014947">
+  <name>MB 95U404.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014948">
+  <name>MB 95U501.05</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014949">
+  <name>CP 500021.05</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021087</polling_location_id>
+</precinct>
+<precinct id="1200000014950">
+  <name>MB 95U598.05</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014951">
+  <name>CP 500020.05</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021118</polling_location_id>
+</precinct>
+<precinct id="1200000014952">
+  <name>CP 500006.06</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021084</polling_location_id>
+</precinct>
+<precinct id="1200000014953">
+  <name>CP 500002.06</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021196</polling_location_id>
+</precinct>
+<precinct id="1200000014954">
+  <name>CP 500005.06</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021202</polling_location_id>
+</precinct>
+<precinct id="1200000014955">
+  <name>CP 500011.06</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021095</polling_location_id>
+</precinct>
+<precinct id="1200000014956">
+  <name>CP 500007.06</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021038</polling_location_id>
+</precinct>
+<precinct id="1200000014957">
+  <name>CP 500009.06</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021084</polling_location_id>
+</precinct>
+<precinct id="1200000014958">
+  <name>CP 500012.08</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021193</polling_location_id>
+</precinct>
+<precinct id="1200000014959">
+  <name>CP 500003.08</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021193</polling_location_id>
+</precinct>
+<precinct id="1200000014960">
+  <name>CP 500001.08</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021183</polling_location_id>
+</precinct>
+<precinct id="1200000014961">
+  <name>CP 500015.08</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021128</polling_location_id>
+</precinct>
+<precinct id="1200000014962">
+  <name>MB 95U599.07</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014964">
+  <name>MB 95U403.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014965">
+  <name>MB 95U404.04</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014966">
+  <name>MB 95U501.08</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014967">
+  <name>MB 96U401.11</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014969">
+  <name>MB 95U405.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014970">
+  <name>MB 95U406.03</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<precinct id="1200000014971">
+  <name>MB 95U407.04</name>
+  <locality_id>9</locality_id>
+  <polling_location_id>1300000021063</polling_location_id>
+</precinct>
+<polling_location id="1300000021038">
+  <address>
+    <line2>807 EMERALD BAY RD</line2>
+    <city>SOUTH LAKE TAHOE</city>
+    <line1>807 EMERALD BAY RD SLT</line1>
+    <state>CA</state>
+    <location_name>CALVARY CHAPEL</location_name>
+    <zip>96150</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021039">
+  <address>
+    <line2>2561 FRANCISCO DR</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>2561 FRANCISCO  DR  EDH</line1>
+    <state>CA</state>
+    <location_name>JACKSON SCHOOL - LIBRARY</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021041">
+  <address>
+    <line2>1050 WILSON BLVD</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>1050 WILSON BLVD  EDH</line1>
+    <state>CA</state>
+    <location_name>EL DORADO HILLS FIRE STA 85</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021045">
+  <address>
+    <line2>3200 COUNTRY CLUB DR</line2>
+    <city>CAMERON PARK</city>
+    <line1>3200 COUNTRY CLUB DR  CP</line1>
+    <state>CA</state>
+    <location_name>CAMERON PARK FIRE STATION</location_name>
+    <zip>95682</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021047">
+  <address>
+    <line2>7900 SOUTH SHINGLE RD</line2>
+    <city>SHINGLE SPRINGS</city>
+    <line1>7900 SOUTH SHINGLE RD SS</line1>
+    <state>CA</state>
+    <location_name>MILLERS HILL SCHOOL</location_name>
+    <zip>95682</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021050">
+  <address>
+    <line2>7061 MT AUKUM RD</line2>
+    <city>SOMERSET</city>
+    <line1>7061 MT AUKUM RD  MT AUKUM</line1>
+    <state>CA</state>
+    <location_name>PIONEER FIRE STA 38</location_name>
+    <zip>95684</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021056">
+  <address>
+    <line2>6040 MOTHER LODE DR</line2>
+    <city>PLACERVILLE</city>
+    <line1>6040 MOTHER LODE DR  PVILLE</line1>
+    <state>CA</state>
+    <location_name>CHURCH OF THE NAZARENE</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021060">
+  <address>
+    <line2>5391 MOTHER LODE DR</line2>
+    <city>PLACERVILLE</city>
+    <line1>5391 MOTHER LODE DR  PVILLE</line1>
+    <state>CA</state>
+    <location_name>BIBLE BAPTIST CHURCH</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021062">
+  <address>
+    <line2>3171 PLEASANT VALLEY RD</line2>
+    <city>PLACERVILLE</city>
+    <line1>3171 PLEASANT VALLEY RD  PVILLE</line1>
+    <state>CA</state>
+    <location_name>GOLD OAK SCHOOL - BOARDROOM</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021063">
+  <address>
+    <line2>2850 FAIRLANE CT</line2>
+    <city>PLACERVILLE</city>
+    <line1>BALLOT WILL BE SENT IN THE MAIL</line1>
+    <state>CA</state>
+    <location_name>MAIL BALLOT PRECINCT VOTER</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021064">
+  <address>
+    <line2>4765 SCIARONI RD</line2>
+    <city>GRIZZLY FLATS</city>
+    <line1>4765 SCIARONI RD GRIZZLY FLATS</line1>
+    <state>CA</state>
+    <location_name>GRIZZLY FLATS CSD</location_name>
+    <zip>95636</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021070">
+  <address>
+    <line2>3745 CHINA GARDEN RD</line2>
+    <city>DIAMOND SPRINGS</city>
+    <line1>3745 CHINA GARDEN RD  DS</line1>
+    <state>CA</state>
+    <location_name>DS ED FIRE FIGHTERS ASSN HALL</location_name>
+    <zip>95619</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021071">
+  <address>
+    <line2>7200 SAINT FLORIAN CT</line2>
+    <city>COOL</city>
+    <line1>7200 ST FLORIAN CT  COOL</line1>
+    <state>CA</state>
+    <location_name>EDC FIRE STA 72 COOL</location_name>
+    <zip>95614</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021076">
+  <address>
+    <line2>6051 GOLD HILL RD</line2>
+    <city>PLACERVILLE</city>
+    <line1>6051 GOLD HILL RD  PVILLE</line1>
+    <state>CA</state>
+    <location_name>EDC FIRE STA 27 PLACERVILLE</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021077">
+  <address>
+    <line2>2954 SCHNELL SCHOOL RD</line2>
+    <city>PLACERVILLE</city>
+    <line1>2954 SCHNELL SCHOOL RD  PVILLE</line1>
+    <state>CA</state>
+    <location_name>PLACER HEIGHTS BAPTIST CHURCH</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021080">
+  <address>
+    <line2>4860 MARSHALL RD</line2>
+    <city>GARDEN VALLEY</city>
+    <line1>4860 MARSHALL RD  GARDV</line1>
+    <state>CA</state>
+    <location_name>GARDEN VALLEY FIRE STA 51</location_name>
+    <zip>95633</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021082">
+  <address>
+    <line2>3520 CARSON RD</line2>
+    <city>CAMINO</city>
+    <line1>3520 CARSON RD SAGE HALL  CAMINO</line1>
+    <state>CA</state>
+    <location_name>SEVENTH DAY ADVENTIST CHURCH</location_name>
+    <zip>95709</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021084">
+  <address>
+    <line2>2733 LAKE TAHOE BLVD</line2>
+    <city>SOUTH LAKE TAHOE</city>
+    <line1>2733 LAKE TAHOE BLVD  SLT</line1>
+    <state>CA</state>
+    <location_name>PRESBYTERIAN CHURCH SLT</location_name>
+    <zip>96150</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021085">
+  <address>
+    <line2>8801 ROCK CREEK RD</line2>
+    <city>PLACERVILLE</city>
+    <line1>8801 ROCK CREEK RD  PVILLE</line1>
+    <state>CA</state>
+    <location_name>MOSQUITO FPD FIREHOUSE</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021087">
+  <address>
+    <line2>4101 OPAL TRL</line2>
+    <city>POLLOCK PINES</city>
+    <line1>4101 OPAL TRL   PPINES</line1>
+    <state>CA</state>
+    <location_name>GOLD RIDGE FOREST LODGE</location_name>
+    <zip>95726</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021095">
+  <address>
+    <line2>3580 BLACKWOOD RD</line2>
+    <city>SOUTH LAKE TAHOE</city>
+    <line1>3580 BLACKWOOD RD  SLT</line1>
+    <state>CA</state>
+    <location_name>LAKE TAHOE CHRISTIAN FELLOWSHIP</location_name>
+    <zip>96150</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021103">
+  <address>
+    <line2>1021 HARVARD WAY</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>1021 HARVARD WAY  EDH</line1>
+    <state>CA</state>
+    <location_name>THE PAVILION</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021109">
+  <address>
+    <line2>1510 LOTUS RD</line2>
+    <city>PLACERVILLE</city>
+    <line1>1510 LOTUS RD  PVILLE</line1>
+    <state>CA</state>
+    <location_name>SUTTERS MILL SCHOOL</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021112">
+  <address>
+    <line2>2480 MERRYCHASE DR</line2>
+    <city>CAMERON PARK</city>
+    <line1>2480 MERRYCHASE DR  CP</line1>
+    <state>CA</state>
+    <location_name>CAMERADO SPRINGS SCH LIBRARY</location_name>
+    <zip>95682</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021114">
+  <address>
+    <line2>6831 MOTHER LODE DR</line2>
+    <city>PLACERVILLE</city>
+    <line1>6831 MOTHER LODE DR  PVILLE</line1>
+    <state>CA</state>
+    <location_name>SEVENTH DAY ADVENTIST CHURCH</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021115">
+  <address>
+    <line2>1401 AMERICAN RIVER TRL</line2>
+    <city>COOL</city>
+    <line1>1401 AMERICAN RIVER TRL  COOL</line1>
+    <state>CA</state>
+    <location_name>AUBURN LAKE TRLS BARN LOFT BLDG</location_name>
+    <zip>95614</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021118">
+  <address>
+    <line2>6361 PONY EXPRESS TRL</line2>
+    <city>POLLOCK PINES</city>
+    <line1>6361 PONY EXPRESS TRL  PPINES</line1>
+    <state>CA</state>
+    <location_name>POLLOCK PINES COMMUNITY CHURCH</location_name>
+    <zip>95726</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021120">
+  <address>
+    <line2>3301 GREEN VALLEY RD</line2>
+    <city>RESCUE</city>
+    <line1>3301 GREEN VALLEY RD  RESCUE</line1>
+    <state>CA</state>
+    <location_name>FOOTHILLS METHODIST CHURCH</location_name>
+    <zip>95672</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021125">
+  <address>
+    <line2>3111 TIERRA DE DIOS DR</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>3111 TIERRA DE DIOS DR  EDH</line1>
+    <state>CA</state>
+    <location_name>HOLY TRINITY CATHOLIC CHURCH</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021128">
+  <address>
+    <line2>1901 AIRPORT RD</line2>
+    <city>SOUTH LAKE TAHOE</city>
+    <line1>1901 AIRPORT RD STR LEVEL  SLT</line1>
+    <state>CA</state>
+    <location_name>SOUTH LAKE TAHOE AIRPORT</location_name>
+    <zip>96150</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021131">
+  <address>
+    <line2>2600 COLD SPRINGS RD</line2>
+    <city>PLACERVILLE</city>
+    <line1>2600 COLD SPRINGS RD  PVILLE</line1>
+    <state>CA</state>
+    <location_name>COLD SPRINGS COM CHURCH FAITH HALL</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021136">
+  <address>
+    <line2>2390 BASS LAKE RD</line2>
+    <city>RESCUE</city>
+    <line1>2390 BASS LAKE RD  RESCUE</line1>
+    <state>CA</state>
+    <location_name>RESCUE UNION SCH DIST OFC BD RM</location_name>
+    <zip>95672</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021137">
+  <address>
+    <line2>3001 GOLDEN EAGLE LN</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>3001 GOLDEN EAGLE LN  EDH</line1>
+    <state>CA</state>
+    <location_name>SILVA VALLEY SCHOOL</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021138">
+  <address>
+    <line2>4180 GREEN VALLEY RD</line2>
+    <city>RESCUE</city>
+    <line1>4180 GREEN VLY RD  RESCUE</line1>
+    <state>CA</state>
+    <location_name>RESCUE COMMUNITY CENTER</location_name>
+    <zip>95672</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021142">
+  <address>
+    <line2>3901 WILD CHAPARRAL DR</line2>
+    <city>SHINGLE SPRINGS</city>
+    <line1>3901 WILD CHAPARRAL DR SS</line1>
+    <state>CA</state>
+    <location_name>PARK COMMUNITY CHURCH</location_name>
+    <zip>95682</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021143">
+  <address>
+    <line2>2361 BASS LAKE RD</line2>
+    <city>CAMERON PARK</city>
+    <line1>2361 BASS LAKE RD  CP</line1>
+    <state>CA</state>
+    <location_name>GLENVIEW APARTMENTS - REC ROOM</location_name>
+    <zip>95682</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021146">
+  <address>
+    <line2>4050 DUROCK RD</line2>
+    <city>SHINGLE SPRINGS</city>
+    <line1>4050 DUROCK RD  STE 8   SS</line1>
+    <state>CA</state>
+    <location_name>SHEPHERD OF THE HILLS CHURCH</location_name>
+    <zip>95682</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021151">
+  <address>
+    <line2>800 WHITE ROCK RD</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>800 WHITE ROCK RD  EDH</line1>
+    <state>CA</state>
+    <location_name>ROLLING HILLS CHRISTIAN CHURCH</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021158">
+  <address>
+    <line2>3581 PALMER DR</line2>
+    <city>CAMERON PARK</city>
+    <line1>3581 PALMER DR STE 602 CP</line1>
+    <state>CA</state>
+    <location_name>MARSHALL MEDICAL PROF CTR</location_name>
+    <zip>95682</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021160">
+  <address>
+    <line2>3371 BRITTANY WAY BLDG B</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>3371 BRITTANY WAY   EDH</line1>
+    <state>CA</state>
+    <location_name>LAKEVIEW ELEMENTARY SCH LIBRARY</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021161">
+  <address>
+    <line2>6740 FAIRPLAY RD</line2>
+    <city>SOMERSET</city>
+    <line1>6740 FAIRPLAY RD  MT AUKUM</line1>
+    <state>CA</state>
+    <location_name>PIONEER PARK COM CTR</location_name>
+    <zip>95684</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021164">
+  <address>
+    <line2>990 LASSEN LN</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>990 LASSEN LN  EDH</line1>
+    <state>CA</state>
+    <location_name>SENIOR CENTER</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021165">
+  <address>
+    <line2>5600 SLY PARK RD</line2>
+    <city>POLLOCK PINES</city>
+    <line1>5600 SLY PARK RD  PPINES</line1>
+    <state>CA</state>
+    <location_name>SLY PARK OUTDOOR EDU CTR</location_name>
+    <zip>95726</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021166">
+  <address>
+    <line2>3186 FOUR SEASONS DR</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>3186 FOUR SEASONS DR  EDH</line1>
+    <state>CA</state>
+    <location_name>LODGE AT FOUR SEASONS</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021172">
+  <address>
+    <line2>7455 SILVA VALLEY PKWY</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>7455 SILVA VALLEY PKWY  EDH</line1>
+    <state>CA</state>
+    <location_name>EL DORADO HILLS LIBRARY</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021175">
+  <address>
+    <line2>1400 WOODMAN CIR</line2>
+    <city>PLACERVILLE</city>
+    <line1>1400 WOODMAN CIR  PVILLE</line1>
+    <state>CA</state>
+    <location_name>SUNRISE GARDENS APTS REC RM</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021176">
+  <address>
+    <line2>4621 PONY EXPRESS TRL</line2>
+    <city>CAMINO</city>
+    <line1>4621 PONY EXPRESS TRL  CAMINO</line1>
+    <state>CA</state>
+    <location_name>CHURCH OF JESUS CHRIST OF LDS</location_name>
+    <zip>95709</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021177">
+  <address>
+    <line2>7280 PROSPECT HILL DR</line2>
+    <city>GEORGETOWN</city>
+    <line1>7280 PROSPECT HILL DR  GTOWN</line1>
+    <state>CA</state>
+    <location_name>CHURCH OF JESUS CHRIST OF LDS</location_name>
+    <zip>95634</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021182">
+  <address>
+    <line2>4765 PLEASANT VALLEY GRANGE RD</line2>
+    <city>PLACERVILLE</city>
+    <line1>4765 PLEASANT VALLEY GRANGE RD  PVILLE</line1>
+    <state>CA</state>
+    <location_name>PLEASANT VALLEY GRANGE HALL</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021183">
+  <address>
+    <line2>1709 REMINGTON TRL</line2>
+    <city>SOUTH LAKE TAHOE</city>
+    <line1>1709 REMINGTON TR.  SLT</line1>
+    <state>CA</state>
+    <location_name>SIERRA HOUSE SCHOOL</location_name>
+    <zip>96150</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021184">
+  <address>
+    <line2>2502 COUNTRY CLUB DR</line2>
+    <city>CAMERON PARK</city>
+    <line1>2502 COUNTRY CLUB DR  CP</line1>
+    <state>CA</state>
+    <location_name>CAMERON PARK CSD</location_name>
+    <zip>95682</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021187">
+  <address>
+    <line2>130 PLACERVILLE DR B</line2>
+    <city>PLACERVILLE</city>
+    <line1>130 PLACERVILLE DR STE B  PVILLE</line1>
+    <state>CA</state>
+    <location_name>VETERANS MEMORIAL BUILDING</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021189">
+  <address>
+    <line2>1275 GREEN VALLEY RD</line2>
+    <city>EL DORADO HILLS</city>
+    <line1>1275 GREEN VALLEY RD  EDH</line1>
+    <state>CA</state>
+    <location_name>CHURCH OF JESUS CHRIST OF LDS</location_name>
+    <zip>95762</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021190">
+  <address>
+    <line2>3821 QUEST CT</line2>
+    <city>SHINGLE SPRINGS</city>
+    <line1>3821 QUEST CT SS</line1>
+    <state>CA</state>
+    <location_name>ELKS LODGE - 1712</location_name>
+    <zip>95682</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021191">
+  <address>
+    <line2>2820 COLD SPRINGS RD</line2>
+    <city>PLACERVILLE</city>
+    <line1>2820 COLD SPRINGS RD  PVILLE</line1>
+    <state>CA</state>
+    <location_name>MASONIC LODGE PLACERVILLE</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021192">
+  <address>
+    <line2>4561 GREENSTONE RD</line2>
+    <city>PLACERVILLE</city>
+    <line1>4561 GREENSTONE RD  PVILLE</line1>
+    <state>CA</state>
+    <location_name>AMERICAN LEGION POST 119</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021193">
+  <address>
+    <line2>1949 APACHE AVE</line2>
+    <city>SOUTH LAKE TAHOE</city>
+    <line1>1949 APACHE DR  SLT</line1>
+    <state>CA</state>
+    <location_name>CA CONSERVATION CORPS SLT</location_name>
+    <zip>96150</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021194">
+  <address>
+    <line2>3380 BLAIRS LN</line2>
+    <city>PLACERVILLE</city>
+    <line1>3380 BLAIRS LN  PVILLE</line1>
+    <state>CA</state>
+    <location_name>ESKATON VILLAGE - PLACERVILLE</location_name>
+    <zip>95667</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021196">
+  <address>
+    <line2>1 COLLEGE DR</line2>
+    <city>SOUTH LAKE TAHOE</city>
+    <line1>1 COLLEGE DR SLT</line1>
+    <state>CA</state>
+    <location_name>LAKE TAHOE COM ASPEN ROOM</location_name>
+    <zip>96150</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021197">
+  <address>
+    <line2>4401 STATE HWY 193</line2>
+    <city>GREENWOOD</city>
+    <line1>4401 STATE HWY 193 GREENWOOD</line1>
+    <state>CA</state>
+    <location_name>GREENWOOD COMMUNITY CENTER</location_name>
+    <zip>95635</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000021202">
+  <address>
+    <line2>886 GLORENE AVE</line2>
+    <city>SOUTH LAKE TAHOE</city>
+    <line1>886 GLORENE AVE</line1>
+    <state>CA</state>
+    <location_name>SOUTH SHORE CHRISTIAN ASSEMBLY</location_name>
+    <zip>96150</zip>
+  </address>
+</polling_location>
+</vip_object>

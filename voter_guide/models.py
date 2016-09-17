@@ -3,10 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from election.models import ElectionManager, TIME_SPAN_LIST
-
 from exception.models import handle_exception, handle_record_not_found_exception, \
     handle_record_found_more_than_one_exception
+import operator
 from organization.models import Organization, OrganizationManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, convert_to_str, positive_value_exists
@@ -15,6 +16,7 @@ from wevote_settings.models import fetch_site_unique_id_prefix, fetch_next_we_vo
 logger = wevote_functions.admin.get_logger(__name__)
 
 ORGANIZATION = 'O'
+ORGANIZATION_WORD = 'ORGANIZATION'
 PUBLIC_FIGURE = 'P'
 VOTER = 'V'
 UNKNOWN_VOTER_GUIDE = 'U'
@@ -31,32 +33,55 @@ class VoterGuideManager(models.Manager):
     """
     def update_or_create_organization_voter_guide_by_election_id(self, organization_we_vote_id,
                                                                  google_civic_election_id):
+        """
+        This creates voter_guides, and also refreshes voter guides with updated organization data
+        """
         google_civic_election_id = convert_to_int(google_civic_election_id)
-        new_voter_guide = VoterGuide()
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
+        organization = Organization()
+        organization_found = False
+        new_voter_guide_created = False
         if not google_civic_election_id or not organization_we_vote_id:
             status = 'ERROR_VARIABLES_MISSING_FOR_ORGANIZATION_VOTER_GUIDE'
             success = False
             new_voter_guide_created = False
         else:
+            # Retrieve the organization object so we can bring over values
+            # NOTE: If we don't have this organization in the local database, we won't create a voter guide
+            organization_manager = OrganizationManager()
+            results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+            if results['organization_found']:
+                organization_found = True
+                organization = results['organization']
+
+            # Now update voter_guide
             try:
-                updated_values = {
-                    # Values we search against below
-                    'google_civic_election_id': google_civic_election_id,
-                    'voter_guide_owner_type': voter_guide_owner_type,
-                    'organization_we_vote_id': organization_we_vote_id,
-                    # The rest of the values
-                }
-                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    organization_we_vote_id__exact=organization_we_vote_id,
-                    defaults=updated_values)
-                success = True
-                if new_voter_guide_created:
-                    status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION'
+                if organization_found:
+                    updated_values = {
+                        # Values we search against below
+                        'google_civic_election_id': google_civic_election_id,
+                        'organization_we_vote_id':  organization_we_vote_id,
+                        # The rest of the values
+                        'voter_guide_owner_type':   voter_guide_owner_type,
+                        'image_url':                organization.organization_photo_url(),
+                        'twitter_handle':           organization.organization_twitter_handle,
+                        'twitter_description':      organization.twitter_description,
+                        'twitter_followers_count':  organization.twitter_followers_count,
+                        'display_name':             organization.organization_name,
+                    }
+                    voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        defaults=updated_values)
+                    success = True
+                    if new_voter_guide_created:
+                        status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION'
+                    else:
+                        status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION'
                 else:
-                    status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION'
+                    success = False
+                    status = 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
             except VoterGuide.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
@@ -74,7 +99,7 @@ class VoterGuideManager(models.Manager):
         return results
 
     def update_or_create_organization_voter_guide_by_time_span(self, organization_we_vote_id, vote_smart_time_span):
-        new_voter_guide = VoterGuide()
+        organization_found = False
         voter_guide_owner_type = ORGANIZATION
         exception_multiple_object_returned = False
         if not vote_smart_time_span or not organization_we_vote_id:
@@ -82,23 +107,44 @@ class VoterGuideManager(models.Manager):
             success = False
             new_voter_guide_created = False
         else:
+            # Retrieve the organization object so we can bring over values
+            organization_manager = OrganizationManager()
+            results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+            if results['organization_found']:
+                organization_found = True
+                organization = results['organization']
+
+            # Now update voter_guide
             try:
-                updated_values = {
-                    # Values we search against below
-                    'vote_smart_time_span': vote_smart_time_span,
-                    'voter_guide_owner_type': voter_guide_owner_type,
-                    'organization_we_vote_id': organization_we_vote_id,
-                    # The rest of the values
-                }
-                voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
-                    vote_smart_time_span__exact=vote_smart_time_span,
-                    organization_we_vote_id__exact=organization_we_vote_id,
-                    defaults=updated_values)
-                success = True
-                if new_voter_guide_created:
-                    status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION_BY_TIME_SPAN'
+                if organization_found:
+                    if organization.twitter_followers_count is None:
+                        twitter_followers_count = 0
+                    else:
+                        twitter_followers_count = convert_to_int(organization.twitter_followers_count)
+                    updated_values = {
+                        # Values we search against below
+                        'vote_smart_time_span':     vote_smart_time_span,
+                        'organization_we_vote_id':  organization_we_vote_id,
+                        # The rest of the values
+                        'voter_guide_owner_type':   voter_guide_owner_type,
+                        'twitter_handle':           organization.organization_twitter_handle,
+                        'display_name':             organization.organization_name,
+                        'image_url':                organization.organization_photo_url(),
+                        'twitter_description':      organization.twitter_description,
+                        'twitter_followers_count':  twitter_followers_count,
+                    }
+                    voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
+                        vote_smart_time_span__exact=vote_smart_time_span,
+                        organization_we_vote_id__iexact=organization_we_vote_id,
+                        defaults=updated_values)
+                    success = True
+                    if new_voter_guide_created:
+                        status = 'VOTER_GUIDE_CREATED_FOR_ORGANIZATION_BY_TIME_SPAN'
+                    else:
+                        status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION_BY_TIME_SPAN'
                 else:
-                    status = 'VOTER_GUIDE_UPDATED_FOR_ORGANIZATION_BY_TIME_SPAN'
+                    success = False
+                    status = 'VOTER_GUIDE_NOT_CREATED_BECAUSE_ORGANIZATION_NOT_FOUND_LOCALLY'
             except VoterGuide.MultipleObjectsReturned as e:
                 handle_record_found_more_than_one_exception(e, logger=logger)
                 success = False
@@ -134,8 +180,8 @@ class VoterGuideManager(models.Manager):
                 }
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
-                    voter_guide_owner_type__exact=voter_guide_owner_type,
-                    public_figure_we_vote_id__exact=public_figure_we_vote_id,
+                    voter_guide_owner_type__iexact=voter_guide_owner_type,
+                    public_figure_we_vote_id__iexact=public_figure_we_vote_id,
                     defaults=updated_values)
                 success = True
                 if new_voter_guide_created:
@@ -178,7 +224,7 @@ class VoterGuideManager(models.Manager):
                 }
                 voter_guide_on_stage, new_voter_guide_created = VoterGuide.objects.update_or_create(
                     google_civic_election_id__exact=google_civic_election_id,
-                    voter_guide_owner_type__exact=voter_guide_owner_type,
+                    voter_guide_owner_type__iexact=voter_guide_owner_type,
                     owner_voter_id__exact=owner_voter_id,
                     defaults=updated_values)
                 success = True
@@ -201,6 +247,19 @@ class VoterGuideManager(models.Manager):
             'new_voter_guide_created':  new_voter_guide_created,
         }
         return results
+
+    def voter_guide_exists(self, organization_we_vote_id, google_civic_election_id):
+        voter_guide_found = False
+        try:
+            if positive_value_exists(organization_we_vote_id) and positive_value_exists(google_civic_election_id):
+                voter_guide_on_stage = VoterGuide.objects.filter(google_civic_election_id=google_civic_election_id,
+                                                                 organization_we_vote_id=organization_we_vote_id)
+                voter_guide_found = True if voter_guide_on_stage.count() > 0 else False
+        except VoterGuide.MultipleObjectsReturned as e:
+            voter_guide_found = True
+        except VoterGuide.DoesNotExist:
+            voter_guide_found = False
+        return voter_guide_found
 
     def retrieve_voter_guide(self, voter_guide_id=0, google_civic_election_id=0, vote_smart_time_span=None,
                              organization_we_vote_id=None, public_figure_we_vote_id=None, owner_we_vote_id=None):
@@ -381,6 +440,80 @@ class VoterGuideManager(models.Manager):
         }
         return results
 
+    def refresh_cached_voter_guide_info(self, voter_guide):
+        """
+        Make sure that the voter guide information has been updated with the latest information in the organization
+        table. NOTE: Dale started building this routine, and then discovered
+        that update_or_create_organization_voter_guide_by_election_id does this "refresh" function
+        """
+        voter_guide_change = False
+
+        # Start with "speaker" information (Organization, Voter, or Public Figure)
+        if positive_value_exists(voter_guide.organization_we_vote_id):
+            if not positive_value_exists(voter_guide.display_name) \
+                    or not positive_value_exists(voter_guide.image_url) \
+                    or not positive_value_exists(voter_guide.twitter_handle) \
+                    or not positive_value_exists(voter_guide.twitter_description):
+                try:
+                    # We need to look in the organization table for display_name & image_url
+                    organization_manager = OrganizationManager()
+                    organization_id = 0
+                    results = organization_manager.retrieve_organization(organization_id,
+                                                                         voter_guide.organization_we_vote_id)
+                    if results['organization_found']:
+                        organization = results['organization']
+                        if not positive_value_exists(voter_guide.display_name):
+                            # speaker_display_name is missing so look it up from source
+                            voter_guide.display_name = organization.organization_name
+                            voter_guide_change = True
+                        if not positive_value_exists(voter_guide.image_url):
+                            # image_url is missing so look it up from source
+                            voter_guide.image_url = organization.organization_photo_url()
+                            voter_guide_change = True
+                        if not positive_value_exists(voter_guide.twitter_handle):
+                            # twitter_url is missing so look it up from source
+                            voter_guide.twitter_handle = organization.organization_twitter_handle
+                            voter_guide_change = True
+                        if not positive_value_exists(voter_guide.twitter_description):
+                            # twitter_description is missing so look it up from source
+                            voter_guide.twitter_description = organization.twitter_description
+                            voter_guide_change = True
+                except Exception as e:
+                    pass
+        elif positive_value_exists(voter_guide.voter_id):
+            pass  # The following to be updated
+            # if not positive_value_exists(voter_guide.speaker_display_name) or \
+            #         not positive_value_exists(voter_guide.voter_we_vote_id) or \
+            #         not positive_value_exists(voter_guide.speaker_image_url_https):
+            #     try:
+            #         # We need to look in the voter table for speaker_display_name
+            #         voter_manager = VoterManager()
+            #         results = voter_manager.retrieve_voter_by_id(voter_guide.voter_id)
+            #         if results['voter_found']:
+            #             voter = results['voter']
+            #             if not positive_value_exists(voter_guide.speaker_display_name):
+            #                 # speaker_display_name is missing so look it up from source
+            #                 voter_guide.speaker_display_name = voter.get_full_name()
+            #                 voter_guide_change = True
+            #             if not positive_value_exists(voter_guide.voter_we_vote_id):
+            #                 # speaker_we_vote_id is missing so look it up from source
+            #                 voter_guide.voter_we_vote_id = voter.we_vote_id
+            #                 voter_guide_change = True
+            #             if not positive_value_exists(voter_guide.speaker_image_url_https):
+            #                 # speaker_image_url_https is missing so look it up from source
+            #                 voter_guide.speaker_image_url_https = voter.voter_photo_url()
+            #                 voter_guide_change = True
+            #     except Exception as e:
+            #         pass
+
+        elif positive_value_exists(voter_guide.public_figure_we_vote_id):
+            pass
+
+        if voter_guide_change:
+            voter_guide.save()
+
+        return voter_guide
+
 
 class VoterGuide(models.Model):
     # We are relying on built-in Python id field
@@ -421,6 +554,7 @@ class VoterGuide(models.Model):
         verbose_name="the period in which the organization stated this position", max_length=255, null=True,
         blank=True, unique=False)
 
+    # This might be the organization name, or the
     display_name = models.CharField(
         verbose_name="display title for this voter guide", max_length=255, null=True, blank=True, unique=False)
 
@@ -431,25 +565,31 @@ class VoterGuide(models.Model):
         verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,
         default=ORGANIZATION)
 
+    twitter_handle = models.CharField(verbose_name='twitter screen_name', max_length=255, null=True, unique=False)
+    twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
+                                           max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
-                                                  null=False, blank=True, default=0)
+                                                  null=True, blank=True, default=0)
 
-    # TODO DALE We want to cache the voter guide name, but in case we haven't, we force the lookup
+    # We usually cache the voter guide name, but in case we haven't, we force the lookup
     def voter_guide_display_name(self):
         if self.display_name:
             return self.display_name
         elif self.voter_guide_owner_type == ORGANIZATION:
-            organization_manager = OrganizationManager()
-            organization_id = 0
-            organization_we_vote_id = self.organization_we_vote_id
-            results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
-            if results['organization_found']:
-                organization = results['organization']
-                organization_name = organization.organization_name
-                return organization_name
+            return self.retrieve_organization_display_name()
         return ''
 
-    # TODO DALE We want to cache the image_url, but in case we haven't, we force the lookup
+    def retrieve_organization_display_name(self):
+        organization_manager = OrganizationManager()
+        organization_id = 0
+        organization_we_vote_id = self.organization_we_vote_id
+        results = organization_manager.retrieve_organization(organization_id, organization_we_vote_id)
+        if results['organization_found']:
+            organization = results['organization']
+            organization_name = organization.organization_name
+            return organization_name
+
+    # We try to cache the image_url, but in case we haven't, we force the lookup
     def voter_guide_image_url(self):
         if self.image_url:
             return self.image_url
@@ -465,7 +605,7 @@ class VoterGuide(models.Model):
         return ''
 
     # The date of the last change to this voter_guide
-    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # TODO convert to date_last_changed
 
     # We want to map these here so they are available in the templates
     ORGANIZATION = ORGANIZATION
@@ -497,7 +637,7 @@ class VoterGuide(models.Model):
     def save(self, *args, **kwargs):
         # Even if this voter_guide came from another source we still need a unique we_vote_id
         if self.we_vote_id:
-            self.we_vote_id = self.we_vote_id.strip()
+            self.we_vote_id = self.we_vote_id.strip().lower()
         if self.we_vote_id == "" or self.we_vote_id is None:  # If there isn't a value...
             # ...generate a new id
             site_unique_id_prefix = fetch_site_unique_id_prefix()
@@ -516,12 +656,12 @@ class VoterGuide(models.Model):
 
 # This is the class that we use to rapidly show lists of voter guides, regardless of whether they are from an
 # organization, public figure, or voter
-class VoterGuideList(models.Model):
+class VoterGuideListManager(models.Model):
     """
     A set of methods to retrieve a list of voter_guides
     """
 
-    # NOTE: This is extremely simple way to retrieve voter guides. Being replaced by:
+    # NOTE: This is extremely simple way to retrieve voter guides, used by admin tools. Being replaced by:
     #  retrieve_voter_guides_by_ballot_item(ballot_item_we_vote_id) AND
     #  retrieve_voter_guides_by_election(google_civic_election_id)
     def retrieve_voter_guides_for_election(self, google_civic_election_id):
@@ -529,7 +669,8 @@ class VoterGuideList(models.Model):
         voter_guide_list_found = False
 
         try:
-            voter_guide_queryset = VoterGuide.objects.order_by('-twitter_followers_count')
+            # voter_guide_queryset = VoterGuide.objects.order_by('-twitter_followers_count')
+            voter_guide_queryset = VoterGuide.objects.order_by('display_name')
             voter_guide_list = voter_guide_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
 
@@ -542,7 +683,7 @@ class VoterGuideList(models.Model):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {
@@ -598,19 +739,44 @@ class VoterGuideList(models.Model):
                      '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
             success = False
 
+        # If we have multiple voter guides for one org, we only want to show the most recent
+        if voter_guide_list_found:
+            voter_guide_list_filtered = self.remove_older_voter_guides_for_each_org(voter_guide_list)
+        else:
+            voter_guide_list_filtered = []
+
         results = {
             'success':                      success,
             'status':                       status,
             'voter_guide_list_found':       voter_guide_list_found,
-            'voter_guide_list':             voter_guide_list,
+            'voter_guide_list':             voter_guide_list_filtered,
         }
         return results
 
-    def retrieve_all_voter_guides(self):
+    def retrieve_voter_guides_to_follow_by_election(self, google_civic_election_id, organization_we_vote_id_list,
+                                                    search_string,
+                                                    maximum_number_to_retrieve=0, sort_by='', sort_order=''):
         voter_guide_list = []
         voter_guide_list_found = False
+        if not positive_value_exists(maximum_number_to_retrieve):
+            maximum_number_to_retrieve = 30
+
         try:
-            voter_guide_queryset = VoterGuide.objects.order_by('-twitter_followers_count')
+            voter_guide_queryset = VoterGuide.objects.all()
+            if search_string:
+                voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
+                                                                   Q(twitter_handle__icontains=search_string))
+
+            voter_guide_queryset = voter_guide_queryset.filter(
+                Q(google_civic_election_id=google_civic_election_id) &
+                Q(organization_we_vote_id__in=organization_we_vote_id_list)
+            )
+
+            if sort_order == 'desc':
+                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+            else:
+                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
+
             voter_guide_list = voter_guide_queryset
 
             if len(voter_guide_list):
@@ -622,7 +788,191 @@ class VoterGuideList(models.Model):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    def retrieve_voter_guides_to_follow_by_time_span(self, orgs_we_need_found_by_position_and_time_span_list_of_dicts,
+                                                     search_string,
+                                                     maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+        """
+        Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
+        """
+        voter_guide_list = []
+        voter_guide_list_found = False
+        if not positive_value_exists(maximum_number_to_retrieve):
+            maximum_number_to_retrieve = 30
+
+        if not len(orgs_we_need_found_by_position_and_time_span_list_of_dicts):
+            status = "NO_VOTER_GUIDES_FOUND_BY_TIME_SPAN"
+            results = {
+                'success': True,
+                'status': status,
+                'voter_guide_list_found': voter_guide_list_found,
+                'voter_guide_list': voter_guide_list,
+            }
+            return results
+
+        try:
+            voter_guide_queryset = VoterGuide.objects.all()
+
+            # Retrieve all pairs that match vote_smart_time_span / organization_we_vote_id
+            filter_list = Q()
+            for item in orgs_we_need_found_by_position_and_time_span_list_of_dicts:
+                filter_list |= Q(vote_smart_time_span=item['vote_smart_time_span'],
+                                 organization_we_vote_id=item['organization_we_vote_id'])
+            voter_guide_queryset = voter_guide_queryset.filter(filter_list)
+
+            if search_string:
+                voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
+                                                                   Q(twitter_handle__icontains=search_string))
+
+            if sort_order == 'desc':
+                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+            else:
+                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
+
+            voter_guide_list = voter_guide_queryset
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDE_FOUND'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
+        }
+        return results
+
+    def retrieve_voter_guides_to_follow_generic(self, organization_we_vote_ids_followed_or_ignored_by_voter,
+                                                search_string,
+                                                maximum_number_to_retrieve=0, sort_by='', sort_order=''):
+        """
+        Get the voter guides for orgs that we found by looking at the positions for an org found based on time span
+        """
+        voter_guide_list = []
+        voter_guide_list_found = False
+        if not positive_value_exists(maximum_number_to_retrieve):
+            maximum_number_to_retrieve = 30
+
+        try:
+            voter_guide_queryset = VoterGuide.objects.all()
+
+            if len(organization_we_vote_ids_followed_or_ignored_by_voter):
+                voter_guide_queryset = voter_guide_queryset.exclude(
+                    organization_we_vote_id__in=organization_we_vote_ids_followed_or_ignored_by_voter)
+
+            if search_string:
+                voter_guide_queryset = voter_guide_queryset.filter(Q(display_name__icontains=search_string) |
+                                                                   Q(twitter_handle__icontains=search_string))
+
+            if sort_order == 'desc':
+                voter_guide_queryset = voter_guide_queryset.order_by('-' + sort_by)[:maximum_number_to_retrieve]
+            else:
+                voter_guide_queryset = voter_guide_queryset.order_by(sort_by)[:maximum_number_to_retrieve]
+
+            voter_guide_list = voter_guide_queryset
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDE_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND_GENERIC_VOTER_GUIDES_TO_FOLLOW'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        # If we have multiple voter guides for one org, we only want to show the most recent
+        if voter_guide_list_found:
+            voter_guide_list_filtered = self.remove_older_voter_guides_for_each_org(voter_guide_list)
+        else:
+            voter_guide_list_filtered = []
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list_filtered,
+        }
+        return results
+
+    def remove_older_voter_guides_for_each_org(self, voter_guide_list):
+        # If we have multiple voter guides for one org, we only want to show the most recent
+        organization_already_reviewed = []
+        organization_with_multiple_voter_guides = []
+        newest_voter_guide_for_org = {}  # Figure out the newest voter guide per org that we should show
+        for one_voter_guide in voter_guide_list:
+            if one_voter_guide.organization_we_vote_id:
+                if one_voter_guide.organization_we_vote_id not in organization_already_reviewed:
+                    organization_already_reviewed.append(one_voter_guide.organization_we_vote_id)
+                # Are we dealing with a time span (instead of google_civic_election_id)?
+                if positive_value_exists(one_voter_guide.vote_smart_time_span):
+                    # Take the first four digits of one_voter_guide.vote_smart_time_span
+                    first_four_digits = convert_to_int(one_voter_guide.vote_smart_time_span[:4])
+                    # And figure out the newest voter guide for each org
+                    if one_voter_guide.organization_we_vote_id in newest_voter_guide_for_org:
+                        # If we are here, it means we have seen this organization once already
+                        if one_voter_guide.organization_we_vote_id not in organization_with_multiple_voter_guides:
+                            organization_with_multiple_voter_guides.append(one_voter_guide.organization_we_vote_id)
+                        # If this voter guide is newer than the one already looked at, update newest_voter_guide_for_org
+                        if first_four_digits > newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id]:
+                            newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id] = first_four_digits
+                    else:
+                        newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id] = first_four_digits
+
+        voter_guide_list_filtered = []
+        for one_voter_guide in voter_guide_list:
+            if one_voter_guide.organization_we_vote_id in organization_with_multiple_voter_guides:
+                if positive_value_exists(one_voter_guide.vote_smart_time_span):
+                    first_four_digits = convert_to_int(one_voter_guide.vote_smart_time_span[:4])
+                    if newest_voter_guide_for_org[one_voter_guide.organization_we_vote_id] == first_four_digits:
+                        # If this voter guide is the newest from among the org's voter guides, include in results
+                        voter_guide_list_filtered.append(one_voter_guide)
+            else:
+                voter_guide_list_filtered.append(one_voter_guide)
+
+        return voter_guide_list_filtered
+
+    def retrieve_all_voter_guides(self, order_by=''):
+        voter_guide_list = []
+        voter_guide_list_found = False
+        try:
+            voter_guide_queryset = VoterGuide.objects.all()
+            if order_by == 'google_civic_election_id':
+                voter_guide_queryset = voter_guide_queryset.order_by(
+                    '-vote_smart_time_span', '-google_civic_election_id')
+            else:
+                voter_guide_queryset = voter_guide_queryset.order_by('-twitter_followers_count')
+            voter_guide_list = voter_guide_queryset
+
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDE_FOUND'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {
@@ -634,23 +984,93 @@ class VoterGuideList(models.Model):
         return results
 
     def reorder_voter_guide_list(self, voter_guide_list, field_to_order_by, asc_or_desc='desc'):
-        def get_key_to_sort_by(voter_guide):
+        def get_key_to_sort_by():
             if field_to_order_by == 'twitter_followers_count':
-                return voter_guide.twitter_followers_count
+                return 'twitter_followers_count'
             else:
-                return voter_guide.twitter_followers_count
-
-        def getKey(voter_guide):
-            return voter_guide.twitter_followers_count
+                return 'twitter_followers_count'
 
         if not len(voter_guide_list):
-            return voter_guide_list
+            return []
 
+        # If we set this to 'desc', then Reverse the sort below. Otherwise sort 'asc' (ascending)
         is_desc = True if asc_or_desc == 'desc' else False
 
-        voter_guide_list_sorted = sorted(voter_guide_list, key=getKey, reverse=True)
+        voter_guide_list_sorted = sorted(voter_guide_list, key=operator.attrgetter(get_key_to_sort_by()),
+                                         reverse=is_desc)
 
         return voter_guide_list_sorted
+
+    def retrieve_possible_duplicate_voter_guides(self, google_civic_election_id, vote_smart_time_span,
+                                                 organization_we_vote_id, public_figure_we_vote_id,
+                                                 twitter_handle,
+                                                 we_vote_id_from_master=''):
+        voter_guide_list_objects = []
+        filters = []
+        voter_guide_list_found = False
+
+        try:
+            voter_guide_queryset = VoterGuide.objects.all()
+            if positive_value_exists(google_civic_election_id):
+                voter_guide_queryset = voter_guide_queryset.filter(google_civic_election_id=google_civic_election_id)
+            elif positive_value_exists(vote_smart_time_span):
+                voter_guide_queryset = voter_guide_queryset.filter(vote_smart_time_span__iexact=vote_smart_time_span)
+
+            # Ignore entries with we_vote_id coming in from master server
+            if positive_value_exists(we_vote_id_from_master):
+                voter_guide_queryset = voter_guide_queryset.filter(~Q(we_vote_id__iexact=we_vote_id_from_master))
+
+            # We want to find candidates with *any* of these values
+            if positive_value_exists(organization_we_vote_id):
+                new_filter = Q(organization_we_vote_id__iexact=organization_we_vote_id)
+                filters.append(new_filter)
+
+            if positive_value_exists(public_figure_we_vote_id):
+                new_filter = Q(public_figure_we_vote_id__iexact=public_figure_we_vote_id)
+                filters.append(new_filter)
+
+            if positive_value_exists(twitter_handle):
+                new_filter = Q(twitter_handle__iexact=twitter_handle)
+                filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                voter_guide_queryset = voter_guide_queryset.filter(final_filters)
+
+            voter_guide_list_objects = voter_guide_queryset
+
+            if len(voter_guide_list_objects):
+                voter_guide_list_found = True
+                status = 'DUPLICATE_VOTER_GUIDES_RETRIEVED'
+                success = True
+            else:
+                status = 'NO_DUPLICATE_VOTER_GUIDES_RETRIEVED'
+                success = True
+        except VoterGuide.DoesNotExist:
+            # No candidates found. Not a problem.
+            status = 'NO_DUPLICATE_VOTER_GUIDES_FOUND_DoesNotExist'
+            voter_guide_list_objects = []
+            success = True
+        except Exception as e:
+            handle_exception(e, logger=logger)
+            status = 'FAILED retrieve_possible_duplicate_voter_guides ' \
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'google_civic_election_id': google_civic_election_id,
+            'voter_guide_list_found':   voter_guide_list_found,
+            'voter_guide_list':         voter_guide_list_objects,
+        }
+        return results
 
 
 class VoterGuidePossibilityManager(models.Manager):
@@ -674,7 +1094,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 voter_guide_possibility_on_stage, new_voter_guide_possibility_created = \
                     VoterGuidePossibility.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        voter_guide_possibility_url__exact=voter_guide_possibility_url,
+                        voter_guide_possibility_url__iexact=voter_guide_possibility_url,
                         defaults=updated_values)
                 success = True
                 if new_voter_guide_possibility_created:
@@ -871,7 +1291,7 @@ class VoterGuidePossibility(models.Model):
         default=ORGANIZATION)
 
     # The date of the last change to this voter_guide_possibility
-    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    last_updated = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)  # TODO Convert to date_last_changed
 
     def __unicode__(self):
         return self.last_updated

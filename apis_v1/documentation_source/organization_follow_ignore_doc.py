@@ -10,13 +10,21 @@ def organization_follow_ignore_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
             'name':         'organization_id',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'Internal database unique identifier for organization',
+        },
+        {
+            'name':         'organization_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this organization across all networks '
+                            '(either organization_id OR organization_we_vote_id required -- not both.) '
+                            'NOTE: In the future we '
+                            'might support other identifiers used in the industry.',
         },
         {
             'name':         'api_key',
@@ -59,6 +67,7 @@ def organization_follow_ignore_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "organization_id": integer,\n' \
+                   '  "organization_we_vote_id": string,\n' \
                    '}'
 
     template_values = {

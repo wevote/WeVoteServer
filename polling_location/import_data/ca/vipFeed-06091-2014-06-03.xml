@@ -1,0 +1,4214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>VIP</name>
+  <datetime>2014-05-15T18:17:56</datetime>
+  <description>VIP aggregates this data from official state sources</description>
+  <organization_url>http://votinginfoproject.org</organization_url>
+</source>
+<state id="6">
+  <name>California</name>
+  <election_administration_id>2</election_administration_id>
+</state>
+<election id="100000564950">
+  <date>2014-06-03</date>
+  <election_type>Primary</election_type>
+  <state_id>6</state_id>
+</election>
+<locality id="91">
+  <name>sierra county</name>
+  <state_id>6</state_id>
+  <type>county</type>
+  <election_administration_id>66091</election_administration_id>
+  <early_vote_site_id>550910001</early_vote_site_id>
+  <early_vote_site_id>550910002</early_vote_site_id>
+</locality>
+<precinct id="330910001">
+  <name>4</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910002">
+  <name>5</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910003">
+  <name>3</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910004">
+  <name>14</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910005">
+  <name>12</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910006">
+  <name>13</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910007">
+  <name>15</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910008">
+  <name>7</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910009">
+  <name>6</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910010">
+  <name>1</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910011">
+  <name>2</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910012">
+  <name>9</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910013">
+  <name>17</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910014">
+  <name>19</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910015">
+  <name>16</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910016">
+  <name>21</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910017">
+  <name>22</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910018">
+  <name>18</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910019">
+  <name>11</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910020">
+  <name>10</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910021">
+  <name>8</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="330910022">
+  <name>20</name>
+  <locality_id>91</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<election_administration id="2">
+  <name>California Secretary of State's Office</name>
+  <elections_url>http://http://www.sos.ca.gov/elections/contacts.htm</elections_url>
+  <registration_url>http://www.sos.ca.gov/elections/elections_vr.htm</registration_url>
+  <absentee_url>http://www.sos.ca.gov/elections/elections_faq.htm#v</absentee_url>
+  <rules_url>http://www.sos.ca.gov/elections/elections-pub-res.htm</rules_url>
+  <hours>8:00 AM to 5:00 PM</hours>
+  <mailing_address>
+    <state>CA</state>
+    <line1>1500 11th Street</line1>
+    <line2>5th Floor</line2>
+    <location_name>Elections Division</location_name>
+    <zip>95184</zip>
+    <city>Sacramento</city>
+  </mailing_address>
+  <physical_address>
+    <state>CA</state>
+    <city>Sacramento</city>
+    <line2>5th Floor</line2>
+    <line1>1500 11th Street</line1>
+    <zip>95814</zip>
+  </physical_address>
+</election_administration>
+<election_administration id="66091">
+  <name>County Clerk-Recorder</name>
+  <elections_url>http://www.sierracounty.ca.gov/index.aspx?NID=214</elections_url>
+  <registration_url>http://www.sierracounty.ca.gov/index.aspx?NID=219</registration_url>
+  <where_do_i_vote_url>http://www.sierracounty.ca.gov/index.aspx?NID=216</where_do_i_vote_url>
+  <physical_address>
+    <state>CA</state>
+    <city>Downieville</city>
+    <line2>Room 11</line2>
+    <line1>100 Courthouse Square</line1>
+    <zip>95936-0398</zip>
+  </physical_address>
+</election_administration>
+<early_vote_site id="550910001">
+  <name>Elections Office</name>
+  <start_date>2014-05-05</start_date>
+  <end_date>2014-06-03</end_date>
+  <days_times_open>2014-05-05 to 2014-06-03: 9:00AM-12:00PM and 1:00PM-4:00PM</days_times_open>
+  <address>
+    <line2>Room 11</line2>
+    <city>Downieville</city>
+    <line1>100 Courthouse Square</line1>
+    <state>CA</state>
+    <location_name>Elections Office</location_name>
+    <zip>95936</zip>
+  </address>
+</early_vote_site>
+<early_vote_site id="550910002">
+  <name>Loyalton Drop Box</name>
+  <start_date>2014-06-03</start_date>
+  <end_date>2014-06-03</end_date>
+  <days_times_open>2014-06-03 to 2014-06-03</days_times_open>
+  <address>
+    <city>Loyalton</city>
+    <line1>302 1st Street</line1>
+    <state>CA</state>
+    <location_name>Senior Center</location_name>
+    <zip>96118</zip>
+  </address>
+</early_vote_site>
+<street_segment id="220930001">
+  <start_house_number>320</start_house_number>
+  <end_house_number>320</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>WATER</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930002">
+  <start_house_number>109</start_house_number>
+  <end_house_number>141</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>GLORY HOLE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930003">
+  <start_house_number>27</start_house_number>
+  <end_house_number>27</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>GREY FOX</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930004">
+  <start_house_number>120</start_house_number>
+  <end_house_number>122</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>OLD SCHOOLHOUSE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930005">
+  <start_house_number>100</start_house_number>
+  <end_house_number>132</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>LOHMAN RANCH</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930006">
+  <start_house_number>115</start_house_number>
+  <end_house_number>122</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>PIKE SHORT CUT</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930007">
+  <start_house_number>95</start_house_number>
+  <end_house_number>95</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>BARRANGO</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930008">
+  <start_house_number>500</start_house_number>
+  <end_house_number>1411</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>PIKE CITY</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930009">
+  <start_house_number>2500</start_house_number>
+  <end_house_number>2500</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>PIKE CITY</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930010">
+  <start_house_number>502</start_house_number>
+  <end_house_number>1078</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>RIDGE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930011">
+  <start_house_number>1388</start_house_number>
+  <end_house_number>1827</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>RIDGE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930012">
+  <start_house_number>1906</start_house_number>
+  <end_house_number>3981</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>RIDGE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930013">
+  <start_house_number>155</start_house_number>
+  <end_house_number>182</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>RIDGE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930014">
+  <start_house_number>1624</start_house_number>
+  <end_house_number>1624</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>PIKE CITY</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930015">
+  <start_house_number>33</start_house_number>
+  <end_house_number>33</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>QUAIL HILL</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930016">
+  <start_house_number>5151</start_house_number>
+  <end_house_number>5151</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 49</street_name>
+    <city>CAMPTONVILLE</city>
+    <state>CA</state>
+    <zip>95922</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930017">
+  <start_house_number>5101</start_house_number>
+  <end_house_number>5101</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>INDIAN WELLS</city>
+    <state>CA</state>
+    <zip>95922</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930018">
+  <start_house_number>500</start_house_number>
+  <end_house_number>522</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>OLD TOLL BRIDGE</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930019">
+  <start_house_number>121</start_house_number>
+  <end_house_number>130</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>POPLAR</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930020">
+  <start_house_number>15</start_house_number>
+  <end_house_number>67</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>NUGGET</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>ALY</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930021">
+  <start_house_number>101</start_house_number>
+  <end_house_number>725</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>LINCOLN</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <street_direction>S</street_direction>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930022">
+  <start_house_number>13</start_house_number>
+  <end_house_number>95</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>BEAR</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930023">
+  <start_house_number>101</start_house_number>
+  <end_house_number>101</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MEADOW RANCH</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930024">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>DIRT</street_name>
+    <city>SATTLEY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930025">
+  <start_house_number>20601</start_house_number>
+  <end_house_number>20605</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 89</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930026">
+  <start_house_number>25</start_house_number>
+  <end_house_number>25</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>MEADOW</street_name>
+    <city>SATTLEY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930027">
+  <start_house_number>57145</start_house_number>
+  <end_house_number>57145</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 49</street_name>
+    <city>LOYALTON</city>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930028">
+  <start_house_number>56707</start_house_number>
+  <end_house_number>56707</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 49</street_name>
+    <city>LOYALTON</city>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930029">
+  <start_house_number>1003</start_house_number>
+  <end_house_number>1003</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>ALLEGHANY RIDGE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930030">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>GOLD LAKE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930031">
+  <start_house_number>63501</start_house_number>
+  <end_house_number>63501</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 49</street_name>
+    <city>LOYALTON</city>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930032">
+  <start_house_number>18280</start_house_number>
+  <end_house_number>18280</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 89</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930033">
+  <start_house_number>18000</start_house_number>
+  <end_house_number>18000</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 89</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930034">
+  <start_house_number>15</start_house_number>
+  <end_house_number>49</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>RANCH</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930035">
+  <start_house_number>426</start_house_number>
+  <end_house_number>426</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>SCHOOL</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930036">
+  <start_house_number>35</start_house_number>
+  <end_house_number>35</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>CAVE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930037">
+  <start_house_number>203</start_house_number>
+  <end_house_number>203</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930038">
+  <start_house_number>2</start_house_number>
+  <end_house_number>9</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MEADOW RANCH</street_name>
+    <city>CALPINE</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930039">
+  <start_house_number>100</start_house_number>
+  <end_house_number>355</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930040">
+  <start_house_number>102</start_house_number>
+  <end_house_number>510</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930041">
+  <start_house_number>3</start_house_number>
+  <end_house_number>211</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>A23</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930042">
+  <start_house_number>12</start_house_number>
+  <end_house_number>15</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>HC</street_name>
+    <city>INDIAN WELLS</city>
+    <state>CA</state>
+    <zip>95922</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930043">
+  <start_house_number>95</start_house_number>
+  <end_house_number>209</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>CALPINE</street_name>
+    <city>CALPINE</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930044">
+  <start_house_number>80</start_house_number>
+  <end_house_number>80</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>WILD ROSE MEADOW</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930045">
+  <start_house_number>438</start_house_number>
+  <end_house_number>499</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>MOUNTAIN HOUSE</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930046">
+  <start_house_number>117</start_house_number>
+  <end_house_number>791</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930047">
+  <start_house_number>12</start_house_number>
+  <end_house_number>13</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>CASTAGNA</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ALY</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930048">
+  <start_house_number>15</start_house_number>
+  <end_house_number>24</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>POST OFFICE</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>SPUR</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930049">
+  <start_house_number>103</start_house_number>
+  <end_house_number>139</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>ROLLINS RANCH</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930050">
+  <start_house_number>10</start_house_number>
+  <end_house_number>10</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>WOODRUFF CREEK</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930051">
+  <start_house_number>16</start_house_number>
+  <end_house_number>16</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>BAILEY RANCH</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930052">
+  <start_house_number>15</start_house_number>
+  <end_house_number>15</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>BEAR</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930053">
+  <start_house_number>102</start_house_number>
+  <end_house_number>102</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>CHURCH</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930054">
+  <start_house_number>110</start_house_number>
+  <end_house_number>387</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>COMMERCIAL</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930055">
+  <start_house_number>133</start_house_number>
+  <end_house_number>235</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>BELLE</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930056">
+  <start_house_number>200</start_house_number>
+  <end_house_number>200</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>CRAYCROFT</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>RDG</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930057">
+  <start_house_number>1</start_house_number>
+  <end_house_number>201</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>GALLOWAY</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930058">
+  <start_house_number>143</start_house_number>
+  <end_house_number>280</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>GOLD BLUFF</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930059">
+  <start_house_number>14671</start_house_number>
+  <end_house_number>14684</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930060">
+  <start_house_number>15902</start_house_number>
+  <end_house_number>15921</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930061">
+  <start_house_number>15921</start_house_number>
+  <end_house_number>15921</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49 7</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930062">
+  <start_house_number>17501</start_house_number>
+  <end_house_number>17501</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930063">
+  <start_house_number>21792</start_house_number>
+  <end_house_number>21792</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930064">
+  <start_house_number>11</start_house_number>
+  <end_house_number>15</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>HUMMINGBIRD</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930065">
+  <start_house_number>18</start_house_number>
+  <end_house_number>18</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>JIM CROW</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>CYN</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930066">
+  <start_house_number>26</start_house_number>
+  <end_house_number>26</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>JIM CROW</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>CYN</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930067">
+  <start_house_number>103</start_house_number>
+  <end_house_number>425</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>LAVEZZOLA</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930068">
+  <start_house_number>212</start_house_number>
+  <end_house_number>225</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>WILD PLUM</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RDG</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930069">
+  <start_house_number>341</start_house_number>
+  <end_house_number>341</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>OAK RANCH</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930070">
+  <start_house_number>104</start_house_number>
+  <end_house_number>184</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>PEARL</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930071">
+  <start_house_number>168</start_house_number>
+  <end_house_number>168</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>PEARL ST B</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930072">
+  <start_house_number>168</start_house_number>
+  <end_house_number>168</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>PEARL ST A</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930073">
+  <start_house_number>102</start_house_number>
+  <end_house_number>140</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>PONTA RANCH</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930074">
+  <start_house_number>115</start_house_number>
+  <end_house_number>135</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>RIVER</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <street_direction>E</street_direction>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930075">
+  <start_house_number>141</start_house_number>
+  <end_house_number>161</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>RIVER</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930076">
+  <start_house_number>148</start_house_number>
+  <end_house_number>154</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>SCHOOL</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930077">
+  <start_house_number>111</start_house_number>
+  <end_house_number>111</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>ALASKA PEAK</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930078">
+  <start_house_number>16</start_house_number>
+  <end_house_number>20</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>COCA COLA</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930079">
+  <start_house_number>44</start_house_number>
+  <end_house_number>44</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>SMOKEY</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930080">
+  <start_house_number>100</start_house_number>
+  <end_house_number>390</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>GOODYEAR CREEK</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930081">
+  <start_house_number>101</start_house_number>
+  <end_house_number>325</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>SUNNYSIDE</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930082">
+  <start_house_number>106</start_house_number>
+  <end_house_number>115</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>HOGAN</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>WAY</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930083">
+  <start_house_number>11</start_house_number>
+  <end_house_number>15</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>WHITE</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>WAY</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930084">
+  <start_house_number>7</start_house_number>
+  <end_house_number>1015</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>SUNRISE CREEK</street_name>
+    <city>VERDI</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930085">
+  <start_house_number>503</start_house_number>
+  <end_house_number>528</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>MINERS</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930086">
+  <start_house_number>115</start_house_number>
+  <end_house_number>131</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>SATTLEY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930087">
+  <start_house_number>100</start_house_number>
+  <end_house_number>324</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>COATES</street_name>
+    <city>CALPINE</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930088">
+  <start_house_number>150</start_house_number>
+  <end_house_number>159</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>SATTLEY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930089">
+  <start_house_number>97</start_house_number>
+  <end_house_number>656</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>CALPINE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930090">
+  <start_house_number>14</start_house_number>
+  <end_house_number>37</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>ZOLLINGER</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930091">
+  <start_house_number>100</start_house_number>
+  <end_house_number>107</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>SIERRA</street_name>
+    <city>CALPINE</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930092">
+  <start_house_number>301</start_house_number>
+  <end_house_number>337</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>RAINBOW</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>CIR</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930093">
+  <start_house_number>103</start_house_number>
+  <end_house_number>205</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910014</precinct_id>
+  <non_house_address>
+    <street_name>HILL</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930094">
+  <start_house_number>605</start_house_number>
+  <end_house_number>728</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>PINE</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930095">
+  <start_house_number>100</start_house_number>
+  <end_house_number>306</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>PATTERSON</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930096">
+  <start_house_number>405</start_house_number>
+  <end_house_number>708</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>CHURCH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930097">
+  <start_house_number>506</start_house_number>
+  <end_house_number>595</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>LONGHORN</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930098">
+  <start_house_number>218</start_house_number>
+  <end_house_number>723</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>OLD TRUCKEE</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930099">
+  <start_house_number>910</start_house_number>
+  <end_house_number>997</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910017</precinct_id>
+  <non_house_address>
+    <street_name>SIERRA BROOKS</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930100">
+  <start_house_number>124</start_house_number>
+  <end_house_number>413</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>BECKWITH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930101">
+  <start_house_number>6780</start_house_number>
+  <end_house_number>6780</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>HARVEY RANCH</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930102">
+  <start_house_number>200</start_house_number>
+  <end_house_number>220</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>BATTELLE</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <street_direction>N</street_direction>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930103">
+  <start_house_number>13</start_house_number>
+  <end_house_number>17</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>OLD</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>HWY</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930104">
+  <start_house_number>410</start_house_number>
+  <end_house_number>700</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>3RD</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930105">
+  <start_house_number>111</start_house_number>
+  <end_house_number>111</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>SALMON CREEK</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930106">
+  <start_house_number>1035</start_house_number>
+  <end_house_number>1035</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MOUNTAIN QUAIL</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930107">
+  <start_house_number>211</start_house_number>
+  <end_house_number>217</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910017</precinct_id>
+  <non_house_address>
+    <street_name>ANTELOPE VALLEY</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930108">
+  <start_house_number>301</start_house_number>
+  <end_house_number>312</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>MEEKER</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930109">
+  <start_house_number>505</start_house_number>
+  <end_house_number>525</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>MINER</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930110">
+  <start_house_number>53976</start_house_number>
+  <end_house_number>63360</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>LOYALTON</city>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930111">
+  <start_house_number>35</start_house_number>
+  <end_house_number>35</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>VALHALLA</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930112">
+  <start_house_number>206</start_house_number>
+  <end_house_number>936</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>WILLOW</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <street_direction>W</street_direction>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930113">
+  <start_house_number>202</start_house_number>
+  <end_house_number>220</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>WILD PLUM RIDGE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930114">
+  <start_house_number>502</start_house_number>
+  <end_house_number>705</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>BECKWITH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930115">
+  <start_house_number>540</start_house_number>
+  <end_house_number>540</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>LINCOLN</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930116">
+  <start_house_number>50744</start_house_number>
+  <end_house_number>50744</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 89</street_name>
+    <city>SIERRAVILLE</city>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930118">
+  <start_house_number>57</start_house_number>
+  <end_house_number>57</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>MUSTANG</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>TRL</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930119">
+  <start_house_number>212</start_house_number>
+  <end_house_number>214</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>NEVADA</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930120">
+  <start_house_number>100</start_house_number>
+  <end_house_number>711</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>RAILROAD</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930121">
+  <start_house_number>401</start_house_number>
+  <end_house_number>505</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>MEEKER</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930122">
+  <start_house_number>104</start_house_number>
+  <end_house_number>104</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>NOURSE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930123">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>GREENE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930124">
+  <start_house_number>500</start_house_number>
+  <end_house_number>809</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>MILL</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930125">
+  <start_house_number>701</start_house_number>
+  <end_house_number>730</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910017</precinct_id>
+  <non_house_address>
+    <street_name>ROUNDUP</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930126">
+  <start_house_number>513</start_house_number>
+  <end_house_number>561</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>BRADY</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930127">
+  <start_house_number>100</start_house_number>
+  <end_house_number>313</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930128">
+  <start_house_number>501</start_house_number>
+  <end_house_number>815</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>LEWIS</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930129">
+  <start_house_number>301</start_house_number>
+  <end_house_number>319</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>PATRICA</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930130">
+  <start_house_number>701</start_house_number>
+  <end_house_number>703</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>KANAKA CREEK</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930131">
+  <start_house_number>110</start_house_number>
+  <end_house_number>310</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>RAILROAD</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930132">
+  <start_house_number>401</start_house_number>
+  <end_house_number>437</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910017</precinct_id>
+  <non_house_address>
+    <street_name>RANCHO CIRCLE</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930133">
+  <start_house_number>605</start_house_number>
+  <end_house_number>650</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>2ND</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930134">
+  <start_house_number>139</start_house_number>
+  <end_house_number>187</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>SMITHNECK</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930135">
+  <start_house_number>10</start_house_number>
+  <end_house_number>19</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910019</precinct_id>
+  <non_house_address>
+    <street_name>EDELWEISS</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930136">
+  <start_house_number>10</start_house_number>
+  <end_house_number>18</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>BUSCH</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930137">
+  <start_house_number>301</start_house_number>
+  <end_house_number>310</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>3RD</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930138">
+  <start_house_number>49400</start_house_number>
+  <end_house_number>50766</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>SIERRAVILLE</city>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930139">
+  <start_house_number>100</start_house_number>
+  <end_house_number>302</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MOUNTAIN VIEW</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930140">
+  <start_house_number>104</start_house_number>
+  <end_house_number>206</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>TAYLOR</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930141">
+  <start_house_number>102</start_house_number>
+  <end_house_number>138</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910017</precinct_id>
+  <non_house_address>
+    <street_name>SMITHNECK</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930142">
+  <start_house_number>431</start_house_number>
+  <end_house_number>446</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>SADDLEBACK</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930143">
+  <start_house_number>22</start_house_number>
+  <end_house_number>27</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>HAYES</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930144">
+  <start_house_number>11</start_house_number>
+  <end_house_number>32</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910019</precinct_id>
+  <non_house_address>
+    <street_name>SAGE</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930145">
+  <start_house_number>10</start_house_number>
+  <end_house_number>10</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>EGBERT</street_name>
+    <city>SATTLEY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930146">
+  <start_house_number>622</start_house_number>
+  <end_house_number>716</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>1ST</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930147">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910020</precinct_id>
+  <non_house_address>
+    <street_name>GREEN GULCH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930148">
+  <start_house_number>52211</start_house_number>
+  <end_house_number>52218</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>SIERRAVILLE</city>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930149">
+  <start_house_number>102</start_house_number>
+  <end_house_number>302</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>ALLEGHANY</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930150">
+  <start_house_number>40</start_house_number>
+  <end_house_number>90</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>SMITHNECK</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930151">
+  <start_house_number>201</start_house_number>
+  <end_house_number>307</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>2ND</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930152">
+  <start_house_number>58500</start_house_number>
+  <end_house_number>60002</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910019</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>LOYALTON</city>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930153">
+  <start_house_number>3185</start_house_number>
+  <end_house_number>6765</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>A 23</street_name>
+    <city>CALPINE</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930154">
+  <start_house_number>3185</start_house_number>
+  <end_house_number>3185</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>A23</street_name>
+    <city>CALPINE</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930155">
+  <start_house_number>102</start_house_number>
+  <end_house_number>102</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>WILSON</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930156">
+  <start_house_number>25</start_house_number>
+  <end_house_number>25</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>SIERRA BUTTES</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930157">
+  <start_house_number>107</start_house_number>
+  <end_house_number>314</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <street_direction>E</street_direction>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930158">
+  <start_house_number>25191</start_house_number>
+  <end_house_number>25545</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>SIERRA CITY</city>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930159">
+  <start_house_number>302</start_house_number>
+  <end_house_number>302</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>FARRAR</street_name>
+    <city>CALPINE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930160">
+  <start_house_number>99</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MT VIEW</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930161">
+  <start_house_number>320</start_house_number>
+  <end_house_number>480</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910021</precinct_id>
+  <non_house_address>
+    <street_name>INDEPENDENCE LAKE</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930162">
+  <start_house_number>525</start_house_number>
+  <end_house_number>525</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>SLEIGHVILLE CREEK</street_name>
+    <city>CAMPTONVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95922</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930163">
+  <start_house_number>501</start_house_number>
+  <end_house_number>526</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910017</precinct_id>
+  <non_house_address>
+    <street_name>LONGHORN</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930164">
+  <start_house_number>40600</start_house_number>
+  <end_house_number>40600</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910021</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>SIERRA CITY</city>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930165">
+  <start_house_number>701</start_house_number>
+  <end_house_number>720</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>COURT</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930166">
+  <start_house_number>105</start_house_number>
+  <end_house_number>120</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>BUTTE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930168">
+  <start_house_number>102</start_house_number>
+  <end_house_number>102</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>ISHAM</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930169">
+  <start_house_number>10</start_house_number>
+  <end_house_number>25</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910019</precinct_id>
+  <non_house_address>
+    <street_name>BELLI</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930170">
+  <start_house_number>204</start_house_number>
+  <end_house_number>307</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <street_direction>W</street_direction>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930171">
+  <start_house_number>20</start_house_number>
+  <end_house_number>75</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>GENASCI</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930172">
+  <start_house_number>255</start_house_number>
+  <end_house_number>255</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>BUTTE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ALY</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930173">
+  <start_house_number>100</start_house_number>
+  <end_house_number>208</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>GRANITE</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930174">
+  <start_house_number>513</start_house_number>
+  <end_house_number>521</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930175">
+  <start_house_number>105</start_house_number>
+  <end_house_number>123</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>WILD PLUM</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930176">
+  <start_house_number>10</start_house_number>
+  <end_house_number>20</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>LOGANVILLE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930177">
+  <start_house_number>400</start_house_number>
+  <end_house_number>400</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>HAGGARD</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>WAY</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930178">
+  <start_house_number>42</start_house_number>
+  <end_house_number>52</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>PATTERSON</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>CIR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930179">
+  <start_house_number>611</start_house_number>
+  <end_house_number>636</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>BEAR VALLEY</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930180">
+  <start_house_number>114</start_house_number>
+  <end_house_number>130</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>WILLOW</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <street_direction>E</street_direction>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930181">
+  <start_house_number>10</start_house_number>
+  <end_house_number>10</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>STRANG RANCH</street_name>
+    <city>SATTLEY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930182">
+  <start_house_number>404</start_house_number>
+  <end_house_number>432</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>TAMARACK</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>BND</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930183">
+  <start_house_number>528</start_house_number>
+  <end_house_number>608</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>4TH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930184">
+  <start_house_number>318</start_house_number>
+  <end_house_number>410</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>WRANGLER</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930185">
+  <start_house_number>20</start_house_number>
+  <end_house_number>30</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910019</precinct_id>
+  <non_house_address>
+    <street_name>HAMLIN</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930186">
+  <start_house_number>1</start_house_number>
+  <end_house_number>2</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>FILIPPINI</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930187">
+  <start_house_number>38</start_house_number>
+  <end_house_number>42</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>CEDAR</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930188">
+  <start_house_number>11</start_house_number>
+  <end_house_number>11</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910019</precinct_id>
+  <non_house_address>
+    <street_name>MOSS</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930189">
+  <start_house_number>32</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>SACRED MOUND</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930190">
+  <start_house_number>400</start_house_number>
+  <end_house_number>810</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930191">
+  <start_house_number>30</start_house_number>
+  <end_house_number>30</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>SPRING</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930192">
+  <start_house_number>6261</start_house_number>
+  <end_house_number>6261</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>A23</street_name>
+    <city>CALPINE</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930193">
+  <start_house_number>601</start_house_number>
+  <end_house_number>609</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>CEDAR</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930194">
+  <start_house_number>101</start_house_number>
+  <end_house_number>111</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>LEWIS</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930195">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910020</precinct_id>
+  <non_house_address>
+    <street_name>EVANS RANCH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930196">
+  <start_house_number>44</start_house_number>
+  <end_house_number>44</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>SIERRA</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>CIR</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930197">
+  <start_house_number>604</start_house_number>
+  <end_house_number>800</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>MAMMOTH SPRINGS</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930198">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>KENTUCKY MINE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930199">
+  <start_house_number>105</start_house_number>
+  <end_house_number>105</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>MEADE</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930200">
+  <start_house_number>35</start_house_number>
+  <end_house_number>35</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>BUCKSKIN</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>TRL</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930201">
+  <start_house_number>66</start_house_number>
+  <end_house_number>220</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MEADOW RANCH</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930202">
+  <start_house_number>1</start_house_number>
+  <end_house_number>1</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>PIETY</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930203">
+  <start_house_number>21640</start_house_number>
+  <end_house_number>23600</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 89</street_name>
+    <city>CALPINE</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930204">
+  <start_house_number>15</start_house_number>
+  <end_house_number>22</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>LAKE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930205">
+  <start_house_number>10</start_house_number>
+  <end_house_number>35</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>FOURNIER RANCH</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930206">
+  <start_house_number>721</start_house_number>
+  <end_house_number>721</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>PINE</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930207">
+  <start_house_number>32122</start_house_number>
+  <end_house_number>32613</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>SIERRA CITY</city>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930208">
+  <start_house_number>302</start_house_number>
+  <end_house_number>315</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>OSTROM</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>WAY</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930209">
+  <start_house_number>20</start_house_number>
+  <end_house_number>29</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>WHITE</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930211">
+  <start_house_number>102</start_house_number>
+  <end_house_number>102</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>1ST</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930212">
+  <start_house_number>15</start_house_number>
+  <end_house_number>15</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>ALEXANDER</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930213">
+  <start_house_number>5902</start_house_number>
+  <end_house_number>5902</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910021</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 89</street_name>
+    <city>SIERRAVILLE</city>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930214">
+  <start_house_number>110</start_house_number>
+  <end_house_number>110</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>ALLEGHNAY</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930215">
+  <start_house_number>103</start_house_number>
+  <end_house_number>115</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>BEVERLY</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930216">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>CASSIDA RANCH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930217">
+  <start_house_number>12</start_house_number>
+  <end_house_number>25</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>CHURCH</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930218">
+  <start_house_number>1010</start_house_number>
+  <end_house_number>1010</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MOUNT QUAIL</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930219">
+  <start_house_number>100</start_house_number>
+  <end_house_number>101</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>FARRAR</street_name>
+    <city>CALPINE</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930220">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910019</precinct_id>
+  <non_house_address>
+    <street_name>HILL</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930221">
+  <start_house_number>800</start_house_number>
+  <end_house_number>800</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>ROMANO RANCH</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930222">
+  <start_house_number>215</start_house_number>
+  <end_house_number>315</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>CHURCH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930224">
+  <start_house_number>23</start_house_number>
+  <end_house_number>25</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>PINTO</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>TRL</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930225">
+  <start_house_number>405</start_house_number>
+  <end_house_number>603</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>4TH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930226">
+  <start_house_number>20</start_house_number>
+  <end_house_number>28</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>MYA</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>WAY</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930227">
+  <start_house_number>180</start_house_number>
+  <end_house_number>180</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>CALPINE</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930228">
+  <start_house_number>205</start_house_number>
+  <end_house_number>205</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910022</precinct_id>
+  <non_house_address>
+    <street_name>HILL</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930229">
+  <start_house_number>5</start_house_number>
+  <end_house_number>5</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>HANSEN</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930230">
+  <start_house_number>204</start_house_number>
+  <end_house_number>238</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>EDNA</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930231">
+  <start_house_number>604</start_house_number>
+  <end_house_number>702</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>SCHOOL</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930232">
+  <start_house_number>5500</start_house_number>
+  <end_house_number>5500</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>FOOTES CROSSING</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930233">
+  <start_house_number>46210</start_house_number>
+  <end_house_number>47371</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930234">
+  <start_house_number>216</start_house_number>
+  <end_house_number>222</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>FORTY NINER</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930236">
+  <start_house_number>211</start_house_number>
+  <end_house_number>211</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>COUNTY ROAD A23</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930237">
+  <start_house_number>101</start_house_number>
+  <end_house_number>103</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>PLAZA</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930238">
+  <start_house_number>10</start_house_number>
+  <end_house_number>10</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910019</precinct_id>
+  <non_house_address>
+    <street_name>PINE</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930239">
+  <start_house_number>20</start_house_number>
+  <end_house_number>27</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>OAK</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930240">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910022</precinct_id>
+  <non_house_address>
+    <street_name>HOLDEN</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930241">
+  <start_house_number>14</start_house_number>
+  <end_house_number>16</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>JONES</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930242">
+  <start_house_number>105</start_house_number>
+  <end_house_number>110</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>ASPEN</street_name>
+    <city>CALPINE</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930243">
+  <start_house_number>304</start_house_number>
+  <end_house_number>304</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>PATRICIA</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930244">
+  <start_house_number>7</start_house_number>
+  <end_house_number>7</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910019</precinct_id>
+  <non_house_address>
+    <street_name>WOODS</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930246">
+  <start_house_number>213</start_house_number>
+  <end_house_number>213</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910013</precinct_id>
+  <non_house_address>
+    <street_name>WILLOW</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930247">
+  <start_house_number>2</start_house_number>
+  <end_house_number>2</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49 IND VALLEY OUTPOST</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930248">
+  <start_house_number>1045</start_house_number>
+  <end_house_number>1095</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>ARBOR</street_name>
+    <city>VERDI</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930249">
+  <start_house_number>68</start_house_number>
+  <end_house_number>68</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>WANDA</street_name>
+    <city>CALPINE</city>
+    <street_suffix>WAY</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930250">
+  <start_house_number>151</start_house_number>
+  <end_house_number>151</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>HENNESS PASS</street_name>
+    <city>CAMPTONVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95922</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930251">
+  <start_house_number>11</start_house_number>
+  <end_house_number>14</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>WRANGLER</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>TRL</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930252">
+  <start_house_number>250</start_house_number>
+  <end_house_number>250</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>SELMA</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930253">
+  <start_house_number>18012</start_house_number>
+  <end_house_number>18012</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910006</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 89</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930254">
+  <start_house_number>106</start_house_number>
+  <end_house_number>106</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>VAN NESS</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>AVE</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930255">
+  <start_house_number>706</start_house_number>
+  <end_house_number>706</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>LEWIS</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930256">
+  <start_house_number>1350</start_house_number>
+  <end_house_number>1350</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910020</precinct_id>
+  <non_house_address>
+    <street_name>LONG VALLEY</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930258">
+  <start_house_number>1010</start_house_number>
+  <end_house_number>1010</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MT QUAIL</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930259">
+  <start_house_number>307</start_house_number>
+  <end_house_number>307</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930260">
+  <start_house_number>105</start_house_number>
+  <end_house_number>175</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>TRELEASE</street_name>
+    <city>VERDI</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930261">
+  <start_house_number>305</start_house_number>
+  <end_house_number>305</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>4TH</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930263">
+  <start_house_number>45811</start_house_number>
+  <end_house_number>45811</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930264">
+  <start_house_number>6261</start_house_number>
+  <end_house_number>6261</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>ROAD A23</street_name>
+    <city>CALPINE</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930265">
+  <start_house_number>40600</start_house_number>
+  <end_house_number>40600</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910021</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 49</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930266">
+  <start_house_number>101</start_house_number>
+  <end_house_number>135</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>RIVER</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <street_direction>E</street_direction>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930267">
+  <start_house_number>321</start_house_number>
+  <end_house_number>321</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>CAMPBELL HOT</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>SPGS</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930268">
+  <start_house_number>15921</start_house_number>
+  <end_house_number>15921</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49 1</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930269">
+  <start_house_number>998</start_house_number>
+  <end_house_number>998</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>SIERRA BROOKS</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930270">
+  <start_house_number>300</start_house_number>
+  <end_house_number>300</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>MEADOW RANCH</street_name>
+    <city>CALPINE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930271">
+  <start_house_number>53844</start_house_number>
+  <end_house_number>53844</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910007</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 49</street_name>
+    <city>LOYALTON</city>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930272">
+  <start_house_number>100</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910021</precinct_id>
+  <non_house_address>
+    <street_name>GROUNDHOG ROCK</street_name>
+    <city>SIERRAVILLE</city>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930273">
+  <start_house_number>4307</start_house_number>
+  <end_house_number>4307</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>BRANDY CITY</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930274">
+  <start_house_number>534</start_house_number>
+  <end_house_number>567</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910016</precinct_id>
+  <non_house_address>
+    <street_name>LONGHORN</street_name>
+    <city>LOYALTON</city>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930275">
+  <start_house_number>8</start_house_number>
+  <end_house_number>8</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>BUTTES MINE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930276">
+  <start_house_number>16</start_house_number>
+  <end_house_number>16</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>SQUIRREL</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>HOLW</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930277">
+  <start_house_number>228</start_house_number>
+  <end_house_number>228</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>FORTY-NINER</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930278">
+  <start_house_number>11</start_house_number>
+  <end_house_number>11</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>MIWOK</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930279">
+  <start_house_number>15921</start_house_number>
+  <end_house_number>15921</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49 4</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930280">
+  <start_house_number>540</start_house_number>
+  <end_house_number>942</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>OLD TOLLBRIDGE</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930281">
+  <start_house_number>15921</start_house_number>
+  <end_house_number>15921</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910010</precinct_id>
+  <non_house_address>
+    <street_name>HIGHWAY 49 2</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930282">
+  <start_house_number>19</start_house_number>
+  <end_house_number>19</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>POST OFFICE SPUR CREEK</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930283">
+  <start_house_number>4307</start_house_number>
+  <end_house_number>4307</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>BRANDY CITY</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930284">
+  <start_house_number>1000</start_house_number>
+  <end_house_number>1000</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>PORT WINE RIDGE</street_name>
+    <city>LA PORTE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95981</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930285">
+  <start_house_number>95</start_house_number>
+  <end_house_number>100</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>SLATE CASTLE RANCH</street_name>
+    <city>DOWNIEVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930286">
+  <start_house_number>15</start_house_number>
+  <end_house_number>22</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>CEDAR</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930287">
+  <start_house_number>927</start_house_number>
+  <end_house_number>927</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910017</precinct_id>
+  <non_house_address>
+    <street_name>SIERRA</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>BRKS</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930288">
+  <start_house_number>21340</start_house_number>
+  <end_house_number>21340</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 89</street_name>
+    <city>SATTLEY</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930289">
+  <start_house_number>480</start_house_number>
+  <end_house_number>480</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>RIDGE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930291">
+  <start_house_number>5</start_house_number>
+  <end_house_number>5</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>OLD CHIMNEY</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930292">
+  <start_house_number>200</start_house_number>
+  <end_house_number>200</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>DANTE</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930293">
+  <start_house_number>321</start_house_number>
+  <end_house_number>321</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>PATRICA</street_name>
+    <city>SIERRA CITY</city>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930294">
+  <start_house_number>22720</start_house_number>
+  <end_house_number>22720</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>STATE HIGHWAY 89</street_name>
+    <city>CALPINE</city>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930295">
+  <start_house_number>102</start_house_number>
+  <end_house_number>102</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>PLAZA</street_name>
+    <city>ALLEGHANY</city>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930296">
+  <start_house_number>428</start_house_number>
+  <end_house_number>428</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>WILLOW</street_name>
+    <city>SIERRAVILLE</city>
+    <state>CA</state>
+    <street_direction>W</street_direction>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930297">
+  <start_house_number>700</start_house_number>
+  <end_house_number>780</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>BEAVER CREEK</street_name>
+    <city>VERDI</city>
+    <street_suffix>CIR</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930298">
+  <start_house_number>320</start_house_number>
+  <end_house_number>395</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>SIERRA</street_name>
+    <city>VERDI</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930299">
+  <start_house_number>905</start_house_number>
+  <end_house_number>990</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>DEERWATER</street_name>
+    <city>VERDI</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930300">
+  <start_house_number>800</start_house_number>
+  <end_house_number>885</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>PINE CONE</street_name>
+    <city>VERDI</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930301">
+  <start_house_number>815</start_house_number>
+  <end_house_number>855</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>DOG VALLEY</street_name>
+    <city>VERDI</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930302">
+  <start_house_number>3500</start_house_number>
+  <end_house_number>3500</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>LADYBUG PEAK</street_name>
+    <city>VERDI</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930303">
+  <start_house_number>855</start_house_number>
+  <end_house_number>865</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>DOG CREEK</street_name>
+    <city>VERDI</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930304">
+  <start_house_number>884</start_house_number>
+  <end_house_number>884</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>PINE CONE</street_name>
+    <city>VERDI</city>
+    <street_suffix>RDG</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930305">
+  <start_house_number>8</start_house_number>
+  <end_house_number>8</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>FEENUNE</street_name>
+    <city>VERDI</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930306">
+  <start_house_number>820</start_house_number>
+  <end_house_number>880</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>PINECONE</street_name>
+    <city>VERDI</city>
+    <street_suffix>DR</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930307">
+  <start_house_number>60</start_house_number>
+  <end_house_number>60</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>B</street_name>
+    <city>CALPINE</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930308">
+  <start_house_number>500</start_house_number>
+  <end_house_number>500</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>USFS</street_name>
+    <city>CAMPTONVILLE</city>
+    <state>CA</state>
+    <zip>95922</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930309">
+  <start_house_number>1500</start_house_number>
+  <end_house_number>1500</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>SALMON LAKE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930310">
+  <start_house_number>1</start_house_number>
+  <end_house_number>1</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>JEAN</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930311">
+  <start_house_number>950</start_house_number>
+  <end_house_number>950</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910012</precinct_id>
+  <non_house_address>
+    <street_name>MALLCRINN</street_name>
+    <city>VERDI</city>
+    <street_suffix>CT</street_suffix>
+    <state>CA</state>
+    <zip>89439</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930312">
+  <start_house_number>104</start_house_number>
+  <end_house_number>104</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910005</precinct_id>
+  <non_house_address>
+    <street_name>CEDAR</street_name>
+    <city>CALPINE</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96124</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930313">
+  <start_house_number>35</start_house_number>
+  <end_house_number>35</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910008</precinct_id>
+  <non_house_address>
+    <street_name>WILD PLUM</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930314">
+  <start_house_number>355</start_house_number>
+  <end_house_number>355</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910011</precinct_id>
+  <non_house_address>
+    <street_name>COMMERCIAL ST D</street_name>
+    <city>DOWNIEVILLE</city>
+    <state>CA</state>
+    <zip>95936</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930315">
+  <start_house_number>511</start_house_number>
+  <end_house_number>511</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910015</precinct_id>
+  <non_house_address>
+    <street_name>MAIN</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930316">
+  <start_house_number>521</start_house_number>
+  <end_house_number>521</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910004</precinct_id>
+  <non_house_address>
+    <street_name>CAMPBELL HOT SPRINGS</street_name>
+    <city>SIERRAVILLE</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96126</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930317">
+  <start_house_number>484</start_house_number>
+  <end_house_number>484</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910002</precinct_id>
+  <non_house_address>
+    <street_name>GLORY HOLE</street_name>
+    <city>NORTH SAN JUAN</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>95960</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930318">
+  <start_house_number>205</start_house_number>
+  <end_house_number>205</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910018</precinct_id>
+  <non_house_address>
+    <street_name>FRONT</street_name>
+    <city>LOYALTON</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>96118</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930319">
+  <start_house_number>1901</start_house_number>
+  <end_house_number>1901</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910009</precinct_id>
+  <non_house_address>
+    <street_name>PACKER LAKE</street_name>
+    <city>SIERRA CITY</city>
+    <street_suffix>RD</street_suffix>
+    <state>CA</state>
+    <zip>96125</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930320">
+  <start_house_number>115</start_house_number>
+  <end_house_number>115</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910003</precinct_id>
+  <non_house_address>
+    <street_name>PEBBLE</street_name>
+    <city>GOODYEARS BAR</city>
+    <street_suffix>ST</street_suffix>
+    <state>CA</state>
+    <zip>95944</zip>
+  </non_house_address>
+</street_segment>
+<street_segment id="220930321">
+  <start_house_number>404</start_house_number>
+  <end_house_number>404</end_house_number>
+  <odd_even_both>both</odd_even_both>
+  <precinct_id>330910001</precinct_id>
+  <non_house_address>
+    <street_name>WHISPERING</street_name>
+    <city>ALLEGHANY</city>
+    <street_suffix>LN</street_suffix>
+    <state>CA</state>
+    <zip>95910</zip>
+  </non_house_address>
+</street_segment>
+</vip_object>

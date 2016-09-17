@@ -1,0 +1,91 @@
+{# templates/candidate/candidate_merge.html #}
+{% extends "template_base.html" %}
+
+{% block title %}{% if candidate_option1 %}{{ candidate_option1.candidate_name  }}{% else %}CANNOT MERGE{% endif %}{% endblock %}
+
+{%  block content %}
+<a href="{% url 'candidate:candidate_list' %}">< Back to Candidates</a>
+
+<h1>{% if candidate_option1 %}Merge {{ candidate_option1.candidate_name }}{% else %}CANNOT MERGE{% endif %}</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+
+<form action="{% url "candidate:candidate_edit_process" %}" method="post">
+{% csrf_token %}
+    <input type="hidden" name="candidate_id" value="{% if candidate_option1 %}{{ candidate_option1.id }}{% else %}0{% endif %}">
+
+{% if candidate_option1 and candidate_option2 %}
+<table>
+<tr>
+    <td>&nbsp;</td>
+    <td>Candidate Option 1</td>
+    <td>Candidate Option 2</td>
+</tr>
+<tr>
+    <td>Candidate Name</td>
+    <td><input type="text" name="candidate_name" id="candidate_name_id" value="{{ candidate_option1.candidate_name }}" /></td>
+    <td>{{ candidate_option2.candidate_name }}</td>
+</tr>
+<tr>
+    <td>ID</td>
+    <td>{{ candidate_option1.id }}</td>
+    <td>{{ candidate_option2.id }}</td>
+</tr>
+<tr>
+    <td>We Vote ID</td>
+    <td>{{ candidate_option1.we_vote_id }}</td>
+    <td>{{ candidate_option2.we_vote_id }}</td>
+</tr>
+<tr>
+    <td>Election</td>
+    <td>{{ candidate_option1.google_civic_election_id }}</td>
+    <td>{{ candidate_option2.google_civic_election_id }}</td>
+</tr>
+<tr>
+    <td>Website</td>
+    <td><input type="text" name="candidate_url" id="candidate_url_id" value="{{ candidate_option1.candidate_url }}" /></td>
+    <td>{{ candidate_option2.candidate_url }}</td>
+</tr>
+<tr>
+    <td>Twitter Handle</td>
+    <td><input type="text" name="candidate_twitter_handle" id="candidate_twitter_handle_id" value="{{ candidate_option1.candidate_twitter_handle }}" /></td>
+    <td>{{ candidate_option2.candidate_twitter_handle }}</td>
+</tr>
+<tr>
+    <td>Twitter URL (from Google)</td>
+    <td>{{ candidate_option1.twitter_url }}</td>
+    <td>{{ candidate_option2.twitter_url }}</td>
+</tr>
+<tr>
+    <td>Twitter Name</td>
+    <td>{{ candidate_option1.twitter_name }}</td>
+    <td>{{ candidate_option2.twitter_name }}</td>
+</tr>
+<tr>
+    <td>Twitter Description</td>
+    <td>{{ candidate_option1.twitter_description }}</td>
+    <td>{{ candidate_option2.twitter_description }}</td>
+</tr>
+<tr>
+    <td>Twitter Location</td>
+    <td>{{ candidate_option1.twitter_location }}</td>
+    <td>{{ candidate_option2.twitter_location }}</td>
+</tr>
+<tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><a href="{% url 'candidate:remove_duplicate_candidate' %}?google_civic_election_id={{ candidate_option2.google_civic_election_id }}&candidate_id={{ candidate_option2.id }}">
+        Delete Candidate Option 2</a></td>
+</tr>
+
+</table>
+<input type="hidden" name="remove_duplicate_process" value="1" />
+{% else %}
+{% endif %}
+<p><a href="{% url 'candidate:candidate_list' %}">cancel</a>
+<input type="submit" value="{% if candidate_option1 %}Update Candidate{% else %}CANNOT MERGE{% endif %}" /></p>
+</form>
+
+<br />
+
+{% endblock %}

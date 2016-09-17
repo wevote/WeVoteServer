@@ -1,0 +1,1591 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-10-06T11:32:55</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>www.co.imperial.ca.us</organization_url>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="64">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>www.co.imperial.ca.us</registration_info>
+  <absentee_ballot_info>www.co.imperial.ca.us</absentee_ballot_info>
+  <results_url>www.co.imperial.ca.us</results_url>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-10-20</registration_deadline>
+  <absentee_request_deadline>2014-10-28</absentee_request_deadline>
+</election>
+<locality id="13">
+  <name>County of Imperial</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="120000003176">
+  <name>VOTING PRECINCT 121004</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003737</polling_location_id>
+</precinct>
+<precinct id="120000003177">
+  <name>VOTING PRECINCT 121005</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003827</polling_location_id>
+</precinct>
+<precinct id="120000003178">
+  <name>VOTING PRECINCT 121006</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003829</polling_location_id>
+</precinct>
+<precinct id="120000003179">
+  <name>VOTING PRECINCT 121007</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003830</polling_location_id>
+</precinct>
+<precinct id="120000003180">
+  <name>VOTING PRECINCT 121008</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003827</polling_location_id>
+</precinct>
+<precinct id="120000003181">
+  <name>MAIL PRECINCT 121009</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003182">
+  <name>VOTING PRECINCT 121010</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003738</polling_location_id>
+</precinct>
+<precinct id="120000003183">
+  <name>VOTING PRECINCT 121011</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003739</polling_location_id>
+</precinct>
+<precinct id="120000003184">
+  <name>VOTING PRECINCT 121012</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003739</polling_location_id>
+</precinct>
+<precinct id="120000003185">
+  <name>VOTING PRECINCT 121013</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003775</polling_location_id>
+</precinct>
+<precinct id="120000003186">
+  <name>VOTING PRECINCT 121014</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003799</polling_location_id>
+</precinct>
+<precinct id="120000003187">
+  <name>MAIL PRECINCT 121015</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003188">
+  <name>VOTING PRECINCT 121016</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003839</polling_location_id>
+</precinct>
+<precinct id="120000003189">
+  <name>VOTING PRECINCT 121017</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003744</polling_location_id>
+</precinct>
+<precinct id="120000003190">
+  <name>VOTING PRECINCT 121018</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003804</polling_location_id>
+</precinct>
+<precinct id="120000003191">
+  <name>VOTING PRECINCT 121019</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003741</polling_location_id>
+</precinct>
+<precinct id="120000003192">
+  <name>VOTING PRECINCT 121020</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003777</polling_location_id>
+</precinct>
+<precinct id="120000003193">
+  <name>MAIL PRECINCT 121021</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003194">
+  <name>MAIL PRECINCT 181001</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003195">
+  <name>MAIL PRECINCT 181002</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003196">
+  <name>MAIL PRECINCT 184003</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003197">
+  <name>VOTING PRECINCT 186005</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003801</polling_location_id>
+</precinct>
+<precinct id="120000003198">
+  <name>MAIL PRECINCT 186006</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003199">
+  <name>MAIL PRECINCT 186007</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003200">
+  <name>VOTING PRECINCT 245205</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003904</polling_location_id>
+</precinct>
+<precinct id="120000003201">
+  <name>VOTING PRECINCT 245214</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003805</polling_location_id>
+</precinct>
+<precinct id="120000003202">
+  <name>VOTING PRECINCT 245215</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003749</polling_location_id>
+</precinct>
+<precinct id="120000003203">
+  <name>MAIL PRECINCT 245216</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003204">
+  <name>MAIL PRECINCT 245217</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003205">
+  <name>VOTING PRECINCT 245218</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003904</polling_location_id>
+</precinct>
+<precinct id="120000003206">
+  <name>VOTING PRECINCT 245219</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003749</polling_location_id>
+</precinct>
+<precinct id="120000003207">
+  <name>VOTING PRECINCT 245220</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003752</polling_location_id>
+</precinct>
+<precinct id="120000003208">
+  <name>VOTING PRECINCT 245221</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003752</polling_location_id>
+</precinct>
+<precinct id="120000003209">
+  <name>VOTING PRECINCT 245222</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003752</polling_location_id>
+</precinct>
+<precinct id="120000003210">
+  <name>VOTING PRECINCT 245223</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003779</polling_location_id>
+</precinct>
+<precinct id="120000003211">
+  <name>VOTING PRECINCT 245224</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003779</polling_location_id>
+</precinct>
+<precinct id="120000003212">
+  <name>MAIL PRECINCT 245225</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003213">
+  <name>VOTING PRECINCT 245226</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003790</polling_location_id>
+</precinct>
+<precinct id="120000003214">
+  <name>VOTING PRECINCT 245227</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003748</polling_location_id>
+</precinct>
+<precinct id="120000003215">
+  <name>VOTING PRECINCT 245228</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003747</polling_location_id>
+</precinct>
+<precinct id="120000003216">
+  <name>VOTING PRECINCT 245231</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003790</polling_location_id>
+</precinct>
+<precinct id="120000003217">
+  <name>VOTING PRECINCT 245236</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003905</polling_location_id>
+</precinct>
+<precinct id="120000003218">
+  <name>VOTING PRECINCT 247229</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003828</polling_location_id>
+</precinct>
+<precinct id="120000003219">
+  <name>VOTING PRECINCT 247234</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003818</polling_location_id>
+</precinct>
+<precinct id="120000003220">
+  <name>VOTING PRECINCT 247235</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003818</polling_location_id>
+</precinct>
+<precinct id="120000003221">
+  <name>MAIL PRECINCT 281011</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003222">
+  <name>MAIL PRECINCT 285001</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003223">
+  <name>MAIL PRECINCT 285002</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003224">
+  <name>MAIL PRECINCT 285004</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003225">
+  <name>MAIL PRECINCT 285006</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003226">
+  <name>MAIL PRECINCT 285007</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003227">
+  <name>MAIL PRECINCT 285033</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003228">
+  <name>MAIL PRECINCT 285042</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003229">
+  <name>MAIL PRECINCT 286210</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003230">
+  <name>MAIL PRECINCT 286212</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003231">
+  <name>VOTING PRECINCT 286213</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003898</polling_location_id>
+</precinct>
+<precinct id="120000003232">
+  <name>VOTING PRECINCT 286232</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003757</polling_location_id>
+</precinct>
+<precinct id="120000003233">
+  <name>MAIL PRECINCT 286238</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003234">
+  <name>VOTING PRECINCT 286244</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003898</polling_location_id>
+</precinct>
+<precinct id="120000003235">
+  <name>MAIL PRECINCT 286245</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003236">
+  <name>MAIL PRECINCT 287205</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003237">
+  <name>MAIL PRECINCT 287208</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003238">
+  <name>MAIL PRECINCT 287209</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003239">
+  <name>MAIL PRECINCT 287239</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003240">
+  <name>MAIL PRECINCT 287240</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003241">
+  <name>MAIL PRECINCT 287241</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003242">
+  <name>MAIL PRECINCT 287243</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003243">
+  <name>MAIL PRECINCT 289203</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003244">
+  <name>VOTING PRECINCT 345201</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003771</polling_location_id>
+</precinct>
+<precinct id="120000003245">
+  <name>VOTING PRECINCT 345202</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003791</polling_location_id>
+</precinct>
+<precinct id="120000003246">
+  <name>VOTING PRECINCT 345203</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003745</polling_location_id>
+</precinct>
+<precinct id="120000003247">
+  <name>VOTING PRECINCT 345204</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003787</polling_location_id>
+</precinct>
+<precinct id="120000003248">
+  <name>VOTING PRECINCT 345223</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003822</polling_location_id>
+</precinct>
+<precinct id="120000003249">
+  <name>VOTING PRECINCT 365018</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003763</polling_location_id>
+</precinct>
+<precinct id="120000003250">
+  <name>VOTING PRECINCT 365019</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003764</polling_location_id>
+</precinct>
+<precinct id="120000003251">
+  <name>VOTING PRECINCT 365020</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003792</polling_location_id>
+</precinct>
+<precinct id="120000003252">
+  <name>VOTING PRECINCT 365021</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003788</polling_location_id>
+</precinct>
+<precinct id="120000003253">
+  <name>VOTING PRECINCT 365025</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003788</polling_location_id>
+</precinct>
+<precinct id="120000003254">
+  <name>VOTING PRECINCT 365026</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003764</polling_location_id>
+</precinct>
+<precinct id="120000003255">
+  <name>VOTING PRECINCT 365027</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003895</polling_location_id>
+</precinct>
+<precinct id="120000003256">
+  <name>VOTING PRECINCT 365028</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003895</polling_location_id>
+</precinct>
+<precinct id="120000003257">
+  <name>MAIL PRECINCT 365229</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003258">
+  <name>MAIL PRECINCT 381116</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003259">
+  <name>MAIL PRECINCT 384122</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003260">
+  <name>MAIL PRECINCT 385005</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003261">
+  <name>MAIL PRECINCT 385009</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003262">
+  <name>MAIL PRECINCT 385011</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003263">
+  <name>VOTING PRECINCT 385014</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003746</polling_location_id>
+</precinct>
+<precinct id="120000003264">
+  <name>MAIL PRECINCT 385015</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003265">
+  <name>MAIL PRECINCT 385017</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003266">
+  <name>MAIL PRECINCT 387206</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003267">
+  <name>MAIL PRECINCT 387210</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003268">
+  <name>MAIL PRECINCT 387213</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003269">
+  <name>MAIL PRECINCT 387245</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003270">
+  <name>VOTING PRECINCT 389207</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003886</polling_location_id>
+</precinct>
+<precinct id="120000003271">
+  <name>VOTING PRECINCT 389208</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003886</polling_location_id>
+</precinct>
+<precinct id="120000003272">
+  <name>VOTING PRECINCT 411102</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003796</polling_location_id>
+</precinct>
+<precinct id="120000003273">
+  <name>VOTING PRECINCT 411103</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003808</polling_location_id>
+</precinct>
+<precinct id="120000003274">
+  <name>VOTING PRECINCT 411104</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003735</polling_location_id>
+</precinct>
+<precinct id="120000003275">
+  <name>VOTING PRECINCT 411105</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003735</polling_location_id>
+</precinct>
+<precinct id="120000003276">
+  <name>VOTING PRECINCT 411106</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003808</polling_location_id>
+</precinct>
+<precinct id="120000003277">
+  <name>VOTING PRECINCT 411107</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003876</polling_location_id>
+</precinct>
+<precinct id="120000003278">
+  <name>VOTING PRECINCT 411108</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003753</polling_location_id>
+</precinct>
+<precinct id="120000003279">
+  <name>VOTING PRECINCT 411109</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003736</polling_location_id>
+</precinct>
+<precinct id="120000003280">
+  <name>VOTING PRECINCT 411135</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003736</polling_location_id>
+</precinct>
+<precinct id="120000003281">
+  <name>MAIL PRECINCT 411136</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003282">
+  <name>VOTING PRECINCT 432019</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003740</polling_location_id>
+</precinct>
+<precinct id="120000003283">
+  <name>VOTING PRECINCT 432034</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003740</polling_location_id>
+</precinct>
+<precinct id="120000003284">
+  <name>VOTING PRECINCT 474117</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003797</polling_location_id>
+</precinct>
+<precinct id="120000003285">
+  <name>MAIL PRECINCT 481101</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003286">
+  <name>MAIL PRECINCT 481116</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003287">
+  <name>MAIL PRECINCT 481137</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003288">
+  <name>MAIL PRECINCT 482018</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003289">
+  <name>MAIL PRECINCT 482024</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003290">
+  <name>MAIL PRECINCT 482025</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003291">
+  <name>MAIL PRECINCT 482026</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003292">
+  <name>MAIL PRECINCT 482027</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003293">
+  <name>VOTING PRECINCT 482028</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003755</polling_location_id>
+</precinct>
+<precinct id="120000003294">
+  <name>MAIL PRECINCT 482029</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003295">
+  <name>MAIL PRECINCT 482030</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003296">
+  <name>MAIL PRECINCT 482031</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003297">
+  <name>MAIL PRECINCT 482033</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003298">
+  <name>MAIL PRECINCT 482040</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003299">
+  <name>MAIL PRECINCT 482042</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003300">
+  <name>MAIL PRECINCT 482043</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003301">
+  <name>MAIL PRECINCT 482044</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003302">
+  <name>MAIL PRECINCT 482110</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003303">
+  <name>MAIL PRECINCT 483020</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003304">
+  <name>VOTING PRECINCT 483021</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003813</polling_location_id>
+</precinct>
+<precinct id="120000003305">
+  <name>MAIL PRECINCT 483022</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003306">
+  <name>MAIL PRECINCT 483023</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003307">
+  <name>MAIL PRECINCT 483112</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003308">
+  <name>MAIL PRECINCT 483113</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003309">
+  <name>MAIL PRECINCT 483138</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003310">
+  <name>MAIL PRECINCT 484111</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003311">
+  <name>MAIL PRECINCT 484114</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003312">
+  <name>MAIL PRECINCT 484115</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003313">
+  <name>MAIL PRECINCT 484132</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003314">
+  <name>MAIL PRECINCT 484135</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003315">
+  <name>MAIL PRECINCT 484160</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003316">
+  <name>VOTING PRECINCT 511127</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003868</polling_location_id>
+</precinct>
+<precinct id="120000003317">
+  <name>VOTING PRECINCT 511128</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003758</polling_location_id>
+</precinct>
+<precinct id="120000003318">
+  <name>VOTING PRECINCT 511129</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003758</polling_location_id>
+</precinct>
+<precinct id="120000003319">
+  <name>VOTING PRECINCT 511130</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003868</polling_location_id>
+</precinct>
+<precinct id="120000003320">
+  <name>VOTING PRECINCT 511131</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003758</polling_location_id>
+</precinct>
+<precinct id="120000003321">
+  <name>VOTING PRECINCT 511143</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003868</polling_location_id>
+</precinct>
+<precinct id="120000003322">
+  <name>MAIL PRECINCT 521041</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003323">
+  <name>VOTING PRECINCT 521042</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003892</polling_location_id>
+</precinct>
+<precinct id="120000003324">
+  <name>MAIL PRECINCT 521043</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003325">
+  <name>MAIL PRECINCT 521044</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003901</polling_location_id>
+</precinct>
+<precinct id="120000003326">
+  <name>VOTING PRECINCT 521046</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003892</polling_location_id>
+</precinct>
+<precinct id="120000003327">
+  <name>VOTING PRECINCT 545209</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003750</polling_location_id>
+</precinct>
+<precinct id="120000003328">
+  <name>VOTING PRECINCT 545210</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003750</polling_location_id>
+</precinct>
+<precinct id="120000003329">
+  <name>MAIL PRECINCT 545238</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003330">
+  <name>MAIL PRECINCT 545245</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003901</polling_location_id>
+</precinct>
+<precinct id="120000003331">
+  <name>VOTING PRECINCT 547239</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003879</polling_location_id>
+</precinct>
+<precinct id="120000003332">
+  <name>MAIL PRECINCT 547240</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003333">
+  <name>MAIL PRECINCT 548211</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003334">
+  <name>VOTING PRECINCT 554021</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003810</polling_location_id>
+</precinct>
+<precinct id="120000003335">
+  <name>VOTING PRECINCT 554022</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003810</polling_location_id>
+</precinct>
+<precinct id="120000003336">
+  <name>VOTING PRECINCT 554023</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003760</polling_location_id>
+</precinct>
+<precinct id="120000003337">
+  <name>VOTING PRECINCT 554036</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003810</polling_location_id>
+</precinct>
+<precinct id="120000003338">
+  <name>MAIL PRECINCT 581002</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003339">
+  <name>MAIL PRECINCT 581125</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003340">
+  <name>MAIL PRECINCT 582134</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003341">
+  <name>MAIL PRECINCT 582135</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003342">
+  <name>MAIL PRECINCT 582224</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003343">
+  <name>MAIL PRECINCT 584003</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003344">
+  <name>MAIL PRECINCT 584004</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003345">
+  <name>MAIL PRECINCT 584006</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003346">
+  <name>MAIL PRECINCT 584007</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003347">
+  <name>MAIL PRECINCT 584014</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003348">
+  <name>MAIL PRECINCT 584017</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003349">
+  <name>MAIL PRECINCT 584018</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003350">
+  <name>VOTING PRECINCT 584020</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003877</polling_location_id>
+</precinct>
+<precinct id="120000003351">
+  <name>MAIL PRECINCT 584026</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003352">
+  <name>MAIL PRECINCT 585016</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003353">
+  <name>MAIL PRECINCT 585019</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003354">
+  <name>MAIL PRECINCT 585024</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003901</polling_location_id>
+</precinct>
+<precinct id="120000003355">
+  <name>MAIL PRECINCT 586005</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003356">
+  <name>MAIL PRECINCT 586008</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003357">
+  <name>MAIL PRECINCT 586032</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003358">
+  <name>MAIL PRECINCT 586037</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003359">
+  <name>MAIL PRECINCT 586201</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003360">
+  <name>MAIL PRECINCT 586213</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003361">
+  <name>MAIL PRECINCT 586248</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003362">
+  <name>MAIL PRECINCT 587233</name>
+  <locality_id>13</locality_id>
+  <mail_only>yes</mail_only>
+</precinct>
+<precinct id="120000003363">
+  <name>VOTING PRECINCT 588215</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003772</polling_location_id>
+</precinct>
+<precinct id="120000003364">
+  <name>MAIL PRECINCT 584050</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003909</polling_location_id>
+</precinct>
+<precinct id="120000003365">
+  <name>MAIL PRECINCT 584051</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003901</polling_location_id>
+</precinct>
+<precinct id="120000003366">
+  <name>MAIL PRECINCT 585049</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003908</polling_location_id>
+</precinct>
+<precinct id="120000003367">
+  <name>MAIL PRECINCT 588252</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003901</polling_location_id>
+</precinct>
+<precinct id="120000003368">
+  <name>MAIL PRECINCT 588253</name>
+  <locality_id>13</locality_id>
+  <polling_location_id>130000003901</polling_location_id>
+</precinct>
+<polling_location id="130000003735">
+  <address>
+    <line2>400 MAIN ST</line2>
+    <city>BRAWLEY</city>
+    <line1>400 MAIN ST., BRAWLEY, CA 92227</line1>
+    <state>CA</state>
+    <location_name>BRAWLEY CITY LIBRARY</location_name>
+    <zip>92227</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003736">
+  <address>
+    <line2>575 J ST</line2>
+    <city>BRAWLEY</city>
+    <line1>575 J ST., BRAWLEY, CA 92227</line1>
+    <state>CA</state>
+    <location_name>BRAWLEY SENIOR CENTER</location_name>
+    <zip>92227</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003737">
+  <address>
+    <line2>850 EADY AVE</line2>
+    <city>CALEXICO</city>
+    <line1>850 EADY AVE., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>MARIO ESQUER BLDG</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003738">
+  <address>
+    <line2>1070 BLAIR AVE</line2>
+    <city>CALEXICO</city>
+    <line1>1070 BLAIR AVE., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>CALEXICO METHODIST CHURCH</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003739">
+  <address>
+    <line2>2301 ANDRADE AVE</line2>
+    <city>CALEXICO</city>
+    <line1>2301 ANDRADE AVE., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>CALEXICO FAMILY APARTMENTS</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003740">
+  <address>
+    <line2>125 N PARK ST</line2>
+    <city>CALIPATRIA</city>
+    <line1>125 N PARK ST., CALIPATRIA, CA 92233</line1>
+    <state>CA</state>
+    <location_name>CALIPATRIA CITY HALL</location_name>
+    <zip>92233</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003741">
+  <address>
+    <line2>850 ENCINAS</line2>
+    <city>CALEXICO</city>
+    <line1>850 ENCINAS., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>CAMARENA LIBRARY</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003744">
+  <address>
+    <line2>707 DOOL AVE</line2>
+    <city>CALEXICO</city>
+    <line1>707 DOOL AVE., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>CALEXICO COMMUNITY CENTER</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003745">
+  <address>
+    <line2>871 PARK AVE</line2>
+    <city>EL CENTRO</city>
+    <line1>871 PARK AVE., EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>FIRST ASSEMBLY OF GOD</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003746">
+  <address>
+    <line2>1093 AIRPORT RD</line2>
+    <city>IMPERIAL</city>
+    <line1>1093 AIRPORT RD., IMPERIAL, CA 92251</line1>
+    <state>CA</state>
+    <location_name>RODEWAY INN</location_name>
+    <zip>92251</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003747">
+  <address>
+    <line2>1530 S WATERMAN AVE</line2>
+    <city>EL CENTRO</city>
+    <line1>1530 S WATERMAN AVE., EL CENTRO, CA</line1>
+    <state>CA</state>
+    <location_name>DE ANZA SCHOOL</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003748">
+  <address>
+    <line2>1900 S 6TH ST D</line2>
+    <city>EL CENTRO</city>
+    <line1>1900 S 6TH ST., EL CENTRO,  CA 92243</line1>
+    <state>CA</state>
+    <location_name>DESERT GARDENS SCHOOL</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003749">
+  <address>
+    <line2>1275 MAIN ST</line2>
+    <city>EL CENTRO</city>
+    <line1>1275 MAIN ST., EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>EL CENTRO CITY HALL</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003750">
+  <address>
+    <line2>375 S 1ST ST</line2>
+    <city>EL CENTRO</city>
+    <line1>375 S 1ST ST, EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>EL CENTRO COMMUNITY CENTER</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003752">
+  <address>
+    <line2>724 ORANGE AVE</line2>
+    <city>EL CENTRO</city>
+    <line1>724 ORANGE AVE., EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>FIRST BAPTIST CHURCH</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003753">
+  <address>
+    <line2>4249 HWY 86 ST</line2>
+    <city>BRAWLEY</city>
+    <line1>4249  HWY 86., BRAWLEY, CA 92227</line1>
+    <state>CA</state>
+    <location_name>GATEWAY CHURCH</location_name>
+    <zip>92227</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003755">
+  <address>
+    <line2>9 E 4TH ST</line2>
+    <city>NILAND</city>
+    <line1>9 E 4TH ST., NILAND, CA 92257</line1>
+    <state>CA</state>
+    <location_name>GRACE SMITH SCHOOL</location_name>
+    <zip>92257</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003757">
+  <address>
+    <line2>1085 INGRAM AVE</line2>
+    <city>HEBER</city>
+    <line1>1085 INGRAM AVE., HEBER, CA  92249</line1>
+    <state>CA</state>
+    <location_name>HEBER YOUTH CONNECTIONS</location_name>
+    <zip>92249</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003758">
+  <address>
+    <line2>1041 H ST</line2>
+    <city>BRAWLEY</city>
+    <line1>1041  H  ST., BRAWLEY, CA 92227</line1>
+    <state>CA</state>
+    <location_name>FIRST MEXICAN BAPTIST CHURCH</location_name>
+    <zip>92227</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003760">
+  <address>
+    <line2>800 BEALE AVE</line2>
+    <city>HOLTVILLE</city>
+    <line1>800 BEALE AVE., HOLTVILLE, CA 92250</line1>
+    <state>CA</state>
+    <location_name>HOLTVILLE MIDDLE SCHOOL</location_name>
+    <zip>92250</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003763">
+  <address>
+    <line2>401 W 14TH ST</line2>
+    <city>IMPERIAL</city>
+    <line1>401 W. 14TH ST.,  IMPERIAL, CA 92251</line1>
+    <state>CA</state>
+    <location_name>IMPERIAL BAPTIST CHURCH</location_name>
+    <zip>92251</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003764">
+  <address>
+    <line2>300 BARIONI BLVD</line2>
+    <city>IMPERIAL</city>
+    <line1>300 BARIONI BLVD., IMPERIAL, CA 92251</line1>
+    <state>CA</state>
+    <location_name>IMPERIAL COMMUNITY CHURCH</location_name>
+    <zip>92251</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003771">
+  <address>
+    <line2>1177 N 8TH ST</line2>
+    <city>EL CENTRO</city>
+    <line1>1177 N 8TH ST., EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>MC KINLEY SCHOOL</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003772">
+  <address>
+    <line2>2059 BOWKER RD F-22</line2>
+    <city>EL CENTRO</city>
+    <line1>2059 BOWKER RD, EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>MEADOWS UNION SCHOOL</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003775">
+  <address>
+    <line2>506 E 4TH ST</line2>
+    <city>CALEXICO</city>
+    <line1>506 E 4TH ST., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>NEIGHBORHOOD HOUSE</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003777">
+  <address>
+    <line2>1720 E IMPERIAL AVE</line2>
+    <city>CALEXICO</city>
+    <line1>1720 E IMPERIAL AVE., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>NEW LIFE ASSEMBLY</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003779">
+  <address>
+    <line2>395 SMOKETREE DR</line2>
+    <city>EL CENTRO</city>
+    <line1>395 SMOKETREE DR., EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>MOTEL 6 EL CENTRO</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003787">
+  <address>
+    <line2>2450 MAIN ST</line2>
+    <city>EL CENTRO</city>
+    <line1>2450 MAIN ST., EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>SUNFLOWER ELEMENTARY SCHOOL</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003788">
+  <address>
+    <line2>247 S IMPERIAL AVE</line2>
+    <city>IMPERIAL</city>
+    <line1>247 S IMPERIAL AVE., IMPERIAL, CA 92251</line1>
+    <state>CA</state>
+    <location_name>VFW HALL</location_name>
+    <zip>92251</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003790">
+  <address>
+    <line2>2015 COTTONWOOD CIR  RM ST C</line2>
+    <city>EL CENTRO</city>
+    <line1>2015 COTTONWOOD CIR RM C, EL CENTRO</line1>
+    <state>CA</state>
+    <location_name>VACATION INN</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003791">
+  <address>
+    <line2>1950 VILLA AVE</line2>
+    <city>EL CENTRO</city>
+    <line1>1950 VILLA AVE., EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>KING ELEMENTARY SCH</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003792">
+  <address>
+    <line2>247 S IMPERIAL AVE</line2>
+    <city>IMPERIAL</city>
+    <line1>247 S IMPERIAL AVE., IMPERIAL, CA 92251</line1>
+    <state>CA</state>
+    <location_name>VFW HALL</location_name>
+    <zip>92251</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003796">
+  <address>
+    <line2>555 N WESTERN AVE</line2>
+    <city>BRAWLEY</city>
+    <line1>555 N WESTERN AVE., BRAWLEY, CA</line1>
+    <state>CA</state>
+    <location_name>WESTERN AVE BAPTIST CHURCH</location_name>
+    <zip>92227</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003797">
+  <address>
+    <line2>355 S CENTER ST</line2>
+    <city>WESTMORLAND</city>
+    <line1>355 S CENTER ST., WESTMORLAND, CA 92281</line1>
+    <state>CA</state>
+    <location_name>WESTMORLAND CITY HALL</location_name>
+    <zip>92281</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003799">
+  <address>
+    <line2>320 HEBER AVE</line2>
+    <city>CALEXICO</city>
+    <line1>320 HEBER AVE., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>WOMANS CLUB</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003801">
+  <address>
+    <line2>686 BASELINE RD</line2>
+    <city>WINTERHAVEN</city>
+    <line1>686 BASELINE RD, WINTERHAVEN, CA 92283</line1>
+    <state>CA</state>
+    <location_name>SAN PASQUAL USD</location_name>
+    <zip>92283</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003802">
+  <address>
+    <line1>IT WILL AUTOMATICALLY BE SENT</line1>
+    <state>CA</state>
+    <location_name>NO NEED TO APPLY FOR BALLOT</location_name>
+  </address>
+</polling_location>
+<polling_location id="130000003804">
+  <address>
+    <line2>2151 ROCKWOOD AVE</line2>
+    <city>CALEXICO</city>
+    <line1>2151 ROCKWOOD AVE., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>ALEJANDRO RIVERA SENIOR APTS</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003805">
+  <address>
+    <line2>550 S WATERMAN AVE</line2>
+    <city>EL CENTRO</city>
+    <line1>550 S. WATERMAN AVE, EL CENTRO, CA</line1>
+    <state>CA</state>
+    <location_name>HEDRICK SCHOOL</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003808">
+  <address>
+    <line2>225 A ST</line2>
+    <city>BRAWLEY</city>
+    <line1>225  A ST., BRAWLEY, CA 92227</line1>
+    <state>CA</state>
+    <location_name>LIONS CENTER</location_name>
+    <zip>92227</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003810">
+  <address>
+    <line2>121 5TH ST</line2>
+    <city>HOLTVILLE</city>
+    <line1>121  5TH ST., HOLTVILLE, CA 92250</line1>
+    <state>CA</state>
+    <location_name>HOLTVILLE CITY HALL</location_name>
+    <zip>92250</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003813">
+  <address>
+    <line2>1375 BORREGO SALTON SEA WAY AVE F-22</line2>
+    <city>SALTON SEA</city>
+    <line1>1375 BORREGO SALTON SEA WAY F-22</line1>
+    <state>CA</state>
+    <location_name>WEST SHORES SENIOR CITIZENS CLUB</location_name>
+    <zip>92275</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003818">
+  <address>
+    <line2>701 W MC CABE RD</line2>
+    <city>EL CENTRO</city>
+    <line1>701 W MC CABE RD., EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>CORFMAN SCHOOL</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003820">
+  <address>
+    <line2>NO STREET ENTERED</line2>
+    <city>NO CITY ENTERED</city>
+    <line1>IT WILL AUTOMATICALLY BE SENT</line1>
+    <state>CA</state>
+    <location_name>NO NEED TO APPLY FOR BALLOT</location_name>
+    <zip>NONE</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003822">
+  <address>
+    <line2>871 PARK AVE</line2>
+    <city>EL CENTRO</city>
+    <line1>871 PARK AVE, EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>FIRST ASSEMBLY OF GOD</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003827">
+  <address>
+    <line2>655 SHERIDAN ST</line2>
+    <city>CALEXICO</city>
+    <line1>655 SHERIDAN ST., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>MAINS ELEMENTARY SCHOOL</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003828">
+  <address>
+    <line2>1290 S IMPERIAL AVE</line2>
+    <city>EL CENTRO</city>
+    <line1>1290 S IMPERIAL AVE., EL CENTRO, CA</line1>
+    <state>CA</state>
+    <location_name>CENTRAL BAPTIST CHURCH</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003829">
+  <address>
+    <line2>1202 KLOKE RD</line2>
+    <city>CALEXICO</city>
+    <line1>1202 KLOKE RD., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>W MORENO JR HS</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003830">
+  <address>
+    <line2>850 EADY AVE</line2>
+    <city>CALEXICO</city>
+    <line1>1202 KLOKE RD., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>W MORENO JR HS</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003839">
+  <address>
+    <line2>707 DOOL AVE</line2>
+    <city>CALEXICO</city>
+    <line1>707 DOOL AVE., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>CALEXICO COMMUNITY CENTER</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003868">
+  <address>
+    <line2>1401 B ST</line2>
+    <city>BRAWLEY</city>
+    <line1>1401 B ST., BRAWLEY, CA 92227</line1>
+    <state>CA</state>
+    <location_name>OAKLEY SCHOOL</location_name>
+    <zip>92227</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003876">
+  <address>
+    <line2>575 W MAIN ST</line2>
+    <city>BRAWLEY</city>
+    <line1>575 W MAIN ST., BRAWLEY, CA 92227</line1>
+    <state>CA</state>
+    <location_name>BRAWLEY INN</location_name>
+    <zip>92227</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003877">
+  <address>
+    <line2>2050 COUNTRY CLUB DR</line2>
+    <city>HOLTVILLE</city>
+    <line1>2050 COUNTRY CLUB DR., HOLTVILLE, CA 922</line1>
+    <state>CA</state>
+    <location_name>BARBARA WORTH</location_name>
+    <zip>92250</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003879">
+  <address>
+    <line2>2895 S 4TH ST B</line2>
+    <city>EL CENTRO</city>
+    <line1>2895 S. 4TH ST., BLDG "B", EL CENTRO, CA</line1>
+    <state>CA</state>
+    <location_name>CALWORKS</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003886">
+  <address>
+    <line2>1812 RIO VISTA ST</line2>
+    <city>SEELEY</city>
+    <line1>1812 W RIO VISTA ST., SEELEY, CA 92273</line1>
+    <state>CA</state>
+    <location_name>SEELEY ELEMENTARY SCHOOL</location_name>
+    <zip>92273</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003892">
+  <address>
+    <line2>1251 ZAPATA ST</line2>
+    <city>CALEXICO</city>
+    <line1>1251 ZAPATA ST., CALEXICO, CA 92231</line1>
+    <state>CA</state>
+    <location_name>CESAR CHAVEZ ELEMENTARY SCHOOL</location_name>
+    <zip>92231</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003895">
+  <address>
+    <line2>627 JOSHUA TREE</line2>
+    <city>IMPERIAL</city>
+    <line1>627 JOSHUA TREE ST., IMPERIAL, CA 92251</line1>
+    <state>CA</state>
+    <location_name>TL WAGGONER SCHOOL</location_name>
+    <zip>92251</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003898">
+  <address>
+    <line2>1052 HEBER AVE</line2>
+    <city>HEBER</city>
+    <line1>1052 HEBER AVE., HEBER, CA 92249</line1>
+    <state>CA</state>
+    <location_name>HEBER ELEMENTARY SCHOOL</location_name>
+    <zip>92249</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003904">
+  <address>
+    <line2>1290 S IMPERIAL AVE</line2>
+    <city>EL CENTRO</city>
+    <line1>1290S IMPERIAL AVE., EL CENTRO, CA 92243</line1>
+    <state>CA</state>
+    <location_name>CENTRAL BAPTIST CHURCH</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+<polling_location id="130000003905">
+  <address>
+    <line2>1290 S IMPERIAL AVE</line2>
+    <city>EL CENTRO</city>
+    <line1>1290 S IMPERIAL AVE., EL CENTRO, CA 9224</line1>
+    <state>CA</state>
+    <location_name>CENTRAL BAPTIST CHURCH</location_name>
+    <zip>92243</zip>
+  </address>
+</polling_location>
+</vip_object>

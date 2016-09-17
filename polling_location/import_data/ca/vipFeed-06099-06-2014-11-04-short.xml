@@ -1,0 +1,2247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vip_object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/votinginfoproject/vip-specification/blob/master/vip_spec_v3.0.xsd" schemaVersion="3.0">
+<source id="1">
+  <name>CALIFORNIA</name>
+  <datetime>2014-09-15T03:17:12</datetime>
+  <description>Voter Data is prohibited from unauthorized use.</description>
+  <organization_url>www.stanvote.com</organization_url>
+</source>
+<state id="5">
+  <name>CALIFORNIA</name>
+</state>
+<election id="97">
+  <date>2014-11-04</date>
+  <election_type>GEN</election_type>
+  <state_id>5</state_id>
+  <registration_info>www.stanvote.com</registration_info>
+  <absentee_ballot_info>www.stanvote.com</absentee_ballot_info>
+  <results_url>www.stanvote.com</results_url>
+  <polling_hours>11/4/2014 7:00:00 AM-11/4/2014 8:00:00 PM</polling_hours>
+  <election_day_registration>no</election_day_registration>
+  <registration_deadline>2014-10-20</registration_deadline>
+  <absentee_request_deadline>2014-10-28</absentee_request_deadline>
+</election>
+<locality id="50">
+  <name>STANISLAUS COUNTY</name>
+  <state_id>5</state_id>
+  <type>county</type>
+</locality>
+<precinct id="1200000035209">
+  <name>AIRPORT 2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042866</polling_location_id>
+</precinct>
+<precinct id="1200000035210">
+  <name>CASWELL 1,3</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042727</polling_location_id>
+</precinct>
+<precinct id="1200000035211">
+  <name>CASWELL 5,6,14</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042949</polling_location_id>
+</precinct>
+<precinct id="1200000035212">
+  <name>CASWELL 7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042976</polling_location_id>
+</precinct>
+<precinct id="1200000035213">
+  <name>CERES 1,21,24,25</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042908</polling_location_id>
+</precinct>
+<precinct id="1200000035214">
+  <name>CERES 2,8,37</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042811</polling_location_id>
+</precinct>
+<precinct id="1200000035215">
+  <name>CERES 3,4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042983</polling_location_id>
+</precinct>
+<precinct id="1200000035216">
+  <name>CERES 5,19,32</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042983</polling_location_id>
+</precinct>
+<precinct id="1200000035217">
+  <name>CERES 6,13,39</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042600</polling_location_id>
+</precinct>
+<precinct id="1200000035218">
+  <name>CERES 7,12</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042579</polling_location_id>
+</precinct>
+<precinct id="1200000035220">
+  <name>CERES 10,20</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042585</polling_location_id>
+</precinct>
+<precinct id="1200000035221">
+  <name>CERES 14,17,40</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042592</polling_location_id>
+</precinct>
+<precinct id="1200000035222">
+  <name>CERES 16,18,33,38</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042848</polling_location_id>
+</precinct>
+<precinct id="1200000035223">
+  <name>CERES 26,28,34</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042791</polling_location_id>
+</precinct>
+<precinct id="1200000035224">
+  <name>CHATOM 1,4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042731</polling_location_id>
+</precinct>
+<precinct id="1200000035225">
+  <name>CLAUS 2, LANGWORTH 5</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042664</polling_location_id>
+</precinct>
+<precinct id="1200000035227">
+  <name>CLUB 1,5</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042791</polling_location_id>
+</precinct>
+<precinct id="1200000035228">
+  <name>CLUB 3</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042961</polling_location_id>
+</precinct>
+<precinct id="1200000035229">
+  <name>CLUB 4,6,7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042961</polling_location_id>
+</precinct>
+<precinct id="1200000035230">
+  <name>CLUB 13</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042791</polling_location_id>
+</precinct>
+<precinct id="1200000035231">
+  <name>COFFEE 5, MCHENRY 1,3</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042764</polling_location_id>
+</precinct>
+<precinct id="1200000035232">
+  <name>COFFEE 7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042927</polling_location_id>
+</precinct>
+<precinct id="1200000035233">
+  <name>COFFEE 8,11, MCHENRY 7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000043007</polling_location_id>
+</precinct>
+<precinct id="1200000035234">
+  <name>COFFEE 10, MCHENRY 4,5,6,9</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042977</polling_location_id>
+</precinct>
+<precinct id="1200000035235">
+  <name>CROWS LANDING 2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042967</polling_location_id>
+</precinct>
+<precinct id="1200000035237">
+  <name>DEL PUERTO 3</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042622</polling_location_id>
+</precinct>
+<precinct id="1200000035239">
+  <name>DENAIR 2,12,13,23</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042941</polling_location_id>
+</precinct>
+<precinct id="1200000035240">
+  <name>DENAIR 9,10,11,14,19</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042941</polling_location_id>
+</precinct>
+<precinct id="1200000035241">
+  <name>EMPIRE 3,4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042614</polling_location_id>
+</precinct>
+<precinct id="1200000035242">
+  <name>EMPIRE 5,9</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042724</polling_location_id>
+</precinct>
+<precinct id="1200000035244">
+  <name>HART RANSOM 2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042947</polling_location_id>
+</precinct>
+<precinct id="1200000035245">
+  <name>HUGHSON 1,2,4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042623</polling_location_id>
+</precinct>
+<precinct id="1200000035246">
+  <name>HUGHSON 3,5,6</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042875</polling_location_id>
+</precinct>
+<precinct id="1200000035247">
+  <name>LANGWORTH 1,4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042906</polling_location_id>
+</precinct>
+<precinct id="1200000035248">
+  <name>LANGWORTH 2B-K</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042906</polling_location_id>
+</precinct>
+<precinct id="1200000035249">
+  <name>MODESTO 1,7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042730</polling_location_id>
+</precinct>
+<precinct id="1200000035250">
+  <name>MODESTO 2,101,175</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042743</polling_location_id>
+</precinct>
+<precinct id="1200000035251">
+  <name>MODESTO 3,124</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042968</polling_location_id>
+</precinct>
+<precinct id="1200000035252">
+  <name>MODESTO 4,115,167,201,207</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042975</polling_location_id>
+</precinct>
+<precinct id="1200000035253">
+  <name>MODESTO 5</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042567</polling_location_id>
+</precinct>
+<precinct id="1200000035254">
+  <name>MODESTO 6,92,200</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042910</polling_location_id>
+</precinct>
+<precinct id="1200000035255">
+  <name>MODESTO 8</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042651</polling_location_id>
+</precinct>
+<precinct id="1200000035256">
+  <name>MODESTO 9,12,188,194</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042826</polling_location_id>
+</precinct>
+<precinct id="1200000035257">
+  <name>MODESTO 10,11,13</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042581</polling_location_id>
+</precinct>
+<precinct id="1200000035258">
+  <name>MODESTO 14,15,208</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042582</polling_location_id>
+</precinct>
+<precinct id="1200000035259">
+  <name>MODESTO 16,64,67</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042836</polling_location_id>
+</precinct>
+<precinct id="1200000035260">
+  <name>MODESTO 17,65</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042656</polling_location_id>
+</precinct>
+<precinct id="1200000035261">
+  <name>MODESTO 18,85,96,144,153,166</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042952</polling_location_id>
+</precinct>
+<precinct id="1200000035262">
+  <name>MODESTO 19,20,52,130-132</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042730</polling_location_id>
+</precinct>
+<precinct id="1200000035263">
+  <name>MODESTO 21,22,158,184</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042596</polling_location_id>
+</precinct>
+<precinct id="1200000035264">
+  <name>MODESTO 23</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042964</polling_location_id>
+</precinct>
+<precinct id="1200000035265">
+  <name>MODESTO 24,135,148,160</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042840</polling_location_id>
+</precinct>
+<precinct id="1200000035266">
+  <name>MODESTO 25,26</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042830</polling_location_id>
+</precinct>
+<precinct id="1200000035267">
+  <name>MODESTO 27,33,34</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042605</polling_location_id>
+</precinct>
+<precinct id="1200000035268">
+  <name>MODESTO 28,31,32,209</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042606</polling_location_id>
+</precinct>
+<precinct id="1200000035269">
+  <name>MODESTO 29,61,133,171</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042741</polling_location_id>
+</precinct>
+<precinct id="1200000035270">
+  <name>MODESTO 30,60,81,89,103</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042654</polling_location_id>
+</precinct>
+<precinct id="1200000035271">
+  <name>MODESTO 35,37,39</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042617</polling_location_id>
+</precinct>
+<precinct id="1200000035272">
+  <name>MODESTO 36,38</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042617</polling_location_id>
+</precinct>
+<precinct id="1200000035273">
+  <name>MODESTO 40-42,152</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042633</polling_location_id>
+</precinct>
+<precinct id="1200000035274">
+  <name>MODESTO 43,45,46,57</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042770</polling_location_id>
+</precinct>
+<precinct id="1200000035275">
+  <name>MODESTO 44,55,79,80</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042688</polling_location_id>
+</precinct>
+<precinct id="1200000035276">
+  <name>MODESTO 47,56,72,129,149</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042742</polling_location_id>
+</precinct>
+<precinct id="1200000035277">
+  <name>MODESTO 48,126</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042661</polling_location_id>
+</precinct>
+<precinct id="1200000035278">
+  <name>MODESTO 50,51,54,82,189</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042639</polling_location_id>
+</precinct>
+<precinct id="1200000035279">
+  <name>MODESTO 53,159</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042723</polling_location_id>
+</precinct>
+<precinct id="1200000035280">
+  <name>MODESTO 58,66,102</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042770</polling_location_id>
+</precinct>
+<precinct id="1200000035281">
+  <name>MODESTO 59,150</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042927</polling_location_id>
+</precinct>
+<precinct id="1200000035282">
+  <name>MODESTO 62,116,185</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042741</polling_location_id>
+</precinct>
+<precinct id="1200000035283">
+  <name>MODESTO 63,164</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042655</polling_location_id>
+</precinct>
+<precinct id="1200000035284">
+  <name>MODESTO 68,97</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042747</polling_location_id>
+</precinct>
+<precinct id="1200000035285">
+  <name>MODESTO 69,90,113</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042851</polling_location_id>
+</precinct>
+<precinct id="1200000035286">
+  <name>MODESTO 70,123,128</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042722</polling_location_id>
+</precinct>
+<precinct id="1200000035287">
+  <name>MODESTO 71,119,127,155</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042818</polling_location_id>
+</precinct>
+<precinct id="1200000035288">
+  <name>MODESTO 73,176</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042564</polling_location_id>
+</precinct>
+<precinct id="1200000035289">
+  <name>MODESTO 74,104,118</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042812</polling_location_id>
+</precinct>
+<precinct id="1200000035290">
+  <name>MODESTO 75,78,191</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042937</polling_location_id>
+</precinct>
+<precinct id="1200000035291">
+  <name>MODESTO 76,77</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042668</polling_location_id>
+</precinct>
+<precinct id="1200000035292">
+  <name>MODESTO 83,88,177</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042644</polling_location_id>
+</precinct>
+<precinct id="1200000035293">
+  <name>MODESTO 84,86</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042691</polling_location_id>
+</precinct>
+<precinct id="1200000035294">
+  <name>MODESTO 91,108,178</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042619</polling_location_id>
+</precinct>
+<precinct id="1200000035295">
+  <name>MODESTO 93,94,110</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042675</polling_location_id>
+</precinct>
+<precinct id="1200000035296">
+  <name>MODESTO 95</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042918</polling_location_id>
+</precinct>
+<precinct id="1200000035297">
+  <name>MODESTO 98,109,145,179,211</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042952</polling_location_id>
+</precinct>
+<precinct id="1200000035298">
+  <name>MODESTO 99,141</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042902</polling_location_id>
+</precinct>
+<precinct id="1200000035299">
+  <name>MODESTO 100,122,136,151</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042722</polling_location_id>
+</precinct>
+<precinct id="1200000035300">
+  <name>MODESTO 105,181</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042955</polling_location_id>
+</precinct>
+<precinct id="1200000035301">
+  <name>MODESTO 106,111</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042690</polling_location_id>
+</precinct>
+<precinct id="1200000035302">
+  <name>MODESTO 107,146,163</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042851</polling_location_id>
+</precinct>
+<precinct id="1200000035303">
+  <name>MODESTO 112,162,180</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042722</polling_location_id>
+</precinct>
+<precinct id="1200000035304">
+  <name>MODESTO 117</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042691</polling_location_id>
+</precinct>
+<precinct id="1200000035305">
+  <name>MODESTO 121</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042812</polling_location_id>
+</precinct>
+<precinct id="1200000035306">
+  <name>MODESTO 125,154,156</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042978</polling_location_id>
+</precinct>
+<precinct id="1200000035307">
+  <name>MODESTO 165,174,182</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042644</polling_location_id>
+</precinct>
+<precinct id="1200000035308">
+  <name>MODESTO 168,169</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042727</polling_location_id>
+</precinct>
+<precinct id="1200000035309">
+  <name>MODESTO 172,173,210</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042978</polling_location_id>
+</precinct>
+<precinct id="1200000035315">
+  <name>NORTH 2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042885</polling_location_id>
+</precinct>
+<precinct id="1200000035316">
+  <name>NORTH 3</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042577</polling_location_id>
+</precinct>
+<precinct id="1200000035318">
+  <name>OAKDALE 3,13,16,17</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042591</polling_location_id>
+</precinct>
+<precinct id="1200000035319">
+  <name>OAKDALE 4,5,8</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042832</polling_location_id>
+</precinct>
+<precinct id="1200000035320">
+  <name>OAKDALE 6,7,12</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042760</polling_location_id>
+</precinct>
+<precinct id="1200000035321">
+  <name>OAKDALE 14,15,18</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042760</polling_location_id>
+</precinct>
+<precinct id="1200000035322">
+  <name>PARADISE 1,2,6,14,16</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042840</polling_location_id>
+</precinct>
+<precinct id="1200000035323">
+  <name>PARADISE 4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042655</polling_location_id>
+</precinct>
+<precinct id="1200000035324">
+  <name>PARADISE 5</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042567</polling_location_id>
+</precinct>
+<precinct id="1200000035325">
+  <name>PARADISE 7,8</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042720</polling_location_id>
+</precinct>
+<precinct id="1200000035326">
+  <name>PATTERSON 1</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042966</polling_location_id>
+</precinct>
+<precinct id="1200000035327">
+  <name>PATTERSON 2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042966</polling_location_id>
+</precinct>
+<precinct id="1200000035328">
+  <name>PATTERSON 3,11,14</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042932</polling_location_id>
+</precinct>
+<precinct id="1200000035329">
+  <name>PATTERSON 4,9</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042932</polling_location_id>
+</precinct>
+<precinct id="1200000035330">
+  <name>PATTERSON 5,13</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042933</polling_location_id>
+</precinct>
+<precinct id="1200000035331">
+  <name>PATTERSON 8,10,12,15</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042933</polling_location_id>
+</precinct>
+<precinct id="1200000035332">
+  <name>RIVERBANK 1,2,13</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042694</polling_location_id>
+</precinct>
+<precinct id="1200000035333">
+  <name>RIVERBANK 3,7,12</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042664</polling_location_id>
+</precinct>
+<precinct id="1200000035334">
+  <name>RIVERBANK 4,5,6</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042805</polling_location_id>
+</precinct>
+<precinct id="1200000035335">
+  <name>RIVERBANK 8,11</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042882</polling_location_id>
+</precinct>
+<precinct id="1200000035336">
+  <name>RIVERBANK 9,10,14</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042946</polling_location_id>
+</precinct>
+<precinct id="1200000035338">
+  <name>SALIDA 2,5A,B</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042863</polling_location_id>
+</precinct>
+<precinct id="1200000035339">
+  <name>SALIDA 3A,B,6B</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042905</polling_location_id>
+</precinct>
+<precinct id="1200000035340">
+  <name>SALIDA 3C,4,6A,C</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042665</polling_location_id>
+</precinct>
+<precinct id="1200000035341">
+  <name>SALIDA 7,9</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042823</polling_location_id>
+</precinct>
+<precinct id="1200000035342">
+  <name>TURLOCK 1,2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042698</polling_location_id>
+</precinct>
+<precinct id="1200000035343">
+  <name>TURLOCK 3,41,42</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042731</polling_location_id>
+</precinct>
+<precinct id="1200000035344">
+  <name>TURLOCK 4,7B</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042957</polling_location_id>
+</precinct>
+<precinct id="1200000035346">
+  <name>TURLOCK 6,8</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042721</polling_location_id>
+</precinct>
+<precinct id="1200000035347">
+  <name>TURLOCK 9,18,27</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042679</polling_location_id>
+</precinct>
+<precinct id="1200000035348">
+  <name>TURLOCK 12,20,26,52</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042692</polling_location_id>
+</precinct>
+<precinct id="1200000035349">
+  <name>TURLOCK 13,47</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042601</polling_location_id>
+</precinct>
+<precinct id="1200000035350">
+  <name>TURLOCK 14,15B,19,37</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042697</polling_location_id>
+</precinct>
+<precinct id="1200000035351">
+  <name>TURLOCK 15A,C,16B,17</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042701</polling_location_id>
+</precinct>
+<precinct id="1200000035352">
+  <name>TURLOCK 16A,24,39,51</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042953</polling_location_id>
+</precinct>
+<precinct id="1200000035353">
+  <name>TURLOCK 22,28A,45,53B</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042701</polling_location_id>
+</precinct>
+<precinct id="1200000035354">
+  <name>TURLOCK 23,29,31,34,46,50</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042670</polling_location_id>
+</precinct>
+<precinct id="1200000035355">
+  <name>TURLOCK 25,36</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042700</polling_location_id>
+</precinct>
+<precinct id="1200000035356">
+  <name>TURLOCK 28B,43,53A,54</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042670</polling_location_id>
+</precinct>
+<precinct id="1200000035357">
+  <name>TURLOCK 30,32,49</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042957</polling_location_id>
+</precinct>
+<precinct id="1200000035358">
+  <name>TURLOCK 38,40,55</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042865</polling_location_id>
+</precinct>
+<precinct id="1200000035359">
+  <name>TURLOCK 44,48,57</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042926</polling_location_id>
+</precinct>
+<precinct id="1200000035360">
+  <name>WATERFORD 1,3,6,7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042696</polling_location_id>
+</precinct>
+<precinct id="1200000035361">
+  <name>WATERFORD 2,4,5</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042650</polling_location_id>
+</precinct>
+<precinct id="1200000035362">
+  <name>WESTPORT 1</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042705</polling_location_id>
+</precinct>
+<precinct id="1200000035363">
+  <name>STAR 2,3</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042650</polling_location_id>
+</precinct>
+<precinct id="1200000035364">
+  <name>STAR 5</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042620</polling_location_id>
+</precinct>
+<precinct id="1200000035367">
+  <name>MT VIEW 1E,K</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035368">
+  <name>MT VIEW 1A,B,F,J</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035369">
+  <name>AIRPORT 1, EMPIRE 7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035370">
+  <name>AIRPORT 3,4, CLUB 2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035371">
+  <name>CASWELL 2,4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035372">
+  <name>CASWELL 10-12, CLUB 11,15</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035373">
+  <name>CERES 11,23</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035374">
+  <name>CHATOM 2,3,5-7 DENAIR 4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035375">
+  <name>CLAUS 4, COFFEE 6</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035376">
+  <name>CLAUS 5, COFFEE 2, EMPIRE 8</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035378">
+  <name>CLUB 8,12</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035379">
+  <name>CLUB 10, EMPIRE 1</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035380">
+  <name>CLUB 16, EMPIRE 6</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035382">
+  <name>CROWS LANDING 1, MT VIEW 3</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035383">
+  <name>CROWS LANDING 3, DENAIR 6,21, MT VIEW 1L,2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035384">
+  <name>CROWS LANDING 4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035385">
+  <name>CROWS LANDING 5,6A,B</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035388">
+  <name>DENAIR 3,5,8,16-18</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035390">
+  <name>EMPIRE 10</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035391">
+  <name>HART RANSOM 3,6,7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035392">
+  <name>HART RANSOM 4, PARADISE 9,24</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035393">
+  <name>HICKMAN 2, STAR 4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035394">
+  <name>MCHENRY 2,8</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035396">
+  <name>MODESTO 87,114,137,161,199</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035397">
+  <name>MODESTO 196</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035398">
+  <name>MT VIEW 1G,H</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035400">
+  <name>PARADISE 3,10,11,13</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035402">
+  <name>PARADISE 15,17-19,21,23</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035403">
+  <name>PARADISE 20,22</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035404">
+  <name>PATTERSON 6,7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035405">
+  <name>TURLOCK 21,33</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035406">
+  <name>WESTPORT 3</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035407">
+  <name>WHITMORE 12</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035408">
+  <name>SALIDA 1,5C-E,10</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042862</polling_location_id>
+</precinct>
+<precinct id="1200000035409">
+  <name>SALIDA 8</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042905</polling_location_id>
+</precinct>
+<precinct id="1200000035410">
+  <name>TURLOCK 5,7A,C,10,11</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042674</polling_location_id>
+</precinct>
+<precinct id="1200000035411">
+  <name>CERES 9,15,22,27,30,31</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042794</polling_location_id>
+</precinct>
+<precinct id="1200000035412">
+  <name>OAKDALE 1,2,9-11</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042925</polling_location_id>
+</precinct>
+<precinct id="1200000035413">
+  <name>COFFEE 1, EMPIRE 2,11, HICKMAN 3, STAR 1</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035414">
+  <name>NORTH 1,4</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042959</polling_location_id>
+</precinct>
+<precinct id="1200000035415">
+  <name>CLAUS 3, LANGWORTH 2A,3</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042760</polling_location_id>
+</precinct>
+<precinct id="1200000035416">
+  <name>MT VIEW 1C,D,I  WESTPORT 2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042909</polling_location_id>
+</precinct>
+<precinct id="1200000035417">
+  <name>DENAIR 1,7,22</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042624</polling_location_id>
+</precinct>
+<precinct id="1200000035418">
+  <name>CROWS LANDING 7,8A,C,F-H,10A-C,E</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035419">
+  <name>CROWS LANDING 6C,8B,D,E,9,10D</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035420">
+  <name>DEL PUERTO 1,2,10</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042846</polling_location_id>
+</precinct>
+<precinct id="1200000035421">
+  <name>DEL PUERTO 6,7</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035422">
+  <name>HART RANSOM 1</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042947</polling_location_id>
+</precinct>
+<precinct id="1200000035423">
+  <name>NEWMAN 1,2</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042772</polling_location_id>
+</precinct>
+<precinct id="1200000035424">
+  <name>NEWMAN 3,4,5,6</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042772</polling_location_id>
+</precinct>
+<precinct id="1200000035425">
+  <name>NEWMAN 7,8,9</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042970</polling_location_id>
+</precinct>
+<precinct id="1200000035426">
+  <name>WHITMORE 1,2,6</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042884</polling_location_id>
+</precinct>
+<precinct id="1200000035427">
+  <name>WHITMORE 3-5,7,8</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042707</polling_location_id>
+</precinct>
+<precinct id="1200000035428">
+  <name>MODESTO 49,170,195,197,198</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<precinct id="1200000035429">
+  <name>SALIDA 11</name>
+  <locality_id>50</locality_id>
+  <polling_location_id>1300000042803</polling_location_id>
+</precinct>
+<polling_location id="1300000042564">
+  <address>
+    <line2>148 IMPERIAL AVE</line2>
+    <city>MODESTO</city>
+    <line1>148 IMPERIAL AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>MODESTO FIRE STATION #10</location_name>
+    <zip>95358</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042567">
+  <address>
+    <line2>718 TUOLUMNE BLVD</line2>
+    <city>MODESTO</city>
+    <line1>718 TUOLUMNE BLVD MODESTO</line1>
+    <state>CA</state>
+    <location_name>MANCINI SENIOR CENTER HALL</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042577">
+  <address>
+    <line2>13231 PIONEER AVE</line2>
+    <city>VALLEY HOME</city>
+    <line1>13231 PIONEER AVE VALLEY HOME</line1>
+    <state>CA</state>
+    <location_name>VALLEY HOME SCHOOL</location_name>
+    <zip>95384</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042579">
+  <address>
+    <line2>1859 RICHARD WAY</line2>
+    <city>CERES</city>
+    <line1>1859 RICHARD WAY CERES</line1>
+    <state>CA</state>
+    <location_name>CERES CHRISTIAN TERRACE</location_name>
+    <zip>95307</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042581">
+  <address>
+    <line2>1600 CARVER RD</line2>
+    <city>MODESTO</city>
+    <line1>1600 CARVER RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>TRINITY UNITED PRESBYTERIAN CHURCH</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042582">
+  <address>
+    <line2>1530 MOUNT VERNON DR BUS.</line2>
+    <city>MODESTO</city>
+    <line1>1530 MT VERNON DR MODESTO</line1>
+    <state>CA</state>
+    <location_name>EVERETT ELEMENTARY SCHOOL</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042585">
+  <address>
+    <line2>2841 FOWLER RD</line2>
+    <city>CERES</city>
+    <line1>2841 FOWLER RD CERES</line1>
+    <state>CA</state>
+    <location_name>LAS CASITAS MOBILE HOME PARK</location_name>
+    <zip>95307</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042591">
+  <address>
+    <line2>311 N 8TH AVE</line2>
+    <city>OAKDALE</city>
+    <line1>311 N 8TH AVE OAKDALE</line1>
+    <state>CA</state>
+    <location_name>OAKDALE COMMUNITY CHURCH</location_name>
+    <zip>95361</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042592">
+  <address>
+    <line2>3939 CENTRAL AVE BUS.</line2>
+    <city>CERES</city>
+    <line1>3939 CENTRAL AVE CERES</line1>
+    <state>CA</state>
+    <location_name>COLONY PARK ESTATES MHP</location_name>
+    <zip>95307</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042596">
+  <address>
+    <line2>1315 LA LOMA AVE</line2>
+    <city>MODESTO</city>
+    <line1>1315 LA LOMA AVE  MODESTO</line1>
+    <state>CA</state>
+    <location_name>LA LOMA GRACE BRETHREN CHURCH</location_name>
+    <zip>95354</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042600">
+  <address>
+    <line2>2609 LAWRENCE ST BUS</line2>
+    <city>CERES</city>
+    <line1>2609 LAWRENCE ST CERES</line1>
+    <state>CA</state>
+    <location_name>CERES AMERICAN LEGION HALL</location_name>
+    <zip>95307</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042601">
+  <address>
+    <line2>3951 N WALNUT RD</line2>
+    <city>TURLOCK</city>
+    <line1>3951 N WALNUT RD TURLOCK</line1>
+    <state>CA</state>
+    <location_name>TURLOCK JUNIOR HIGH SCHOOL</location_name>
+    <zip>95382</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042605">
+  <address>
+    <line2>400 ENSLEN AVE BUS.</line2>
+    <city>MODESTO</city>
+    <line1>400 ENSLEN AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>BOY SCOUT CLUBHOUSE</location_name>
+    <zip>95354</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042606">
+  <address>
+    <line2>1215 LUCERN BUS.</line2>
+    <city>MODESTO</city>
+    <line1>1215 LUCERN AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>JOHN MUIR ELEMENTARY SCHOOL</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042614">
+  <address>
+    <line2>434 CHURCH ST</line2>
+    <city>MODESTO</city>
+    <line1>434 CHURCH ST EMPIRE</line1>
+    <state>CA</state>
+    <location_name>CHURCH OF CHRIST</location_name>
+    <zip>95357</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042617">
+  <address>
+    <line2>505 W GRANGER AVE</line2>
+    <city>MODESTO</city>
+    <line1>505 W GRANGER AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>OUR LADY OF FATIMA</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042619">
+  <address>
+    <line2>3931 COFFEE RD</line2>
+    <city>MODESTO</city>
+    <line1>3931 COFFEE RD  MODESTO</line1>
+    <state>CA</state>
+    <location_name>SILVERWOOD MOBILE HOME PARK</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042620">
+  <address>
+    <line2>854 I ST</line2>
+    <city>HICKMAN</city>
+    <line1>854 I ST HICKMAN</line1>
+    <state>CA</state>
+    <location_name>HICKMAN COMMUNITY CHURCH</location_name>
+    <zip>95323</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042622">
+  <address>
+    <line2>8598 KERN ST</line2>
+    <city>WESTLEY</city>
+    <line1>8598 KERN ST WESTLEY</line1>
+    <state>CA</state>
+    <location_name>WESTLEY FIRE STATION</location_name>
+    <zip>95387</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042623">
+  <address>
+    <line2>2007 6TH ST BUS.</line2>
+    <city>HUGHSON</city>
+    <line1>2007 6TH ST HUGHSON</line1>
+    <state>CA</state>
+    <location_name>HUGHSON UNITED METHODIST CHURCH</location_name>
+    <zip>95326</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042624">
+  <address>
+    <line2>3850 N GRATTON RD</line2>
+    <city>DENAIR</city>
+    <line1>3850 N GRATTON RD DENAIR</line1>
+    <state>CA</state>
+    <location_name>DENAIR COMMUNITY  CENTER</location_name>
+    <zip>95316</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042633">
+  <address>
+    <line2>1918 SHERWOOD AVE</line2>
+    <city>MODESTO</city>
+    <line1>1918 SHERWOOD AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>NORTH MODESTO CHURCH OF GOD</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042639">
+  <address>
+    <line2>1120 MCHENRY AVE BUS</line2>
+    <city>MODESTO</city>
+    <line1>1120 MC HENRY AVE  MODESTO</line1>
+    <state>CA</state>
+    <location_name>HOUSE OF CARPETS</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042644">
+  <address>
+    <line2>3461 MERLE AVE</line2>
+    <city>MODESTO</city>
+    <line1>3461 MERLE AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>ST PETER LUTHERAN CHURCH</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042650">
+  <address>
+    <line2>150 N PASADENA AVE</line2>
+    <city>WATERFORD</city>
+    <line1>150 N PASADENA AVE  WATERFORD</line1>
+    <state>CA</state>
+    <location_name>WATERFORD ASSEMBLY OF GOD CHURCH</location_name>
+    <zip>95386</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042651">
+  <address>
+    <line2>1325 BEVERLY DR</line2>
+    <city>MODESTO</city>
+    <line1>1325 BEVERLY DR MODESTO</line1>
+    <state>CA</state>
+    <location_name>STANISLAUS COUNTY PAL OFFICE</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042654">
+  <address>
+    <line2>547 ROSE AVE</line2>
+    <city>MODESTO</city>
+    <line1>547 ROSE AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>CALVARY LUTHERAN CHURCH</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042655">
+  <address>
+    <line2>1701 ROBERTSON RD</line2>
+    <city>MODESTO</city>
+    <line1>1701 ROBERTSON RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>HOUSING AUTHORITY OF STAN CO</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042656">
+  <address>
+    <line2>2621 PRESCOTT RD</line2>
+    <city>MODESTO</city>
+    <line1>2621 PRESCOTT RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>FRIENDLY VILLAGE MOBILE HOME PARK</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042661">
+  <address>
+    <line2>2920 MIDDLEBORO PL</line2>
+    <city>MODESTO</city>
+    <line1>2920 MIDDLEBORO PL MODESTO</line1>
+    <state>CA</state>
+    <location_name>LAKEWOOD ELEMENTARY SCHOOL</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042664">
+  <address>
+    <line2>3600 SANTA FE ST</line2>
+    <city>RIVERBANK</city>
+    <line1>3600 SANTA FE ST RIVERBANK</line1>
+    <state>CA</state>
+    <location_name>RIVERBANK COMMUNITY CENTER</location_name>
+    <zip>95367</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042665">
+  <address>
+    <line2>4825 BROADWAY BUS.</line2>
+    <city>SALIDA</city>
+    <line1>4825 BROADWAY SALIDA</line1>
+    <state>CA</state>
+    <location_name>FIRST CONGREGATIONAL CHURCH</location_name>
+    <zip>95368</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042668">
+  <address>
+    <line2>2307 OAKDALE RD</line2>
+    <city>MODESTO</city>
+    <line1>2307 OAKDALE RD  MODESTO</line1>
+    <state>CA</state>
+    <location_name>GLENWOOD MOBILE HOME PARK</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042670">
+  <address>
+    <line2>1619 E MONTE VISTA AVE</line2>
+    <city>TURLOCK</city>
+    <line1>1619 E MONTE VISTA AVE TURLOCK</line1>
+    <state>CA</state>
+    <location_name>MONTE VISTA CHAPEL</location_name>
+    <zip>95382</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042674">
+  <address>
+    <line2>640 N MINARET AVE</line2>
+    <city>TURLOCK</city>
+    <line1>640 N MINARET AVE TURLOCK</line1>
+    <state>CA</state>
+    <location_name>GOOD SHEPHERD LUTHERAN CHURCH</location_name>
+    <zip>95380</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042675">
+  <address>
+    <line2>605 SYLVAN AVE</line2>
+    <city>MODESTO</city>
+    <line1>605 SYLVAN AVE  MODESTO</line1>
+    <state>CA</state>
+    <location_name>SYLVAN UNION SCHOOL DISTRICT</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042679">
+  <address>
+    <line2>1360 N JOHNSON RD</line2>
+    <city>TURLOCK</city>
+    <line1>1360 N JOHNSON RD TURLOCK</line1>
+    <state>CA</state>
+    <location_name>CROSSROADS CHURCH</location_name>
+    <zip>95380</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042688">
+  <address>
+    <line2>1200 W RUMBLE RD BUS.</line2>
+    <city>MODESTO</city>
+    <line1>1200 W RUMBLE RD  MODESTO</line1>
+    <state>CA</state>
+    <location_name>GRACE DAVIS HIGH SCHOOL</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042690">
+  <address>
+    <line2>2300 BRIGGSMORE AVE</line2>
+    <city>MODESTO</city>
+    <line1>2300  BRIGGSMORE AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>EASTRIDGE COMMUNITY CHURCH OF NAZARENE</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042691">
+  <address>
+    <line2>3936 DALE RD</line2>
+    <city>MODESTO</city>
+    <line1>3936 DALE RD  MODESTO</line1>
+    <state>CA</state>
+    <location_name>CHURCH OF THE CROSS</location_name>
+    <zip>95356</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042692">
+  <address>
+    <line2>2125 N OLIVE AVE</line2>
+    <city>TURLOCK</city>
+    <line1>2125 N OLIVE AVE TURLOCK</line1>
+    <state>CA</state>
+    <location_name>COVENANT VILLAGE OF TURLOCK</location_name>
+    <zip>95382</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042694">
+  <address>
+    <line2>2827 TOPEKA ST</line2>
+    <city>RIVERBANK</city>
+    <line1>2827 TOPEKA ST RIVERBANK</line1>
+    <state>CA</state>
+    <location_name>ST FRANCES OF ROME</location_name>
+    <zip>95367</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042696">
+  <address>
+    <line2>321 E ST</line2>
+    <city>WATERFORD</city>
+    <line1>321 E ST WATERFORD</line1>
+    <state>CA</state>
+    <location_name>STANISLAUS CONSOLIDATED FIRE #34</location_name>
+    <zip>95386</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042697">
+  <address>
+    <line2>2217 GEER RD</line2>
+    <city>TURLOCK</city>
+    <line1>2217 GEER RD TURLOCK</line1>
+    <state>CA</state>
+    <location_name>TURLOCK FREE WILL BAPTIST CHURCH</location_name>
+    <zip>95382</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042698">
+  <address>
+    <line2>677 N SODERQUIST RD</line2>
+    <city>TURLOCK</city>
+    <line1>677 N SODERQUIST  RD TURLOCK</line1>
+    <state>CA</state>
+    <location_name>MAGIC SANDS MOBILE HOME PARK</location_name>
+    <zip>95380</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042700">
+  <address>
+    <line2>1700 N TULLY RD</line2>
+    <city>TURLOCK</city>
+    <line1>1700 N TULLY RD  TURLOCK</line1>
+    <state>CA</state>
+    <location_name>OAK PARK APARTMENTS CLUBHOUSE</location_name>
+    <zip>95380</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042701">
+  <address>
+    <line2>700 E MONTE VISTA AVE</line2>
+    <city>TURLOCK</city>
+    <line1>700 E MONTE VISTA AVE TURLOCK</line1>
+    <state>CA</state>
+    <location_name>CALVARY BAPTIST CHURCH</location_name>
+    <zip>95382</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042705">
+  <address>
+    <line2>5160 S CARPENTER RD</line2>
+    <city>MODESTO</city>
+    <line1>5160 S CARPENTER RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>WESTPORT FIRE STATION</location_name>
+    <zip>95358</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042707">
+  <address>
+    <line2>7820 FOX RD</line2>
+    <city>HUGHSON</city>
+    <line1>7820 FOX RD HUGHSON</line1>
+    <state>CA</state>
+    <location_name>ST ANTHONYS CATHOLIC CHURCH</location_name>
+    <zip>95326</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042720">
+  <address>
+    <line2>1313 BEVERLY DR BUS.</line2>
+    <city>MODESTO</city>
+    <line1>1313 BEVERLY DR MODESTO</line1>
+    <state>CA</state>
+    <location_name>BURBANK PARADISE FIRE STATION</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042721">
+  <address>
+    <line2>1574 E CANAL DR BUS</line2>
+    <city>TURLOCK</city>
+    <line1>1574 E CANAL DR TURLOCK</line1>
+    <state>CA</state>
+    <location_name>TURLOCK SCHOOL DISTRICT OFFICE</location_name>
+    <zip>95380</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042722">
+  <address>
+    <line2>2545 SYLVAN AVE</line2>
+    <city>MODESTO</city>
+    <line1>2545 SYLVAN AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>SYLVAN IMPROVEMENT CLUB</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042723">
+  <address>
+    <line2>635 EL VISTA AVE</line2>
+    <city>MODESTO</city>
+    <line1>635 EL VISTA AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>MODESTO FIRE STATION #03</location_name>
+    <zip>95354</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042724">
+  <address>
+    <line2>7737 YOSEMITE BLVD</line2>
+    <city>MODESTO</city>
+    <line1>7737 YOSEMITE BLVD MODESTO</line1>
+    <state>CA</state>
+    <location_name>STANISLAUS CONSOLIDATED FIRE #33</location_name>
+    <zip>95357</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042727">
+  <address>
+    <line2>116 EL PASO AVE</line2>
+    <city>MODESTO</city>
+    <line1>116 EL PASO AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>SHACKELFORD FAMILY LEARNING CTR</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042730">
+  <address>
+    <line2>1732 MILLER AVE BUS.</line2>
+    <city>MODESTO</city>
+    <line1>1732 MILLER AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>CALVARY BAPTIST CHURCH</location_name>
+    <zip>95354</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042731">
+  <address>
+    <line2>2602 S WALNUT RD</line2>
+    <city>TURLOCK</city>
+    <line1>2602 S WALNUT RD TURLOCK</line1>
+    <state>CA</state>
+    <location_name>OUR LADY OF THE ASSUMPTION  CHURCH</location_name>
+    <zip>95380</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042741">
+  <address>
+    <line2>2301 WOODLAND AVE</line2>
+    <city>MODESTO</city>
+    <line1>2301 WOODLAND AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>MODESTO CHURCH OF THE BRETHREN</location_name>
+    <zip>95358</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042742">
+  <address>
+    <line2>2908 COFFEE RD BUS.</line2>
+    <city>MODESTO</city>
+    <line1>2908 COFFEE RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>SYLVAN ELEMENTARY SCHOOL</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042743">
+  <address>
+    <line2>1528 OAKDALE RD</line2>
+    <city>MODESTO</city>
+    <line1>1528 OAKDALE RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>ST PAULS EPISCOPAL CHURCH</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042747">
+  <address>
+    <line2>3420 SHAWNEE DR</line2>
+    <city>MODESTO</city>
+    <line1>3420 SHAWNEE DR MODESTO</line1>
+    <state>CA</state>
+    <location_name>STANDIFORD PLACE</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042760">
+  <address>
+    <line2>1700 WEST F ST BUS</line2>
+    <city>OAKDALE</city>
+    <line1>1700 WEST F ST OAKDALE</line1>
+    <state>CA</state>
+    <location_name>OAKDALE FAMILY CHURCH OF THE NAZARENE</location_name>
+    <zip>95361</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042764">
+  <address>
+    <line2>2206 KIERNAN AVE</line2>
+    <city>MODESTO</city>
+    <line1>2206 KIERNAN AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>UNITARIAN FELLOWSHIP CHURCH</location_name>
+    <zip>95356</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042770">
+  <address>
+    <line2>913 FLOYD AVE</line2>
+    <city>MODESTO</city>
+    <line1>913 FLOYD AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>MODESTO COVENANT CHURCH</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042772">
+  <address>
+    <line2>1162 N ST</line2>
+    <city>NEWMAN</city>
+    <line1>1162 N ST NEWMAN</line1>
+    <state>CA</state>
+    <location_name>NEWMAN FIRE STATION</location_name>
+    <zip>95360</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042791">
+  <address>
+    <line2>3901 E WHITMORE AVE</line2>
+    <city>CERES</city>
+    <line1>3901 E WHITMORE AVE CERES</line1>
+    <state>CA</state>
+    <location_name>VALLEY VIEW CHURCH  OF THE NAZARENE</location_name>
+    <zip>95307</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042794">
+  <address>
+    <line2>1021 MOFFETT RD</line2>
+    <city>MODESTO</city>
+    <line1>1021 MOFFETT RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>VIRGINIA PARKS ELEMENTARY SCHOOL</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042803">
+  <address>
+    <line1>**BALLOT WILL BE MAILED TO YOU**</line1>
+    <state>CA</state>
+    <location_name>***DO NOT RETURN APPLICATION***</location_name>
+    <zip>0</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042805">
+  <address>
+    <line2>6443 ESTELLE AVE BUS</line2>
+    <city>RIVERBANK</city>
+    <line1>6443 ESTELLE AVE RIVERBANK</line1>
+    <state>CA</state>
+    <location_name>CHRIST THE KING EPISCOPAL CHURCH</location_name>
+    <zip>95367</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042811">
+  <address>
+    <line2>3618 HELEN PERRY RD</line2>
+    <city>CERES</city>
+    <line1>3618 HELEN PERRY RD CERES</line1>
+    <state>CA</state>
+    <location_name>SAM VAUGHN ELEMENTARY SCHOOL</location_name>
+    <zip>95307</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042812">
+  <address>
+    <line2>641 NORSEMAN DR BUS</line2>
+    <city>MODESTO</city>
+    <line1>641 NORSEMAN DR MODESTO</line1>
+    <state>CA</state>
+    <location_name>JOHANSEN HIGH SCHOOL THEATER</location_name>
+    <zip>95357</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042818">
+  <address>
+    <line2>4141 COPPER CREEK DR</line2>
+    <city>MODESTO</city>
+    <line1>4141 COPPER CREEK DR MODESTO</line1>
+    <state>CA</state>
+    <location_name>COPPER CREEK CLUB HOUSE</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042823">
+  <address>
+    <line2>4801 GOLD VALLEY RD</line2>
+    <city>SALIDA</city>
+    <line1>4801 GOLD VALLEY RD SALIDA</line1>
+    <state>CA</state>
+    <location_name>DENA BOER SCHOOL</location_name>
+    <zip>95368</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042826">
+  <address>
+    <line2>1161 CARVER RD BUS</line2>
+    <city>MODESTO</city>
+    <line1>1161 CARVER RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>DESTINY CHRISTIAN CENTER</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042830">
+  <address>
+    <line2>850 16TH ST</line2>
+    <city>MODESTO</city>
+    <line1>850 16TH STREET MODESTO</line1>
+    <state>CA</state>
+    <location_name>FIRST UNITED METHODIST CHURCH</location_name>
+    <zip>95354</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042832">
+  <address>
+    <line2>330 MAXWELL AVE</line2>
+    <city>OAKDALE</city>
+    <line1>330 MAXWELL AVE OAKDALE</line1>
+    <state>CA</state>
+    <location_name>OAKDALE CHRISTIAN CHURCH</location_name>
+    <zip>95361</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042836">
+  <address>
+    <line2>2800 W RUMBLE RD</line2>
+    <city>MODESTO</city>
+    <line1>2800 W RUMBLE RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>ASHWOOD VILLAGE APTS</location_name>
+    <zip>95350</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042840">
+  <address>
+    <line2>725 MAZE BLVD</line2>
+    <city>MODESTO</city>
+    <line1>725 MAZE BLVD MODESTO</line1>
+    <state>CA</state>
+    <location_name>ST JAMES ORTHODOX CHURCH</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042846">
+  <address>
+    <line2>344 W LAS PALMAS AVE</line2>
+    <city>PATTERSON</city>
+    <line1>344 W LAS PALMAS AVE PATTERSON</line1>
+    <state>CA</state>
+    <location_name>PATTERSON FIRE STATION</location_name>
+    <zip>95363</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042848">
+  <address>
+    <line2>420 E SERVICE RD</line2>
+    <city>CERES</city>
+    <line1>420 E SERVICE RD CERES</line1>
+    <state>CA</state>
+    <location_name>CERES FIRE STATION #3</location_name>
+    <zip>95307</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042851">
+  <address>
+    <line2>3900 DALE RD</line2>
+    <city>MODESTO</city>
+    <line1>3900 DALE RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>DALE COMMONS</location_name>
+    <zip>95356</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042862">
+  <address>
+    <line2>5057 KIERNAN CT</line2>
+    <city>SALIDA</city>
+    <line1>5057 KIERNAN CT SALIDA</line1>
+    <state>CA</state>
+    <location_name>VALLEY FAMILY CHURCH</location_name>
+    <zip>95368</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042863">
+  <address>
+    <line2>4835 SISK RD</line2>
+    <city>SALIDA</city>
+    <line1>4835 SISK RD SALIDA</line1>
+    <state>CA</state>
+    <location_name>SALIDA LIBRARY</location_name>
+    <zip>95368</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042865">
+  <address>
+    <line2>4105 CROWELL RD</line2>
+    <city>TURLOCK</city>
+    <line1>4105 CROWELL RD TURLOCK</line1>
+    <state>CA</state>
+    <location_name>CORNERSTONE COVENANT CHURCH</location_name>
+    <zip>95382</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042866">
+  <address>
+    <line2>461 MITCHELL RD</line2>
+    <city>MODESTO</city>
+    <line1>461 MITCHELL RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>STANISLAUS CONSOLIDATED FIRE #31</location_name>
+    <zip>95354</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042875">
+  <address>
+    <line2>7700 FOX RD</line2>
+    <city>HUGHSON</city>
+    <line1>7700 FOX RD  HUGHSON</line1>
+    <state>CA</state>
+    <location_name>SAMARITAN VILLAGE</location_name>
+    <zip>95326</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042882">
+  <address>
+    <line2>5901 NEWBROOK CIR</line2>
+    <city>RIVERBANK</city>
+    <line1>5901 NEWBROOK CIR RIVERBANK</line1>
+    <state>CA</state>
+    <location_name>QUAIL MEADOWS MHP CLUBHOUSE</location_name>
+    <zip>95367</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042884">
+  <address>
+    <line2>5627 7TH ST</line2>
+    <city>KEYES</city>
+    <line1>5627 7TH ST KEYES</line1>
+    <state>CA</state>
+    <location_name>KEYES FIRE STATION</location_name>
+    <zip>95328</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042885">
+  <address>
+    <line2>17631 SONORA RD</line2>
+    <city>OAKDALE</city>
+    <line1>17631 SONORA RD KNIGHTS FERRY</line1>
+    <state>CA</state>
+    <location_name>KNIGHTS FERRY SENIOR CENTER</location_name>
+    <zip>95361</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042902">
+  <address>
+    <line2>2800 BRADEN AVE</line2>
+    <city>MODESTO</city>
+    <line1>2800 BRADEN AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>STONEBRIDGE APARTMENTS CLUBHOUSE</location_name>
+    <zip>95356</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042905">
+  <address>
+    <line2>5551 CICCARELLI RD</line2>
+    <city>MODESTO</city>
+    <line1>5551 CICCARELLI RD SALIDA</line1>
+    <state>CA</state>
+    <location_name>MODESTO FIRE STATION #14</location_name>
+    <zip>95358</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042906">
+  <address>
+    <line2>12000 HWY 120</line2>
+    <city>OAKDALE</city>
+    <line1>12000 HWY 120 OAKDALE</line1>
+    <state>CA</state>
+    <location_name>BURCHELL NURSERY ( HWY 120 / WAMBLE )</location_name>
+    <zip>95361</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042908">
+  <address>
+    <line2>1824 NADINE AVE</line2>
+    <city>MODESTO</city>
+    <line1>1824 NADINE AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>ADKISON ELEMENTARY SCHOOL</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042909">
+  <address>
+    <line2>4033 CENTRAL AVE</line2>
+    <city>CERES</city>
+    <line1>4033 CENTRAL AVE CERES</line1>
+    <state>CA</state>
+    <location_name>CENTRAL VALLEY HIGH SCHOOL</location_name>
+    <zip>95307</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042910">
+  <address>
+    <line2>601 S MARTIN LUTHER KING DR</line2>
+    <city>MODESTO</city>
+    <line1>601 N MARTIN LUTHER KING DR MODESTO</line1>
+    <state>CA</state>
+    <location_name>KING KENNEDY MEMORIAL CENTER</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042918">
+  <address>
+    <line2>4225 CARVER RD</line2>
+    <city>MODESTO</city>
+    <line1>4225 CARVER RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>MODESTO FIRE STATION #11</location_name>
+    <zip>95356</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042925">
+  <address>
+    <line2>400 S MAAG AVE</line2>
+    <city>OAKDALE</city>
+    <line1>400 S MAAG AVE OAKDALE</line1>
+    <state>CA</state>
+    <location_name>OAKDALE JUNIOR HIGH SCHOOL</location_name>
+    <zip>95361</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042926">
+  <address>
+    <line2>3791 CROWELL RD</line2>
+    <city>TURLOCK</city>
+    <line1>3791 CROWELL RD TURLOCK</line1>
+    <state>CA</state>
+    <location_name>PARAMOUNT COURT SENIOR LIVING</location_name>
+    <zip>95382</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042927">
+  <address>
+    <line2>3529 FOREST GLENN DR</line2>
+    <city>MODESTO</city>
+    <line1>3529 FOREST GLENN DR MODESTO</line1>
+    <state>CA</state>
+    <location_name>STRATFORD BEYER PARK</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042932">
+  <address>
+    <line2>220 SALADO AVE</line2>
+    <city>PATTERSON</city>
+    <line1>220 SALADO AVE PATTERSON</line1>
+    <state>CA</state>
+    <location_name>SACRED HEART CATHOLIC CHURCH</location_name>
+    <zip>95363</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042933">
+  <address>
+    <line2>510 KEYSTONE BLVD</line2>
+    <city>PATTERSON</city>
+    <line1>510 KEYSTONE BLVD PATTERSON</line1>
+    <state>CA</state>
+    <location_name>PATTERSON JOINT UNIFIED SCHOOL DISTRICT</location_name>
+    <zip>95363</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042937">
+  <address>
+    <line2>4025 FARA BIUNDO DR</line2>
+    <city>MODESTO</city>
+    <line1>4025 FARA BIUNDO DR MODESTO</line1>
+    <state>CA</state>
+    <location_name>MODESTO FIRE STATION #09</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042941">
+  <address>
+    <line2>3200 E MONTE VISTA AVE</line2>
+    <city>DENAIR</city>
+    <line1>3200 E MONTE VISTA AVE DENAIR</line1>
+    <state>CA</state>
+    <location_name>CONNECTING POINT CHURCH OF THE NAZARENE</location_name>
+    <zip>95316</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042946">
+  <address>
+    <line2>4825 ROSELLE AVE</line2>
+    <city>MODESTO</city>
+    <line1>4825 ROSELLE AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>LIVING FAITH COMMUNITY CHURCH</location_name>
+    <zip>95357</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042947">
+  <address>
+    <line2>3920 SHOEMAKE AVE</line2>
+    <city>MODESTO</city>
+    <line1>3920 SHOEMAKE AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>HART RANSOM SCHOOL</location_name>
+    <zip>95358</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042949">
+  <address>
+    <line2>909 GLENN AVE</line2>
+    <city>MODESTO</city>
+    <line1>909 GLENN AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>BRET HARTE ELEMENTARY SCHOOL</location_name>
+    <zip>95358</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042952">
+  <address>
+    <line2>4221 TULLY RD</line2>
+    <city>MODESTO</city>
+    <line1>4221 TULLY RD  MODESTO</line1>
+    <state>CA</state>
+    <location_name>WOODSTONE APARTMENTS</location_name>
+    <zip>95356</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042953">
+  <address>
+    <line2>780 W MONTE VISTA AVE</line2>
+    <city>TURLOCK</city>
+    <line1>780 W MONTE VISTA AVE TURLOCK</line1>
+    <state>CA</state>
+    <location_name>STANISLAUS CHRISTIAN FELLOWSHIP</location_name>
+    <zip>95382</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042955">
+  <address>
+    <line2>116 N MCCLURE RD</line2>
+    <city>MODESTO</city>
+    <line1>116 N MC CLURE RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>EMPIRE UNION SCHOOL DISTRICT</location_name>
+    <zip>95357</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042957">
+  <address>
+    <line2>865 LANDER AVE</line2>
+    <city>TURLOCK</city>
+    <line1>865 LANDER AVE TURLOCK</line1>
+    <state>CA</state>
+    <location_name>TURLOCK SILVERCREST RESIDENCE</location_name>
+    <zip>95380</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042959">
+  <address>
+    <line2>10055 VALLEY HOME RD</line2>
+    <city>OAKDALE</city>
+    <line1>10055 VALLEY HOME RD @ RIVER RD OAKDALE</line1>
+    <state>CA</state>
+    <location_name>LIVING HOPE CHRISTIAN FELLOWSHIP</location_name>
+    <zip>95361</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042961">
+  <address>
+    <line2>917 SONORA AVE</line2>
+    <city>MODESTO</city>
+    <line1>917 SONORA AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>APOSTOLIC ASSEMBLY FIRST CHURCH</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042964">
+  <address>
+    <line2>801 EMPIRE AVE</line2>
+    <city>MODESTO</city>
+    <line1>801 EMPIRE AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>WRIGHT START FAMILY LEARNING CENTER</location_name>
+    <zip>95354</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042966">
+  <address>
+    <line2>1075 W LAS PALMAS AVE</line2>
+    <city>PATTERSON</city>
+    <line1>1075 W LAS PALMAS AVE PATTERSON</line1>
+    <state>CA</state>
+    <location_name>LAS PALMAS SENIOR APARTMENTS</location_name>
+    <zip>95363</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042967">
+  <address>
+    <line2>21943 G ST</line2>
+    <city>CROWS LANDING</city>
+    <line1>21943 G ST CROWS LANDING</line1>
+    <state>CA</state>
+    <location_name>HARVEST COMMUNITY CHURCH</location_name>
+    <zip>95313</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042968">
+  <address>
+    <line2>1937 W WHITMORE AVE</line2>
+    <city>MODESTO</city>
+    <line1>1937 W WHITMORE AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>FAIRVIEW ELEMENTARY SCHOOL</location_name>
+    <zip>95358</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042970">
+  <address>
+    <line2>1107 KERN ST</line2>
+    <city>NEWMAN</city>
+    <line1>1107 KERN ST NEWMAN</line1>
+    <state>CA</state>
+    <location_name>ORESTIMBA PRESBYTERIAN CHURCH</location_name>
+    <zip>95360</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042975">
+  <address>
+    <line2>420 CHICAGO AVE</line2>
+    <city>MODESTO</city>
+    <line1>420 CHICAGO AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>MODESTO FIRE STATION #02</location_name>
+    <zip>95351</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042976">
+  <address>
+    <line2>2801 W HATCH RD</line2>
+    <city>MODESTO</city>
+    <line1>2801 W HATCH RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>VFW POST #3199</location_name>
+    <zip>95358</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042977">
+  <address>
+    <line2>1512 CLARIBEL RD</line2>
+    <city>MODESTO</city>
+    <line1>1512 CLARIBEL RD MODESTO</line1>
+    <state>CA</state>
+    <location_name>MORNINGSIDE MOBILE HOME PARK</location_name>
+    <zip>95357</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042978">
+  <address>
+    <line2>2929 FLOYD AVE</line2>
+    <city>MODESTO</city>
+    <line1>2929 FLOYD AVE MODESTO</line1>
+    <state>CA</state>
+    <location_name>THE VILLAS AT VILLAGGIO</location_name>
+    <zip>95355</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000042983">
+  <address>
+    <line2>2701 4TH ST</line2>
+    <city>CERES</city>
+    <line1>2701 4TH ST CERES</line1>
+    <state>CA</state>
+    <location_name>CERES COMMUNITY CENTER</location_name>
+    <zip>95307</zip>
+  </address>
+</polling_location>
+<polling_location id="1300000043007">
+  <address>
+    <line2>5170 PENTECOST DR 2</line2>
+    <city>MODESTO</city>
+    <line1>5170 PENTECOST DR #2 MODESTO</line1>
+    <state>CA</state>
+    <location_name>GYMSTARS</location_name>
+    <zip>95356</zip>
+  </address>
+</polling_location>
+</vip_object>

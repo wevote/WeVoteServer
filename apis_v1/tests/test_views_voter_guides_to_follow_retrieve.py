@@ -3,8 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.core.urlresolvers import reverse
-from django.test import Client, TestCase
-from django.http import SimpleCookie
+from django.test import TestCase
 import json
 from organization.models import Organization
 
@@ -17,7 +16,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         self.voter_create_url = reverse("apis_v1:voterCreateView")
         self.voter_guides_to_follow_retrieve_url = reverse("apis_v1:voterGuidesToFollowRetrieveView")
 
-    def test_retrieve_with_no_cookie(self):
+    def test_retrieve_with_no_voter_device_id(self):
         #######################################
         # Without a cookie, we don't expect valid response
         response = self.client.get(self.voter_guides_to_follow_retrieve_url)
@@ -33,7 +32,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
             "voter_device_id: {voter_device_id}".format(
                 status=json_data['status'], voter_device_id=json_data['voter_device_id']))
 
-    def test_retrieve_with_cookie(self):
+    def test_retrieve_with_voter_device_id(self):
         """
         Test the various cookie states
         :return:
@@ -48,14 +47,12 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         self.assertEqual('voter_device_id' in json_data01, True,
                          "voter_device_id expected in the deviceIdGenerateView json response")
 
-        # Now save the retrieved voter_device_id in a mock cookie
-        cookies = SimpleCookie()
-        cookies["voter_device_id"] = json_data01['voter_device_id']
-        self.client = Client(HTTP_COOKIE=cookies.output(header='', sep='; '))
+        # Now put the voter_device_id in a variable we can use below
+        voter_device_id = json_data01['voter_device_id'] if 'voter_device_id' in json_data01 else ''
 
         #######################################
         # With a cookie, but without a voter_id in the database, we don't expect valid response
-        response02 = self.client.get(self.voter_guides_to_follow_retrieve_url)
+        response02 = self.client.get(self.voter_guides_to_follow_retrieve_url, {'voter_device_id': voter_device_id})
         json_data02 = json.loads(response02.content.decode())
 
         self.assertEqual('status' in json_data02, True, "status expected in the json response, and not found")
@@ -70,7 +67,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
 
         #######################################
         # Create a voter so we can test retrieve
-        response03 = self.client.get(self.voter_create_url)
+        response03 = self.client.get(self.voter_create_url, {'voter_device_id': voter_device_id})
         json_data03 = json.loads(response03.content.decode())
 
         self.assertEqual('status' in json_data03, True,
@@ -86,7 +83,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
 
         #######################################
         # Test the response before any voter guides exist
-        response04 = self.client.get(self.voter_guides_to_follow_retrieve_url)
+        response04 = self.client.get(self.voter_guides_to_follow_retrieve_url, {'voter_device_id': voter_device_id})
         json_data04 = json.loads(response04.content.decode())
 
         self.assertEqual('status' in json_data04, True,
@@ -98,8 +95,8 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
         self.assertEqual('voter_guides' in json_data04, True,
                          "voter_guides expected in the voterGuidesToFollowRetrieveView json response but not found")
         self.assertEqual(
-            json_data04['status'], 'NO_VOTER_GUIDES_FOUND-MISSING_REQUIRED_VARIABLES',
-            "status: {status} (NO_VOTER_GUIDES_FOUND-MISSING_REQUIRED_VARIABLES expected), "
+            json_data04['status'], 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC NO_VOTER_GUIDES_FOUND',
+            "status: {status} ('SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_GENERIC NO_VOTER_GUIDES_FOUND' expected), "
             "voter_device_id: {voter_device_id}".format(
                 status=json_data04['status'], voter_device_id=json_data04['voter_device_id']))
 
@@ -132,7 +129,7 @@ class WeVoteAPIsV1TestsVoterGuidesToFollowRetrieve(TestCase):
 
         #######################################
         # Test the response with one voter guide
-        response40 = self.client.get(self.voter_guides_to_follow_retrieve_url)
+        response40 = self.client.get(self.voter_guides_to_follow_retrieve_url, {'voter_device_id': voter_device_id})
         json_data40 = json.loads(response40.content.decode())
 
         self.assertEqual('status' in json_data40, True,

@@ -2,9 +2,12 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from candidate.models import CandidateCampaignManager
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
+from measure.models import ContestMeasureManager
+from office.models import ContestOfficeManager
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 from voter.models import VoterManager
@@ -27,15 +30,21 @@ class StarItem(models.Model):
 
     # The candidate being starred
     candidate_campaign_id = models.BigIntegerField(null=True, blank=True)
+    candidate_campaign_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
     # The office being starred
     contest_office_id = models.BigIntegerField(null=True, blank=True)
+    contest_office_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
     # The measure being starred
     contest_measure_id = models.BigIntegerField(null=True, blank=True)
+    contest_measure_we_vote_id = models.CharField(
+        verbose_name="we vote permanent id", max_length=255, null=True, blank=True, unique=False)
 
     # Is this person following or ignoring this organization?
     star_status = models.CharField(max_length=16, choices=STAR_CHOICES, default=ITEM_NOT_STARRED)
 
-    # The date the voter followed or stopped following this organization
+    # The date the voter starred or unstarred this ballot_item
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     # This is used when we want to export the organizations that a voter is following
@@ -43,10 +52,24 @@ class StarItem(models.Model):
         voter_manager = VoterManager()
         return voter_manager.fetch_we_vote_id_from_local_id(self.voter_id)
 
-    # This is used when we want to export the organizations that a voter is following
-    # def candidate_campaign_we_vote_id(self):
-    #     organization_manager = OrganizationManager()
-    #     return organization_manager.fetch_we_vote_id_from_local_id(self.organization_id)
+    def ballot_item_we_vote_id(self):
+        if self.candidate_campaign_we_vote_id:
+            return self.candidate_campaign_we_vote_id
+        elif self.contest_office_we_vote_id:
+            return self.contest_office_we_vote_id
+        elif self.contest_measure_we_vote_id:
+            return self.contest_measure_we_vote_id
+        elif self.candidate_campaign_id:
+            candidate_campaign_manager = CandidateCampaignManager()
+            return candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(self.candidate_campaign_id)
+        elif self.contest_measure_id:
+            contest_measure_manager = ContestMeasureManager()
+            return contest_measure_manager.fetch_contest_measure_we_vote_id_from_id(self.contest_measure_id)
+        elif self.contest_office_id:
+            contest_office_manager = ContestOfficeManager()
+            return contest_office_manager.fetch_contest_office_we_vote_id_from_id(self.contest_office_id)
+        else:
+            return 'not_found'
 
     def is_starred(self):
         if self.star_status == ITEM_STARRED:
@@ -114,13 +137,15 @@ class StarItemManager(models.Model):
         return star_item_manager.toggle_voter_starred_item(
             voter_id, star_status, candidate_campaign_id, contest_office_id, contest_measure_id)
 
-    def toggle_voter_starred_item(self, voter_id, star_status,
-                                  candidate_campaign_id=0, contest_office_id=0, contest_measure_id=0):
+    def toggle_voter_starred_item(
+            self, voter_id, star_status, candidate_campaign_id=0, contest_office_id=0, contest_measure_id=0,
+            contest_office_we_vote_id='', candidate_campaign_we_vote_id='', contest_measure_we_vote_id=''):
         # Does a star_item entry exist from this voter already exist?
         star_item_manager = StarItemManager()
         star_item_id = 0
-        results = star_item_manager.retrieve_star_item(star_item_id, voter_id,
-                                                       contest_office_id, candidate_campaign_id, contest_measure_id)
+        results = star_item_manager.retrieve_star_item(
+            star_item_id, voter_id,
+            contest_office_id, candidate_campaign_id, contest_measure_id)
 
         star_item_on_stage_found = False
         star_item_on_stage_id = 0
@@ -145,12 +170,29 @@ class StarItemManager(models.Model):
         elif results['DoesNotExist']:
             try:
                 # Create new star_item entry
+                if candidate_campaign_id and not candidate_campaign_we_vote_id:
+                    candidate_campaign_manager = CandidateCampaignManager()
+                    candidate_campaign_we_vote_id = \
+                        candidate_campaign_manager.fetch_candidate_campaign_we_vote_id_from_id(candidate_campaign_id)
+                if contest_measure_id and not contest_measure_we_vote_id:
+                    contest_measure_manager = ContestMeasureManager()
+                    contest_measure_we_vote_id = contest_measure_manager.fetch_contest_measure_we_vote_id_from_id(
+                        contest_measure_id)
+                if contest_office_id and not contest_office_we_vote_id:
+                    contest_office_manager = ContestOfficeManager()
+                    contest_office_we_vote_id = contest_office_manager.fetch_contest_office_we_vote_id_from_id(
+                        contest_office_id)
+
                 # NOTE: For speed purposes, we are not validating the existence of the items being starred
+                #  although we could if the we_vote_id is not returned.
                 star_item_on_stage = StarItem(
                     voter_id=voter_id,
                     candidate_campaign_id=candidate_campaign_id,
+                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id,
                     contest_office_id=contest_office_id,
+                    contest_office_we_vote_id=contest_office_we_vote_id,
                     contest_measure_id=contest_measure_id,
+                    contest_measure_we_vote_id=contest_measure_we_vote_id,
                     star_status=star_status,
                     # We don't need to update date_last_changed here because set set auto_now=True in the field
                 )
@@ -245,19 +287,26 @@ class StarItemList(models.Model):
     def retrieve_star_item_list_for_voter(self, voter_id):
         # Retrieve a list of star_item entries for this voter
         star_item_list_found = False
-        star_status = ITEM_STARRED
-        star_item_list = {}
+        star_item_list = []
         try:
             star_item_list = StarItem.objects.all()
             star_item_list = star_item_list.filter(voter_id=voter_id)
-            star_item_list = star_item_list.filter(star_status=star_status)
             if len(star_item_list):
                 star_item_list_found = True
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
 
         if star_item_list_found:
-            return star_item_list
+            results = {
+                'status':           "STAR_ITEMS_FOUND",
+                'success':          True,
+                'star_item_list':   star_item_list,
+            }
+            return results
         else:
-            star_item_list = {}
-            return star_item_list
+            results = {
+                'status':           "STAR_ITEMS_NOT_FOUND",
+                'success':          True,
+                'star_item_list':   [],
+            }
+            return results

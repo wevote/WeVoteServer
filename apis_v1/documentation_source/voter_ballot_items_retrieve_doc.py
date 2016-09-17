@@ -10,7 +10,7 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -62,6 +62,12 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer,\n' \
+                   '  "text_for_map_search": string,\n' \
+                   '  "substituted_address_nearby": string,\n' \
+                   '  "ballot_found": boolean,\n' \
+                   '  "ballot_caveat": string,\n' \
+                   '  "is_from_substituted_address": boolean,\n' \
+                   '  "is_from_test_ballot": boolean,\n' \
                    '  "ballot_item_list": list\n' \
                    '   [\n' \
                    '     "ballot_item_display_name": string,\n' \
@@ -69,7 +75,7 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '     "google_civic_election_id": integer,\n' \
                    '     "google_ballot_placement": integer,\n' \
                    '     "local_ballot_order": integer,\n' \
-                   '     "kind_of_ballot_item": string,\n' \
+                   '     "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
                    '     "id": integer,\n' \
                    '     "we_vote_id": string,\n' \
                    '     "candidate_list": list\n' \
@@ -78,6 +84,7 @@ def voter_ballot_items_retrieve_doc_template_values(url_root):
                    '        "we_vote_id": string,\n' \
                    '        "ballot_item_display_name": string,\n' \
                    '        "candidate_photo_url": string,\n' \
+                   '        "party": string,\n' \
                    '        "order_on_ballot": integer,\n' \
                    '      ],\n' \
                    '   ],\n' \

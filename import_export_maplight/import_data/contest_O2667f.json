@@ -1,0 +1,98 @@
+{
+    "15017": {
+        "bio": "",
+        "candidate_flags": "",
+        "candidate_id": "15017",
+        "contest": {
+            "election_date": "2014-11-04",
+            "id": "O2667",
+            "jurisdiction": {
+                "id": "64",
+                "level": "C",
+                "name": "San Francisco",
+                "region_name": "San Francisco County, California",
+                "state": "California",
+                "statecode": "CA"
+            },
+            "office": {
+                "body": "",
+                "class": "department",
+                "district": "20",
+                "flags": {
+                    "nonpartisan": true,
+                    "vote_for": "1"
+                },
+                "region_name": "San Francisco County, California",
+                "state": "California",
+                "statecode": "CA",
+                "title": "Superior Court Judge"
+            },
+            "title": "Superior Court Judge Department 20 - San Francisco County, California",
+            "type": "office",
+            "url": "http://votersedge.org/california/2014/november/san-francisco-county/candidates/superior-court-judge-department-20"
+        },
+        "display_name": "Daniel Flores",
+        "first_name": "Daniel",
+        "gender": "",
+        "last_funding_update": "0000-00-00",
+        "last_name": "Flores",
+        "middle_name": "",
+        "name_prefix": "",
+        "name_suffix": "",
+        "original_name": "Daniel Flores",
+        "party": "",
+        "photo": "http://m.es.votersedge.org/sites/all/modules/map/modules/map_proposition/images/politicians/12349.jpg?v",
+        "politician_id": "12349",
+        "roster_name": "Daniel Flores",
+        "type": "",
+        "url": "http://votersedge.org/california/2014/november/san-francisco-county/candidates/superior-court-judge-department-20/12349-daniel-flores"
+    },
+    "15018": {
+        "bio": "",
+        "candidate_flags": "",
+        "candidate_id": "15018",
+        "contest": {
+            "election_date": "2014-11-04",
+            "id": "O2667",
+            "jurisdiction": {
+                "id": "64",
+                "level": "C",
+                "name": "San Francisco",
+                "region_name": "San Francisco County, California",
+                "state": "California",
+                "statecode": "CA"
+            },
+            "office": {
+                "body": "",
+                "class": "department",
+                "district": "20",
+                "flags": {
+                    "nonpartisan": true,
+                    "vote_for": "1"
+                },
+                "region_name": "San Francisco County, California",
+                "state": "California",
+                "statecode": "CA",
+                "title": "Superior Court Judge"
+            },
+            "title": "Superior Court Judge Department 20 - San Francisco County, California",
+            "type": "office",
+            "url": "http://votersedge.org/california/2014/november/san-francisco-county/candidates/superior-court-judge-department-20"
+        },
+        "display_name": "Carol Kingsley",
+        "first_name": "Carol",
+        "gender": "",
+        "last_funding_update": "0000-00-00",
+        "last_name": "Kingsley",
+        "middle_name": "",
+        "name_prefix": "",
+        "name_suffix": "",
+        "original_name": "Carol Kingsley",
+        "party": "",
+        "photo": "http://m.es.votersedge.org/sites/all/modules/map/modules/map_proposition/images/politicians/12350.jpg?v",
+        "politician_id": "12350",
+        "roster_name": "Carol Kingsley",
+        "type": "",
+        "url": "http://votersedge.org/california/2014/november/san-francisco-county/candidates/superior-court-judge-department-20/12350-carol-kingsley"
+    }
+}

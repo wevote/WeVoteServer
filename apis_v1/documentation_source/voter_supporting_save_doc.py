@@ -16,8 +16,7 @@ def voter_supporting_save_doc_template_values(url_root):
         {
             'name':         'voter_device_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'An 88 character unique identifier (from cookie - not URL variable) linked to '
-                            'a voter record on the server',
+            'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
             'name':         'kind_of_ballot_item',
@@ -32,25 +31,15 @@ def voter_supporting_save_doc_template_values(url_root):
                             '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
                             'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
-        # {
-        #     'name':         'candidate_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The candidate that the voter is supporting. '
-        #                     '(Either measure_id or candidate_id must exist)',
-        # },
-        # {
-        #     'name':         'measure_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The measure that the voter is supporting. '
-        #                     '(Either measure_id or candidate_id must exist)',
-        # },
+        {
+            'name':         'ballot_item_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this ballot_item across all networks '
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
+                            'NOTE: In the future we might support other identifiers used in the industry.',
+        },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
     ]
 
     potential_status_codes_list = [
@@ -108,6 +97,9 @@ def voter_supporting_save_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "status": string (description of what happened),\n' \
                    '  "success": boolean (did the save happen?),\n' \
+                   '  "ballot_item_id": integer,\n' \
+                   '  "ballot_item_we_vote_id": string,\n' \
+                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE),\n' \
                    '}'
 
     template_values = {

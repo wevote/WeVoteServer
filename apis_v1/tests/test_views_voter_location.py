@@ -1,10 +1,10 @@
 # -*- coding: UTF-8 -*-
-import json
-from functools import wraps
 
 from django.contrib.gis import geoip
 from django.core.urlresolvers import reverse
 from django.test import Client, TestCase
+from functools import wraps
+import json
 
 
 def print_geoip_instructions_on_exc(unittest):
@@ -19,7 +19,7 @@ def print_geoip_instructions_on_exc(unittest):
     return wrapper
 
 
-class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
+class WeVoteAPIsV1TestsVoterVoterLocation(TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -42,7 +42,7 @@ class WeVoteAPIsV1TestsVoterAddressSave(TestCase):
         self.assertEqual(response.status_code, 200)
         json_data = json.loads(response.content.decode())
         self.assertEqual(json_data['success'], False)
-        self.assertEqual(json_data['status'], 'missing ip_address request parameter')
+        self.assertEqual(json_data['status'], 'LOCATION_RETRIEVE_IP_ADDRESS_REQUEST_PARAMETER_MISSING')
         self.assertEqual(json_data['voter_location_found'], False)
 
     @print_geoip_instructions_on_exc

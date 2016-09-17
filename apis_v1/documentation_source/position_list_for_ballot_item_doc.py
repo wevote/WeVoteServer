@@ -10,7 +10,7 @@ def position_list_for_ballot_item_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -31,24 +31,13 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                             '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
                             'If it exists, ballot_item_id is used instead of ballot_item_we_vote_id)',
         },
-        # {
-        #     'name':         'office_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The office we want positions for. '
-        #                     '(One and only one of these must exist: office_id, candidate_id, or measure_id)',
-        # },
-        # {
-        #     'name':         'candidate_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The candidate we want positions for. '
-        #                     '(One and only one of these must exist: office_id, candidate_id, or measure_id)',
-        # },
-        # {
-        #     'name':         'measure_id',
-        #     'value':        'integer',  # boolean, integer, long, string
-        #     'description':  'The measure we want the oppose count for. '
-        #                     '(One and only one of these must exist: office_id, candidate_id, or measure_id)',
-        # },
+        {
+            'name':         'ballot_item_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this ballot_item across all networks '
+                            '(either ballot_item_id OR ballot_item_we_vote_id required -- not both. '
+                            'NOTE: In the future we might support other identifiers used in the industry.',
+        },
     ]
     optional_query_parameter_list = [
         {
@@ -57,6 +46,12 @@ def position_list_for_ballot_item_doc_template_values(url_root):
             'description':  'Default is ANY_STANCE. '
                             'Other options include SUPPORT, STILL_DECIDING, INFO_ONLY, NO_STANCE, OPPOSE, '
                             'PERCENT_RATING',
+        },
+        {
+            'name':         'friends_vs_public',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Default is FRIENDS_AND_PUBLIC. '
+                            'Other options include FRIENDS_ONLY, PUBLIC_ONLY, FRIENDS_AND_PUBLIC',
         },
         {
             'name':         'show_positions_this_voter_follows',
@@ -95,26 +90,39 @@ def position_list_for_ballot_item_doc_template_values(url_root):
         'ballot_item_id': '5655',
         'show_positions_this_voter_follows': 'False',
         'stance': 'ANY_STANCE',
+        'friends_vs_public': 'FRIENDS_AND_PUBLIC',
     }
 
     api_response = '{\n' \
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "count": integer,\n' \
-                   '  "kind_of_ballot_item": string, ' \
+                   '  "kind_of_ballot_item": string (CANDIDATE, MEASURE), ' \
                    '   (One of these: \'CANDIDATE\', \'MEASURE\', \'OFFICE\', \'UNKNOWN\',)\n' \
                    '  "ballot_item_id": integer,\n' \
+                   '  "ballot_item_we_vote_id": string,\n' \
                    '  "position_list": list\n' \
                    '   [\n' \
-                   '     "position_id": integer,\n' \
                    '     "position_we_vote_id": string,\n' \
-                   '     "speaker_label": string,\n' \
+                   '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
+                   '     "speaker_display_name": string,\n' \
+                   '     "speaker_image_url_https": string,\n' \
+                   '     "speaker_twitter_handle": string,\n' \
                    '     "speaker_type": string, ' \
                    '      (One of these: \'ORGANIZATION\', \'VOTER\', \'PUBLIC_FIGURE\', \'UNKNOWN\',)\n' \
                    '     "speaker_id": integer,\n' \
                    '     "speaker_we_vote_id": string,\n' \
                    '     "is_support": boolean,\n' \
+                   '     "is_positive_rating": boolean,\n' \
+                   '     "is_support_or_positive_rating": boolean,\n' \
                    '     "is_oppose": boolean,\n' \
+                   '     "is_negative_rating": boolean,\n' \
+                   '     "is_oppose_or_negative_rating": boolean,\n' \
+                   '     "is_information_only": boolean,\n' \
+                   '     "is_public_position": boolean,\n' \
+                   '     "more_info_url": string,\n' \
+                   '     "statement_text": string,\n' \
+                   '     "last_updated": string,\n' \
                    '   ],\n' \
                    '}'
 

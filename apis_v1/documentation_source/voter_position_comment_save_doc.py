@@ -10,7 +10,7 @@ def voter_position_comment_save_doc_template_values(url_root):
     required_query_parameter_list = [
         {
             'name':         'voter_device_id',
-            'value':        'string (from cookie)',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
         {
@@ -19,25 +19,15 @@ def voter_position_comment_save_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
-            'name':         'office_we_vote_id',
+            'name':         'kind_of_ballot_item',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for the office the position about. '
-                            '(One and only one of these is required: '
-                            'office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)',
+            'description':  'The kind of ballot item the voter wants to comment on. '
+                            '(kind_of_ballot_item is either "CANDIDATE", "POLITICIAN" or "MEASURE")',
         },
         {
-            'name':         'candidate_we_vote_id',
+            'name':         'ballot_item_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for the candidate the position about. '
-                            '(One and only one of these is required: '
-                            'office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)',
-        },
-        {
-            'name':         'measure_we_vote_id',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'The unique identifier for the measure the position about. '
-                            '(One and only one of these is required: '
-                            'office_we_vote_id, candidate_we_vote_id, measure_we_vote_id)',
+            'description':  'The unique identifier for this ballot_item across all networks.',
         },
         {
             'name':         'statement_text',
@@ -57,14 +47,15 @@ def voter_position_comment_save_doc_template_values(url_root):
     ]
     optional_query_parameter_list = [
         {
-            'name':         'position_id',
-            'value':        'integer',  # boolean, integer, long, string
-            'description':  'Internal database unique identifier for a position.',
-        },
-        {
             'name':         'position_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'We Vote unique identifier for this position.',
+        },
+        {
+            'name':         'set_as_public_position',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Should this position be saved so it can be seen by anyone in the public, '
+                            'or only for friends',
         },
     ]
 
@@ -77,50 +68,11 @@ def voter_position_comment_save_doc_template_values(url_root):
             'code':         'VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID',
             'description':  'Cannot proceed. A valid voter_id was not found.',
         },
-        # {
-        #     'code':         'POSITION_REQUIRED_UNIQUE_IDENTIFIER_VARIABLES_MISSING',
-        #     'description':  'Cannot proceed. Missing sufficient unique identifiers for either save new or update.',
-        # },
-        # {
-        #     'code':         'NEW_ORGANIZATION_REQUIRED_VARIABLES_MISSING',
-        #     'description':  'Cannot proceed. This is a new entry and there are not sufficient variables.',
-        # },
-        # {
-        #     'code':         'CREATE_POSITION_SUCCESSFUL',
-        #     'description':  'Position created.',
-        # },
-        # {
-        #     'code':         'POSITION_SAVED_WITH_POSITION_ID',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'POSITION_SAVED_WITH_POSITION_WE_VOTE_ID',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'POSITION_CHANGES_SAVED',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'NO_POSITION_CHANGES_SAVED_WITH_POSITION_ID',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'NO_POSITION_CHANGES_SAVED_WITH_POSITION_WE_VOTE_ID',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'NO_POSITION_CHANGES_SAVED',
-        #     'description':  '',
-        # },
-        # {
-        #     'code':         'POSITION_COULD_NOT_BE_FOUND_WITH_POSITION_ID_OR_WE_VOTE_ID',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
-        'candidate_we_vote_id': 'wv01cand1755',
+        'kind_of_ballot_item': 'CANDIDATE',
+        'ballot_item_we_vote_id': 'wv01cand1755',
         'statement_text': 'This is what I believe...',
         'google_civic_election_id': '4162',
     }
@@ -129,7 +81,6 @@ def voter_position_comment_save_doc_template_values(url_root):
                    '  "status": string,\n' \
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
-                   '  "position_id": integer (the internal id of the position found),\n' \
                    '  "position_we_vote_id": string (the position identifier that moves server-to-server),\n' \
                    '  "new_position_created": boolean,\n' \
                    '  "google_civic_election_id": integer,\n' \
@@ -138,6 +89,7 @@ def voter_position_comment_save_doc_template_values(url_root):
                    '  "measure_we_vote_id": string,\n' \
                    '  "statement_text": string,\n' \
                    '  "statement_html": string,\n' \
+                   '  "is_public_position": boolean,\n' \
                    '  "last_updated": string,\n' \
                    '}'
 
@@ -149,7 +101,7 @@ def voter_position_comment_save_doc_template_values(url_root):
         'try_now_link': 'apis_v1:voterPositionCommentSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
-        'get_or_post': 'POST',
+        'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,

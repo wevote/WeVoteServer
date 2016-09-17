@@ -16,8 +16,7 @@ def voter_address_retrieve_doc_template_values(url_root):
         {
             'name':         'voter_device_id',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'An 88 character unique identifier (from cookie - not URL variable) linked to '
-                            'a voter record on the server',
+            'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
     ]
 
@@ -47,7 +46,7 @@ def voter_address_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        # 'organization_we_vote_id': 'wv85org1',
+        # 'voter_device_id': '',
     }
 
     api_response = '{\n' \
@@ -55,6 +54,9 @@ def voter_address_retrieve_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "text_for_map_search": string (the value submitted and saved),\n' \
                    '  "address_type": string (one char: B = Ballot address),\n' \
+                   '  "google_civic_election_id": integer,\n' \
+                   '  "guess_if_no_address_saved": boolean,\n' \
+                   '  "address_found": boolean,\n' \
                    '  "latitude": string (value from Google),\n' \
                    '  "longitude": string (value from Google),\n' \
                    '  "normalized_line1": string (value from Google),\n' \

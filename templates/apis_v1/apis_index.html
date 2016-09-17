@@ -18,6 +18,11 @@
         <td>Static</td>
         <td>Description</td>
     </thead>
+    <tr>
+        <td><a href="{% url 'apis_v1:searchAllDocs' %}">searchAll</a></td>
+        <td></td>
+        <td>This api will search everything. Can be used for instant search.</td>
+    </tr>
     {###  ###}
     <tr>
         <td colspan="3"><strong>Voter Basic Data</strong></td>
@@ -49,14 +54,19 @@
         <td>Create an empty voter entry attached to a voter_device_id</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterPhotoSaveDocs' %}">voterPhotoSave</a></td>
+        <td><a href="{% url 'apis_v1:voterUpdateDocs' %}">voterUpdate</a></td>
+        <td></td>
+        <td>Save profile-related fields for an existing voter.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterPhotoSaveDocs' %}">voterPhotoSave - DEPRECATED, PLEASE USE voterUpdate</a></td>
         <td></td>
         <td>Save photo (pulled from Facebook or Twitter) for an existing voter.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterRetrieveDocs' %}">voterRetrieve</a></td>
         <td></td>
-        <td>Export raw voter data to JSON format</td>
+        <td>Export key voter data to JSON format</td>
     </tr>
 
     {###  ###}
@@ -76,9 +86,35 @@
         </td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:twitterIdentityRetrieveDocs' %}">twitterIdentityRetrieve</a></td>
+        <td></td>
+        <td>Find the kind of owner and unique id of this twitter handle, whether it be a candidate, organization, or
+            individual voter. We use this to take an incoming URI like
+            https://wevote.guide/RepBarbaraLee and return the owner of 'RepBarbaraLee'.
+        </td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:twitterSignInStartDocs' %}">twitterSignInStart</a></td>
         <td></td>
         <td>Start the process of signing in with Twitter.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:twitterSignInRequestAccessTokenDocs' %}">twitterSignInRequestAccessToken</a></td>
+        <td></td>
+        <td>Step 2 in the process of signing in with Twitter.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:twitterSignInRequestVoterInfoDocs' %}">twitterSignInRequestVoterInfo</a></td>
+        <td></td>
+        <td>Step 3 in the process of signing in with Twitter.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterSignOutDocs' %}">voterSignOut</a></td>
+        <td></td>
+        <td>Delete the voter sign in session. (Remove voter_device_id from database.)
         </td>
     </tr>
 
@@ -107,11 +143,6 @@
         </td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:electionsRetrieveDocs' %}">electionsRetrieve</a></td>
-        <td>static c3</td>
-        <td>Export the raw elections data stored in the database to JSON format.</td>
-    </tr>
-    <tr>
         <td><a href="{% url 'apis_v1:voterBallotItemsRetrieveDocs' %}">voterBallotItemsRetrieve</a></td>
         <td>c3</td>
         <td>Retrieve a list of ballot items to display for the current voter from the We Vote database. These entries
@@ -126,6 +157,16 @@
             the We Vote database so we can display them
             with voterBallotItemsRetrieve, and other API calls.</td>
     </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:electionsSyncOutDocs' %}">electionsSyncOut</a></td>
+        <td>static c3</td>
+        <td>Provide another We Vote Server a complete listing of all public elections information.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:pollingLocationsSyncOutDocs' %}">pollingLocationsSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all polling locations.</td>
+    </tr>
 
     {###  ###}
     <tr>
@@ -136,6 +177,16 @@
         <td>static c3</td>
         <td>Retrieve details about one office, candidate or measure. This is a wrapper for officeRetrieve,
         candidateRetrieve and measureRetrieve.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:ballotItemsSyncOutDocs' %}">ballotItemsSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all ballot items information.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:ballotReturnedSyncOutDocs' %}">ballotReturnedSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all ballot_returned items.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:officeRetrieveDocs' %}">officeRetrieve</a></td>
@@ -162,6 +213,21 @@
         <td>static c3</td>
         <td>Information necessary to populate a bubble next to a ballot item.</td>
     </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:officesSyncOutDocs' %}">officesSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public office information.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:candidatesSyncOutDocs' %}">candidatesSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public candidates information.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:measuresSyncOutDocs' %}">measuresSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public measures information.</td>
+    </tr>
 
     {###  ###}
     <tr>
@@ -172,6 +238,30 @@
         <td></td>
         <td>A list of all positions (support/oppose/info) for this Ballot Item (Office, Candidate or Measure)
             from organizations, friends, and public figures this voter follows.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionListForOpinionMakerDocs' %}">positionListForOpinionMaker</a></td>
+        <td></td>
+        <td>A list of all positions (support/oppose/info) for this Opinion Maker (Organization or Public Figure)
+            relating to Candidates, Measures or Offices.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionListForVoterDocs' %}">positionListForVoter</a></td>
+        <td></td>
+        <td>A list of all positions (support/oppose/info) for this voter
+            relating to Candidates, Measures or Offices.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionsCountForAllBallotItemsDocs' %}">positionsCountForAllBallotItems</a></td>
+        <td></td>
+        <td>A list of the support and oppose counts for all Ballot Items (Candidate or Measure) from organizations,
+            friends, and public figures this voter follows.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionsCountForOneBallotItemDocs' %}">positionsCountForOneBallotItem</a></td>
+        <td></td>
+        <td>A list of the support and oppose counts for one Ballot Item (Candidate or Measure) from organizations,
+            friends, and public figures this voter follows.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionSupportCountForBallotItemDocs' %}">positionSupportCountForBallotItem</a></td>
@@ -209,6 +299,16 @@
         <td>Save a new position or update an existing position. Mostly for volunteer tools and voter guides. For the
         typical voter, we use voterPositionCommentSave, voterSupportingSave, voterOpposingSave,
             voterStopSupportingSave, and voterStopOpposingSave.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterAllPositionsRetrieveDocs' %}">voterAllPositionsRetrieve</a></td>
+        <td></td>
+        <td>Retrieve all support/oppose stances held by this voter in one list. For a list of positions with full data, use positionListForVoter.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterAllStarsStatusRetrieveDocs' %}">voterAllStarsStatusRetrieve</a></td>
+        <td></td>
+        <td>Retrieve all of the voter's stars.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterPositionRetrieveDocs' %}">voterPositionRetrieve</a></td>
@@ -276,6 +376,11 @@
         <td></td>
         <td>Has the voter starred this measure, office or candidate?</td>
     </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:positionsSyncOutDocs' %}">positionsSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public positions information.</td>
+    </tr>
 
     {###  ###}
     <tr>
@@ -333,6 +438,11 @@
         <td>Mark this URL as a voter guide.</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:voterGuidesSyncOutDocs' %}">voterGuidesSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all voter guides.</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:voterGuidesToFollowRetrieveDocs' %}">voterGuidesToFollowRetrieve</a></td>
         <td></td>
         <td>Retrieve a list of voter guides that a voter might want to follow.</td>
@@ -343,10 +453,20 @@
         <td>Retrieve a list of the most recent voter guide from each organization the voter follows.
             See also organizationsFollowedRetrieve, which returns a list of organizations the voter follows.</td>
     </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:organizationsSyncOutDocs' %}">organizationsSyncOut</a></td>
+        <td>c3</td>
+        <td>Provide another We Vote Server a complete listing of all public organization information.</td>
+    </tr>
 
     {###  ###}
     <tr>
         <td colspan="3"><strong>Voter Friends</strong></td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:friendInvitationByEmailSendDocs' %}">friendInvitationByEmailSend</a></td>
+        <td></td>
+        <td>Send invitations to friends by email address.</td>
     </tr>
 
     {###  ###}

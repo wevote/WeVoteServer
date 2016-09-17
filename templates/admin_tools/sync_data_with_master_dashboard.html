@@ -1,0 +1,159 @@
+{# templates/admin_tools/statistics_summary.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Sync Data With Master We Vote Servers{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+
+<h1>Sync Data With Master We Vote Servers</h1>
+
+<p>These imports are best run in order from top-to-bottom.</p>
+
+<form name="candidate_choose_election" method="get" action="{% url 'admin_tools:sync_dashboard' %}">
+    {% csrf_token %}
+
+{# ################################### #}
+<h4>Elections</h4>
+
+<p><a href="{% url 'election:elections_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve All Elections</a> (Meta information only)</p>
+<br />
+
+{% if election_list %}
+
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id|convert_to_int %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    <br />
+{% endif %}{# End of if election_list #}
+
+
+{% if state_list %}
+
+    <select id="state_code" name="state_code">
+        <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+            -- All States --</option>
+    {% for key, state in state_list %}
+        <option value="{{ key }}"
+                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+            {{ state }}</option>
+    {% endfor %}
+    </select>
+    <br />
+{% endif %}{# End of if state_list #}
+
+
+
+{# ################################### #}
+<h4>Offices</h4>
+
+<p><a href="{% url 'office:offices_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Offices</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
+<br />
+
+
+{# ################################### #}
+<h4>Candidates</h4>
+
+<p><a href="{% url 'candidate:candidates_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Candidates</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
+<br />
+
+
+{# ################################### #}
+<h4>Measures</h4>
+
+<p><a href="{% url 'measure:measures_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Measures</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
+<br />
+
+
+{# ################################### #}
+<h4>Organizations</h4>
+
+<p><a href="{% url 'organization:organizations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Organizations</a>{% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}</p>
+<br />
+
+
+{# ################################### #}
+<h4>Positions</h4>
+
+<p>{% if google_civic_election_id|convert_to_int > 0 %}
+    <a href="{% url 'position:positions_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Positions</a> for election {{ google_civic_election_id }}{% else %} (Cannot retrieve Positions without election id){% endif %}</p>
+<br />
+
+
+{# ################################### #}
+<h4>Polling Locations</h4>
+
+<p><a href="{% url 'polling_location:polling_locations_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Polling Locations</a>{% if state_code %} for the state {{ state_code }}{% else %} for ALL states{% endif %}</p>
+<br />
+
+
+{# ################################### #}
+<h4>Ballot Items</h4>
+
+<p><a href="{% url 'ballot:ballot_items_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Saved Ballot Items</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
+<br />
+
+
+{# ################################### #}
+<h4>Ballot Returned</h4>
+
+<p><a href="{% url 'ballot:ballot_returned_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Saved Ballots</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
+<br />
+
+
+{# ################################### #}
+<h4>Voter Guides</h4>
+
+<p><a href="{% url 'voter_guide:voter_guides_import_from_master_server' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    Retrieve Voter Guides</a>{% if google_civic_election_id|convert_to_int > 0 %} for election {{ google_civic_election_id }}{% else %} for ALL elections{% endif %}</p>
+<br />
+
+</form>
+
+{# ################################### #}
+    <br />
+    <br />
+    <br />
+<h4>Settings</h4>
+<p>ELECTIONS_SYNC_URL: {{ elections_sync_url }}</p>
+<p>OFFICES_SYNC_URL: {{ offices_sync_url }}</p>
+<p>CANDIDATES_SYNC_URL: {{ candidates_sync_url }}</p>
+<p>MEASURES_SYNC_URL: {{ measures_sync_url }}</p>
+<p>ORGANIZATIONS_SYNC_URL: {{ organizations_sync_url }}</p>
+<p>POSITIONS_SYNC_URL: {{ positions_sync_url }}</p>
+<p>POLLING_LOCATIONS_SYNC_URL: {{ polling_locations_sync_url }}</p>
+<p>BALLOT_ITEMS_SYNC_URL: {{ ballot_items_sync_url }}</p>
+<p>BALLOT_RETURNED_SYNC_URL: {{ ballot_returned_sync_url }}</p>
+<p>VOTER_GUIDES_SYNC_URL: {{ voter_guides_sync_url }}</p>
+
+
+<script>
+    $(function() {
+        $('#google_civic_election_id').change(function() {
+            this.form.submit();
+        });
+    });
+    $(function() {
+        $('#state_code').change(function() {
+            this.form.submit();
+        });
+    });
+</script>
+
+{%  endblock %}

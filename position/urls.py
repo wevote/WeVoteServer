@@ -6,41 +6,19 @@ from django.conf.urls import url
 from . import views, views_admin
 
 urlpatterns = [
-    # admin_views.py
+    # views_admin.py
     url(r'^$', views_admin.position_list_view, name='position_list',),
+    url(r'^delete/$', views_admin.position_delete_process_view, name='position_delete_process',),
     url(r'^edit_process/$', views_admin.position_edit_process_view, name='position_edit_process'),
-    url(r'^export/', views_admin.ExportPositionDataView.as_view(), name='positions_export'),
+    url(r'^export/', views_admin.PositionsSyncOutView.as_view(), name='positions_export'),
+    url(r'^import/$',
+        views_admin.positions_import_from_master_server_view, name='positions_import_from_master_server'),
     url(r'^new/$', views_admin.position_new_view, name='position_new',),
     url(r'^relink_candidates_measures/$', views_admin.relink_candidates_measures_view,
         name='relink_candidates_measures'),
-    url(r'^(?P<position_id>[0-9]+)/edit/$', views_admin.position_edit_view, name='position_edit'),
-    url(r'^(?P<position_id>[0-9]+)/summary/$', views_admin.position_summary_view, name='position_summary'),
-
-    # views.py
-    # These pages are called by the ballot HTML page, and they return a JSON with all of the orgs that oppose a
-    # particular candidate or measure (Ex/ "Common Cause, Berkeley Democratic Club and 3 others oppose")
-    url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/oppose/$',
-        views.positions_related_to_candidate_campaign_oppose_view,
-        name='positions_related_to_candidate_campaign_oppose_view'),
-    url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/opposecount/$',
-        views.positions_count_for_candidate_campaign_oppose_view,
-        name='positions_count_for_candidate_campaign_oppose_view'),
-    url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/support/$',
-        views.positions_related_to_candidate_campaign_support_view,
-        name='positions_related_to_candidate_campaign_support_view'),
-    url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/supportcount/$',
-        views.positions_count_for_candidate_campaign_support_view,
-        name='positions_count_for_candidate_campaign_support_view'),
-    url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/infoonly/$',
-        views.positions_related_to_candidate_campaign_information_only_view,
-        name='positions_related_to_candidate_campaign_information_only_view'),
-    url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/deciding/$',
-        views.positions_related_to_candidate_campaign_still_deciding_view,
-        name='positions_related_to_candidate_campaign_still_deciding_view'),
-
-    url(r'^cand/(?P<candidate_campaign_id>[0-9]+)/anypositionnfcount/$',
-        views.positions_count_for_candidate_campaign_any_not_followed_view,
-        name='positions_count_for_candidate_campaign_any_not_followed_view'),
+    url(r'^(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/edit/$', views_admin.position_edit_view, name='position_edit'),
+    url(r'^(?P<position_we_vote_id>wv[\w]{2}pos[\w]+)/summary/$',
+        views_admin.position_summary_view, name='position_summary'),
 
     # # These pages are used to return the div popup page with details about all supporters, opposers, etc.
     # # Any position that this voter isn't already following

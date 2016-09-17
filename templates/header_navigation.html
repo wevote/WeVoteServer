@@ -8,7 +8,7 @@
       {# <img src="{{ social.profile_photo|default:'https://pbs.twimg.com/profile_images/584051530958909441/jT5oa-9w.jpg' }}" class="navimg"> #}
       <div class="navbar-text hidden-sm hidden-xs">
         {% if user.first_name %}
-          <a href="/">{{ user.first_name }}</a> is a Voter
+          <a href="/login">{{ user.first_name }}</a> is a Voter
         {% else %}
           <span>Hello, Voter!</span>
         {% endif %}
