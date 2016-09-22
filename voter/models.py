@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
@@ -246,49 +247,70 @@ class VoterManager(BaseUserManager):
                 voter_on_stage = Voter.objects.get(id=voter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif email is not '' and email is not None:
-                # TODO DALE Convert to look in facebook_email field as well
-                voter_on_stage = Voter.objects.get(
-                    email__iexact=email)
-                # If still here, we found an existing voter
-                voter_id = voter_on_stage.id
+                voter_queryset = Voter.objects.all()
+                # TODO DALE: Currently facebook_email is not a unique entry.
+                # TODO DALE: We need to clean up the facebook sign in code to deal with this, and move the
+                # facebook_email into "email"
+                # voter_queryset = voter_queryset.filter(Q(email__iexact=email) |
+                #                                        Q(facebook_email__iexact=email))
+                voter_queryset = voter_queryset.filter(Q(email__iexact=email))
+                voter_list = list(voter_queryset[:1])
+                if len(voter_list):
+                    voter_on_stage = voter_list[0]
+                    voter_id = voter_on_stage.id
+                    success = True
+                else:
+                    voter_on_stage = Voter()
+                    voter_id = 0
+                    success = True
             elif positive_value_exists(voter_we_vote_id):
                 voter_on_stage = Voter.objects.get(
                     we_vote_id__iexact=voter_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(twitter_request_token):
                 voter_on_stage = Voter.objects.get(
                     twitter_request_token=twitter_request_token)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(facebook_id):
                 voter_on_stage = Voter.objects.get(
                     facebook_id=facebook_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(twitter_id):
                 voter_on_stage = Voter.objects.get(
                     twitter_id=twitter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(organization_we_vote_id):
                 voter_on_stage = Voter.objects.get(
                     linked_organization_we_vote_id__iexact=organization_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             else:
                 voter_id = 0
                 error_result = True
+                success = False
         except Voter.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
             exception_multiple_object_returned = True
+            success = False
         except Voter.DoesNotExist as e:
             error_result = True
             exception_does_not_exist = True
+            success = True
 
         results = {
+            'success':                  success,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
@@ -605,8 +627,12 @@ class Voter(AbstractBaseUser):
             return False
 
     def __str__(self):              # __unicode__ on Python 2
-        # return self.get_full_name(self)
-        return str(self.email)
+        if self.has_valid_email():
+            return str(self.email)
+        elif positive_value_exists(self.twitter_screen_name):
+            return str(self.twitter_screen_name)
+        else:
+            return str(self.get_full_name())
 
     def has_perm(self, perm, obj=None):
         """
@@ -657,7 +683,9 @@ class Voter(AbstractBaseUser):
         return False
 
     def has_valid_email(self):
-        if positive_value_exists(self.email) or positive_value_exists(self.facebook_email):
+        if positive_value_exists(self.email):
+            # TODO DALE -- we don't want to use facebook_email without copying it over to email
+            #  or positive_value_exists(self.facebook_email)
             return True
         return False
 

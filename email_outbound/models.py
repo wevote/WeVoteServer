@@ -47,6 +47,8 @@ class EmailAddress(models.Model):
         verbose_name="we vote id for the email owner", max_length=255, null=True, blank=True, unique=False)
     normalized_email_address = models.EmailField(
         verbose_name='email address', max_length=255, null=False, blank=False, unique=True)
+    secret_key = models.CharField(
+        verbose_name="secret key to verify ownership of email", max_length=255, null=True, blank=True, unique=True)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -78,18 +80,19 @@ class EmailOutboundDescription(models.Model):
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the recipient if we have it", max_length=255, null=True, blank=True, unique=False)
-    email_we_vote_id = models.CharField(
-        verbose_name="we vote id for the email address", max_length=255, null=True, blank=True, unique=False)
+    recipient_email_we_vote_id = models.CharField(
+        verbose_name="email we vote id for recipient", max_length=255, null=True, blank=True, unique=False)
+    # We include this here for data monitoring and debugging
     recipient_voter_email = models.EmailField(
-        verbose_name='email address', max_length=255, null=True, blank=True, unique=False)
-    email_scheduled_id = models.PositiveIntegerField(
-        verbose_name="the internal id of EmailScheduled", default=0, null=False)
-    assembly_status = models.CharField(max_length=20, choices=ASSEMBLY_STATUS_CHOICES, default=TO_BE_PROCESSED)
+        verbose_name='email address for recipient', max_length=255, null=True, blank=True, unique=False)
+    invitation_message = models.TextField(null=True, blank=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
 
 class EmailScheduled(models.Model):
     """
-    Used to tell the email server literally what to send.
+    Used to tell the email server literally what to send. If an email bounces temporarily, we will
+    want to trigger the EmailOutboundDescription to generate an new EmailScheduled entry.
     """
     subject = models.CharField(verbose_name="email subject", max_length=255, null=True, blank=True, unique=False)
     message_text = models.TextField(null=True, blank=True)
@@ -98,40 +101,216 @@ class EmailScheduled(models.Model):
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the recipient", max_length=255, null=True, blank=True, unique=False)
-    recipient_voter_email_we_vote_id = models.CharField(
+    recipient_email_we_vote_id = models.CharField(
         verbose_name="we vote id for the email", max_length=255, null=True, blank=True, unique=False)
     recipient_voter_email = models.EmailField(
         verbose_name='email address', max_length=255, null=True, blank=True, unique=False)
     send_status = models.CharField(max_length=20, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)
+    email_outbound_description_id = models.PositiveIntegerField(
+        verbose_name="the internal id of EmailOutboundDescription", default=0, null=False)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
 
 class EmailManager(models.Model):
     def __unicode__(self):
         return "EmailManager"
 
-    def create_email_outbound_description(self, voter, email_addresses_raw, invitation_message):
-        friend_invitation_by_email_saved = False
-        # try:
-        #     friend_invitation_by_email = FriendInvitationByEmail.objects.create(
-        #         email_addresses_raw=email_addresses_raw,
-        #         invitation_message=invitation_message,
-        #         sender_voter_we_vote_id=voter.we_vote_id,
-        #     )
-        #     friend_invitation_by_email_saved = True
-        #     success = True
-        #     status = "BATCH_ROW_ACTION_ORGANIZATION_CREATED"
-        # except Exception as e:
-        #     batch_row_action_created = False
-        #     batch_row_action_organization = BatchRowActionOrganization()
-        #     success = False
-        #     status = "BATCH_ROW_ACTION_ORGANIZATION_NOT_CREATED"
-        #
-        # # if friend_invitation_by_email_saved:
+    def create_email_address_for_voter(self, normalized_email_address, voter):
+        return self.create_email_address(normalized_email_address, voter.we_vote_id)
+
+    def create_email_address(self, normalized_email_address, voter_we_vote_id=''):
+        secret_key = None
+        normalized_email_address = str(normalized_email_address)
+        normalized_email_address = normalized_email_address.strip()
+        normalized_email_address = normalized_email_address.lower()
+
+        if not positive_value_exists(normalized_email_address):
+            email_address_object = EmailAddress()
+            results = {
+                'success':                      False,
+                'status':                       "EMAIL_ADDRESS_FOR_VOTER_MISSING_RAW_EMAIL",
+                'email_address_object_saved':   False,
+                'email_address_object':         email_address_object,
+            }
+            return results
+
+        try:
+            email_address_object = EmailAddress.objects.create(
+                normalized_email_address=normalized_email_address,
+                voter_we_vote_id=voter_we_vote_id,
+                secret_key=secret_key,
+            )
+            email_address_object_saved = True
+            success = True
+            status = "EMAIL_ADDRESS_FOR_VOTER_CREATED"
+        except Exception as e:
+            email_address_object_saved = False
+            email_address_object = EmailAddress()
+            success = False
+            status = "EMAIL_ADDRESS_FOR_VOTER_NOT_CREATED"
 
         results = {
-            'success': success,
-            'status': status,
-            'batch_row_action_created': batch_row_action_created,
-            'batch_row_action_organization': batch_row_action_organization,
+            'success':                    success,
+            'status':                     status,
+            'email_address_object_saved': email_address_object_saved,
+            'email_address_object':       email_address_object,
+        }
+        return results
+
+    def create_email_outbound_description(
+            self, sender_voter_we_vote_id, recipient_voter_we_vote_id='',
+            recipient_email_we_vote_id='', recipient_voter_email='', invitation_message='',
+            kind_of_email_template=''):
+        if not positive_value_exists(kind_of_email_template):
+            kind_of_email_template = GENERIC_EMAIL
+
+        try:
+            email_outbound_description = EmailOutboundDescription.objects.create(
+                sender_voter_we_vote_id=sender_voter_we_vote_id,
+                recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+                recipient_email_we_vote_id=recipient_email_we_vote_id,
+                recipient_voter_email=recipient_voter_email,
+                invitation_message=invitation_message,
+                kind_of_email_template=kind_of_email_template,
+            )
+            email_outbound_description_saved = True
+            success = True
+            status = "EMAIL_OUTBOUND_DESCRIPTION_CREATED"
+        except Exception as e:
+            email_outbound_description_saved = False
+            email_outbound_description = EmailOutboundDescription()
+            success = False
+            status = "EMAIL_OUTBOUND_DESCRIPTION_NOT_CREATED"
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'email_outbound_description_saved': email_outbound_description_saved,
+            'email_outbound_description':       email_outbound_description,
+        }
+        return results
+
+    def parse_raw_emails_into_list(self, email_addresses_raw):
+        success = True
+        status = "EMAIL_MANAGER_PARSE_RAW_EMAILS-TEST_MODE"
+        email_list = []
+        email_list.append(email_addresses_raw)  # TODO DALE This is a hack for testing now. Needs to be implemented.
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'at_least_one_email_found': True,
+            'email_list':               email_list,
+        }
+        return results
+
+    def retrieve_email_address_object(self, normalized_email_address, email_address_object_we_vote_id=''):
+        exception_does_not_exist = False
+        exception_multiple_object_returned = False
+        email_address_object_found = False
+        email_address_object = EmailAddress()
+        email_address_object_id = 0
+
+        try:
+            if positive_value_exists(email_address_object_we_vote_id):
+                email_address_object = EmailAddress.objects.get(
+                    we_vote_id__iexact=email_address_object_we_vote_id)
+                email_address_object_id = email_address_object.id
+                email_address_object_we_vote_id = email_address_object.we_vote_id
+                email_address_object_found = True
+                success = True
+                status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_WE_VOTE_ID"
+            elif positive_value_exists(normalized_email_address):
+                email_address_object = EmailAddress.objects.get(
+                    normalized_email_address__iexact=normalized_email_address)
+                email_address_object_id = email_address_object.id
+                email_address_object_we_vote_id = email_address_object.we_vote_id
+                email_address_object_found = True
+                success = True
+                status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_RAW_EMAIL"
+            else:
+                email_address_object_found = False
+                success = False
+                status = "RETRIEVE_EMAIL_ADDRESS_VARIABLES_MISSING"
+        except EmailAddress.MultipleObjectsReturned as e:
+            exception_multiple_object_returned = True
+            success = False
+            status = "RETRIEVE_EMAIL_ADDRESS_MULTIPLE_OBJECTS_RETURNED"
+        except EmailAddress.DoesNotExist:
+            exception_does_not_exist = True
+            success = True
+            status = "RETRIEVE_EMAIL_ADDRESS_NOT_FOUND"
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'DoesNotExist':                     exception_does_not_exist,
+            'MultipleObjectsReturned':          exception_multiple_object_returned,
+            'email_address_object_found':       email_address_object_found,
+            'email_address_object_id':          email_address_object_id,
+            'email_address_object_we_vote_id':  email_address_object_we_vote_id,
+            'email_address_object':             email_address_object,
+        }
+        return results
+
+    def schedule_email(self, email_outbound_description):
+        sender_voter_we_vote_id = email_outbound_description.sender_voter_we_vote_id
+        recipient_voter_we_vote_id = email_outbound_description.recipient_voter_we_vote_id
+        recipient_email_we_vote_id = email_outbound_description.recipient_email_we_vote_id
+        recipient_voter_email = email_outbound_description.recipient_voter_email
+        invitation_message = email_outbound_description.invitation_message
+        if positive_value_exists(email_outbound_description.kind_of_email_template):
+            kind_of_email_template = email_outbound_description.kind_of_email_template
+        else:
+            kind_of_email_template = GENERIC_EMAIL
+
+        # We need to combine the invitation_message with the kind_of_email_template
+        subject = "TEST SUBJECT"
+        message_html = ""
+        message_text = "TEST TEXT: " + invitation_message
+
+        send_status = TO_BE_PROCESSED
+
+        try:
+            email_scheduled = EmailScheduled.objects.create(
+                sender_voter_we_vote_id=sender_voter_we_vote_id,
+                recipient_voter_we_vote_id=recipient_voter_we_vote_id,
+                recipient_email_we_vote_id=recipient_email_we_vote_id,
+                recipient_voter_email=recipient_voter_email,
+                message_html=message_html,
+                message_text=message_text,
+                email_outbound_description_id=email_outbound_description.id,
+                send_status=send_status,
+                subject=subject,
+            )
+            email_scheduled_saved = True
+            success = True
+            status = "SCHEDULE_EMAIL_CREATED"
+        except Exception as e:
+            email_scheduled_saved = False
+            email_scheduled = EmailScheduled()
+            success = False
+            status = "SCHEDULE_EMAIL_NOT_CREATED"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'email_scheduled_saved':    email_scheduled_saved,
+            'email_scheduled_id':       email_scheduled.id,
+            'email_scheduled':          email_scheduled,
+        }
+        return results
+
+    def send_scheduled_email_list(self, messages_to_send):
+        """
+        Take in a list of scheduled_email_id's, and send them
+        :param messages_to_send:
+        :return:
+        """
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'at_least_one_email_found': True,
+            'email_list':               email_list,
         }
         return results
