@@ -485,9 +485,10 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url):  # twitterSignIn
             success = False
             status = ''
             error_tuple = error_instance.args
-            for error_dict in error_tuple:
-                for one_error in error_dict:
-                    status += '[' + one_error['message'] + '] '
+
+            # For each error, return append the message to the error message
+            for nested_error in error_tuple:
+                status += nested_error.reason
 
         if success:
             # Reach out to the twitterSignInRequestVoterInfo -- no need to redirect
@@ -553,9 +554,10 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url):  # twitterSignIn
         success = False
         status = 'TWITTER_SIGN_IN_START: '
         error_tuple = error_instance.args
-        for error_dict in error_tuple:
-            for one_error in error_dict:
-                status += '[' + one_error['message'] + '] '
+
+        # For each error, return append the message to the error message
+        for nested_error in error_tuple:
+            status += nested_error.reason
 
     if success:
         results = {
@@ -651,11 +653,10 @@ def twitter_sign_in_request_access_token_for_api(voter_device_id,
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_ACCESS_TOKEN: '
         error_tuple = error_instance.args
-        for error_dict in error_tuple:
-            count = 0
-            # for one_error in error_dict:
-            #     status += '[' + one_error[count] + '] '
-            #     count += 1
+
+        # For each error, return append the message to the error message
+        for nested_error in error_tuple:
+            status += nested_error.reason
 
     try:
         # We save these values in the Voter table
@@ -762,9 +763,10 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url, swit
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TWEEPY_ERROR: '
         error_tuple = error_instance.args
-        for error_dict in error_tuple:
-            for one_error in error_dict:
-                status += '[' + one_error['message'] + '] '
+
+        # For each error, return append the message to the error message
+        for nested_error in error_tuple:
+            status += nested_error.reason
 
     if twitter_user_object_found:
         # We need to deal with these cases
