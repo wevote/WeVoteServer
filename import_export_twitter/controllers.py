@@ -747,7 +747,6 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url, swit
     except tweepy.error.TweepError as error_instance:
         success = False
         status = 'TWITTER_SIGN_IN_REQUEST_VOTER_INFO_TWEEPY_ERROR: {}'.format(error_instance.reason)
-        error_tuple = error_instance.reason
 
     if twitter_user_object_found:
         # We need to deal with these cases
