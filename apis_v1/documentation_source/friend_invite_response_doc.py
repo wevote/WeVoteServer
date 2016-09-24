@@ -22,12 +22,19 @@ def friend_invite_response_doc_template_values(url_root):
             'name':         'kind_of_invite_response',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Default is ACCEPT_INVITATION. '
-                            'Other options include IGNORE_INVITATION.',
+                            'Other options include DELETE_INVITATION_EMAIL_SENT_BY_ME, '
+                            'DELETE_INVITATION_VOTER_SENT_BY_ME, IGNORE_INVITATION, UNFRIEND_CURRENT_FRIEND.',
         },
         {
             'name':         'voter_we_vote_id',
             'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for the voter who sent the invitation.',
+        },
+        {
+            'name':         'recipient_voter_email',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The email address the invitation was sent to (when a recipient we_vote_id could not '
+                            'be found.',
         },
     ]
     optional_query_parameter_list = [
