@@ -9,9 +9,12 @@ from ballot.controllers import ballot_item_options_retrieve_for_api, choose_elec
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
-from friend.controllers import friend_invitation_by_email_send_for_api, friend_list_for_api
-from friend.models import CURRENT_FRIENDS, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, FRIENDS_IN_COMMON, \
-    IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS
+from friend.controllers import friend_invitation_by_email_send_for_api, friend_invite_response_for_api, \
+    friend_list_for_api
+from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
+    FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
+    FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS, ACCEPT_INVITATION, IGNORE_INVITATION, \
+    UNFRIEND_CURRENT_FRIEND
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_facebook.controllers import facebook_disconnect_for_api, facebook_sign_in_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
@@ -206,25 +209,23 @@ def friend_invite_response_view(request):  # friendInviteResponse
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    kind_of_list = request.GET.get('kind_of_list', CURRENT_FRIENDS)
-    if kind_of_list in(CURRENT_FRIENDS, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, FRIENDS_IN_COMMON,
-                       IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS):
-        kind_of_list_we_are_looking_for = kind_of_list
-    else:
-        kind_of_list_we_are_looking_for = CURRENT_FRIENDS
-    state_code = request.GET.get('state_code', "")
-    results = friend_list_for_api(voter_device_id=voter_device_id,
-                                  kind_of_list_we_are_looking_for=kind_of_list_we_are_looking_for,
-                                  state_code=state_code)
+    kind_of_invite_response = request.GET.get('kind_of_invite_response', ACCEPT_INVITATION)
+    if not kind_of_invite_response in(ACCEPT_INVITATION, DELETE_INVITATION_EMAIL_SENT_BY_ME,
+                                      DELETE_INVITATION_VOTER_SENT_BY_ME, IGNORE_INVITATION, UNFRIEND_CURRENT_FRIEND):
+        kind_of_invite_response = ACCEPT_INVITATION
+    other_voter_we_vote_id = request.GET.get('voter_we_vote_id', "")
+    recipient_voter_email = request.GET.get('recipient_voter_email', "")
+    results = friend_invite_response_for_api(voter_device_id=voter_device_id,
+                                             kind_of_invite_response=kind_of_invite_response,
+                                             other_voter_we_vote_id=other_voter_we_vote_id,
+                                             recipient_voter_email=recipient_voter_email)
 
     json_data = {
-        'status':               results['status'],
-        'success':              False,  # TODO DALE THIS ROUTINE NEEDS TO BE BUILT
-        'voter_device_id':      voter_device_id,
-        'state_code':           state_code,
-        'kind_of_list':         kind_of_list_we_are_looking_for,
-        'friend_list_found':    results['friend_list_found'],
-        'friend_list':          results['friend_list'],
+        'status':                   results['status'],
+        'success':                  results['success'],
+        'voter_device_id':          voter_device_id,
+        'voter_we_vote_id':         other_voter_we_vote_id,
+        'kind_of_invite_response':  kind_of_invite_response,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
