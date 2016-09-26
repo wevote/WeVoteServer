@@ -193,7 +193,9 @@ def friend_invitation_by_email_send_view(request):  # friendInvitationByEmailSen
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     email_addresses_raw = request.GET.get('email_addresses_raw', "")
     invitation_message = request.GET.get('invitation_message', "")
-    results = friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw, invitation_message)
+    sender_email_address = request.GET.get('sender_email_address', "")
+    results = friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw, invitation_message,
+                                                      sender_email_address)
     json_data = {
         'status':                               results['status'],
         'success':                              results['success'],

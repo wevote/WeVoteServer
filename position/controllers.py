@@ -12,6 +12,7 @@ from django.http import HttpResponse
 from election.models import fetch_election_state
 from exception.models import handle_record_not_saved_exception
 from follow.models import FollowOrganizationManager, FollowOrganizationList
+from friend.models import FriendManager
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from organization.models import OrganizationManager
@@ -390,7 +391,13 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
         and show_positions_this_voter_follows
     retrieve_public_positions = friends_vs_public in (PUBLIC_ONLY, FRIENDS_AND_PUBLIC)
 
-    friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends
+    friends_we_vote_id_list = []
+    if positive_value_exists(voter_we_vote_id):
+        friend_manager = FriendManager()
+        friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
+        if friend_results['friends_we_vote_id_list_found']:
+            friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+
     # Add yourself as a friend so your opinions show up
     friends_we_vote_id_list.append(voter_we_vote_id)
 

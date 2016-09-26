@@ -59,11 +59,30 @@ class FriendInvitationEmailLink(models.Model):
     """
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+    sender_email_address_verified = models.BooleanField(default=False)  # Do we have an email address for sender?
     recipient_email_we_vote_id = models.CharField(
         verbose_name="email we vote id for recipient", max_length=255, null=True, blank=True, unique=False)
     # We include this here for data monitoring and debugging
     recipient_voter_email = models.EmailField(
         verbose_name='email address for recipient', max_length=255, null=True, blank=True, unique=False)
+    secret_key = models.CharField(
+        verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
+    invitation_message = models.TextField(null=True, blank=True)
+    invitation_status = models.CharField(max_length=20, choices=INVITATION_STATUS_CHOICES, default=DRAFT)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
+
+
+class FriendInvitationTwitterLink(models.Model):
+    """
+    Created when voter 1) invites via twitter handle and the twitter handle isn't recognized or linked to voter).
+    Once we have linked the twitter handle to a voter, we want to remove this database entry and
+    rely on the FriendInvitationVoterLink.
+    """
+    sender_voter_we_vote_id = models.CharField(
+        verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+    recipient_twitter_handle = models.CharField(
+        verbose_name='twitter screen_name', max_length=255, null=False, unique=False)
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
     invitation_message = models.TextField(null=True, blank=True)
@@ -79,6 +98,7 @@ class FriendInvitationVoterLink(models.Model):
     """
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+    sender_email_address_verified = models.BooleanField(default=False)  # Do we have an email address for sender?
     recipient_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the recipient if we have it", max_length=255, null=True, blank=True, unique=False)
     secret_key = models.CharField(
@@ -95,12 +115,14 @@ class FriendManager(models.Model):
         return "FriendManager"
 
     def create_or_update_friend_invitation_email_link(self, sender_voter_we_vote_id, recipient_email_we_vote_id='',
-                                                      recipient_voter_email='', invitation_message=''):
+                                                      recipient_voter_email='', invitation_message='',
+                                                      sender_email_address_verified=False):
         defaults = {
-            "sender_voter_we_vote_id":      sender_voter_we_vote_id,
-            "recipient_email_we_vote_id":   recipient_email_we_vote_id,
-            "recipient_voter_email":        recipient_voter_email,
-            "invitation_message":           invitation_message
+            "sender_voter_we_vote_id":          sender_voter_we_vote_id,
+            "sender_email_address_verified":    sender_email_address_verified,
+            "recipient_email_we_vote_id":       recipient_email_we_vote_id,
+            "recipient_voter_email":            recipient_voter_email,
+            "invitation_message":               invitation_message
         }
 
         try:
@@ -129,11 +151,12 @@ class FriendManager(models.Model):
         return results
 
     def create_or_update_friend_invitation_voter_link(self, sender_voter_we_vote_id, recipient_voter_we_vote_id='',
-                                                      invitation_message=''):
+                                                      invitation_message='', sender_email_address_verified=False):
         defaults = {
-            "sender_voter_we_vote_id":      sender_voter_we_vote_id,
-            "recipient_voter_we_vote_id":   recipient_voter_we_vote_id,
-            "invitation_message":           invitation_message
+            "sender_voter_we_vote_id":          sender_voter_we_vote_id,
+            "sender_email_address_verified":    sender_email_address_verified,
+            "recipient_voter_we_vote_id":       recipient_voter_we_vote_id,
+            "invitation_message":               invitation_message
         }
 
         try:
@@ -449,6 +472,75 @@ class FriendManager(models.Model):
             'voter_we_vote_id':     voter_we_vote_id,
             'friend_list_found':    friend_list_found,
             'friend_list':          friend_list,
+        }
+        return results
+
+    def retrieve_friends_we_vote_id_list(self, voter_we_vote_id):
+        """
+        This is similar to retrieve_current_friends, but only returns the we_vote_id
+        :param voter_we_vote_id:
+        :return:
+        """
+        current_friend_list_found = False
+        current_friend_list = []  # The entries from CurrentFriend table
+        friends_we_vote_id_list_found = False
+        friends_we_vote_id_list = []  # A list of friends, returned as we_vote_id's
+
+        if not positive_value_exists(voter_we_vote_id):
+            success = False
+            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'voter_we_vote_id':                 voter_we_vote_id,
+                'friends_we_vote_id_list_found':    friends_we_vote_id_list_found,
+                'friends_we_vote_id_list':          friends_we_vote_id_list,
+            }
+            return results
+
+        try:
+            current_friend_queryset = CurrentFriend.objects.all()
+            current_friend_queryset = current_friend_queryset.filter(
+                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            current_friend_queryset = current_friend_queryset.order_by('-date_last_changed')
+            current_friend_list = current_friend_queryset
+
+            if len(current_friend_list):
+                success = True
+                current_friend_list_found = True
+                status = 'FRIEND_LIST_RETRIEVED'
+            else:
+                success = True
+                current_friend_list_found = False
+                status = 'NO_FRIEND_LIST_RETRIEVED'
+        except CurrentFriend.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            current_friend_list_found = False
+            status = 'NO_FRIEND_LIST_RETRIEVED_DoesNotExist'
+            friends_we_vote_id_list = []
+        except Exception as e:
+            success = False
+            current_friend_list_found = False
+            status = 'FAILED retrieve_friend_invitations_sent_by_me '
+
+        if current_friend_list_found:
+            for current_friend_entry in current_friend_list:
+                if current_friend_entry.viewer_voter_we_vote_id == voter_we_vote_id:
+                    we_vote_id_of_friend = current_friend_entry.viewee_voter_we_vote_id
+                else:
+                    we_vote_id_of_friend = current_friend_entry.viewer_voter_we_vote_id
+                # This is the voter you are friends with
+                friends_we_vote_id_list.append(we_vote_id_of_friend)
+                friends_we_vote_id_list_found = True
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'voter_we_vote_id':                 voter_we_vote_id,
+            'friends_we_vote_id_list_found':    friends_we_vote_id_list_found,
+            'friends_we_vote_id_list':          friends_we_vote_id_list,
         }
         return results
 

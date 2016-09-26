@@ -6,11 +6,11 @@ from django.core.validators import RegexValidator
 from django.db import models
 from email_outbound.models import SEND_STATUS_CHOICES, TO_BE_PROCESSED
 
-FRIEND_INVITATION = 'FRIEND_INVITATION'
-GENERIC_EMAIL = 'GENERIC_EMAIL'
+FRIEND_INVITATION_FACEBOOK_TEMPLATE = 'FRIEND_INVITATION_FACEBOOK_TEMPLATE'
+GENERIC_EMAIL_FACEBOOK_TEMPLATE = 'GENERIC_EMAIL_FACEBOOK_TEMPLATE'
 KIND_OF_FACEBOOK_TEMPLATE_CHOICES = (
-    (GENERIC_EMAIL,  'Generic Email'),
-    (FRIEND_INVITATION, 'Invite Friend'),
+    (GENERIC_EMAIL_FACEBOOK_TEMPLATE,  'Generic Email'),
+    (FRIEND_INVITATION_FACEBOOK_TEMPLATE, 'Invite Friend'),
 )
 
 
@@ -21,7 +21,7 @@ class FacebookMessageOutboundDescription(models.Model):
     alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
 
     kind_of_send_template = models.CharField(max_length=20, choices=KIND_OF_FACEBOOK_TEMPLATE_CHOICES,
-                                             default=GENERIC_EMAIL)
+                                             default=GENERIC_EMAIL_FACEBOOK_TEMPLATE)
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
