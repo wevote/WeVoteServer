@@ -6,11 +6,13 @@ from django.db import models
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_email_integer, fetch_site_unique_id_prefix
 
-FRIEND_INVITATION = 'FRIEND_INVITATION'
-GENERIC_EMAIL = 'GENERIC_EMAIL'
+FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
+VERIFY_EMAIL_ADDRESS_TEMPLATE = 'VERIFY_EMAIL_ADDRESS_TEMPLATE'
+GENERIC_EMAIL_TEMPLATE = 'GENERIC_EMAIL_TEMPLATE'
 KIND_OF_EMAIL_TEMPLATE_CHOICES = (
-    (GENERIC_EMAIL,  'Generic Email'),
-    (FRIEND_INVITATION, 'Invite Friend'),
+    (GENERIC_EMAIL_TEMPLATE,  'Generic Email'),
+    (FRIEND_INVITATION_TEMPLATE, 'Invite Friend'),
+    (VERIFY_EMAIL_ADDRESS_TEMPLATE, 'Verify Senders Email Address'),
 )
 
 TO_BE_PROCESSED = 'TO_BE_PROCESSED'
@@ -75,7 +77,7 @@ class EmailOutboundDescription(models.Model):
     Specifications for a single email we want to send. This data is used to assemble an EmailScheduled
     """
     kind_of_email_template = models.CharField(max_length=20, choices=KIND_OF_EMAIL_TEMPLATE_CHOICES,
-                                              default=GENERIC_EMAIL)
+                                              default=GENERIC_EMAIL_TEMPLATE)
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
@@ -162,7 +164,7 @@ class EmailManager(models.Model):
             recipient_email_we_vote_id='', recipient_voter_email='', invitation_message='',
             kind_of_email_template=''):
         if not positive_value_exists(kind_of_email_template):
-            kind_of_email_template = GENERIC_EMAIL
+            kind_of_email_template = GENERIC_EMAIL_TEMPLATE
 
         try:
             email_outbound_description = EmailOutboundDescription.objects.create(
@@ -262,7 +264,7 @@ class EmailManager(models.Model):
         if positive_value_exists(email_outbound_description.kind_of_email_template):
             kind_of_email_template = email_outbound_description.kind_of_email_template
         else:
-            kind_of_email_template = GENERIC_EMAIL
+            kind_of_email_template = GENERIC_EMAIL_TEMPLATE
 
         # We need to combine the invitation_message with the kind_of_email_template
         subject = "TEST SUBJECT"
