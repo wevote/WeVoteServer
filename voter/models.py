@@ -531,7 +531,13 @@ class Voter(AbstractBaseUser):
 
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=20, validators=[alphanumeric])  # Increase max_length to 255
+    # We cache the email here for quick lookup, but the official email address for the voter
+    # is referenced by primary_email_we_vote_id and stored in the EmailAddress table
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True, null=True, blank=True)
+    primary_email_we_vote_id = models.CharField(
+        verbose_name="we vote id for primary email for this voter", max_length=255, null=True, blank=True, unique=True)
+    # This "email_ownership_is_verified" is a copy of the master data in EmailAddress.email_ownership_is_verified
+    email_ownership_is_verified = models.BooleanField(default=True)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
@@ -664,8 +670,7 @@ class Voter(AbstractBaseUser):
         return ''
 
     def signed_in_personal(self):
-        if positive_value_exists(self.email) or self.signed_in_facebook() or self.signed_in_twitter():
-            # or positive_value_exists(self.is_authenticated()):
+        if self.signed_in_with_email() or self.signed_in_facebook() or self.signed_in_twitter():
             return True
         return False
 
@@ -682,10 +687,23 @@ class Voter(AbstractBaseUser):
             return True
         return False
 
+    def signed_in_with_email(self):
+        verified_email_found = (positive_value_exists(self.email) or
+                                positive_value_exists(self.primary_email_we_vote_id)) and \
+                               self.email_ownership_is_verified
+        if verified_email_found:
+            return True
+        return False
+
     def has_valid_email(self):
         if positive_value_exists(self.email):
             # TODO DALE -- we don't want to use facebook_email without copying it over to email
             #  or positive_value_exists(self.facebook_email)
+            return True
+        return False
+
+    def has_email_with_verified_ownership(self):
+        if positive_value_exists(self.email) and self.email_ownership_is_verified:
             return True
         return False
 

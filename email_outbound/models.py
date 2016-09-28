@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, extract_email_addresses_from_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_email_integer, fetch_site_unique_id_prefix
 
 FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
@@ -49,6 +49,10 @@ class EmailAddress(models.Model):
         verbose_name="we vote id for the email owner", max_length=255, null=True, blank=True, unique=False)
     normalized_email_address = models.EmailField(
         verbose_name='email address', max_length=255, null=False, blank=False, unique=True)
+    # Has this email been verified by the owner?
+    email_ownership_is_verified = models.BooleanField(default=False)
+    # Has this email had a permanent bounce? If so, we should not send emails to it.
+    email_permanent_bounce = models.BooleanField(default=False)
     secret_key = models.CharField(
         verbose_name="secret key to verify ownership of email", max_length=255, null=True, blank=True, unique=True)
 
@@ -76,7 +80,7 @@ class EmailOutboundDescription(models.Model):
     """
     Specifications for a single email we want to send. This data is used to assemble an EmailScheduled
     """
-    kind_of_email_template = models.CharField(max_length=20, choices=KIND_OF_EMAIL_TEMPLATE_CHOICES,
+    kind_of_email_template = models.CharField(max_length=50, choices=KIND_OF_EMAIL_TEMPLATE_CHOICES,
                                               default=GENERIC_EMAIL_TEMPLATE)
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
@@ -107,7 +111,7 @@ class EmailScheduled(models.Model):
         verbose_name="we vote id for the email", max_length=255, null=True, blank=True, unique=False)
     recipient_voter_email = models.EmailField(
         verbose_name='email address', max_length=255, null=True, blank=True, unique=False)
-    send_status = models.CharField(max_length=20, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)
+    send_status = models.CharField(max_length=50, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)
     email_outbound_description_id = models.PositiveIntegerField(
         verbose_name="the internal id of EmailOutboundDescription", default=0, null=False)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
@@ -117,10 +121,10 @@ class EmailManager(models.Model):
     def __unicode__(self):
         return "EmailManager"
 
-    def create_email_address_for_voter(self, normalized_email_address, voter):
-        return self.create_email_address(normalized_email_address, voter.we_vote_id)
+    def create_email_address_for_voter(self, normalized_email_address, voter, email_ownership_is_verified=False):
+        return self.create_email_address(normalized_email_address, voter.we_vote_id, email_ownership_is_verified)
 
-    def create_email_address(self, normalized_email_address, voter_we_vote_id=''):
+    def create_email_address(self, normalized_email_address, voter_we_vote_id='', email_ownership_is_verified=False):
         secret_key = None
         normalized_email_address = str(normalized_email_address)
         normalized_email_address = normalized_email_address.strip()
@@ -140,6 +144,7 @@ class EmailManager(models.Model):
             email_address_object = EmailAddress.objects.create(
                 normalized_email_address=normalized_email_address,
                 voter_we_vote_id=voter_we_vote_id,
+                email_ownership_is_verified=email_ownership_is_verified,
                 secret_key=secret_key,
             )
             email_address_object_saved = True
@@ -194,9 +199,8 @@ class EmailManager(models.Model):
 
     def parse_raw_emails_into_list(self, email_addresses_raw):
         success = True
-        status = "EMAIL_MANAGER_PARSE_RAW_EMAILS-TEST_MODE"
-        email_list = []
-        email_list.append(email_addresses_raw)  # TODO DALE This is a hack for testing now. Needs to be implemented.
+        status = "EMAIL_MANAGER_PARSE_RAW_EMAILS"
+        email_list = extract_email_addresses_from_string(email_addresses_raw)
 
         results = {
             'success':                  success,
@@ -252,6 +256,60 @@ class EmailManager(models.Model):
             'email_address_object_id':          email_address_object_id,
             'email_address_object_we_vote_id':  email_address_object_we_vote_id,
             'email_address_object':             email_address_object,
+        }
+        return results
+
+    def retrieve_voter_email_address_list(self, voter_we_vote_id):
+        """
+
+        :param voter_we_vote_id:
+        :return:
+        """
+        if not positive_value_exists(voter_we_vote_id):
+            success = False
+            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'voter_we_vote_id':         voter_we_vote_id,
+                'email_address_list_found': False,
+                'email_address_list':       [],
+            }
+            return results
+
+        email_address_list = []
+        try:
+            email_address_queryset = EmailAddress.objects.all()
+            email_address_queryset = email_address_queryset.filter(
+                voter_we_vote_id__iexact=voter_we_vote_id)
+            email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
+            email_address_list = email_address_queryset
+
+            if len(email_address_list):
+                success = True
+                email_address_list_found = True
+                status = 'EMAIL_ADDRESS_LIST_RETRIEVED'
+            else:
+                success = True
+                email_address_list_found = False
+                status = 'NO_EMAIL_ADDRESS_LIST_RETRIEVED'
+        except EmailAddress.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            email_address_list_found = False
+            status = 'NO_EMAIL_ADDRESS_LIST_RETRIEVED_DoesNotExist'
+            email_address_list = []
+        except Exception as e:
+            success = False
+            email_address_list_found = False
+            status = 'FAILED retrieve_friend_invitations_sent_by_me EmailAddress'
+
+        results = {
+            'success': success,
+            'status': status,
+            'voter_we_vote_id': voter_we_vote_id,
+            'email_address_list_found': email_address_list_found,
+            'email_address_list': email_address_list,
         }
         return results
 

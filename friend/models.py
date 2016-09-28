@@ -8,10 +8,12 @@ from wevote_functions.functions import convert_to_int, positive_value_exists
 from voter.models import VoterManager
 
 NO_RESPONSE = 'NO_RESPONSE'
+PENDING_EMAIL_VERIFICATION = 'PENDING_EMAIL_VERIFICATION'
 ACCEPTED = 'ACCEPTED'
 IGNORED = 'IGNORED'
 INVITATION_STATUS_CHOICES = (
-    (NO_RESPONSE,  'No response yet'),
+    (PENDING_EMAIL_VERIFICATION, 'Pending verification of your email'),
+    (NO_RESPONSE, 'No response yet'),
     (ACCEPTED, 'Invitation accepted'),
     (IGNORED, 'Voter invited chose to ignore the invitation'),
 )
@@ -22,13 +24,6 @@ IGNORE_INVITATION = 'IGNORE_INVITATION'
 DELETE_INVITATION_VOTER_SENT_BY_ME = 'DELETE_INVITATION_VOTER_SENT_BY_ME'
 DELETE_INVITATION_EMAIL_SENT_BY_ME = 'DELETE_INVITATION_EMAIL_SENT_BY_ME'
 UNFRIEND_CURRENT_FRIEND = 'UNFRIEND_CURRENT_FRIEND'
-
-DRAFT = 'DRAFT'
-INVITATIONS_SENT = 'INVITATIONS_SENT'
-FRIEND_INVITATIONS_STATUS_CHOICES = (
-    (DRAFT,  'Still a draft, more info needed'),
-    (INVITATIONS_SENT,  'Invitations sent'),
-)
 
 # Kinds of lists of friends
 CURRENT_FRIENDS = 'CURRENT_FRIENDS'
@@ -68,7 +63,7 @@ class FriendInvitationEmailLink(models.Model):
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
     invitation_message = models.TextField(null=True, blank=True)
-    invitation_status = models.CharField(max_length=20, choices=INVITATION_STATUS_CHOICES, default=DRAFT)
+    invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
@@ -86,7 +81,7 @@ class FriendInvitationTwitterLink(models.Model):
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
     invitation_message = models.TextField(null=True, blank=True)
-    invitation_status = models.CharField(max_length=20, choices=INVITATION_STATUS_CHOICES, default=DRAFT)
+    invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
@@ -104,7 +99,7 @@ class FriendInvitationVoterLink(models.Model):
     secret_key = models.CharField(
         verbose_name="secret key to accept invite", max_length=255, null=True, blank=True, unique=True)
     invitation_message = models.TextField(null=True, blank=True)
-    invitation_status = models.CharField(max_length=20, choices=INVITATION_STATUS_CHOICES, default=DRAFT)
+    invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
@@ -384,7 +379,8 @@ class FriendManager(models.Model):
         if friend_invitation_found:
             if kind_of_invite_response == DELETE_INVITATION_EMAIL_SENT_BY_ME:
                 try:
-                    friend_invitation_email_link.delete()
+                    friend_invitation_email_link.deleted = True
+                    friend_invitation_email_link.save()
                     friend_invitation_deleted = True
                     success = True
                     status = 'FRIEND_INVITATION_EMAIL_DELETED'
@@ -564,6 +560,7 @@ class FriendManager(models.Model):
             friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 sender_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=False)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.order_by('-date_last_changed')
             friend_list = friend_invitation_voter_queryset
 
@@ -591,6 +588,7 @@ class FriendManager(models.Model):
             friend_invitation_email_queryset = FriendInvitationEmailLink.objects.all()
             friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
                 sender_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+            friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=False)
             friend_invitation_email_queryset = friend_invitation_email_queryset.order_by('-date_last_changed')
             friend_list_email = friend_invitation_email_queryset
             success = True

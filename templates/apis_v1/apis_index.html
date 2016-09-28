@@ -59,6 +59,16 @@
         <td>Save profile-related fields for an existing voter.</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:voterEmailAddressRetrieveDocs' %}">voterEmailAddressRetrieve</a></td>
+        <td></td>
+        <td>Retrieve all of the voter's email addresses, including the status of each email.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterEmailAddressSaveDocs' %}">voterEmailAddressSave</a></td>
+        <td></td>
+        <td>Save or update email address for an existing voter.</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:voterPhotoSaveDocs' %}">voterPhotoSave - DEPRECATED, PLEASE USE voterUpdate</a></td>
         <td></td>
         <td>Save photo (pulled from Facebook or Twitter) for an existing voter.</td>

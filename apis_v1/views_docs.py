@@ -21,9 +21,10 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     positions_count_for_all_ballot_items_doc, positions_count_for_one_ballot_item_doc, \
     quick_info_retrieve_doc, search_all_doc, twitter_identity_retrieve_doc, \
     twitter_sign_in_start_doc, twitter_sign_in_request_access_token_doc, twitter_sign_in_request_voter_info_doc, \
-    voter_address_retrieve_doc, \
-    voter_address_save_doc, voter_all_positions_retrieve_doc, voter_all_stars_status_retrieve_doc, \
+    voter_address_retrieve_doc, voter_address_save_doc, \
+    voter_all_positions_retrieve_doc, voter_all_stars_status_retrieve_doc, \
     voter_ballot_items_retrieve_doc, voter_ballot_items_retrieve_from_google_civic_doc, voter_count_doc, \
+    voter_email_address_retrieve_doc, voter_email_address_save_doc, \
     voter_create_doc, voter_guide_possibility_retrieve_doc, voter_guide_possibility_save_doc, \
     voter_guides_followed_retrieve_doc, voter_guides_sync_out_doc, voter_guides_to_follow_retrieve_doc, \
     voter_location_retrieve_from_ip_doc, voter_photo_save_doc, \
@@ -527,7 +528,7 @@ def voter_address_retrieve_doc_view(request):
 
 def voter_address_save_doc_view(request):
     """
-    Show documentation about voterSaveRetrieve
+    Show documentation about voterAddressSave
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_address_save_doc.voter_address_save_doc_template_values(url_root)
@@ -571,6 +572,26 @@ def voter_create_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = voter_create_doc.voter_create_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_email_address_retrieve_doc_view(request):
+    """
+    Show documentation about voterEmailAddressRetrieve
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_email_address_retrieve_doc.voter_email_address_retrieve_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def voter_email_address_save_doc_view(request):
+    """
+    Show documentation about voterEmailAddressSave
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = voter_email_address_save_doc.voter_email_address_save_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

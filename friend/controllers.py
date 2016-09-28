@@ -5,6 +5,7 @@
 from .models import FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, \
     FRIEND_INVITATIONS_SENT_BY_ME, FRIEND_INVITATIONS_SENT_TO_ME, FRIENDS_IN_COMMON, UNFRIEND_CURRENT_FRIEND
 from email_outbound.models import EmailAddress, EmailManager, FRIEND_INVITATION_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
+from validate_email import validate_email
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
@@ -16,6 +17,7 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
                                             sender_email_address):
     success = False
     status = ""
+    error_message_to_show_voter = ""
 
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
@@ -23,7 +25,8 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
             'status':                               results['status'],
             'success':                              False,
             'voter_device_id':                      voter_device_id,
-            'sender_voter_email_address_missing':   True
+            'sender_voter_email_address_missing':   True,
+            'error_message_to_show_voter':          error_message_to_show_voter
         }
         return error_results
 
@@ -35,7 +38,8 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
             'status':                               "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
             'success':                              False,
             'voter_device_id':                      voter_device_id,
-            'sender_voter_email_address_missing':   True
+            'sender_voter_email_address_missing':   True,
+            'error_message_to_show_voter':          error_message_to_show_voter
         }
         return error_results
 
@@ -44,50 +48,109 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
     messages_to_send = []
 
     send_now = False
-    if sender_voter.has_valid_email():
+    valid_new_sender_email_address = False
+    if sender_voter.has_email_with_verified_ownership():
         send_now = True
     else:
         # If here, check to see if a sender_email_address was passed in
-        if positive_value_exists(sender_email_address):
-            # Send verification email, and store the rest of the data without processing until sender_email is verified
-            # TODO DALE Does this email exist in the EmailAddress database?
-            recipient_voter_email = sender_email_address
-            # TODO DALE If not, create it
-            recipient_email_we_vote_id = ""
-
-            send_now = False
-            kind_of_email_template = VERIFY_EMAIL_ADDRESS_TEMPLATE
-            recipient_voter_we_vote_id = sender_voter.we_vote_id
-            outbound_results = email_manager.create_email_outbound_description(
-                sender_voter.we_vote_id, recipient_voter_we_vote_id,
-                recipient_email_we_vote_id, recipient_voter_email,
-                invitation_message, kind_of_email_template)
-            status += outbound_results['status'] + " "
-            if outbound_results['email_outbound_description_saved']:
-                email_outbound_description = outbound_results['email_outbound_description']
-                schedule_results = email_manager.schedule_email(email_outbound_description)
-                if schedule_results['email_scheduled_saved']:
-                    messages_to_send.append(schedule_results['email_scheduled_id'])
-                status += schedule_results['status'] + " "
-        else:
+        valid_new_sender_email_address = False
+        if not positive_value_exists(sender_email_address) or not validate_email(sender_email_address):
             error_results = {
                 'status':                               "VOTER_DOES_NOT_HAVE_VALID_EMAIL",
                 'success':                              False,
                 'voter_device_id':                      voter_device_id,
-                'sender_voter_email_address_missing':   True
+                'sender_voter_email_address_missing':   True,
+                'error_message_to_show_voter':          error_message_to_show_voter
             }
             return error_results
+        else:
+            valid_new_sender_email_address = True
+
+    sender_email_address_object = EmailAddress()
+    if valid_new_sender_email_address:
+        # Does this email exist in the EmailAddress database?
+        email_address_object_found = False
+        results = email_manager.retrieve_email_address_object(sender_email_address)
+        if results['email_address_object_found']:
+            email_address_object_found = True
+            sender_email_address_object = results['email_address_object']
+            # Is this email address in use by another voter?
+            in_use_by_another_voter = \
+                sender_email_address_object.voter_we_vote_id.lower() == sender_voter.we_vote_id.lower()
+            if in_use_by_another_voter:
+                valid_new_sender_email_address = False
+                error_message_to_show_voter = "This email is already in use by another voter."
+        else:
+            # Create email address object
+            if sender_voter.signed_in_personal():
+                email_results = email_manager.create_email_address_for_voter(sender_email_address, sender_voter)
+            else:
+                email_results = email_manager.create_email_address(sender_email_address)
+
+            if email_results['email_address_object_saved']:
+                # We recognize the email
+                email_address_object_found = True
+                sender_email_address_object = email_results['email_address_object']
+
+        # double-check that we have email_address_object
+        if not email_address_object_found:
+            success = False
+            status = "FRIEND_INVITATION_BY_EMAIL_SEND-EMAIL_ADDRESS_OBJECT_MISSING"
+            error_results = {
+                'success':                              success,
+                'status':                               status,
+                'voter_device_id':                      voter_device_id,
+                'sender_voter_email_address_missing':   True,
+                'error_message_to_show_voter':          error_message_to_show_voter
+            }
+            return error_results
+
+    if valid_new_sender_email_address:
+        # Send verification email, and store the rest of the data without processing until sender_email is verified
+        recipient_voter_email = sender_email_address_object.normalized_email_address
+        recipient_email_we_vote_id = sender_email_address_object.we_vote_id
+
+        send_now = False
+        kind_of_email_template = VERIFY_EMAIL_ADDRESS_TEMPLATE
+        recipient_voter_we_vote_id = sender_voter.we_vote_id
+        verification_message = ""
+        outbound_results = email_manager.create_email_outbound_description(
+            sender_voter.we_vote_id, recipient_voter_we_vote_id,
+            recipient_email_we_vote_id, recipient_voter_email,
+            verification_message, kind_of_email_template)
+        status += outbound_results['status'] + " "
+        if outbound_results['email_outbound_description_saved']:
+            email_outbound_description = outbound_results['email_outbound_description']
+            schedule_results = email_manager.schedule_email(email_outbound_description)
+            if schedule_results['email_scheduled_saved']:
+                messages_to_send.append(schedule_results['email_scheduled_id'])
+            status += schedule_results['status'] + " "
+
+    if sender_voter.has_valid_email() or valid_new_sender_email_address:
+        # We can continue. Note that we are not checking for "voter.has_email_with_verified_ownership()"
+        pass
+    else:
+        error_results = {
+            'status':                               "VOTER_DOES_NOT_HAVE_VALID_EMAIL",
+            'success':                              False,
+            'voter_device_id':                      voter_device_id,
+            'sender_voter_email_address_missing':   True,
+            'error_message_to_show_voter':          error_message_to_show_voter
+        }
+        return error_results
 
     # Break apart all of the emails in email_addresses_raw input from the voter
     results = email_manager.parse_raw_emails_into_list(email_addresses_raw)
     if results['at_least_one_email_found']:
         raw_email_list_to_invite = results['email_list']
     else:
+        error_message_to_show_voter = "Please enter the email address of at least one friend."
         error_results = {
             'status':                               "LIST_OF_EMAILS_NOT_RECEIVED " + results['status'],
             'success':                              False,
             'voter_device_id':                      voter_device_id,
-            'sender_voter_email_address_missing':   False
+            'sender_voter_email_address_missing':   False,
+            'error_message_to_show_voter':          error_message_to_show_voter
         }
         return error_results
 
@@ -97,11 +160,14 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
         # and the owner (Voter) if exists
         retrieve_results = retrieve_voter_and_email_address(one_normalized_raw_email)
         if not retrieve_results['success']:
+            error_message_to_show_voter = "There was an error retrieving one of your friend's email addresses. " \
+                                          "Please try again."
             results = {
                 'success':                              False,
                 'status':                               retrieve_results['status'],
                 'voter_device_id':                      voter_device_id,
                 'sender_voter_email_address_missing':   False,
+                'error_message_to_show_voter':          error_message_to_show_voter
             }
             return results
         status += retrieve_results['status'] + " "
@@ -156,12 +222,21 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
         'status':                               status,
         'voter_device_id':                      voter_device_id,
         'sender_voter_email_address_missing':   False,
+        'error_message_to_show_voter':          error_message_to_show_voter
     }
     return results
 
 
 def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, other_voter_we_vote_id,
                                    recipient_voter_email=''):
+    """
+    friendInviteResponse
+    :param voter_device_id:
+    :param kind_of_invite_response:
+    :param other_voter_we_vote_id:
+    :param recipient_voter_email:
+    :return:
+    """
     success = False
     status = "IN_DEVELOPMENT"
 
@@ -272,6 +347,7 @@ def friend_list_for_api(voter_device_id,
                     "voter_twitter_description":        "",  # To be implemented
                     "voter_twitter_followers_count":    0,  # To be implemented
                     "voter_state_code":                 "",  # To be implemented
+                    "invitation_status":                "",  # Not used with CurrentFriends
                 }
                 friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_TO_ME:
@@ -295,6 +371,7 @@ def friend_list_for_api(voter_device_id,
                         "voter_twitter_description":        "",  # To be implemented
                         "voter_twitter_followers_count":    0,  # To be implemented
                         "voter_state_code":                 "",  # To be implemented
+                        "invitation_status":                "",  # Not used for invitations sent to me
                     }
                     friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_BY_ME:
@@ -325,21 +402,23 @@ def friend_list_for_api(voter_device_id,
                             "voter_twitter_description":        "",  # To be implemented
                             "voter_twitter_followers_count":    0,  # To be implemented
                             "voter_state_code":                 "",  # To be implemented
-                            "voter_email_address":              ""
+                            "voter_email_address":              "",
+                            "invitation_status":                one_friend_invitation.invitation_status,
                         }
                         friend_list.append(one_friend)
                 else:
                     if hasattr(one_friend_invitation, 'recipient_voter_email'):
                         if positive_value_exists(one_friend_invitation.recipient_voter_email):
                             one_friend = {
-                                "voter_we_vote_id": "",
-                                "voter_display_name": "",
-                                "voter_photo_url": "",
-                                "voter_twitter_handle": "",
-                                "voter_twitter_description": "",  # To be implemented
-                                "voter_twitter_followers_count": 0,  # To be implemented
-                                "voter_state_code": "",  # To be implemented
-                                "voter_email_address": one_friend_invitation.recipient_voter_email,
+                                "voter_we_vote_id":                 "",
+                                "voter_display_name":               "",
+                                "voter_photo_url":                  "",
+                                "voter_twitter_handle":             "",
+                                "voter_twitter_description":        "",  # To be implemented
+                                "voter_twitter_followers_count":    0,  # To be implemented
+                                "voter_state_code":                 "",  # To be implemented
+                                "voter_email_address":              one_friend_invitation.recipient_voter_email,
+                                "invitation_status":                one_friend_invitation.invitation_status,
                             }
                             friend_list.append(one_friend)
     else:
@@ -461,7 +540,7 @@ def store_internal_friend_invitation_with_two_voters(voter, invitation_message,
         return results
 
     friend_manager = FriendManager()
-    sender_email_address_verified = voter.has_valid_email()
+    sender_email_address_verified = voter.has_email_with_verified_ownership()
     create_results = friend_manager.create_or_update_friend_invitation_voter_link(
         sender_voter_we_vote_id, recipient_voter_we_vote_id, invitation_message, sender_email_address_verified)
     results = {
@@ -481,7 +560,7 @@ def store_internal_friend_invitation_with_unknown_email(voter, invitation_messag
     recipient_voter_email = email_address_object.normalized_email_address
 
     friend_manager = FriendManager()
-    sender_email_address_verified = voter.has_valid_email()
+    sender_email_address_verified = voter.has_email_with_verified_ownership()
     create_results = friend_manager.create_or_update_friend_invitation_email_link(
         sender_voter_we_vote_id, recipient_email_we_vote_id,
         recipient_voter_email, invitation_message, sender_email_address_verified)
