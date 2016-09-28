@@ -20,7 +20,7 @@ class FacebookMessageOutboundDescription(models.Model):
     """
     alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
 
-    kind_of_send_template = models.CharField(max_length=20, choices=KIND_OF_FACEBOOK_TEMPLATE_CHOICES,
+    kind_of_send_template = models.CharField(max_length=50, choices=KIND_OF_FACEBOOK_TEMPLATE_CHOICES,
                                              default=GENERIC_EMAIL_FACEBOOK_TEMPLATE)
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
@@ -30,4 +30,4 @@ class FacebookMessageOutboundDescription(models.Model):
     recipient_facebook_email = models.EmailField(verbose_name='facebook email address', max_length=255, unique=False,
                                                  null=True, blank=True)
     recipient_fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
-    send_status = models.CharField(max_length=20, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)
+    send_status = models.CharField(max_length=50, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)

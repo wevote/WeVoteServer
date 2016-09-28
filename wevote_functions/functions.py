@@ -5,6 +5,7 @@
 import datetime
 from nameparser import HumanName
 import random
+import re
 import string
 import sys
 import types
@@ -271,6 +272,25 @@ def display_full_name_with_correct_capitalization(full_name):
     full_name_parsed.capitalize()
     full_name_capitalized = str(full_name_parsed)
     return full_name_capitalized
+
+
+def extract_email_addresses_from_string(incoming_string):
+    """
+    Thanks to https://gist.github.com/dideler/5219706
+    :param incoming_string:
+    :return:
+    """
+    regex = re.compile(("([a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`"
+                        "{|}~-]+)*(@|\sat\s)(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(\.|"
+                        "\sdot\s))+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)"))
+
+    collection_of_emails = (email[0] for email in re.findall(regex, incoming_string) if not email[0].startswith('//'))
+
+    list_of_emails = []
+    for email in collection_of_emails:
+        list_of_emails.append(email)
+
+    return list_of_emails
 
 
 def extract_first_name_from_full_name(full_name):

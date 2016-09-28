@@ -9,6 +9,7 @@ from ballot.controllers import ballot_item_options_retrieve_for_api, choose_elec
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
+from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api
 from friend.controllers import friend_invitation_by_email_send_for_api, friend_invite_response_for_api, \
     friend_list_for_api
 from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
@@ -1398,6 +1399,50 @@ def voter_count_view(request):
 def voter_create_view(request):  # voterCreate
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return voter_create_for_api(voter_device_id)
+
+
+def voter_email_address_retrieve_view(request):  # voterEmailAddressRetrieve
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = voter_email_address_retrieve_for_api(voter_device_id=voter_device_id)
+
+    json_data = {
+        'status':                   results['status'],
+        'success':                  results['success'],
+        'voter_device_id':          voter_device_id,
+        'email_address_list_found': results['email_address_list_found'],
+        'email_address_list':       results['email_address_list'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_email_address_save_view(request):  # voterEmailAddressSave
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    text_for_email_address = request.GET.get('text_for_email_address', '')
+    email_we_vote_id = request.GET.get('email_we_vote_id', '')
+    make_primary_email = request.GET.get('make_primary_email', False)
+    results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
+                                               text_for_email_address=text_for_email_address,
+                                               email_we_vote_id=email_we_vote_id,
+                                               make_primary_email=make_primary_email)
+
+    json_data = {
+        'status':               results['status'],
+        'success':              results['success'],
+        'voter_device_id':      voter_device_id,
+        'state_code':           state_code,
+        'kind_of_list':         kind_of_list_we_are_looking_for,
+        'friend_list_found':    results['friend_list_found'],
+        'friend_list':          results['friend_list'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_guide_possibility_retrieve_view(request):
