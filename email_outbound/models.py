@@ -55,6 +55,7 @@ class EmailAddress(models.Model):
     email_permanent_bounce = models.BooleanField(default=False)
     secret_key = models.CharField(
         verbose_name="secret key to verify ownership of email", max_length=255, null=True, blank=True, unique=True)
+    deleted = models.BooleanField(default=False)  # If email address is removed from person's account, mark as deleted
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -124,7 +125,8 @@ class EmailManager(models.Model):
     def create_email_address_for_voter(self, normalized_email_address, voter, email_ownership_is_verified=False):
         return self.create_email_address(normalized_email_address, voter.we_vote_id, email_ownership_is_verified)
 
-    def create_email_address(self, normalized_email_address, voter_we_vote_id='', email_ownership_is_verified=False):
+    def create_email_address(self, normalized_email_address, voter_we_vote_id='', email_ownership_is_verified=False,
+                             make_primary_email=True):
         secret_key = None
         normalized_email_address = str(normalized_email_address)
         normalized_email_address = normalized_email_address.strip()
@@ -211,29 +213,59 @@ class EmailManager(models.Model):
         return results
 
     def retrieve_email_address_object(self, normalized_email_address, email_address_object_we_vote_id=''):
+        """
+        There are cases where we store multiple entries for the same normalized_email_address (prior to an email
+        address being verified)
+        :param normalized_email_address:
+        :param email_address_object_we_vote_id:
+        :return:
+        """
         exception_does_not_exist = False
         exception_multiple_object_returned = False
         email_address_object_found = False
         email_address_object = EmailAddress()
         email_address_object_id = 0
+        email_address_list_found = False
+        email_address_list = []
 
         try:
             if positive_value_exists(email_address_object_we_vote_id):
                 email_address_object = EmailAddress.objects.get(
-                    we_vote_id__iexact=email_address_object_we_vote_id)
+                    we_vote_id__iexact=email_address_object_we_vote_id,
+                    deleted=False
+                )
                 email_address_object_id = email_address_object.id
                 email_address_object_we_vote_id = email_address_object.we_vote_id
                 email_address_object_found = True
                 success = True
                 status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_WE_VOTE_ID"
             elif positive_value_exists(normalized_email_address):
-                email_address_object = EmailAddress.objects.get(
-                    normalized_email_address__iexact=normalized_email_address)
-                email_address_object_id = email_address_object.id
-                email_address_object_we_vote_id = email_address_object.we_vote_id
-                email_address_object_found = True
-                success = True
-                status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_RAW_EMAIL"
+                email_address_queryset = EmailAddress.objects.all()
+                email_address_queryset = email_address_queryset.filter(
+                    normalized_email_address__iexact=normalized_email_address,
+                    deleted=False
+                )
+                email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
+                email_address_list = email_address_queryset
+
+                if len(email_address_list):
+                    if len(email_address_list) == 1:
+                        # If only one email is found, return the results as a single email
+                        email_address_object = email_address_list[0]
+                        email_address_object_id = email_address_object.id
+                        email_address_object_we_vote_id = email_address_object.we_vote_id
+                        email_address_object_found = True
+                        email_address_list_found = False
+                        success = True
+                        status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_NORMALIZED_EMAIL_ADDRESS"
+                    else:
+                        success = True
+                        email_address_list_found = True
+                        status = 'RETRIEVE_EMAIL_ADDRESS_OBJECT-EMAIL_ADDRESS_LIST_RETRIEVED'
+                else:
+                    success = True
+                    email_address_list_found = False
+                    status = 'RETRIEVE_EMAIL_ADDRESS_OBJECT-NO_EMAIL_ADDRESS_LIST_RETRIEVED'
             else:
                 email_address_object_found = False
                 success = False
@@ -246,6 +278,9 @@ class EmailManager(models.Model):
             exception_does_not_exist = True
             success = True
             status = "RETRIEVE_EMAIL_ADDRESS_NOT_FOUND"
+        except Exception as e:
+            success = False
+            status = 'FAILED retrieve_email_address_object EmailAddress'
 
         results = {
             'success':                          success,
@@ -256,6 +291,8 @@ class EmailManager(models.Model):
             'email_address_object_id':          email_address_object_id,
             'email_address_object_we_vote_id':  email_address_object_we_vote_id,
             'email_address_object':             email_address_object,
+            'email_address_list_found':         email_address_list_found,
+            'email_address_list':               email_address_list,
         }
         return results
 
@@ -281,7 +318,9 @@ class EmailManager(models.Model):
         try:
             email_address_queryset = EmailAddress.objects.all()
             email_address_queryset = email_address_queryset.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id)
+                voter_we_vote_id__iexact=voter_we_vote_id,
+                deleted=False
+            )
             email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
             email_address_list = email_address_queryset
 

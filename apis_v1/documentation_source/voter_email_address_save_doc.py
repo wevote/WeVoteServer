@@ -55,7 +55,10 @@ def voter_email_address_save_doc_template_values(url_root):
                    '  "text_for_email_address": string,\n' \
                    '  "email_address_saved_we_vote_id": string,\n' \
                    '  "email_address_created": boolean,\n' \
+                   '  "verification_email_sent": boolean,\n' \
+                   '  "email_address_already_owned_by_other_voter": boolean,\n' \
                    '  "email_address_found": boolean,\n' \
+                   '  "email_address_list_found": boolean,\n' \
                    '  "email_address_list": list\n' \
                    '   [\n' \
                    '     "normalized_email_address": string,\n' \

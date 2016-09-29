@@ -1427,20 +1427,32 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     text_for_email_address = request.GET.get('text_for_email_address', '')
     email_we_vote_id = request.GET.get('email_we_vote_id', '')
+    resend_verification_email = request.GET.get('resend_verification_email', False)
     make_primary_email = request.GET.get('make_primary_email', False)
+    deleted = request.GET.get('deleted', "")
     results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
                                                text_for_email_address=text_for_email_address,
                                                email_we_vote_id=email_we_vote_id,
-                                               make_primary_email=make_primary_email)
+                                               resend_verification_email=resend_verification_email,
+                                               make_primary_email=make_primary_email,
+                                               deleted=deleted,
+                                               )
 
     json_data = {
-        'status':               results['status'],
-        'success':              results['success'],
-        'voter_device_id':      voter_device_id,
-        'state_code':           state_code,
-        'kind_of_list':         kind_of_list_we_are_looking_for,
-        'friend_list_found':    results['friend_list_found'],
-        'friend_list':          results['friend_list'],
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+        'text_for_email_address':           text_for_email_address,
+        'email_we_vote_id':                 email_we_vote_id,
+        'make_primary_email':               make_primary_email,
+        'deleted':                          deleted,
+        'email_address_saved_we_vote_id':   results['email_address_saved_we_vote_id'],
+        'email_address_created':            results['email_address_created'],
+        'verification_email_sent':          results['verification_email_sent'],
+        'email_address_already_owned_by_other_voter': results['email_address_already_owned_by_other_voter'],
+        'email_address_found':              results['email_address_found'],
+        'email_address_list_found':         results['email_address_list_found'],
+        'email_address_list':               results['email_address_list'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
