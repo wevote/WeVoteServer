@@ -4,6 +4,7 @@
 
 from .models import FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, \
     FRIEND_INVITATIONS_SENT_BY_ME, FRIEND_INVITATIONS_SENT_TO_ME, FRIENDS_IN_COMMON, UNFRIEND_CURRENT_FRIEND
+from email_outbound.controllers import schedule_verification_email
 from email_outbound.models import EmailAddress, EmailManager, FRIEND_INVITATION_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
 from validate_email import validate_email
 from voter.models import Voter, VoterManager
@@ -80,6 +81,10 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
             if in_use_by_another_voter:
                 valid_new_sender_email_address = False
                 error_message_to_show_voter = "This email is already in use by another voter."
+        elif results['email_address_list_found']:
+            # This email was used by more than one person
+            # TODO DALE
+            pass
         else:
             # Create email address object
             if sender_voter.signed_in_personal():
@@ -107,24 +112,17 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
 
     if valid_new_sender_email_address:
         # Send verification email, and store the rest of the data without processing until sender_email is verified
-        recipient_voter_email = sender_email_address_object.normalized_email_address
         recipient_email_we_vote_id = sender_email_address_object.we_vote_id
-
+        recipient_voter_email = sender_email_address_object.normalized_email_address
         send_now = False
-        kind_of_email_template = VERIFY_EMAIL_ADDRESS_TEMPLATE
-        recipient_voter_we_vote_id = sender_voter.we_vote_id
-        verification_message = ""
-        outbound_results = email_manager.create_email_outbound_description(
-            sender_voter.we_vote_id, recipient_voter_we_vote_id,
-            recipient_email_we_vote_id, recipient_voter_email,
-            verification_message, kind_of_email_template)
-        status += outbound_results['status'] + " "
-        if outbound_results['email_outbound_description_saved']:
-            email_outbound_description = outbound_results['email_outbound_description']
-            schedule_results = email_manager.schedule_email(email_outbound_description)
-            if schedule_results['email_scheduled_saved']:
-                messages_to_send.append(schedule_results['email_scheduled_id'])
-            status += schedule_results['status'] + " "
+
+        verifications_send_results = schedule_verification_email(sender_voter.we_vote_id, sender_voter.we_vote_id,
+                                                                 recipient_email_we_vote_id, recipient_voter_email)
+        status += verifications_send_results['status']
+        email_scheduled_saved = verifications_send_results['email_scheduled_saved']
+        email_scheduled_id = verifications_send_results['email_scheduled_id']
+        if email_scheduled_saved:
+            messages_to_send.append(email_scheduled_id)
 
     if sender_voter.has_valid_email() or valid_new_sender_email_address:
         # We can continue. Note that we are not checking for "voter.has_email_with_verified_ownership()"
@@ -459,6 +457,10 @@ def retrieve_voter_and_email_address(one_normalized_raw_email):
         # We have an EmailAddress entry for this raw email
         email_address_object_found = True
         email_address_object = email_results['email_address_object']
+    elif email_results['email_address_list_found']:
+        # This email was used by more than one person
+        # TODO DALE
+        pass
     else:
         # We need to create an EmailAddress entry for this raw email
         voter_by_email_results = voter_manager.retrieve_voter_by_email(one_normalized_raw_email)
