@@ -296,6 +296,9 @@ SOCIAL_AUTH_PIPELINE = (
     'wevote_social.utils.switch_user'  # Order in this pipeline matters
 )
 
+EMAIL_BACKEND = get_environment_variable("EMAIL_BACKEND")
+SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY")
+
 
 # ########## Logging configurations ###########
 #   LOG_STREAM          Boolean     True will turn on stream handler and write to command line.

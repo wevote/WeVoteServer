@@ -1428,14 +1428,18 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     text_for_email_address = request.GET.get('text_for_email_address', '')
     email_we_vote_id = request.GET.get('email_we_vote_id', '')
     resend_verification_email = request.GET.get('resend_verification_email', False)
+    resend_verification_email = True if positive_value_exists(resend_verification_email) else False
     make_primary_email = request.GET.get('make_primary_email', False)
-    deleted = request.GET.get('deleted', "")
+    make_primary_email = True if positive_value_exists(make_primary_email) else False
+    delete_email = request.GET.get('delete_email', "")
+    delete_email = True if positive_value_exists(delete_email) else False
+
     results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
                                                text_for_email_address=text_for_email_address,
                                                email_we_vote_id=email_we_vote_id,
                                                resend_verification_email=resend_verification_email,
                                                make_primary_email=make_primary_email,
-                                               deleted=deleted,
+                                               delete_email=delete_email,
                                                )
 
     json_data = {
@@ -1443,11 +1447,11 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
         'success':                          results['success'],
         'voter_device_id':                  voter_device_id,
         'text_for_email_address':           text_for_email_address,
-        'email_we_vote_id':                 email_we_vote_id,
         'make_primary_email':               make_primary_email,
-        'deleted':                          deleted,
+        'delete_email':                     delete_email,
         'email_address_saved_we_vote_id':   results['email_address_saved_we_vote_id'],
         'email_address_created':            results['email_address_created'],
+        'email_address_deleted':            results['email_address_deleted'],
         'verification_email_sent':          results['verification_email_sent'],
         'email_address_already_owned_by_other_voter': results['email_address_already_owned_by_other_voter'],
         'email_address_found':              results['email_address_found'],
