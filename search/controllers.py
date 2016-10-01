@@ -85,14 +85,13 @@ def search_all_for_api(text_from_search_field, voter_device_id):
     # Example of querying ALL indexes
     search_results = []
     search_count = 0
+    candidate_manager = CandidateCampaignManager()
+    organization_manager = OrganizationManager()
     try:
         res = elastic_search_object.search(body=query)
         # See bottom of this file for example results from Elastic Search
 
         search_results = res['hits']['hits']
-        if search_results.count() > 0:
-            candidate_manager = CandidateCampaignManager()
-            organization_manager = OrganizationManager()
 
         for hit in search_results:
             one_search_result_type = hit['_type']
