@@ -2,8 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from elasticsearch import Elasticsearch
+from organization.models import OrganizationManager
 from voter.models import fetch_voter_id_from_voter_device_link
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
@@ -87,7 +89,12 @@ def search_all_for_api(text_from_search_field, voter_device_id):
         res = elastic_search_object.search(body=query)
         # See bottom of this file for example results from Elastic Search
 
-        for hit in res['hits']['hits']:
+        search_results = res['hits']['hits']
+        if search_results.count() > 0:
+            candidate_manager = CandidateCampaignManager()
+            organization_manager = OrganizationManager()
+
+        for hit in search_results:
             one_search_result_type = hit['_type']
             one_search_result_id = hit['_id']
             one_search_result_dict = hit['_source']
@@ -117,9 +124,17 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                 else:
                     link_internal = "/candidate/" + one_search_result_dict['we_vote_id']
 
+                results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(
+                    one_search_result_dict['we_vote_id'])
+                if results['candidate_campaign_found']:
+                    candidate = results['candidate_campaign']
+                    result_image = candidate.candidate_photo_url()
+                else:
+                    result_image = ""
+
                 one_search_result = {
                     'result_title':             one_search_result_dict['candidate_name'],
-                    'result_image':             "",
+                    'result_image':             result_image,
                     'result_subtitle':          "",
                     'result_summary':           "",
                     'result_score':             one_search_result_score,
@@ -159,9 +174,17 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                 else:
                     link_internal = "/voterguide/" + one_search_result_dict['we_vote_id']
 
+                results = organization_manager.retrieve_organization_from_we_vote_id(
+                    one_search_result_dict['we_vote_id'])
+                if results['organization_found']:
+                    organization = results['organization']
+                    result_image = organization.organization_photo_url()
+                else:
+                    result_image = ""
+
                 one_search_result = {
                     'result_title':             one_search_result_dict['organization_name'],
-                    'result_image':             "",
+                    'result_image':             result_image,
                     'result_subtitle':          "",
                     'result_summary':           one_search_result_dict['twitter_description'],
                     'result_score':             one_search_result_score,
