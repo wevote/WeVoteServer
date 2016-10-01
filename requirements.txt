@@ -31,6 +31,7 @@ requests==2.6.2
 requests-oauthlib==0.5.0
 rsa==3.1.4
 selenium==2.45.0
+sendgrid-django==2.0.0
 simplejson==3.6.5
 six==1.9.0
 static3==0.5.1

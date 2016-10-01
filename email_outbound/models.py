@@ -2,8 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from django.core.mail import EmailMultiAlternatives
 from django.db import models
-from wevote_functions.functions import convert_to_int, extract_email_addresses_from_string, positive_value_exists
+from wevote_functions.functions import extract_email_addresses_from_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_email_integer, fetch_site_unique_id_prefix
 
 FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
@@ -47,8 +48,9 @@ class EmailAddress(models.Model):
         blank=True, unique=True)
     voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the email owner", max_length=255, null=True, blank=True, unique=False)
+    # Until an EmailAddress has had its ownership verified, multiple voter accounts can try to use it
     normalized_email_address = models.EmailField(
-        verbose_name='email address', max_length=255, null=False, blank=False, unique=True)
+        verbose_name='email address', max_length=255, null=False, blank=False, unique=False)
     # Has this email been verified by the owner?
     email_ownership_is_verified = models.BooleanField(default=False)
     # Has this email had a permanent bounce? If so, we should not send emails to it.
@@ -85,6 +87,8 @@ class EmailOutboundDescription(models.Model):
                                               default=GENERIC_EMAIL_TEMPLATE)
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+    sender_voter_email = models.EmailField(
+        verbose_name='email address for sender', max_length=255, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the recipient if we have it", max_length=255, null=True, blank=True, unique=False)
     recipient_email_we_vote_id = models.CharField(
@@ -92,7 +96,7 @@ class EmailOutboundDescription(models.Model):
     # We include this here for data monitoring and debugging
     recipient_voter_email = models.EmailField(
         verbose_name='email address for recipient', max_length=255, null=True, blank=True, unique=False)
-    invitation_message = models.TextField(null=True, blank=True)
+    template_variables_in_json = models.TextField(null=True, blank=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
 
@@ -106,12 +110,14 @@ class EmailScheduled(models.Model):
     message_html = models.TextField(null=True, blank=True)
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
+    sender_voter_email = models.EmailField(
+        verbose_name='sender email address', max_length=255, null=True, blank=True, unique=False)
     recipient_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the recipient", max_length=255, null=True, blank=True, unique=False)
     recipient_email_we_vote_id = models.CharField(
         verbose_name="we vote id for the email", max_length=255, null=True, blank=True, unique=False)
     recipient_voter_email = models.EmailField(
-        verbose_name='email address', max_length=255, null=True, blank=True, unique=False)
+        verbose_name='recipient email address', max_length=255, null=True, blank=True, unique=False)
     send_status = models.CharField(max_length=50, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)
     email_outbound_description_id = models.PositiveIntegerField(
         verbose_name="the internal id of EmailOutboundDescription", default=0, null=False)
@@ -167,8 +173,9 @@ class EmailManager(models.Model):
         return results
 
     def create_email_outbound_description(
-            self, sender_voter_we_vote_id, recipient_voter_we_vote_id='',
-            recipient_email_we_vote_id='', recipient_voter_email='', invitation_message='',
+            self, sender_voter_we_vote_id, sender_voter_email,
+            recipient_voter_we_vote_id='',
+            recipient_email_we_vote_id='', recipient_voter_email='', template_variables_in_json='',
             kind_of_email_template=''):
         if not positive_value_exists(kind_of_email_template):
             kind_of_email_template = GENERIC_EMAIL_TEMPLATE
@@ -176,11 +183,12 @@ class EmailManager(models.Model):
         try:
             email_outbound_description = EmailOutboundDescription.objects.create(
                 sender_voter_we_vote_id=sender_voter_we_vote_id,
+                sender_voter_email=sender_voter_email,
                 recipient_voter_we_vote_id=recipient_voter_we_vote_id,
                 recipient_email_we_vote_id=recipient_email_we_vote_id,
                 recipient_voter_email=recipient_voter_email,
-                invitation_message=invitation_message,
                 kind_of_email_template=kind_of_email_template,
+                template_variables_in_json=template_variables_in_json,
             )
             email_outbound_description_saved = True
             success = True
@@ -212,12 +220,14 @@ class EmailManager(models.Model):
         }
         return results
 
-    def retrieve_email_address_object(self, normalized_email_address, email_address_object_we_vote_id=''):
+    def retrieve_email_address_object(self, normalized_email_address, email_address_object_we_vote_id='',
+                                      voter_we_vote_id=''):
         """
         There are cases where we store multiple entries for the same normalized_email_address (prior to an email
         address being verified)
         :param normalized_email_address:
         :param email_address_object_we_vote_id:
+        :param voter_we_vote_id:
         :return:
         """
         exception_does_not_exist = False
@@ -230,10 +240,17 @@ class EmailManager(models.Model):
 
         try:
             if positive_value_exists(email_address_object_we_vote_id):
-                email_address_object = EmailAddress.objects.get(
-                    we_vote_id__iexact=email_address_object_we_vote_id,
-                    deleted=False
-                )
+                if positive_value_exists(voter_we_vote_id):
+                    email_address_object = EmailAddress.objects.get(
+                        we_vote_id__iexact=email_address_object_we_vote_id,
+                        voter_we_vote_id__iexact=voter_we_vote_id,
+                        deleted=False
+                    )
+                else:
+                    email_address_object = EmailAddress.objects.get(
+                        we_vote_id__iexact=email_address_object_we_vote_id,
+                        deleted=False
+                    )
                 email_address_object_id = email_address_object.id
                 email_address_object_we_vote_id = email_address_object.we_vote_id
                 email_address_object_found = True
@@ -241,11 +258,19 @@ class EmailManager(models.Model):
                 status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_WE_VOTE_ID"
             elif positive_value_exists(normalized_email_address):
                 email_address_queryset = EmailAddress.objects.all()
-                email_address_queryset = email_address_queryset.filter(
-                    normalized_email_address__iexact=normalized_email_address,
-                    deleted=False
-                )
-                email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
+                if positive_value_exists(voter_we_vote_id):
+                    email_address_queryset = email_address_queryset.filter(
+                        normalized_email_address__iexact=normalized_email_address,
+                        voter_we_vote_id__iexact=voter_we_vote_id,
+                        deleted=False
+                    )
+                else:
+                    email_address_queryset = email_address_queryset.filter(
+                        normalized_email_address__iexact=normalized_email_address,
+                        deleted=False
+                    )
+                # We need the email that has been verified email at top of list
+                email_address_queryset = email_address_queryset.order_by('-email_ownership_is_verified')
                 email_address_list = email_address_queryset
 
                 if len(email_address_list):
@@ -270,10 +295,6 @@ class EmailManager(models.Model):
                 email_address_object_found = False
                 success = False
                 status = "RETRIEVE_EMAIL_ADDRESS_VARIABLES_MISSING"
-        except EmailAddress.MultipleObjectsReturned as e:
-            exception_multiple_object_returned = True
-            success = False
-            status = "RETRIEVE_EMAIL_ADDRESS_MULTIPLE_OBJECTS_RETURNED"
         except EmailAddress.DoesNotExist:
             exception_does_not_exist = True
             success = True
@@ -352,30 +373,66 @@ class EmailManager(models.Model):
         }
         return results
 
-    def schedule_email(self, email_outbound_description):
-        sender_voter_we_vote_id = email_outbound_description.sender_voter_we_vote_id
-        recipient_voter_we_vote_id = email_outbound_description.recipient_voter_we_vote_id
-        recipient_email_we_vote_id = email_outbound_description.recipient_email_we_vote_id
-        recipient_voter_email = email_outbound_description.recipient_voter_email
-        invitation_message = email_outbound_description.invitation_message
-        if positive_value_exists(email_outbound_description.kind_of_email_template):
-            kind_of_email_template = email_outbound_description.kind_of_email_template
-        else:
-            kind_of_email_template = GENERIC_EMAIL_TEMPLATE
+    def retrieve_primary_email_with_ownership_verified(self, voter_we_vote_id):
+        email_address_list = []
+        email_address_list_found = False
+        email_address_object = EmailAddress()
+        email_address_object_found = False
+        try:
+            email_address_queryset = EmailAddress.objects.all()
+            email_address_queryset = email_address_queryset.filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+                email_ownership_is_verified=True,
+                deleted=False
+            )
+            email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
+            email_address_list = email_address_queryset
 
-        # We need to combine the invitation_message with the kind_of_email_template
-        subject = "TEST SUBJECT"
-        message_html = ""
-        message_text = "TEST TEXT: " + invitation_message
+            if len(email_address_list):
+                success = True
+                email_address_list_found = True
+                status = 'RETRIEVE_PRIMARY_EMAIL_ADDRESS_OBJECT-EMAIL_ADDRESS_LIST_RETRIEVED'
+            else:
+                success = True
+                email_address_list_found = False
+                status = 'RETRIEVE_PRIMARY_EMAIL_ADDRESS_OBJECT-NO_EMAIL_ADDRESS_LIST_RETRIEVED'
+        except EmailAddress.DoesNotExist:
+            success = True
+            status = "RETRIEVE_PRIMARY_EMAIL_ADDRESS_NOT_FOUND"
+        except Exception as e:
+            success = False
+            status = 'FAILED retrieve_primary_email_with_ownership_verified EmailAddress'
 
+        if email_address_list_found:
+            email_address_object_found = True
+            email_address_object = email_address_list[0]
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'email_address_object_found':       email_address_object_found,
+            'email_address_object':             email_address_object,
+        }
+        return results
+
+    def fetch_primary_email_with_ownership_verified(self, voter_we_vote_id):
+        results = self.retrieve_primary_email_with_ownership_verified(voter_we_vote_id)
+        if results['email_address_object_found']:
+            email_address_object = results['email_address_object']
+            return email_address_object.normalized_email_address
+
+        return ""
+
+    def schedule_email(self, email_outbound_description, subject, message_text, message_html):
         send_status = TO_BE_PROCESSED
 
         try:
             email_scheduled = EmailScheduled.objects.create(
-                sender_voter_we_vote_id=sender_voter_we_vote_id,
-                recipient_voter_we_vote_id=recipient_voter_we_vote_id,
-                recipient_email_we_vote_id=recipient_email_we_vote_id,
-                recipient_voter_email=recipient_voter_email,
+                sender_voter_we_vote_id=email_outbound_description.sender_voter_we_vote_id,
+                sender_voter_email=email_outbound_description.sender_voter_email,
+                recipient_voter_we_vote_id=email_outbound_description.recipient_voter_we_vote_id,
+                recipient_email_we_vote_id=email_outbound_description.recipient_email_we_vote_id,
+                recipient_voter_email=email_outbound_description.recipient_voter_email,
                 message_html=message_html,
                 message_text=message_text,
                 email_outbound_description_id=email_outbound_description.id,
@@ -383,11 +440,13 @@ class EmailManager(models.Model):
                 subject=subject,
             )
             email_scheduled_saved = True
+            email_scheduled_id = email_scheduled.id
             success = True
             status = "SCHEDULE_EMAIL_CREATED"
         except Exception as e:
             email_scheduled_saved = False
             email_scheduled = EmailScheduled()
+            email_scheduled_id = 0
             success = False
             status = "SCHEDULE_EMAIL_NOT_CREATED"
 
@@ -395,8 +454,71 @@ class EmailManager(models.Model):
             'success':                  success,
             'status':                   status,
             'email_scheduled_saved':    email_scheduled_saved,
-            'email_scheduled_id':       email_scheduled.id,
+            'email_scheduled_id':       email_scheduled_id,
             'email_scheduled':          email_scheduled,
+        }
+        return results
+
+    def send_scheduled_email(self, email_scheduled):
+        success = True
+        status = ""
+        if not positive_value_exists(email_scheduled.sender_voter_email):
+            status += "MISSING_SENDER_VOTER_EMAIL"
+            success = False
+
+        if not positive_value_exists(email_scheduled.recipient_voter_email):
+            status += "MISSING_RECIPIENT_VOTER_EMAIL"
+            success = False
+
+        if not positive_value_exists(email_scheduled.subject):
+            status += "MISSING_EMAIL_SUBJECT "
+            success = False
+
+        # We need either plain text or HTML message
+        if not positive_value_exists(email_scheduled.message_text) and \
+                not positive_value_exists(email_scheduled.message_html):
+            status += "MISSING_EMAIL_MESSAGE "
+            success = False
+
+        if success:
+            return self.send_scheduled_email_via_sendgrid(email_scheduled)
+        else:
+            email_scheduled_sent = False
+            results = {
+                'success': success,
+                'status': status,
+                'email_scheduled_sent': email_scheduled_sent,
+            }
+            return results
+
+    def send_scheduled_email_via_sendgrid(self, email_scheduled):
+        """
+        Send a single scheduled email
+        :param email_scheduled:
+        :return:
+        """
+        status = ""
+        success = True
+
+        mail = EmailMultiAlternatives(
+            subject=email_scheduled.subject,
+            body=email_scheduled.message_text,
+            from_email=email_scheduled.sender_voter_email,
+            to=[email_scheduled.recipient_voter_email],
+            headers={"Reply-To": email_scheduled.sender_voter_email}
+        )
+        if positive_value_exists(email_scheduled.message_html):
+            mail.attach_alternative(email_scheduled.message_html, "text/html")
+
+        mail.send()
+
+        status += "SENDING_VIA_SENDGRID"
+        email_scheduled_sent = True
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'email_scheduled_sent':     email_scheduled_sent,
         }
         return results
 
@@ -406,10 +528,12 @@ class EmailManager(models.Model):
         :param messages_to_send:
         :return:
         """
+        success = False
+        status = ""
+
         results = {
             'success':                  success,
             'status':                   status,
             'at_least_one_email_found': True,
-            'email_list':               email_list,
         }
         return results

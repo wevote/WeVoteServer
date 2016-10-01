@@ -2,7 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import EmailManager, VERIFY_EMAIL_ADDRESS_TEMPLATE
+from .functions import merge_message_content_with_template
+from .models import EmailManager, EmailScheduled, GENERIC_EMAIL_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
+from config.base import get_environment_variable
+import json
 from validate_email import validate_email
 from voter.models import VoterManager
 import wevote_functions.admin
@@ -10,40 +13,106 @@ from wevote_functions.functions import is_voter_device_id_valid, positive_value_
 
 logger = wevote_functions.admin.get_logger(__name__)
 
+WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
+WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
+
+
+def schedule_email_with_email_outbound_description(email_outbound_description):
+    email_manager = EmailManager()
+
+    template_variables_in_json = email_outbound_description.template_variables_in_json
+    if positive_value_exists(email_outbound_description.kind_of_email_template):
+        kind_of_email_template = email_outbound_description.kind_of_email_template
+    else:
+        kind_of_email_template = GENERIC_EMAIL_TEMPLATE
+
+    email_template_results = merge_message_content_with_template(kind_of_email_template, template_variables_in_json)
+    if email_template_results['success']:
+        subject = email_template_results['subject']
+        message_text = email_template_results['message_text']
+        message_html = email_template_results['message_html']
+        schedule_email_results = email_manager.schedule_email(email_outbound_description, subject, message_text, message_html)
+        success = schedule_email_results['success']
+        status = schedule_email_results['status']
+        email_scheduled_saved = schedule_email_results['email_scheduled_saved']
+        email_scheduled = schedule_email_results['email_scheduled']
+        email_scheduled_id = schedule_email_results['email_scheduled_id']
+    else:
+        success = False
+        status = "SCHEDULE_EMAIL_TEMPLATE_NOT_PROCESSED"
+        email_scheduled_saved = False
+        email_scheduled = EmailScheduled()
+        email_scheduled_id = 0
+
+    results = {
+        'success': success,
+        'status': status,
+        'email_scheduled_saved': email_scheduled_saved,
+        'email_scheduled_id': email_scheduled_id,
+        'email_scheduled': email_scheduled,
+    }
+    return results
+
 
 def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote_id,
-                                recipient_email_we_vote_id, recipient_voter_email):
+                                recipient_email_we_vote_id, recipient_voter_email,
+                                recipient_email_address_secret_key, verification_context=None):
     """
-    When a voter adds a new email address for self, create and schedule an outbound email with a link
+    When a voter adds a new email address for self, create and send an outbound email with a link
     that the voter can click to verify the email.
     :param sender_voter_we_vote_id:
     :param recipient_voter_we_vote_id:
     :param recipient_email_we_vote_id:
     :param recipient_voter_email:
+    :param recipient_email_address_secret_key:
+    :param verification_context: We tell the voter the context in which the verification was triggered
     :return:
     """
     email_scheduled_saved = False
+    email_scheduled_sent = False
     email_scheduled_id = 0
 
     email_manager = EmailManager()
     status = ""
     kind_of_email_template = VERIFY_EMAIL_ADDRESS_TEMPLATE
-    verification_message = ""
+
+    subject = "Please verify your email"
+
+    template_variables_for_json = {
+        "subject":                      subject,
+        "recipient_voter_email":        recipient_voter_email,
+        "we_vote_url":                  WEB_APP_ROOT_URL,
+        "verify_email_url":
+            WEB_APP_ROOT_URL + "/more/sign_in?verify_key=" + recipient_email_address_secret_key,
+        "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
+        "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
+    }
+    template_variables_in_json = json.dumps(template_variables_for_json, ensure_ascii=True)
+    verification_from_email = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
+
     outbound_results = email_manager.create_email_outbound_description(
-        sender_voter_we_vote_id, recipient_voter_we_vote_id,
+        sender_voter_we_vote_id, verification_from_email, recipient_voter_we_vote_id,
         recipient_email_we_vote_id, recipient_voter_email,
-        verification_message, kind_of_email_template)
+        template_variables_in_json, kind_of_email_template)
     status += outbound_results['status'] + " "
     if outbound_results['email_outbound_description_saved']:
         email_outbound_description = outbound_results['email_outbound_description']
-        schedule_results = email_manager.schedule_email(email_outbound_description)
+
+        schedule_results = schedule_email_with_email_outbound_description(email_outbound_description)
+        status += schedule_results['status'] + " "
         email_scheduled_saved = schedule_results['email_scheduled_saved']
         email_scheduled_id = schedule_results['email_scheduled_id']
+        email_scheduled = schedule_results['email_scheduled']
+
+        if email_scheduled_saved:
+            send_results = email_manager.send_scheduled_email(email_scheduled)
+            email_scheduled_sent = send_results['email_scheduled_sent']
 
     results = {
         'status':                   status,
         'success':                  True,
         'email_scheduled_saved':    email_scheduled_saved,
+        'email_scheduled_sent':     email_scheduled_sent,
         'email_scheduled_id':       email_scheduled_id,
     }
     return results
@@ -109,7 +178,7 @@ def voter_email_address_retrieve_for_api(voter_device_id):
 
 
 def voter_email_address_save_for_api(voter_device_id, text_for_email_address, email_we_vote_id,
-                                     resend_verification_email, make_primary_email, deleted):
+                                     resend_verification_email, make_primary_email, delete_email):
     """
     voterEmailAddressSave
     :param voter_device_id:
@@ -117,7 +186,7 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
     :param email_we_vote_id:
     :param resend_verification_email:
     :param make_primary_email:
-    :param deleted:
+    :param delete_email:
     :return:
     """
     email_address_saved_we_vote_id = ""
@@ -138,7 +207,7 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
             'success':                          False,
             'voter_device_id':                  voter_device_id,
             'text_for_email_address':           text_for_email_address,
-            'email_address_saved_we_vote_id':   "",
+            'email_address_saved_we_vote_id':   email_we_vote_id,
             'email_address_created':            False,
             'email_address_deleted':            False,
             'verification_email_sent':          False,
@@ -150,20 +219,41 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
         return json_data
 
     # Is the text_for_email_address a valid email address?
-    if not positive_value_exists(text_for_email_address) or not validate_email(text_for_email_address):
+    if positive_value_exists(email_we_vote_id):
+        # We are happy
+        pass
+    elif positive_value_exists(text_for_email_address):
+        if not validate_email(text_for_email_address):
+            error_results = {
+                'status':                           "VOTER_EMAIL_ADDRESS_SAVE_MISSING_VALID_EMAIL",
+                'success':                          False,
+                'voter_device_id':                  voter_device_id,
+                'text_for_email_address':           text_for_email_address,
+                'email_address_saved_we_vote_id':   email_we_vote_id,
+                'email_address_created':            False,
+                'email_address_deleted':            False,
+                'verification_email_sent':          False,
+                'email_address_already_owned_by_other_voter': False,
+                'email_address_found':              False,
+                'email_address_list_found':         False,
+                'email_address_list':               [],
+            }
+            return error_results
+    else:
+        # We need EITHER email_we_vote_id or text_for_email_address
         error_results = {
-            'status':                           "VOTER_EMAIL_ADDRESS_SAVE_MISSING_VALID_EMAIL",
-            'success':                          False,
-            'voter_device_id':                  voter_device_id,
-            'text_for_email_address':           text_for_email_address,
-            'email_address_saved_we_vote_id':   "",
-            'email_address_created':            False,
-            'email_address_deleted':            False,
-            'verification_email_sent':          False,
+            'status': "VOTER_EMAIL_ADDRESS_SAVE_MISSING_EMAIL",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'text_for_email_address': text_for_email_address,
+            'email_address_saved_we_vote_id': email_we_vote_id,
+            'email_address_created': False,
+            'email_address_deleted': False,
+            'verification_email_sent': False,
             'email_address_already_owned_by_other_voter': False,
-            'email_address_found':              False,
-            'email_address_list_found':         False,
-            'email_address_list':               [],
+            'email_address_found': False,
+            'email_address_list_found': False,
+            'email_address_list': [],
         }
         return error_results
 
@@ -209,11 +299,13 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
             # This can be over-ridden/ignored if email_address_already_owned_by_other_voter is true for other entry
             email_address_already_owned_by_this_voter = True
             email_address_saved_we_vote_id = email_address_object.we_vote_id
+            text_for_email_address = email_address_object.normalized_email_address
             email_address_created = False
             email_address_found = True
-            if deleted:
+            if delete_email:
                 try:
                     email_address_object.delete()
+                    email_address_deleted = True
                     status += "DELETED_EMAIL_ADDRESS"
                     success = True
                 except Exception as e:
@@ -235,9 +327,11 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
             # If here, then another voter already has verified this text_for_email_address
             email_address_already_owned_by_other_voter = True
 
-    new_email_we_vote_id = ""
     send_verification_email = False
-    if email_address_already_owned_by_other_voter:
+    if email_address_deleted:
+        # We cannot proceed with this email address
+        pass
+    elif email_address_already_owned_by_other_voter:
         # We cannot proceed with this email address
         pass
     elif email_address_already_owned_by_this_voter:
@@ -254,25 +348,31 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
             # Send verification email
             send_verification_email = True
             new_email_address_object = email_save_results['email_address_object']
-            new_email_we_vote_id = new_email_address_object.we_vote_id
-            email_address_saved_we_vote_id = new_email_we_vote_id
+            email_we_vote_id = new_email_address_object.we_vote_id
+            email_address_saved_we_vote_id = email_we_vote_id
             email_address_created = True
             email_address_found = True
+            success = True
         else:
             send_verification_email = False
             success = False
             status += " UNABLE_TO_SAVE_EMAIL_ADDRESS"
 
     if send_verification_email:
+        # Generate secret key
+        recipient_email_address_secret_key = "1234"
+
         # Run the code to send verification email for new_email_we_vote_id
         verifications_send_results = schedule_verification_email(voter_we_vote_id, voter_we_vote_id,
-                                                                 new_email_we_vote_id, text_for_email_address)
+                                                                 email_we_vote_id, text_for_email_address,
+                                                                 recipient_email_address_secret_key)
         status += verifications_send_results['status']
         email_scheduled_saved = verifications_send_results['email_scheduled_saved']
         email_scheduled_id = verifications_send_results['email_scheduled_id']
         if email_scheduled_saved:
             messages_to_send.append(email_scheduled_id)
             verification_email_sent = True
+            success = True
 
     # Now that the save is complete, retrieve the updated list
     email_address_list_augmented = []
@@ -366,3 +466,4 @@ def augment_email_address_list(email_address_list, voter):
         'email_address_list':               email_address_list_augmented,
     }
     return results
+

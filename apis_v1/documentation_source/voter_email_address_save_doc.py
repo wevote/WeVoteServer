@@ -24,12 +24,27 @@ def voter_email_address_save_doc_template_values(url_root):
             'description':  'The address text a voter enters to identify the location tied to their ballot. '
                             '(Not mailing address.)',
         },
+        {
+            'name':         'email_we_vote_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The unique identifier for this email across all networks ',
+        },
     ]
     optional_query_parameter_list = [
+        {
+            'name':         'delete_email',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'When this variable is passed in as true, mark this email as deleted.',
+        },
         {
             'name':         'make_primary_email',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'When this variable is passed in as true, change this (verified) email to be the primary.',
+        },
+        {
+            'name':         'resend_verification_email',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Send the a verification email to this address again.',
         },
     ]
 
@@ -53,8 +68,11 @@ def voter_email_address_save_doc_template_values(url_root):
                    '  "success": boolean,\n' \
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "text_for_email_address": string,\n' \
+                   '  "make_primary_email": boolean,\n' \
+                   '  "delete_email": boolean,\n' \
                    '  "email_address_saved_we_vote_id": string,\n' \
                    '  "email_address_created": boolean,\n' \
+                   '  "email_address_deleted": boolean,\n' \
                    '  "verification_email_sent": boolean,\n' \
                    '  "email_address_already_owned_by_other_voter": boolean,\n' \
                    '  "email_address_found": boolean,\n' \
@@ -62,7 +80,7 @@ def voter_email_address_save_doc_template_values(url_root):
                    '  "email_address_list": list\n' \
                    '   [\n' \
                    '     "normalized_email_address": string,\n' \
-                   '     "primary_email": boolean,\n' \
+                   '     "primary_email_address": boolean,\n' \
                    '     "email_permanent_bounce": boolean,\n' \
                    '     "email_ownership_is_verified": boolean,\n' \
                    '     "voter_we_vote_id": string,\n' \
