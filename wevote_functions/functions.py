@@ -280,11 +280,12 @@ def extract_email_addresses_from_string(incoming_string):
     :param incoming_string:
     :return:
     """
+    string_lower_case = incoming_string.lower()
     regex = re.compile(("([a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`"
                         "{|}~-]+)*(@|\sat\s)(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(\.|"
                         "\sdot\s))+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)"))
 
-    collection_of_emails = (email[0] for email in re.findall(regex, incoming_string) if not email[0].startswith('//'))
+    collection_of_emails = (email[0] for email in re.findall(regex, string_lower_case) if not email[0].startswith('//'))
 
     list_of_emails = []
     for email in collection_of_emails:

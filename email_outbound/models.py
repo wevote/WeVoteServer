@@ -4,7 +4,8 @@
 
 from django.core.mail import EmailMultiAlternatives
 from django.db import models
-from wevote_functions.functions import extract_email_addresses_from_string, positive_value_exists
+from wevote_functions.functions import extract_email_addresses_from_string, generate_random_string, \
+    positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_email_integer, fetch_site_unique_id_prefix
 
 FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
@@ -317,6 +318,104 @@ class EmailManager(models.Model):
         }
         return results
 
+    def retrieve_email_address_object_from_secret_key(self, email_secret_key):
+        """
+
+        :param email_secret_key:
+        :return:
+        """
+        email_address_object_found = False
+        email_address_object = EmailAddress()
+        email_address_object_id = 0
+        email_address_object_we_vote_id = ""
+
+        try:
+            if positive_value_exists(email_secret_key):
+                email_address_object = EmailAddress.objects.get(
+                    secret_key=email_secret_key,
+                )
+                email_address_object_id = email_address_object.id
+                email_address_object_we_vote_id = email_address_object.we_vote_id
+                email_address_object_found = True
+                success = True
+                status = "RETRIEVE_EMAIL_ADDRESS_FOUND_BY_SECRET_KEY"
+            else:
+                email_address_object_found = False
+                success = False
+                status = "RETRIEVE_EMAIL_ADDRESS_BY_SECRET_KEY_VARIABLES_MISSING"
+        except EmailAddress.DoesNotExist:
+            success = True
+            status = "RETRIEVE_EMAIL_ADDRESS_BY_SECRET_KEY_NOT_FOUND"
+        except Exception as e:
+            success = False
+            status = 'FAILED retrieve_email_address_object_from_secret_key EmailAddress'
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'email_address_object_found':       email_address_object_found,
+            'email_address_object_id':          email_address_object_id,
+            'email_address_object_we_vote_id':  email_address_object_we_vote_id,
+            'email_address_object':             email_address_object,
+        }
+        return results
+
+    def verify_email_address_object_from_secret_key(self, email_secret_key):
+        """
+
+        :param email_secret_key:
+        :return:
+        """
+        email_address_object_found = False
+        email_address_object = EmailAddress()
+        email_address_object_id = 0
+        email_address_object_we_vote_id = ""
+
+        try:
+            if positive_value_exists(email_secret_key):
+                email_address_object = EmailAddress.objects.get(
+                    secret_key=email_secret_key,
+                    email_ownership_is_verified=False,
+                    deleted=False
+                )
+                email_address_object_id = email_address_object.id
+                email_address_object_we_vote_id = email_address_object.we_vote_id
+                email_address_object_found = True
+                success = True
+                status = "VERIFY_EMAIL_ADDRESS_FOUND_BY_WE_VOTE_ID"
+            else:
+                email_address_object_found = False
+                success = False
+                status = "VERIFY_EMAIL_ADDRESS_VARIABLES_MISSING"
+        except EmailAddress.DoesNotExist:
+            success = True
+            status = "VERIFY_EMAIL_ADDRESS_NOT_FOUND"
+        except Exception as e:
+            success = False
+            status = 'FAILED verify_email_address_object_from_secret_key EmailAddress'
+
+        email_ownership_is_verified = False
+        if email_address_object_found:
+            try:
+                # Note that we leave the secret key in place so we can the owner we_vote_id in a subsequent call
+                email_address_object.email_ownership_is_verified = True
+                email_address_object.save()
+                email_ownership_is_verified = True
+            except Exception as e:
+                success = False
+                status = 'FAILED_TO_SAVE_EMAIL_OWNERSHIP_IS_VERIFIED'
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'email_address_object_found':       email_address_object_found,
+            'email_address_object_id':          email_address_object_id,
+            'email_address_object_we_vote_id':  email_address_object_we_vote_id,
+            'email_address_object':             email_address_object,
+            'email_ownership_is_verified':      email_ownership_is_verified,
+        }
+        return results
+
     def retrieve_voter_email_address_list(self, voter_we_vote_id):
         """
 
@@ -537,3 +636,16 @@ class EmailManager(models.Model):
             'at_least_one_email_found': True,
         }
         return results
+
+    def update_email_address_with_new_secret_key(self, email_we_vote_id):
+        results = self.retrieve_email_address_object('', email_we_vote_id)
+        if results['email_address_object_found']:
+            email_address_object = results['email_address_object']
+            try:
+                email_address_object.secret_key = generate_random_string(12)
+                email_address_object.save()
+                return email_address_object.secret_key
+            except Exception as e:
+                return ""
+        else:
+            return ""
