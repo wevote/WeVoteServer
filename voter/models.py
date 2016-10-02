@@ -507,6 +507,35 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def update_voter_email_ownership_verified(self, voter, email_address_object):
+        voter_updated = False
+
+        try:
+            should_save_voter = False
+            if email_address_object.email_ownership_is_verified:
+                voter.primary_email_we_vote_id = email_address_object.we_vote_id
+                voter.email = email_address_object.normalized_email_address
+                voter.email_ownership_is_verified = True
+                should_save_voter = True
+
+            if should_save_voter:
+                voter.save()
+                voter_updated = True
+            status = "UPDATED_VOTER_EMAIL_OWNERSHIP"
+            success = True
+        except Exception as e:
+            status = "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP"
+            success = False
+            voter_updated = False
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter': voter,
+            'voter_updated': voter_updated,
+        }
+        return results
+
 
 class Voter(AbstractBaseUser):
     """
@@ -700,6 +729,27 @@ class Voter(AbstractBaseUser):
             # TODO DALE -- we don't want to use facebook_email without copying it over to email
             #  or positive_value_exists(self.facebook_email)
             return True
+        return False
+
+    def has_data_to_preserve(self):
+        # Does this voter record have any values associated in this table that are unique
+        if self.has_email_with_verified_ownership() or self.signed_in_twitter() or self.signed_in_facebook():
+            return True
+        else:
+            # Has any important data been stored in other tables attached to this voter account?
+            # (Each additional query costs more server resources, so we return True as early as we can.)
+            # NOTE: We can't do this because we can't bring position classes in this file
+            # Consider caching "has_position" data in the voter table
+            # position_list_manager = PositionListManager()
+            # positions_found = position_list_manager.positions_exist_for_voter(self.we_vote_id)
+            # if positive_value_exists(positions_found):
+            #     return True
+
+            # Following any organizations?
+
+            # No need to check for friends, because you can't have any without a signed in status, which we've checked
+            pass
+
         return False
 
     def has_email_with_verified_ownership(self):

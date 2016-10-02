@@ -76,14 +76,28 @@ def schedule_verification_email(sender_voter_we_vote_id, recipient_voter_we_vote
     status = ""
     kind_of_email_template = VERIFY_EMAIL_ADDRESS_TEMPLATE
 
+    # Generate secret key if needed
+    if not positive_value_exists(recipient_email_address_secret_key):
+        recipient_email_address_secret_key = email_manager.update_email_address_with_new_secret_key(
+            recipient_email_we_vote_id)
+
+    if not positive_value_exists(recipient_email_address_secret_key):
+        results = {
+            'status': "SCHEDULE_VERIFICATION-MISSING_EMAIL_SECRET_KEY ",
+            'success': False,
+            'email_scheduled_saved': email_scheduled_saved,
+            'email_scheduled_sent': email_scheduled_sent,
+            'email_scheduled_id': email_scheduled_id,
+        }
+        return results
+
     subject = "Please verify your email"
 
     template_variables_for_json = {
         "subject":                      subject,
         "recipient_voter_email":        recipient_voter_email,
         "we_vote_url":                  WEB_APP_ROOT_URL,
-        "verify_email_url":
-            WEB_APP_ROOT_URL + "/more/sign_in?verify_key=" + recipient_email_address_secret_key,
+        "verify_email_url":             WEB_APP_ROOT_URL + "/verify_email/" + recipient_email_address_secret_key,
         "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
         "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
     }
@@ -177,6 +191,97 @@ def voter_email_address_retrieve_for_api(voter_device_id):
     return json_data
 
 
+def voter_email_address_verify_for_api(voter_device_id, email_secret_key):
+    """
+
+    :param voter_device_id:
+    :param email_secret_key:
+    :return:
+    """
+    email_ownership_is_verified = False
+    email_secret_key_belongs_to_this_voter = False
+    email_address_found = False
+    status = ""
+    success = False
+
+    # If a voter_device_id is passed in that isn't valid, we want to throw an error
+    device_id_results = is_voter_device_id_valid(voter_device_id)
+    if not device_id_results['success']:
+        json_data = {
+            'status':                                   device_id_results['status'],
+            'success':                                  False,
+            'voter_device_id':                          voter_device_id,
+            'email_ownership_is_verified':              False,
+            'email_secret_key_belongs_to_this_voter':   False,
+            'email_address_found':                      False,
+        }
+        return json_data
+
+    if not positive_value_exists(email_secret_key):
+        error_results = {
+            'status':                                   "VOTER_EMAIL_ADDRESS_VERIFY_MISSING_SECRET_KEY",
+            'success':                                  False,
+            'voter_device_id':                          voter_device_id,
+            'email_ownership_is_verified':              False,
+            'email_secret_key_belongs_to_this_voter':   False,
+            'email_address_found':                      False,
+        }
+        return error_results
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        error_results = {
+            'status':                                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                                  False,
+            'voter_device_id':                          voter_device_id,
+            'email_ownership_is_verified':              False,
+            'email_secret_key_belongs_to_this_voter':   False,
+            'email_address_found':                      False,
+        }
+        return error_results
+    voter = voter_results['voter']
+    voter_we_vote_id = voter.we_vote_id
+
+    email_manager = EmailManager()
+    # Look to see if there is an EmailAddress entry for the incoming text_for_email_address or email_we_vote_id
+    email_results = email_manager.verify_email_address_object_from_secret_key(email_secret_key)
+    if not email_results['email_address_object_found']:
+        error_results = {
+            'status':                                   "EMAIL_NOT_FOUND_FROM_SECRET_KEY",
+            'success':                                  False,
+            'voter_device_id':                          voter_device_id,
+            'email_ownership_is_verified':              False,
+            'email_secret_key_belongs_to_this_voter':   False,
+            'email_address_found':                      False,
+        }
+        return error_results
+
+    email_address_object = email_results['email_address_object']
+    email_address_found = True
+
+    email_ownership_is_verified = email_address_object.email_ownership_is_verified
+    if voter_we_vote_id is email_address_object.voter_we_vote_id:
+        email_secret_key_belongs_to_this_voter = True
+        voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
+    else:
+        email_owner_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+        if email_owner_results['voter_found']:
+            email_owner_voter = email_owner_results['voter']
+            voter_manager.update_voter_email_ownership_verified(email_owner_voter, email_address_object)
+
+    json_data = {
+        'status':                                   status,
+        'success':                                  success,
+        'voter_device_id':                          voter_device_id,
+        'email_ownership_is_verified':              email_ownership_is_verified,
+        'email_secret_key_belongs_to_this_voter':   email_secret_key_belongs_to_this_voter,
+        'email_address_found':                      email_address_found,
+    }
+    return json_data
+
+
 def voter_email_address_save_for_api(voter_device_id, text_for_email_address, email_we_vote_id,
                                      resend_verification_email, make_primary_email, delete_email):
     """
@@ -242,18 +347,18 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
     else:
         # We need EITHER email_we_vote_id or text_for_email_address
         error_results = {
-            'status': "VOTER_EMAIL_ADDRESS_SAVE_MISSING_EMAIL",
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'text_for_email_address': text_for_email_address,
-            'email_address_saved_we_vote_id': email_we_vote_id,
-            'email_address_created': False,
-            'email_address_deleted': False,
-            'verification_email_sent': False,
+            'status':                           "VOTER_EMAIL_ADDRESS_SAVE_MISSING_EMAIL",
+            'success':                          False,
+            'voter_device_id':                  voter_device_id,
+            'text_for_email_address':           text_for_email_address,
+            'email_address_saved_we_vote_id':   email_we_vote_id,
+            'email_address_created':            False,
+            'email_address_deleted':            False,
+            'verification_email_sent':          False,
             'email_address_already_owned_by_other_voter': False,
-            'email_address_found': False,
-            'email_address_list_found': False,
-            'email_address_list': [],
+            'email_address_found':              False,
+            'email_address_list_found':         False,
+            'email_address_list':               [],
         }
         return error_results
 
@@ -284,7 +389,9 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
     email_address_already_owned_by_other_voter = False
     email_address_list = []
     # Look to see if there is an EmailAddress entry for the incoming text_for_email_address or email_we_vote_id
-    email_results = email_manager.retrieve_email_address_object(text_for_email_address, email_we_vote_id)
+    #  for this voter
+    email_results = email_manager.retrieve_email_address_object(text_for_email_address, email_we_vote_id,
+                                                                voter_we_vote_id)
     if email_results['email_address_object_found']:
         email_address_object = email_results['email_address_object']
         email_address_list.append(email_address_object)
@@ -294,45 +401,35 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
 
     # Cycle through all EmailAddress entries with the email set as "text_for_email_address"
     for email_address_object in email_address_list:
-        # Does the current voter own an existing entry for this text_for_email_address
-        if email_address_object.voter_we_vote_id == voter_we_vote_id:
-            # This can be over-ridden/ignored if email_address_already_owned_by_other_voter is true for other entry
-            email_address_already_owned_by_this_voter = True
-            email_address_saved_we_vote_id = email_address_object.we_vote_id
-            text_for_email_address = email_address_object.normalized_email_address
-            email_address_created = False
-            email_address_found = True
-            if delete_email:
-                try:
-                    email_address_object.delete()
-                    email_address_deleted = True
-                    status += "DELETED_EMAIL_ADDRESS"
-                    success = True
-                except Exception as e:
-                    status += "UNABLE_TO_DELETE_EMAIL_ADDRESS"
-                    success = False
-            elif make_primary_email:
-                try:
-                    voter.primary_email_we_vote_id = email_address_object.we_vote_id
-                    voter.email = text_for_email_address
-                    voter.save()
-                    status += "SAVED_EMAIL_ADDRESS_AS_PRIMARY"
-                    success = True
-                except Exception as e:
-                    status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_PRIMARY"
-                    success = False
-
-        # If current voter is not owner, has ownership been verified? (Claiming an email is first-come-first-served)
-        elif email_address_object.email_ownership_is_verified:
-            # If here, then another voter already has verified this text_for_email_address
-            email_address_already_owned_by_other_voter = True
+        email_address_already_owned_by_this_voter = True
+        email_address_saved_we_vote_id = email_address_object.we_vote_id
+        text_for_email_address = email_address_object.normalized_email_address
+        recipient_email_address_secret_key = email_address_object.secret_key
+        email_address_created = False
+        email_address_found = True
+        if delete_email:
+            try:
+                email_address_object.delete()
+                email_address_deleted = True
+                status += "DELETED_EMAIL_ADDRESS"
+                success = True
+            except Exception as e:
+                status += "UNABLE_TO_DELETE_EMAIL_ADDRESS"
+                success = False
+        elif make_primary_email:
+            try:
+                voter.primary_email_we_vote_id = email_address_object.we_vote_id
+                voter.email = text_for_email_address
+                voter.save()
+                status += "SAVED_EMAIL_ADDRESS_AS_PRIMARY"
+                success = True
+            except Exception as e:
+                status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_PRIMARY"
+                success = False
 
     send_verification_email = False
     if email_address_deleted:
-        # We cannot proceed with this email address
-        pass
-    elif email_address_already_owned_by_other_voter:
-        # We cannot proceed with this email address
+        # We cannot proceed with this email address, since it was just marked deleted
         pass
     elif email_address_already_owned_by_this_voter:
         # We send back a message that the email already owned by setting email_address_found = True
@@ -350,18 +447,17 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
             new_email_address_object = email_save_results['email_address_object']
             email_we_vote_id = new_email_address_object.we_vote_id
             email_address_saved_we_vote_id = email_we_vote_id
+            recipient_email_address_secret_key = new_email_address_object.secret_key
             email_address_created = True
             email_address_found = True
             success = True
+            status += email_save_results['status']
         else:
             send_verification_email = False
             success = False
             status += " UNABLE_TO_SAVE_EMAIL_ADDRESS"
 
     if send_verification_email:
-        # Generate secret key
-        recipient_email_address_secret_key = "1234"
-
         # Run the code to send verification email for new_email_we_vote_id
         verifications_send_results = schedule_verification_email(voter_we_vote_id, voter_we_vote_id,
                                                                  email_we_vote_id, text_for_email_address,
@@ -393,7 +489,7 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
         'email_address_created':            email_address_created,
         'email_address_deleted':            email_address_deleted,
         'verification_email_sent':          verification_email_sent,
-        'email_address_already_owned_by_other_voter': email_address_already_owned_by_other_voter,
+        'email_address_already_owned_by_other_voter':   email_address_already_owned_by_other_voter,
         'email_address_found':              email_address_found,
         'email_address_list_found':         email_address_list_found,
         'email_address_list':               email_address_list_augmented,

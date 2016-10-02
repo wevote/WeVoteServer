@@ -54,7 +54,7 @@ class FriendInvitationEmailLink(models.Model):
     """
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
-    sender_email_address_verified = models.BooleanField(default=False)  # Do we have an email address for sender?
+    sender_email_ownership_is_verified = models.BooleanField(default=False)  # Do we have an email address for sender?
     recipient_email_we_vote_id = models.CharField(
         verbose_name="email we vote id for recipient", max_length=255, null=True, blank=True, unique=False)
     # We include this here for data monitoring and debugging
@@ -93,7 +93,7 @@ class FriendInvitationVoterLink(models.Model):
     """
     sender_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the sender", max_length=255, null=True, blank=True, unique=False)
-    sender_email_address_verified = models.BooleanField(default=False)  # Do we have an email address for sender?
+    sender_email_ownership_is_verified = models.BooleanField(default=False)  # Do we have an email address for sender?
     recipient_voter_we_vote_id = models.CharField(
         verbose_name="we vote id for the recipient if we have it", max_length=255, null=True, blank=True, unique=False)
     secret_key = models.CharField(
@@ -111,14 +111,19 @@ class FriendManager(models.Model):
 
     def create_or_update_friend_invitation_email_link(self, sender_voter_we_vote_id, recipient_email_we_vote_id='',
                                                       recipient_voter_email='', invitation_message='',
-                                                      sender_email_address_verified=False):
+                                                      sender_email_ownership_is_verified=False,
+                                                      invitation_secret_key=''):
         defaults = {
             "sender_voter_we_vote_id":          sender_voter_we_vote_id,
-            "sender_email_address_verified":    sender_email_address_verified,
             "recipient_email_we_vote_id":       recipient_email_we_vote_id,
             "recipient_voter_email":            recipient_voter_email,
-            "invitation_message":               invitation_message
         }
+        if positive_value_exists(sender_email_ownership_is_verified):
+            defaults["sender_email_ownership_is_verified"] = sender_email_ownership_is_verified
+        if positive_value_exists(invitation_message):
+            defaults["invitation_message"] = invitation_message
+        if positive_value_exists(invitation_secret_key):
+            defaults["invitation_secret_key"] = invitation_secret_key
 
         try:
             friend_invitation, created = FriendInvitationEmailLink.objects.update_or_create(
@@ -146,13 +151,18 @@ class FriendManager(models.Model):
         return results
 
     def create_or_update_friend_invitation_voter_link(self, sender_voter_we_vote_id, recipient_voter_we_vote_id='',
-                                                      invitation_message='', sender_email_address_verified=False):
+                                                      invitation_message='', sender_email_ownership_is_verified=False,
+                                                      invitation_secret_key=''):
         defaults = {
-            "sender_voter_we_vote_id":          sender_voter_we_vote_id,
-            "sender_email_address_verified":    sender_email_address_verified,
-            "recipient_voter_we_vote_id":       recipient_voter_we_vote_id,
-            "invitation_message":               invitation_message
+            "sender_voter_we_vote_id":              sender_voter_we_vote_id,
+            "recipient_voter_we_vote_id":           recipient_voter_we_vote_id,
         }
+        if positive_value_exists(sender_email_ownership_is_verified):
+            defaults["sender_email_ownership_is_verified"] = sender_email_ownership_is_verified
+        if positive_value_exists(invitation_message):
+            defaults["invitation_message"] = invitation_message
+        if positive_value_exists(invitation_secret_key):
+            defaults["invitation_secret_key"] = invitation_secret_key
 
         try:
             friend_invitation, created = FriendInvitationVoterLink.objects.update_or_create(
@@ -445,8 +455,7 @@ class FriendManager(models.Model):
         except Exception as e:
             success = False
             current_friend_list_found = False
-            status = 'FAILED retrieve_friend_invitations_sent_by_me ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            status = 'FAILED retrieve_current_friends '
 
         if current_friend_list_found:
             voter_manager = VoterManager()
@@ -608,7 +617,7 @@ class FriendManager(models.Model):
             status = 'FAILED retrieve_friend_invitations_sent_by_me FriendInvitationEmailLink'
 
         if friend_list_found and friend_list_email_found:
-            friend_list = friend_list + friend_list_email
+            friend_list = list(friend_list) + list(friend_list_email)
         elif friend_list_email_found:
             friend_list = friend_list_email
 
@@ -661,8 +670,7 @@ class FriendManager(models.Model):
         except Exception as e:
             success = False
             friend_list_found = False
-            status = 'FAILED retrieve_friend_invitations_sent_to_me ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            status = 'FAILED retrieve_friend_invitations_sent_to_me '
 
         results = {
             'success':                      success,
@@ -691,8 +699,7 @@ class FriendManager(models.Model):
             except Exception as e:
                 success = False
                 current_friend_deleted = False
-                status = 'FAILED unfriend_current_friend ' \
-                         '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                status = 'FAILED unfriend_current_friend '
 
         results = {
             'success':                      success,

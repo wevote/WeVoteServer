@@ -777,6 +777,38 @@ class PositionListManager(models.Model):
 
         return position_count
 
+    def positions_exist_for_voter(self, voter_we_vote_id):
+        # Don't proceed unless we have voter identifier
+        if not positive_value_exists(voter_we_vote_id):
+            return 0
+
+        position_count = 0
+        try:
+            position_on_stage_starter = PositionForFriends
+
+            position_list = position_on_stage_starter.objects.all()
+            position_list = position_list.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            position_count = position_list.count()
+        except Exception as e:
+            pass
+
+        if positive_value_exists(position_count):
+            return True
+
+        try:
+            position_on_stage_starter = PositionEntered
+
+            position_list = position_on_stage_starter.objects.all()
+            position_list = position_list.filter(voter_we_vote_id__iexact=voter_we_vote_id)
+            position_count = position_list.count()
+        except Exception as e:
+            pass
+
+        if positive_value_exists(position_count):
+            return True
+
+        return False
+
     def remove_positions_ignored_by_voter(
             self, positions_list, organizations_ignored_by_voter):
         """

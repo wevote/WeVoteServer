@@ -29,6 +29,11 @@ def voter_email_address_save_doc_template_values(url_root):
             'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for this email across all networks ',
         },
+        {
+            'name':         'email_secret_key',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'We can pass in the secret key as an identifier.',
+        },
     ]
     optional_query_parameter_list = [
         {
@@ -40,6 +45,11 @@ def voter_email_address_save_doc_template_values(url_root):
             'name':         'make_primary_email',
             'value':        'boolean',  # boolean, integer, long, string
             'description':  'When this variable is passed in as true, change this (verified) email to be the primary.',
+        },
+        {
+            'name':         'verify_email',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'When this variable is passed in as true, change this email to verified.',
         },
         {
             'name':         'resend_verification_email',

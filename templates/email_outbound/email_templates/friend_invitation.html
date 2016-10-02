@@ -45,11 +45,12 @@
                     <td height="28" style="line-height:28px;">&nbsp;</td>
                   </tr>
                   <tr>
-                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;color:#141823;"><a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;">{{ sender_name }}</a> wants to be friends with you on We Vote.</span></td>
+                    <td style=""><span class="mb_text" style="font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;color:#141823;"><a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;">{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %}</a> wants to be friends with you on We Vote.</span></td>
                   </tr>
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
                   </tr>
+                {% if sender_photo or sender_description or sender_network_details %}
                   <tr>
                     <td style="">
                       <table cellspacing="0" cellpadding="0" width="100%" style="border-collapse:collapse;">
@@ -57,11 +58,13 @@
                           <td style="font-size:11px;font-family:LucidaGrande,tahoma,verdana,arial,sans-serif;border:solid 1px #e5e5e5;border-radius:2px;padding:10px;display:block;">
                             <table cellspacing="0" cellpadding="0" width="100%" align="left" class="ib_t" style="border-collapse:collapse;width:100%;min-width:420px;">
                               <tr class="ib_row">
+                                {% if sender_photo %}
                                 <td valign="middle" style="padding-right:15px;font-size:0px;" class="ib_img"><a href="{{ see_all_friend_requests_url }}" style="color:#3b5998;text-decoration:none;"><img src="{{ sender_photo }}" width="75" height="75" style="border:0;background:#ffffff;" /></a></td>
+                                {% endif %}
                                 <td width="100%" valign="middle" style="padding-right:10px;" class="ib_mid">
                                   <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
                                     <tr>
-                                      <td style=""><a href="{{ see_all_friend_requests_url }}" style="color:#141823;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;font-weight:bold;">{{ sender_name }}</a></td>
+                                      <td style=""><a href="{{ see_all_friend_requests_url }}" style="color:#141823;text-decoration:none;font-family:Helvetica Neue,Helvetica,Lucida Grande,tahoma,verdana,arial,sans-serif;font-size:16px;line-height:21px;font-weight:bold;">{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %}</a></td>
                                     </tr>
                                     {% if sender_description %}
                                     <tr>
@@ -87,6 +90,7 @@
                       </table>
                     </td>
                   </tr>
+                {% endif %}
                   <tr style="">
                     <td height="14" style="line-height:14px;">&nbsp;</td>
                   </tr>
