@@ -91,9 +91,9 @@ def search_all_for_api(text_from_search_field, voter_device_id):
         res = elastic_search_object.search(body=query)
         # See bottom of this file for example results from Elastic Search
 
-        search_results = res['hits']['hits']
+        search_results_elastic_search_raw = res['hits']['hits']
 
-        for hit in search_results:
+        for hit in search_results_elastic_search_raw:
             one_search_result_type = hit['_type']
             one_search_result_id = hit['_id']
             one_search_result_dict = hit['_source']
