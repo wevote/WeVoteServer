@@ -472,21 +472,32 @@ class EmailManager(models.Model):
         }
         return results
 
-    def retrieve_primary_email_with_ownership_verified(self, voter_we_vote_id):
+    def retrieve_primary_email_with_ownership_verified(self, voter_we_vote_id, normalized_email_address=''):
         email_address_list = []
         email_address_list_found = False
         email_address_object = EmailAddress()
         email_address_object_found = False
         try:
-            email_address_queryset = EmailAddress.objects.all()
-            email_address_queryset = email_address_queryset.filter(
-                voter_we_vote_id__iexact=voter_we_vote_id,
-                email_ownership_is_verified=True,
-                deleted=False
-            )
-            email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
-            email_address_list = email_address_queryset
-
+            if positive_value_exists(voter_we_vote_id):
+                email_address_queryset = EmailAddress.objects.all()
+                email_address_queryset = email_address_queryset.filter(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                    email_ownership_is_verified=True,
+                    deleted=False
+                )
+                email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
+                email_address_list = email_address_queryset
+            elif positive_value_exists(normalized_email_address):
+                email_address_queryset = EmailAddress.objects.all()
+                email_address_queryset = email_address_queryset.filter(
+                    normalized_email_address__iexact=normalized_email_address,
+                    email_ownership_is_verified=True,
+                    deleted=False
+                )
+                email_address_queryset = email_address_queryset.order_by('-id')  # Put most recent email at top of list
+                email_address_list = email_address_queryset
+            else:
+                email_address_list = []
             if len(email_address_list):
                 success = True
                 email_address_list_found = True
