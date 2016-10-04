@@ -8,7 +8,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(asctime)s: %(message)s')
 
 if len(sys.argv) != 6:
-	print "Usage: %s <pgsql-host> <pgsql-username> <pgsql-password> <pgsql-db> <elasticsearch-host>" % sys.argv[0]
+	print("Usage: %s <pgsql-host> <pgsql-username> <pgsql-password> <pgsql-db> <elasticsearch-host>" % sys.argv[0])
 	sys.exit(-1)
 
 pgsql_host = sys.argv[1]
@@ -25,15 +25,15 @@ conn = psycopg2.connect(
 	port = "5432"
 )
 
-print "Connected to DB"
+print("Connected to DB")
 
 
 es = Elasticsearch([es_host + ":9200"], timeout = 20, max_retries = 5, retry_on_timeout = True)
 
-print "Connected to ES"
+print("Connected to ES")
 
 # 2016-08-27 We no longer index politician data
-indexes = ['candidates','measures','offices','organizations']
+indexes = ['candidates','offices','organizations']
 
 
 # create indexes
@@ -43,6 +43,11 @@ for index in indexes:
 	es.indices.delete(index = index, ignore = [400, 404])
 	logging.info("Creating index %s", index)
 	es.indices.create(index = index, body = index_settings)
+
+logging.info("Dropping index %s", "measures")
+es.indices.delete(index = "measures", ignore = [400, 404])
+logging.info("Creating index %s", "measures")
+es.indices.create(index = "measures", body = { "aliases": {}, "mappings": { "measure": { "properties": { "google_civic_election_id": { "type": "string" }, "measure_subtitle": { "type": "string", "analyzer": "measure_synonyms" }, "measure_text": { "type": "string", "analyzer": "measure_synonyms" }, "measure_title": { "type": "string", "analyzer": "measure_synonyms" }, "state_code": { "type": "string" }, "we_vote_id": { "type": "string" } } } }, "settings": { "index": { "creation_date": "1472589475499", "number_of_shards": "3", "number_of_replicas": "0", "version": { "created": "1070299" }, "uuid": "-SGViI04S6Sl8Xs75iRFAQ" }, "analysis": { "filter": { "measure_synonym_filter": { "type": "synonym", "synonyms": [ "proposition,prop" ] } }, "analyzer": { "measure_synonyms": { "tokenizer": "standard", "filter": [ "lowercase", "measure_synonym_filter" ] } } } }, "warmers": {} } )
 
 # index candidate_candidatecampaign table
 logging.info("Indexing candidate data")
@@ -154,4 +159,3 @@ logging.info("Bulk indexing organization data")
 bulk_data_json = "\n".join(map(json.dumps,bulk_data))
 if bulk_data_json: es.bulk(body = bulk_data_json)
 bulk_data = []
-
