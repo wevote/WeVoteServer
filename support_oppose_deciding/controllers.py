@@ -6,6 +6,7 @@ from ballot.controllers import figure_out_google_civic_election_id_voter_is_watc
     voter_ballot_items_retrieve_for_one_election_for_api
 from ballot.models import CANDIDATE, MEASURE, OFFICE
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
+from friend.models import FriendManager
 from measure.models import ContestMeasureManager
 from django.http import HttpResponse
 from follow.models import FollowOrganizationList
@@ -128,9 +129,15 @@ def positions_count_for_candidate_campaign(voter_id, candidate_id, candidate_we_
         else:
             voter_we_vote_id = ""
 
-        retrieve_public_positions_now = False  # Retrieve positions intended for friends-only
-        most_recent_only = False
-        friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
+        friends_we_vote_id_list = []
+        if positive_value_exists(voter_we_vote_id):
+            retrieve_public_positions_now = False  # Retrieve positions intended for friends-only
+            most_recent_only = False
+            friend_manager = FriendManager()
+            friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
+            if friend_results['friends_we_vote_id_list_found']:
+                friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+
         # Add yourself as a friend so your opinions show up
         friends_we_vote_id_list.append(voter_we_vote_id)
         friends_positions_list_for_candidate_campaign = \
@@ -225,9 +232,15 @@ def positions_count_for_contest_measure(voter_id, measure_id, measure_we_vote_id
         else:
             voter_we_vote_id = ""
 
-        retrieve_public_positions_now = False  # Retrieve positions intended for friends-only
-        most_recent_only = False
-        friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
+        friends_we_vote_id_list = []
+        if positive_value_exists(voter_we_vote_id):
+            retrieve_public_positions_now = False  # Retrieve positions intended for friends-only
+            most_recent_only = False
+            friend_manager = FriendManager()
+            friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
+            if friend_results['friends_we_vote_id_list_found']:
+                friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+
         # Add yourself as a friend so your opinions show up
         friends_we_vote_id_list.append(voter_we_vote_id)
         friends_positions_list_for_contest_measure = \
@@ -353,7 +366,13 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
     # The list where we capture results
     position_counts_list_results = []
 
-    friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
+    friends_we_vote_id_list = []
+    if positive_value_exists(voter_we_vote_id):
+        friend_manager = FriendManager()
+        friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
+        if friend_results['friends_we_vote_id_list_found']:
+            friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+
     # Add yourself as a friend so your opinions show up
     friends_we_vote_id_list.append(voter_we_vote_id)
 
@@ -515,7 +534,13 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
     organizations_followed_by_voter = \
         follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
 
-    friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends (as we_vote_id's)
+    friends_we_vote_id_list = []
+    if positive_value_exists(voter_we_vote_id):
+        friend_manager = FriendManager()
+        friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
+        if friend_results['friends_we_vote_id_list_found']:
+            friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+
     # Add yourself as a friend so your opinions show up
     friends_we_vote_id_list.append(voter_we_vote_id)
 

@@ -6,7 +6,7 @@ from django.conf.urls import url
 from . import views, views_admin
 
 urlpatterns = [
-    # admin_views.py
+    # views_admin.py
     url(r'^$', views_admin.position_list_view, name='position_list',),
     url(r'^delete/$', views_admin.position_delete_process_view, name='position_delete_process',),
     url(r'^edit_process/$', views_admin.position_edit_process_view, name='position_edit_process'),

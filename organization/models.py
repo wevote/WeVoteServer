@@ -12,6 +12,22 @@ import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
 
+NONPROFIT_501C3 = '3'
+NONPROFIT_501C4 = '4'
+POLITICAL_ACTION_COMMITTEE = 'P'
+CORPORATION = 'C'
+NEWS_CORPORATION = 'N'
+UNKNOWN = 'U'
+ORGANIZATION_TYPE_CHOICES = (
+    (NONPROFIT_501C3, 'Nonprofit 501c3'),
+    (NONPROFIT_501C4, 'Nonprofit 501c4'),
+    (POLITICAL_ACTION_COMMITTEE, 'Political Action Committee'),
+    (CORPORATION, 'Corporation'),
+    (NEWS_CORPORATION, 'News Corporation'),
+    (UNKNOWN, 'Unknown'),
+)
+
+alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -530,7 +546,9 @@ class OrganizationManager(models.Manager):
 
         if organization:
             if organization_twitter_handle:
-                if organization_twitter_handle != organization.organization_twitter_handle:
+                organization_twitter_handle = str(organization_twitter_handle)
+                object_organization_twitter_handle = str(organization.organization_twitter_handle)
+                if organization_twitter_handle.lower() != object_organization_twitter_handle.lower():
                     organization.organization_twitter_handle = organization_twitter_handle
                     values_changed = True
             if organization_facebook:
@@ -569,7 +587,9 @@ class OrganizationManager(models.Manager):
                     organization.twitter_user_id = convert_to_int(twitter_json['id'])
                     values_changed = True
             if positive_value_exists(twitter_json['screen_name']):
-                if twitter_json['screen_name'] != organization.organization_twitter_handle:
+                incoming_twitter_screen_name = str(twitter_json['screen_name'])
+                organization_twitter_handle = str(organization.organization_twitter_handle)
+                if incoming_twitter_screen_name.lower() != organization_twitter_handle.lower():
                     organization.organization_twitter_handle = twitter_json['screen_name']
                     values_changed = True
             if positive_value_exists(twitter_json['name']):
@@ -931,7 +951,6 @@ class OrganizationListManager(models.Manager):
 
 class Organization(models.Model):
     # We are relying on built-in Python id field
-    alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')
 
     # The we_vote_id identifier is unique across all We Vote sites, and allows us to share our org info with other
     # organizations
@@ -1002,23 +1021,10 @@ class Organization(models.Model):
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
 
-    NONPROFIT_501C3 = '3'
-    NONPROFIT_501C4 = '4'
-    POLITICAL_ACTION_COMMITTEE = 'P'
-    CORPORATION = 'C'
-    NEWS_CORPORATION = 'N'
-    UNKNOWN = 'U'
-    ORGANIZATION_TYPE_CHOICES = (
-        (NONPROFIT_501C3, 'Nonprofit 501c3'),
-        (NONPROFIT_501C4, 'Nonprofit 501c4'),
-        (POLITICAL_ACTION_COMMITTEE, 'Political Action Committee'),
-        (CORPORATION, 'Corporation'),
-        (NEWS_CORPORATION, 'News Corporation'),
-        (UNKNOWN, 'Unknown'),
-    )
-
     organization_type = models.CharField(
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
+
+    organization_endorsements_api_url = models.URLField(verbose_name='url of endorsements importer', blank=True, null=True)
 
     def __unicode__(self):
         return str(self.organization_name)
@@ -1081,24 +1087,24 @@ class Organization(models.Model):
         super(Organization, self).save(*args, **kwargs)
 
     def is_nonprofit_501c3(self):
-        return self.organization_type in self.NONPROFIT_501C3
+        return self.organization_type in NONPROFIT_501C3
 
     def is_nonprofit_501c4(self):
-        return self.organization_type in self.NONPROFIT_501C4
+        return self.organization_type in NONPROFIT_501C4
 
     def is_political_action_committee(self):
-        return self.organization_type in self.POLITICAL_ACTION_COMMITTEE
+        return self.organization_type in POLITICAL_ACTION_COMMITTEE
 
     def is_corporation(self):
-        return self.organization_type in self.CORPORATION
+        return self.organization_type in CORPORATION
 
     def is_news_corporation(self):
-        return self.organization_type in self.NEWS_CORPORATION
+        return self.organization_type in NEWS_CORPORATION
 
     def is_organization_type_specified(self):
         return self.organization_type in (
-            self.NONPROFIT_501C3, self.NONPROFIT_501C4, self.POLITICAL_ACTION_COMMITTEE,
-            self.CORPORATION, self.NEWS_CORPORATION)
+            NONPROFIT_501C3, NONPROFIT_501C4, POLITICAL_ACTION_COMMITTEE,
+            CORPORATION, NEWS_CORPORATION)
 
     def generate_facebook_link(self):
         if self.organization_facebook:

@@ -5,6 +5,7 @@
 from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, \
     VoterDeviceLinkManager, VoterManager
 from django.http import HttpResponse
+from email_outbound.models import EmailManager
 import json
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
@@ -181,6 +182,96 @@ def voter_create_for_api(voter_device_id):  # voterCreate
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
+    current_voter_found = False
+    email_owner_voter_id = 0
+    email_owner_voter_found = False
+    success = False
+    status = ""
+
+    voter_device_link_manager = VoterDeviceLinkManager()
+    voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+    if not voter_device_link_results['voter_device_link_found']:
+        error_results = {
+            'status':                   voter_device_link_results['status'],
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'current_voter_found':      current_voter_found,
+            'email_owner_voter_found':  email_owner_voter_found,
+        }
+        return error_results
+
+    # We need this below
+    voter_device_link = voter_device_link_results['voter_device_link']
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        error_results = {
+            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'current_voter_found':      current_voter_found,
+            'email_owner_voter_found':  email_owner_voter_found,
+        }
+        return error_results
+
+    voter = voter_results['voter']
+    current_voter_found = True
+
+    email_manager = EmailManager
+    email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key)
+    if email_results['email_address_object_found']:
+        email_address_object = email_results['email_address_object']
+
+        email_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+        if email_owner_voter_results['voter_found']:
+            email_owner_voter_id = email_owner_voter_results['voter_id']
+            email_owner_voter_found = True
+            email_owner_voter = email_owner_voter_results['voter']
+
+    if not email_owner_voter_found:
+        error_results = {
+            'status':                   "EMAIL_OWNER_VOTER_NOT_FOUND",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'current_voter_found':      current_voter_found,
+            'email_owner_voter_found':  email_owner_voter_found,
+        }
+        return error_results
+
+    # Double-check they aren't the same voter account
+    if voter.id == email_owner_voter.id:
+        error_results = {
+            'status':                   "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
+            'success':                  True,
+            'voter_device_id':          voter_device_id,
+            'current_voter_found':      current_voter_found,
+            'email_owner_voter_found':  email_owner_voter_found,
+        }
+        return error_results
+
+    # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
+    # We are going to make the email_owner_voter the new master
+
+    # And finally, relink the current voter_device_id to email_owner_voter
+    update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, email_owner_voter)
+    if update_link_results['voter_device_link_updated']:
+        success = True
+        status += "MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED"
+
+    results = {
+        'status': status,
+        'success': success,
+        'voter_device_id': voter_device_id,
+        'current_voter_found': current_voter_found,
+        'email_owner_voter_found': email_owner_voter_found,
+    }
+
+    return results
+
+
 def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, facebook_photo_variable_exists):
     facebook_profile_image_url_https = facebook_profile_image_url_https.strip()
 
@@ -348,6 +439,10 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'signed_in_facebook':               voter.signed_in_facebook(),
             'signed_in_google':                 voter.signed_in_google(),
             'signed_in_twitter':                voter.signed_in_twitter(),
+            'signed_in_with_email':             voter.signed_in_with_email(),
+            'has_valid_email':                  voter.has_valid_email(),
+            'has_data_to_preserve':             voter.has_data_to_preserve(),
+            'has_email_with_verified_ownership':    voter.has_email_with_verified_ownership(),
             'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
             'voter_photo_url':                  voter.voter_photo_url(),
         }
@@ -374,6 +469,10 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'signed_in_facebook':               False,
             'signed_in_google':                 False,
             'signed_in_twitter':                False,
+            'signed_in_with_email':             False,
+            'has_valid_email':                  False,
+            'has_data_to_preserve':             False,
+            'has_email_with_verified_ownership':    False,
             'linked_organization_we_vote_id':   '',
             'voter_photo_url':                  '',
         }

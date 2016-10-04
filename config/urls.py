@@ -36,12 +36,14 @@ urlpatterns = [
     url(r'^e/', include('election.urls', namespace="election")),
     url(r'^follow/', include('follow.urls', namespace="follow")),
     url(r'^health/', views.health_view),  # A simple health check to make sure the site is running
+    url(r'^import_export_batches/', include('import_export_batches.urls', namespace="import_export_batches")),
     url(r'^import_export_google_civic/', include(
         'import_export_google_civic.urls', namespace="import_export_google_civic")),
     url(r'^import_export_maplight/', include('import_export_maplight.urls', namespace="import_export_maplight")),
     url(r'^import_export_twitter/', include('import_export_twitter.urls', namespace="import_export_twitter")),
     url(r'^import_export_vote_smart/', include('import_export_vote_smart.urls', namespace="import_export_vote_smart")),
     url(r'^import_export_wikipedia/', include('import_export_wikipedia.urls', namespace="import_export_wikipedia")),
+    url(r'^import_export_endorsements/', include('import_export_endorsements.urls', namespace="import_export_endorsements")),
     url(r'^info/', include('quick_info.urls', namespace="quick_info")),
     url(r'^m/', include('measure.urls', namespace="measure")),
     url(r'^off/', include('office.urls', namespace="office")),

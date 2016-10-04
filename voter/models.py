@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
@@ -179,6 +180,11 @@ class VoterManager(BaseUserManager):
         voter_manager = VoterManager()
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
 
+    def retrieve_voter_by_email(self, email):
+        voter_id = ''
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email)
+
     def retrieve_voter_by_we_vote_id(self, voter_we_vote_id):
         voter_id = ''
         email = ''
@@ -241,48 +247,70 @@ class VoterManager(BaseUserManager):
                 voter_on_stage = Voter.objects.get(id=voter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif email is not '' and email is not None:
-                voter_on_stage = Voter.objects.get(
-                    email=email)
-                # If still here, we found an existing voter
-                voter_id = voter_on_stage.id
+                voter_queryset = Voter.objects.all()
+                # TODO DALE: Currently facebook_email is not a unique entry.
+                # TODO DALE: We need to clean up the facebook sign in code to deal with this, and move the
+                # facebook_email into "email"
+                # voter_queryset = voter_queryset.filter(Q(email__iexact=email) |
+                #                                        Q(facebook_email__iexact=email))
+                voter_queryset = voter_queryset.filter(Q(email__iexact=email))
+                voter_list = list(voter_queryset[:1])
+                if len(voter_list):
+                    voter_on_stage = voter_list[0]
+                    voter_id = voter_on_stage.id
+                    success = True
+                else:
+                    voter_on_stage = Voter()
+                    voter_id = 0
+                    success = True
             elif positive_value_exists(voter_we_vote_id):
                 voter_on_stage = Voter.objects.get(
-                    we_vote_id=voter_we_vote_id)
+                    we_vote_id__iexact=voter_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(twitter_request_token):
                 voter_on_stage = Voter.objects.get(
                     twitter_request_token=twitter_request_token)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(facebook_id):
                 voter_on_stage = Voter.objects.get(
                     facebook_id=facebook_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(twitter_id):
                 voter_on_stage = Voter.objects.get(
                     twitter_id=twitter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(organization_we_vote_id):
                 voter_on_stage = Voter.objects.get(
-                    linked_organization_we_vote_id=organization_we_vote_id)
+                    linked_organization_we_vote_id__iexact=organization_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             else:
                 voter_id = 0
                 error_result = True
+                success = False
         except Voter.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
             exception_multiple_object_returned = True
+            success = False
         except Voter.DoesNotExist as e:
             error_result = True
             exception_does_not_exist = True
+            success = True
 
         results = {
+            'success':                  success,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
@@ -479,6 +507,35 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def update_voter_email_ownership_verified(self, voter, email_address_object):
+        voter_updated = False
+
+        try:
+            should_save_voter = False
+            if email_address_object.email_ownership_is_verified:
+                voter.primary_email_we_vote_id = email_address_object.we_vote_id
+                voter.email = email_address_object.normalized_email_address
+                voter.email_ownership_is_verified = True
+                should_save_voter = True
+
+            if should_save_voter:
+                voter.save()
+                voter_updated = True
+            status = "UPDATED_VOTER_EMAIL_OWNERSHIP"
+            success = True
+        except Exception as e:
+            status = "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP"
+            success = False
+            voter_updated = False
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter': voter,
+            'voter_updated': voter_updated,
+        }
+        return results
+
 
 class Voter(AbstractBaseUser):
     """
@@ -503,7 +560,13 @@ class Voter(AbstractBaseUser):
 
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=20, validators=[alphanumeric])  # Increase max_length to 255
+    # We cache the email here for quick lookup, but the official email address for the voter
+    # is referenced by primary_email_we_vote_id and stored in the EmailAddress table
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True, null=True, blank=True)
+    primary_email_we_vote_id = models.CharField(
+        verbose_name="we vote id for primary email for this voter", max_length=255, null=True, blank=True, unique=True)
+    # This "email_ownership_is_verified" is a copy of the master data in EmailAddress.email_ownership_is_verified
+    email_ownership_is_verified = models.BooleanField(default=True)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
@@ -599,8 +662,12 @@ class Voter(AbstractBaseUser):
             return False
 
     def __str__(self):              # __unicode__ on Python 2
-        # return self.get_full_name(self)
-        return str(self.email)
+        if self.has_valid_email():
+            return str(self.email)
+        elif positive_value_exists(self.twitter_screen_name):
+            return str(self.twitter_screen_name)
+        else:
+            return str(self.get_full_name())
 
     def has_perm(self, perm, obj=None):
         """
@@ -632,8 +699,7 @@ class Voter(AbstractBaseUser):
         return ''
 
     def signed_in_personal(self):
-        if positive_value_exists(self.email) or self.signed_in_facebook() or self.signed_in_twitter():
-            # or positive_value_exists(self.is_authenticated()):
+        if self.signed_in_with_email() or self.signed_in_facebook() or self.signed_in_twitter():
             return True
         return False
 
@@ -647,6 +713,47 @@ class Voter(AbstractBaseUser):
 
     def signed_in_twitter(self):
         if positive_value_exists(self.twitter_access_token):
+            return True
+        return False
+
+    def signed_in_with_email(self):
+        verified_email_found = (positive_value_exists(self.email) or
+                                positive_value_exists(self.primary_email_we_vote_id)) and \
+                               self.email_ownership_is_verified
+        if verified_email_found:
+            return True
+        return False
+
+    def has_valid_email(self):
+        if positive_value_exists(self.email):
+            # TODO DALE -- we don't want to use facebook_email without copying it over to email
+            #  or positive_value_exists(self.facebook_email)
+            return True
+        return False
+
+    def has_data_to_preserve(self):
+        # Does this voter record have any values associated in this table that are unique
+        if self.has_email_with_verified_ownership() or self.signed_in_twitter() or self.signed_in_facebook():
+            return True
+        else:
+            # Has any important data been stored in other tables attached to this voter account?
+            # (Each additional query costs more server resources, so we return True as early as we can.)
+            # NOTE: We can't do this because we can't bring position classes in this file
+            # Consider caching "has_position" data in the voter table
+            # position_list_manager = PositionListManager()
+            # positions_found = position_list_manager.positions_exist_for_voter(self.we_vote_id)
+            # if positive_value_exists(positions_found):
+            #     return True
+
+            # Following any organizations?
+
+            # No need to check for friends, because you can't have any without a signed in status, which we've checked
+            pass
+
+        return False
+
+    def has_email_with_verified_ownership(self):
+        if positive_value_exists(self.email) and self.email_ownership_is_verified:
             return True
         return False
 

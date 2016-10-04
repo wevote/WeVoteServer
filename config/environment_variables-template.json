@@ -1,6 +1,7 @@
 {
   "_comment":                       "Note that WE_VOTE_SERVER_ROOT_URL should end without slash",
   "WE_VOTE_SERVER_ROOT_URL":        "https://api.wevoteusa.org",
+  "WEB_APP_ROOT_URL":               "https://WeVote.US",
   "SERVER_IN_DEBUG_MODE":           true,
 
   "_comment":                       "local.py settings, including database",
@@ -23,6 +24,17 @@
   "LOG_FILE":                       "/var/log/wevote/wevoteserver.log",
   "_comment":                       "*** LOG_FILE_LEVEL is the level of logging written to the log file",
   "LOG_FILE_LEVEL":                 "ERROR",
+
+  "_comment":                       "Email server settings",
+  "EMAIL_HOST":                     "smtp.sendgrid.net",
+  "EMAIL_HOST_USER":                "sendgrid_username",
+  "EMAIL_HOST_PASSWORD":            "sendgrid_password",
+  "EMAIL_PORT":                     "587",
+  "EMAIL_USE_TLS":                  "True",
+
+  "_comment":                       "sendgrid-django API settings",
+  "EMAIL_BACKEND":                  "sgbackend.SendGridBackend",
+  "SENDGRID_API_KEY":               "",
 
   "_comment":                       "import_export",
   "WE_VOTE_API_KEY":                "",

@@ -1,6 +1,10 @@
 # README for API Installation
+
 [Back to root README](README.md)
+
 [Read about working with WeVoteServer](README_WORKING_WITH_WE_VOTE_SERVER.md)
+
+[Installation Troubleshooting](README_INSTALLATION_TROUBLESHOOTING.md)
 
 NOTE: We are running Django version 1.8
 
@@ -47,6 +51,9 @@ Now activate this new virtual environment for WeVoteServer:
     $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
     $ pip install -r requirements.txt
     $ python manage.py runserver
+
+[Having troubles? See Installation Troubleshooting](README_INSTALLATION_TROUBLESHOOTING.md)
+
 
 ### Running Linux?
 If you are installing on a Linux environment, we recommend the following steps within your virtual environment. If you
@@ -216,6 +223,8 @@ Start up the webserver:
     $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
     $ pip install -r requirements.txt
     $ python manage.py runserver
+
+[Having troubles? See Installation Troubleshooting](README_INSTALLATION_TROUBLESHOOTING.md)
 
 ## Grant yourself Admin rights
 

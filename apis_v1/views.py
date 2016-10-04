@@ -9,6 +9,14 @@ from ballot.controllers import ballot_item_options_retrieve_for_api, choose_elec
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
+from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
+    voter_email_address_verify_for_api
+from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
+    friend_invite_response_for_api, friend_list_for_api
+from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
+    FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
+    FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS, ACCEPT_INVITATION, IGNORE_INVITATION, \
+    UNFRIEND_CURRENT_FRIEND
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_facebook.controllers import facebook_disconnect_for_api, facebook_sign_in_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
@@ -42,7 +50,7 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
     positions_count_for_one_ballot_item_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
 from twitter.controllers import twitter_identity_retrieve_for_api
-from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, \
+from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
     VoterDeviceLink, VoterDeviceLinkManager, voter_has_authority, VoterManager
@@ -174,6 +182,101 @@ def facebook_sign_in_view(request):  # facebookSignIn
         'voter_device_id': voter_device_id,
         'facebook_id': results['facebook_id'],
         'facebook_email': results['facebook_email'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_invitation_by_email_send_view(request):  # friendInvitationByEmailSend
+    """
+
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    email_addresses_raw = request.GET.get('email_addresses_raw', "")
+    invitation_message = request.GET.get('invitation_message', "")
+    sender_email_address = request.GET.get('sender_email_address', "")
+    results = friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw, invitation_message,
+                                                      sender_email_address)
+    json_data = {
+        'status':                               results['status'],
+        'success':                              results['success'],
+        'voter_device_id':                      voter_device_id,
+        'sender_voter_email_address_missing':   results['sender_voter_email_address_missing'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_invitation_by_email_verify_view(request):  # friendInvitationByEmailVerify
+    """
+
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    invitation_secret_key = request.GET.get('invitation_secret_key', "")
+    results = friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret_key)
+    json_data = {
+        'status':                               results['status'],
+        'success':                              results['success'],
+        'voter_device_id':                      voter_device_id,
+        'sender_voter_email_address_missing':   results['sender_voter_email_address_missing'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_invite_response_view(request):  # friendInviteResponse
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    kind_of_invite_response = request.GET.get('kind_of_invite_response', ACCEPT_INVITATION)
+    if not kind_of_invite_response in(ACCEPT_INVITATION, DELETE_INVITATION_EMAIL_SENT_BY_ME,
+                                      DELETE_INVITATION_VOTER_SENT_BY_ME, IGNORE_INVITATION, UNFRIEND_CURRENT_FRIEND):
+        kind_of_invite_response = ACCEPT_INVITATION
+    other_voter_we_vote_id = request.GET.get('voter_we_vote_id', "")
+    recipient_voter_email = request.GET.get('recipient_voter_email', "")
+    results = friend_invite_response_for_api(voter_device_id=voter_device_id,
+                                             kind_of_invite_response=kind_of_invite_response,
+                                             other_voter_we_vote_id=other_voter_we_vote_id,
+                                             recipient_voter_email=recipient_voter_email)
+
+    json_data = {
+        'status':                   results['status'],
+        'success':                  results['success'],
+        'voter_device_id':          voter_device_id,
+        'voter_we_vote_id':         other_voter_we_vote_id,
+        'kind_of_invite_response':  kind_of_invite_response,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_list_view(request):  # friendList
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    kind_of_list = request.GET.get('kind_of_list', CURRENT_FRIENDS)
+    if kind_of_list in(CURRENT_FRIENDS, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, FRIENDS_IN_COMMON,
+                       IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS):
+        kind_of_list_we_are_looking_for = kind_of_list
+    else:
+        kind_of_list_we_are_looking_for = CURRENT_FRIENDS
+    state_code = request.GET.get('state_code', "")
+    results = friend_list_for_api(voter_device_id=voter_device_id,
+                                  kind_of_list_we_are_looking_for=kind_of_list_we_are_looking_for,
+                                  state_code=state_code)
+
+    json_data = {
+        'status':               results['status'],
+        'success':              results['success'],
+        'voter_device_id':      voter_device_id,
+        'state_code':           state_code,
+        'kind_of_list':         kind_of_list_we_are_looking_for,
+        'friend_list_found':    results['friend_list_found'],
+        'friend_list':          results['friend_list'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1317,6 +1420,89 @@ def voter_create_view(request):  # voterCreate
     return voter_create_for_api(voter_device_id)
 
 
+def voter_email_address_retrieve_view(request):  # voterEmailAddressRetrieve
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = voter_email_address_retrieve_for_api(voter_device_id=voter_device_id)
+
+    json_data = {
+        'status':                   results['status'],
+        'success':                  results['success'],
+        'voter_device_id':          voter_device_id,
+        'email_address_list_found': results['email_address_list_found'],
+        'email_address_list':       results['email_address_list'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_email_address_save_view(request):  # voterEmailAddressSave
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    text_for_email_address = request.GET.get('text_for_email_address', '')
+    email_we_vote_id = request.GET.get('email_we_vote_id', '')
+    resend_verification_email = request.GET.get('resend_verification_email', False)
+    resend_verification_email = True if positive_value_exists(resend_verification_email) else False
+    make_primary_email = request.GET.get('make_primary_email', False)
+    make_primary_email = True if positive_value_exists(make_primary_email) else False
+    delete_email = request.GET.get('delete_email', "")
+    delete_email = True if positive_value_exists(delete_email) else False
+
+    results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
+                                               text_for_email_address=text_for_email_address,
+                                               email_we_vote_id=email_we_vote_id,
+                                               resend_verification_email=resend_verification_email,
+                                               make_primary_email=make_primary_email,
+                                               delete_email=delete_email,
+                                               )
+
+    json_data = {
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+        'text_for_email_address':           text_for_email_address,
+        'make_primary_email':               make_primary_email,
+        'delete_email':                     delete_email,
+        'email_address_saved_we_vote_id':   results['email_address_saved_we_vote_id'],
+        'email_address_created':            results['email_address_created'],
+        'email_address_deleted':            results['email_address_deleted'],
+        'verification_email_sent':          results['verification_email_sent'],
+        'email_address_found':              results['email_address_found'],
+        'email_address_list_found':         results['email_address_list_found'],
+        'email_address_list':               results['email_address_list'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_email_address_verify_view(request):  # voterEmailAddressVerify
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    email_secret_key = request.GET.get('email_secret_key', '')
+
+    results = voter_email_address_verify_for_api(voter_device_id=voter_device_id,
+                                                 email_secret_key=email_secret_key)
+
+    email_retrieve_attempted = results['success']
+    json_data = {
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+        'email_ownership_is_verified':      results['email_ownership_is_verified'],
+        'email_secret_key_belongs_to_this_voter':   results['email_secret_key_belongs_to_this_voter'],
+        'email_retrieve_attempted':         email_retrieve_attempted,
+        'email_address_found':              results['email_address_found'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 def voter_guide_possibility_retrieve_view(request):
     """
     Retrieve a previously saved website that may contain a voter guide (voterGuidePossibilityRetrieve)
@@ -1421,6 +1607,25 @@ def voter_location_retrieve_from_ip_view(request):  # GeoIP geo location
         'http_x_forwarded_for': voter_location_results['http_x_forwarded_for'],
     }
 
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_merge_two_accounts_view(request):  # voterMergeTwoAccounts
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    email_secret_key = request.GET.get('email_secret_key', '')
+
+    results = voter_merge_two_accounts_for_api(voter_device_id=voter_device_id,
+                                               email_secret_key=email_secret_key)
+
+    json_data = {
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+    }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 

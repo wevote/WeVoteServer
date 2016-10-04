@@ -83,15 +83,19 @@ INSTALLED_APPS = (
     'candidate',
     'config',
     'election',
+    'email_outbound',
     'exception',
     'follow',
+    'friend',
     'geoip',
+    'import_export_batches',
     'import_export_facebook',
     'import_export_google_civic',
     'import_export_maplight',
     'import_export_twitter',  # See also twitter (below)
     'import_export_vote_smart',
     'import_export_wikipedia',
+    'import_export_endorsements',
     'measure',
     'office',
     'organization',
@@ -291,6 +295,9 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.user_details',
     'wevote_social.utils.switch_user'  # Order in this pipeline matters
 )
+
+EMAIL_BACKEND = get_environment_variable("EMAIL_BACKEND")
+SENDGRID_API_KEY = get_environment_variable("SENDGRID_API_KEY")
 
 
 # ########## Logging configurations ###########
