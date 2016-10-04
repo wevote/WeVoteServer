@@ -186,6 +186,8 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
     current_voter_found = False
     email_owner_voter_id = 0
     email_owner_voter_found = False
+    success = False
+    status = ""
 
     voter_device_link_manager = VoterDeviceLinkManager()
     voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
@@ -229,7 +231,7 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
             email_owner_voter_found = True
             email_owner_voter = email_owner_voter_results['voter']
 
-    if not positive_value_exists(email_owner_voter_id):
+    if not email_owner_voter_found:
         error_results = {
             'status':                   "EMAIL_OWNER_VOTER_NOT_FOUND",
             'success':                  False,
@@ -256,8 +258,8 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
     # And finally, relink the current voter_device_id to email_owner_voter
     update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, email_owner_voter)
     if update_link_results['voter_device_link_updated']:
-        # TODO DALE Continue working on this
-        pass
+        success = True
+        status += "MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED"
 
     results = {
         'status': status,

@@ -123,7 +123,7 @@ class FriendManager(models.Model):
         if positive_value_exists(invitation_message):
             defaults["invitation_message"] = invitation_message
         if positive_value_exists(invitation_secret_key):
-            defaults["invitation_secret_key"] = invitation_secret_key
+            defaults["secret_key"] = invitation_secret_key
 
         try:
             friend_invitation, created = FriendInvitationEmailLink.objects.update_or_create(
@@ -162,7 +162,7 @@ class FriendManager(models.Model):
         if positive_value_exists(invitation_message):
             defaults["invitation_message"] = invitation_message
         if positive_value_exists(invitation_secret_key):
-            defaults["invitation_secret_key"] = invitation_secret_key
+            defaults["secret_key"] = invitation_secret_key
 
         try:
             friend_invitation, created = FriendInvitationVoterLink.objects.update_or_create(
@@ -254,8 +254,8 @@ class FriendManager(models.Model):
         else:
             try:
                 current_friend = CurrentFriend.objects.create(
-                    viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                    viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    viewer_voter_we_vote_id=sender_voter_we_vote_id,
+                    viewee_voter_we_vote_id=recipient_voter_we_vote_id,
                 )
                 current_friend_created = True
                 success = True
@@ -678,6 +678,87 @@ class FriendManager(models.Model):
             'recipient_voter_we_vote_id':   recipient_voter_we_vote_id,
             'friend_list_found':            friend_list_found,
             'friend_list':                  friend_list,
+        }
+        return results
+
+    def accept_friend_invitation_from_secret_key(self, invitation_secret_key):
+        """
+
+        :param invitation_secret_key:
+        :return:
+        """
+        # Start by looking in FriendInvitationVoterLink table
+        friend_invitation_voter_link_found = False
+        friend_invitation_voter_link = FriendInvitationVoterLink()
+        # If not found, then look in FriendInvitationEmailLink table
+        friend_invitation_email_link_found = False
+        friend_invitation_email_link = FriendInvitationEmailLink()
+        status = ""
+
+        try:
+            if positive_value_exists(invitation_secret_key):
+                friend_invitation_voter_link = FriendInvitationVoterLink.objects.get(
+                    secret_key=invitation_secret_key,
+                    deleted=False,
+                )
+                friend_invitation_voter_link_found = True
+                success = True
+                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY1"
+            else:
+                friend_invitation_voter_link_found = False
+                success = False
+                status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_VARIABLES_MISSING1"
+        except FriendInvitationVoterLink.DoesNotExist:
+            success = True
+            status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_NOT_FOUND1"
+        except Exception as e:
+            success = False
+            status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationVoterLink'
+
+        if friend_invitation_voter_link_found:
+
+            results = {
+                'success':                              success,
+                'status':                               status,
+                'friend_invitation_found':
+                    friend_invitation_email_link_found or friend_invitation_voter_link_found,
+                'friendship_created':                   friendship_created,
+                'friend_invitation_email_link_found':   friend_invitation_email_link_found,
+                'friend_invitation_email_link':         friend_invitation_email_link,
+                'friend_invitation_voter_link_found':   friend_invitation_voter_link_found,
+                'friend_invitation_voter_link':         friend_invitation_voter_link,
+            }
+            return results
+
+        try:
+            if positive_value_exists(invitation_secret_key):
+                friend_invitation_email_link = FriendInvitationEmailLink.objects.get(
+                    secret_key=invitation_secret_key,
+                    deleted=False,
+                )
+                friend_invitation_email_link_found = True
+                success = True
+                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY2"
+            else:
+                friend_invitation_email_link_found = False
+                success = False
+                status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_VARIABLES_MISSING2"
+        except FriendInvitationEmailLink.DoesNotExist:
+            success = True
+            status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_NOT_FOUND2"
+        except Exception as e:
+            success = False
+            status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationEmailLink'
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'friend_invitation_found':
+                friend_invitation_email_link_found or friend_invitation_voter_link_found,
+            'friend_invitation_email_link_found':   friend_invitation_email_link_found,
+            'friend_invitation_email_link':         friend_invitation_email_link,
+            'friend_invitation_voter_link_found':   friend_invitation_voter_link_found,
+            'friend_invitation_voter_link':         friend_invitation_voter_link,
         }
         return results
 

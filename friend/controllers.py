@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, \
+from .models import ACCEPTED, FriendInvitationVoterLink, FriendManager, CURRENT_FRIENDS, \
+    DELETE_INVITATION_EMAIL_SENT_BY_ME, \
     FRIEND_INVITATIONS_SENT_BY_ME, FRIEND_INVITATIONS_SENT_TO_ME, FRIENDS_IN_COMMON, UNFRIEND_CURRENT_FRIEND
 from config.base import get_environment_variable
 from email_outbound.controllers import schedule_email_with_email_outbound_description, schedule_verification_email
@@ -288,6 +289,203 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
     return results
 
 
+def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret_key):
+    """
+
+    :param voter_device_id:
+    :param invitation_secret_key:
+    :return:
+    """
+    invitation_found = False
+    friendship_created = False
+    email_address_status_updated = False
+    invitation_secret_key_belongs_to_this_voter = False
+    status = ""
+    success = False
+
+    # If a voter_device_id is passed in that isn't valid, we want to throw an error
+    device_id_results = is_voter_device_id_valid(voter_device_id)
+    if not device_id_results['success']:
+        json_data = {
+            'status':                                       device_id_results['status'],
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'invitation_found':                             invitation_found,
+            'friendship_created':                           friendship_created,
+            'email_address_status_updated':                 email_address_status_updated,
+            'invitation_secret_key_belongs_to_this_voter':  invitation_secret_key_belongs_to_this_voter,
+        }
+        return json_data
+
+    if not positive_value_exists(invitation_secret_key):
+        error_results = {
+            'status':                                       "VOTER_EMAIL_ADDRESS_VERIFY_MISSING_SECRET_KEY",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'invitation_found':                             invitation_found,
+            'friendship_created':                           friendship_created,
+            'email_address_status_updated':                 email_address_status_updated,
+            'invitation_secret_key_belongs_to_this_voter':  invitation_secret_key_belongs_to_this_voter,
+        }
+        return error_results
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        error_results = {
+            'status':                                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'invitation_found':                             invitation_found,
+            'friendship_created':                           friendship_created,
+            'email_address_status_updated':                 email_address_status_updated,
+            'invitation_secret_key_belongs_to_this_voter':  invitation_secret_key_belongs_to_this_voter,
+        }
+        return error_results
+    voter = voter_results['voter']
+    voter_we_vote_id = voter.we_vote_id
+
+    friend_manager = FriendManager()
+    friend_invitation_results = friend_manager.accept_friend_invitation_from_secret_key(invitation_secret_key)
+    if not friend_invitation_results['friend_invitation_found']:
+        error_results = {
+            'status':                                       "EMAIL_NOT_FOUND_FROM_SECRET_KEY",
+            'success':                                      False,
+            'voter_device_id':                              voter_device_id,
+            'invitation_found':                             invitation_found,
+            'friendship_created':                           friendship_created,
+            'email_address_status_updated':                 email_address_status_updated,
+            'invitation_secret_key_belongs_to_this_voter':  invitation_secret_key_belongs_to_this_voter,
+        }
+        return error_results
+
+    unverified_email_address_object_found = False
+    unverified_email_address_object = EmailAddress()
+    voter_we_vote_id_accepting_invitation = ""
+    email_manager = EmailManager()
+    if friend_invitation_results['friend_invitation_voter_link_found']:
+        friend_invitation_voter_link = friend_invitation_results['friend_invitation_voter_link']
+        voter_we_vote_id_accepting_invitation = friend_invitation_voter_link.recipient_voter_we_vote_id
+        # Now we want to
+        friend_results = friend_manager.create_or_update_current_friend(
+            friend_invitation_voter_link.sender_voter_we_vote_id,
+            friend_invitation_voter_link.recipient_voter_we_vote_id)
+
+        if friend_results['success']:
+            friendship_created = True
+            try:
+                friend_invitation_voter_link.invitation_status = ACCEPTED
+                friend_invitation_voter_link.deleted = True
+                friend_invitation_voter_link.save()
+            except Exception as e:
+                success = False
+                status += 'FAILED_TO_UPDATE_INVITATION_STATUS1'
+        else:
+            friendship_created = False
+
+        if friendship_created:
+            # There is the possible case where a recipient_voter was invited, and an email was sent to emailY
+            #  but then emailY was verified and attached to another voter account. In that case we approve (above)
+            #  the friendship with the original account invited, but we DON'T want to verify emailY
+            # Check to see if the email used has been claimed by a voter account yet
+            temp_voter_we_vote_id = ""
+            email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+                temp_voter_we_vote_id, friend_invitation_voter_link.recipient_voter_email)
+            if email_results['email_address_object_found']:
+                # If here, we know that this email been verified. We don't need to do anything.
+                # (It doesn't matter who verified it)
+                pass
+            else:
+                # Retrieve the email used to send the invitation to this specific voter
+                email_results = email_manager.retrieve_email_address_object(
+                    friend_invitation_voter_link.recipient_voter_email,
+                    friend_invitation_voter_link.recipient_voter_we_vote_id)
+
+                if email_results['email_address_object_found']:
+                    unverified_email_address_object_found = True
+                    unverified_email_address_object = email_results['email_address_object_found']
+    elif friend_invitation_results['friend_invitation_email_link_found']:
+        friend_invitation_email_link = friend_invitation_results['friend_invitation_email_link']
+        # Check to see if the email used has been claimed by a voter account yet
+        temp_voter_we_vote_id = ""
+        email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+            temp_voter_we_vote_id, friend_invitation_email_link.recipient_voter_email)
+        if email_results['email_address_object_found']:
+            email_address_object = email_results['email_address_object_found']
+            voter_we_vote_id_accepting_invitation = email_address_object.voter_we_vote_id
+        else:
+            # If not, use current voter_we_vote_id
+            voter_we_vote_id_accepting_invitation = voter_we_vote_id
+
+            # Given we are here, we know that the email wasn't verified and linked to any other voter accounts
+            # Now we try to find the email_address entry, verify it and link it to this voter
+            email_results = email_manager.retrieve_email_address_object(
+                friend_invitation_email_link.recipient_voter_email)
+
+            if email_results['email_address_object_found']:
+                # If we get 'email_address_object_found' back, then we know there was only one result for this email
+                #  and it hasn't been verified yet
+                unverified_email_address_object = email_results['email_address_object']
+                unverified_email_address_object_found = True
+
+        # Update invitation status
+        friend_results = friend_manager.create_or_update_current_friend(
+            friend_invitation_email_link.sender_voter_we_vote_id,
+            voter_we_vote_id_accepting_invitation)
+
+        if friend_results['success']:
+            friendship_created = True
+            try:
+                friend_invitation_email_link.invitation_status = ACCEPTED
+                friend_invitation_email_link.deleted = True
+                friend_invitation_email_link.save()
+            except Exception as e:
+                success = False
+                status += 'FAILED_TO_UPDATE_INVITATION_STATUS2'
+        else:
+            friendship_created = False
+
+    invitation_secret_key_belongs_to_this_voter = \
+        voter_we_vote_id == voter_we_vote_id_accepting_invitation
+
+    # Since the owner of the email address was able to click this link, mark the email as verified
+    if unverified_email_address_object_found and positive_value_exists(voter_we_vote_id_accepting_invitation):
+        # Make sure the email_address that the invitation was sent to gets verified and attached to this account
+        try:
+            unverified_email_address_object.voter_we_vote_id = voter_we_vote_id_accepting_invitation
+            unverified_email_address_object.email_ownership_is_verified = True
+            unverified_email_address_object.secret_key = generate_random_string(12)  # Reset the secret_key
+            unverified_email_address_object.save()
+            email_address_status_updated = True
+        except Exception as e:
+            success = False
+            status += 'FAILED_TO_UPDATE_UNVERIFIED_EMAIL'
+
+    # Now update primary_email_we_vote_id on the voter record that owns this email
+    email_results = email_manager.retrieve_primary_email_with_ownership_verified(voter_we_vote_id_accepting_invitation)
+    if email_results['email_address_object_found']:
+        email_address_object = email_results['email_address_object']
+        if voter_we_vote_id is email_address_object.voter_we_vote_id:
+            voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
+        else:
+            email_owner_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+            if email_owner_results['voter_found']:
+                email_owner_voter = email_owner_results['voter']
+                voter_manager.update_voter_email_ownership_verified(email_owner_voter, email_address_object)
+
+    json_data = {
+        'status':                                       status,
+        'success':                                      success,
+        'voter_device_id':                              voter_device_id,
+        'invitation_found':                             invitation_found,
+        'friendship_created':                           friendship_created,
+        'email_address_status_updated':                 email_address_status_updated,
+        'invitation_secret_key_belongs_to_this_voter':  invitation_secret_key_belongs_to_this_voter,
+    }
+    return json_data
+
+
 def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, other_voter_we_vote_id,
                                    recipient_voter_email=''):
     """
@@ -404,9 +602,11 @@ def friend_list_for_api(voter_device_id,
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
                     "voter_display_name":               friend_voter.get_full_name(),
                     "voter_photo_url":                  friend_voter.voter_photo_url(),
+                    "voter_email_address":              friend_voter.email,
                     "voter_twitter_handle":             friend_voter.twitter_screen_name,
                     "voter_twitter_description":        "",  # To be implemented
                     "voter_twitter_followers_count":    0,  # To be implemented
+                    "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
                     "voter_state_code":                 "",  # To be implemented
                     "invitation_status":                "",  # Not used with CurrentFriends
                 }
@@ -428,9 +628,11 @@ def friend_list_for_api(voter_device_id,
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
                         "voter_display_name":               friend_voter.get_full_name(),
                         "voter_photo_url":                  friend_voter.voter_photo_url(),
+                        "voter_email_address":              friend_voter.email,
                         "voter_twitter_handle":             friend_voter.twitter_screen_name,
                         "voter_twitter_description":        "",  # To be implemented
                         "voter_twitter_followers_count":    0,  # To be implemented
+                        "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
                         "voter_state_code":                 "",  # To be implemented
                         "invitation_status":                "",  # Not used for invitations sent to me
                     }
@@ -459,11 +661,12 @@ def friend_list_for_api(voter_device_id,
                             "voter_we_vote_id":                 friend_voter.we_vote_id,
                             "voter_display_name":               friend_voter.get_full_name(),
                             "voter_photo_url":                  friend_voter.voter_photo_url(),
+                            "voter_email_address":              friend_voter.email,
                             "voter_twitter_handle":             friend_voter.twitter_screen_name,
                             "voter_twitter_description":        "",  # To be implemented
                             "voter_twitter_followers_count":    0,  # To be implemented
+                            "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
                             "voter_state_code":                 "",  # To be implemented
-                            "voter_email_address":              "",
                             "invitation_status":                one_friend_invitation.invitation_status,
                         }
                         friend_list.append(one_friend)

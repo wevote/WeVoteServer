@@ -31,7 +31,8 @@ def schedule_email_with_email_outbound_description(email_outbound_description):
         subject = email_template_results['subject']
         message_text = email_template_results['message_text']
         message_html = email_template_results['message_html']
-        schedule_email_results = email_manager.schedule_email(email_outbound_description, subject, message_text, message_html)
+        schedule_email_results = email_manager.schedule_email(email_outbound_description, subject,
+                                                              message_text, message_html)
         success = schedule_email_results['success']
         status = schedule_email_results['status']
         email_scheduled_saved = schedule_email_results['email_scheduled_saved']
@@ -300,6 +301,7 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, em
     verification_email_sent = False
     email_address_found = False
     email_address_list_found = False
+    recipient_email_address_secret_key = ""
     messages_to_send = []
     status = ""
     success = False

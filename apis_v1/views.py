@@ -11,8 +11,8 @@ from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_verify_for_api
-from friend.controllers import friend_invitation_by_email_send_for_api, friend_invite_response_for_api, \
-    friend_list_for_api
+from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
+    friend_invite_response_for_api, friend_list_for_api
 from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
     FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
     FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS, ACCEPT_INVITATION, IGNORE_INVITATION, \
@@ -198,6 +198,24 @@ def friend_invitation_by_email_send_view(request):  # friendInvitationByEmailSen
     sender_email_address = request.GET.get('sender_email_address', "")
     results = friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw, invitation_message,
                                                       sender_email_address)
+    json_data = {
+        'status':                               results['status'],
+        'success':                              results['success'],
+        'voter_device_id':                      voter_device_id,
+        'sender_voter_email_address_missing':   results['sender_voter_email_address_missing'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def friend_invitation_by_email_verify_view(request):  # friendInvitationByEmailVerify
+    """
+
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    invitation_secret_key = request.GET.get('invitation_secret_key', "")
+    results = friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret_key)
     json_data = {
         'status':                               results['status'],
         'success':                              results['success'],
