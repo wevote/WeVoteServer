@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import FRIEND_INVITATION_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
+from .models import FRIEND_INVITATION_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
 from django.template.loader import get_template
 from django.template import Context
 import json
@@ -19,6 +19,11 @@ def get_template_filename(kind_of_email_template, text_or_html):
             return "friend_invitation.html"
         else:
             return "friend_invitation.txt"
+    elif kind_of_email_template == LINK_TO_SIGN_IN_TEMPLATE:
+        if text_or_html == "HTML":
+            return "link_to_sign_in.html"
+        else:
+            return "link_to_sign_in.txt"
 
     # If the template wasn't recognized, return GENERIC_EMAIL_TEMPLATE
     if text_or_html == "HTML":

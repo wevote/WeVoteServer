@@ -466,7 +466,7 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
     email_results = email_manager.retrieve_primary_email_with_ownership_verified(voter_we_vote_id_accepting_invitation)
     if email_results['email_address_object_found']:
         email_address_object = email_results['email_address_object']
-        if voter_we_vote_id is email_address_object.voter_we_vote_id:
+        if voter_we_vote_id == email_address_object.voter_we_vote_id:
             voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
         else:
             email_owner_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)

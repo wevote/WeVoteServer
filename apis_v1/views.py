@@ -10,7 +10,7 @@ from candidate.controllers import candidate_retrieve_for_api, candidates_retriev
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
-    voter_email_address_verify_for_api
+    voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
 from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
     friend_invite_response_for_api, friend_list_for_api
 from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
@@ -1445,9 +1445,11 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     text_for_email_address = request.GET.get('text_for_email_address', '')
-    email_we_vote_id = request.GET.get('email_we_vote_id', '')
+    incoming_email_we_vote_id = request.GET.get('email_we_vote_id', '')
     resend_verification_email = request.GET.get('resend_verification_email', False)
     resend_verification_email = True if positive_value_exists(resend_verification_email) else False
+    send_link_to_sign_in = request.GET.get('send_link_to_sign_in', False)
+    send_link_to_sign_in = True if positive_value_exists(send_link_to_sign_in) else False
     make_primary_email = request.GET.get('make_primary_email', False)
     make_primary_email = True if positive_value_exists(make_primary_email) else False
     delete_email = request.GET.get('delete_email', "")
@@ -1455,7 +1457,8 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
 
     results = voter_email_address_save_for_api(voter_device_id=voter_device_id,
                                                text_for_email_address=text_for_email_address,
-                                               email_we_vote_id=email_we_vote_id,
+                                               incoming_email_we_vote_id=incoming_email_we_vote_id,
+                                               send_link_to_sign_in=send_link_to_sign_in,
                                                resend_verification_email=resend_verification_email,
                                                make_primary_email=make_primary_email,
                                                delete_email=delete_email,
@@ -1468,13 +1471,40 @@ def voter_email_address_save_view(request):  # voterEmailAddressSave
         'text_for_email_address':           text_for_email_address,
         'make_primary_email':               make_primary_email,
         'delete_email':                     delete_email,
+        'email_address_we_vote_id':         results['email_address_we_vote_id'],
         'email_address_saved_we_vote_id':   results['email_address_saved_we_vote_id'],
+        'email_address_already_owned_by_other_voter':   results['email_address_already_owned_by_other_voter'],
         'email_address_created':            results['email_address_created'],
         'email_address_deleted':            results['email_address_deleted'],
         'verification_email_sent':          results['verification_email_sent'],
+        'link_to_sign_in_email_sent':       results['link_to_sign_in_email_sent'],
         'email_address_found':              results['email_address_found'],
         'email_address_list_found':         results['email_address_list_found'],
         'email_address_list':               results['email_address_list'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_email_address_sign_in_view(request):  # voterEmailAddressSignIn
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    email_secret_key = request.GET.get('email_secret_key', '')
+
+    results = voter_email_address_sign_in_for_api(voter_device_id=voter_device_id,
+                                                  email_secret_key=email_secret_key)
+
+    email_retrieve_attempted = results['success']
+    json_data = {
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+        'email_ownership_is_verified':      results['email_ownership_is_verified'],
+        'email_secret_key_belongs_to_this_voter':   results['email_secret_key_belongs_to_this_voter'],
+        'email_retrieve_attempted':         email_retrieve_attempted,
+        'email_address_found':              results['email_address_found'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

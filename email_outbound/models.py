@@ -9,11 +9,13 @@ from wevote_functions.functions import extract_email_addresses_from_string, gene
 from wevote_settings.models import fetch_next_we_vote_id_last_email_integer, fetch_site_unique_id_prefix
 
 FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
-VERIFY_EMAIL_ADDRESS_TEMPLATE = 'VERIFY_EMAIL_ADDRESS_TEMPLATE'
 GENERIC_EMAIL_TEMPLATE = 'GENERIC_EMAIL_TEMPLATE'
+LINK_TO_SIGN_IN_TEMPLATE = 'LINK_TO_SIGN_IN_TEMPLATE'
+VERIFY_EMAIL_ADDRESS_TEMPLATE = 'VERIFY_EMAIL_ADDRESS_TEMPLATE'
 KIND_OF_EMAIL_TEMPLATE_CHOICES = (
     (GENERIC_EMAIL_TEMPLATE,  'Generic Email'),
     (FRIEND_INVITATION_TEMPLATE, 'Invite Friend'),
+    (LINK_TO_SIGN_IN_TEMPLATE, 'Link to sign in.'),
     (VERIFY_EMAIL_ADDRESS_TEMPLATE, 'Verify Senders Email Address'),
 )
 
@@ -134,7 +136,7 @@ class EmailManager(models.Model):
 
     def create_email_address(self, normalized_email_address, voter_we_vote_id='', email_ownership_is_verified=False,
                              make_primary_email=True):
-        secret_key = None
+        secret_key = generate_random_string(12)
         normalized_email_address = str(normalized_email_address)
         normalized_email_address = normalized_email_address.strip()
         normalized_email_address = normalized_email_address.lower()
@@ -320,7 +322,6 @@ class EmailManager(models.Model):
 
     def retrieve_email_address_object_from_secret_key(self, email_secret_key):
         """
-
         :param email_secret_key:
         :return:
         """
@@ -357,6 +358,51 @@ class EmailManager(models.Model):
             'email_address_object_id':          email_address_object_id,
             'email_address_object_we_vote_id':  email_address_object_we_vote_id,
             'email_address_object':             email_address_object,
+        }
+        return results
+
+    def email_address_sign_in_from_secret_key(self, email_secret_key):
+        """
+        :param email_secret_key:
+        :return:
+        """
+        email_address_object_found = False
+        email_address_object = EmailAddress()
+        email_address_object_id = 0
+        email_address_object_we_vote_id = ""
+        email_ownership_is_verified = False
+
+        try:
+            if positive_value_exists(email_secret_key):
+                email_address_object = EmailAddress.objects.get(
+                    secret_key=email_secret_key,
+                    deleted=False
+                )
+                email_address_object_id = email_address_object.id
+                email_address_object_we_vote_id = email_address_object.we_vote_id
+                email_ownership_is_verified = email_address_object.email_ownership_is_verified
+                email_address_object_found = True
+                success = True
+                status = "EMAIL_ADDRESS_SIGN_IN_BY_WE_VOTE_ID"
+            else:
+                email_address_object_found = False
+                success = False
+                status = "EMAIL_ADDRESS_SIGN_IN_VARIABLES_MISSING"
+        except EmailAddress.DoesNotExist:
+            success = True
+            status = "EMAIL_ADDRESS_SIGN_IN_NOT_FOUND"
+        except Exception as e:
+            success = False
+            status = 'FAILED email_address_sign_in_from_secret_key EmailAddress'
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'email_address_object_found':       email_address_object_found,
+            'email_address_object_id':          email_address_object_id,
+            'email_address_object_we_vote_id':  email_address_object_we_vote_id,
+            'email_address_object':             email_address_object,
+            'email_ownership_is_verified':      email_ownership_is_verified,
         }
         return results
 
