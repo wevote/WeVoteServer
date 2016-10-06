@@ -748,6 +748,7 @@ class Voter(AbstractBaseUser):
             # Following any organizations?
 
             # No need to check for friends, because you can't have any without a signed in status, which we've checked
+            # return True  # TODO DALE Set to True for testing
             pass
 
         return False

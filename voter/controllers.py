@@ -6,7 +6,10 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
     VoterDeviceLinkManager, VoterManager
 from django.http import HttpResponse
 from email_outbound.models import EmailManager
+from follow.controllers import move_follow_entries_to_another_voter
+from friend.controllers import move_friends_to_another_voter
 import json
+from position.controllers import move_positions_to_another_voter
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
 
@@ -220,7 +223,17 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
     voter = voter_results['voter']
     current_voter_found = True
 
-    email_manager = EmailManager
+    if not positive_value_exists(email_secret_key):
+        error_results = {
+            'status':                   "VOTER_MERGE_TWO_ACCOUNTS_EMAIL_SECRET_KEY_MISSING",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'current_voter_found':      current_voter_found,
+            'email_owner_voter_found':  email_owner_voter_found,
+        }
+        return error_results
+
+    email_manager = EmailManager()
     email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key)
     if email_results['email_address_object_found']:
         email_address_object = email_results['email_address_object']
@@ -254,6 +267,33 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
 
     # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
     # We are going to make the email_owner_voter the new master
+    from_voter_id = voter.id
+    from_voter_we_vote_id = voter.we_vote_id
+    to_voter_id = email_owner_voter.id
+    to_voter_we_vote_id = email_owner_voter.we_vote_id
+
+    # Transfer positions from voter to email_owner_voter
+    # TODO DALE In development
+    # move_positions_results = move_positions_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
+    # status += move_positions_results['status']
+
+    if positive_value_exists(voter.linked_organization_we_vote_id):
+        # Move linked organization positions?
+
+        # Change ownership of organization the person is linked to
+        pass
+
+    # Transfer friends from voter to email_owner_voter
+    move_friends_results = move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
+    status += move_friends_results['status']
+
+    # Transfer friend invitations from voter to email_owner_voter
+
+    # Transfer voter account info to email_owner_voter
+
+    # Transfer followed orgs from voter to email_owner_voter
+    move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id)
+    status += move_follow_results['status']
 
     # And finally, relink the current voter_device_id to email_owner_voter
     update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, email_owner_voter)

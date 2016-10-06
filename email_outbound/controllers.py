@@ -291,6 +291,7 @@ def voter_email_address_sign_in_for_api(voter_device_id, email_secret_key):  # v
             'email_ownership_is_verified':              False,
             'email_secret_key_belongs_to_this_voter':   False,
             'email_address_found':                      False,
+            'voter_we_vote_id_from_secret_key':         "",
         }
         return json_data
 
@@ -302,6 +303,7 @@ def voter_email_address_sign_in_for_api(voter_device_id, email_secret_key):  # v
             'email_ownership_is_verified':              False,
             'email_secret_key_belongs_to_this_voter':   False,
             'email_address_found':                      False,
+            'voter_we_vote_id_from_secret_key':         "",
         }
         return error_results
 
@@ -316,6 +318,7 @@ def voter_email_address_sign_in_for_api(voter_device_id, email_secret_key):  # v
             'email_ownership_is_verified':              False,
             'email_secret_key_belongs_to_this_voter':   False,
             'email_address_found':                      False,
+            'voter_we_vote_id_from_secret_key':         "",
         }
         return error_results
     voter = voter_results['voter']
@@ -332,6 +335,7 @@ def voter_email_address_sign_in_for_api(voter_device_id, email_secret_key):  # v
             'email_ownership_is_verified':              False,
             'email_secret_key_belongs_to_this_voter':   False,
             'email_address_found':                      False,
+            'voter_we_vote_id_from_secret_key':         "",
         }
         return error_results
 
@@ -351,6 +355,7 @@ def voter_email_address_sign_in_for_api(voter_device_id, email_secret_key):  # v
         'email_ownership_is_verified':              email_ownership_is_verified,
         'email_secret_key_belongs_to_this_voter':   email_secret_key_belongs_to_this_voter,
         'email_address_found':                      email_address_found,
+        'voter_we_vote_id_from_secret_key':         email_address_object.voter_we_vote_id,
     }
     return json_data
 

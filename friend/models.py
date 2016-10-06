@@ -45,6 +45,15 @@ class CurrentFriend(models.Model):
         verbose_name="voter we vote id person 2", max_length=255, null=True, blank=True, unique=False)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
+    def fetch_other_voter_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.viewer_voter_we_vote_id:
+            return self.viewee_voter_we_vote_id
+        elif one_we_vote_id == self.viewee_voter_we_vote_id:
+            return self.viewer_voter_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
+
 
 class FriendInvitationEmailLink(models.Model):
     """
