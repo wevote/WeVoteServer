@@ -700,6 +700,59 @@ def friend_list_for_api(voter_device_id,
     return results
 
 
+def move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
+    status = ''
+    success = False
+    friend_entries_moved = 0
+    friend_entries_not_moved = 0
+    friend_manager = FriendManager()
+    from_friend_results = friend_manager.retrieve_current_friends(from_voter_we_vote_id)
+    from_friend_list = from_friend_results['friend_list']
+    to_friend_results = friend_manager.retrieve_current_friends(to_voter_we_vote_id)
+    to_friend_list = to_friend_results['friend_list']
+
+    for from_friend_entry in from_friend_list:
+        # See if the "to_voter" already has an entry for this organization
+        to_friend_found = False
+        from_friend_other_friend = from_friend_entry.fetch_other_voter_we_vote_id(from_voter_we_vote_id)
+        # Cycle through all of the "to_voter" current_friend entries and if there isn't one, create it
+        for to_friend_entry in to_friend_list:
+            to_friend_other_friend = to_friend_entry.fetch_other_voter_we_vote_id(to_voter_we_vote_id)
+            if to_friend_other_friend == from_friend_other_friend:
+                to_friend_found = True
+                break
+
+        if not to_friend_found:
+            # Change the friendship values to the new we_vote_id
+            try:
+                from_friend_entry.viewer_voter_we_vote_id = to_voter_we_vote_id
+                from_friend_entry.viewee_voter_we_vote_id = from_friend_other_friend
+                from_friend_entry.save()
+                friend_entries_moved += 1
+            except Exception as e:
+                friend_entries_not_moved += 1
+
+    from_friend_list_remaining = friend_manager.retrieve_current_friends(from_voter_we_vote_id)
+    for from_friend_entry in from_friend_list_remaining:
+        # Delete the remaining friendship values
+        try:
+            # Leave this turned off until testing is finished
+            # from_friend_entry.delete()
+            pass
+        except Exception as e:
+            pass
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'friend_entries_moved': friend_entries_moved,
+        'friend_entries_not_moved': friend_entries_not_moved,
+    }
+    return results
+
+
 def retrieve_voter_and_email_address(one_normalized_raw_email):
     """
     Starting with an incoming email address, find the EmailAddress and Voter that owns it (if it exists)

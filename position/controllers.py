@@ -29,6 +29,66 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
 
 
+def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id, to_voter_id, to_voter_we_vote_id):
+    status = ''
+    success = False
+    position_entries_moved = 0
+    position_entries_not_moved = 0
+    position_manager = PositionManager()
+    position_list_manager = PositionListManager()
+    from_voter_id = 0
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = FRIENDS_ONLY
+    from_position_private_list = position_list_manager.retrieve_all_positions_for_voter(
+        from_voter_id, from_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+
+    for from_position_entry in from_position_private_list:
+        # See if the "to_voter" already has the same entry
+        position_we_vote_id = ""
+        results = position_manager.retrieve_position_table_unknown(
+            position_we_vote_id, from_position_entry.organization_id, from_position_entry.organization_we_vote_id,
+            to_voter_id,
+            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
+            from_position_entry.contest_measure_id,
+            from_position_entry.voter_we_vote_id, from_position_entry.contest_office_we_vote_id,
+            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
+
+        if not results['position_found']:
+            # Change the position values to the new we_vote_id
+            try:
+                from_position_entry.voter_we_vote_id = to_voter_we_vote_id
+                from_position_entry.voter_id = to_voter_id
+                from_position_entry.save()
+                position_entries_moved += 1
+            except Exception as e:
+                position_entries_not_moved += 1
+
+    from_position_private_list_remaining = position_list_manager.retrieve_all_positions_for_voter(
+        from_voter_id, from_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+    for from_position_entry in from_position_private_list_remaining:
+        # Delete the remaining position values
+        try:
+            # Leave this turned off until testing is finished
+            # from_position_entry.delete()
+            pass
+        except Exception as e:
+            pass
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter_id': from_voter_id,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_id': to_voter_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'position_entries_moved': position_entries_moved,
+        'position_entries_not_moved': position_entries_not_moved,
+    }
+    return results
+
+
 # We retrieve from only one of the two possible variables
 def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # positionRetrieve
     position_we_vote_id = position_we_vote_id.strip().lower()
@@ -393,7 +453,7 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
 
     friends_we_vote_id_list = []
     if positive_value_exists(voter_we_vote_id):
-        friend_manager = FriendManager()
+        position_list_manager = FriendManager()
         friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
         if friend_results['friends_we_vote_id_list_found']:
             friends_we_vote_id_list = friend_results['friends_we_vote_id_list']

@@ -1492,19 +1492,22 @@ def voter_email_address_sign_in_view(request):  # voterEmailAddressSignIn
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     email_secret_key = request.GET.get('email_secret_key', '')
+    yes_please_merge_accounts = request.GET.get('yes_please_merge_accounts', '')
 
     results = voter_email_address_sign_in_for_api(voter_device_id=voter_device_id,
                                                   email_secret_key=email_secret_key)
 
-    email_retrieve_attempted = results['success']
+    email_sign_in_attempted = results['success']
     json_data = {
         'status':                           results['status'],
         'success':                          results['success'],
         'voter_device_id':                  voter_device_id,
         'email_ownership_is_verified':      results['email_ownership_is_verified'],
         'email_secret_key_belongs_to_this_voter':   results['email_secret_key_belongs_to_this_voter'],
-        'email_retrieve_attempted':         email_retrieve_attempted,
+        'email_sign_in_attempted':          email_sign_in_attempted,
         'email_address_found':              results['email_address_found'],
+        'yes_please_merge_accounts':        yes_please_merge_accounts,
+        'voter_we_vote_id_from_secret_key': results['voter_we_vote_id_from_secret_key'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
