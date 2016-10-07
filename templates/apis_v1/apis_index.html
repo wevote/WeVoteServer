@@ -94,7 +94,13 @@
         <td colspan="3"><strong>Twitter, Facebook, Google</strong></td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:facebookSignInDocs' %}">facebookSignIn</a></td>
+        <td><a href="{% url 'apis_v1:voterFacebookSignInRetrieveDocs' %}">voterFacebookSignInRetrieve</a></td>
+        <td></td>
+        <td>Retrieve the Facebook Sign In status based on voter_device_id.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterFacebookSignInSaveDocs' %}">voterFacebookSignInSave</a></td>
         <td></td>
         <td>Save the results of Facebook sign in authentication.
         </td>

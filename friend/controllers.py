@@ -700,6 +700,27 @@ def friend_list_for_api(voter_device_id,
     return results
 
 
+def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
+    status = "MOVE_FRIEND_INVITATIONS_IN_DEVELOPMENT "
+    success = False
+    friend_invitation_entries_moved = 0
+    friend_invitation_entries_not_moved = 0
+
+    # FriendInvitationEmailLink
+
+    # FriendInvitationVoterLink
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'friend_entries_moved': friend_invitation_entries_moved,
+        'friend_entries_not_moved': friend_invitation_entries_not_moved,
+    }
+    return results
+
+
 def move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     status = ''
     success = False

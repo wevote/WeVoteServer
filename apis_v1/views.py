@@ -18,7 +18,8 @@ from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, D
     FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS, ACCEPT_INVITATION, IGNORE_INVITATION, \
     UNFRIEND_CURRENT_FRIEND
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
-from import_export_facebook.controllers import facebook_disconnect_for_api, facebook_sign_in_for_api
+from import_export_facebook.controllers import facebook_disconnect_for_api, facebook_sign_in_for_api, \
+    voter_facebook_sign_in_retrieve_for_api, voter_facebook_sign_in_save_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import twitter_sign_in_start_for_api, \
     twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api
@@ -1497,14 +1498,13 @@ def voter_email_address_sign_in_view(request):  # voterEmailAddressSignIn
     results = voter_email_address_sign_in_for_api(voter_device_id=voter_device_id,
                                                   email_secret_key=email_secret_key)
 
-    email_sign_in_attempted = results['success']
     json_data = {
         'status':                           results['status'],
         'success':                          results['success'],
         'voter_device_id':                  voter_device_id,
         'email_ownership_is_verified':      results['email_ownership_is_verified'],
         'email_secret_key_belongs_to_this_voter':   results['email_secret_key_belongs_to_this_voter'],
-        'email_sign_in_attempted':          email_sign_in_attempted,
+        'email_sign_in_attempted':          True,
         'email_address_found':              results['email_address_found'],
         'yes_please_merge_accounts':        yes_please_merge_accounts,
         'voter_we_vote_id_from_secret_key': results['voter_we_vote_id_from_secret_key'],
@@ -1523,15 +1523,84 @@ def voter_email_address_verify_view(request):  # voterEmailAddressVerify
     results = voter_email_address_verify_for_api(voter_device_id=voter_device_id,
                                                  email_secret_key=email_secret_key)
 
-    email_retrieve_attempted = results['success']
     json_data = {
         'status':                           results['status'],
         'success':                          results['success'],
         'voter_device_id':                  voter_device_id,
         'email_ownership_is_verified':      results['email_ownership_is_verified'],
         'email_secret_key_belongs_to_this_voter':   results['email_secret_key_belongs_to_this_voter'],
-        'email_retrieve_attempted':         email_retrieve_attempted,
+        'email_verify_attempted':           True,
         'email_address_found':              results['email_address_found'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetrieve
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    results = voter_facebook_sign_in_retrieve_for_api(voter_device_id=voter_device_id)
+
+    json_data = {
+        'status':                                   results['status'],
+        'success':                                  results['success'],
+        'voter_device_id':                          voter_device_id,
+        'voter_we_vote_id_attached_to_facebook':    results['voter_we_vote_id_attached_to_facebook'],
+        'voter_we_vote_id_attached_to_facebook_email':  results['voter_we_vote_id_attached_to_facebook_email'],
+        'facebook_retrieve_attempted':              True,
+        'facebook_sign_in_found':                   results['facebook_sign_in_found'],
+        'facebook_sign_in_verified':                results['facebook_sign_in_verified'],
+        'facebook_sign_in_failed':                  results['facebook_sign_in_failed'],
+        'facebook_secret_key':                      results['facebook_secret_key'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    save_auth_data = request.GET.get('save_auth_data', False)
+    save_auth_data = positive_value_exists(save_auth_data)
+    facebook_access_token = request.GET.get('facebook_access_token', '')
+    facebook_user_id = request.GET.get('facebook_user_id', '')
+    facebook_expires_in = request.GET.get('facebook_expires_in', 0)
+    facebook_signed_request = request.GET.get('facebook_signed_request', '')
+    save_profile_data = request.GET.get('save_profile_data', False)
+    save_profile_data = positive_value_exists(save_profile_data)
+    facebook_email = request.GET.get('facebook_email', '')
+    facebook_first_name = request.GET.get('facebook_first_name', '')
+    facebook_middle_name = request.GET.get('facebook_middle_name', '')
+    facebook_last_name = request.GET.get('facebook_last_name', '')
+    facebook_profile_image_url_https = request.GET.get('facebook_profile_image_url_https', '')
+
+    results = voter_facebook_sign_in_save_for_api(voter_device_id=voter_device_id,
+                                                  save_auth_data=save_auth_data,
+                                                  facebook_access_token=facebook_access_token,
+                                                  facebook_user_id=facebook_user_id,
+                                                  facebook_expires_in=facebook_expires_in,
+                                                  facebook_signed_request=facebook_signed_request,
+                                                  save_profile_data=save_profile_data,
+                                                  facebook_email=facebook_email,
+                                                  facebook_first_name=facebook_first_name,
+                                                  facebook_middle_name=facebook_middle_name,
+                                                  facebook_last_name=facebook_last_name,
+                                                  facebook_profile_image_url_https=facebook_profile_image_url_https,
+                                                  )
+
+    json_data = {
+        'status':                   results['status'],
+        'success':                  results['success'],
+        'voter_device_id':          voter_device_id,
+        'facebook_save_attempted':  True,
+        'facebook_sign_in_saved':   results['facebook_sign_in_saved'],
+        'save_auth_data':           save_auth_data,
+        'save_profile_data':        save_profile_data,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1650,9 +1719,11 @@ def voter_merge_two_accounts_view(request):  # voterMergeTwoAccounts
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     email_secret_key = request.GET.get('email_secret_key', '')
+    facebook_secret_key = request.GET.get('facebook_secret_key', '')
 
     results = voter_merge_two_accounts_for_api(voter_device_id=voter_device_id,
-                                               email_secret_key=email_secret_key)
+                                               email_secret_key=email_secret_key,
+                                               facebook_secret_key=facebook_secret_key)
 
     json_data = {
         'status':                           results['status'],
