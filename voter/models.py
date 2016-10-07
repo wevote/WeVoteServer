@@ -536,6 +536,33 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def update_voter_with_facebook_link_verified(self, voter, facebook_user_id, facebook_email):
+        should_save_voter = False
+        voter_updated = False
+
+        try:
+            voter.facebook_id = facebook_user_id
+            voter.facebook_email = facebook_email
+            should_save_voter = True
+
+            if should_save_voter:
+                voter.save()
+                voter_updated = True
+            status = "UPDATED_VOTER_WITH_FACEBOOK_LINK"
+            success = True
+        except Exception as e:
+            status = "UNABLE_TO_UPDATE_VOTER_WITH_FACEBOOK_LINK"
+            success = False
+            voter_updated = False
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter': voter,
+            'voter_updated': voter_updated,
+        }
+        return results
+
 
 class Voter(AbstractBaseUser):
     """

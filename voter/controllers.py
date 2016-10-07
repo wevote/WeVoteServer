@@ -7,7 +7,8 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
 from django.http import HttpResponse
 from email_outbound.models import EmailManager
 from follow.controllers import move_follow_entries_to_another_voter
-from friend.controllers import move_friends_to_another_voter
+from friend.controllers import move_friend_invitations_to_another_voter, move_friends_to_another_voter
+from import_export_facebook.models import FacebookManager
 import json
 from position.controllers import move_positions_to_another_voter
 import wevote_functions.admin
@@ -185,10 +186,11 @@ def voter_create_for_api(voter_device_id):  # voterCreate
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
+def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook_secret_key):
     current_voter_found = False
-    email_owner_voter_id = 0
     email_owner_voter_found = False
+    facebook_owner_voter_found = False
+    new_owner_voter = Voter()
     success = False
     status = ""
 
@@ -201,6 +203,7 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
             'voter_device_id':          voter_device_id,
             'current_voter_found':      current_voter_found,
             'email_owner_voter_found':  email_owner_voter_found,
+            'facebook_owner_voter_found': facebook_owner_voter_found,
         }
         return error_results
 
@@ -217,86 +220,141 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
             'voter_device_id':          voter_device_id,
             'current_voter_found':      current_voter_found,
             'email_owner_voter_found':  email_owner_voter_found,
+            'facebook_owner_voter_found': facebook_owner_voter_found,
         }
         return error_results
 
     voter = voter_results['voter']
     current_voter_found = True
 
-    if not positive_value_exists(email_secret_key):
+    if not positive_value_exists(email_secret_key) and not positive_value_exists(facebook_secret_key):
         error_results = {
-            'status':                   "VOTER_MERGE_TWO_ACCOUNTS_EMAIL_SECRET_KEY_MISSING",
+            'status':                   "VOTER_MERGE_TWO_ACCOUNTS_EMAIL_SECRET_KEY_AND_FACEBOOK_SECRET_KEY_MISSING",
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'current_voter_found':      current_voter_found,
             'email_owner_voter_found':  email_owner_voter_found,
+            'facebook_owner_voter_found': facebook_owner_voter_found,
         }
         return error_results
 
-    email_manager = EmailManager()
-    email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key)
-    if email_results['email_address_object_found']:
-        email_address_object = email_results['email_address_object']
+    from_voter_id = 0
+    from_voter_we_vote_id = ""
+    to_voter_id = 0
+    to_voter_we_vote_id = ""
+    if positive_value_exists(email_secret_key):
+        email_manager = EmailManager()
+        email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key)
+        if email_results['email_address_object_found']:
+            email_address_object = email_results['email_address_object']
 
-        email_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
-        if email_owner_voter_results['voter_found']:
-            email_owner_voter_id = email_owner_voter_results['voter_id']
-            email_owner_voter_found = True
-            email_owner_voter = email_owner_voter_results['voter']
+            email_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+            if email_owner_voter_results['voter_found']:
+                email_owner_voter_found = True
+                email_owner_voter = email_owner_voter_results['voter']
 
-    if not email_owner_voter_found:
-        error_results = {
-            'status':                   "EMAIL_OWNER_VOTER_NOT_FOUND",
-            'success':                  False,
-            'voter_device_id':          voter_device_id,
-            'current_voter_found':      current_voter_found,
-            'email_owner_voter_found':  email_owner_voter_found,
-        }
-        return error_results
+        if not email_owner_voter_found:
+            error_results = {
+                'status':                   "EMAIL_OWNER_VOTER_NOT_FOUND",
+                'success':                  False,
+                'voter_device_id':          voter_device_id,
+                'current_voter_found':      current_voter_found,
+                'email_owner_voter_found':  email_owner_voter_found,
+                'facebook_owner_voter_found': False,
+            }
+            return error_results
 
-    # Double-check they aren't the same voter account
-    if voter.id == email_owner_voter.id:
-        error_results = {
-            'status':                   "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
-            'success':                  True,
-            'voter_device_id':          voter_device_id,
-            'current_voter_found':      current_voter_found,
-            'email_owner_voter_found':  email_owner_voter_found,
-        }
-        return error_results
+        # Double-check they aren't the same voter account
+        if voter.id == email_owner_voter.id:
+            error_results = {
+                'status':                   "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
+                'success':                  True,
+                'voter_device_id':          voter_device_id,
+                'current_voter_found':      current_voter_found,
+                'email_owner_voter_found':  email_owner_voter_found,
+                'facebook_owner_voter_found': False,
+            }
+            return error_results
 
-    # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
-    # We are going to make the email_owner_voter the new master
-    from_voter_id = voter.id
-    from_voter_we_vote_id = voter.we_vote_id
-    to_voter_id = email_owner_voter.id
-    to_voter_we_vote_id = email_owner_voter.we_vote_id
+        # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
+        # We are going to make the email_owner_voter the new master
+        from_voter_id = voter.id
+        from_voter_we_vote_id = voter.we_vote_id
+        to_voter_id = email_owner_voter.id
+        to_voter_we_vote_id = email_owner_voter.we_vote_id
+        new_owner_voter = email_owner_voter
+    elif positive_value_exists(facebook_secret_key):
+        facebook_manager = FacebookManager()
+        facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_secret_key(
+            facebook_secret_key)
+        if facebook_results['facebook_link_to_voter_found']:
+            facebook_link_to_voter = facebook_results['facebook_link_to_voter']
+
+            facebook_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                facebook_link_to_voter.voter_we_vote_id)
+            if facebook_owner_voter_results['voter_found']:
+                facebook_owner_voter_found = True
+                facebook_owner_voter = facebook_owner_voter_results['voter']
+
+        if not facebook_owner_voter_found:
+            error_results = {
+                'status': "FACEBOOK_OWNER_VOTER_NOT_FOUND",
+                'success': False,
+                'voter_device_id': voter_device_id,
+                'current_voter_found': current_voter_found,
+                'email_owner_voter_found': False,
+                'facebook_owner_voter_found': facebook_owner_voter_found,
+            }
+            return error_results
+
+        # Double-check they aren't the same voter account
+        if voter.id == facebook_owner_voter.id:
+            error_results = {
+                'status': "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
+                'success': True,
+                'voter_device_id': voter_device_id,
+                'current_voter_found': current_voter_found,
+                'email_owner_voter_found': False,
+                'facebook_owner_voter_found': facebook_owner_voter_found,
+            }
+            return error_results
+
+        # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
+        # We are going to make the email_owner_voter the new master
+        from_voter_id = voter.id
+        from_voter_we_vote_id = voter.we_vote_id
+        to_voter_id = facebook_owner_voter.id
+        to_voter_we_vote_id = facebook_owner_voter.we_vote_id
+        new_owner_voter = facebook_owner_voter
 
     # Transfer positions from voter to email_owner_voter
-    # TODO DALE In development
-    # move_positions_results = move_positions_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
-    # status += move_positions_results['status']
-
-    if positive_value_exists(voter.linked_organization_we_vote_id):
-        # Move linked organization positions?
-
-        # Change ownership of organization the person is linked to
-        pass
+    move_positions_results = move_positions_to_another_voter(
+        from_voter_id, from_voter_we_vote_id, to_voter_id, to_voter_we_vote_id)
+    # TODO DALE Add from_organization_we_vote_id? to_organization_we_vote_id?
+    status += move_positions_results['status']
 
     # Transfer friends from voter to email_owner_voter
     move_friends_results = move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
     status += move_friends_results['status']
 
     # Transfer friend invitations from voter to email_owner_voter
+    move_friend_invitations_results = move_friend_invitations_to_another_voter(
+        from_voter_we_vote_id, to_voter_we_vote_id)
+    status += move_friends_results['status']
 
     # Transfer voter account info to email_owner_voter
+    if positive_value_exists(voter.linked_organization_we_vote_id):
+        # Move linked organization positions?
+
+        # Change ownership of organization the person is linked to
+        pass
 
     # Transfer followed orgs from voter to email_owner_voter
     move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id)
     status += move_follow_results['status']
 
     # And finally, relink the current voter_device_id to email_owner_voter
-    update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, email_owner_voter)
+    update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, new_owner_voter)
     if update_link_results['voter_device_link_updated']:
         success = True
         status += "MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED"
@@ -307,6 +365,7 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key):
         'voter_device_id': voter_device_id,
         'current_voter_found': current_voter_found,
         'email_owner_voter_found': email_owner_voter_found,
+        'facebook_owner_voter_found': facebook_owner_voter_found,
     }
 
     return results
