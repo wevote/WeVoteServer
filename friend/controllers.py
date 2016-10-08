@@ -238,12 +238,14 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
         if invitation_secret_key is None:
             invitation_secret_key = ""
 
+        system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
+
         template_variables_for_json = {
             "subject":                      subject,
             "invitation_message":           invitation_message,
             "sender_name":                  sender_name,
             "sender_photo":                 sender_photo,
-            "sender_email_address":         sender_email_address,
+            "sender_email_address":         system_sender_email_address,  # TODO DALE WAS sender_email_address,
             "sender_description":           sender_description,
             "sender_network_details":       sender_network_details,
             "recipient_name":               recipient_name,
