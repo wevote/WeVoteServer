@@ -687,12 +687,13 @@ class PositionListManager(models.Model):
         return outgoing_position_list
 
     def calculate_positions_followed_by_voter(
-            self, voter_id, all_positions_list, organizations_followed_by_voter):
+            self, voter_id, all_positions_list, organizations_followed_by_voter, voter_friend_list=[]):
         """
         We need a list of positions that were made by an organization, public figure or friend that this voter follows
         :param voter_id:
         :param all_positions_list:
         :param organizations_followed_by_voter:
+        :param voter_friend_list:
         :return:
         """
 
@@ -701,19 +702,21 @@ class PositionListManager(models.Model):
         for position in all_positions_list:
             if position.voter_id == voter_id:  # We include the voter currently viewing the ballot in this list
                 positions_followed_by_voter.append(position)
-            # TODO Include a check against a list of "people_followed_by_voter" so we can include friends
+            elif position.voter_we_vote_id in voter_friend_list:
+                positions_followed_by_voter.append(position)
             elif position.organization_id in organizations_followed_by_voter:
                 positions_followed_by_voter.append(position)
 
         return positions_followed_by_voter
 
     def calculate_positions_not_followed_by_voter(
-            self, all_positions_list, organizations_followed_by_voter):
+            self, all_positions_list, organizations_followed_by_voter, voter_friend_list=[]):
         """
         We need a list of positions that were NOT made by an organization, public figure or friend
         that this voter follows
         :param all_positions_list:
         :param organizations_followed_by_voter:
+        :param voter_friend_list:
         :return:
         """
         positions_not_followed_by_voter = []
@@ -721,7 +724,14 @@ class PositionListManager(models.Model):
         for position in all_positions_list:
             # Some positions are for individual voters, so we want to filter those out
             if position.organization_id \
-                    and position.organization_id not in organizations_followed_by_voter:
+                    and position.organization_id in organizations_followed_by_voter:
+                # Do not add
+                pass
+            elif position.voter_we_vote_id \
+                    and position.voter_we_vote_id in voter_friend_list:
+                # Do not add
+                pass
+            else:
                 positions_not_followed_by_voter.append(position)
 
         return positions_not_followed_by_voter
@@ -1140,7 +1150,7 @@ class PositionListManager(models.Model):
                 # Find the Voter id for the organization showing the positions. Organizations that sign in with
                 #  their Twitter accounts get a Voter entry, with "voter.linked_organization_we_vote_id" containing
                 #  the organizations we_vote_id.
-                results = voter_manager.retrieve_voter_from_organization_we_vote_id(organization_we_vote_id)
+                results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
                 organization_voter_local_id = 0
                 organization_voter_we_vote_id = ""
                 if results['voter_found']:

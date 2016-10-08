@@ -18,7 +18,8 @@ from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, D
     FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS, ACCEPT_INVITATION, IGNORE_INVITATION, \
     UNFRIEND_CURRENT_FRIEND
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
-from import_export_facebook.controllers import facebook_disconnect_for_api, facebook_sign_in_for_api, \
+from import_export_facebook.controllers import facebook_disconnect_for_api, \
+    voter_facebook_save_to_current_account_for_api, \
     voter_facebook_sign_in_retrieve_for_api, voter_facebook_sign_in_save_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import twitter_sign_in_start_for_api, \
@@ -167,22 +168,18 @@ def facebook_disconnect_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def facebook_sign_in_view(request):  # facebookSignIn
+def voter_facebook_save_to_current_account_view(request):  # voterFacebookSaveToCurrentAccount
     """
     Saving the results of signing in with Facebook
     :param request:
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    facebook_id = request.GET.get('facebook_id', None)
-    facebook_email = request.GET.get('facebook_email', None)
-    results = facebook_sign_in_for_api(voter_device_id, facebook_id, facebook_email)
+    results = voter_facebook_save_to_current_account_for_api(voter_device_id)
     json_data = {
         'status': results['status'],
         'success': results['success'],
         'voter_device_id': voter_device_id,
-        'facebook_id': results['facebook_id'],
-        'facebook_email': results['facebook_email'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1541,6 +1538,7 @@ def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetriev
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    yes_please_merge_accounts = request.GET.get('yes_please_merge_accounts', '')
 
     results = voter_facebook_sign_in_retrieve_for_api(voter_device_id=voter_device_id)
 
@@ -1555,6 +1553,7 @@ def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetriev
         'facebook_sign_in_verified':                results['facebook_sign_in_verified'],
         'facebook_sign_in_failed':                  results['facebook_sign_in_failed'],
         'facebook_secret_key':                      results['facebook_secret_key'],
+        'yes_please_merge_accounts':                yes_please_merge_accounts,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

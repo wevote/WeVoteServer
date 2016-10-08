@@ -216,7 +216,7 @@ class VoterManager(BaseUserManager):
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
                                             twitter_id)
 
-    def retrieve_voter_from_organization_we_vote_id(self, organization_we_vote_id):
+    def retrieve_voter_by_organization_we_vote_id(self, organization_we_vote_id):
         voter_id = ''
         email = ''
         voter_we_vote_id = ''
@@ -328,17 +328,13 @@ class VoterManager(BaseUserManager):
         #  to ever be used
         logger.info("clear_out_abandoned_voter_records")
 
-    def save_facebook_user_values(self, voter, facebook_id, facebook_email=''):
+    def save_facebook_user_values(self, voter, facebook_auth_response):
         try:
-            if facebook_id == 0:
-                voter.facebook_id = 0
-            elif positive_value_exists(facebook_id):
-                voter.facebook_id = facebook_id
-
-            if facebook_email == '' or facebook_email is False:
-                voter.facebook_email = ''
-            elif positive_value_exists(facebook_email):
-                voter.facebook_email = facebook_email
+            voter.facebook_id = facebook_auth_response.facebook_user_id
+            voter.first_name = facebook_auth_response.facebook_first_name
+            voter.middle_name = facebook_auth_response.facebook_middle_name
+            voter.last_name = facebook_auth_response.facebook_last_name
+            voter.facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
 
             voter.save()
             success = True
@@ -346,7 +342,6 @@ class VoterManager(BaseUserManager):
         except Exception as e:
             status = "UNABLE_TO_SAVE_VOTER_FACEBOOK_VALUES"
             success = False
-            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
         results = {
             'status':   status,
@@ -675,6 +670,13 @@ class Voter(AbstractBaseUser):
         full_name = self.first_name if positive_value_exists(self.first_name) else ''
         full_name += " " if positive_value_exists(self.first_name) and positive_value_exists(self.last_name) else ''
         full_name += self.last_name if positive_value_exists(self.last_name) else ''
+
+        if not positive_value_exists(full_name):
+            full_name = self.twitter_screen_name
+
+        if not positive_value_exists(full_name) and positive_value_exists(self.email):
+            full_name = self.email.split("@", 1)[0]
+
         return full_name
 
     def get_short_name(self):
