@@ -6,10 +6,12 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
     VoterDeviceLinkManager, VoterManager
 from django.http import HttpResponse
 from email_outbound.models import EmailManager
-from follow.controllers import move_follow_entries_to_another_voter
+from follow.controllers import move_follow_entries_to_another_voter, move_organization_followers_to_another_organization
 from friend.controllers import move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from import_export_facebook.models import FacebookManager
 import json
+from organization.controllers import move_organization_data_to_another_organization
+from organization.models import OrganizationManager
 from position.controllers import move_positions_to_another_voter
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
@@ -186,7 +188,7 @@ def voter_create_for_api(voter_device_id):  # voterCreate
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook_secret_key):
+def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook_secret_key):  # voterMergeTwoAccounts
     current_voter_found = False
     email_owner_voter_found = False
     facebook_owner_voter_found = False
@@ -242,8 +244,8 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook
     from_voter_we_vote_id = ""
     to_voter_id = 0
     to_voter_we_vote_id = ""
+    email_manager = EmailManager()
     if positive_value_exists(email_secret_key):
-        email_manager = EmailManager()
         email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key)
         if email_results['email_address_object_found']:
             email_address_object = email_results['email_address_object']
@@ -307,17 +309,63 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook
             }
             return error_results
 
+        auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+        if auth_response_results['facebook_auth_response_found']:
+            facebook_auth_response = auth_response_results['facebook_auth_response']
+
         # Double-check they aren't the same voter account
         if voter.id == facebook_owner_voter.id:
-            error_results = {
-                'status': "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
-                'success': True,
-                'voter_device_id': voter_device_id,
-                'current_voter_found': current_voter_found,
-                'email_owner_voter_found': False,
-                'facebook_owner_voter_found': facebook_owner_voter_found,
-            }
-            return error_results
+            # If here, we probably have some bad data and need to update the voter record to reflect that
+            #  it is signed in with Facebook
+            if auth_response_results['facebook_auth_response_found']:
+                # Get the recent facebook_user_id and facebook_email
+                voter_manager.update_voter_with_facebook_link_verified(
+                    facebook_owner_voter,
+                    facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_email)
+
+            else:
+                error_results = {
+                    'status': "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
+                    'success': True,
+                    'voter_device_id': voter_device_id,
+                    'current_voter_found': current_voter_found,
+                    'email_owner_voter_found': False,
+                    'facebook_owner_voter_found': facebook_owner_voter_found,
+                }
+                return error_results
+
+        # ##### Make the facebook_email the primary email for facebook_owner_voter TODO DALE
+        # Does facebook_owner_voter already have a primary email? If not, update it
+        if not facebook_owner_voter.email_ownership_is_verified:
+            if positive_value_exists(facebook_auth_response.facebook_email):
+                # Check to make sure there isn't an account already using the facebook_email
+                temp_voter_we_vote_id = ""
+                email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+                    temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+                if not email_results['email_address_object_found']:
+                    # See if an unverified email exists for this voter
+                    email_address_object_we_vote_id = ""
+                    email_retrieve_results = email_manager.retrieve_email_address_object(
+                        facebook_auth_response.facebook_email, email_address_object_we_vote_id,
+                        facebook_owner_voter.we_vote_id)
+                    if email_retrieve_results['email_address_object_found']:
+                        email_address_object = email_retrieve_results['email_address_object']
+                        email_address_object = email_manager.update_email_address_object_to_be_verified(
+                            email_address_object)
+                    else:
+                        email_ownership_is_verified = True
+                        email_create_results = email_manager.create_email_address(
+                            facebook_auth_response.facebook_email, facebook_owner_voter.we_vote_id,
+                            email_ownership_is_verified)
+                        if email_create_results['email_address_object_saved']:
+                            email_address_object = email_create_results['email_address_object']
+                    try:
+                        # Attach the email_address_object to facebook_owner_voter
+                        voter_manager.update_voter_email_ownership_verified(facebook_owner_voter,
+                                                                            email_address_object)
+                    except Exception as e:
+                        # Fail silently
+                        pass
 
         # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
         # We are going to make the email_owner_voter the new master
@@ -327,31 +375,93 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook
         to_voter_we_vote_id = facebook_owner_voter.we_vote_id
         new_owner_voter = facebook_owner_voter
 
-    # Transfer positions from voter to email_owner_voter
+    # The from_voter and to_voter may both have their own linked_organization_we_vote_id
+    organization_manager = OrganizationManager()
+    from_voter_linked_organization_we_vote_id = voter.linked_organization_we_vote_id
+    from_voter_linked_organization_id = 0
+    if positive_value_exists(from_voter_linked_organization_we_vote_id):
+        from_linked_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+            from_voter_linked_organization_we_vote_id)
+        if from_linked_organization_results['organization_found']:
+            from_linked_organization = from_linked_organization_results['organization']
+            from_voter_linked_organization_id = from_linked_organization.id
+    to_voter_linked_organization_we_vote_id = new_owner_voter.linked_organization_we_vote_id
+    to_voter_linked_organization_id = 0
+    if positive_value_exists(to_voter_linked_organization_we_vote_id):
+        to_linked_organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+            to_voter_linked_organization_we_vote_id)
+        if to_linked_organization_results['organization_found']:
+            to_linked_organization = to_linked_organization_results['organization']
+            to_voter_linked_organization_id = to_linked_organization.id
+
+    # If the to_voter does not have a linked_organization_we_vote_id, then we should move the from_voter's
+    #  organization_we_vote_id
+    if not positive_value_exists(to_voter_linked_organization_we_vote_id):
+        # Use the from_voter's linked_organization_we_vote_id
+        to_voter_linked_organization_we_vote_id = from_voter_linked_organization_we_vote_id
+        to_voter_linked_organization_id = from_voter_linked_organization_id
+
+    # Transfer positions from voter to new_owner_voter
     move_positions_results = move_positions_to_another_voter(
-        from_voter_id, from_voter_we_vote_id, to_voter_id, to_voter_we_vote_id)
-    # TODO DALE Add from_organization_we_vote_id? to_organization_we_vote_id?
+        from_voter_id, from_voter_we_vote_id,
+        to_voter_id, to_voter_we_vote_id, to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
     status += move_positions_results['status']
 
-    # Transfer friends from voter to email_owner_voter
+    if from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
+        # If anyone is following the old voter's organization, move those followers to the new voter's organization
+        move_organization_followers_results = move_organization_followers_to_another_organization(
+            from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
+            to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
+        status += move_organization_followers_results['status']
+
+        # There might be some useful information in the from_voter's organization that needs to be moved
+        move_organization_results = move_organization_data_to_another_organization(
+            from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
+        status += move_organization_results['status']
+
+        # Finally, delete the from_voter's organization
+        if move_organization_results['data_transfer_complete']:
+            from_organization = move_organization_results['from_organization']
+            try:
+                from_organization.delete()
+            except Exception as e:
+                # Fail silently
+                pass
+
+    # Transfer friends from voter to new_owner_voter
     move_friends_results = move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
     status += move_friends_results['status']
 
     # Transfer friend invitations from voter to email_owner_voter
     move_friend_invitations_results = move_friend_invitations_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id)
-    status += move_friends_results['status']
+    status += move_friend_invitations_results['status']
 
-    # Transfer voter account info to email_owner_voter
     if positive_value_exists(voter.linked_organization_we_vote_id):
-        # Move linked organization positions?
+        # Remove the link to the organization so we don't have a future conflict
+        try:
+            voter.linked_organization_we_vote_id = ""
+            voter.save()
+        except Exception as e:
+            # Fail silently
+            pass
 
-        # Change ownership of organization the person is linked to
-        pass
-
-    # Transfer followed orgs from voter to email_owner_voter
+    # Transfer the organizations the from_voter is following to the new_owner_voter
     move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id)
     status += move_follow_results['status']
+
+    # Make sure we bring over all emails from the from_voter over to the to_voter
+
+    if positive_value_exists(voter.primary_email_we_vote_id):
+        # Remove the email information so we don't have a future conflict
+        try:
+            voter.email = ""
+            voter.primary_email_we_vote_id = ""
+            voter.email_ownership_is_verified = False
+            voter.save()
+        except Exception as e:
+            # Fail silently
+            pass
 
     # And finally, relink the current voter_device_id to email_owner_voter
     update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, new_owner_voter)

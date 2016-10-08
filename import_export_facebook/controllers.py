@@ -14,7 +14,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 
-def facebook_sign_in_for_api(voter_device_id, facebook_id=None, facebook_email=None):  # facebookSignIn
+def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFacebookSaveToCurrentAccount
     """
 
     :param voter_device_id:
@@ -29,8 +29,6 @@ def facebook_sign_in_for_api(voter_device_id, facebook_id=None, facebook_email=N
             'success': False,
             'status': "VALID_VOTER_DEVICE_ID_MISSING",
             'voter_device_id': voter_device_id,
-            'facebook_id': facebook_id,
-            'facebook_email': facebook_email,
         }
         return results
 
@@ -41,71 +39,89 @@ def facebook_sign_in_for_api(voter_device_id, facebook_id=None, facebook_email=N
             'success': False,
             'status': "VALID_VOTER_MISSING",
             'voter_device_id': voter_device_id,
-            'facebook_id': facebook_id,
-            'facebook_email': facebook_email,
         }
         return results
 
     voter = results['voter']
 
-    results_from_facebook_id = voter_manager.retrieve_voter_by_facebook_id(facebook_id)
-    if positive_value_exists(results_from_facebook_id['voter_found']):
-        voter_found_with_facebook_id = results_from_facebook_id['voter']
-        if voter_found_with_facebook_id.id == voter.id:
-            # If here, the owner of the facebook_id is already the current primary voter
-            status += "FACEBOOK_SIGN_IN-ALREADY_LINKED_TO_THIS_FACEBOOK_ACCOUNT "
-            success = True
-            # Only save if the email is different than what is saved
-            if positive_value_exists(facebook_email) or facebook_email == '':
-                results = voter_manager.save_facebook_user_values(voter, facebook_id, facebook_email)
-                status += results['status']
-                success = results['success']
-        else:
-            # If here, we need to merge accounts TODO
-
-            # ...but for now we are simply going to switch to the earlier account and abandon
-            # the newer account
-            if positive_value_exists(facebook_email) or facebook_email == '':
-                results = voter_manager.save_facebook_user_values(voter_found_with_facebook_id,
-                                                                  facebook_id, facebook_email)
-                status += results['status'] + ", "
-                success = results['success']
-
-            # Relink this voter_device_id to the original account
-            voter_device_manager = VoterDeviceLinkManager()
-            voter_device_link_results = voter_device_manager.retrieve_voter_device_link(voter_device_id)
-            voter_device_link = voter_device_link_results['voter_device_link']
-
-            update_voter_device_link_results = voter_device_manager.update_voter_device_link(
-                voter_device_link, voter_found_with_facebook_id)
-            if update_voter_device_link_results['voter_device_link_updated']:
-                status += "FACEBOOK_SIGN_IN-ALREADY_LINKED_TO_OTHER_ACCOUNT-TRANSFERRED "
-                success = True
-            else:
-                status = "FACEBOOK_SIGN_IN-ALREADY_LINKED_TO_OTHER_ACCOUNT-COULD_NOT_TRANSFER "
-                success = False
-    else:
-        # An existing account linked to this facebook account was not found
-        results = voter_manager.save_facebook_user_values(voter, facebook_id, facebook_email)
-        status = results['status']
-        success = results['success']
-
-    if success:
-        results = {
-            'success': True,
-            'status': status,
-            'voter_device_id': voter_device_id,
-            'facebook_id': facebook_id,
-            'facebook_email': facebook_email,
-        }
-    else:
-        results = {
+    facebook_manager = FacebookManager()
+    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(voter.we_vote_id)
+    if facebook_results['facebook_link_to_voter_found']:
+        error_results = {
+            'status': "FACEBOOK_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
             'success': False,
-            'status': status,
             'voter_device_id': voter_device_id,
-            'facebook_id': facebook_id,
-            'facebook_email': facebook_email,
         }
+        return error_results
+
+    auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+    if not auth_response_results['facebook_auth_response_found']:
+        error_results = {
+            'status': "FACEBOOK_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return error_results
+
+    facebook_auth_response = auth_response_results['facebook_auth_response']
+
+    link_results = facebook_manager.create_facebook_link_to_voter(facebook_auth_response.facebook_user_id,
+                                                                  voter.we_vote_id)
+
+    if not link_results['facebook_link_to_voter_saved']:
+        error_results = {
+            'status': link_results['status'],
+            'success': False,
+            'voter_device_id': voter_device_id,
+        }
+        return error_results
+
+    facebook_link_to_voter = link_results['facebook_link_to_voter']
+
+    # Update voter with Facebook info (not including email -- that is done below)
+    results = voter_manager.save_facebook_user_values(voter, facebook_auth_response)
+    status += results['status'] + ", "
+    success = results['success']
+    voter = results['voter']
+
+    # ##### Make the facebook_email the primary email for the current voter
+    # Does the current voter already have a primary email?
+    if not voter.email_ownership_is_verified:
+        email_manager = EmailManager()
+        if positive_value_exists(facebook_auth_response.facebook_email):
+            # Check to make sure there isn't an account already using the facebook_email
+            temp_voter_we_vote_id = ""
+            email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+                temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+            if not email_results['email_address_object_found']:
+                # See if an unverified email exists for this voter
+                email_address_object_we_vote_id = ""
+                email_retrieve_results = email_manager.retrieve_email_address_object(
+                    facebook_auth_response.facebook_email, email_address_object_we_vote_id,
+                    voter.we_vote_id)
+                if email_retrieve_results['email_address_object_found']:
+                    email_address_object = email_retrieve_results['email_address_object']
+                    email_address_object = email_manager.update_email_address_object_to_be_verified(
+                        email_address_object)
+                else:
+                    email_ownership_is_verified = True
+                    email_create_results = email_manager.create_email_address(
+                        facebook_auth_response.facebook_email, voter.we_vote_id,
+                        email_ownership_is_verified)
+                    if email_create_results['email_address_object_saved']:
+                        email_address_object = email_create_results['email_address_object']
+                try:
+                    # Attach the email_address_object to voter
+                    voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
+                except Exception as e:
+                    # Fail silently
+                    pass
+
+    results = {
+        'success': success,
+        'status': status,
+        'voter_device_id': voter_device_id,
+    }
     return results
 
 
@@ -138,7 +154,7 @@ def facebook_disconnect_for_api(voter_device_id):  # facebookDisconnect
     voter = results['voter']
 
     facebook_id = 0
-    results = voter_manager.save_facebook_user_values(voter, facebook_id)
+    results = voter_manager.save_facebook_user_values(voter)  # THIS IS BROKEN
     status = results['status']
     success = results['success']
 

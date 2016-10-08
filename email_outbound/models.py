@@ -706,3 +706,11 @@ class EmailManager(models.Model):
                 return ""
         else:
             return ""
+
+    def update_email_address_object_to_be_verified(self, email_address_object):
+        try:
+            email_address_object.email_ownership_is_verified = True
+            email_address_object.save()
+            return email_address_object
+        except Exception as e:
+            return email_address_object

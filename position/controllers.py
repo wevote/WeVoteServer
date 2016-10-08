@@ -29,16 +29,15 @@ WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
 
 
-def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id, to_voter_id, to_voter_we_vote_id):
+def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
+                                    to_voter_id, to_voter_we_vote_id,
+                                    to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id):
     status = ''
     success = False
     position_entries_moved = 0
     position_entries_not_moved = 0
     position_manager = PositionManager()
     position_list_manager = PositionListManager()
-
-    # TODO DALE: Any individual who shares any positions publicly is also given an organization_we_vote_id
-    # We need to take that into consideration and move those positions as well.
 
     # Find private positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
@@ -60,7 +59,7 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id, to_vot
             from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
 
         if results['position_found']:
-            # Look to see if there is a statement that can be preserved
+            # Look to see if there is a statement that can be preserved (i.e., moved from from_position to to_position
             save_to_position = False
             to_position_entry = results['position']
             if not positive_value_exists(to_position_entry.statement_html):
@@ -75,6 +74,14 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id, to_vot
                 if positive_value_exists(from_position_entry.statement_text):
                     to_position_entry.statement_text = from_position_entry.statement_text
                     save_to_position = True
+            # There might be a case where the to_voter didn't have a linked_organization_we_vote_id, but
+            # the from_voter does, so we want to make sure to update that
+            if not positive_value_exists(to_position_entry.organization_we_vote_id):
+                to_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
+                save_to_position = True
+            if not positive_value_exists(to_position_entry.organization_id):
+                to_position_entry.organization_id = to_voter_linked_organization_id
+                save_to_position = True
             if save_to_position:
                 try:
                     to_position_entry.save()
@@ -84,6 +91,8 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id, to_vot
             # Change the position values to the new we_vote_id
             try:
                 from_position_entry.voter_we_vote_id = to_voter_we_vote_id
+                from_position_entry.organization_id = to_voter_linked_organization_id
+                from_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
                 from_position_entry.voter_id = to_voter_id
                 from_position_entry.save()
                 position_entries_moved += 1
@@ -776,8 +785,10 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                     or not positive_value_exists(one_position.speaker_image_url_https) \
                     or not positive_value_exists(one_position.speaker_twitter_handle):
                 one_position = position_manager.refresh_cached_position_info(one_position)
-
-            speaker_display_name = "You"
+            if positive_value_exists(one_position.speaker_display_name):
+                speaker_display_name = one_position.speaker_display_name
+            else:
+                speaker_display_name = "Your Friend (Missing Name)"
         elif positive_value_exists(one_position.public_figure_we_vote_id):
             speaker_type = PUBLIC_FIGURE
             speaker_id = one_position.public_figure_id

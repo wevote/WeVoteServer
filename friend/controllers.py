@@ -890,7 +890,7 @@ def store_internal_friend_invitation_with_two_voters(voter, invitation_message,
         sender_voter_we_vote_id, recipient_voter_we_vote_id, invitation_message, sender_email_ownership_is_verified,
         invitation_secret_key)
     results = {
-        'success':                  create_results['status'],
+        'success':                  create_results['success'],
         'status':                   create_results['status'],
         'friend_invitation_saved':  create_results['friend_invitation_saved'],
         'friend_invitation':        create_results['friend_invitation'],
