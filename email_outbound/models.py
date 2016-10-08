@@ -656,13 +656,16 @@ class EmailManager(models.Model):
         status = ""
         success = True
 
+        system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
+
         mail = EmailMultiAlternatives(
             subject=email_scheduled.subject,
             body=email_scheduled.message_text,
-            from_email=email_scheduled.sender_voter_email,
+            from_email=system_sender_email_address,
             to=[email_scheduled.recipient_voter_email],
             headers={"Reply-To": email_scheduled.sender_voter_email}
         )
+        # TODO DALE ADD: reply_to = email_scheduled.sender_voter_email,
         if positive_value_exists(email_scheduled.message_html):
             mail.attach_alternative(email_scheduled.message_html, "text/html")
 
