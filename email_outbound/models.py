@@ -655,6 +655,15 @@ class EmailManager(models.Model):
         """
         status = ""
         success = True
+        sendgrid_turned_off_for_testing = False
+        if sendgrid_turned_off_for_testing:
+            status = "SENDGRID_TURNED_OFF_FOR_TESTING "
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'email_scheduled_sent':     True,
+            }
+            return results
 
         system_sender_email_address = "We Vote <info@WeVote.US>"  # TODO DALE Make system variable
 

@@ -4,6 +4,7 @@
 
 from django.db import models
 from django.db.models import Q
+from email_outbound.models import EmailAddress, EmailManager
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from voter.models import VoterManager
 
@@ -27,6 +28,7 @@ UNFRIEND_CURRENT_FRIEND = 'UNFRIEND_CURRENT_FRIEND'
 
 # Kinds of lists of friends
 CURRENT_FRIENDS = 'CURRENT_FRIENDS'
+FRIEND_INVITATIONS_PROCESSED = 'FRIEND_INVITATIONS_PROCESSED'
 FRIEND_INVITATIONS_SENT_TO_ME = 'FRIEND_INVITATIONS_SENT_TO_ME'
 FRIEND_INVITATIONS_SENT_BY_ME = 'FRIEND_INVITATIONS_SENT_BY_ME'
 FRIENDS_IN_COMMON = 'FRIENDS_IN_COMMON'
@@ -74,6 +76,7 @@ class FriendInvitationEmailLink(models.Model):
     invitation_message = models.TextField(null=True, blank=True)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    merge_by_secret_key_allowed = models.BooleanField(default=True)  # To allow merges after delete
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
@@ -92,6 +95,7 @@ class FriendInvitationTwitterLink(models.Model):
     invitation_message = models.TextField(null=True, blank=True)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    merge_by_secret_key_allowed = models.BooleanField(default=True)  # To allow merges after delete
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
@@ -110,6 +114,7 @@ class FriendInvitationVoterLink(models.Model):
     invitation_message = models.TextField(null=True, blank=True)
     invitation_status = models.CharField(max_length=50, choices=INVITATION_STATUS_CHOICES, default=NO_RESPONSE)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+    merge_by_secret_key_allowed = models.BooleanField(default=True)  # To allow merges after delete
     deleted = models.BooleanField(default=False)  # If invitation is completed or rescinded, mark as deleted
 
 
@@ -558,6 +563,236 @@ class FriendManager(models.Model):
         }
         return results
 
+    def retrieve_friend_invitations_processed(self, viewer_voter_we_vote_id):
+        """
+
+        :param viewer_voter_we_vote_id:
+        :return:
+        """
+        friend_list_found = False
+        friend_list = []
+        status = ""
+
+        if not positive_value_exists(viewer_voter_we_vote_id):
+            success = False
+            status = 'VALID_VOTER_WE_VOTE_ID_MISSING '
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'viewer_voter_we_vote_id':  viewer_voter_we_vote_id,
+                'friend_list_found':        friend_list_found,
+                'friend_list':              friend_list,
+            }
+            return results
+
+        # ###########################
+        # In this block, we look for invitations sent by viewer_voter_we_vote_id
+        friend_invitation_from_voter_list = []
+        friend_invitation_from_voter_list_found = False
+        try:
+            # Find invitations that I sent that were accepted. Do NOT show invitations that were ignored.
+            friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
+                sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(invitation_status=ACCEPTED)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=True)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.order_by('-date_last_changed')
+            friend_invitation_from_voter_list = friend_invitation_voter_queryset
+
+            if len(friend_invitation_from_voter_list):
+                success = True
+                friend_invitation_from_voter_list_found = True
+                status += 'FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
+            else:
+                success = True
+                friend_invitation_from_voter_list_found = False
+                status += 'NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
+        except FriendInvitationVoterLink.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            friend_invitation_from_voter_list_found = False
+            status += 'NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED_DoesNotExist '
+            friend_invitation_from_voter_list = []
+        except Exception as e:
+            success = False
+            friend_invitation_from_voter_list_found = False
+            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationVoterLink '
+
+        friend_invitation_from_email_list = []
+        try:
+            # Find invitations that I sent that were accepted. Do NOT show invitations that were ignored.
+            friend_invitation_email_queryset = FriendInvitationEmailLink.objects.all()
+            friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
+                sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+            friend_invitation_email_queryset = friend_invitation_email_queryset.filter(invitation_status=ACCEPTED)
+            friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=True)
+            friend_invitation_email_queryset = friend_invitation_email_queryset.order_by('-date_last_changed')
+            friend_invitation_from_email_list = friend_invitation_email_queryset
+            success = True
+
+            if len(friend_invitation_from_email_list):
+                status += 'FRIEND_LIST_EMAIL_RETRIEVED '
+                friend_invitation_from_email_list_found = True
+            else:
+                status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED '
+                friend_invitation_from_email_list_found = False
+        except FriendInvitationEmailLink.DoesNotExist:
+            # No data found. Not a problem.
+            friend_invitation_from_email_list_found = False
+            status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist '
+        except Exception as e:
+            friend_invitation_from_email_list_found = False
+            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink '
+
+        if friend_invitation_from_voter_list_found and friend_invitation_from_email_list_found:
+            friend_invitation_from_list_found = True
+            friend_invitation_from_list = list(friend_invitation_from_voter_list) + \
+                list(friend_invitation_from_email_list)
+        elif friend_invitation_from_voter_list_found:
+            friend_invitation_from_list_found = True
+            friend_invitation_from_list = friend_invitation_from_voter_list
+        elif friend_invitation_from_email_list_found:
+            friend_invitation_from_list_found = True
+            friend_invitation_from_list = friend_invitation_from_email_list
+        else:
+            friend_invitation_from_list_found = False
+            friend_invitation_from_list = []
+
+        # ###########################
+        # In this block, we look for invitations sent TO viewer_voter_we_vote_id
+        friend_invitation_to_voter_list = []
+        friend_invitation_to_voter_list_found = False
+        try:
+            # Find invitations that I received, including ones that I have ignored.
+            friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
+                recipient_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
+                Q(invitation_status=ACCEPTED) |
+                Q(invitation_status=IGNORED))
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=True)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.order_by('-date_last_changed')
+            friend_invitation_to_voter_list = friend_invitation_voter_queryset
+
+            if len(friend_invitation_to_voter_list):
+                success = True
+                friend_invitation_to_voter_list_found = True
+                status += 'FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED'
+            else:
+                success = True
+                friend_invitation_to_voter_list_found = False
+                status += 'NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
+        except FriendInvitationVoterLink.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            friend_invitation_to_voter_list_found = False
+            status += 'NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED_DoesNotExist '
+            friend_invitation_to_voter_list = []
+        except Exception as e:
+            success = False
+            friend_invitation_to_voter_list_found = False
+            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationVoterLink '
+
+        friend_invitation_to_email_list = []
+        friend_invitation_to_email_list_found = False
+        try:
+            # Cycle through all of the viewer_voter_we_vote_id email addresses so we can retrieve invitations sent
+            #  to this voter when we didn't know the voter_we_vote_id
+
+            # First, find the verified email for viewer_voter_we_vote_id. # TODO DALE
+            email_manager = EmailManager()
+            filters = []
+            email_results = email_manager.retrieve_voter_email_address_list(viewer_voter_we_vote_id)
+            if email_results['email_address_list_found']:
+                email_address_list = email_results['email_address_list']
+
+                for one_email in email_address_list:
+                    if positive_value_exists(one_email.we_vote_id):
+                        new_filter = Q(recipient_voter_email__iexact=one_email.normalized_email_address)
+                        filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                viewer_voter_emails_found = True
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+            else:
+                viewer_voter_emails_found = False
+        except EmailAddress.DoesNotExist:
+            # No data found. Not a problem.
+            viewer_voter_emails_found = False
+            status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist '
+        except Exception as e:
+            viewer_voter_emails_found = False
+            status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink '
+
+        if viewer_voter_emails_found and len(final_filters):
+            try:
+                # Find invitations that were sent to one of my email addresses
+                friend_invitation_email_queryset = FriendInvitationEmailLink.objects.all()
+                friend_invitation_email_queryset = friend_invitation_email_queryset.filter(final_filters)
+                friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
+                    Q(invitation_status=ACCEPTED) |
+                    Q(invitation_status=IGNORED))
+                friend_invitation_email_queryset = friend_invitation_email_queryset.filter(deleted=True)
+                friend_invitation_email_queryset = friend_invitation_email_queryset.order_by('-date_last_changed')
+                friend_invitation_to_email_list = friend_invitation_email_queryset
+                success = True
+
+                if len(friend_invitation_to_email_list):
+                    status += ' FRIEND_LIST_EMAIL_RETRIEVED '
+                    friend_invitation_to_email_list_found = True
+                else:
+                    status += ' NO_FRIEND_LIST_EMAIL_RETRIEVED '
+                    friend_invitation_to_email_list_found = False
+            except FriendInvitationEmailLink.DoesNotExist:
+                # No data found. Not a problem.
+                friend_invitation_to_email_list_found = False
+                status += 'NO_FRIEND_LIST_EMAIL_RETRIEVED_DoesNotExist '
+            except Exception as e:
+                friend_invitation_to_email_list_found = False
+                status += 'FAILED retrieve_friend_invitations_processed FriendInvitationEmailLink '
+
+        if friend_invitation_to_voter_list_found and friend_invitation_to_email_list_found:
+            friend_invitation_to_list_found = True
+            friend_invitation_to_list = list(friend_invitation_to_voter_list) + list(friend_invitation_to_email_list)
+        elif friend_invitation_to_voter_list_found:
+            friend_invitation_to_list_found = True
+            friend_invitation_to_list = friend_invitation_to_voter_list
+        elif friend_invitation_to_email_list_found:
+            friend_invitation_to_list_found = True
+            friend_invitation_to_list = friend_invitation_to_email_list
+        else:
+            friend_invitation_to_list_found = False
+            friend_invitation_to_list = []
+
+        # ####################################
+        # Now merge the "from" and "to" lists
+        if friend_invitation_from_list_found and friend_invitation_to_list_found:
+            friend_list_found = True
+            friend_list = list(friend_invitation_from_list) + list(friend_invitation_to_list)
+        elif friend_invitation_from_list_found:
+            friend_list_found = True
+            friend_list = friend_invitation_from_list
+        elif friend_invitation_to_list_found:
+            friend_list_found = True
+            friend_list = friend_invitation_to_list
+        else:
+            friend_list_found = False
+            friend_list = []
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'viewer_voter_we_vote_id':  viewer_voter_we_vote_id,
+            'friend_list_found':        friend_list_found,
+            'friend_list':              friend_list,
+        }
+        return results
+
     def retrieve_friend_invitations_sent_by_me(self, sender_voter_we_vote_id):
         friend_list_found = False
         friend_list = []
@@ -690,10 +925,11 @@ class FriendManager(models.Model):
         }
         return results
 
-    def accept_friend_invitation_from_secret_key(self, invitation_secret_key):
+    def retrieve_friend_invitation_from_secret_key(self, invitation_secret_key, for_merge_accounts=False):
         """
 
         :param invitation_secret_key:
+        :param for_merge_accounts:
         :return:
         """
         # Start by looking in FriendInvitationVoterLink table
@@ -705,24 +941,32 @@ class FriendManager(models.Model):
         status = ""
 
         try:
-            if positive_value_exists(invitation_secret_key):
+            if positive_value_exists(invitation_secret_key) and for_merge_accounts:
+                friend_invitation_voter_link = FriendInvitationVoterLink.objects.get(
+                    secret_key=invitation_secret_key,
+                    merge_by_secret_key_allowed=True,
+                )
+                friend_invitation_voter_link_found = True
+                success = True
+                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY_FOR_MERGE "
+            elif positive_value_exists(invitation_secret_key):
                 friend_invitation_voter_link = FriendInvitationVoterLink.objects.get(
                     secret_key=invitation_secret_key,
                     deleted=False,
                 )
                 friend_invitation_voter_link_found = True
                 success = True
-                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY1"
+                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_SECRET_KEY1 "
             else:
                 friend_invitation_voter_link_found = False
                 success = False
-                status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_VARIABLES_MISSING1"
+                status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_VARIABLES_MISSING1 "
         except FriendInvitationVoterLink.DoesNotExist:
             success = True
-            status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_NOT_FOUND1"
+            status += "RETRIEVE_FRIEND_INVITATION_BY_SECRET_KEY_NOT_FOUND1 "
         except Exception as e:
             success = False
-            status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationVoterLink'
+            status += 'FAILED retrieve_friend_invitation_from_secret_key FriendInvitationVoterLink '
 
         if friend_invitation_voter_link_found:
 
@@ -731,7 +975,6 @@ class FriendManager(models.Model):
                 'status':                               status,
                 'friend_invitation_found':
                     friend_invitation_email_link_found or friend_invitation_voter_link_found,
-                'friendship_created':                   friendship_created,
                 'friend_invitation_email_link_found':   friend_invitation_email_link_found,
                 'friend_invitation_email_link':         friend_invitation_email_link,
                 'friend_invitation_voter_link_found':   friend_invitation_voter_link_found,
@@ -740,7 +983,15 @@ class FriendManager(models.Model):
             return results
 
         try:
-            if positive_value_exists(invitation_secret_key):
+            if positive_value_exists(invitation_secret_key) and for_merge_accounts:
+                friend_invitation_email_link = FriendInvitationEmailLink.objects.get(
+                    secret_key=invitation_secret_key,
+                    merge_by_secret_key_allowed=True,
+                )
+                friend_invitation_email_link_found = True
+                success = True
+                status += "RETRIEVE_FRIEND_INVITATION_FOUND_BY_INVITATION_SECRET_KEY_FOR_MERGE2 "
+            elif positive_value_exists(invitation_secret_key):
                 friend_invitation_email_link = FriendInvitationEmailLink.objects.get(
                     secret_key=invitation_secret_key,
                     deleted=False,
