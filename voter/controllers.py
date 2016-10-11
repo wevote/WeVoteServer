@@ -7,7 +7,9 @@ from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter
 from django.http import HttpResponse
 from email_outbound.models import EmailManager
 from follow.controllers import move_follow_entries_to_another_voter, move_organization_followers_to_another_organization
-from friend.controllers import move_friend_invitations_to_another_voter, move_friends_to_another_voter
+from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, \
+    move_friend_invitations_to_another_voter, move_friends_to_another_voter
+from friend.models import FriendManager
 from import_export_facebook.models import FacebookManager
 import json
 from organization.controllers import move_organization_data_to_another_organization
@@ -188,10 +190,12 @@ def voter_create_for_api(voter_device_id):  # voterCreate
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook_secret_key):  # voterMergeTwoAccounts
+def voter_merge_two_accounts_for_api(
+        voter_device_id, email_secret_key, facebook_secret_key, invitation_secret_key):  # voterMergeTwoAccounts
     current_voter_found = False
     email_owner_voter_found = False
     facebook_owner_voter_found = False
+    invitation_owner_voter_found = False
     new_owner_voter = Voter()
     success = False
     status = ""
@@ -229,9 +233,11 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook
     voter = voter_results['voter']
     current_voter_found = True
 
-    if not positive_value_exists(email_secret_key) and not positive_value_exists(facebook_secret_key):
+    if not positive_value_exists(email_secret_key) \
+            and not positive_value_exists(facebook_secret_key) \
+            and not positive_value_exists(invitation_secret_key):
         error_results = {
-            'status':                   "VOTER_MERGE_TWO_ACCOUNTS_EMAIL_SECRET_KEY_AND_FACEBOOK_SECRET_KEY_MISSING",
+            'status':                   "VOTER_MERGE_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN",
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'current_voter_found':      current_voter_found,
@@ -374,6 +380,52 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook
         to_voter_id = facebook_owner_voter.id
         to_voter_we_vote_id = facebook_owner_voter.we_vote_id
         new_owner_voter = facebook_owner_voter
+    elif positive_value_exists(invitation_secret_key):
+        friend_manager = FriendManager()
+        for_merge_accounts = True
+        friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
+            invitation_secret_key, for_merge_accounts)
+        if not friend_invitation_results['friend_invitation_found']:
+            friend_invitation = friend_invitation_results['friend_invitation']
+            recipient_voter_we_vote_id = fetch_friend_invitation_recipient_voter_we_vote_id(friend_invitation)
+
+            invitation_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(recipient_voter_we_vote_id)
+            if invitation_owner_voter_results['voter_found']:
+                invitation_owner_voter_found = True
+                invitation_owner_voter = invitation_owner_voter_results['voter']
+
+        if not invitation_owner_voter_found:
+            error_results = {
+                'status':                       "INVITATION_OWNER_VOTER_NOT_FOUND",
+                'success':                      False,
+                'voter_device_id':              voter_device_id,
+                'current_voter_found':          current_voter_found,
+                'email_owner_voter_found':      False,
+                'facebook_owner_voter_found':   False,
+                'invitation_owner_voter_found': invitation_owner_voter_found,
+            }
+            return error_results
+
+        # Double-check they aren't the same voter account
+        if voter.id == invitation_owner_voter.id:
+            error_results = {
+                'status':                       "CURRENT_VOTER_AND_INVITATION_OWNER_VOTER_ARE_SAME",
+                'success':                      True,
+                'voter_device_id':              voter_device_id,
+                'current_voter_found':          current_voter_found,
+                'email_owner_voter_found':      False,
+                'facebook_owner_voter_found':   False,
+                'invitation_owner_voter_found': invitation_owner_voter_found,
+            }
+            return error_results
+
+        # Now we have voter (from voter_device_id) and invitation_owner_voter (from invitation_secret_key)
+        # We are going to make the email_owner_voter the new master
+        from_voter_id = voter.id
+        from_voter_we_vote_id = voter.we_vote_id
+        to_voter_id = invitation_owner_voter.id
+        to_voter_we_vote_id = invitation_owner_voter.we_vote_id
+        new_owner_voter = invitation_owner_voter
 
     # The from_voter and to_voter may both have their own linked_organization_we_vote_id
     organization_manager = OrganizationManager()
@@ -476,6 +528,7 @@ def voter_merge_two_accounts_for_api(voter_device_id, email_secret_key, facebook
         'current_voter_found': current_voter_found,
         'email_owner_voter_found': email_owner_voter_found,
         'facebook_owner_voter_found': facebook_owner_voter_found,
+        'invitation_owner_voter_found': invitation_owner_voter_found,
     }
 
     return results

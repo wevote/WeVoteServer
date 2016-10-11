@@ -14,7 +14,7 @@ from email_outbound.controllers import voter_email_address_save_for_api, voter_e
 from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
     friend_invite_response_for_api, friend_list_for_api
 from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
-    FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
+    FRIEND_INVITATIONS_PROCESSED, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
     FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS, ACCEPT_INVITATION, IGNORE_INVITATION, \
     UNFRIEND_CURRENT_FRIEND
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
@@ -215,10 +215,14 @@ def friend_invitation_by_email_verify_view(request):  # friendInvitationByEmailV
     invitation_secret_key = request.GET.get('invitation_secret_key', "")
     results = friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret_key)
     json_data = {
-        'status':                               results['status'],
-        'success':                              results['success'],
-        'voter_device_id':                      voter_device_id,
-        'sender_voter_email_address_missing':   results['sender_voter_email_address_missing'],
+        'status':                       results['status'],
+        'success':                      results['success'],
+        'voter_device_id':              voter_device_id,
+        'voter_has_data_to_preserve':   results['voter_has_data_to_preserve'],
+        'invitation_found':             results['invitation_found'],
+        'attempted_to_approve_own_invitation':          results['attempted_to_approve_own_invitation'],
+        'invitation_secret_key':                        invitation_secret_key,
+        'invitation_secret_key_belongs_to_this_voter':  results['invitation_secret_key_belongs_to_this_voter'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -257,7 +261,8 @@ def friend_list_view(request):  # friendList
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     kind_of_list = request.GET.get('kind_of_list', CURRENT_FRIENDS)
-    if kind_of_list in(CURRENT_FRIENDS, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, FRIENDS_IN_COMMON,
+    if kind_of_list in(CURRENT_FRIENDS, FRIEND_INVITATIONS_PROCESSED,
+                       FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, FRIENDS_IN_COMMON,
                        IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS):
         kind_of_list_we_are_looking_for = kind_of_list
     else:
@@ -1719,10 +1724,12 @@ def voter_merge_two_accounts_view(request):  # voterMergeTwoAccounts
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     email_secret_key = request.GET.get('email_secret_key', '')
     facebook_secret_key = request.GET.get('facebook_secret_key', '')
+    invitation_secret_key = request.GET.get('invitation_secret_key', '')
 
     results = voter_merge_two_accounts_for_api(voter_device_id=voter_device_id,
                                                email_secret_key=email_secret_key,
-                                               facebook_secret_key=facebook_secret_key)
+                                               facebook_secret_key=facebook_secret_key,
+                                               invitation_secret_key=invitation_secret_key)
 
     json_data = {
         'status':                           results['status'],

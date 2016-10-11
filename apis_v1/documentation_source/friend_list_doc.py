@@ -22,7 +22,8 @@ def friend_list_doc_template_values(url_root):
             'name':         'kind_of_list',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Default is CURRENT_FRIENDS. '
-                            'Other options include FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, '
+                            'Other options include FRIEND_INVITATIONS_PROCESSED, '
+                            'FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, '
                             'FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, or SUGGESTED_FRIENDS.',
         },
     ]
