@@ -22,13 +22,16 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     """
     status = ""
     success = False
+    facebook_account_created = False
+
     # Get voter_id from the voter_device_id
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results = {
-            'success': False,
-            'status': "VALID_VOTER_DEVICE_ID_MISSING",
-            'voter_device_id': voter_device_id,
+            'success':                  False,
+            'status':                   "VALID_VOTER_DEVICE_ID_MISSING",
+            'voter_device_id':          voter_device_id,
+            'facebook_account_created': facebook_account_created,
         }
         return results
 
@@ -36,9 +39,10 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
     if not positive_value_exists(results['voter_found']):
         results = {
-            'success': False,
-            'status': "VALID_VOTER_MISSING",
-            'voter_device_id': voter_device_id,
+            'success':                  False,
+            'status':                   "VALID_VOTER_MISSING",
+            'voter_device_id':          voter_device_id,
+            'facebook_account_created': facebook_account_created,
         }
         return results
 
@@ -48,18 +52,20 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     facebook_results = facebook_manager.retrieve_facebook_link_to_voter(voter.we_vote_id)
     if facebook_results['facebook_link_to_voter_found']:
         error_results = {
-            'status': "FACEBOOK_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
-            'success': False,
-            'voter_device_id': voter_device_id,
+            'status':                   "FACEBOOK_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'facebook_account_created': facebook_account_created,
         }
         return error_results
 
     auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
     if not auth_response_results['facebook_auth_response_found']:
         error_results = {
-            'status': "FACEBOOK_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
-            'success': False,
-            'voter_device_id': voter_device_id,
+            'status':                   "FACEBOOK_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'facebook_account_created': facebook_account_created,
         }
         return error_results
 
@@ -70,12 +76,14 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
 
     if not link_results['facebook_link_to_voter_saved']:
         error_results = {
-            'status': link_results['status'],
-            'success': False,
-            'voter_device_id': voter_device_id,
+            'status':                   link_results['status'],
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'facebook_account_created': facebook_account_created,
         }
         return error_results
 
+    facebook_account_created = True
     facebook_link_to_voter = link_results['facebook_link_to_voter']
 
     # Update voter with Facebook info (not including email -- that is done below)
@@ -118,9 +126,10 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
                     pass
 
     results = {
-        'success': success,
-        'status': status,
-        'voter_device_id': voter_device_id,
+        'success':                  success,
+        'status':                   status,
+        'voter_device_id':          voter_device_id,
+        'facebook_account_created': facebook_account_created,
     }
     return results
 
@@ -179,6 +188,38 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     :param voter_device_id:
     :return:
     """
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        success = False
+        error_results = {
+            'success':                                  success,
+            'status':                                   "VOTER_FACEBOOK_SIGN_IN_NO_VOTER",
+            'voter_device_id':                          voter_device_id,
+            'voter_we_vote_id':                         "",
+            'voter_has_data_to_preserve':               False,
+            'existing_facebook_account_found':          False,
+            'voter_we_vote_id_attached_to_facebook':    "",
+            'voter_we_vote_id_attached_to_facebook_email':  "",
+            'facebook_sign_in_found':                   False,
+            'facebook_sign_in_verified':                False,
+            'facebook_sign_in_failed':                  True,
+            'facebook_secret_key':                      "",
+            'facebook_access_token':                    "",
+            'facebook_signed_request':                  "",
+            'facebook_user_id':                         0,
+            'facebook_email':                           "",
+            'facebook_first_name':                      "",
+            'facebook_middle_name':                     "",
+            'facebook_last_name':                       "",
+            'facebook_profile_image_url_https':         "",
+        }
+        return error_results
+    voter = voter_results['voter']
+    voter_we_vote_id = voter.we_vote_id
+    voter_has_data_to_preserve = voter.has_data_to_preserve()
+
     facebook_manager = FacebookManager()
     auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
     status = auth_response_results['status']
@@ -188,6 +229,9 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             'success':                                  success,
             'status':                                   status,
             'voter_device_id':                          voter_device_id,
+            'voter_we_vote_id':                         voter_we_vote_id,
+            'voter_has_data_to_preserve':               False,
+            'existing_facebook_account_found':          False,
             'voter_we_vote_id_attached_to_facebook':    "",
             'voter_we_vote_id_attached_to_facebook_email':  "",
             'facebook_sign_in_found':                   False,
@@ -214,6 +258,9 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             'success':                                  success,
             'status':                                   status,
             'voter_device_id':                          voter_device_id,
+            'voter_we_vote_id':                         voter_we_vote_id,
+            'voter_has_data_to_preserve':               False,
+            'existing_facebook_account_found':          False,
             'voter_we_vote_id_attached_to_facebook':    "",
             'voter_we_vote_id_attached_to_facebook_email': "",
             'facebook_sign_in_found':                   False,
@@ -268,10 +315,19 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     else:
         voter_we_vote_id_attached_to_facebook_email = ""
 
+    if positive_value_exists(voter_we_vote_id_attached_to_facebook) or \
+            positive_value_exists(voter_we_vote_id_attached_to_facebook_email):
+        existing_facebook_account_found = True
+    else:
+        existing_facebook_account_found = False
+
     json_data = {
         'success':                                  success,
         'status':                                   status,
         'voter_device_id':                          voter_device_id,
+        'voter_we_vote_id':                         voter_we_vote_id,
+        'voter_has_data_to_preserve':               voter_has_data_to_preserve,
+        'existing_facebook_account_found':          existing_facebook_account_found,
         'voter_we_vote_id_attached_to_facebook':    voter_we_vote_id_attached_to_facebook,
         'voter_we_vote_id_attached_to_facebook_email':    voter_we_vote_id_attached_to_facebook_email,
         'facebook_sign_in_found':                   auth_response_results['facebook_auth_response_found'],

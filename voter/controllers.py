@@ -5,6 +5,7 @@
 from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, \
     VoterDeviceLinkManager, VoterManager
 from django.http import HttpResponse
+from email_outbound.controllers import move_email_address_entries_to_another_voter
 from email_outbound.models import EmailManager
 from follow.controllers import move_follow_entries_to_another_voter, move_organization_followers_to_another_organization
 from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, \
@@ -457,19 +458,19 @@ def voter_merge_two_accounts_for_api(
     move_positions_results = move_positions_to_another_voter(
         from_voter_id, from_voter_we_vote_id,
         to_voter_id, to_voter_we_vote_id, to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
-    status += move_positions_results['status']
+    status += " " + move_positions_results['status']
 
     if from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
         # If anyone is following the old voter's organization, move those followers to the new voter's organization
         move_organization_followers_results = move_organization_followers_to_another_organization(
             from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
             to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
-        status += move_organization_followers_results['status']
+        status += " " + move_organization_followers_results['status']
 
         # There might be some useful information in the from_voter's organization that needs to be moved
         move_organization_results = move_organization_data_to_another_organization(
             from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
-        status += move_organization_results['status']
+        status += " " + move_organization_results['status']
 
         # Finally, delete the from_voter's organization
         if move_organization_results['data_transfer_complete']:
@@ -482,12 +483,12 @@ def voter_merge_two_accounts_for_api(
 
     # Transfer friends from voter to new_owner_voter
     move_friends_results = move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
-    status += move_friends_results['status']
+    status += " " + move_friends_results['status']
 
     # Transfer friend invitations from voter to email_owner_voter
     move_friend_invitations_results = move_friend_invitations_to_another_voter(
         from_voter_we_vote_id, to_voter_we_vote_id)
-    status += move_friend_invitations_results['status']
+    status += " " + move_friend_invitations_results['status']
 
     if positive_value_exists(voter.linked_organization_we_vote_id):
         # Remove the link to the organization so we don't have a future conflict
@@ -500,9 +501,12 @@ def voter_merge_two_accounts_for_api(
 
     # Transfer the organizations the from_voter is following to the new_owner_voter
     move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id, to_voter_we_vote_id)
-    status += move_follow_results['status']
+    status += " " + move_follow_results['status']
 
     # Make sure we bring over all emails from the from_voter over to the to_voter
+    move_email_addresses_results = move_email_address_entries_to_another_voter(from_voter_we_vote_id,
+                                                                               to_voter_we_vote_id)
+    status += " " + move_email_addresses_results['status']
 
     if positive_value_exists(voter.primary_email_we_vote_id):
         # Remove the email information so we don't have a future conflict
@@ -519,7 +523,7 @@ def voter_merge_two_accounts_for_api(
     update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, new_owner_voter)
     if update_link_results['voter_device_link_updated']:
         success = True
-        status += "MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED"
+        status += " MERGE_TWO_ACCOUNTS_VOTER_DEVICE_LINK_UPDATED"
 
     results = {
         'status': status,

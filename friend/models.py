@@ -429,6 +429,59 @@ class FriendManager(models.Model):
 
     def retrieve_current_friends(self, voter_we_vote_id):
         current_friend_list = []  # The entries from CurrentFriend table
+        current_friend_list_found = False
+
+        if not positive_value_exists(voter_we_vote_id):
+            success = False
+            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'voter_we_vote_id':             voter_we_vote_id,
+                'current_friend_list_found':    current_friend_list_found,
+                'current_friend_list':          current_friend_list,
+            }
+            return results
+
+        try:
+            current_friend_queryset = CurrentFriend.objects.all()
+            current_friend_queryset = current_friend_queryset.filter(
+                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            current_friend_queryset = current_friend_queryset.order_by('-date_last_changed')
+            current_friend_list = current_friend_queryset
+
+            if len(current_friend_list):
+                success = True
+                current_friend_list_found = True
+                status = 'CURRENT_FRIEND_LIST_RETRIEVED'
+            else:
+                success = True
+                current_friend_list_found = False
+                status = 'NO_CURRENT_FRIEND_LIST_RETRIEVED'
+        except CurrentFriend.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            current_friend_list_found = False
+            status = 'NO_CURRENT_FRIEND_LIST_RETRIEVED_DoesNotExist'
+            current_friend_list = []
+        except Exception as e:
+            success = False
+            current_friend_list_found = False
+            status = 'FAILED retrieve_current_friends '
+            current_friend_list = []
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_we_vote_id':             voter_we_vote_id,
+            'current_friend_list_found':    current_friend_list_found,
+            'current_friend_list':          current_friend_list,
+        }
+        return results
+
+    def retrieve_current_friends_as_voters(self, voter_we_vote_id):
+        current_friend_list = []  # The entries from CurrentFriend table
         friend_list_found = False
         friend_list = []  # A list of friends, returned as voter entries
 
@@ -469,7 +522,7 @@ class FriendManager(models.Model):
         except Exception as e:
             success = False
             current_friend_list_found = False
-            status = 'FAILED retrieve_current_friends '
+            status = 'FAILED retrieve_current_friends_as_voters '
 
         if current_friend_list_found:
             voter_manager = VoterManager()
