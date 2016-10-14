@@ -18,6 +18,121 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 WEB_APP_ROOT_URL = get_environment_variable("WEB_APP_ROOT_URL")
 
 
+def augment_email_address_list(email_address_list, voter):
+    email_address_list_augmented = []
+    primary_email_address_found = False
+
+    status = ""
+    success = True
+    for email_address in email_address_list:
+        is_primary_email_address = False
+        if email_address.we_vote_id == voter.primary_email_we_vote_id:
+            is_primary_email_address = True
+            primary_email_address_found = True
+            primary_email_address = email_address
+        elif email_address.normalized_email_address == voter.email:
+            is_primary_email_address = True
+            primary_email_address_found = True
+            primary_email_address = email_address
+        email_address_for_json = {
+            'normalized_email_address': email_address.normalized_email_address,
+            'primary_email_address': is_primary_email_address,
+            'email_permanent_bounce': email_address.email_permanent_bounce,
+            'email_ownership_is_verified': email_address.email_ownership_is_verified,
+            'voter_we_vote_id': email_address.voter_we_vote_id,
+            'email_we_vote_id': email_address.we_vote_id,
+        }
+        email_address_list_augmented.append(email_address_for_json)
+
+    if primary_email_address_found:
+        # Make sure the voter's cached "email" and "primary_email_we_vote_id" are both correct and match same email
+        voter_data_updated = False
+        if voter.primary_email_we_vote_id.lower != primary_email_address.we_vote_id.lower:
+            voter.primary_email_we_vote_id = primary_email_address.we_vote_id
+            voter_data_updated = True
+        if voter.email.lower != primary_email_address.normalized_email_address.lower:
+            voter.email = primary_email_address.normalized_email_address
+            voter_data_updated = True
+
+        if voter_data_updated:
+            try:
+                voter.save()
+                status += "SAVED_UPDATED_EMAIL_VALUES"
+            except Exception as e:
+                # TODO DALE We could get this exception if the EmailAddress table has email X for voter 1
+                # and the voter table stores the same email X for voter 2
+                status += "UNABLE_TO_SAVE_UPDATED_EMAIL_VALUES"
+    else:
+        # If here we need to heal data. If here we know that the voter record doesn't have any email info
+        for primary_email_address_candidate in email_address_list:
+            if primary_email_address_candidate.email_ownership_is_verified:
+                # Now that we have found a verified email, save it to the voter account, and break out of loop
+                voter.primary_email_we_vote_id = primary_email_address_candidate.we_vote_id
+                voter.email = primary_email_address_candidate.normalized_email_address
+                voter.email_ownership_is_verified = True
+                try:
+                    voter.save()
+                    status += "SAVED_PRIMARY_EMAIL_ADDRESS_CANDIDATE"
+                except Exception as e:
+                    status += "UNABLE_TO_SAVE_PRIMARY_EMAIL_ADDRESS_CANDIDATE"
+                break
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'email_address_list':               email_address_list_augmented,
+    }
+    return results
+
+
+def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
+    status = " MOVE_EMAIL_ADDRESSES"
+    success = False
+    email_addresses_moved = 0
+    email_addresses_not_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status = "MOVE_EMAIL_ADDRESS_ENTRIES_MISSING_FROM_OR_TO_VOTER_ID"
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'email_addresses_moved': email_addresses_moved,
+            'email_addresses_not_moved': email_addresses_not_moved,
+        }
+        return results
+
+    email_manager = EmailManager()
+    email_address_list_results = email_manager.retrieve_voter_email_address_list(from_voter_we_vote_id)
+    if email_address_list_results['email_address_list_found']:
+        email_address_list = email_address_list_results['email_address_list']
+
+        for email_address_object in email_address_list:
+            # Change the voter_we_vote_id
+            try:
+                email_address_object.voter_we_vote_id = to_voter_we_vote_id
+                email_address_object.save()
+                email_addresses_moved += 1
+            except Exception as e:
+                email_addresses_not_moved += 1
+
+        status += " MOVE_EMAIL_ADDRESSES, moved: " + str(email_addresses_moved) + \
+                  ", not moved: " + str(email_addresses_not_moved)
+    else:
+        status += " " + email_address_list_results['status']
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'email_addresses_moved': email_addresses_moved,
+        'email_addresses_not_moved': email_addresses_not_moved,
+    }
+    return results
+
+
 def schedule_email_with_email_outbound_description(email_outbound_description):
     email_manager = EmailManager()
 
@@ -773,71 +888,3 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
         'email_address_list':               email_address_list_augmented,
     }
     return json_data
-
-
-def augment_email_address_list(email_address_list, voter):
-    email_address_list_augmented = []
-    primary_email_address_found = False
-
-    status = ""
-    success = True
-    for email_address in email_address_list:
-        is_primary_email_address = False
-        if email_address.we_vote_id == voter.primary_email_we_vote_id:
-            is_primary_email_address = True
-            primary_email_address_found = True
-            primary_email_address = email_address
-        elif email_address.normalized_email_address == voter.email:
-            is_primary_email_address = True
-            primary_email_address_found = True
-            primary_email_address = email_address
-        email_address_for_json = {
-            'normalized_email_address': email_address.normalized_email_address,
-            'primary_email_address': is_primary_email_address,
-            'email_permanent_bounce': email_address.email_permanent_bounce,
-            'email_ownership_is_verified': email_address.email_ownership_is_verified,
-            'voter_we_vote_id': email_address.voter_we_vote_id,
-            'email_we_vote_id': email_address.we_vote_id,
-        }
-        email_address_list_augmented.append(email_address_for_json)
-
-    if primary_email_address_found:
-        # Make sure the voter's cached "email" and "primary_email_we_vote_id" are both correct and match same email
-        voter_data_updated = False
-        if voter.primary_email_we_vote_id.lower != primary_email_address.we_vote_id.lower:
-            voter.primary_email_we_vote_id = primary_email_address.we_vote_id
-            voter_data_updated = True
-        if voter.email.lower != primary_email_address.normalized_email_address.lower:
-            voter.email = primary_email_address.normalized_email_address
-            voter_data_updated = True
-
-        if voter_data_updated:
-            try:
-                voter.save()
-                status += "SAVED_UPDATED_EMAIL_VALUES"
-            except Exception as e:
-                # TODO DALE We could get this exception if the EmailAddress table has email X for voter 1
-                # and the voter table stores the same email X for voter 2
-                status += "UNABLE_TO_SAVE_UPDATED_EMAIL_VALUES"
-    else:
-        # If here we need to heal data. If here we know that the voter record doesn't have any email info
-        for primary_email_address_candidate in email_address_list:
-            if primary_email_address_candidate.email_ownership_is_verified:
-                # Now that we have found a verified email, save it to the voter account, and break out of loop
-                voter.primary_email_we_vote_id = primary_email_address_candidate.we_vote_id
-                voter.email = primary_email_address_candidate.normalized_email_address
-                voter.email_ownership_is_verified = True
-                try:
-                    voter.save()
-                    status += "SAVED_PRIMARY_EMAIL_ADDRESS_CANDIDATE"
-                except Exception as e:
-                    status += "UNABLE_TO_SAVE_PRIMARY_EMAIL_ADDRESS_CANDIDATE"
-                break
-
-    results = {
-        'status':                           status,
-        'success':                          success,
-        'email_address_list':               email_address_list_augmented,
-    }
-    return results
-

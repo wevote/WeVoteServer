@@ -1496,6 +1496,7 @@ def voter_email_address_sign_in_view(request):  # voterEmailAddressSignIn
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     email_secret_key = request.GET.get('email_secret_key', '')
     yes_please_merge_accounts = request.GET.get('yes_please_merge_accounts', '')
+    yes_please_merge_accounts = positive_value_exists(yes_please_merge_accounts)
 
     results = voter_email_address_sign_in_for_api(voter_device_id=voter_device_id,
                                                   email_secret_key=email_secret_key)
@@ -1543,7 +1544,6 @@ def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetriev
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    yes_please_merge_accounts = request.GET.get('yes_please_merge_accounts', '')
 
     results = voter_facebook_sign_in_retrieve_for_api(voter_device_id=voter_device_id)
 
@@ -1551,6 +1551,7 @@ def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetriev
         'status':                                   results['status'],
         'success':                                  results['success'],
         'voter_device_id':                          voter_device_id,
+        'existing_facebook_account_found':          results['existing_facebook_account_found'],
         'voter_we_vote_id_attached_to_facebook':    results['voter_we_vote_id_attached_to_facebook'],
         'voter_we_vote_id_attached_to_facebook_email':  results['voter_we_vote_id_attached_to_facebook_email'],
         'facebook_retrieve_attempted':              True,
@@ -1558,7 +1559,7 @@ def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetriev
         'facebook_sign_in_verified':                results['facebook_sign_in_verified'],
         'facebook_sign_in_failed':                  results['facebook_sign_in_failed'],
         'facebook_secret_key':                      results['facebook_secret_key'],
-        'yes_please_merge_accounts':                yes_please_merge_accounts,
+        'voter_has_data_to_preserve':               results['voter_has_data_to_preserve'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

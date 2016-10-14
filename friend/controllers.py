@@ -625,11 +625,11 @@ def friend_list_for_api(voter_device_id,
     # IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS):
     friend_manager = FriendManager()
     if kind_of_list_we_are_looking_for == CURRENT_FRIENDS:
-        retrieve_current_friends_results = friend_manager.retrieve_current_friends(voter.we_vote_id)
-        success = retrieve_current_friends_results['success']
-        status = retrieve_current_friends_results['status']
-        if retrieve_current_friends_results['friend_list_found']:
-            current_friend_list = retrieve_current_friends_results['friend_list']
+        retrieve_current_friends_as_voters_results = friend_manager.retrieve_current_friends_as_voters(voter.we_vote_id)
+        success = retrieve_current_friends_as_voters_results['success']
+        status = retrieve_current_friends_as_voters_results['status']
+        if retrieve_current_friends_as_voters_results['friend_list_found']:
+            current_friend_list = retrieve_current_friends_as_voters_results['friend_list']
             for friend_voter in current_friend_list:
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
@@ -803,9 +803,9 @@ def move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     friend_entries_not_moved = 0
     friend_manager = FriendManager()
     from_friend_results = friend_manager.retrieve_current_friends(from_voter_we_vote_id)
-    from_friend_list = from_friend_results['friend_list']
+    from_friend_list = from_friend_results['current_friend_list']
     to_friend_results = friend_manager.retrieve_current_friends(to_voter_we_vote_id)
-    to_friend_list = to_friend_results['friend_list']
+    to_friend_list = to_friend_results['current_friend_list']
 
     for from_friend_entry in from_friend_list:
         # See if the "to_voter" already has an entry for this organization
