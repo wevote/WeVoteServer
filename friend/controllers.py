@@ -776,21 +776,139 @@ def friend_list_for_api(voter_device_id,
 
 
 def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
-    status = "MOVE_FRIEND_INVITATIONS_IN_DEVELOPMENT "
+    status = "MOVE_FRIEND_INVITATIONS_START "
     success = False
     friend_invitation_entries_moved = 0
     friend_invitation_entries_not_moved = 0
 
-    # FriendInvitationEmailLink
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status = "MOVE_FRIENDS-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID"
+        results = {
+            'status':                               status,
+            'success':                              success,
+            'from_voter_we_vote_id':                from_voter_we_vote_id,
+            'to_voter_we_vote_id':                  to_voter_we_vote_id,
+            'friend_invitation_entries_moved':      0,
+            'friend_invitation_entries_not_moved':  0,
+        }
+        return results
 
+    friend_manager = FriendManager()
+
+    # ###############################
+    # FriendInvitationEmailLink
+    # SENDER entries
+    # FROM SENDER: Invitations sent BY the from_voter to others
+    friend_invitation_email_link_from_sender_results = friend_manager.retrieve_friend_invitation_email_link_list(
+        from_voter_we_vote_id)
+    if friend_invitation_email_link_from_sender_results['friend_invitation_list_found']:
+        friend_invitation_email_link_from_sender_list = \
+            friend_invitation_email_link_from_sender_results['friend_invitation_list']
+
+        # TO SENDER: Now get existing invitations for the to_voter so we can see if an invitation already exists
+        friend_invitation_email_link_to_sender_results = friend_manager.retrieve_friend_invitation_email_link_list(
+            to_voter_we_vote_id)
+        friend_invitation_email_link_to_sender_list = \
+            friend_invitation_email_link_to_sender_results['friend_invitation_list']
+
+        for from_sender_entry in friend_invitation_email_link_from_sender_list:
+            # See if the "to_voter" already has an invitation
+            to_sender_invitation_found = False
+            # Cycle through all of the "to_voter" entries and if there isn't one, move it
+            for to_sender_entry in friend_invitation_email_link_to_sender_list:
+                if to_sender_entry.recipient_voter_email == from_sender_entry.recipient_voter_email:
+                    to_sender_invitation_found = True
+                    break
+
+            if not to_sender_invitation_found:
+                # Change the sender_voter_we_vote_id to the new we_vote_id
+                try:
+                    from_sender_entry.sender_voter_we_vote_id = to_voter_we_vote_id
+                    from_sender_entry.save()
+                    friend_invitation_entries_moved += 1
+                except Exception as e:
+                    friend_invitation_entries_not_moved += 1
+            else:
+                friend_invitation_entries_not_moved += 1
+
+    # ###############################
     # FriendInvitationVoterLink
+    # SENDER entries
+    # FROM SENDER: Invitations sent BY the from_voter to others
+    friend_invitation_voter_link_from_sender_results = friend_manager.retrieve_friend_invitation_voter_link_list(
+        from_voter_we_vote_id)
+    if friend_invitation_voter_link_from_sender_results['friend_invitation_list_found']:
+        friend_invitation_voter_link_from_sender_list = \
+            friend_invitation_voter_link_from_sender_results['friend_invitation_list']
+
+        # TO SENDER: Now get existing invitations for the to_voter so we can see if an invitation already exists
+        friend_invitation_voter_link_to_sender_results = friend_manager.retrieve_friend_invitation_voter_link_list(
+            to_voter_we_vote_id)
+        friend_invitation_voter_link_to_sender_list = \
+            friend_invitation_voter_link_to_sender_results['friend_invitation_list']
+
+        for from_sender_entry in friend_invitation_voter_link_from_sender_list:
+            # See if the "to_voter" already has an invitation
+            to_sender_invitation_found = False
+            # Cycle through all of the "to_voter" entries and if there isn't one, move it
+            for to_sender_entry in friend_invitation_voter_link_to_sender_list:
+                if to_sender_entry.recipient_voter_we_vote_id == from_sender_entry.recipient_voter_we_vote_id:
+                    to_sender_invitation_found = True
+                    break
+
+            if not to_sender_invitation_found:
+                # Change the friendship values to the new we_vote_id
+                try:
+                    from_sender_entry.sender_voter_we_vote_id = to_voter_we_vote_id
+                    from_sender_entry.save()
+                    friend_invitation_entries_moved += 1
+                except Exception as e:
+                    friend_invitation_entries_not_moved += 1
+            else:
+                friend_invitation_entries_not_moved += 1
+
+    # RECIPIENT entries
+    # FROM RECIPIENT: Invitations sent TO the from_voter from others
+    friend_invitation_voter_link_from_recipient_results = friend_manager.retrieve_friend_invitation_voter_link_list(
+        '', from_voter_we_vote_id)
+    if friend_invitation_voter_link_from_recipient_results['friend_invitation_list_found']:
+        friend_invitation_voter_link_from_recipient_list = \
+            friend_invitation_voter_link_from_recipient_results['friend_invitation_list']
+
+        # TO RECIPIENT: Now get existing invitations for the to_voter so we can see if an invitation already exists
+        friend_invitation_voter_link_to_recipient_results = friend_manager.retrieve_friend_invitation_voter_link_list(
+            '', to_voter_we_vote_id)
+        friend_invitation_voter_link_to_recipient_list = \
+            friend_invitation_voter_link_to_recipient_results['friend_invitation_list']
+
+        for from_sender_entry in friend_invitation_voter_link_from_recipient_list:
+            # See if the "to_voter" already has an invitation
+            to_sender_invitation_found = False
+            # Cycle through all of the "to_voter" entries and if there isn't one, move it
+            for to_sender_entry in friend_invitation_voter_link_to_recipient_list:
+                if to_sender_entry.sender_voter_we_vote_id == from_sender_entry.sender_voter_we_vote_id:
+                    to_sender_invitation_found = True
+                    break
+
+            if not to_sender_invitation_found:
+                # Change the friendship values to the new we_vote_id
+                try:
+                    from_sender_entry.recipient_voter_we_vote_id = to_voter_we_vote_id
+                    from_sender_entry.save()
+                    friend_invitation_entries_moved += 1
+                except Exception as e:
+                    friend_invitation_entries_not_moved += 1
+            else:
+                friend_invitation_entries_not_moved += 1
+    status += " FRIEND_INVITATIONS moved: " + str(friend_invitation_entries_moved) + \
+              ", not moved: " + str(friend_invitation_entries_not_moved)
 
     results = {
-        'status': status,
-        'success': success,
-        'from_voter_we_vote_id': from_voter_we_vote_id,
-        'to_voter_we_vote_id': to_voter_we_vote_id,
-        'friend_entries_moved': friend_invitation_entries_moved,
+        'status':                   status,
+        'success':                  success,
+        'from_voter_we_vote_id':    from_voter_we_vote_id,
+        'to_voter_we_vote_id':      to_voter_we_vote_id,
+        'friend_entries_moved':     friend_invitation_entries_moved,
         'friend_entries_not_moved': friend_invitation_entries_not_moved,
     }
     return results
@@ -801,6 +919,19 @@ def move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
     success = False
     friend_entries_moved = 0
     friend_entries_not_moved = 0
+
+    if not positive_value_exists(from_voter_we_vote_id) or not positive_value_exists(to_voter_we_vote_id):
+        status = "MOVE_FRIENDS-MISSING_EITHER_FROM_OR_TO_VOTER_WE_VOTE_ID"
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter_we_vote_id': from_voter_we_vote_id,
+            'to_voter_we_vote_id': to_voter_we_vote_id,
+            'friend_entries_moved': friend_entries_moved,
+            'friend_entries_not_moved': friend_entries_not_moved,
+        }
+        return results
+
     friend_manager = FriendManager()
     from_friend_results = friend_manager.retrieve_current_friends(from_voter_we_vote_id)
     from_friend_list = from_friend_results['current_friend_list']
@@ -828,7 +959,8 @@ def move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id):
             except Exception as e:
                 friend_entries_not_moved += 1
 
-    from_friend_list_remaining = friend_manager.retrieve_current_friends(from_voter_we_vote_id)
+    from_friend_list_remaining_results = friend_manager.retrieve_current_friends(from_voter_we_vote_id)
+    from_friend_list_remaining = from_friend_list_remaining_results['current_friend_list']
     for from_friend_entry in from_friend_list_remaining:
         # Delete the remaining friendship values
         try:

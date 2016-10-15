@@ -1578,6 +1578,8 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
     facebook_signed_request = request.GET.get('facebook_signed_request', '')
     save_profile_data = request.GET.get('save_profile_data', False)
     save_profile_data = positive_value_exists(save_profile_data)
+    save_photo_data = request.GET.get('save_photo_data', False)
+    save_photo_data = positive_value_exists(save_photo_data)
     facebook_email = request.GET.get('facebook_email', '')
     facebook_first_name = request.GET.get('facebook_first_name', '')
     facebook_middle_name = request.GET.get('facebook_middle_name', '')
@@ -1595,6 +1597,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
                                                   facebook_first_name=facebook_first_name,
                                                   facebook_middle_name=facebook_middle_name,
                                                   facebook_last_name=facebook_last_name,
+                                                  save_photo_data=save_photo_data,
                                                   facebook_profile_image_url_https=facebook_profile_image_url_https,
                                                   )
 
@@ -1606,6 +1609,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
         'facebook_sign_in_saved':   results['facebook_sign_in_saved'],
         'save_auth_data':           save_auth_data,
         'save_profile_data':        save_profile_data,
+        'save_photo_data':          save_photo_data,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

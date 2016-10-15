@@ -341,6 +341,11 @@ def voter_merge_two_accounts_for_api(
                 }
                 return error_results
 
+        # Update the facebook photo
+        save_facebook_results = voter_manager.save_facebook_user_values(facebook_owner_voter, facebook_auth_response)
+        status += " " + save_facebook_results['status']
+        facebook_owner_voter = save_facebook_results['voter']
+
         # ##### Make the facebook_email the primary email for facebook_owner_voter TODO DALE
         # Does facebook_owner_voter already have a primary email? If not, update it
         if not facebook_owner_voter.email_ownership_is_verified:
