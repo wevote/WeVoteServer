@@ -352,6 +352,7 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
                                         facebook_signed_request,
                                         save_profile_data,
                                         facebook_email, facebook_first_name, facebook_middle_name, facebook_last_name,
+                                        save_photo_data,
                                         facebook_profile_image_url_https):
     """
 
@@ -366,6 +367,7 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     :param facebook_first_name:
     :param facebook_middle_name:
     :param facebook_last_name:
+    :param save_photo_data:
     :param facebook_profile_image_url_https:
     :return:
     """
@@ -384,7 +386,7 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
         }
         return json_data
 
-    if not save_auth_data and not save_profile_data:
+    if not save_auth_data and not save_profile_data and not save_photo_data:
         error_results = {
             'status':                       "VOTER_FACEBOOK_SIGN_IN_SAVE_MUST_SPECIFY_AUTH_OR_PROFILE ",
             'success':                      False,

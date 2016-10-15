@@ -616,6 +616,114 @@ class FriendManager(models.Model):
         }
         return results
 
+    def retrieve_friend_invitation_email_link_list(self, sender_voter_we_vote_id):
+        status = ""
+
+        if not positive_value_exists(sender_voter_we_vote_id):
+            success = False
+            status = 'RETRIEVE_FRIEND_INVITATION_EMAIL_LINK-MISSING_SENDER '
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'sender_voter_we_vote_id':      sender_voter_we_vote_id,
+                'friend_invitation_list_found': False,
+                'friend_invitation_list':       [],
+            }
+            return results
+
+        friend_invitation_email_link_list = []
+        try:
+            # Find invitations that I sent.
+            friend_invitation_email_queryset = FriendInvitationEmailLink.objects.all()
+            friend_invitation_email_queryset = friend_invitation_email_queryset.filter(
+                sender_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+            friend_invitation_email_link_list = friend_invitation_email_queryset
+
+            if len(friend_invitation_email_link_list):
+                success = True
+                friend_invitation_email_link_list_found = True
+                status += ' FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
+            else:
+                success = True
+                friend_invitation_email_link_list_found = False
+                status += ' NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
+        except FriendInvitationEmailLink.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            friend_invitation_email_link_list_found = False
+            status += ' NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED_DoesNotExist '
+            friend_invitation_email_link_list = []
+        except Exception as e:
+            success = False
+            friend_invitation_email_link_list_found = False
+            status += ' FAILED retrieve_friend_invitation_email_link_list FriendInvitationVoterLink '
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'sender_voter_we_vote_id':      sender_voter_we_vote_id,
+            'friend_invitation_list_found': friend_invitation_email_link_list_found,
+            'friend_invitation_list':       friend_invitation_email_link_list,
+        }
+        return results
+
+    def retrieve_friend_invitation_voter_link_list(self, sender_voter_we_vote_id='', recipient_voter_we_vote_id=''):
+        status = ""
+
+        if not positive_value_exists(sender_voter_we_vote_id) and not positive_value_exists(recipient_voter_we_vote_id):
+            success = False
+            status = 'RETRIEVE_FRIEND_INVITATION_VOTER_LINK-MISSING_BOTH_SENDER_AND_RECIPIENT '
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'sender_voter_we_vote_id':      sender_voter_we_vote_id,
+                'recipient_voter_we_vote_id':   recipient_voter_we_vote_id,
+                'friend_invitation_list_found': False,
+                'friend_invitation_list':       [],
+            }
+            return results
+
+        friend_invitation_from_voter_list = []
+        try:
+            # Find invitations that I sent.
+            friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
+            if positive_value_exists(sender_voter_we_vote_id):
+                friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
+                    sender_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+            if positive_value_exists(recipient_voter_we_vote_id):
+                friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
+                    recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id)
+            friend_invitation_from_voter_list = friend_invitation_voter_queryset
+
+            if len(friend_invitation_from_voter_list):
+                success = True
+                friend_invitation_from_voter_list_found = True
+                status += ' FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
+            else:
+                success = True
+                friend_invitation_from_voter_list_found = False
+                status += ' NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED '
+        except FriendInvitationVoterLink.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            friend_invitation_from_voter_list_found = False
+            status += ' NO_FRIEND_INVITATIONS_PROCESSED_LIST_RETRIEVED_DoesNotExist '
+            friend_invitation_from_voter_list = []
+        except Exception as e:
+            success = False
+            friend_invitation_from_voter_list_found = False
+            status += ' FAILED retrieve_friend_invitation_voter_link_list FriendInvitationVoterLink '
+
+        results = {
+            'success': success,
+            'status': status,
+            'sender_voter_we_vote_id': sender_voter_we_vote_id,
+            'recipient_voter_we_vote_id': recipient_voter_we_vote_id,
+            'friend_invitation_list_found': friend_invitation_from_voter_list_found,
+            'friend_invitation_list': friend_invitation_from_voter_list,
+        }
+        return results
+
     def retrieve_friend_invitations_processed(self, viewer_voter_we_vote_id):
         """
 
