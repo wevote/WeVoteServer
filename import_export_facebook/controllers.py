@@ -282,6 +282,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     facebook_sign_in_failed = False
     facebook_secret_key = ""
     voter_we_vote_id_attached_to_facebook = ""
+    voter_manager = VoterManager()
 
     facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_auth_response.facebook_user_id)
     if facebook_link_results['facebook_link_to_voter_found']:
@@ -291,7 +292,6 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         facebook_secret_key = facebook_link_to_voter.secret_key
     else:
         # See if we need to heal the data - look in the voter table for any records with a facebook_user_id
-        voter_manager = VoterManager()
         voter_results = voter_manager.retrieve_voter_by_facebook_id(facebook_auth_response.facebook_user_id)
         if voter_results['voter_found']:
             voter_with_facebook_user_id = voter_results['voter']
@@ -301,19 +301,34 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
                     facebook_auth_response.facebook_user_id, voter_we_vote_id_attached_to_facebook)
                 status += " " + save_results['status']
 
-    # Now we want to check on the incoming facebook_email to see if it is already in use with another account
-    # We do not want to allow people to separate their facebook_email from their facebook account, but
-    #  there are conditions where it might happen and we can't prevent it. (Like someone signs in with Email A,
-    #  then signs into Facebook which uses Email B, then changes their Facebook email to Email A.)
-    email_manager = EmailManager()
-    temp_voter_we_vote_id = ""
-    email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-        temp_voter_we_vote_id, facebook_auth_response.facebook_email)
-    if email_results['email_address_object_found']:
-        email_address_object = email_results['email_address_object']
-        voter_we_vote_id_attached_to_facebook_email = email_address_object.voter_we_vote_id
-    else:
-        voter_we_vote_id_attached_to_facebook_email = ""
+    voter_we_vote_id_attached_to_facebook_email = ""
+    if not voter_we_vote_id_attached_to_facebook:
+        # Now we want to check on the incoming facebook_email to see if it is already in use with another account
+        # We do not want to allow people to separate their facebook_email from their facebook account, but
+        #  there are conditions where it might happen and we can't prevent it. (Like someone signs in with Email A,
+        #  then signs into Facebook which uses Email B, then changes their Facebook email to Email A.)
+        email_manager = EmailManager()
+        temp_voter_we_vote_id = ""
+        email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+            temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+        if email_results['email_address_object_found']:
+            # See if we need to heal the data - look in the voter table for any records with a facebook_email
+            email_address_object = email_results['email_address_object']
+            voter_we_vote_id_attached_to_facebook_email = email_address_object.voter_we_vote_id
+
+            # DALE NOTE: I don't believe it is necessary to retrieve the voter_with_facebook_email
+            # voter_results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id_attached_to_facebook_email)
+            # if voter_results['voter_found']:
+            #     voter_with_facebook_email = voter_results['voter']
+            save_results = facebook_manager.create_facebook_link_to_voter(
+                facebook_auth_response.facebook_user_id, voter_we_vote_id_attached_to_facebook_email)
+            status += " " + save_results['status']
+
+            if save_results['facebook_link_to_voter_saved']:
+                facebook_link_to_voter = save_results['facebook_link_to_voter']
+                facebook_secret_key = facebook_link_to_voter.secret_key
+        else:
+            voter_we_vote_id_attached_to_facebook_email = ""
 
     if positive_value_exists(voter_we_vote_id_attached_to_facebook) or \
             positive_value_exists(voter_we_vote_id_attached_to_facebook_email):
@@ -377,23 +392,25 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
         json_data = {
-            'status':                       device_id_results['status'],
-            'success':                      False,
-            'voter_device_id':              voter_device_id,
-            'facebook_sign_in_saved':       False,
-            'save_auth_data':               save_auth_data,
-            'save_profile_data':            save_profile_data,
+            'status':                   device_id_results['status'],
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'facebook_sign_in_saved':   False,
+            'save_auth_data':           save_auth_data,
+            'save_profile_data':        save_profile_data,
+            'minimum_data_saved':       False,
         }
         return json_data
 
     if not save_auth_data and not save_profile_data and not save_photo_data:
         error_results = {
-            'status':                       "VOTER_FACEBOOK_SIGN_IN_SAVE_MUST_SPECIFY_AUTH_OR_PROFILE ",
-            'success':                      False,
-            'voter_device_id':              voter_device_id,
-            'facebook_sign_in_saved':       False,
-            'save_auth_data':               save_auth_data,
-            'save_profile_data':            save_profile_data,
+            'status':                   "VOTER_FACEBOOK_SIGN_IN_SAVE_MUST_SPECIFY_AUTH_OR_PROFILE ",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'facebook_sign_in_saved':   False,
+            'save_auth_data':           save_auth_data,
+            'save_profile_data':        save_profile_data,
+            'minimum_data_saved':       False,
         }
         return error_results
 
@@ -406,17 +423,21 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     # Look to see if there is an EmailAddress entry for the incoming text_for_email_address or email_we_vote_id
     if not auth_data_results['facebook_auth_response_saved']:
         error_results = {
-            'status':                       "FACEBOOK_AUTH_NOT_SAVED ",
-            'success':                      False,
-            'voter_device_id':              voter_device_id,
-            'facebook_sign_in_saved':       False,
-            'save_auth_data':               save_auth_data,
-            'save_profile_data':            save_profile_data,
+            'status':                   "FACEBOOK_AUTH_NOT_SAVED ",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'facebook_sign_in_saved':   False,
+            'save_auth_data':           save_auth_data,
+            'save_profile_data':        save_profile_data,
+            'minimum_data_saved':       False,
         }
         return error_results
 
     success = auth_data_results['success']
     status += auth_data_results['status']
+
+    minimum_data_saved = positive_value_exists(facebook_email) | \
+        positive_value_exists(facebook_profile_image_url_https)
 
     json_data = {
         'status':                   status,
@@ -425,5 +446,6 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
         'facebook_sign_in_saved':   auth_data_results['facebook_auth_response_saved'],
         'save_auth_data':           save_auth_data,
         'save_profile_data':        save_profile_data,
+        'minimum_data_saved':       minimum_data_saved,
     }
     return json_data

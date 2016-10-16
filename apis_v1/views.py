@@ -23,7 +23,8 @@ from import_export_facebook.controllers import facebook_disconnect_for_api, \
     voter_facebook_sign_in_retrieve_for_api, voter_facebook_sign_in_save_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import twitter_sign_in_start_for_api, \
-    twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api
+    twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
+    twitter_sign_in_retrieve_for_api, voter_twitter_save_to_current_account_for_api
 import json
 from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
@@ -52,6 +53,7 @@ from support_oppose_deciding.controllers import position_oppose_count_for_ballot
     positions_count_for_one_ballot_item_for_api, \
     voter_opposing_save, voter_stop_opposing_save, voter_stop_supporting_save, voter_supporting_save_for_api
 from twitter.controllers import twitter_identity_retrieve_for_api
+from urllib.parse import quote
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
 from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
@@ -850,7 +852,7 @@ def quick_info_retrieve_view(request):
                                        ballot_item_we_vote_id=ballot_item_we_vote_id)
 
 
-def search_all_view(request):
+def search_all_view(request):  # searchAll
     """
     Find information anywhere in the We Vote universe.
     :param request:
@@ -889,7 +891,7 @@ def search_all_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def twitter_identity_retrieve_view(request):
+def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
     """
     Find the kind of owner and unique id of this twitter handle. We use this to take an incoming URI like
     https://wevote.guide/RepBarbaraLee and return the owner of 'RepBarbaraLee'. (twitterIdentityRetrieve)
@@ -933,7 +935,7 @@ def twitter_identity_retrieve_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def twitter_sign_in_start_view(request):
+def twitter_sign_in_start_view(request):  # twitterSignInStart
     """
     Start off the process of signing in with Twitter (twitterSignInStart)
     :param request:
@@ -944,6 +946,13 @@ def twitter_sign_in_start_view(request):
     return_url = request.GET.get('return_url', '')
 
     results = twitter_sign_in_start_for_api(voter_device_id, return_url)
+
+    if positive_value_exists(results['jump_to_request_voter_info']) and positive_value_exists(results['return_url']):
+        next_step_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestVoterInfo/"
+        next_step_url += "?voter_device_id=" + voter_device_id
+        next_step_url += "&return_url=" + quote(results['return_url'], safe='')
+        return HttpResponseRedirect(next_step_url)
+
     json_data = {
         'status':               results['status'],
         'success':              results['success'],
@@ -955,7 +964,7 @@ def twitter_sign_in_start_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def twitter_sign_in_request_access_token_view(request):
+def twitter_sign_in_request_access_token_view(request):  # twitterSignInRequestAccessToken
     """
     Step 2 of the Twitter Sign In Process (twitterSignInRequestAccessToken)
     :param request:
@@ -974,7 +983,7 @@ def twitter_sign_in_request_access_token_view(request):
     if positive_value_exists(results['return_url']):
         next_step_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestVoterInfo/"
         next_step_url += "?voter_device_id=" + voter_device_id
-        next_step_url += "&return_url=" + results['return_url']
+        next_step_url += "&return_url=" + quote(results['return_url'], safe='')
         return HttpResponseRedirect(next_step_url)
 
     json_data = {
@@ -986,7 +995,7 @@ def twitter_sign_in_request_access_token_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def twitter_sign_in_request_voter_info_view(request):
+def twitter_sign_in_request_voter_info_view(request):  # twitterSignInRequestVoterInfo
     """
     Step 3 of the Twitter Sign In Process (twitterSignInRequestVoterInfo)
     :param request:
@@ -999,11 +1008,7 @@ def twitter_sign_in_request_voter_info_view(request):
     results = twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url)
 
     if positive_value_exists(results['return_url']):
-        modified_return_url = results['return_url']
-        if results['twitter_handle_found']:
-            modified_return_url = modified_return_url.replace("signinswitchend", "signinswitchend/" +
-                                                              results['twitter_handle'])
-        return HttpResponseRedirect(modified_return_url)
+        return HttpResponseRedirect(results['return_url'])
 
     json_data = {
         'status':               results['status'],
@@ -1015,6 +1020,33 @@ def twitter_sign_in_request_voter_info_view(request):
         'switch_accounts':      results['switch_accounts'],
     }
 
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
+    """
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    results = twitter_sign_in_retrieve_for_api(voter_device_id=voter_device_id)
+
+    json_data = {
+        'status':                                   results['status'],
+        'success':                                  results['success'],
+        'voter_device_id':                          voter_device_id,
+        'voter_we_vote_id':               results['voter_we_vote_id'],
+        'voter_has_data_to_preserve':               results['voter_has_data_to_preserve'],
+        'existing_twitter_account_found':          results['existing_twitter_account_found'],
+        'voter_we_vote_id_attached_to_twitter':    results['voter_we_vote_id_attached_to_twitter'],
+        'twitter_retrieve_attempted':              True,
+        'twitter_sign_in_found':                   results['twitter_sign_in_found'],
+        'twitter_sign_in_verified':                results['twitter_sign_in_verified'],
+        'twitter_sign_in_failed':                  results['twitter_sign_in_failed'],
+        'twitter_secret_key':                      results['twitter_secret_key'],
+        # There are more values we currently aren't returning
+    }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
@@ -1610,6 +1642,7 @@ def voter_facebook_sign_in_save_view(request):  # voterFacebookSignInSave
         'save_auth_data':           save_auth_data,
         'save_profile_data':        save_profile_data,
         'save_photo_data':          save_photo_data,
+        'minimum_data_saved':       results['minimum_data_saved'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1729,11 +1762,13 @@ def voter_merge_two_accounts_view(request):  # voterMergeTwoAccounts
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     email_secret_key = request.GET.get('email_secret_key', '')
     facebook_secret_key = request.GET.get('facebook_secret_key', '')
+    twitter_secret_key = request.GET.get('twitter_secret_key', '')
     invitation_secret_key = request.GET.get('invitation_secret_key', '')
 
     results = voter_merge_two_accounts_for_api(voter_device_id=voter_device_id,
                                                email_secret_key=email_secret_key,
                                                facebook_secret_key=facebook_secret_key,
+                                               twitter_secret_key=twitter_secret_key,
                                                invitation_secret_key=invitation_secret_key)
 
     json_data = {
@@ -2308,6 +2343,22 @@ def voter_all_stars_status_retrieve_view(request):  # voterAllStarsStatusRetriev
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     return voter_all_stars_status_retrieve_for_api(
         voter_device_id=voter_device_id)
+
+
+def voter_twitter_save_to_current_account_view(request):  # voterTwitterSaveToCurrentAccount
+    """
+    Saving the results of signing in with Twitter
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = voter_twitter_save_to_current_account_for_api(voter_device_id)
+    json_data = {
+        'status': results['status'],
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_update_view(request):  # voterUpdate

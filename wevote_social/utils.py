@@ -27,7 +27,7 @@ def authenticate_associate_by_email(**kwargs):
 
 # We replace the default social_user pipeline entry so we can switch to an existing account:
 # http://www.scriptscoop.net/t/08c148b90d9a/python-authalreadyassociated-exception-in-django-social-auth.html (jacob)
-def social_user(backend, uid, details, user=None, *args, **kwargs):
+def social_user(backend, uid, details, user=None, *args, **kwargs):  # TODO DALE Upgrade this to use TwitterAuthResponse
     voter_manager = VoterManager()
     provider = backend.name
     social = backend.strategy.storage.user.get_social_auth(provider, uid)

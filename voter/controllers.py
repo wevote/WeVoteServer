@@ -12,14 +12,204 @@ from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_i
     move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
 from import_export_facebook.models import FacebookManager
+from import_export_twitter.models import TwitterAuthManager
 import json
 from organization.controllers import move_organization_data_to_another_organization
 from organization.models import OrganizationManager
 from position.controllers import move_positions_to_another_voter
+from twitter.models import TwitterUserManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
+
+
+def move_facebook_info_to_another_voter(from_voter, to_voter):
+    status = "MOVE_FACEBOOK_INFO "  # Deal with situation where destination account already has facebook_id
+    success = False
+
+    if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
+            or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
+        status += "MOVE_FACEBOOK_INFO_MISSING_FROM_OR_TO_VOTER_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
+
+    facebook_manager = FacebookManager()
+    to_voter_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
+        to_voter.we_vote_id)
+    # if to_voter_facebook_results['facebook_link_to_voter_found']:
+    #     to_voter_facebook_link = to_voter_facebook_results['facebook_link_to_voter']
+    from_voter_facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_voter_we_vote_id(
+        from_voter.we_vote_id)
+
+    # Move facebook_link_to_voter
+    if to_voter_facebook_results['facebook_link_to_voter_found']:
+        # Don't try to move from the from_voter
+        success = True
+        status += "TO_VOTER_ALREADY_HAS_FACEBOOK_LINK "
+    elif from_voter_facebook_results['facebook_link_to_voter_found']:
+        from_voter_facebook_link = from_voter_facebook_results['facebook_link_to_voter']
+        try:
+            from_voter_facebook_link.voter_we_vote_id = to_voter.we_vote_id
+            from_voter_facebook_link.save()
+            success = True
+            status += "FROM_VOTER_FACEBOOK_LINK_MOVED "
+        except Exception as e:
+            # Fail silently
+            pass
+    elif positive_value_exists(from_voter.facebook_id):
+        create_results = facebook_manager.create_facebook_link_to_voter(from_voter.facebook_id, to_voter.we_vote_id)
+        status += " " + create_results['status']
+
+    # Transfer data in voter records
+    temp_facebook_email = ""
+    temp_facebook_id = 0
+    temp_facebook_profile_image_url_https = ""
+    temp_fb_username = ""
+    if positive_value_exists(to_voter.facebook_id):
+        # Don't try to move from the from_voter
+        success = True
+        status += "TO_VOTER_ALREADY_HAS_FACEBOOK_ID "
+    elif positive_value_exists(from_voter.facebook_id):
+        # Remove info from the from_voter and then move facebook info to the to_voter
+        try:
+            # Copy values
+            temp_facebook_email = from_voter.facebook_email
+            temp_facebook_id = from_voter.facebook_id
+            temp_facebook_profile_image_url_https = from_voter.facebook_profile_image_url_https
+            temp_fb_username = from_voter.fb_username
+            # Now delete it and save so we can save the unique facebook_id in the to_voter
+            from_voter.facebook_email = ""
+            from_voter.facebook_id = 0
+            from_voter.facebook_profile_image_url_https = ""
+            from_voter.fb_username = ""
+            from_voter.save()
+            status += "FROM_VOTER_FACEBOOK_DATA_REMOVED "
+        except Exception as e:
+            # Fail silently
+            status += "FROM_VOTER_FACEBOOK_DATA_NOT_REMOVED "
+
+        try:
+            # Now move values to new entry and save
+            to_voter.facebook_email = temp_facebook_email
+            to_voter.facebook_id = temp_facebook_id
+            to_voter.facebook_profile_image_url_https = temp_facebook_profile_image_url_https
+            to_voter.fb_username = temp_fb_username
+            to_voter.save()
+            status += "TO_VOTER_FACEBOOK_DATA_SAVED "
+        except Exception as e:
+            # Fail silently
+            status += "TO_VOTER_FACEBOOK_DATA_NOT_SAVED "
+
+    else:
+        success = True
+        status += "NO_FACEBOOK_ID_FOUND "
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter': from_voter,
+        'to_voter': to_voter,
+    }
+    return results
+
+
+def move_twitter_info_to_another_voter(from_voter, to_voter):
+    status = "MOVE_TWITTER_INFO "  # Deal with situation where destination account already has facebook_id
+    success = False
+
+    if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
+            or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
+        status += "MOVE_TWITTER_INFO_MISSING_FROM_OR_TO_VOTER_ID "
+        results = {
+            'status': status,
+            'success': success,
+            'from_voter': from_voter,
+            'to_voter': to_voter,
+        }
+        return results
+
+    twitter_user_manager = TwitterUserManager()
+    to_voter_twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
+        to_voter.we_vote_id)
+    from_voter_twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
+        from_voter.we_vote_id)
+
+    # Move facebook_link_to_voter
+    if to_voter_twitter_results['twitter_link_to_voter_found']:
+        # Don't try to move from the from_voter
+        success = True
+        status += "TO_VOTER_ALREADY_HAS_TWITTER_LINK "
+    elif from_voter_twitter_results['twitter_link_to_voter_found']:
+        from_voter_twitter_link = from_voter_twitter_results['twitter_link_to_voter']
+        try:
+            from_voter_twitter_link.voter_we_vote_id = to_voter.we_vote_id
+            from_voter_twitter_link.save()
+            success = True
+            status += "FROM_VOTER_TWITTER_LINK_MOVED "
+        except Exception as e:
+            # Fail silently
+            status += "FROM_VOTER_TWITTER_LINK_NOT_MOVED "
+    elif positive_value_exists(from_voter.twitter_id):
+        create_results = twitter_user_manager.create_twitter_link_to_voter(from_voter.twitter_id, to_voter.we_vote_id)
+        status += " " + create_results['status']
+
+    # Transfer data in voter records
+    temp_twitter_id = 0
+    temp_twitter_name = ""
+    temp_twitter_profile_image_url_https = ""
+    temp_twitter_screen_name = ""
+    if positive_value_exists(to_voter.twitter_id):
+        # Don't try to move from the from_voter
+        success = True
+        status += "TO_VOTER_ALREADY_HAS_TWITTER_ID "
+    elif positive_value_exists(from_voter.twitter_id):
+        # Remove info from the from_voter and then move facebook info to the to_voter
+        try:
+            # Copy values
+            temp_twitter_id = from_voter.twitter_id
+            temp_twitter_name = from_voter.twitter_name
+            temp_twitter_profile_image_url_https = from_voter.twitter_profile_image_url_https
+            temp_twitter_screen_name = from_voter.twitter_screen_name
+            # Now delete it and save so we can save the unique facebook_id in the to_voter
+            from_voter.twitter_id = 0
+            from_voter.twitter_name = ""
+            from_voter.twitter_profile_image_url_https = ""
+            from_voter.twitter_screen_name = ""
+            from_voter.save()
+            status += "FROM_VOTER_TWITTER_DATA_REMOVED "
+        except Exception as e:
+            # Fail silently
+            status += "FROM_VOTER_TWITTER_DATA_NOT_REMOVED "
+
+        try:
+            # Now move values to new entry and save
+            to_voter.twitter_id = temp_twitter_id
+            to_voter.twitter_name = temp_twitter_name
+            to_voter.twitter_profile_image_url_https = temp_twitter_profile_image_url_https
+            to_voter.twitter_screen_name = temp_twitter_screen_name
+            to_voter.save()
+            status += "TO_VOTER_TWITTER_DATA_SAVED "
+        except Exception as e:
+            # Fail silently
+            status += "TO_VOTER_TWITTER_DATA_NOT_SAVED "
+
+    else:
+        success = True
+        status += "NO_TWITTER_ID_FOUND "
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter': from_voter,
+        'to_voter': to_voter,
+    }
+    return results
 
 
 # We are going to start retrieving only the ballot address
@@ -191,11 +381,12 @@ def voter_create_for_api(voter_device_id):  # voterCreate
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_merge_two_accounts_for_api(
-        voter_device_id, email_secret_key, facebook_secret_key, invitation_secret_key):  # voterMergeTwoAccounts
+def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
+        voter_device_id, email_secret_key, facebook_secret_key, twitter_secret_key, invitation_secret_key):
     current_voter_found = False
     email_owner_voter_found = False
     facebook_owner_voter_found = False
+    twitter_owner_voter_found = False
     invitation_owner_voter_found = False
     new_owner_voter = Voter()
     success = False
@@ -236,6 +427,7 @@ def voter_merge_two_accounts_for_api(
 
     if not positive_value_exists(email_secret_key) \
             and not positive_value_exists(facebook_secret_key) \
+            and not positive_value_exists(twitter_secret_key) \
             and not positive_value_exists(invitation_secret_key):
         error_results = {
             'status':                   "VOTER_MERGE_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN",
@@ -386,6 +578,71 @@ def voter_merge_two_accounts_for_api(
         to_voter_id = facebook_owner_voter.id
         to_voter_we_vote_id = facebook_owner_voter.we_vote_id
         new_owner_voter = facebook_owner_voter
+    elif positive_value_exists(twitter_secret_key):
+        twitter_user_manager = TwitterUserManager()
+        twitter_user_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_secret_key(
+            twitter_secret_key)
+        if twitter_user_results['twitter_link_to_voter_found']:
+            twitter_link_to_voter = twitter_user_results['twitter_link_to_voter']
+
+            twitter_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                twitter_link_to_voter.voter_we_vote_id)
+            if twitter_owner_voter_results['voter_found']:
+                twitter_owner_voter_found = True
+                twitter_owner_voter = twitter_owner_voter_results['voter']
+
+        if not twitter_owner_voter_found:
+            error_results = {
+                'status': "TWITTER_OWNER_VOTER_NOT_FOUND",
+                'success': False,
+                'voter_device_id': voter_device_id,
+                'current_voter_found': current_voter_found,
+                'email_owner_voter_found': False,
+                'facebook_owner_voter_found': False,
+                'twitter_owner_voter_found': twitter_owner_voter_found,
+            }
+            return error_results
+
+        twitter_auth_manager = TwitterAuthManager()
+        auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
+        if auth_response_results['twitter_auth_response_found']:
+            twitter_auth_response = auth_response_results['twitter_auth_response']
+
+        # Double-check they aren't the same voter account
+        if voter.id == twitter_owner_voter.id:
+            # If here, we probably have some bad data and need to update the voter record to reflect that
+            #  it is signed in with Twitter
+            if auth_response_results['twitter_auth_response_found']:
+                # Get the recent twitter_id
+                voter_manager.update_voter_with_twitter_link_verified(
+                    twitter_owner_voter,
+                    twitter_auth_response.twitter_id)
+
+            else:
+                error_results = {
+                    'status': "CURRENT_VOTER_AND_TWITTER_OWNER_VOTER_ARE_SAME",
+                    'success': True,
+                    'voter_device_id': voter_device_id,
+                    'current_voter_found': current_voter_found,
+                    'email_owner_voter_found': False,
+                    'facebook_owner_voter_found': False,
+                    'twitter_owner_voter_found': twitter_owner_voter_found,
+                }
+                return error_results
+
+        # Update the Twitter photo
+        save_twitter_results = voter_manager.save_twitter_user_values_from_twitter_auth_response(
+            twitter_owner_voter, twitter_auth_response)
+        status += " " + save_twitter_results['status']
+        twitter_owner_voter = save_twitter_results['voter']
+
+        # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
+        # We are going to make the email_owner_voter the new master
+        from_voter_id = voter.id
+        from_voter_we_vote_id = voter.we_vote_id
+        to_voter_id = twitter_owner_voter.id
+        to_voter_we_vote_id = twitter_owner_voter.we_vote_id
+        new_owner_voter = twitter_owner_voter
     elif positive_value_exists(invitation_secret_key):
         friend_manager = FriendManager()
         for_merge_accounts = True
@@ -523,6 +780,14 @@ def voter_merge_two_accounts_for_api(
         except Exception as e:
             # Fail silently
             pass
+
+    # Bring over Facebook information
+    move_facebook_results = move_facebook_info_to_another_voter(voter, new_owner_voter)
+    status += " " + move_facebook_results['status']
+
+    # Bring over Twitter information
+    move_twitter_results = move_twitter_info_to_another_voter(voter, new_owner_voter)
+    status += " " + move_twitter_results['status']
 
     # And finally, relink the current voter_device_id to email_owner_voter
     update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link, new_owner_voter)
