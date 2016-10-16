@@ -6,23 +6,31 @@
 
 from django.db import models
 from import_export_twitter.functions import retrieve_twitter_user_info
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
+
+
+class TwitterLinkToVoter(models.Model):
+    """
+    This is the link between a Twitter account and a We Vote voter account
+    """
+    voter_we_vote_id = models.CharField(verbose_name="we vote id for the email owner", max_length=255, unique=True)
+    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=False, unique=True)
+    secret_key = models.CharField(
+        verbose_name="secret key to verify ownership twitter account", max_length=255, null=False, unique=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=False, auto_now=True)
 
 
 class TwitterUser(models.Model):
     """
-    We cache the Twitter info for one handle here. NOTE: multiple accounts can be signed into same Twitter account
+    We cache the Twitter info for one handle here.
     """
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, blank=True)
     twitter_handle = models.CharField(verbose_name='twitter screen name / handle',
                                       max_length=255, null=False, unique=True)
-    twitter_name = models.CharField(
-        verbose_name="display name from twitter", max_length=255, null=True, blank=True)
+    twitter_name = models.CharField(verbose_name="display name from twitter", max_length=255, null=True, blank=True)
     twitter_url = models.URLField(blank=True, null=True, verbose_name='url of user\'s website')
-
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
-    twitter_location = models.CharField(
-        verbose_name="location from twitter", max_length=255, null=True, blank=True)
+    twitter_location = models.CharField(verbose_name="location from twitter", max_length=255, null=True, blank=True)
     twitter_followers_count = models.IntegerField(verbose_name="number of twitter followers",
                                                   null=False, blank=True, default=0)
     twitter_profile_background_image_url_https = models.URLField(verbose_name='tile-able background from twitter',
@@ -37,6 +45,103 @@ class TwitterUserManager(models.Model):
 
     def __unicode__(self):
         return "TwitterUserManager"
+
+    def create_twitter_link_to_voter(self, twitter_id, voter_we_vote_id):
+
+        # Any attempts to save a twitter_link using either twitter_id or voter_we_vote_id that already
+        #  exist in the table will fail, since those fields are required to be unique.
+        twitter_secret_key = generate_random_string(12)
+
+        try:
+            twitter_link_to_voter = TwitterLinkToVoter.objects.create(
+                twitter_id=twitter_id,
+                voter_we_vote_id=voter_we_vote_id,
+                secret_key=twitter_secret_key,
+            )
+            twitter_link_to_voter_saved = True
+            success = True
+            status = "TWITTER_LINK_TO_VOTER_CREATED"
+        except Exception as e:
+            twitter_link_to_voter_saved = False
+            twitter_link_to_voter = TwitterLinkToVoter()
+            success = False
+            status = "TWITTER_LINK_TO_VOTER_NOT_CREATED"
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'twitter_link_to_voter_saved':  twitter_link_to_voter_saved,
+            'twitter_link_to_voter':        twitter_link_to_voter,
+        }
+        return results
+
+    def retrieve_twitter_link_to_voter_from_voter_we_vote_id(self, voter_we_vote_id):
+        twitter_id = 0
+        twitter_secret_key = ""
+        return self.retrieve_twitter_link_to_voter(twitter_id, voter_we_vote_id, twitter_secret_key)
+
+    def retrieve_twitter_link_to_voter_from_twitter_secret_key(self, twitter_secret_key):
+        twitter_id = 0
+        voter_we_vote_id = ""
+        return self.retrieve_twitter_link_to_voter(twitter_id, voter_we_vote_id, twitter_secret_key)
+
+    def retrieve_twitter_link_to_voter(self, twitter_id=0, voter_we_vote_id='', twitter_secret_key=''):
+        """
+
+        :param twitter_id:
+        :param voter_we_vote_id:
+        :param twitter_secret_key:
+        :return:
+        """
+        twitter_link_to_voter = TwitterLinkToVoter()
+        twitter_link_to_voter_id = 0
+
+        try:
+            if positive_value_exists(twitter_id):
+                twitter_link_to_voter = TwitterLinkToVoter.objects.get(
+                    twitter_id=twitter_id,
+                )
+                twitter_link_to_voter_id = twitter_link_to_voter.id
+                twitter_link_to_voter_found = True
+                success = True
+                status = "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_TWITTER_USER_ID"
+            elif positive_value_exists(voter_we_vote_id):
+                twitter_link_to_voter = TwitterLinkToVoter.objects.get(
+                    voter_we_vote_id__iexact=voter_we_vote_id,
+                )
+                twitter_link_to_voter_id = twitter_link_to_voter.id
+                twitter_link_to_voter_found = True
+                success = True
+                status = "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_VOTER_WE_VOTE_ID"
+            elif positive_value_exists(twitter_secret_key):
+                twitter_link_to_voter = TwitterLinkToVoter.objects.get(
+                    secret_key=twitter_secret_key,
+                )
+                twitter_link_to_voter_id = twitter_link_to_voter.id
+                twitter_link_to_voter_found = True
+                success = True
+                status = "RETRIEVE_TWITTER_LINK_TO_VOTER_FOUND_BY_TWITTER_SECRET_KEY"
+            else:
+                twitter_link_to_voter_found = False
+                success = False
+                status = "RETRIEVE_TWITTER_LINK_TO_VOTER_VARIABLES_MISSING"
+        except TwitterLinkToVoter.DoesNotExist:
+            twitter_link_to_voter_found = False
+            success = True
+            status = "RETRIEVE_TWITTER_LINK_TO_VOTER_NOT_FOUND"
+        except Exception as e:
+            twitter_link_to_voter_found = False
+            success = False
+            status = 'FAILED retrieve_twitter_link_to_voter'
+
+        results = {
+            'success': success,
+            'status': status,
+            'twitter_link_to_voter_found': twitter_link_to_voter_found,
+            'twitter_link_to_voter_id': twitter_link_to_voter_id,
+            'twitter_link_to_voter': twitter_link_to_voter,
+        }
+        return results
 
     def retrieve_twitter_user_locally_or_remotely(self, twitter_handle):
         twitter_user_found = False
@@ -152,7 +257,7 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def update_or_create_twitter_user(self, twitter_user_id, twitter_user_we_vote_id,
+    def update_or_create_twitter_user(self, twitter_id, twitter_user_we_vote_id,  # TODO DALE To be built
                                     ballot_item_display_name,
                                     contest_office_we_vote_id,
                                     candidate_campaign_we_vote_id,
@@ -169,7 +274,7 @@ class TwitterUserManager(models.Model):
                                     ):
         # Does a twitter_user entry already exist?
         twitter_user_manager = TwitterUserManager()
-        results = twitter_user_manager.retrieve_twitter_user(twitter_user_id, twitter_user_we_vote_id,
+        results = twitter_user_manager.retrieve_twitter_user(twitter_id, twitter_user_we_vote_id,
                                                          contest_office_we_vote_id,
                                                          candidate_campaign_we_vote_id,
                                                          politician_we_vote_id,
@@ -221,7 +326,6 @@ class TwitterUserManager(models.Model):
                     twitter_user_on_stage.info_text = ""
                     twitter_user_on_stage.info_html = ""
                     twitter_user_on_stage.more_info_url = ""
-                    twitter_user_on_stage.more_info_credit = NOT_SPECIFIED
                 else:
                     # If here, this is NOT a master entry
                     if info_text is not False:
@@ -250,8 +354,6 @@ class TwitterUserManager(models.Model):
                 # Create new twitter_user entry
                 if ballot_item_display_name is False:
                     ballot_item_display_name = ""
-                if language is False:
-                    language = ENGLISH
                 if last_editor_we_vote_id is False:
                     last_editor_we_vote_id = ""
                 if contest_office_we_vote_id is False:
@@ -298,7 +400,6 @@ class TwitterUserManager(models.Model):
                 status = 'CREATED_TWITTER_USER'
             except Exception as e:
                 status = 'FAILED_TO_CREATE_NEW_TWITTER_USER'
-                handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
         else:
             status = results['status']
 
@@ -306,30 +407,30 @@ class TwitterUserManager(models.Model):
             'success':            True if twitter_user_on_stage_found else False,
             'status':             status,
             'twitter_user_found':   twitter_user_on_stage_found,
-            'twitter_user_id':      twitter_user_on_stage_id,
+            'twitter_id':      twitter_user_on_stage_id,
             'twitter_user':         twitter_user_on_stage,
         }
         return results
 
-    def delete_twitter_user(self, twitter_user_id):
-        twitter_user_id = convert_to_int(twitter_user_id)
+    def delete_twitter_user(self, twitter_id):
+        twitter_id = convert_to_int(twitter_id)
         twitter_user_deleted = False
 
         try:
-            if twitter_user_id:
-                results = self.retrieve_twitter_user(twitter_user_id)
+            if twitter_id:
+                results = self.retrieve_twitter_user(twitter_id)
                 if results['twitter_user_found']:
                     twitter_user = results['twitter_user']
-                    twitter_user_id = twitter_user.id
+                    twitter_id = twitter_user.id
                     twitter_user.delete()
                     twitter_user_deleted = True
         except Exception as e:
-            handle_exception(e, logger=logger)
+            pass
 
         results = {
             'success':            twitter_user_deleted,
             'twitter_user_deleted': twitter_user_deleted,
-            'twitter_user_id':      twitter_user_id,
+            'twitter_id':      twitter_id,
         }
         return results
 

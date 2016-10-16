@@ -9,7 +9,6 @@ from . import views, views_admin
 
 urlpatterns = [
     # views
-    url(r'^process_sign_in_response/$', views.process_sign_in_response_view, name='process_sign_in_response'),
 
     # views_admin
     url(r'^(?P<candidate_id>[0-9]+)/refresh_twitter_candidate_details/$',

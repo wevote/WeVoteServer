@@ -351,31 +351,93 @@ class VoterManager(BaseUserManager):
         return results
 
     def save_twitter_user_values(self, voter, twitter_user_object):
+        """
+        This is used to store the cached values in the voter record after authentication.
+        Please also see import_export_twitter/models.py TwitterAuthResponse->save_twitter_auth_values
+        :param voter:
+        :param twitter_user_object:
+        :return:
+        """
         try:
-            # 'id': 132728535,
-            if positive_value_exists(twitter_user_object.id):
+            voter_to_save = False
+            if hasattr(twitter_user_object, "id") and positive_value_exists(twitter_user_object.id):
                 voter.twitter_id = twitter_user_object.id
+                voter_to_save = True
             # 'id_str': '132728535',
             # 'utc_offset': 32400,
             # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
-            if positive_value_exists(twitter_user_object.profile_image_url_https):
+            if hasattr(twitter_user_object, "profile_image_url_https") and \
+                    positive_value_exists(twitter_user_object.profile_image_url_https):
                 voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+                voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
             # 'screen_name': 'jaeeeee',
-            if positive_value_exists(twitter_user_object.screen_name):
+            if hasattr(twitter_user_object, "screen_name") and positive_value_exists(twitter_user_object.screen_name):
                 voter.twitter_screen_name = twitter_user_object.screen_name
+                voter_to_save = True
             # 'lang': 'en',
-            # 'name': 'Jae Jung Chung',
+            if hasattr(twitter_user_object, "name") and positive_value_exists(twitter_user_object.name):
+                voter.twitter_name = twitter_user_object.name
+                voter_to_save = True
             # 'url': 'http://www.carbonize.co.kr',
             # 'time_zone': 'Seoul',
-            voter.save()
+            if voter_to_save:
+                voter.save()
             success = True
             status = "SAVED_VOTER_TWITTER_VALUES"
         except Exception as e:
             status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES"
             success = False
-            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':   status,
+            'success':  success,
+            'voter':    voter,
+        }
+        return results
+
+    def save_twitter_user_values_from_twitter_auth_response(self, voter, twitter_auth_response):
+        """
+        This is used to store the cached values in the voter record from the twitter_auth_response object once
+        voter agrees to a merge.
+        :param voter:
+        :param twitter_auth_response:
+        :return:
+        """
+        try:
+            voter_to_save = False
+            if hasattr(twitter_auth_response, "twitter_id") and positive_value_exists(twitter_auth_response.twitter_id):
+                voter.twitter_id = twitter_auth_response.twitter_id
+                voter_to_save = True
+            # 'id_str': '132728535',
+            # 'utc_offset': 32400,
+            # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
+            # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
+            if hasattr(twitter_auth_response, "twitter_profile_image_url_https") and \
+                    positive_value_exists(twitter_auth_response.twitter_profile_image_url_https):
+                voter.twitter_profile_image_url_https = twitter_auth_response.twitter_profile_image_url_https
+                voter_to_save = True
+            # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
+            # 'screen_name': 'jaeeeee',
+            if hasattr(twitter_auth_response, "twitter_screen_name") and \
+                    positive_value_exists(twitter_auth_response.twitter_screen_name):
+                voter.twitter_screen_name = twitter_auth_response.twitter_screen_name
+                voter_to_save = True
+            # 'lang': 'en',
+            if hasattr(twitter_auth_response, "twitter_name") and \
+                    positive_value_exists(twitter_auth_response.twitter_name):
+                voter.twitter_name = twitter_auth_response.twitter_name
+                voter_to_save = True
+            # 'url': 'http://www.carbonize.co.kr',
+            # 'time_zone': 'Seoul',
+            if voter_to_save:
+                voter.save()
+            success = True
+            status = "SAVED_VOTER_TWITTER_VALUES_FROM_TWITTER_AUTH_RESPONSE "
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_TWITTER_AUTH_RESPONSE "
+            success = False
 
         results = {
             'status':   status,
@@ -558,6 +620,32 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def update_voter_with_twitter_link_verified(self, voter, twitter_id):
+        should_save_voter = False
+        voter_updated = False
+
+        try:
+            voter.twitter_id = twitter_id
+            should_save_voter = True
+
+            if should_save_voter:
+                voter.save()
+                voter_updated = True
+            status = "UPDATED_VOTER_WITH_TWITTER_LINK"
+            success = True
+        except Exception as e:
+            status = "UNABLE_TO_UPDATE_VOTER_WITH_TWITTER_LINK"
+            success = False
+            voter_updated = False
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter': voter,
+            'voter_updated': voter_updated,
+        }
+        return results
+
 
 class Voter(AbstractBaseUser):
     """
@@ -606,6 +694,7 @@ class Voter(AbstractBaseUser):
 
     # Twitter session information
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, blank=True)
+    twitter_name = models.CharField(verbose_name="display name from twitter", max_length=255, null=True, blank=True)
     twitter_screen_name = models.CharField(verbose_name='twitter screen name / handle',
                                            max_length=255, null=True, unique=False)
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
@@ -672,7 +761,10 @@ class Voter(AbstractBaseUser):
         full_name += self.last_name if positive_value_exists(self.last_name) else ''
 
         if not positive_value_exists(full_name):
-            full_name = self.twitter_screen_name
+            if positive_value_exists(self.twitter_name):
+                full_name = self.twitter_name
+            else:
+                full_name = self.twitter_screen_name
 
         if not positive_value_exists(full_name) and positive_value_exists(self.email):
             full_name = self.email.split("@", 1)[0]
@@ -741,7 +833,7 @@ class Voter(AbstractBaseUser):
         return False
 
     def signed_in_twitter(self):
-        if positive_value_exists(self.twitter_access_token):
+        if positive_value_exists(self.twitter_id):
             return True
         return False
 
