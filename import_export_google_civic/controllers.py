@@ -550,6 +550,9 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                     if 'name' in one_state_entry:
                         state_name = one_state_entry['name']
         state_code = convert_state_text_to_state_code(state_name)
+    if not positive_value_exists(state_code):
+        if 'normalizedInput' in one_ballot_json:
+            state_code = one_ballot_json['normalizedInput']['state']
 
     # Loop through all contests and store in local db cache
     if 'contests' in one_ballot_json:
@@ -814,6 +817,9 @@ def process_contest_referendum_from_structured_json(
         'referendumTitle' in one_contest_referendum_structured_json else ''
     referendum_subtitle = one_contest_referendum_structured_json['referendumSubtitle'] if \
         'referendumSubtitle' in one_contest_referendum_structured_json else ''
+    if not positive_value_exists(referendum_subtitle):
+        referendum_subtitle = one_contest_referendum_structured_json['referendumBrief'] if \
+            'referendumBrief' in one_contest_referendum_structured_json else ''
     referendum_url = one_contest_referendum_structured_json['referendumUrl'] if \
         'referendumUrl' in one_contest_referendum_structured_json else ''
     referendum_text = one_contest_referendum_structured_json['referendumText'] if \
@@ -833,21 +839,34 @@ def process_contest_referendum_from_structured_json(
     # Note that all of the information saved here is independent of a particular voter
     we_vote_id = ''
     if google_civic_election_id and (district_id or district_name) and referendum_title:
+        # We want to only add values, and never clear out existing values that may have been
+        # entered independently
         update_contest_measure_values = {
-            # Values we search against
             'google_civic_election_id': google_civic_election_id,
-            'state_code': state_code.lower(),  # Not required for cases of federal offices
-            'district_id': district_id,
-            'district_name': district_name,
-            'measure_title': referendum_title,
-            # The rest of the values
-            'measure_subtitle': referendum_subtitle,
-            'measure_url': referendum_url,
-            'measure_text': referendum_text,
-            'ocd_division_id': ocd_division_id,
-            'primary_party': primary_party,
-            'district_scope': district_scope,
         }
+        if positive_value_exists(state_code):
+            update_contest_measure_values["state_code"] = state_code.lower()
+        if positive_value_exists(district_id):
+            update_contest_measure_values["district_id"] = district_id
+        if positive_value_exists(district_name):
+            update_contest_measure_values["district_name"] = district_name
+        if positive_value_exists(referendum_title):
+            update_contest_measure_values["measure_title"] = referendum_title
+            # We store the literal spelling here so we can match in the future, even if we customize measure_title
+            update_contest_measure_values["google_civic_measure_title"] = referendum_title
+        if positive_value_exists(referendum_subtitle):
+            update_contest_measure_values["measure_subtitle"] = referendum_subtitle
+        if positive_value_exists(referendum_url):
+            update_contest_measure_values["measure_url"] = referendum_url
+        if positive_value_exists(referendum_text):
+            update_contest_measure_values["measure_text"] = referendum_text
+        if positive_value_exists(ocd_division_id):
+            update_contest_measure_values["ocd_division_id"] = ocd_division_id
+        if positive_value_exists(primary_party):
+            update_contest_measure_values["primary_party"] = primary_party
+        if positive_value_exists(district_scope):
+            update_contest_measure_values["district_scope"] = district_scope
+
         contest_measure_manager = ContestMeasureManager()
         update_or_create_contest_measure_results = contest_measure_manager.update_or_create_contest_measure(
             we_vote_id, google_civic_election_id, referendum_title, district_id, district_name, state_code,

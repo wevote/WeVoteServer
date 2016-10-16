@@ -255,10 +255,15 @@ class ContestMeasureManager(models.Model):
                         we_vote_id__iexact=we_vote_id,
                         defaults=update_contest_measure_values)
                 else:
+                    # TODO DALE: We should make use of searching against "google_civic_measure_title"
+                    # if "measure_title" isn't found
+
+                    # DALE NOTE 2016-10-16 I think making this too strict will cause problems of data duplication
+                    #  since we need to import data prior to the Google Civic data arriving.
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
-                        district_id__exact=district_id,
-                        district_name__iexact=district_name,  # Case doesn't matter
+                        # district_id__exact=district_id,
+                        # district_name__iexact=district_name,  # Case doesn't matter
                         measure_title__iexact=measure_title,  # Case doesn't matter
                         state_code__iexact=state_code,  # Case doesn't matter
                         defaults=update_contest_measure_values)
