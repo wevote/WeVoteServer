@@ -491,6 +491,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if party is not False:
                 candidate_on_stage.party = party
+            if google_civic_candidate_name is not False:
+                candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
 
             # Check to see if this is a We Vote-created election
             # is_we_vote_google_civic_election_id = True \

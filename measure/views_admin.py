@@ -122,6 +122,8 @@ def measure_edit_view(request, measure_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+
     messages_on_stage = get_messages(request)
     measure_id = convert_to_int(measure_id)
     measure_on_stage_found = False
@@ -138,12 +140,14 @@ def measure_edit_view(request, measure_id):
 
     if measure_on_stage_found:
         template_values = {
-            'messages_on_stage':    messages_on_stage,
-            'measure':              measure_on_stage,
+            'messages_on_stage':        messages_on_stage,
+            'google_civic_election_id': google_civic_election_id,
+            'measure':                  measure_on_stage,
         }
     else:
         template_values = {
-            'messages_on_stage':    messages_on_stage,
+            'messages_on_stage':        messages_on_stage,
+            'google_civic_election_id': google_civic_election_id,
         }
     return render(request, 'measure/measure_edit.html', template_values)
 
