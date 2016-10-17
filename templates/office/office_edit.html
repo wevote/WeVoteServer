@@ -57,7 +57,7 @@
     </table>
 
 {% if office %}
-<p><a href="{% url 'office:office_summary' office.id %}">cancel</a>
+<p><a href="{% url 'office:office_summary' office.id %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
 {% else %}
 <p><a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
 {% endif %}

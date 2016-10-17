@@ -206,15 +206,16 @@ class ContestMeasureManager(models.Model):
 
     def update_or_create_contest_measure(self, we_vote_id, google_civic_election_id, measure_title,
                                          district_id, district_name, state_code,
-                                         update_contest_measure_values):
+                                         updated_contest_measure_values):
         """
-        Either update or create an office entry.
+        Either update or create an measure entry.
         """
         exception_multiple_object_returned = False
         new_measure_created = False
+        measure_updated = False
         proceed_to_update_or_save = True
         success = False
-        status = 'ENTERING update_or_create_contest_measure'
+        status = 'ENTERING update_or_create_contest_measure '
 
         contest_measure_on_stage = ContestMeasure()
         if positive_value_exists(we_vote_id):
@@ -241,40 +242,97 @@ class ContestMeasureManager(models.Model):
             proceed_to_update_or_save = False
 
         if proceed_to_update_or_save:
-            # We need to use one set of values when we are creating an entry, and another set of values when we
-            #  are updating an entry
-            try:
-                # Use get_or_create with create_contest_measure_values. It will be more elegent and less prone
-                #  to problems.
+            # if a contest_measure_on_stage is found, *then* update it with updated_contest_measure_values
 
-                # if a contest_measure_on_stage is found, *then* update it with update_contest_measure_values
-
-                if positive_value_exists(we_vote_id):
+            if positive_value_exists(we_vote_id):
+                try:
                     contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
                         google_civic_election_id__exact=google_civic_election_id,
                         we_vote_id__iexact=we_vote_id,
-                        defaults=update_contest_measure_values)
-                else:
-                    # TODO DALE: We should make use of searching against "google_civic_measure_title"
-                    # if "measure_title" isn't found
-
-                    # DALE NOTE 2016-10-16 I think making this too strict will cause problems of data duplication
-                    #  since we need to import data prior to the Google Civic data arriving.
-                    contest_measure_on_stage, new_measure_created = ContestMeasure.objects.update_or_create(
+                        defaults=updated_contest_measure_values)
+                except ContestMeasure.MultipleObjectsReturned as e:
+                    handle_record_found_more_than_one_exception(e, logger=logger)
+                    success = False
+                    status = 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND'
+                    exception_multiple_object_returned = True
+            else:
+                # Given we might have the measure listed by google_civic_measure_title
+                # OR measure_title, we need to check both before we try to create a new entry
+                contest_measure_found = False
+                try:
+                    contest_measure_on_stage = ContestMeasure.objects.get(
                         google_civic_election_id__exact=google_civic_election_id,
-                        # district_id__exact=district_id,
-                        # district_name__iexact=district_name,  # Case doesn't matter
-                        measure_title__iexact=measure_title,  # Case doesn't matter
-                        state_code__iexact=state_code,  # Case doesn't matter
-                        defaults=update_contest_measure_values)
+                        google_civic_measure_title__iexact=measure_title,
+                        state_code__iexact=state_code
+                    )
+                    contest_measure_found = True
+                    success = True
+                    status += 'CONTEST_MEASURE_SAVED '
+                except ContestMeasure.MultipleObjectsReturned as e:
+                    success = False
+                    status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND_BY_GOOGLE_CIVIC_MEASURE_TITLE '
+                    exception_multiple_object_returned = True
+                except ContestMeasure.DoesNotExist:
+                    exception_does_not_exist = True
+                    status += "RETRIEVE_MEASURE_NOT_FOUND "
+                except Exception as e:
+                    status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_MEASURE_TITLE ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
 
-                success = True
-                status = 'CONTEST_MEASURE_SAVED'
-            except ContestMeasure.MultipleObjectsReturned as e:
-                handle_record_found_more_than_one_exception(e, logger=logger)
-                success = False
-                status = 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND'
-                exception_multiple_object_returned = True
+                if not contest_measure_found and not exception_multiple_object_returned:
+                    # Try to find record based on measure_title (instead of google_civic_measure_title)
+                    try:
+                        contest_measure_on_stage = ContestMeasure.objects.get(
+                            google_civic_election_id__exact=google_civic_election_id,
+                            measure_title__iexact=measure_title,
+                            state_code__iexact=state_code
+                        )
+                        contest_measure_found = True
+                        success = True
+                        status += 'CONTEST_MEASURE_SAVED '
+                    except ContestMeasure.MultipleObjectsReturned as e:
+                        success = False
+                        status += 'MULTIPLE_MATCHING_CONTEST_MEASURES_FOUND_BY_MEASURE_NAME '
+                        exception_multiple_object_returned = True
+                    except ContestMeasure.DoesNotExist:
+                        exception_does_not_exist = True
+                        status += "RETRIEVE_MEASURE_NOT_FOUND "
+                    except Exception as e:
+                        status += 'FAILED_TO_RETRIEVE_MEASURE_BY_MEASURE_TITLE ' \
+                                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                        success = False
+
+                if exception_multiple_object_returned:
+                    # We can't proceed because there is an error with the data
+                    success = False
+                elif contest_measure_found:
+                    # Update record
+                    try:
+                        for key, value in updated_contest_measure_values.items():
+                            if hasattr(contest_measure_on_stage, key):
+                                setattr(contest_measure_on_stage, key, value)
+                        contest_measure_on_stage.save()
+                        measure_updated = True
+                        new_measure_created = False
+                        success = True
+                        status += "CONTEST_MEASURE_UPDATED "
+                    except Exception as e:
+                        status += 'FAILED_TO_UPDATE_CONTEST_MEASURE ' \
+                                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                        success = False
+                else:
+                    # Create record
+                    try:
+                        contest_measure_on_stage = ContestMeasure.objects.create(updated_contest_measure_values)
+                        measure_updated = False
+                        new_measure_created = True
+                        success = True
+                        status += "CONTEST_MEASURE_CREATED "
+                    except Exception as e:
+                        status += 'FAILED_TO_CREATE_CONTEST_MEASURE ' \
+                                 '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                        success = False
 
         results = {
             'success':                  success,
@@ -283,7 +341,7 @@ class ContestMeasureManager(models.Model):
             'new_measure_created':      new_measure_created,
             'contest_measure':          contest_measure_on_stage,
             'saved':                    new_measure_created,
-            'updated':                  True if success and not new_measure_created else False,
+            'updated':                  measure_updated,
             'not_processed':            True if not success else False,
         }
         return results
