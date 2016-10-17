@@ -508,9 +508,17 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
                     if not positive_value_exists(voter_ballot_saved.election_date_text()):
                         voter_ballot_saved.election_date = \
                             datetime.strptime(election.election_day_text, "%Y-%m-%d").date()
-                    voter_ballot_saved.save()
+                if voter_address.text_for_map_search != voter_ballot_saved.original_text_for_map_search:
+                    voter_ballot_saved.original_text_for_map_search = voter_address.text_for_map_search
+                voter_ballot_saved.save()
             except Exception as e:
-                status += "Failed to update election_name"
+                status += "Failed to update election_name or original_text_for_map_search "
+        elif voter_ballot_saved.original_text_for_map_search != voter_address.text_for_map_search:
+            try:
+                voter_ballot_saved.original_text_for_map_search = voter_address.text_for_map_search
+                voter_ballot_saved.save()
+            except Exception as e:
+                status += "Failed to update original_text_for_map_search"
 
         status += " " + results['status']
         json_data = {

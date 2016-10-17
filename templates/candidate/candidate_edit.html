@@ -89,7 +89,11 @@
             {% for office in office_list %}
                 <option value="{{ office.id }}"
                         {% if office.id|convert_to_int == contest_office_id|convert_to_int %} selected="selected"{% endif %}>
-                    {{ office.office_name }}</option>
+                    {{ office.office_name }}
+                {% if office.district_id %}
+                    - District {{ office.district_id }}
+                {% endif %}
+                </option>
             {% endfor %}
             </select>
         {% else %}

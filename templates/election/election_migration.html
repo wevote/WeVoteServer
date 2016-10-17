@@ -111,7 +111,11 @@
                     {% for office in google_civic_election_office_list %}
                         <option value="{{ office.id }}"
                                 {% if office.id|slugify == candidate.contest_office_id|slugify %} selected="selected"{% endif %}>
-                            {{ office.office_name }} - {{ office.we_vote_id }}</option>
+                            {{ office.office_name }}
+                                {% if office.district_id %}
+                                    - District {{ office.district_id }}
+                                {% endif %}
+                            - {{ office.we_vote_id }}</option>
                     {% endfor %}
                     </select>
                 {% else %}

@@ -324,7 +324,11 @@ class ContestMeasureManager(models.Model):
                 else:
                     # Create record
                     try:
-                        contest_measure_on_stage = ContestMeasure.objects.create(updated_contest_measure_values)
+                        contest_measure_on_stage = ContestMeasure.objects.create()
+                        for key, value in updated_contest_measure_values.items():
+                            if hasattr(contest_measure_on_stage, key):
+                                setattr(contest_measure_on_stage, key, value)
+                        contest_measure_on_stage.save()
                         measure_updated = False
                         new_measure_created = True
                         success = True

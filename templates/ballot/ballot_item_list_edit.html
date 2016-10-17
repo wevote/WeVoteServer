@@ -94,7 +94,11 @@
         <select id="contest_office1_id_id" name="contest_office1_id">
             <option value="0" >-- Choose Office --</option>
         {% for office in office_list %}
-            <option value="{{ office.id }}">{{ office.office_name }}</option>
+            <option value="{{ office.id }}">{{ office.office_name }}
+                {% if office.district_id %}
+                    - District {{ office.district_id }}
+                {% endif %}
+            </option>
         {% endfor %}
         </select>
 
