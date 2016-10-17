@@ -107,7 +107,12 @@
             <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}</td>
             <td>
         {% if candidate.office %}
-                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
+                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}
+                {% if candidate.office.district_id %}
+                    - District {{ candidate.office.district_id }}
+                {% endif %}
+
+                </a>
         {% else %}
             (office missing)
         {% endif %}

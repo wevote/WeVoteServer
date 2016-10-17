@@ -153,7 +153,7 @@ class ContestOfficeManager(models.Model):
         return 0
 
     def update_or_create_contest_office(self, office_we_vote_id, maplight_id, google_civic_election_id,
-                                        office_name, state_code, updated_contest_office_values):
+                                        office_name, state_code, district_id, updated_contest_office_values):
         """
         Either update or create an office entry.
         """
@@ -220,11 +220,19 @@ class ContestOfficeManager(models.Model):
             # OR office_name, we need to check both before we try to create a new entry
             contest_office_found = False
             try:
-                contest_office_on_stage = ContestOffice.objects.get(
-                    google_civic_election_id__exact=google_civic_election_id,
-                    google_civic_office_name__iexact=office_name,
-                    state_code__iexact=state_code
-                )
+                if positive_value_exists(district_id):
+                    contest_office_on_stage = ContestOffice.objects.get(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        google_civic_office_name__iexact=office_name,
+                        district_id__exact=district_id,
+                        state_code__iexact=state_code
+                    )
+                else:
+                    contest_office_on_stage = ContestOffice.objects.get(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        google_civic_office_name__iexact=office_name,
+                        state_code__iexact=state_code
+                    )
                 contest_office_found = True
                 success = True
                 status += 'CONTEST_OFFICE_SAVED '
@@ -243,11 +251,19 @@ class ContestOfficeManager(models.Model):
             if not contest_office_found and not exception_multiple_object_returned:
                 # Try to find record based on office_name (instead of google_civic_office_name)
                 try:
-                    contest_office_on_stage = ContestOffice.objects.get(
-                        google_civic_election_id__exact=google_civic_election_id,
-                        office_name__iexact=office_name,
-                        state_code__iexact=state_code
-                    )
+                    if positive_value_exists(district_id):
+                        contest_office_on_stage = ContestOffice.objects.get(
+                            google_civic_election_id__exact=google_civic_election_id,
+                            office_name__iexact=office_name,
+                            district_id__exact=district_id,
+                            state_code__iexact=state_code
+                        )
+                    else:
+                        contest_office_on_stage = ContestOffice.objects.get(
+                            google_civic_election_id__exact=google_civic_election_id,
+                            office_name__iexact=office_name,
+                            state_code__iexact=state_code
+                        )
                     contest_office_found = True
                     success = True
                     status += 'CONTEST_OFFICE_SAVED '
@@ -283,7 +299,11 @@ class ContestOfficeManager(models.Model):
             else:
                 # Create record
                 try:
-                    contest_office_on_stage = ContestOffice.objects.create(updated_contest_office_values)
+                    contest_office_on_stage = ContestOffice.objects.create()
+                    for key, value in updated_contest_office_values.items():
+                        if hasattr(contest_office_on_stage, key):
+                            setattr(contest_office_on_stage, key, value)
+                    contest_office_on_stage.save()
                     office_updated = False
                     new_office_created = True
                     success = True

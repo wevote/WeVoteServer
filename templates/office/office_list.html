@@ -48,6 +48,7 @@
             <td>We Vote ID</td>
             <td>Office Name</td>
             <td>State</td>
+            <td>District ID</td>
             <td># of Candidates</td>
         </tr>
     {% for office in office_list %}
@@ -55,8 +56,13 @@
             <td>{{ forloop.counter }}</td>
             <td>{{ office.id }}</td>
             <td>{{ office.we_vote_id }}</td>
-            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
+            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}
+                {% if office.district_id %}
+                    - District {{ office.district_id }}
+                {% endif %}
+            </a></td>
             <td>{{ office.state_code }}</td>
+            <td>{{ office.district_id|default_if_none:"" }}</td>
             <td>{{ office.candidate_count }}</td>
         </tr>
     {% endfor %}

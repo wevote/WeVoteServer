@@ -1,12 +1,20 @@
 {# templates/office/office_edit.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if office %}{{ office.office_name }}{% else %}Create New Office{% endif %}{% endblock %}
+{% block title %}{% if office %}{{ office.office_name }}
+                {% if office.district_id %}
+                    - District {{ office.district_id }}
+                {% endif %}
+{% else %}Create New Office{% endif %}{% endblock %}
 
 {%  block content %}
 {% load template_filters %}
 
-<h1>{% if office %}Edit {{ office.office_name|default_if_none:"" }}{% else %}
+<h1>{% if office %}Edit {{ office.office_name|default_if_none:"" }}
+                {% if office.district_id %}
+                    - District {{ office.district_id }}
+                {% endif %}
+    {% else %}
     Create New Office{% endif %}</h1>
 
 <form action="{% url "office:office_edit_process" %}" method="post" class="form-horizontal">
@@ -83,7 +91,11 @@
         <tr>
             <td>{{ office.id }}</td>
             <td>{{ office.we_vote_id }}</td>
-            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}</a></td>
+            <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}
+                {% if office.district_id %}
+                    - District {{ office.district_id }}
+                {% endif %}
+            </a></td>
             <td>{{ office.state_code }}</td>
             <td>{{ office.candidate_count }}</td>
         </tr>

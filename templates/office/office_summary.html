@@ -1,7 +1,11 @@
 {# templates/office/office_summary.html #}
 {% extends "template_base.html" %}
 
-{% block title %}{% if office %}{{ office.office_name }} Summary{% else %}No Office Found{% endif %}{% endblock %}
+{% block title %}{% if office %}{{ office.office_name }}
+                {% if office.district_id %}
+                    - District {{ office.district_id }}
+                {% endif %}
+    Summary{% else %}No Office Found{% endif %}{% endblock %}
 
 {%  block content %}
 
@@ -9,7 +13,7 @@
 
 {% if office %}
 
-    <h1>{{ office.office_name }}</h1>
+    <h1>{{ office.office_name }}{% if office.district_id %} - District {{ office.district_id }}{% endif %}</h1>
     <p>
         Office Website: <strong>{{ office.office_url }}</strong><br />
         Google Civic Election ID: <strong>{{ office.google_civic_election_id }}</strong><br />
@@ -53,7 +57,11 @@
             <td>{{ candidate.election.election_name }}</td>
             <td>
         {% if candidate.office %}
-                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
+                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}
+                    {% if office.district_id %}
+                    - District {{ office.district_id }}
+                    {% endif %}
+                </a>
         {% else %}
             (office missing)
         {% endif %}

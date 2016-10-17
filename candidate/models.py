@@ -906,7 +906,11 @@ class CandidateCampaignManager(models.Model):
             else:
                 # Create record
                 try:
-                    candidate_campaign_on_stage = CandidateCampaign.objects.create(updated_candidate_campaign_values)
+                    candidate_campaign_on_stage = CandidateCampaign.objects.create()
+                    for key, value in updated_candidate_campaign_values.items():
+                        if hasattr(candidate_campaign_on_stage, key):
+                            setattr(candidate_campaign_on_stage, key, value)
+                    candidate_campaign_on_stage.save()
                     new_candidate_created = True
                     success = True
                     status += "CANDIDATE_CREATED "
