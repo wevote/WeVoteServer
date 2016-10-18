@@ -127,7 +127,7 @@
                     <br />{{ candidate.politician_we_vote_id }}
                 {% endif %}
             </td>
-            <td>{{ candidate.vote_smart_id }}</td>
+            <td>{{ candidate.vote_smart_id|default_if_none:"" }}</td>
         </tr>
     {% endfor %}
     </table>
