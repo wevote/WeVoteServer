@@ -799,7 +799,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                     if collision_voter.we_vote_id != voter.we_vote_id:
                         # Release the linked_organization_we_vote_id from collision_voter so it can be used on voter
                         try:
-                            collision_voter.linked_organization_we_vote_id = ""
+                            collision_voter.linked_organization_we_vote_id = None
                             collision_voter.save()
                         except Exception as e:
                             status += " UNABLE_TO_UPDATE_COLLISION_VOTER_WITH_EMPTY_ORGANIZATION_WE_VOTE_ID"
