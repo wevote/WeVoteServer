@@ -483,6 +483,8 @@ def candidate_edit_process_view(request):
             return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
         elif candidate_on_stage_found:
             # Update
+            if candidate_name is not False:
+                candidate_on_stage.candidate_name = candidate_name
             if candidate_twitter_handle is not False:
                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
             if candidate_url is not False:
