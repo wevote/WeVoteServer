@@ -70,7 +70,7 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
     temp_facebook_email = ""
     temp_facebook_id = 0
     temp_facebook_profile_image_url_https = ""
-    temp_fb_username = ""
+    temp_fb_username = None
     if positive_value_exists(to_voter.facebook_id):
         # Don't try to move from the from_voter
         success = True
@@ -87,7 +87,7 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
             from_voter.facebook_email = ""
             from_voter.facebook_id = 0
             from_voter.facebook_profile_image_url_https = ""
-            from_voter.fb_username = ""
+            from_voter.fb_username = None
             from_voter.save()
             status += "FROM_VOTER_FACEBOOK_DATA_REMOVED "
         except Exception as e:
@@ -177,7 +177,7 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
             temp_twitter_profile_image_url_https = from_voter.twitter_profile_image_url_https
             temp_twitter_screen_name = from_voter.twitter_screen_name
             # Now delete it and save so we can save the unique facebook_id in the to_voter
-            from_voter.twitter_id = 0
+            from_voter.twitter_id = None
             from_voter.twitter_name = ""
             from_voter.twitter_profile_image_url_https = ""
             from_voter.twitter_screen_name = ""
@@ -755,7 +755,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     if positive_value_exists(voter.linked_organization_we_vote_id):
         # Remove the link to the organization so we don't have a future conflict
         try:
-            voter.linked_organization_we_vote_id = ""
+            voter.linked_organization_we_vote_id = None
             voter.save()
         except Exception as e:
             # Fail silently
@@ -773,8 +773,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     if positive_value_exists(voter.primary_email_we_vote_id):
         # Remove the email information so we don't have a future conflict
         try:
-            voter.email = ""
-            voter.primary_email_we_vote_id = ""
+            voter.email = None
+            voter.primary_email_we_vote_id = None
             voter.email_ownership_is_verified = False
             voter.save()
         except Exception as e:

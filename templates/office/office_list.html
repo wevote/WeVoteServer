@@ -60,6 +60,9 @@
                 {% if office.district_id %}
                     - District {{ office.district_id }}
                 {% endif %}
+                {% if office.state_code %}
+                    - {{ office.state_code }}
+                {% endif %}
             </a></td>
             <td>{{ office.state_code }}</td>
             <td>{{ office.district_id|default_if_none:"" }}</td>

@@ -8,10 +8,11 @@ from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
+from import_export_facebook.models import FacebookManager
 import json
 from organization.models import Organization
 import requests
-from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
+from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
@@ -752,6 +753,35 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         }
         return results
 
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter_found = True
+        voter = voter_results['voter']
+    else:
+        voter_found = False
+        voter = Voter()
+
+    if organization_name is False:
+        # If the variable comes in as a literal value "False" then don't create an organization_name
+        pass
+    else:
+        if not positive_value_exists(organization_name) or organization_name == "null null":
+            organization_name = ""
+            if voter_found:
+                # First see if there is a Twitter name
+                organization_name = voter.twitter_name
+
+                # Check to see if the voter has a name
+                if not positive_value_exists(organization_name):
+                    organization_name = voter.get_full_name()
+
+            # If not, check the FacebookAuthResponse table
+            if not positive_value_exists(organization_name):
+                facebook_manager = FacebookManager()
+                facebook_auth_response = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+                organization_name = facebook_auth_response.get_full_name()
+
     organization_manager = OrganizationManager()
     save_results = organization_manager.update_or_create_organization(
         organization_id=organization_id, we_vote_id=organization_we_vote_id,
@@ -764,16 +794,13 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         facebook_profile_image_url_https=facebook_profile_image_url_https,
     )
 
+    success = save_results['success']
     if save_results['success']:
         organization = save_results['organization']
         status = save_results['status']
 
         # Now update the voter record with the organization_we_vote_id
-        voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-        if voter_results['voter_found']:
-            voter = voter_results['voter']
-
+        if voter_found:
             # Does this voter have the same Twitter handle as this organization? If so, link this organization to
             #  this particular voter
             temp_twitter_screen_name = voter.twitter_screen_name or ""
@@ -789,6 +816,7 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                     voter.linked_organization_we_vote_id = organization.we_vote_id
                     voter.save()
                 except Exception as e:
+                    success = False
                     status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID"
             elif facebook_id_matches:
                 # Check to make sure another voter isn't hanging onto this organization_we_vote_id
@@ -802,18 +830,20 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                             collision_voter.linked_organization_we_vote_id = None
                             collision_voter.save()
                         except Exception as e:
+                            success = False
                             status += " UNABLE_TO_UPDATE_COLLISION_VOTER_WITH_EMPTY_ORGANIZATION_WE_VOTE_ID"
                 try:
                     voter.linked_organization_we_vote_id = organization.we_vote_id
                     voter.save()
                 except Exception as e:
+                    success = False
                     status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID"
             # If not, then this is a volunteer or admin setting up an organization
             else:
-                status += " DID_NOT_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID-VOTER_DOES_NOT_MATCH_TWITTER_HANDLE"
+                status += " DID_NOT_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID-VOTER_NOT_FOUND"
 
         results = {
-            'success':                      save_results['success'],
+            'success':                      success,
             'status':                       status,
             'voter_device_id':              voter_device_id,
             'organization_id':              organization.id,

@@ -98,6 +98,9 @@
                 {% if office.district_id %}
                     - District {{ office.district_id }}
                 {% endif %}
+                {% if office.state_code %}
+                    - {{ office.state_code }}
+                {% endif %}
             </option>
         {% endfor %}
         </select>

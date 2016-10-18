@@ -47,10 +47,10 @@ def augment_email_address_list(email_address_list, voter):
     if primary_email_address_found:
         # Make sure the voter's cached "email" and "primary_email_we_vote_id" are both correct and match same email
         voter_data_updated = False
-        if voter.primary_email_we_vote_id.lower != primary_email_address.we_vote_id.lower:
+        if voter.primary_email_we_vote_id and voter.primary_email_we_vote_id.lower != primary_email_address.we_vote_id.lower:
             voter.primary_email_we_vote_id = primary_email_address.we_vote_id
             voter_data_updated = True
-        if voter.email.lower != primary_email_address.normalized_email_address.lower:
+        if voter.email and voter.email.lower != primary_email_address.normalized_email_address.lower:
             voter.email = primary_email_address.normalized_email_address
             voter_data_updated = True
 
@@ -759,7 +759,7 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
             # This email was used by more than one person
             email_address_list = email_results['email_address_list']
 
-        # Cycle through all EmailAddress entries with the email set as "text_for_email_address"
+        # Cycle through all EmailAddress entries with "text_for_email_address" or "incoming_email_we_vote_id"
         for email_address_object in email_address_list:
             email_address_already_owned_by_this_voter = True
             email_address_we_vote_id = email_address_object.we_vote_id
@@ -771,15 +771,17 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
             if delete_email:
                 # If this email is cached in a voter record, remove it as long as primary_email_we_vote_id
                 # matches email_address_object.we_vote_id
-                if voter.primary_email_we_vote_id.lower() == email_address_object.we_vote_id.lower():
+                if positive_value_exists(voter.primary_email_we_vote_id) \
+                        and voter.primary_email_we_vote_id.lower() == email_address_object.we_vote_id.lower():
                     try:
-                        voter.primary_email_we_vote_id = ""
-                        voter.email = ""
+                        voter.primary_email_we_vote_id = None
+                        voter.email_ownership_is_verified = False
+                        voter.email = None
                         voter.save()
-                        status += "VOTER_PRIMARY_EMAIL_ADDRESS_UPDATED "
+                        status += "VOTER_PRIMARY_EMAIL_ADDRESS_REMOVED "
                         success = True
                     except Exception as e:
-                        status += "UNABLE_TO_UPDATE_VOTER_PRIMARY_EMAIL_ADDRESS "
+                        status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_EMAIL_ADDRESS "
                         success = False
                 try:
                     email_address_object.delete()
@@ -790,17 +792,101 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
                     status += "UNABLE_TO_DELETE_EMAIL_ADDRESS "
                     success = False
 
-                break  # TODO DALE Is there ever a case where we want to delete more than one email?
-            elif make_primary_email:
-                try:
-                    voter.primary_email_we_vote_id = email_address_object.we_vote_id
-                    voter.email = text_for_email_address
-                    voter.save()
-                    status += "SAVED_EMAIL_ADDRESS_AS_PRIMARY "
-                    success = True
-                except Exception as e:
-                    status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_PRIMARY "
-                    success = False
+                if email_address_deleted:
+                    # If there are any other verified emails, promote the first one to be the voter's verified email
+                    temp_text_for_email_address = ""
+                    temp_incoming_email_we_vote_id = ""
+                    email_promotion_results = email_manager.retrieve_email_address_object(
+                        temp_text_for_email_address, temp_incoming_email_we_vote_id, voter_we_vote_id)
+                    email_address_list_for_promotion = []
+                    if email_promotion_results['email_address_object_found']:
+                        email_address_object = email_promotion_results['email_address_object']
+                        email_address_list_for_promotion.append(email_address_object)
+                        email_address_list_found_for_promotion_to_primary = True
+                    elif email_promotion_results['email_address_list_found']:
+                        # This email was used by more than one person
+                        email_address_list_for_promotion = email_promotion_results['email_address_list']
+                        email_address_list_found_for_promotion_to_primary = True
+                    else:
+                        email_address_list_found_for_promotion_to_primary = False
+
+                    if email_address_list_found_for_promotion_to_primary:
+                        for email_address_object_for_promotion in email_address_list_for_promotion:
+                            if positive_value_exists(email_address_object_for_promotion.email_ownership_is_verified):
+                                # Assign this as voter's new primary email
+                                try:
+                                    voter.primary_email_we_vote_id = email_address_object_for_promotion.we_vote_id
+                                    voter.email_ownership_is_verified = True
+                                    voter.email = email_address_object_for_promotion.normalized_email_address
+                                    voter.save()
+                                    status += "SAVED_EMAIL_ADDRESS_AS_NEW_PRIMARY "
+                                    success = True
+                                except Exception as e:
+                                    status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_NEW_PRIMARY "
+                                    success = False
+                                break  # Stop looking at email addresses to make the new primary
+
+                break  # TODO DALE Is there ever a case where we want to delete more than one email at a time?
+            elif make_primary_email and positive_value_exists(incoming_email_we_vote_id):
+                # We know we want to make incoming_email_we_vote_id the primary email
+                if not email_address_object.email_ownership_is_verified:
+                    # Do not make an unverified email primary
+                    pass
+                elif email_address_object.we_vote_id.lower() == incoming_email_we_vote_id.lower():
+                    # Make sure this is the primary
+                    if positive_value_exists(voter.primary_email_we_vote_id) \
+                            and voter.primary_email_we_vote_id.lower() == email_address_object.we_vote_id.lower():
+                        # If already the primary email, leave it but make sure to heal the data
+                        try:
+                            voter.primary_email_we_vote_id = email_address_object.we_vote_id
+                            voter.email_ownership_is_verified = True
+                            voter.email = email_address_object.normalized_email_address
+                            voter.save()
+                            status += "SAVED_EMAIL_ADDRESS_AS_PRIMARY-HEALING_DATA "
+                            success = True
+                        except Exception as e:
+                            status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_PRIMARY-HEALING_DATA "
+                            success = False
+                    else:
+                        # Set this email address as the primary
+
+                        # First, search for any other voter records that think they are using this
+                        # normalized_email_address or primary_email_we_vote_id. If there are other records
+                        # using these, they are bad data that don't reflect
+                        temp_voter_results = voter_manager.retrieve_voter_by_email(
+                            email_address_object.normalized_email_address)
+                        if temp_voter_results['voter_found']:
+                            temp_voter = temp_voter_results['voter']
+                            if temp_voter.id != voter.id:
+                                try:
+                                    # Wipe email info
+                                    temp_voter.primary_email_we_vote_id = None
+                                    temp_voter.email_ownership_is_verified = False
+                                    temp_voter.email = None
+                                    temp_voter.save()
+                                    status += "VOTER_EMAIL_ADDRESS_REMOVED_FROM_PRIMARY "
+                                    success = True
+                                except Exception as e:
+                                    status += "UNABLE_TO_REMOVE_EMAIL_ADDRESS_FROM_PRIMARY "
+                                    success = False
+
+                        # And now, update current voter
+                        try:
+                            voter.primary_email_we_vote_id = email_address_object.we_vote_id
+                            voter.email_ownership_is_verified = True
+                            voter.email = email_address_object.normalized_email_address
+                            voter.save()
+                            status += "SAVED_EMAIL_ADDRESS_AS_PRIMARY "
+                            success = True
+                        except Exception as e:
+                            status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_PRIMARY "
+                            success = False
+                    break  # Break out of the email_address_list loop
+                elif positive_value_exists(voter.primary_email_we_vote_id) \
+                        and voter.primary_email_we_vote_id.lower() == email_address_object.we_vote_id.lower():
+                    # If here, we know that we are not looking at the email we want to make primary,
+                    # but we only want to wipe out a voter's primary email when we replace it with another email
+                    pass
 
         send_verification_email = False
         if email_address_deleted:
@@ -810,8 +896,8 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
             # We send back a message that the email already owned by setting email_address_found = True
             if resend_verification_email:
                 send_verification_email = True
-        else:
-            # Save the email
+        elif not positive_value_exists(incoming_email_we_vote_id):
+            # Save the new email address
             email_ownership_is_verified = False
             email_save_results = email_manager.create_email_address(text_for_email_address, voter_we_vote_id,
                                                                     email_ownership_is_verified, make_primary_email)

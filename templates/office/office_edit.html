@@ -5,6 +5,9 @@
                 {% if office.district_id %}
                     - District {{ office.district_id }}
                 {% endif %}
+                {% if office.state_code %}
+                    - {{ office.state_code }}
+                {% endif %}
 {% else %}Create New Office{% endif %}{% endblock %}
 
 {%  block content %}
@@ -13,6 +16,9 @@
 <h1>{% if office %}Edit {{ office.office_name|default_if_none:"" }}
                 {% if office.district_id %}
                     - District {{ office.district_id }}
+                {% endif %}
+                {% if office.state_code %}
+                    - {{ office.state_code }}
                 {% endif %}
     {% else %}
     Create New Office{% endif %}</h1>
@@ -94,6 +100,9 @@
             <td><a href="{% url 'office:office_summary' office.id %}">{{ office.office_name }}
                 {% if office.district_id %}
                     - District {{ office.district_id }}
+                {% endif %}
+                {% if office.state_code %}
+                    - {{ office.state_code }}
                 {% endif %}
             </a></td>
             <td>{{ office.state_code }}</td>

@@ -5,6 +5,9 @@
                 {% if office.district_id %}
                     - District {{ office.district_id }}
                 {% endif %}
+                {% if office.state_code %}
+                    - {{ office.state_code }}
+                {% endif %}
     Summary{% else %}No Office Found{% endif %}{% endblock %}
 
 {%  block content %}
@@ -13,7 +16,8 @@
 
 {% if office %}
 
-    <h1>{{ office.office_name }}{% if office.district_id %} - District {{ office.district_id }}{% endif %}</h1>
+    <h1>{{ office.office_name }}{% if office.district_id %} - District {{ office.district_id }}{% endif %}{% if office.state_code %} - {{ office.state_code }}{% endif %}
+</h1>
     <p>
         Office Website: <strong>{{ office.office_url }}</strong><br />
         Google Civic Election ID: <strong>{{ office.google_civic_election_id }}</strong><br />
@@ -58,9 +62,12 @@
             <td>
         {% if candidate.office %}
                 <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}
-                    {% if office.district_id %}
-                    - District {{ office.district_id }}
-                    {% endif %}
+                {% if office.district_id %}
+                - District {{ office.district_id }}
+                {% endif %}
+                {% if office.state_code %}
+                    - {{ office.state_code }}
+                {% endif %}
                 </a>
         {% else %}
             (office missing)
