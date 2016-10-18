@@ -676,7 +676,7 @@ class Voter(AbstractBaseUser):
     primary_email_we_vote_id = models.CharField(
         verbose_name="we vote id for primary email for this voter", max_length=255, null=True, blank=True, unique=True)
     # This "email_ownership_is_verified" is a copy of the master data in EmailAddress.email_ownership_is_verified
-    email_ownership_is_verified = models.BooleanField(default=True)
+    email_ownership_is_verified = models.BooleanField(default=False)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
@@ -838,6 +838,7 @@ class Voter(AbstractBaseUser):
         return False
 
     def signed_in_with_email(self):
+        # TODO DALE Consider merging with has_email_with_verified_ownership
         verified_email_found = (positive_value_exists(self.email) or
                                 positive_value_exists(self.primary_email_we_vote_id)) and \
                                self.email_ownership_is_verified
@@ -846,9 +847,7 @@ class Voter(AbstractBaseUser):
         return False
 
     def has_valid_email(self):
-        if positive_value_exists(self.email):
-            # TODO DALE -- we don't want to use facebook_email without copying it over to email
-            #  or positive_value_exists(self.facebook_email)
+        if self.has_email_with_verified_ownership():
             return True
         return False
 
@@ -875,7 +874,12 @@ class Voter(AbstractBaseUser):
         return False
 
     def has_email_with_verified_ownership(self):
-        if positive_value_exists(self.email) and self.email_ownership_is_verified:
+        # TODO DALE Consider merging with signed_in_with_email
+        # Because there might be some cases where we can't update the email because of caching issues
+        # (voter.email must be unique, and there was a bug where we tried to wipe out voter.email by setting
+        # it to "", which failed), we only require email_ownership_is_verified to be true
+        # if positive_value_exists(self.email) and self.email_ownership_is_verified:
+        if self.email_ownership_is_verified:
             return True
         return False
 

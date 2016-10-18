@@ -111,7 +111,9 @@
                 {% if candidate.office.district_id %}
                     - District {{ candidate.office.district_id }}
                 {% endif %}
-
+                {% if candidate.office.state_code %}
+                    - {{ candidate.office.state_code }}
+                {% endif %}
                 </a>
         {% else %}
             (office missing)

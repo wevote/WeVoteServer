@@ -41,6 +41,17 @@ class FacebookAuthResponse(models.Model):
         verbose_name="first_name from Facebook", max_length=255, null=True, blank=True, unique=False)
     facebook_profile_image_url_https = models.URLField(verbose_name='url of image from facebook', blank=True, null=True)
 
+    def get_full_name(self):
+        full_name = self.facebook_first_name if positive_value_exists(self.facebook_first_name) else ''
+        full_name += " " if positive_value_exists(self.facebook_first_name) \
+            and positive_value_exists(self.facebook_last_name) else ''
+        full_name += self.facebook_last_name if positive_value_exists(self.facebook_last_name) else ''
+
+        if not positive_value_exists(full_name) and positive_value_exists(self.facebook_email):
+            full_name = self.email.split("@", 1)[0]
+
+        return full_name
+
 
 class FacebookLinkToVoter(models.Model):
     """

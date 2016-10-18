@@ -71,6 +71,7 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
 
     send_now = False
     valid_new_sender_email_address = False
+    sender_email_with_ownership_verified = ""
     if sender_voter.has_email_with_verified_ownership():
         send_now = True
         sender_email_with_ownership_verified = \
@@ -137,7 +138,7 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw
         recipient_voter_we_vote_id = sender_voter.we_vote_id
         recipient_email_we_vote_id = sender_email_address_object.we_vote_id
         recipient_voter_email = sender_email_address_object.normalized_email_address
-        recipient_email_address_secret_key = sender_email_address_object
+        recipient_email_address_secret_key = sender_email_address_object.secret_key
         send_now = False
         verification_context = None  # TODO DALE Figure out best way to do this
 
@@ -662,17 +663,17 @@ def friend_list_for_api(voter_device_id,
                         if hasattr(one_friend_invitation, "recipient_voter_email") \
                         else ""
                     one_friend = {
-                        "voter_we_vote_id": friend_voter.we_vote_id,
-                        "voter_display_name": friend_voter.get_full_name(),
-                        "voter_photo_url": friend_voter.voter_photo_url(),
-                        "voter_email_address": friend_voter.email,
-                        "voter_twitter_handle": friend_voter.twitter_screen_name,
-                        "voter_twitter_description": "",  # To be implemented
-                        "voter_twitter_followers_count": 0,  # To be implemented
-                        "linked_organization_we_vote_id": friend_voter.linked_organization_we_vote_id,
-                        "voter_state_code": "",  # To be implemented
-                        "invitation_status": one_friend_invitation.invitation_status,
-                        "invitation_sent_to": recipient_voter_email,
+                        "voter_we_vote_id":                 friend_voter.we_vote_id,
+                        "voter_display_name":               friend_voter.get_full_name(),
+                        "voter_photo_url":                  friend_voter.voter_photo_url(),
+                        "voter_email_address":              friend_voter.email,
+                        "voter_twitter_handle":             friend_voter.twitter_screen_name,
+                        "voter_twitter_description":        "",  # To be implemented
+                        "voter_twitter_followers_count":    0,  # To be implemented
+                        "linked_organization_we_vote_id":   friend_voter.linked_organization_we_vote_id,
+                        "voter_state_code":                 "",  # To be implemented
+                        "invitation_status":                one_friend_invitation.invitation_status,
+                        "invitation_sent_to":               recipient_voter_email,
                     }
                     friend_list.append(one_friend)
     elif kind_of_list_we_are_looking_for == FRIEND_INVITATIONS_SENT_TO_ME:
