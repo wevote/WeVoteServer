@@ -507,7 +507,7 @@ class EmailManager(models.Model):
         except Exception as e:
             success = False
             email_address_list_found = False
-            status = 'FAILED retrieve_friend_invitations_sent_by_me EmailAddress'
+            status = 'FAILED retrieve_voter_email_address_list EmailAddress'
 
         results = {
             'success': success,

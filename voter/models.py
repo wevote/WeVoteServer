@@ -227,8 +227,20 @@ class VoterManager(BaseUserManager):
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
                                             twitter_id, organization_we_vote_id)
 
+    def retrieve_voter_by_primary_email_we_vote_id(self, primary_email_we_vote_id):
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
+        twitter_request_token = ''
+        facebook_id = 0
+        twitter_id = 0
+        organization_we_vote_id = ''
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
+                                            twitter_id, organization_we_vote_id, primary_email_we_vote_id)
+
     def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=0,
-                       twitter_id=0, organization_we_vote_id=''):
+                       twitter_id=0, organization_we_vote_id='', primary_email_we_vote_id=''):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
@@ -292,6 +304,12 @@ class VoterManager(BaseUserManager):
             elif positive_value_exists(organization_we_vote_id):
                 voter_on_stage = Voter.objects.get(
                     linked_organization_we_vote_id__iexact=organization_we_vote_id)
+                # If still here, we found an existing voter
+                voter_id = voter_on_stage.id
+                success = True
+            elif positive_value_exists(primary_email_we_vote_id):
+                voter_on_stage = Voter.objects.get(
+                    primary_email_we_vote_id__iexact=primary_email_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True

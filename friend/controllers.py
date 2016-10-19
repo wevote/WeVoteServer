@@ -726,7 +726,7 @@ def friend_list_for_api(voter_device_id,
 
                 if positive_value_exists(recipient_voter_we_vote_id):
                     friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
-                        recipient_voter_we_vote_id)  # The is the voter who received invitation
+                        recipient_voter_we_vote_id)  # This is the voter who received invitation
                     if friend_voter_results['voter_found']:
                         friend_voter = friend_voter_results['voter']
                         one_friend = {

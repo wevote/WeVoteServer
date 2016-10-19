@@ -342,25 +342,24 @@ class FriendManager(models.Model):
                     friend_invitation_voter_link.save()
                     friend_invitation_saved = True
                     success = True
-                    status = 'CURRENT_FRIEND_STATUS_UPDATED_TO_IGNORE'
+                    status = 'CURRENT_FRIEND_INVITATION_VOTER_LINK_STATUS_UPDATED_TO_IGNORE'
                 except Exception as e:
                     friend_invitation_saved = False
                     success = False
                     status = 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink '
             elif kind_of_invite_response == DELETE_INVITATION_VOTER_SENT_BY_ME:
                 try:
-                    friend_invitation_voter_link.invitation_status = IGNORED
-                    friend_invitation_voter_link.save()
+                    friend_invitation_voter_link.delete()
                     friend_invitation_saved = True
                     success = True
-                    status = 'CURRENT_FRIEND_STATUS_UPDATED_TO_IGNORE'
+                    status = 'CURRENT_FRIEND_INVITATION_VOTER_LINK_DELETED'
                 except Exception as e:
                     friend_invitation_saved = False
                     success = False
                     status = 'FAILED process_friend_invitation_voter_response delete FriendInvitationVoterLink '
             else:
                 success = False
-                status = 'CURRENT_FRIEND_KIND_OF_INVITE_RESPONSE_NOT_SUPPORTED'
+                status = 'CURRENT_FRIEND_INVITATION_KIND_OF_INVITE_RESPONSE_NOT_SUPPORTED'
 
         results = {
             'success':                      success,
@@ -595,7 +594,7 @@ class FriendManager(models.Model):
         except Exception as e:
             success = False
             current_friend_list_found = False
-            status = 'FAILED retrieve_friend_invitations_sent_by_me '
+            status = 'FAILED retrieve_friends_we_vote_id_list '
 
         if current_friend_list_found:
             for current_friend_entry in current_friend_list:
@@ -755,6 +754,9 @@ class FriendManager(models.Model):
             friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+            # It is possible through account merging to have an invitation to yourself. We want to exclude these.
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
+                recipient_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(invitation_status=ACCEPTED)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=True)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.order_by('-date_last_changed')
@@ -828,6 +830,9 @@ class FriendManager(models.Model):
             friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 recipient_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
+            # It is possible through account merging to have an invitation to yourself. We want to exclude these.
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
+                sender_voter_we_vote_id__iexact=viewer_voter_we_vote_id)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 Q(invitation_status=ACCEPTED) |
                 Q(invitation_status=IGNORED))
@@ -974,6 +979,9 @@ class FriendManager(models.Model):
             friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 sender_voter_we_vote_id__iexact=sender_voter_we_vote_id)
+            # It is possible through account merging to have an invitation to yourself. We want to exclude these.
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
+                recipient_voter_we_vote_id__iexact=sender_voter_we_vote_id)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(deleted=False)
             friend_invitation_voter_queryset = friend_invitation_voter_queryset.order_by('-date_last_changed')
             friend_list = friend_invitation_voter_queryset
@@ -995,7 +1003,7 @@ class FriendManager(models.Model):
         except Exception as e:
             success = False
             friend_list_found = False
-            status = 'FAILED retrieve_friend_invitations_sent_by_me FriendInvitationVoterLink'
+            status = 'FAILED retrieve_friend_invitations_processed FriendInvitationVoterLink'
 
         friend_list_email = []
         try:
@@ -1010,6 +1018,34 @@ class FriendManager(models.Model):
             if len(friend_list_email):
                 status += ' FRIEND_LIST_EMAIL_RETRIEVED'
                 friend_list_email_found = True
+
+                # Filter out invitations to the same voter (assuming the other voter signed in). These are invitations
+                #  sent to an email address before we knew who owned the email address. There isn't a need to
+                #  show the invitation to the email address if we have a direct invitation to the voter above.
+                updated_friend_list_email = []
+                email_manager = EmailManager()
+                # Cycle through each invitation. If a verified owner of the email is found, augment the record
+                # with recipient_voter_we_vote_id so we can treat the invitation as a link to a We Vote account
+                for friend_invitation_email_link_object in friend_list_email:
+                    is_new_invitation = True
+                    email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+                        "", friend_invitation_email_link_object.recipient_voter_email)
+                    if email_results['email_address_object_found']:
+                        email_address_object = email_results['email_address_object']
+                        # We create a new attribute on this object (that normally doesn't exist)
+                        friend_invitation_email_link_object.recipient_voter_we_vote_id = \
+                            email_address_object.voter_we_vote_id
+                        just_found_voter_we_vote_id = friend_invitation_email_link_object.recipient_voter_we_vote_id
+                        for friend_invitation_voter_link in friend_list:
+                            # Do we already have an invitation from this voter? If so, ignore it.
+                            if just_found_voter_we_vote_id == friend_invitation_voter_link.recipient_voter_we_vote_id:
+                                is_new_invitation = False
+                                break
+
+                        # Is there already an invitation for just_found_voter_we_vote_id?
+                    if is_new_invitation:
+                        updated_friend_list_email.append(friend_invitation_email_link_object)
+                friend_list_email = updated_friend_list_email
             else:
                 status += ' NO_FRIEND_LIST_EMAIL_RETRIEVED'
                 friend_list_email_found = False
@@ -1052,11 +1088,14 @@ class FriendManager(models.Model):
             return results
 
         try:
-            friend_invitation_queryset = FriendInvitationVoterLink.objects.all()
-            friend_invitation_queryset = friend_invitation_queryset.filter(
+            friend_invitation_voter_queryset = FriendInvitationVoterLink.objects.all()
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.filter(
                 recipient_voter_we_vote_id__iexact=recipient_voter_we_vote_id)
-            friend_invitation_queryset = friend_invitation_queryset.order_by('-date_last_changed')
-            friend_list = friend_invitation_queryset
+            # It is possible through account merging to have an invitation to yourself. We want to exclude these.
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.exclude(
+                sender_voter_we_vote_id__iexact=recipient_voter_we_vote_id)
+            friend_invitation_voter_queryset = friend_invitation_voter_queryset.order_by('-date_last_changed')
+            friend_list = friend_invitation_voter_queryset
 
             if len(friend_list):
                 success = True
