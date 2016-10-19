@@ -449,7 +449,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         if email_results['email_address_object_found']:
             email_address_object = email_results['email_address_object']
 
-            email_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(email_address_object.voter_we_vote_id)
+            email_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(
+                email_address_object.voter_we_vote_id)
             if email_owner_voter_results['voter_found']:
                 email_owner_voter_found = True
                 email_owner_voter = email_owner_voter_results['voter']
@@ -1087,15 +1088,246 @@ def voter_retrieve_list_for_api(voter_device_id):
     return results
 
 
+def refresh_voter_primary_email_cached_information_by_email(normalized_email_address):
+    """
+    Make sure all voter records at all connected to this email address are updated to reflect accurate information
+    :param normalized_email_address:
+    :return:
+    """
+    success = True  # Assume success unless we hit a problem
+    status = "REFRESH_VOTER_PRIMARY_EMAIL_CACHED_INFORMATION_BY_EMAIL "
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_by_email(normalized_email_address)
+    voter_found_by_email_boolean = False
+    voter_found_by_email = Voter()
+    if voter_results['voter_found']:
+        voter_found_by_email_boolean = True
+        voter_found_by_email = voter_results['voter']
+
+    email_manager = EmailManager()
+    email_results = email_manager.retrieve_primary_email_with_ownership_verified("", normalized_email_address)
+    if email_results['email_address_object_found']:
+        verified_email_address_object = email_results['email_address_object']
+        if voter_found_by_email_boolean:
+            if verified_email_address_object.voter_we_vote_id == voter_found_by_email.we_vote_id:
+                status += "EMAIL_TABLE_AND_VOTER_TABLE_VOTER_MATCHES "
+                # Make sure the link back to the email_address_object is correct
+                try:
+                    if voter_found_by_email_boolean:
+                        voter_found_by_email.primary_email_we_vote_id = verified_email_address_object.we_vote_id
+                        voter_found_by_email.email_ownership_is_verified = True
+                        voter_found_by_email.save()
+                        status += "ABLE_TO_UPDATE_VOTER_FOUND_BY_EMAIL1 "
+                except Exception as e:
+                    status = "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL1 "
+                    # We already tried to retrieve the email by normalized_email_address, and the only other
+                    # required unique value is primary_email_we_vote_id, so we retrieve by that
+                    voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
+                        verified_email_address_object.we_vote_id)
+                    if voter_by_primary_email_results['voter_found']:
+                        voter_found_by_primary_email_we_vote_id = voter_results['voter']
+
+                        # Wipe this voter...
+                        try:
+                            voter_found_by_primary_email_we_vote_id.email = None
+                            voter_found_by_primary_email_we_vote_id.primary_email_we_vote_id = None
+                            voter_found_by_primary_email_we_vote_id.email_ownership_is_verified = False
+                            voter_found_by_primary_email_we_vote_id.save()
+                            status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID "
+
+                            # ...and now update voter_found_by_email
+                            try:
+                                # We don't need to check again for voter_found_by_email
+                                voter_found_by_email.primary_email_we_vote_id = \
+                                    verified_email_address_object.we_vote_id
+                                voter_found_by_email.email_ownership_is_verified = True
+                                voter_found_by_email.save()
+                                status += "ABLE_TO_UPDATE_VOTER_FOUND_BY_EMAIL "
+                            except Exception as e:
+                                success = False
+                                status += "UNABLE_TO_UPDATE_VOTER_FOUND_BY_EMAIL "
+                        except Exception as e:
+                            success = False
+                            status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID "
+            else:
+                # The voter_we_vote id in the email table doesn't match the voter_we_vote_id
+                #  in voter_found_by_email. The email table value is master, so we want to update the voter
+                #  record.
+                # Wipe this voter...
+                try:
+                    voter_found_by_email.email = None
+                    voter_found_by_email.primary_email_we_vote_id = None
+                    voter_found_by_email.email_ownership_is_verified = False
+                    voter_found_by_email.save()
+                    status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL "
+
+                    # ...and now update the voter referenced in the EmailAddress table
+                    try:
+                        voter_found_by_voter_we_vote_id_results2 = voter_manager.retrieve_voter_by_we_vote_id(
+                            verified_email_address_object.voter_we_vote_id)
+                        if voter_found_by_voter_we_vote_id_results2['voter_found']:
+                            voter_found_by_voter_we_vote_id2 = voter_found_by_voter_we_vote_id_results2['voter']
+                            voter_found_by_voter_we_vote_id2.email = \
+                                verified_email_address_object.normalized_email_address
+                            voter_found_by_voter_we_vote_id2.primary_email_we_vote_id = \
+                                verified_email_address_object.we_vote_id
+                            voter_found_by_voter_we_vote_id2.email_ownership_is_verified = True
+                            voter_found_by_voter_we_vote_id2.save()
+                            status += "ABLE_TO_UPDATE_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
+                        else:
+                            # Could not find voter by voter_we_vote_id in EmailAddress table
+                            status += "UNABLE_TO_FIND_VOTER_BY_VOTER_WE_VOTE_ID "
+                    except Exception as e:
+                        status = "UNABLE_TO_UPDATE_VOTER_FOUND_BY_EMAIL "
+                        # We tried to update the voter found by the voter_we_vote_id stored in the EmailAddress table,
+                        #  but got an error, so assume it was because of a collision with the primary_email_we_vote_id
+                        # Here, we retrieve the voter already "claiming" this email entry so we can wipe the
+                        #  email values.
+                        voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
+                            verified_email_address_object.we_vote_id)
+                        if voter_by_primary_email_results['voter_found']:
+                            voter_found_by_primary_email_we_vote_id2 = voter_results['voter']
+
+                            # Wipe this voter's email values...
+                            try:
+                                voter_found_by_primary_email_we_vote_id2.email = None
+                                voter_found_by_primary_email_we_vote_id2.primary_email_we_vote_id = None
+                                voter_found_by_primary_email_we_vote_id2.email_ownership_is_verified = False
+                                voter_found_by_primary_email_we_vote_id2.save()
+                                status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID2 "
+
+                                # ...and now update voter_found_by_voter_we_vote_id
+                                try:
+                                    # We don't need to check again for voter_found_by_voter_we_vote_id
+                                    voter_found_by_voter_we_vote_id2.primary_email_we_vote_id = \
+                                        verified_email_address_object.we_vote_id
+                                    voter_found_by_voter_we_vote_id2.email_ownership_is_verified = True
+                                    voter_found_by_voter_we_vote_id2.save()
+                                    status += "ABLE_TO_UPDATE_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
+                                except Exception as e:
+                                    success = False
+                                    status += "UNABLE_TO_UPDATE_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
+                            except Exception as e:
+                                success = False
+                                status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID2 "
+                except Exception as e:
+                    success = False
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL "
+        else:
+            # If here we need to look up the voter based on the values in the email table
+            voter_found_by_voter_we_vote_id_results = voter_manager.retrieve_voter_by_we_vote_id(
+                verified_email_address_object.voter_we_vote_id)
+            if voter_found_by_voter_we_vote_id_results['voter_found']:
+                voter_found_by_voter_we_vote_id = voter_found_by_voter_we_vote_id_results['voter']
+                try:
+                    voter_found_by_voter_we_vote_id.email = verified_email_address_object.normalized_email_address
+                    voter_found_by_voter_we_vote_id.primary_email_we_vote_id = verified_email_address_object.we_vote_id
+                    voter_found_by_voter_we_vote_id.email_ownership_is_verified = True
+                    voter_found_by_voter_we_vote_id.save()
+                    status += "ABLE_TO_UPDATE_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
+                except Exception as e:
+                    status = "UNABLE_TO_UPDATE_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
+                    # We already tried to retrieve the email by normalized_email_address, and the only other
+                    # required unique value is primary_email_we_vote_id, so we retrieve by that
+                    voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
+                        verified_email_address_object.we_vote_id)
+                    if voter_by_primary_email_results['voter_found']:
+                        voter_found_by_primary_email_we_vote_id2 = voter_results['voter']
+
+                        # Wipe this voter...
+                        try:
+                            voter_found_by_primary_email_we_vote_id2.email = None
+                            voter_found_by_primary_email_we_vote_id2.primary_email_we_vote_id = None
+                            voter_found_by_primary_email_we_vote_id2.email_ownership_is_verified = False
+                            voter_found_by_primary_email_we_vote_id2.save()
+                            status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID2 "
+
+                            # ...and now update voter_found_by_voter_we_vote_id
+                            try:
+                                # We don't need to check again for voter_found_by_voter_we_vote_id
+                                voter_found_by_voter_we_vote_id.primary_email_we_vote_id = \
+                                    verified_email_address_object.we_vote_id
+                                voter_found_by_voter_we_vote_id.email_ownership_is_verified = True
+                                voter_found_by_voter_we_vote_id.save()
+                                status += "ABLE_TO_UPDATE_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
+                            except Exception as e:
+                                success = False
+                                status += "UNABLE_TO_UPDATE_VOTER_FOUND_BY_VOTER_WE_VOTE_ID "
+                        except Exception as e:
+                            success = False
+                            status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID2 "
+
+    else:
+        # Email address was not found. As long as "success" is true, we want to make sure the voter found has the
+        #  email address removed.
+        if positive_value_exists(email_results['success']):
+            # Make sure no voter's think they are using this email address
+            # Remove the email information so we don't have a future conflict
+            try:
+                if voter_found_by_email_boolean:
+                    voter_found_by_email.email = None
+                    voter_found_by_email.primary_email_we_vote_id = None
+                    voter_found_by_email.email_ownership_is_verified = False
+                    voter_found_by_email.save()
+                    status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL2 "
+                else:
+                    status += "NO_VOTER_FOUND_BY_EMAIL "
+            except Exception as e:
+                success = False
+                status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL2 "
+        else:
+            status += "PROBLEM_RETRIEVING_EMAIL_ADDRESS_OBJECT"
+
+    results = {
+        'success':  success,
+        'status':   status,
+    }
+    return results
+
+
+def refresh_voter_primary_email_cached_information_by_voter_we_vote_id(voter_we_vote_id):
+    """
+    Make sure this voter record has accurate cached email information.
+    :param voter_we_vote_id:
+    :return:
+    """
+    results = {
+        'success':  False,
+        'status':   "TO_BE_IMPLEMENTED",
+    }
+    return results
+
+
 def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # voterSignOut
+    status = ""
+
     voter_device_link_manager = VoterDeviceLinkManager()
-    if sign_out_all_devices:
+
+    voter_manager = VoterManager()
+    results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if results['voter_found']:
+        voter_signing_out = results['voter']
+        if positive_value_exists(voter_signing_out.email):
+            refresh_results = refresh_voter_primary_email_cached_information_by_email(voter_signing_out.email)
+            status += refresh_results['status']
+        elif positive_value_exists(voter_signing_out.primary_email_we_vote_id):
+            email_manager = EmailManager()
+            email_results = email_manager.retrieve_email_address_object("", voter_signing_out.primary_email_we_vote_id)
+            if email_results['email_address_object_found']:
+                email_address_object = email_results['email_address_object']
+                if positive_value_exists(email_address_object.normalized_email_address):
+                    refresh_results = refresh_voter_primary_email_cached_information_by_email(
+                        email_address_object.normalized_email_address)
+                    status += refresh_results['status']
+
+    if positive_value_exists(sign_out_all_devices):
         results = voter_device_link_manager.delete_all_voter_device_links(voter_device_id)
     else:
         results = voter_device_link_manager.delete_voter_device_link(voter_device_id)
+    status += results['status']
 
     results = {
         'success':  results['success'],
-        'status':   results['status'],
+        'status':   status,
     }
     return results
