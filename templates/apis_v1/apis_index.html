@@ -59,6 +59,26 @@
         <td>Save profile-related fields for an existing voter.</td>
     </tr>
     <tr>
+        <td><a href="{% url 'apis_v1:voterEmailAddressRetrieveDocs' %}">voterEmailAddressRetrieve</a></td>
+        <td></td>
+        <td>Retrieve all of the voter's email addresses, including the status of each email.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterEmailAddressSaveDocs' %}">voterEmailAddressSave</a></td>
+        <td></td>
+        <td>Save or update email address for an existing voter.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterEmailAddressSignInDocs' %}">voterEmailAddressSignIn</a></td>
+        <td></td>
+        <td>Sign in based on an email_secret_key that get's emailed to voter.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterEmailAddressVerifyDocs' %}">voterEmailAddressVerify</a></td>
+        <td></td>
+        <td>Verify an email address using an email_secret_key that get's emailed to voter.</td>
+    </tr>
+    <tr>
         <td><a href="{% url 'apis_v1:voterPhotoSaveDocs' %}">voterPhotoSave - DEPRECATED, PLEASE USE voterUpdate</a></td>
         <td></td>
         <td>Save photo (pulled from Facebook or Twitter) for an existing voter.</td>
@@ -74,9 +94,21 @@
         <td colspan="3"><strong>Twitter, Facebook, Google</strong></td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:facebookSignInDocs' %}">facebookSignIn</a></td>
+        <td><a href="{% url 'apis_v1:voterFacebookSignInRetrieveDocs' %}">voterFacebookSignInRetrieve</a></td>
+        <td></td>
+        <td>Retrieve the Facebook Sign In status based on voter_device_id.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterFacebookSignInSaveDocs' %}">voterFacebookSignInSave</a></td>
         <td></td>
         <td>Save the results of Facebook sign in authentication.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterFacebookSaveToCurrentAccountDocs' %}">voterFacebookSaveToCurrentAccount</a></td>
+        <td></td>
+        <td>Save Facebook information (name) to current voter account.
         </td>
     </tr>
     <tr>
@@ -109,6 +141,25 @@
         <td><a href="{% url 'apis_v1:twitterSignInRequestVoterInfoDocs' %}">twitterSignInRequestVoterInfo</a></td>
         <td></td>
         <td>Step 3 in the process of signing in with Twitter.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:twitterSignInRetrieveDocs' %}">twitterSignInRetrieve</a></td>
+        <td></td>
+        <td>Retrieve the Twitter user information following Twitter authentication.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterTwitterSaveToCurrentAccountDocs' %}">voterTwitterSaveToCurrentAccount</a></td>
+        <td></td>
+        <td>Save Twitter information to current voter account.
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:voterMergeTwoAccountsDocs' %}">voterMergeTwoAccounts</a></td>
+        <td></td>
+        <td>Combine two accounts into one. Leave existing voter_device_id in place, but link it to the remaining voter
+            account.
         </td>
     </tr>
     <tr>
@@ -467,6 +518,22 @@
         <td><a href="{% url 'apis_v1:friendInvitationByEmailSendDocs' %}">friendInvitationByEmailSend</a></td>
         <td></td>
         <td>Send invitations to friends by email address.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:friendInvitationByEmailVerifyDocs' %}">friendInvitationByEmailVerify</a></td>
+        <td></td>
+        <td>Accept an invitation to be someone's friend based on a secret key.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:friendInviteResponseDocs' %}">friendInviteResponse</a></td>
+        <td></td>
+        <td>Respond to a friend request.</td>
+    </tr>
+    <tr>
+        <td><a href="{% url 'apis_v1:friendListDocs' %}">friendList</a></td>
+        <td></td>
+        <td>Request information about a voter's friends, including invitations to become a friend,
+            a list of current friends, and friends you share in common with another voter.</td>
     </tr>
 
     {###  ###}

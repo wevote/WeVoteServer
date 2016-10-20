@@ -338,7 +338,27 @@ class FollowOrganizationList(models.Model):
             if len(follow_organization_list):
                 follow_organization_list_found = True
         except Exception as e:
-            handle_record_not_found_exception(e, logger=logger)
+            pass
+
+        if follow_organization_list_found:
+            return follow_organization_list
+        else:
+            follow_organization_list = {}
+            return follow_organization_list
+
+    def retrieve_follow_organization_by_organization_we_vote_id(self, organization_we_vote_id):
+        # Retrieve a list of follow_organization entries for this organization
+        follow_organization_list_found = False
+        following_status = FOLLOWING
+        follow_organization_list = {}
+        try:
+            follow_organization_list = FollowOrganization.objects.all()
+            follow_organization_list = follow_organization_list.filter(organization_we_vote_id=organization_we_vote_id)
+            follow_organization_list = follow_organization_list.filter(following_status=following_status)
+            if len(follow_organization_list):
+                follow_organization_list_found = True
+        except Exception as e:
+            pass
 
         if follow_organization_list_found:
             return follow_organization_list

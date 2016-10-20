@@ -107,7 +107,14 @@
             <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}</td>
             <td>
         {% if candidate.office %}
-                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}</a>
+                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}
+                {% if candidate.office.district_id %}
+                    - District {{ candidate.office.district_id }}
+                {% endif %}
+                {% if candidate.office.state_code %}
+                    - {{ candidate.office.state_code }}
+                {% endif %}
+                </a>
         {% else %}
             (office missing)
         {% endif %}
@@ -122,7 +129,7 @@
                     <br />{{ candidate.politician_we_vote_id }}
                 {% endif %}
             </td>
-            <td>{{ candidate.vote_smart_id }}</td>
+            <td>{{ candidate.vote_smart_id|default_if_none:"" }}</td>
         </tr>
     {% endfor %}
     </table>

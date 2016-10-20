@@ -65,6 +65,9 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     # Check to see if we have polling location data related to the region(s) covered by this election
     # We request the ballot data for each polling location as a way to build up our local data
     state = election_on_stage.get_election_state()
+    if not positive_value_exists(state):  # TODO DALE Temp for 2016
+        state = "CA"
+
     try:
         polling_location_count_query = PollingLocation.objects.all()
         polling_location_count_query = polling_location_count_query.filter(state__iexact=state)
@@ -74,7 +77,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         polling_location_list = polling_location_list.filter(state__iexact=state)
         # We used to have a limit of 500 ballots to pull per election, but now retrieve all
         # Ordering by "location_name" creates a bit of (locational) random order
-        polling_location_list = polling_location_list.order_by('location_name')  # [:500]
+        polling_location_list = polling_location_list.order_by('location_name')  # [:500]  TODO DALE Remove soon
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '

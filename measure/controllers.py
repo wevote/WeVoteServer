@@ -7,10 +7,11 @@ from ballot.models import MEASURE
 from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
+from election.models import ElectionManager
 import json
 import requests
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import convert_state_code_to_state_text, positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -63,6 +64,13 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
 
     if success:
         contest_measure = results['contest_measure']
+        election_manager = ElectionManager()
+        election_results = election_manager.retrieve_election(contest_measure.google_civic_election_id)
+        if election_results['election_found']:
+            election = election_results['election']
+            election_display_name = election.election_name
+        else:
+            election_display_name = ""
         json_data = {
             'status':                   status,
             'success':                  True,
@@ -79,6 +87,9 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
             'ocd_division_id':          contest_measure.ocd_division_id,
             'district_name':            contest_measure.district_name,
             'state_code':               contest_measure.state_code,
+            'state_display_name':       convert_state_code_to_state_text(contest_measure.state_code),
+            'election_display_name':    election_display_name,
+            'regional_display_name':    "",
         }
     else:
         json_data = {
@@ -202,6 +213,8 @@ def measures_import_from_structured_json(structured_json):
                 'measure_text': one_measure['measure_text'] if 'measure_text' in one_measure else '',
                 'measure_url': one_measure['measure_url'] if 'measure_url' in one_measure else '',
                 'measure_title': measure_title,
+                'google_civic_measure_title':
+                    one_measure['google_civic_measure_title'] if 'google_civic_measure_title' in one_measure else '',
                 'ocd_division_id': one_measure['ocd_division_id'] if 'ocd_division_id' in one_measure else '',
                 'primary_party': one_measure['primary_party'] if 'primary_party' in one_measure else '',
                 'state_code': state_code,

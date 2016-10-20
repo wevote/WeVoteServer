@@ -483,6 +483,8 @@ def candidate_edit_process_view(request):
             return HttpResponseRedirect(reverse('candidate:candidate_new', args=()) + url_variables)
         elif candidate_on_stage_found:
             # Update
+            if candidate_name is not False:
+                candidate_on_stage.candidate_name = candidate_name
             if candidate_twitter_handle is not False:
                 candidate_on_stage.candidate_twitter_handle = candidate_twitter_handle
             if candidate_url is not False:
@@ -491,6 +493,8 @@ def candidate_edit_process_view(request):
                 candidate_on_stage.ballot_guide_official_statement = ballot_guide_official_statement
             if party is not False:
                 candidate_on_stage.party = party
+            if google_civic_candidate_name is not False:
+                candidate_on_stage.google_civic_candidate_name = google_civic_candidate_name
 
             # Check to see if this is a We Vote-created election
             # is_we_vote_google_civic_election_id = True \

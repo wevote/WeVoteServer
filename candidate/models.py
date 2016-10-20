@@ -794,19 +794,21 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
-    def update_or_create_candidate_campaign(self, we_vote_id, google_civic_election_id, ocd_division_id,
+    def update_or_create_candidate_campaign(self, candidate_we_vote_id, google_civic_election_id, ocd_division_id,
                                             contest_office_id, contest_office_we_vote_id, google_civic_candidate_name,
                                             updated_candidate_campaign_values):
         """
         Either update or create a candidate_campaign entry.
         """
         exception_multiple_object_returned = False
+        success = False
         new_candidate_created = False
         candidate_campaign_on_stage = CandidateCampaign()
+        status = ""
 
         if not positive_value_exists(google_civic_election_id):
             success = False
-            status = 'MISSING_GOOGLE_CIVIC_ELECTION_ID'
+            status += 'MISSING_GOOGLE_CIVIC_ELECTION_ID '
         # We are avoiding requiring ocd_division_id
         # elif not positive_value_exists(ocd_division_id):
         #     success = False
@@ -817,42 +819,105 @@ class CandidateCampaignManager(models.Model):
         #     status = 'MISSING_CONTEST_OFFICE_ID'
         elif not positive_value_exists(google_civic_candidate_name):
             success = False
-            status = 'MISSING_GOOGLE_CIVIC_CANDIDATE_NAME'
-        else:
+            status += 'MISSING_GOOGLE_CIVIC_CANDIDATE_NAME '
+        elif positive_value_exists(candidate_we_vote_id) and positive_value_exists(contest_office_we_vote_id):
             try:
-                # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
-                #  updating candidate_name via subsequent Google Civic imports
-
-                # If coming from a record that has already been in We Vote
-                if positive_value_exists(we_vote_id) and positive_value_exists(contest_office_we_vote_id):
-                    # If here we are using permanent public identifier contest_office_we_vote_id
-                    candidate_campaign_on_stage, new_candidate_created = \
-                        CandidateCampaign.objects.update_or_create(
-                            google_civic_election_id__exact=google_civic_election_id,
-                            we_vote_id__iexact=we_vote_id,
-                            contest_office_we_vote_id__iexact=contest_office_we_vote_id,
-                            defaults=updated_candidate_campaign_values)
-                # If coming (most likely) from a Google Civic import, or internal bulk update
-                else:
-                    # If here we are using internal contest_office_id
-                    candidate_campaign_on_stage, new_candidate_created = \
-                        CandidateCampaign.objects.update_or_create(
-                            google_civic_election_id__exact=google_civic_election_id,
-                            # ocd_division_id__exact=ocd_division_id,
-                            # 2016-02-20 We want to allow contest_office ids to change
-                            # contest_office_we_vote_id__iexact=contest_office_we_vote_id,
-                            google_civic_candidate_name__exact=google_civic_candidate_name,
-                            defaults=updated_candidate_campaign_values)
-
+                # If here we are using permanent public identifier contest_office_we_vote_id
+                candidate_campaign_on_stage, new_candidate_created = \
+                    CandidateCampaign.objects.update_or_create(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        we_vote_id__iexact=candidate_we_vote_id,
+                        contest_office_we_vote_id__iexact=contest_office_we_vote_id,
+                        defaults=updated_candidate_campaign_values)
                 success = True
-                status = 'CANDIDATE_CAMPAIGN_SAVED'
+                status += "CANDIDATE_CAMPAIGN_UPDATED_OR_CREATED "
             except CandidateCampaign.MultipleObjectsReturned as e:
                 success = False
-                status = 'MULTIPLE_MATCHING_CANDIDATE_CAMPAIGNS_FOUND'
+                status += 'MULTIPLE_MATCHING_CANDIDATE_CAMPAIGNS_FOUND_BY_CANDIDATE_WE_VOTE_ID '
                 exception_multiple_object_returned = True
-                exception_message_optional = status
-                handle_record_found_more_than_one_exception(
-                    e, logger=logger, exception_message_optional=exception_message_optional)
+            except Exception as e:
+                status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_OFFICE_NAME ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False  # If coming (most likely) from a Google Civic import, or internal bulk update
+        else:
+            # Given we might have the office listed by google_civic_office_name
+            # OR office_name, we need to check both before we try to create a new entry
+            candidate_found = False
+            try:
+                candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                    google_civic_election_id__exact=google_civic_election_id,
+                    google_civic_candidate_name__iexact=google_civic_candidate_name
+                )
+                candidate_found = True
+                success = True
+                status += 'CONTEST_OFFICE_SAVED '
+            except CandidateCampaign.MultipleObjectsReturned as e:
+                success = False
+                status += 'MULTIPLE_MATCHING_CONTEST_OFFICES_FOUND_BY_GOOGLE_CIVIC_OFFICE_NAME '
+                exception_multiple_object_returned = True
+            except CandidateCampaign.DoesNotExist:
+                exception_does_not_exist = True
+                status += "RETRIEVE_OFFICE_NOT_FOUND_BY_GOOGLE_CIVIC_CANDIDATE_NAME "
+            except Exception as e:
+                status += 'FAILED_TO_RETRIEVE_OFFICE_BY_GOOGLE_CIVIC_OFFICE_NAME ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+
+            if not candidate_found and not exception_multiple_object_returned:
+                # Try to find record based on office_name (instead of google_civic_office_name)
+                try:
+                    candidate_campaign_on_stage = CandidateCampaign.objects.get(
+                        google_civic_election_id__exact=google_civic_election_id,
+                        candidate_name__iexact=google_civic_candidate_name
+                    )
+                    candidate_found = True
+                    success = True
+                    status += 'CANDIDATE_RETRIEVED_FROM_CANDIDATE_NAME '
+                except CandidateCampaign.MultipleObjectsReturned as e:
+                    success = False
+                    status += 'MULTIPLE_MATCHING_CANDIDATES_FOUND_BY_CANDIDATE_NAME '
+                    exception_multiple_object_returned = True
+                except CandidateCampaign.DoesNotExist:
+                    exception_does_not_exist = True
+                    status += "RETRIEVE_CANDIDATE_NOT_FOUND_BY_CANDIDATE_NAME "
+                except Exception as e:
+                    status += 'FAILED retrieve_all_offices_for_upcoming_election ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+
+            if exception_multiple_object_returned:
+                # We can't proceed because there is an error with the data
+                success = False
+            elif candidate_found:
+                # Update record
+                # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
+                #  updating candidate_name via subsequent Google Civic imports
+                try:
+                    for key, value in updated_candidate_campaign_values.items():
+                        if hasattr(candidate_campaign_on_stage, key):
+                            setattr(candidate_campaign_on_stage, key, value)
+                    candidate_campaign_on_stage.save()
+                    new_candidate_created = False
+                    success = True
+                    status += "CANDIDATE_UPDATED "
+                except Exception as e:
+                    status += 'FAILED_TO_UPDATE_CANDIDATE ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
+            else:
+                # Create record
+                try:
+                    candidate_campaign_on_stage = CandidateCampaign.objects.create()
+                    for key, value in updated_candidate_campaign_values.items():
+                        if hasattr(candidate_campaign_on_stage, key):
+                            setattr(candidate_campaign_on_stage, key, value)
+                    candidate_campaign_on_stage.save()
+                    new_candidate_created = True
+                    success = True
+                    status += "CANDIDATE_CREATED "
+                except Exception as e:
+                    status += 'FAILED_TO_CREATE_CANDIDATE ' \
+                             '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                    success = False
 
         results = {
             'success':                          success,

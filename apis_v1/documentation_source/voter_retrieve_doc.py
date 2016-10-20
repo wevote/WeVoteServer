@@ -61,7 +61,10 @@ def voter_retrieve_doc_template_values(url_root):
                    '  "signed_in_facebook": boolean,\n' \
                    '  "signed_in_google": boolean,\n' \
                    '  "signed_in_twitter": boolean,\n' \
+                   '  "signed_in_with_email": boolean,\n' \
                    '  "has_valid_email": boolean,\n' \
+                   '  "has_data_to_preserve": boolean,\n' \
+                   '  "has_email_with_verified_ownership": boolean,\n' \
                    '  "linked_organization_we_vote_id": string,\n' \
                    '}'
 

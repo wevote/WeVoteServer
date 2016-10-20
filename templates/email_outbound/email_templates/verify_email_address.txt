@@ -1,0 +1,16 @@
+Hello,
+
+Please follow the link below to verify your email so you can save your ballot and invite your friends to We Vote.
+{{ verify_email_link }}
+
+If you did not sign up for We Vote, please do not follow the link. You can notify us that there was a problem by forwarding this email to info@WeVote.US.
+
+Thank you,
+The We Vote Team
+
+
+
+========================================
+This message was sent to {{ recipient_email }}. If you don't want to receive these emails from We Vote in the future, please follow the link below to unsubscribe.
+{{ recipient_unsubscribe }}
+We Vote, Attention: Community Team, 1717 Clemens Rd, Oakland, CA 94602

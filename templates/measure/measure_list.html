@@ -50,10 +50,10 @@
     {% for measure in measure_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'measure:measure_summary' measure.id %}">{{ measure.measure_title }}</a></td>
+            <td><a href="{% url 'measure:measure_summary' measure.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ measure.measure_title }}</a></td>
             <td>{{ measure.state_code }}</td>
             <td>{{ measure.we_vote_id }}</td>
-            <td><a href="{% url 'measure:measure_edit' measure.id %}" style="font-size: .65em">edit</a></td>
+            <td><a href="{% url 'measure:measure_edit' measure.id %}?google_civic_election_id={{ google_civic_election_id }}" style="font-size: .65em">edit</a></td>
         </tr>
     {% endfor %}
     </table>

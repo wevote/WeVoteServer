@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # PermissionsMixin
 from django.core.validators import RegexValidator
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
@@ -215,7 +216,7 @@ class VoterManager(BaseUserManager):
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
                                             twitter_id)
 
-    def retrieve_voter_from_organization_we_vote_id(self, organization_we_vote_id):
+    def retrieve_voter_by_organization_we_vote_id(self, organization_we_vote_id):
         voter_id = ''
         email = ''
         voter_we_vote_id = ''
@@ -226,8 +227,20 @@ class VoterManager(BaseUserManager):
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
                                             twitter_id, organization_we_vote_id)
 
+    def retrieve_voter_by_primary_email_we_vote_id(self, primary_email_we_vote_id):
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
+        twitter_request_token = ''
+        facebook_id = 0
+        twitter_id = 0
+        organization_we_vote_id = ''
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token, facebook_id,
+                                            twitter_id, organization_we_vote_id, primary_email_we_vote_id)
+
     def retrieve_voter(self, voter_id, email='', voter_we_vote_id='', twitter_request_token='', facebook_id=0,
-                       twitter_id=0, organization_we_vote_id=''):
+                       twitter_id=0, organization_we_vote_id='', primary_email_we_vote_id=''):
         voter_id = convert_to_int(voter_id)
         if not validate_email(email):
             # We do not want to search for an invalid email
@@ -246,49 +259,76 @@ class VoterManager(BaseUserManager):
                 voter_on_stage = Voter.objects.get(id=voter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif email is not '' and email is not None:
-                # TODO DALE Convert to look in facebook_email field as well
-                voter_on_stage = Voter.objects.get(
-                    email__iexact=email)
-                # If still here, we found an existing voter
-                voter_id = voter_on_stage.id
+                voter_queryset = Voter.objects.all()
+                # TODO DALE: Currently facebook_email is not a unique entry.
+                # TODO DALE: We need to clean up the facebook sign in code to deal with this, and move the
+                # facebook_email into "email"
+                # voter_queryset = voter_queryset.filter(Q(email__iexact=email) |
+                #                                        Q(facebook_email__iexact=email))
+                voter_queryset = voter_queryset.filter(Q(email__iexact=email))
+                voter_list = list(voter_queryset[:1])
+                if len(voter_list):
+                    voter_on_stage = voter_list[0]
+                    voter_id = voter_on_stage.id
+                    success = True
+                else:
+                    voter_on_stage = Voter()
+                    voter_id = 0
+                    success = True
             elif positive_value_exists(voter_we_vote_id):
                 voter_on_stage = Voter.objects.get(
                     we_vote_id__iexact=voter_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(twitter_request_token):
                 voter_on_stage = Voter.objects.get(
                     twitter_request_token=twitter_request_token)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(facebook_id):
                 voter_on_stage = Voter.objects.get(
                     facebook_id=facebook_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(twitter_id):
                 voter_on_stage = Voter.objects.get(
                     twitter_id=twitter_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
             elif positive_value_exists(organization_we_vote_id):
                 voter_on_stage = Voter.objects.get(
                     linked_organization_we_vote_id__iexact=organization_we_vote_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
+                success = True
+            elif positive_value_exists(primary_email_we_vote_id):
+                voter_on_stage = Voter.objects.get(
+                    primary_email_we_vote_id__iexact=primary_email_we_vote_id)
+                # If still here, we found an existing voter
+                voter_id = voter_on_stage.id
+                success = True
             else:
                 voter_id = 0
                 error_result = True
+                success = False
         except Voter.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
             exception_multiple_object_returned = True
+            success = False
         except Voter.DoesNotExist as e:
             error_result = True
             exception_does_not_exist = True
+            success = True
 
         results = {
+            'success':                  success,
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
@@ -306,17 +346,13 @@ class VoterManager(BaseUserManager):
         #  to ever be used
         logger.info("clear_out_abandoned_voter_records")
 
-    def save_facebook_user_values(self, voter, facebook_id, facebook_email=''):
+    def save_facebook_user_values(self, voter, facebook_auth_response):
         try:
-            if facebook_id == 0:
-                voter.facebook_id = 0
-            elif positive_value_exists(facebook_id):
-                voter.facebook_id = facebook_id
-
-            if facebook_email == '' or facebook_email is False:
-                voter.facebook_email = ''
-            elif positive_value_exists(facebook_email):
-                voter.facebook_email = facebook_email
+            voter.facebook_id = facebook_auth_response.facebook_user_id
+            voter.first_name = facebook_auth_response.facebook_first_name
+            voter.middle_name = facebook_auth_response.facebook_middle_name
+            voter.last_name = facebook_auth_response.facebook_last_name
+            voter.facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
 
             voter.save()
             success = True
@@ -324,7 +360,6 @@ class VoterManager(BaseUserManager):
         except Exception as e:
             status = "UNABLE_TO_SAVE_VOTER_FACEBOOK_VALUES"
             success = False
-            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
         results = {
             'status':   status,
@@ -334,31 +369,93 @@ class VoterManager(BaseUserManager):
         return results
 
     def save_twitter_user_values(self, voter, twitter_user_object):
+        """
+        This is used to store the cached values in the voter record after authentication.
+        Please also see import_export_twitter/models.py TwitterAuthResponse->save_twitter_auth_values
+        :param voter:
+        :param twitter_user_object:
+        :return:
+        """
         try:
-            # 'id': 132728535,
-            if positive_value_exists(twitter_user_object.id):
+            voter_to_save = False
+            if hasattr(twitter_user_object, "id") and positive_value_exists(twitter_user_object.id):
                 voter.twitter_id = twitter_user_object.id
+                voter_to_save = True
             # 'id_str': '132728535',
             # 'utc_offset': 32400,
             # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
-            if positive_value_exists(twitter_user_object.profile_image_url_https):
+            if hasattr(twitter_user_object, "profile_image_url_https") and \
+                    positive_value_exists(twitter_user_object.profile_image_url_https):
                 voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+                voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
             # 'screen_name': 'jaeeeee',
-            if positive_value_exists(twitter_user_object.screen_name):
+            if hasattr(twitter_user_object, "screen_name") and positive_value_exists(twitter_user_object.screen_name):
                 voter.twitter_screen_name = twitter_user_object.screen_name
+                voter_to_save = True
             # 'lang': 'en',
-            # 'name': 'Jae Jung Chung',
+            if hasattr(twitter_user_object, "name") and positive_value_exists(twitter_user_object.name):
+                voter.twitter_name = twitter_user_object.name
+                voter_to_save = True
             # 'url': 'http://www.carbonize.co.kr',
             # 'time_zone': 'Seoul',
-            voter.save()
+            if voter_to_save:
+                voter.save()
             success = True
             status = "SAVED_VOTER_TWITTER_VALUES"
         except Exception as e:
             status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES"
             success = False
-            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+
+        results = {
+            'status':   status,
+            'success':  success,
+            'voter':    voter,
+        }
+        return results
+
+    def save_twitter_user_values_from_twitter_auth_response(self, voter, twitter_auth_response):
+        """
+        This is used to store the cached values in the voter record from the twitter_auth_response object once
+        voter agrees to a merge.
+        :param voter:
+        :param twitter_auth_response:
+        :return:
+        """
+        try:
+            voter_to_save = False
+            if hasattr(twitter_auth_response, "twitter_id") and positive_value_exists(twitter_auth_response.twitter_id):
+                voter.twitter_id = twitter_auth_response.twitter_id
+                voter_to_save = True
+            # 'id_str': '132728535',
+            # 'utc_offset': 32400,
+            # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
+            # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
+            if hasattr(twitter_auth_response, "twitter_profile_image_url_https") and \
+                    positive_value_exists(twitter_auth_response.twitter_profile_image_url_https):
+                voter.twitter_profile_image_url_https = twitter_auth_response.twitter_profile_image_url_https
+                voter_to_save = True
+            # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
+            # 'screen_name': 'jaeeeee',
+            if hasattr(twitter_auth_response, "twitter_screen_name") and \
+                    positive_value_exists(twitter_auth_response.twitter_screen_name):
+                voter.twitter_screen_name = twitter_auth_response.twitter_screen_name
+                voter_to_save = True
+            # 'lang': 'en',
+            if hasattr(twitter_auth_response, "twitter_name") and \
+                    positive_value_exists(twitter_auth_response.twitter_name):
+                voter.twitter_name = twitter_auth_response.twitter_name
+                voter_to_save = True
+            # 'url': 'http://www.carbonize.co.kr',
+            # 'time_zone': 'Seoul',
+            if voter_to_save:
+                voter.save()
+            success = True
+            status = "SAVED_VOTER_TWITTER_VALUES_FROM_TWITTER_AUTH_RESPONSE "
+        except Exception as e:
+            status = "UNABLE_TO_SAVE_VOTER_TWITTER_VALUES_FROM_TWITTER_AUTH_RESPONSE "
+            success = False
 
         results = {
             'status':   status,
@@ -485,6 +582,88 @@ class VoterManager(BaseUserManager):
         }
         return results
 
+    def update_voter_email_ownership_verified(self, voter, email_address_object):
+        voter_updated = False
+
+        try:
+            should_save_voter = False
+            if email_address_object.email_ownership_is_verified:
+                voter.primary_email_we_vote_id = email_address_object.we_vote_id
+                voter.email = email_address_object.normalized_email_address
+                voter.email_ownership_is_verified = True
+                should_save_voter = True
+
+            if should_save_voter:
+                voter.save()
+                voter_updated = True
+            status = "UPDATED_VOTER_EMAIL_OWNERSHIP"
+            success = True
+        except Exception as e:
+            status = "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP"
+            success = False
+            voter_updated = False
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter': voter,
+            'voter_updated': voter_updated,
+        }
+        return results
+
+    def update_voter_with_facebook_link_verified(self, voter, facebook_user_id, facebook_email):
+        should_save_voter = False
+        voter_updated = False
+
+        try:
+            voter.facebook_id = facebook_user_id
+            voter.facebook_email = facebook_email
+            should_save_voter = True
+
+            if should_save_voter:
+                voter.save()
+                voter_updated = True
+            status = "UPDATED_VOTER_WITH_FACEBOOK_LINK"
+            success = True
+        except Exception as e:
+            status = "UNABLE_TO_UPDATE_VOTER_WITH_FACEBOOK_LINK"
+            success = False
+            voter_updated = False
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter': voter,
+            'voter_updated': voter_updated,
+        }
+        return results
+
+    def update_voter_with_twitter_link_verified(self, voter, twitter_id):
+        should_save_voter = False
+        voter_updated = False
+
+        try:
+            voter.twitter_id = twitter_id
+            should_save_voter = True
+
+            if should_save_voter:
+                voter.save()
+                voter_updated = True
+            status = "UPDATED_VOTER_WITH_TWITTER_LINK"
+            success = True
+        except Exception as e:
+            status = "UNABLE_TO_UPDATE_VOTER_WITH_TWITTER_LINK"
+            success = False
+            voter_updated = False
+
+        results = {
+            'status': status,
+            'success': success,
+            'voter': voter,
+            'voter_updated': voter_updated,
+        }
+        return results
+
 
 class Voter(AbstractBaseUser):
     """
@@ -509,7 +688,13 @@ class Voter(AbstractBaseUser):
 
     # Redefine the basic fields that would normally be defined in User
     # username = models.CharField(unique=True, max_length=20, validators=[alphanumeric])  # Increase max_length to 255
+    # We cache the email here for quick lookup, but the official email address for the voter
+    # is referenced by primary_email_we_vote_id and stored in the EmailAddress table
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True, null=True, blank=True)
+    primary_email_we_vote_id = models.CharField(
+        verbose_name="we vote id for primary email for this voter", max_length=255, null=True, blank=True, unique=True)
+    # This "email_ownership_is_verified" is a copy of the master data in EmailAddress.email_ownership_is_verified
+    email_ownership_is_verified = models.BooleanField(default=False)
     first_name = models.CharField(verbose_name='first name', max_length=255, null=True, blank=True)
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
@@ -527,6 +712,7 @@ class Voter(AbstractBaseUser):
 
     # Twitter session information
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, blank=True)
+    twitter_name = models.CharField(verbose_name="display name from twitter", max_length=255, null=True, blank=True)
     twitter_screen_name = models.CharField(verbose_name='twitter screen name / handle',
                                            max_length=255, null=True, unique=False)
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
@@ -591,6 +777,16 @@ class Voter(AbstractBaseUser):
         full_name = self.first_name if positive_value_exists(self.first_name) else ''
         full_name += " " if positive_value_exists(self.first_name) and positive_value_exists(self.last_name) else ''
         full_name += self.last_name if positive_value_exists(self.last_name) else ''
+
+        if not positive_value_exists(full_name):
+            if positive_value_exists(self.twitter_name):
+                full_name = self.twitter_name
+            else:
+                full_name = self.twitter_screen_name
+
+        if not positive_value_exists(full_name) and positive_value_exists(self.email):
+            full_name = self.email.split("@", 1)[0]
+
         return full_name
 
     def get_short_name(self):
@@ -605,8 +801,12 @@ class Voter(AbstractBaseUser):
             return False
 
     def __str__(self):              # __unicode__ on Python 2
-        # return self.get_full_name(self)
-        return str(self.email)
+        if self.has_valid_email():
+            return str(self.email)
+        elif positive_value_exists(self.twitter_screen_name):
+            return str(self.twitter_screen_name)
+        else:
+            return str(self.get_full_name())
 
     def has_perm(self, perm, obj=None):
         """
@@ -638,8 +838,7 @@ class Voter(AbstractBaseUser):
         return ''
 
     def signed_in_personal(self):
-        if positive_value_exists(self.email) or self.signed_in_facebook() or self.signed_in_twitter():
-            # or positive_value_exists(self.is_authenticated()):
+        if self.signed_in_with_email() or self.signed_in_facebook() or self.signed_in_twitter():
             return True
         return False
 
@@ -652,12 +851,53 @@ class Voter(AbstractBaseUser):
         return False
 
     def signed_in_twitter(self):
-        if positive_value_exists(self.twitter_access_token):
+        if positive_value_exists(self.twitter_id):
+            return True
+        return False
+
+    def signed_in_with_email(self):
+        # TODO DALE Consider merging with has_email_with_verified_ownership
+        verified_email_found = (positive_value_exists(self.email) or
+                                positive_value_exists(self.primary_email_we_vote_id)) and \
+                               self.email_ownership_is_verified
+        if verified_email_found:
             return True
         return False
 
     def has_valid_email(self):
-        if positive_value_exists(self.email) or positive_value_exists(self.facebook_email):
+        if self.has_email_with_verified_ownership():
+            return True
+        return False
+
+    def has_data_to_preserve(self):
+        # Does this voter record have any values associated in this table that are unique
+        if self.has_email_with_verified_ownership() or self.signed_in_twitter() or self.signed_in_facebook():
+            return True
+        else:
+            # Has any important data been stored in other tables attached to this voter account?
+            # (Each additional query costs more server resources, so we return True as early as we can.)
+            # NOTE: We can't do this because we can't bring position classes in this file
+            # Consider caching "has_position" data in the voter table
+            # position_list_manager = PositionListManager()
+            # positions_found = position_list_manager.positions_exist_for_voter(self.we_vote_id)
+            # if positive_value_exists(positions_found):
+            #     return True
+
+            # Following any organizations?
+
+            # No need to check for friends, because you can't have any without a signed in status, which we've checked
+            # return True  # TODO DALE Set to True for testing
+            pass
+
+        return False
+
+    def has_email_with_verified_ownership(self):
+        # TODO DALE Consider merging with signed_in_with_email
+        # Because there might be some cases where we can't update the email because of caching issues
+        # (voter.email must be unique, and there was a bug where we tried to wipe out voter.email by setting
+        # it to "", which failed), we only require email_ownership_is_verified to be true
+        # if positive_value_exists(self.email) and self.email_ownership_is_verified:
+        if self.email_ownership_is_verified:
             return True
         return False
 

@@ -12,6 +12,7 @@ from django.http import HttpResponse
 from election.models import fetch_election_state
 from exception.models import handle_record_not_saved_exception
 from follow.models import FollowOrganizationManager, FollowOrganizationList
+from friend.models import FriendManager
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from organization.models import OrganizationManager
@@ -26,6 +27,165 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
+
+
+def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
+                                    to_voter_id, to_voter_we_vote_id,
+                                    to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id):
+    status = ''
+    success = False
+    position_entries_moved = 0
+    position_entries_not_moved = 0
+    position_manager = PositionManager()
+    position_list_manager = PositionListManager()
+
+    # Find private positions for the "from_voter" that we are moving away from
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = FRIENDS_ONLY
+    from_position_private_results = position_list_manager.retrieve_all_positions_for_voter(
+        from_voter_id, from_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+    from_position_private_list = from_position_private_results['position_list']
+
+    for from_position_entry in from_position_private_list:
+        # See if the "to_voter" already has the same entry
+        position_we_vote_id = ""
+        results = position_manager.retrieve_position_table_unknown(
+            position_we_vote_id, from_position_entry.organization_id, from_position_entry.organization_we_vote_id,
+            to_voter_id,
+            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
+            from_position_entry.contest_measure_id,
+            from_position_entry.voter_we_vote_id, from_position_entry.contest_office_we_vote_id,
+            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
+
+        if results['position_found']:
+            # Look to see if there is a statement that can be preserved (i.e., moved from from_position to to_position
+            save_to_position = False
+            to_position_entry = results['position']
+            if not positive_value_exists(to_position_entry.statement_html):
+                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
+                # we can use
+                if positive_value_exists(from_position_entry.statement_html):
+                    to_position_entry.statement_html = from_position_entry.statement_html
+                    save_to_position = True
+            if not positive_value_exists(to_position_entry.statement_text):
+                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
+                # we can use
+                if positive_value_exists(from_position_entry.statement_text):
+                    to_position_entry.statement_text = from_position_entry.statement_text
+                    save_to_position = True
+            # There might be a case where the to_voter didn't have a linked_organization_we_vote_id, but
+            # the from_voter does, so we want to make sure to update that
+            if not positive_value_exists(to_position_entry.organization_we_vote_id):
+                to_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
+                save_to_position = True
+            if not positive_value_exists(to_position_entry.organization_id):
+                to_position_entry.organization_id = to_voter_linked_organization_id
+                save_to_position = True
+            if save_to_position:
+                try:
+                    to_position_entry.save()
+                except Exception as e:
+                    pass
+        else:
+            # Change the position values to the new we_vote_id
+            try:
+                from_position_entry.voter_we_vote_id = to_voter_we_vote_id
+                from_position_entry.organization_id = to_voter_linked_organization_id
+                from_position_entry.organization_we_vote_id = to_voter_linked_organization_we_vote_id
+                from_position_entry.voter_id = to_voter_id
+                from_position_entry.save()
+                position_entries_moved += 1
+            except Exception as e:
+                position_entries_not_moved += 1
+
+    from_position_private_results = position_list_manager.retrieve_all_positions_for_voter(
+        from_voter_id, from_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+    from_position_private_list_remaining = from_position_private_results['position_list']
+    for from_position_entry in from_position_private_list_remaining:
+        # Delete the remaining position values
+        try:
+            # Leave this turned off until testing is finished
+            # from_position_entry.delete()
+            pass
+        except Exception as e:
+            pass
+
+    # Find public positions for the "from_voter" that we are moving away from
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = PUBLIC_ONLY
+    from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
+        from_voter_id, from_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+    from_position_public_list = from_position_public_results['position_list']
+
+    for from_position_entry in from_position_public_list:
+        # See if the "to_voter" already has the same entry
+        position_we_vote_id = ""
+        results = position_manager.retrieve_position_table_unknown(
+            position_we_vote_id, from_position_entry.organization_id, from_position_entry.organization_we_vote_id,
+            to_voter_id,
+            from_position_entry.contest_office_id, from_position_entry.candidate_campaign_id,
+            from_position_entry.contest_measure_id,
+            from_position_entry.voter_we_vote_id, from_position_entry.contest_office_we_vote_id,
+            from_position_entry.candidate_campaign_we_vote_id, from_position_entry.contest_measure_we_vote_id)
+
+        if results['position_found']:
+            # Look to see if there is a statement that can be preserved
+            save_to_position = False
+            to_position_entry = results['position']
+            if not positive_value_exists(to_position_entry.statement_html):
+                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
+                # we can use
+                if positive_value_exists(from_position_entry.statement_html):
+                    to_position_entry.statement_html = from_position_entry.statement_html
+                    save_to_position = True
+            if not positive_value_exists(to_position_entry.statement_text):
+                # If the "to_position" does NOT have a statement_html, we look to see if the "from_position" has one
+                # we can use
+                if positive_value_exists(from_position_entry.statement_text):
+                    to_position_entry.statement_text = from_position_entry.statement_text
+                    save_to_position = True
+            if save_to_position:
+                try:
+                    to_position_entry.save()
+                except Exception as e:
+                    pass
+        else:
+            # Change the position values to the new we_vote_id
+            try:
+                from_position_entry.voter_we_vote_id = to_voter_we_vote_id
+                from_position_entry.voter_id = to_voter_id
+                from_position_entry.save()
+                position_entries_moved += 1
+            except Exception as e:
+                position_entries_not_moved += 1
+
+    from_position_public_results = position_list_manager.retrieve_all_positions_for_voter(
+        from_voter_id, from_voter_we_vote_id,
+        stance_we_are_looking_for, friends_vs_public)
+    from_position_public_list_remaining = from_position_public_results['position_list']
+    for from_position_entry in from_position_public_list_remaining:
+        # Delete the remaining position values
+        try:
+            # Leave this turned off until testing is finished
+            # from_position_entry.delete()
+            pass
+        except Exception as e:
+            pass
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_voter_id': from_voter_id,
+        'from_voter_we_vote_id': from_voter_we_vote_id,
+        'to_voter_id': to_voter_id,
+        'to_voter_we_vote_id': to_voter_we_vote_id,
+        'position_entries_moved': position_entries_moved,
+        'position_entries_not_moved': position_entries_not_moved,
+    }
+    return results
 
 
 # We retrieve from only one of the two possible variables
@@ -390,7 +550,13 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
         and show_positions_this_voter_follows
     retrieve_public_positions = friends_vs_public in (PUBLIC_ONLY, FRIENDS_AND_PUBLIC)
 
-    friends_we_vote_id_list = []  # TODO DALE We need to pass in the voter's list of friends
+    friends_we_vote_id_list = []
+    if positive_value_exists(voter_we_vote_id):
+        friend_manager = FriendManager()
+        friend_results = friend_manager.retrieve_friends_we_vote_id_list(voter_we_vote_id)
+        if friend_results['friends_we_vote_id_list_found']:
+            friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+
     # Add yourself as a friend so your opinions show up
     friends_we_vote_id_list.append(voter_we_vote_id)
 
@@ -619,8 +785,10 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                     or not positive_value_exists(one_position.speaker_image_url_https) \
                     or not positive_value_exists(one_position.speaker_twitter_handle):
                 one_position = position_manager.refresh_cached_position_info(one_position)
-
-            speaker_display_name = "You"
+            if positive_value_exists(one_position.speaker_display_name):
+                speaker_display_name = one_position.speaker_display_name
+            else:
+                speaker_display_name = "Your Friend (Missing Name)"
         elif positive_value_exists(one_position.public_figure_we_vote_id):
             speaker_type = PUBLIC_FIGURE
             speaker_id = one_position.public_figure_id

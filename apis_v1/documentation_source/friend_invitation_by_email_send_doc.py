@@ -30,6 +30,11 @@ def friend_invitation_by_email_send_doc_template_values(url_root):
             'value':        'string',  # boolean, integer, long, string
             'description':  'An optional message to send.',
         },
+        {
+            'name':         'sender_email_address',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The email address to use if an email is not attached to voter account.',
+        },
     ]
 
     potential_status_codes_list = [

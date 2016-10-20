@@ -55,7 +55,7 @@ def process_candidates_from_structured_json(
     for one_candidate in candidates_structured_json:
         candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
         # For some reason Google Civic API violates the JSON standard and uses a / in front of '
-        candidate_name = candidate_name.replace('/', "'")
+        candidate_name = candidate_name.replace("/'", "'")
         # We want to save the name exactly as it comes from the Google Civic API
         google_civic_candidate_name = one_candidate['name'] if 'name' in one_candidate else ''
         party = one_candidate['party'] if 'party' in one_candidate else ''
@@ -102,28 +102,44 @@ def process_candidates_from_structured_json(
             updated_candidate_campaign_values = {
                 # Values we search against
                 'google_civic_election_id': google_civic_election_id,
-                'ocd_division_id': ocd_division_id,
+            }
+            if positive_value_exists(ocd_division_id):
+                updated_candidate_campaign_values["ocd_division_id"] = ocd_division_id
+            if positive_value_exists(candidate_name):
                 # Note: When we decide to start updating candidate_name elsewhere within We Vote, we should stop
                 #  updating candidate_name via subsequent Google Civic imports
-                'candidate_name': candidate_name,
-                # The rest of the values
-                'state_code': state_code,  # Not required due to federal candidates
-                'party': party,
-                'candidate_email': email,
-                'candidate_phone': phone,
-                'order_on_ballot': order_on_ballot,
-                'candidate_url': candidate_url,
-                'photo_url': photo_url,
-                'facebook_url': facebook_url,
-                'twitter_url': twitter_url,
-                'google_plus_url': google_plus_url,
-                'youtube_url': youtube_url,
-                'google_civic_candidate_name': google_civic_candidate_name,
-                # 2016-02-20 Google Civic sometimes changes the name of contests, which can create a new contest
-                #  so we may need to update the candidate to a new contest_office_id
-                'contest_office_id': contest_office_id,
-                'contest_office_we_vote_id': contest_office_we_vote_id,
-            }
+                updated_candidate_campaign_values["candidate_name"] = candidate_name
+                # We store the literal spelling here so we can match in the future, even if we customize candidate_name
+                updated_candidate_campaign_values["google_civic_candidate_name"] = candidate_name
+            if positive_value_exists(state_code):
+                updated_candidate_campaign_values["state_code"] = state_code.lower()
+            if positive_value_exists(party):
+                updated_candidate_campaign_values["party"] = party
+            if positive_value_exists(email):
+                updated_candidate_campaign_values["candidate_email"] = email
+            if positive_value_exists(phone):
+                updated_candidate_campaign_values["candidate_phone"] = phone
+            if positive_value_exists(order_on_ballot):
+                updated_candidate_campaign_values["order_on_ballot"] = order_on_ballot
+            if positive_value_exists(candidate_url):
+                updated_candidate_campaign_values["candidate_url"] = candidate_url
+            if positive_value_exists(photo_url):
+                updated_candidate_campaign_values["photo_url"] = photo_url
+            if positive_value_exists(facebook_url):
+                updated_candidate_campaign_values["facebook_url"] = facebook_url
+            if positive_value_exists(twitter_url):
+                updated_candidate_campaign_values["twitter_url"] = twitter_url
+            if positive_value_exists(google_plus_url):
+                updated_candidate_campaign_values["google_plus_url"] = google_plus_url
+            if positive_value_exists(youtube_url):
+                updated_candidate_campaign_values["youtube_url"] = youtube_url
+            # 2016-02-20 Google Civic sometimes changes the name of contests, which can create a new contest
+            #  so we may need to update the candidate to a new contest_office_id
+            if positive_value_exists(contest_office_id):
+                updated_candidate_campaign_values["contest_office_id"] = contest_office_id
+            if positive_value_exists(contest_office_we_vote_id):
+                updated_candidate_campaign_values["contest_office_we_vote_id"] = contest_office_we_vote_id
+
             candidate_campaign_manager = CandidateCampaignManager()
             results = candidate_campaign_manager.update_or_create_candidate_campaign(
                 we_vote_id, google_civic_election_id,
@@ -248,27 +264,43 @@ def process_contest_office_from_structured_json(
     # Note that all of the information saved here is independent of a particular voter
     if google_civic_election_id and (district_id or district_name) and office_name:
         updated_contest_office_values = {
-            # Values we search against
             'google_civic_election_id': google_civic_election_id,
-            'state_code': state_code.lower(),  # Not required for cases of federal offices
-            'district_id': district_id,
-            'district_name': district_name,
-            'office_name': office_name,
-            # The rest of the values
-            'ocd_division_id': ocd_division_id,
-            'number_voting_for': number_voting_for,
-            'number_elected': number_elected,
-            'contest_level0': contest_level0,
-            'contest_level1': contest_level1,
-            'contest_level2': contest_level2,
-            'primary_party': primary_party,
-            'district_scope': district_scope,
-            'electorate_specifications': electorate_specifications,
-            'special': special,
         }
+        if positive_value_exists(state_code):
+            updated_contest_office_values["state_code"] = state_code.lower()
+        if positive_value_exists(district_id):
+            updated_contest_office_values["district_id"] = district_id
+        if positive_value_exists(district_name):
+            updated_contest_office_values["district_name"] = district_name
+        if positive_value_exists(office_name):
+            # Note: When we decide to start updating office_name elsewhere within We Vote, we should stop
+            #  updating office_name via subsequent Google Civic imports
+            updated_contest_office_values["office_name"] = office_name
+            # We store the literal spelling here so we can match in the future, even if we customize measure_title
+            updated_contest_office_values["google_civic_office_name"] = office_name
+        if positive_value_exists(ocd_division_id):
+            updated_contest_office_values["ocd_division_id"] = ocd_division_id
+        if positive_value_exists(number_voting_for):
+            updated_contest_office_values["number_voting_for"] = number_voting_for
+        if positive_value_exists(number_elected):
+            updated_contest_office_values["number_elected"] = number_elected
+        if positive_value_exists(contest_level0):
+            updated_contest_office_values["contest_level0"] = contest_level0
+        if positive_value_exists(contest_level1):
+            updated_contest_office_values["contest_level1"] = contest_level1
+        if positive_value_exists(contest_level2):
+            updated_contest_office_values["contest_level2"] = contest_level2
+        if positive_value_exists(primary_party):
+            updated_contest_office_values["primary_party"] = primary_party
+        if positive_value_exists(district_scope):
+            updated_contest_office_values["district_scope"] = district_scope
+        if positive_value_exists(electorate_specifications):
+            updated_contest_office_values["electorate_specifications"] = electorate_specifications
+        if positive_value_exists(special):
+            updated_contest_office_values["special"] = special
         contest_office_manager = ContestOfficeManager()
         update_or_create_contest_office_results = contest_office_manager.update_or_create_contest_office(
-            we_vote_id, maplight_id, google_civic_election_id, office_name,
+            we_vote_id, maplight_id, google_civic_election_id, office_name, state_code, district_id,
             updated_contest_office_values)
     else:
         update_or_create_contest_office_results = {
@@ -550,6 +582,9 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                     if 'name' in one_state_entry:
                         state_name = one_state_entry['name']
         state_code = convert_state_text_to_state_code(state_name)
+    if not positive_value_exists(state_code):
+        if 'normalizedInput' in one_ballot_json:
+            state_code = one_ballot_json['normalizedInput']['state']
 
     # Loop through all contests and store in local db cache
     if 'contests' in one_ballot_json:
@@ -814,6 +849,9 @@ def process_contest_referendum_from_structured_json(
         'referendumTitle' in one_contest_referendum_structured_json else ''
     referendum_subtitle = one_contest_referendum_structured_json['referendumSubtitle'] if \
         'referendumSubtitle' in one_contest_referendum_structured_json else ''
+    if not positive_value_exists(referendum_subtitle):
+        referendum_subtitle = one_contest_referendum_structured_json['referendumBrief'] if \
+            'referendumBrief' in one_contest_referendum_structured_json else ''
     referendum_url = one_contest_referendum_structured_json['referendumUrl'] if \
         'referendumUrl' in one_contest_referendum_structured_json else ''
     referendum_text = one_contest_referendum_structured_json['referendumText'] if \
@@ -833,25 +871,38 @@ def process_contest_referendum_from_structured_json(
     # Note that all of the information saved here is independent of a particular voter
     we_vote_id = ''
     if google_civic_election_id and (district_id or district_name) and referendum_title:
-        update_contest_measure_values = {
-            # Values we search against
+        # We want to only add values, and never clear out existing values that may have been
+        # entered independently
+        updated_contest_measure_values = {
             'google_civic_election_id': google_civic_election_id,
-            'state_code': state_code.lower(),  # Not required for cases of federal offices
-            'district_id': district_id,
-            'district_name': district_name,
-            'measure_title': referendum_title,
-            # The rest of the values
-            'measure_subtitle': referendum_subtitle,
-            'measure_url': referendum_url,
-            'measure_text': referendum_text,
-            'ocd_division_id': ocd_division_id,
-            'primary_party': primary_party,
-            'district_scope': district_scope,
         }
+        if positive_value_exists(state_code):
+            updated_contest_measure_values["state_code"] = state_code.lower()
+        if positive_value_exists(district_id):
+            updated_contest_measure_values["district_id"] = district_id
+        if positive_value_exists(district_name):
+            updated_contest_measure_values["district_name"] = district_name
+        if positive_value_exists(referendum_title):
+            updated_contest_measure_values["measure_title"] = referendum_title
+            # We store the literal spelling here so we can match in the future, even if we customize measure_title
+            updated_contest_measure_values["google_civic_measure_title"] = referendum_title
+        if positive_value_exists(referendum_subtitle):
+            updated_contest_measure_values["measure_subtitle"] = referendum_subtitle
+        if positive_value_exists(referendum_url):
+            updated_contest_measure_values["measure_url"] = referendum_url
+        if positive_value_exists(referendum_text):
+            updated_contest_measure_values["measure_text"] = referendum_text
+        if positive_value_exists(ocd_division_id):
+            updated_contest_measure_values["ocd_division_id"] = ocd_division_id
+        if positive_value_exists(primary_party):
+            updated_contest_measure_values["primary_party"] = primary_party
+        if positive_value_exists(district_scope):
+            updated_contest_measure_values["district_scope"] = district_scope
+
         contest_measure_manager = ContestMeasureManager()
         update_or_create_contest_measure_results = contest_measure_manager.update_or_create_contest_measure(
             we_vote_id, google_civic_election_id, referendum_title, district_id, district_name, state_code,
-            update_contest_measure_values)
+            updated_contest_measure_values)
     else:
         update_or_create_contest_measure_results = {
             'success': False,

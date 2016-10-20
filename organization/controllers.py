@@ -8,10 +8,11 @@ from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
+from import_export_facebook.models import FacebookManager
 import json
 from organization.models import Organization
 import requests
-from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
+from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
 from voter_guide.models import VoterGuide, VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
@@ -20,6 +21,159 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 ORGANIZATIONS_SYNC_URL = get_environment_variable("ORGANIZATIONS_SYNC_URL")
+
+
+def move_organization_data_to_another_organization(from_organization_we_vote_id, to_organization_we_vote_id):
+    status = ""
+    success = False
+    from_organization = Organization()
+    to_organization = Organization()
+    data_transfer_complete = False
+
+    if not positive_value_exists(from_organization_we_vote_id) \
+            or not positive_value_exists(to_organization_we_vote_id):
+        results = {
+            'status': 'MOVE_ORGANIZATION_DATA_INCOMING_VARIABLES_MISSING ',
+            'success': False,
+            'from_organization': from_organization,
+            'to_organization': to_organization,
+            'data_transfer_complete': False,
+        }
+        return results
+
+    organization_manager = OrganizationManager()
+    from_organization_results = organization_manager.retrieve_organization_from_we_vote_id(from_organization_we_vote_id)
+    if from_organization_results['organization_found']:
+        from_organization = from_organization_results['organization']
+    else:
+        results = {
+            'status': 'MOVE_ORGANIZATION_DATA_COULD_NOT_RETRIEVE_FROM_ORGANIZATION ',
+            'success': False,
+            'from_organization': from_organization,
+            'to_organization': to_organization,
+            'data_transfer_complete': False,
+        }
+        return results
+
+    to_organization_results = organization_manager.retrieve_organization_from_we_vote_id(to_organization_we_vote_id)
+    if to_organization_results['organization_found']:
+        to_organization = to_organization_results['organization']
+    else:
+        results = {
+            'status': 'MOVE_ORGANIZATION_DATA_COULD_NOT_RETRIEVE_FROM_ORGANIZATION ',
+            'success': False,
+            'from_organization': from_organization,
+            'to_organization': to_organization,
+            'data_transfer_complete': False,
+        }
+        return results
+
+    # If here we know that we have both from_organization and to_organization
+    save_to_organization = False
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_website'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_email'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_contact_name'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_facebook'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_image'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'state_served_code'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'vote_smart_id'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_description'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_address'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_city'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_state'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_zip'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_phone1'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_phone2'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_fax'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'facebook_id'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'facebook_email'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'fb_username'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'facebook_profile_image_url_https'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'twitter_user_id'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_twitter_handle'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'twitter_name'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'twitter_location'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'twitter_followers_count'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'twitter_profile_image_url_https'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization,
+                                           'twitter_profile_background_image_url_https'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'twitter_profile_banner_url_https'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'twitter_description'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_page_id'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_page_title'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_thumbnail_url'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_thumbnail_width'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_thumbnail_height'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'wikipedia_photo_url'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'ballotpedia_page_title'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'ballotpedia_photo_url'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_type'):
+        save_to_organization = True
+    if transfer_to_organization_if_missing(from_organization, to_organization, 'organization_endorsements_api_url'):
+        save_to_organization = True
+
+    if save_to_organization:
+        try:
+            to_organization.save()
+            data_transfer_complete = True
+        except Exception as e:
+            # Fail silently
+            pass
+
+    results = {
+        'status': status,
+        'success': success,
+        'from_organization': from_organization,
+        'to_organization': to_organization,
+        'data_transfer_complete': data_transfer_complete,
+    }
+    return results
+
+
+def transfer_to_organization_if_missing(from_organization, to_organization, field):
+    save_to_organization = False
+    if positive_value_exists(getattr(from_organization, field)):
+        if not positive_value_exists(getattr(to_organization, field)):
+            setattr(to_organization, field, getattr(from_organization, field))
+            save_to_organization = True
+
+    return save_to_organization
 
 
 def organization_follow_all(voter_device_id, organization_id, organization_we_vote_id, follow_kind=FOLLOWING):
@@ -599,6 +753,35 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         }
         return results
 
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    if voter_results['voter_found']:
+        voter_found = True
+        voter = voter_results['voter']
+    else:
+        voter_found = False
+        voter = Voter()
+
+    if organization_name is False:
+        # If the variable comes in as a literal value "False" then don't create an organization_name
+        pass
+    else:
+        if not positive_value_exists(organization_name) or organization_name == "null null":
+            organization_name = ""
+            if voter_found:
+                # First see if there is a Twitter name
+                organization_name = voter.twitter_name
+
+                # Check to see if the voter has a name
+                if not positive_value_exists(organization_name):
+                    organization_name = voter.get_full_name()
+
+            # If not, check the FacebookAuthResponse table
+            if not positive_value_exists(organization_name):
+                facebook_manager = FacebookManager()
+                facebook_auth_response = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+                organization_name = facebook_auth_response.get_full_name()
+
     organization_manager = OrganizationManager()
     save_results = organization_manager.update_or_create_organization(
         organization_id=organization_id, we_vote_id=organization_we_vote_id,
@@ -611,16 +794,13 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         facebook_profile_image_url_https=facebook_profile_image_url_https,
     )
 
+    success = save_results['success']
     if save_results['success']:
         organization = save_results['organization']
         status = save_results['status']
 
         # Now update the voter record with the organization_we_vote_id
-        voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
-        if voter_results['voter_found']:
-            voter = voter_results['voter']
-
+        if voter_found:
             # Does this voter have the same Twitter handle as this organization? If so, link this organization to
             #  this particular voter
             temp_twitter_screen_name = voter.twitter_screen_name or ""
@@ -631,18 +811,39 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
             # Does the facebook_id for the voter and org match?
             facebook_id_matches = positive_value_exists(voter.facebook_id) \
                 and voter.facebook_id == organization.facebook_id
-            if twitter_screen_name_matches or facebook_id_matches:
+            if twitter_screen_name_matches:
                 try:
                     voter.linked_organization_we_vote_id = organization.we_vote_id
                     voter.save()
                 except Exception as e:
+                    success = False
+                    status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID"
+            elif facebook_id_matches:
+                # Check to make sure another voter isn't hanging onto this organization_we_vote_id
+                collision_results = voter_manager.retrieve_voter_by_organization_we_vote_id(
+                    organization.we_vote_id)
+                if collision_results['voter_found']:
+                    collision_voter = collision_results['voter']
+                    if collision_voter.we_vote_id != voter.we_vote_id:
+                        # Release the linked_organization_we_vote_id from collision_voter so it can be used on voter
+                        try:
+                            collision_voter.linked_organization_we_vote_id = None
+                            collision_voter.save()
+                        except Exception as e:
+                            success = False
+                            status += " UNABLE_TO_UPDATE_COLLISION_VOTER_WITH_EMPTY_ORGANIZATION_WE_VOTE_ID"
+                try:
+                    voter.linked_organization_we_vote_id = organization.we_vote_id
+                    voter.save()
+                except Exception as e:
+                    success = False
                     status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID"
             # If not, then this is a volunteer or admin setting up an organization
             else:
-                status += " DID_NOT_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID-VOTER_DOES_NOT_MATCH_TWITTER_HANDLE"
+                status += " DID_NOT_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID-VOTER_NOT_FOUND"
 
         results = {
-            'success':                      save_results['success'],
+            'success':                      success,
             'status':                       status,
             'voter_device_id':              voter_device_id,
             'organization_id':              organization.id,

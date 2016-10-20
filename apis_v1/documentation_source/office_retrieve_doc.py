@@ -27,7 +27,7 @@ def office_retrieve_doc_template_values(url_root):
         },
         {
             'name':         'office_we_vote_id',
-            'value':        'integer',  # boolean, integer, long, string
+            'value':        'string',  # boolean, integer, long, string
             'description':  'The unique identifier for this office across all networks '
                             '(either office_id OR office_we_vote_id required -- not both.) NOTE: In the future we '
                             'might support other identifiers used in the industry.',

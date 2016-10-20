@@ -5,6 +5,7 @@
 import datetime
 from nameparser import HumanName
 import random
+import re
 import string
 import sys
 import types
@@ -266,11 +267,34 @@ def display_full_name_with_correct_capitalization(full_name):
     :param full_name:
     :return:
     """
-    full_name.strip()
-    full_name_parsed = HumanName(full_name)
-    full_name_parsed.capitalize()
-    full_name_capitalized = str(full_name_parsed)
-    return full_name_capitalized
+    if full_name is not None and not callable(full_name):
+        full_name = str(full_name)
+        full_name.strip()
+        full_name_parsed = HumanName(full_name)
+        full_name_parsed.capitalize()
+        full_name_capitalized = str(full_name_parsed)
+        return full_name_capitalized
+    return ""
+
+
+def extract_email_addresses_from_string(incoming_string):
+    """
+    Thanks to https://gist.github.com/dideler/5219706
+    :param incoming_string:
+    :return:
+    """
+    string_lower_case = incoming_string.lower()
+    regex = re.compile(("([a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`"
+                        "{|}~-]+)*(@|\sat\s)(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(\.|"
+                        "\sdot\s))+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)"))
+
+    collection_of_emails = (email[0] for email in re.findall(regex, string_lower_case) if not email[0].startswith('//'))
+
+    list_of_emails = []
+    for email in collection_of_emails:
+        list_of_emails.append(email)
+
+    return list_of_emails
 
 
 def extract_first_name_from_full_name(full_name):
@@ -279,10 +303,13 @@ def extract_first_name_from_full_name(full_name):
     :param full_name:
     :return:
     """
-    full_name.strip()
-    full_name_parsed = HumanName(full_name)
-    first_name = full_name_parsed.first
-    return first_name
+    if full_name is not None and not callable(full_name):
+        full_name = str(full_name)
+        full_name.strip()
+        full_name_parsed = HumanName(full_name)
+        first_name = full_name_parsed.first
+        return first_name
+    return ""
 
 
 def extract_middle_name_from_full_name(full_name):
@@ -291,10 +318,13 @@ def extract_middle_name_from_full_name(full_name):
     :param full_name:
     :return:
     """
-    full_name.strip()
-    full_name_parsed = HumanName(full_name)
-    middle_name = full_name_parsed.middle
-    return middle_name
+    if full_name is not None and not callable(full_name):
+        full_name = str(full_name)
+        full_name.strip()
+        full_name_parsed = HumanName(full_name)
+        middle_name = full_name_parsed.middle
+        return middle_name
+    return ""
 
 
 def extract_last_name_from_full_name(full_name):
@@ -303,10 +333,13 @@ def extract_last_name_from_full_name(full_name):
     :param full_name:
     :return:
     """
-    full_name.strip()
-    full_name_parsed = HumanName(full_name)
-    last_name = full_name_parsed.last
-    return last_name
+    if full_name is not None and not callable(full_name):
+        full_name = str(full_name)
+        full_name.strip()
+        full_name_parsed = HumanName(full_name)
+        last_name = full_name_parsed.last
+        return last_name
+    return ""
 
 
 def extract_twitter_handle_from_text_string(twitter_text_string):
