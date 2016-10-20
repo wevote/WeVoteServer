@@ -593,6 +593,10 @@ def fetch_candidate_count_for_office(office_id=0, office_we_vote_id=''):
 
 # See also 'convert_to_political_party_constant' in we_vote_functions/functions.py
 def candidate_party_display(raw_party):
+    if raw_party is None:
+        return ''
+    if raw_party == '':
+        return ''
     if raw_party == 'Amer. Ind.':
         return 'American Independent'
     if raw_party == 'DEM':

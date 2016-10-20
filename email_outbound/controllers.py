@@ -44,10 +44,12 @@ def augment_email_address_list(email_address_list, voter):
         }
         email_address_list_augmented.append(email_address_for_json)
 
+    voter_manager = VoterManager()
     if primary_email_address_found:
         # Make sure the voter's cached "email" and "primary_email_we_vote_id" are both correct and match same email
         voter_data_updated = False
-        if voter.primary_email_we_vote_id and voter.primary_email_we_vote_id.lower != primary_email_address.we_vote_id.lower:
+        if voter.primary_email_we_vote_id and \
+                voter.primary_email_we_vote_id.lower != primary_email_address.we_vote_id.lower:
             voter.primary_email_we_vote_id = primary_email_address.we_vote_id
             voter_data_updated = True
         if voter.email and voter.email.lower != primary_email_address.normalized_email_address.lower:
@@ -57,13 +59,26 @@ def augment_email_address_list(email_address_list, voter):
         if voter_data_updated:
             try:
                 voter.save()
-                status += "SAVED_UPDATED_EMAIL_VALUES"
+                status += "SAVED_UPDATED_EMAIL_VALUES "
             except Exception as e:
-                # TODO DALE We could get this exception if the EmailAddress table has email X for voter 1
+                # We could get this exception if the EmailAddress table has email X for voter 1
                 # and the voter table stores the same email X for voter 2
                 status += "UNABLE_TO_SAVE_UPDATED_EMAIL_VALUES"
+                remove_cached_results = \
+                    voter_manager.remove_voter_cached_email_entries_from_email_address_object(primary_email_address)
+                status += remove_cached_results['status']
+                try:
+                    voter.primary_email_we_vote_id = primary_email_address.we_vote_id
+                    voter.email_ownership_is_verified = True
+                    voter.email = primary_email_address.normalized_email_address
+                    voter.save()
+                    status += "SAVED_UPDATED_EMAIL_VALUES2 "
+                    success = True
+                except Exception as e:
+                    status += "UNABLE_TO_SAVE_UPDATED_EMAIL_VALUES2 "
     else:
-        # If here we need to heal data. If here we know that the voter record doesn't have any email info
+        # If here we need to heal data. If here we know that the voter record doesn't have any email info that matches
+        #  an email address, so we want to make the first email address in the list the new master
         for primary_email_address_candidate in email_address_list:
             if primary_email_address_candidate.email_ownership_is_verified:
                 # Now that we have found a verified email, save it to the voter account, and break out of loop
@@ -75,6 +90,19 @@ def augment_email_address_list(email_address_list, voter):
                     status += "SAVED_PRIMARY_EMAIL_ADDRESS_CANDIDATE"
                 except Exception as e:
                     status += "UNABLE_TO_SAVE_PRIMARY_EMAIL_ADDRESS_CANDIDATE"
+                    remove_cached_results = \
+                        voter_manager.remove_voter_cached_email_entries_from_email_address_object(
+                            primary_email_address_candidate)
+                    status += remove_cached_results['status']
+                    try:
+                        voter.primary_email_we_vote_id = primary_email_address_candidate.we_vote_id
+                        voter.email_ownership_is_verified = True
+                        voter.email = primary_email_address_candidate.normalized_email_address
+                        voter.save()
+                        status += "SAVED_PRIMARY_EMAIL_ADDRESS_CANDIDATE2 "
+                        success = True
+                    except Exception as e:
+                        status += "UNABLE_TO_SAVE_PRIMARY_EMAIL_ADDRESS_CANDIDATE2 "
                 break
 
     results = {
@@ -116,6 +144,7 @@ def move_email_address_entries_to_another_voter(from_voter_we_vote_id, to_voter_
                 email_addresses_moved += 1
             except Exception as e:
                 email_addresses_not_moved += 1
+                status += "UNABLE_TO_SAVE_EMAIL_ADDRESS "
 
         status += " MOVE_EMAIL_ADDRESSES, moved: " + str(email_addresses_moved) + \
                   ", not moved: " + str(email_addresses_not_moved)
@@ -782,7 +811,6 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
                         success = True
                     except Exception as e:
                         status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_EMAIL_ADDRESS "
-                        success = False
                 try:
                     email_address_object.delete()
                     email_address_deleted = True
@@ -823,7 +851,19 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
                                     success = True
                                 except Exception as e:
                                     status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_NEW_PRIMARY "
-                                    success = False
+                                    remove_cached_results = \
+                                        voter_manager.remove_voter_cached_email_entries_from_email_address_object(
+                                            email_address_object_for_promotion)
+                                    status += remove_cached_results['status']
+                                    try:
+                                        voter.primary_email_we_vote_id = email_address_object_for_promotion.we_vote_id
+                                        voter.email_ownership_is_verified = True
+                                        voter.email = email_address_object_for_promotion.normalized_email_address
+                                        voter.save()
+                                        status += "SAVED_EMAIL_ADDRESS_AS_NEW_PRIMARY "
+                                        success = True
+                                    except Exception as e:
+                                        status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_EMAIL_ADDRESS2 "
                                 break  # Stop looking at email addresses to make the new primary
 
                 break  # TODO DALE Is there ever a case where we want to delete more than one email at a time?
@@ -846,29 +886,30 @@ def voter_email_address_save_for_api(voter_device_id, text_for_email_address, in
                             success = True
                         except Exception as e:
                             status += "UNABLE_TO_SAVE_EMAIL_ADDRESS_AS_PRIMARY-HEALING_DATA "
-                            success = False
+                            remove_cached_results = \
+                                voter_manager.remove_voter_cached_email_entries_from_email_address_object(
+                                    email_address_object)
+                            status += remove_cached_results['status']
+                            try:
+                                voter.primary_email_we_vote_id = email_address_object.we_vote_id
+                                voter.email_ownership_is_verified = True
+                                voter.email = email_address_object.normalized_email_address
+                                voter.save()
+                                status += "SAVED_EMAIL_ADDRESS_AS_NEW_PRIMARY "
+                                success = True
+                            except Exception as e:
+                                status += "UNABLE_TO_REMOVE_VOTER_PRIMARY_EMAIL_ADDRESS2 "
+                                success = False
                     else:
                         # Set this email address as the primary
 
                         # First, search for any other voter records that think they are using this
                         # normalized_email_address or primary_email_we_vote_id. If there are other records
                         # using these, they are bad data that don't reflect
-                        temp_voter_results = voter_manager.retrieve_voter_by_email(
-                            email_address_object.normalized_email_address)
-                        if temp_voter_results['voter_found']:
-                            temp_voter = temp_voter_results['voter']
-                            if temp_voter.id != voter.id:
-                                try:
-                                    # Wipe email info
-                                    temp_voter.primary_email_we_vote_id = None
-                                    temp_voter.email_ownership_is_verified = False
-                                    temp_voter.email = None
-                                    temp_voter.save()
-                                    status += "VOTER_EMAIL_ADDRESS_REMOVED_FROM_PRIMARY "
-                                    success = True
-                                except Exception as e:
-                                    status += "UNABLE_TO_REMOVE_EMAIL_ADDRESS_FROM_PRIMARY "
-                                    success = False
+                        remove_cached_results = \
+                            voter_manager.remove_voter_cached_email_entries_from_email_address_object(
+                                email_address_object)
+                        status += remove_cached_results['status']
 
                         # And now, update current voter
                         try:

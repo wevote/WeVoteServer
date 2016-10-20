@@ -510,46 +510,50 @@ def twitter_sign_in_start_for_api(voter_device_id, return_url):  # twitterSignIn
 
         twitter_auth_response = auth_create_results['twitter_auth_response']
 
-    if twitter_auth_response.twitter_access_token and twitter_auth_response.twitter_access_secret:
-        # If here the voter might already be signed in, so we don't want to ask them to approve again
-        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-        auth.set_access_token(twitter_auth_response.twitter_access_token, twitter_auth_response.twitter_access_secret)
-
-        api = tweepy.API(auth)
-
-        try:
-            tweepy_user_object = api.me()
-            success = True
-        # What is the error situation where the twitter_access_token and twitter_access_secret are no longer valid?
-        # We need to deal with this (wipe them from the database and rewind to the right place in the process
-        except tweepy.RateLimitError:
-            success = False
-            status = 'TWITTER_RATE_LIMIT_ERROR'
-        except tweepy.error.TweepError as error_instance:
-            success = False
-            status = error_instance.reason
-
-        if success:
-            # Reach out to the twitterSignInRequestVoterInfo -- no need to redirect
-            empty_return_url = ""  # We set this to empty so we get a response instead of a redirection
-            voter_info_results = twitter_sign_in_request_voter_info_for_api(voter_device_id, empty_return_url)
-
-            success = voter_info_results['success']
-            status = "SKIPPED_AUTH_DIRECT_REQUEST_VOTER_INFO: " + voter_info_results['status'] + " "
-            results = {
-                'status':                       status,
-                'success':                      success,
-                'voter_device_id':              voter_device_id,
-                'twitter_redirect_url':         '',
-                'voter_info_retrieved':         voter_info_results['voter_info_retrieved'],
-                'switch_accounts':              voter_info_results['switch_accounts'],
-                'jump_to_request_voter_info':   True,
-                'return_url':                   return_url,
-            }
-            return results
-        else:
-            # Somehow reset tokens and start over.
-            pass
+    # ### This whole block causes a "No 'Access-Control-Allow-Origin'" error:
+    #   XMLHttpRequest cannot load http://localhost:3000/twitter_sign_in. No 'Access-Control-Allow-Origin' header is
+    #   present on the requested resource. Origin 'null' is therefore not allowed access.
+    # I think it is good to ask them to authenticate again
+    # if twitter_auth_response.twitter_access_token and twitter_auth_response.twitter_access_secret:
+    #     # If here the voter might already be signed in, so we don't want to ask them to approve again
+    #     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+    #     auth.set_access_token(twitter_auth_response.twitter_access_token, twitter_auth_response.twitter_access_secret)
+    #
+    #     api = tweepy.API(auth)
+    #
+    #     try:
+    #         tweepy_user_object = api.me()
+    #         success = True
+    #     # What is the error situation where the twitter_access_token and twitter_access_secret are no longer valid?
+    #     # We need to deal with this (wipe them from the database and rewind to the right place in the process
+    #     except tweepy.RateLimitError:
+    #         success = False
+    #         status = 'TWITTER_RATE_LIMIT_ERROR'
+    #     except tweepy.error.TweepError as error_instance:
+    #         success = False
+    #         status = error_instance.reason
+    #
+    #     if success:
+    #         # Reach out to the twitterSignInRequestVoterInfo -- no need to redirect
+    #         empty_return_url = ""  # We set this to empty so we get a response instead of a redirection
+    #         voter_info_results = twitter_sign_in_request_voter_info_for_api(voter_device_id, empty_return_url)
+    #
+    #         success = voter_info_results['success']
+    #         status = "SKIPPED_AUTH_DIRECT_REQUEST_VOTER_INFO: " + voter_info_results['status'] + " "
+    #         results = {
+    #             'status':                       status,
+    #             'success':                      success,
+    #             'voter_device_id':              voter_device_id,
+    #             'twitter_redirect_url':         '',
+    #             'voter_info_retrieved':         voter_info_results['voter_info_retrieved'],
+    #             'switch_accounts':              voter_info_results['switch_accounts'],
+    #             'jump_to_request_voter_info':   True,
+    #             'return_url':                   return_url,
+    #         }
+    #         return results
+    #     else:
+    #         # Somehow reset tokens and start over.
+    #         pass
 
     callback_url = WE_VOTE_SERVER_ROOT_URL + "/apis/v1/twitterSignInRequestAccessToken/"
     callback_url += "?voter_device_id=" + voter_device_id

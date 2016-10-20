@@ -396,12 +396,13 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
     if not voter_device_link_results['voter_device_link_found']:
         error_results = {
-            'status':                   voter_device_link_results['status'],
-            'success':                  False,
-            'voter_device_id':          voter_device_id,
-            'current_voter_found':      current_voter_found,
-            'email_owner_voter_found':  email_owner_voter_found,
-            'facebook_owner_voter_found': facebook_owner_voter_found,
+            'status':                       voter_device_link_results['status'],
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'current_voter_found':          current_voter_found,
+            'email_owner_voter_found':      email_owner_voter_found,
+            'facebook_owner_voter_found':   facebook_owner_voter_found,
+            'invitation_owner_voter_found': False,
         }
         return error_results
 
@@ -413,12 +414,13 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     voter_id = voter_results['voter_id']
     if not positive_value_exists(voter_id):
         error_results = {
-            'status':                   "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
-            'success':                  False,
-            'voter_device_id':          voter_device_id,
-            'current_voter_found':      current_voter_found,
-            'email_owner_voter_found':  email_owner_voter_found,
-            'facebook_owner_voter_found': facebook_owner_voter_found,
+            'status':                       "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'current_voter_found':          current_voter_found,
+            'email_owner_voter_found':      email_owner_voter_found,
+            'facebook_owner_voter_found':   facebook_owner_voter_found,
+            'invitation_owner_voter_found': False,
         }
         return error_results
 
@@ -430,12 +432,13 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             and not positive_value_exists(twitter_secret_key) \
             and not positive_value_exists(invitation_secret_key):
         error_results = {
-            'status':                   "VOTER_MERGE_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN",
-            'success':                  False,
-            'voter_device_id':          voter_device_id,
-            'current_voter_found':      current_voter_found,
-            'email_owner_voter_found':  email_owner_voter_found,
-            'facebook_owner_voter_found': facebook_owner_voter_found,
+            'status':                       "VOTER_MERGE_TWO_ACCOUNTS_SECRET_KEY_NOT_PASSED_IN",
+            'success':                      False,
+            'voter_device_id':              voter_device_id,
+            'current_voter_found':          current_voter_found,
+            'email_owner_voter_found':      email_owner_voter_found,
+            'facebook_owner_voter_found':   facebook_owner_voter_found,
+            'invitation_owner_voter_found': False,
         }
         return error_results
 
@@ -457,24 +460,26 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
         if not email_owner_voter_found:
             error_results = {
-                'status':                   "EMAIL_OWNER_VOTER_NOT_FOUND",
-                'success':                  False,
-                'voter_device_id':          voter_device_id,
-                'current_voter_found':      current_voter_found,
-                'email_owner_voter_found':  email_owner_voter_found,
-                'facebook_owner_voter_found': False,
+                'status':                       "EMAIL_OWNER_VOTER_NOT_FOUND",
+                'success':                      False,
+                'voter_device_id':              voter_device_id,
+                'current_voter_found':          current_voter_found,
+                'email_owner_voter_found':      email_owner_voter_found,
+                'facebook_owner_voter_found':   False,
+                'invitation_owner_voter_found': False,
             }
             return error_results
 
         # Double-check they aren't the same voter account
         if voter.id == email_owner_voter.id:
             error_results = {
-                'status':                   "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
-                'success':                  True,
-                'voter_device_id':          voter_device_id,
-                'current_voter_found':      current_voter_found,
-                'email_owner_voter_found':  email_owner_voter_found,
-                'facebook_owner_voter_found': False,
+                'status':                       "CURRENT_VOTER_AND_EMAIL_OWNER_VOTER_ARE_SAME",
+                'success':                      True,
+                'voter_device_id':              voter_device_id,
+                'current_voter_found':          current_voter_found,
+                'email_owner_voter_found':      email_owner_voter_found,
+                'facebook_owner_voter_found':   False,
+                'invitation_owner_voter_found': False,
             }
             return error_results
 
@@ -506,6 +511,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 'current_voter_found': current_voter_found,
                 'email_owner_voter_found': False,
                 'facebook_owner_voter_found': facebook_owner_voter_found,
+                'invitation_owner_voter_found': False,
             }
             return error_results
 
@@ -531,6 +537,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     'current_voter_found': current_voter_found,
                     'email_owner_voter_found': False,
                     'facebook_owner_voter_found': facebook_owner_voter_found,
+                    'invitation_owner_voter_found': False,
                 }
                 return error_results
 
@@ -1178,7 +1185,7 @@ def refresh_voter_primary_email_cached_information_by_email(normalized_email_add
                             # Could not find voter by voter_we_vote_id in EmailAddress table
                             status += "UNABLE_TO_FIND_VOTER_BY_VOTER_WE_VOTE_ID "
                     except Exception as e:
-                        status = "UNABLE_TO_UPDATE_VOTER_FOUND_BY_EMAIL "
+                        status += "UNABLE_TO_UPDATE_VOTER_FOUND_BY_EMAIL "
                         # We tried to update the voter found by the voter_we_vote_id stored in the EmailAddress table,
                         #  but got an error, so assume it was because of a collision with the primary_email_we_vote_id
                         # Here, we retrieve the voter already "claiming" this email entry so we can wipe the

@@ -797,7 +797,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
     get the ballot items related to that election.
     :return:
     """
-
+    status = ""
     ballot_item_list_manager = BallotItemListManager()
 
     ballot_item_list = []
@@ -805,10 +805,10 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
     try:
         results = ballot_item_list_manager.retrieve_all_ballot_items_for_voter(voter_id, google_civic_election_id)
         success = results['success']
-        status = results['status']
+        status += results['status']
         ballot_item_list = results['ballot_item_list']
     except Exception as e:
-        status = 'FAILED voter_ballot_items_retrieve. ' \
+        status += 'FAILED voter_ballot_items_retrieve. ' \
                  '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
         handle_exception(e, logger=logger, exception_message=status)
         success = False
@@ -844,6 +844,7 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
                     # status = 'FAILED candidates_retrieve. ' \
                     #          '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
                     candidates_to_display = []
+                    status += results['status'] + " "
                 one_ballot_item = {
                     'ballot_item_display_name':     ballot_item.ballot_item_display_name,
                     'google_civic_election_id':     ballot_item.google_civic_election_id,

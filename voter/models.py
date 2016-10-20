@@ -346,6 +346,51 @@ class VoterManager(BaseUserManager):
         #  to ever be used
         logger.info("clear_out_abandoned_voter_records")
 
+    def remove_voter_cached_email_entries_from_email_address_object(self, email_address_object):
+        status = ""
+        success = False
+
+        voter_manager = VoterManager()
+        if positive_value_exists(email_address_object.normalized_email_address):
+            voter_found_by_email_results = voter_manager.retrieve_voter_by_email(
+                email_address_object.normalized_email_address)
+            if voter_found_by_email_results['voter_found']:
+                voter_found_by_email = voter_found_by_email_results['voter']
+
+                # Wipe this voter's email values...
+                try:
+                    voter_found_by_email.email = None
+                    voter_found_by_email.primary_email_we_vote_id = None
+                    voter_found_by_email.email_ownership_is_verified = False
+                    voter_found_by_email.save()
+                    status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL "
+                    success = True
+                except Exception as e:
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_EMAIL "
+
+        if positive_value_exists(email_address_object.we_vote_id):
+            voter_by_primary_email_results = voter_manager.retrieve_voter_by_primary_email_we_vote_id(
+                email_address_object.we_vote_id)
+            if voter_by_primary_email_results['voter_found']:
+                voter_found_by_primary_email_we_vote_id = voter_by_primary_email_results['voter']
+
+                # Wipe this voter's email values...
+                try:
+                    voter_found_by_primary_email_we_vote_id.email = None
+                    voter_found_by_primary_email_we_vote_id.primary_email_we_vote_id = None
+                    voter_found_by_primary_email_we_vote_id.email_ownership_is_verified = False
+                    voter_found_by_primary_email_we_vote_id.save()
+                    status += "ABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID "
+                    success = True
+                except Exception as e:
+                    status += "UNABLE_TO_CLEAN_OUT_VOTER_FOUND_BY_PRIMARY_EMAIL_WE_VOTE_ID "
+
+        results = {
+            'success': success,
+            'status': status,
+        }
+        return results
+
     def save_facebook_user_values(self, voter, facebook_auth_response):
         try:
             voter.facebook_id = facebook_auth_response.facebook_user_id
@@ -583,7 +628,10 @@ class VoterManager(BaseUserManager):
         return results
 
     def update_voter_email_ownership_verified(self, voter, email_address_object):
+        status = ""
+        success = True  # Assume success unless we hit a problem
         voter_updated = False
+        voter_manager = VoterManager()
 
         try:
             should_save_voter = False
@@ -596,12 +644,28 @@ class VoterManager(BaseUserManager):
             if should_save_voter:
                 voter.save()
                 voter_updated = True
-            status = "UPDATED_VOTER_EMAIL_OWNERSHIP"
+            status += "UPDATED_VOTER_EMAIL_OWNERSHIP"
             success = True
         except Exception as e:
-            status = "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP"
-            success = False
-            voter_updated = False
+            status += "UNABLE_TO_UPDATE_INCOMING_VOTER "
+            # We tried to update the incoming voter found but got an error, so we retrieve voter's based on
+            #  normalized_email address, and then by primary_email_we_vote_id
+            remove_cached_results = voter_manager.remove_voter_cached_email_entries_from_email_address_object(
+                email_address_object)
+            status += remove_cached_results['status']
+
+            # And now, try to save again
+            try:
+                voter.primary_email_we_vote_id = email_address_object.we_vote_id
+                voter.email = email_address_object.normalized_email_address
+                voter.email_ownership_is_verified = True
+                voter.save()
+                voter_updated = True
+                status += "UPDATED_VOTER_EMAIL_OWNERSHIP2 "
+                success = True
+            except Exception as e:
+                success = False
+                status += "UNABLE_TO_UPDATE_VOTER_EMAIL_OWNERSHIP2 "
 
         results = {
             'status': status,
