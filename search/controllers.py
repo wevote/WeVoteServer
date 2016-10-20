@@ -199,7 +199,7 @@ def search_all_for_api(text_from_search_field, voter_device_id):
                 search_count += 1
             elif one_search_result_type == "politician":
                 # If we are here, then we should skip out. We aren't displaying politicians
-                break
+                continue
         status = "SEARCH_ALL_COMPLETE"
         success = True
 
