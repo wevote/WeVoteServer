@@ -828,9 +828,11 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
                     from_sender_entry.save()
                     friend_invitation_entries_moved += 1
                 except Exception as e:
+                    status += "FriendInvitationEmailLink Sender entries not moved "
                     friend_invitation_entries_not_moved += 1
             else:
-                friend_invitation_entries_not_moved += 1
+                status += "to_sender_invitation_found found, EmailLink Sender entries not moved "
+                # friend_invitation_entries_not_moved += 1
 
     # ###############################
     # FriendInvitationVoterLink
@@ -864,9 +866,11 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
                     from_sender_entry.save()
                     friend_invitation_entries_moved += 1
                 except Exception as e:
+                    status += "FriendInvitationVoterLink Sender entries not moved "
                     friend_invitation_entries_not_moved += 1
             else:
-                friend_invitation_entries_not_moved += 1
+                status += "to_sender_invitation_found found, VoterLink Sender entries not moved "
+                # friend_invitation_entries_not_moved += 1
 
     # RECIPIENT entries
     # FROM RECIPIENT: Invitations sent TO the from_voter from others
@@ -881,6 +885,7 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
             '', to_voter_we_vote_id)
         friend_invitation_voter_link_to_recipient_list = \
             friend_invitation_voter_link_to_recipient_results['friend_invitation_list']
+        status += friend_invitation_voter_link_to_recipient_results['status']
 
         for from_sender_entry in friend_invitation_voter_link_from_recipient_list:
             # See if the "to_voter" already has an invitation
@@ -898,9 +903,11 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
                     from_sender_entry.save()
                     friend_invitation_entries_moved += 1
                 except Exception as e:
+                    status += "FriendInvitationVoterLink Recipient entries not moved "
                     friend_invitation_entries_not_moved += 1
             else:
-                friend_invitation_entries_not_moved += 1
+                status += "to_sender_invitation_found found, Recipient entries not moved "
+                # friend_invitation_entries_not_moved += 1
     status += " FRIEND_INVITATIONS moved: " + str(friend_invitation_entries_moved) + \
               ", not moved: " + str(friend_invitation_entries_not_moved)
 
@@ -1118,7 +1125,8 @@ def store_internal_friend_invitation_with_unknown_email(voter, invitation_messag
     invitation_secret_key = generate_random_string(12)
 
     create_results = friend_manager.create_or_update_friend_invitation_email_link(
-        sender_voter_we_vote_id, recipient_email_we_vote_id,
+        sender_voter_we_vote_id,
+        recipient_email_we_vote_id,
         recipient_voter_email, invitation_message, sender_email_ownership_is_verified,
         invitation_secret_key)
     results = {

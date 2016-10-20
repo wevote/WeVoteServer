@@ -1102,6 +1102,8 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             }
             position_list.append(one_position_dict_for_api)
 
+    # Now change the sort order
+
     status += ' POSITION_LIST_FOR_OPINION_MAKER_SUCCEEDED'
     success = True
     json_data = {

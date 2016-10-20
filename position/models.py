@@ -1069,7 +1069,7 @@ class PositionListManager(models.Model):
         if retrieve_public_positions:
             try:
                 public_positions_list = PositionEntered.objects.order_by('-vote_smart_time_span',
-                                                                           '-google_civic_election_id')
+                                                                         '-google_civic_election_id')
                 if positive_value_exists(organization_id):
                     public_positions_list = public_positions_list.filter(organization_id=organization_id)
                 else:

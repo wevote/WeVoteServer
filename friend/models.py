@@ -142,9 +142,10 @@ class FriendManager(models.Model):
         try:
             friend_invitation, created = FriendInvitationEmailLink.objects.update_or_create(
                 sender_voter_we_vote_id__iexact=sender_voter_we_vote_id,
-                recipient_email_we_vote_id__iexact=recipient_email_we_vote_id,
+                recipient_voter_email__iexact=recipient_voter_email,
                 defaults=defaults,
             )
+            # recipient_email_we_vote_id__iexact = recipient_email_we_vote_id,
             friend_invitation_saved = True
             success = True
             status = "FRIEND_INVITATION_EMAIL_LINK_UPDATED_OR_CREATED"
