@@ -9,7 +9,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import GoogleCivicApiCounterManager
-from ballot.models import BallotItemManager, BallotItemListManager, BallotReturnedManager
+from ballot.models import BallotItemManager, BallotItemListManager, BallotReturned, BallotReturnedManager
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from election.models import ElectionManager
@@ -602,6 +602,8 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
     # process_polling_locations_from_structured_json(one_ballot_json['pollingLocations'])
 
     # If we successfully save a ballot, create/update a BallotReturned entry
+    ballot_returned_found = False
+    ballot_returned = BallotReturned()
     is_test_election = True if positive_value_exists(google_civic_election_id) \
         and convert_to_int(google_civic_election_id) == 2000 else False
     if success and positive_value_exists(voter_address_dict) and not is_test_election:
@@ -611,27 +613,37 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
             if results['ballot_returned_found']:
                 update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
                     voter_address_dict, results['ballot_returned'])
+                ballot_returned_found = True  # If the update fails, we just return the original ballot_returned object
+                ballot_returned = update_results['ballot_returned']
             else:
                 create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
                     voter_address_dict,
                     election_date_text, election_description_text,
                     google_civic_election_id, voter_id, '')
+                ballot_returned_found = create_results['ballot_returned_found']
+                ballot_returned = create_results['ballot_returned']
         if positive_value_exists(polling_location_we_vote_id) and positive_value_exists(google_civic_election_id):
             results = ballot_returned_manager.retrieve_ballot_returned_from_polling_location_we_vote_id(
                 polling_location_we_vote_id, google_civic_election_id)
             if results['ballot_returned_found']:
                 update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
                     voter_address_dict, results['ballot_returned'])
+                ballot_returned_found = True  # If the update fails, we just return the original ballot_returned object
+                ballot_returned = update_results['ballot_returned']
             else:
                 create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
                     voter_address_dict,
                     election_date_text, election_description_text,
                     google_civic_election_id, 0, polling_location_we_vote_id)
+                ballot_returned_found = create_results['ballot_returned_found']
+                ballot_returned = create_results['ballot_returned']
         # Currently we don't report the success or failure of storing ballot_returned
 
     results = {
-        'status': status,
-        'success': success,
+        'status':                   status,
+        'success':                  success,
+        'ballot_returned_found':    ballot_returned_found,
+        'ballot_returned':          ballot_returned,
         'google_civic_election_id': google_civic_election_id,
     }
     return results

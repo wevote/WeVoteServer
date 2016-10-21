@@ -6,7 +6,7 @@ from .controllers import election_remote_retrieve, elections_import_from_master_
 from .models import Election
 from .serializers import ElectionSerializer
 from admin_tools.views import redirect_to_sign_in_page
-from ballot.models import BallotReturnedListManager
+from ballot.models import BallotReturnedListManager, BallotReturnedManager
 from candidate.models import CandidateCampaignListManager
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -77,7 +77,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         polling_location_list = polling_location_list.filter(state__iexact=state)
         # We used to have a limit of 500 ballots to pull per election, but now retrieve all
         # Ordering by "location_name" creates a bit of (locational) random order
-        polling_location_list = polling_location_list.order_by('location_name')  # [:500]  TODO DALE Remove soon
+        polling_location_list = polling_location_list.order_by('location_name')  # [:500]  For testing smaller batches
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '
@@ -101,6 +101,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     # We used to only retrieve up to 500 locations from each state, but we don't limit now
     # # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
     # number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
+    ballot_returned_manager = BallotReturnedManager()
     for polling_location in polling_location_list:
         success = False
         # Get the address for this polling place, and then retrieve the ballot from Google Civic API
@@ -113,6 +114,9 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                                                                               polling_location.we_vote_id)
             if store_one_ballot_results['success']:
                 success = True
+                if store_one_ballot_results['ballot_returned_found']:
+                    ballot_returned = store_one_ballot_results['ballot_returned']
+                    ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(ballot_returned)
 
         if success:
             ballots_retrieved += 1

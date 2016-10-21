@@ -17,4 +17,7 @@ urlpatterns = [
     url(r'^(?P<ballot_returned_id>[0-9]+)/list_edit/$', views_admin.ballot_item_list_edit_view,
         name='ballot_item_list_edit'),
     url(r'^list_edit_process/$', views_admin.ballot_item_list_edit_process_view, name='ballot_item_list_edit_process'),
+    url(r'^update_ballot_returned_latitude_and_longitude/$',
+        views_admin.update_ballot_returned_with_latitude_and_longitude_view,
+        name='update_ballot_returned_latitude_and_longitude'),
 ]
