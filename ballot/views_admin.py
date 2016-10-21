@@ -6,6 +6,7 @@ from .controllers import ballot_items_import_from_master_server, ballot_returned
 from .models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager
 from .serializers import BallotItemSerializer, BallotReturnedSerializer
 from admin_tools.views import redirect_to_sign_in_page
+from config.base import get_environment_variable
 from office.models import ContestOffice, ContestOfficeManager
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -23,6 +24,8 @@ import time
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
+
+GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -324,7 +327,7 @@ def ballot_item_list_edit_process_view(request):
         # Make sure we have saved a latitude and longitude for the ballot_returned entry
         if ballot_returned_found and positive_value_exists(ballot_returned.text_for_map_search):
             if not ballot_returned.latitude or not ballot_returned.longitude:
-                google_client = get_geocoder_for_service('google')()
+                google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
                 location = google_client.geocode(ballot_returned.text_for_map_search)
                 if location is None:
                     status = 'Could not find location matching "{}"'.format(ballot_returned.text_for_map_search)

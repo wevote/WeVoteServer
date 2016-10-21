@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from candidate.models import CandidateCampaign
+from config.base import get_environment_variable
 import datetime  # Note this is importing the module. "from datetime import datetime" imports the class
 from django.db import models
 from django.db.models import F, Q
@@ -26,6 +27,8 @@ KIND_OF_BALLOT_ITEM_CHOICES = (
     (POLITICIAN,    'Politician'),
     (MEASURE,       'Measure'),
 )
+
+GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -903,7 +906,7 @@ class BallotReturnedManager(models.Model):
         ballot_returned = None
 
         if not hasattr(self, 'google_client') or not self.google_client:
-            self.google_client = get_geocoder_for_service('google')()
+            self.google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
 
         try:
             location = self.google_client.geocode(text_for_map_search)
@@ -1016,7 +1019,7 @@ class BallotReturnedManager(models.Model):
         status = ""
         # We try to use existing google_client
         if not hasattr(self, 'google_client') or not self.google_client:
-            self.google_client = get_geocoder_for_service('google')()
+            self.google_client = get_geocoder_for_service('google')(GOOGLE_MAPS_API_KEY)
 
         if not hasattr(ballot_returned_object, "normalized_line1"):
             results = {
