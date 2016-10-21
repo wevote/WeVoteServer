@@ -1,8 +1,10 @@
+from config.base import get_environment_variable
 from django.core.management.base import BaseCommand
 from geopy.geocoders import get_geocoder_for_service
 from geopy.exc import GeocoderQuotaExceeded
-
 from ballot.models import BallotReturned
+
+# GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
 
 class Command(BaseCommand):
@@ -20,7 +22,7 @@ class Command(BaseCommand):
             b.save()
 
     def handle(self, *args, **options):
-        self.google_client = get_geocoder_for_service('google')()
+        self.google_client = get_geocoder_for_service('google')()  # Add in parens GOOGLE_MAPS_API_KEY
 
         while BallotReturned.objects.filter(latitude=None).exists():
             try:

@@ -116,16 +116,17 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                                                                               polling_location.we_vote_id)
             if store_one_ballot_results['success']:
                 success = True
-                if store_one_ballot_results['ballot_returned_found']:
-                    ballot_returned = store_one_ballot_results['ballot_returned']
-                    ballot_returned_results = \
-                        ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(ballot_returned)
-                    if ballot_returned_results['success']:
-                        rate_limit_count += 1
-                        if rate_limit_count >= 10:
-                            time.sleep(1)
-                            # After pause, reset the limit count
-                            rate_limit_count = 0
+                # NOTE: We don't support retrieving ballots for polling locations AND geocoding simultaneously
+                # if store_one_ballot_results['ballot_returned_found']:
+                #     ballot_returned = store_one_ballot_results['ballot_returned']
+                #     ballot_returned_results = \
+                #         ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(ballot_returned)
+                #     if ballot_returned_results['success']:
+                #         rate_limit_count += 1
+                #         if rate_limit_count >= 10:  # Avoid problems with the geocoder rate limiting
+                #             time.sleep(1)
+                #             # After pause, reset the limit count
+                #             rate_limit_count = 0
 
         if success:
             ballots_retrieved += 1

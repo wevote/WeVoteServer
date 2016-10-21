@@ -52,6 +52,7 @@
 
   "_comment":                       "import_export_google_civic",
   "GOOGLE_CIVIC_API_KEY":           "",
+  "GOOGLE_MAPS_API_KEY":            "",
   "ELECTION_QUERY_URL":             "https://www.googleapis.com/civicinfo/v2/elections",
   "VOTER_INFO_URL":                 "https://www.googleapis.com/civicinfo/v2/voterinfo",
   "VOTER_INFO_JSON_FILE":           "import_export_google_civic/import_data/voterinfo_sample.json",
