@@ -908,8 +908,13 @@ class BallotReturnedManager(models.Model):
         try:
             location = self.google_client.geocode(text_for_map_search)
         except GeocoderQuotaExceeded:
-            self.google_client = get_geocoder_for_service('google')()
-            location = self.google_client.geocode(text_for_map_search)
+            results = {
+                'status':                   "GeocoderQuotaExceeded ",
+                'geocoder_quota_exceeded':  True,
+                'ballot_returned_found':    ballot_returned_found,
+                'ballot_returned':          ballot_returned,
+            }
+            return results
 
         if location is None:
             status = 'Could not find location matching "{}"'.format(text_for_map_search)
@@ -931,9 +936,10 @@ class BallotReturnedManager(models.Model):
                 status = 'No stored ballot matches the state {}.'.format(state)
 
         return {
-            'status': status,
-            'ballot_returned_found': ballot_returned_found,
-            'ballot_returned': ballot_returned,
+            'status':                   status,
+            'geocoder_quota_exceeded':  False,
+            'ballot_returned_found':    ballot_returned_found,
+            'ballot_returned':          ballot_returned,
         }
 
     def update_or_create_ballot_returned(
@@ -1014,8 +1020,9 @@ class BallotReturnedManager(models.Model):
 
         if not hasattr(ballot_returned_object, "normalized_line1"):
             results = {
-                'status': "POPULATE_LATITUDE_AND_LONGITUDE-NOT_A_BALLOT_RETURNED_OBJECT ",
-                'success': False,
+                'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-NOT_A_BALLOT_RETURNED_OBJECT ",
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
             }
             return results
 
@@ -1025,8 +1032,9 @@ class BallotReturnedManager(models.Model):
                 positive_value_exists(ballot_returned_object.normalized_zip):
             # We require all four values
             results = {
-                'status': "POPULATE_LATITUDE_AND_LONGITUDE-MISSING_REQUIRED_ADDRESS_INFO ",
-                'success': False,
+                'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-MISSING_REQUIRED_ADDRESS_INFO ",
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
             }
             return results
 
@@ -1038,13 +1046,18 @@ class BallotReturnedManager(models.Model):
         try:
             location = self.google_client.geocode(full_ballot_address)
         except GeocoderQuotaExceeded:
-            self.google_client = get_geocoder_for_service('google')()
-            location = self.google_client.geocode(full_ballot_address)
+            results = {
+                'status':                   "GeocoderQuotaExceeded ",
+                'geocoder_quota_exceeded':  True,
+                'success':                  False,
+            }
+            return results
 
         if location is None:
             results = {
-                'status': "POPULATE_LATITUDE_AND_LONGITUDE-LOCATION_NOT_RETURNED_FROM_GEOCODER ",
-                'success': False,
+                'status':                   "POPULATE_LATITUDE_AND_LONGITUDE-LOCATION_NOT_RETURNED_FROM_GEOCODER ",
+                'geocoder_quota_exceeded':  False,
+                'success':                  False,
             }
             return results
 
@@ -1058,8 +1071,9 @@ class BallotReturnedManager(models.Model):
             success = False
 
         results = {
-            'status': status,
-            'success': success,
+            'status':                   status,
+            'geocoder_quota_exceeded':  False,
+            'success':                  success,
         }
         return results
 
