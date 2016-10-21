@@ -25,6 +25,7 @@ from polling_location.models import PollingLocation
 from position.models import PositionListManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
+import time
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_device_id, positive_value_exists
@@ -102,6 +103,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     # # We retrieve 10% of the total polling locations, which should give us coverage of the entire election
     # number_of_polling_locations_to_retrieve = int(.1 * polling_location_count)
     ballot_returned_manager = BallotReturnedManager()
+    rate_limit_count = 0
     for polling_location in polling_location_list:
         success = False
         # Get the address for this polling place, and then retrieve the ballot from Google Civic API
@@ -116,7 +118,14 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                 success = True
                 if store_one_ballot_results['ballot_returned_found']:
                     ballot_returned = store_one_ballot_results['ballot_returned']
-                    ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(ballot_returned)
+                    ballot_returned_results = \
+                        ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(ballot_returned)
+                    if ballot_returned_results['success']:
+                        rate_limit_count += 1
+                        if rate_limit_count >= 10:
+                            time.sleep(1)
+                            # After pause, reset the limit count
+                            rate_limit_count = 0
 
         if success:
             ballots_retrieved += 1

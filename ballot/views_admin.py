@@ -19,6 +19,7 @@ from measure.models import ContestMeasure, ContestMeasureManager
 from polling_location.models import PollingLocation, PollingLocationManager
 from rest_framework.views import APIView
 from rest_framework.response import Response
+import time
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -387,7 +388,7 @@ def ballot_item_list_edit_process_view(request):
 
 
 @login_required
-def update_ballot_returned_with_latitude_and_longitude_view(request):  # TODO DALE FINISH THIS
+def update_ballot_returned_with_latitude_and_longitude_view(request):
     """
     Cycle through all of the specified BallotReturned entries and look up latitude and longitude
     :param request:
@@ -427,11 +428,19 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):  # TODO DA
             ballot_returned_query = ballot_returned_query.filter(state_code=state_code)
         ballot_returned_query = ballot_returned_query
 
+        rate_limit_count = 0
         for ballot_returned in ballot_returned_query:
+            rate_limit_count += 1
             ballot_returned_results = ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(
                  ballot_returned)
             if ballot_returned_results['success']:
                 latitude_and_longitude_updated_count += 1
+                if rate_limit_count >= 10:
+                    time.sleep(1)
+                    # After pause, reset the limit count
+                    rate_limit_count = 0
+            if ballot_returned_results['geocoder_quota_exceeded']:
+                break
 
     messages.add_message(request, messages.INFO, 'BallotReturned entries updated with lat/long info: ' +
                          str(latitude_and_longitude_updated_count))
