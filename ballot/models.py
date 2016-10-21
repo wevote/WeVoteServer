@@ -902,7 +902,7 @@ class BallotReturnedManager(models.Model):
         ballot_returned_found = False
         ballot_returned = None
 
-        if not self.google_client:
+        if not hasattr(self, 'google_client') or not self.google_client:
             self.google_client = get_geocoder_for_service('google')()
 
         try:
