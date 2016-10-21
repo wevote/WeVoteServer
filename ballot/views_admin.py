@@ -425,7 +425,7 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):  # TODO DA
             ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
             ballot_returned_query = ballot_returned_query.filter(state_code=state_code)
-        ballot_returned_query = ballot_returned_query[:20]
+        ballot_returned_query = ballot_returned_query
 
         for ballot_returned in ballot_returned_query:
             ballot_returned_results = ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(
