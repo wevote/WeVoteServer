@@ -384,3 +384,65 @@ def ballot_item_list_edit_process_view(request):
                                 "&polling_location_city=" + polling_location_city +
                                 "&polling_location_zip=" + str(polling_location_zip)
                                 )
+
+
+@login_required
+def update_ballot_returned_with_latitude_and_longitude_view(request):  # TODO DALE FINISH THIS
+    """
+    Cycle through all of the specified BallotReturned entries and look up latitude and longitude
+    :param request:
+    :return:
+    """
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    ballot_returned_id = convert_to_int(request.GET.get('ballot_returned_id', 0))
+    google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', "")
+
+    latitude_and_longitude_updated_count = 0
+
+    ballot_returned_manager = BallotReturnedManager()
+    if positive_value_exists(ballot_returned_id):
+        # Find existing ballot_returned
+        if positive_value_exists(ballot_returned_id):
+            try:
+                ballot_returned_query = BallotReturned.objects.filter(id=ballot_returned_id)
+                if len(ballot_returned_query):
+                    ballot_returned = ballot_returned_query[0]
+                    ballot_returned_results = \
+                        ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(ballot_returned)
+                    if ballot_returned_results['success']:
+                        latitude_and_longitude_updated_count += 1
+            except Exception as e:
+                pass
+    else:
+        ballot_returned_query = BallotReturned.objects.order_by('id')
+        ballot_returned_query = ballot_returned_query.filter(latitude=None)
+        ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id=None)
+        if positive_value_exists(google_civic_election_id):
+            ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            ballot_returned_query = ballot_returned_query.filter(state_code=state_code)
+        ballot_returned_query = ballot_returned_query[:20]
+
+        for ballot_returned in ballot_returned_query:
+            ballot_returned_results = ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(
+                 ballot_returned)
+            if ballot_returned_results['success']:
+                latitude_and_longitude_updated_count += 1
+
+    messages.add_message(request, messages.INFO, 'BallotReturned entries updated with lat/long info: ' +
+                         str(latitude_and_longitude_updated_count))
+
+    if positive_value_exists(google_civic_election_id):
+        election_manager = ElectionManager()
+        election_results = election_manager.retrieve_election(google_civic_election_id)
+        if election_results['election_found']:
+            election = election_results['election']
+            local_election_id = election.id
+            return HttpResponseRedirect(reverse('election:election_summary', args=(local_election_id,)))
+
+    return HttpResponseRedirect(reverse('election:election_list', args=()))
+

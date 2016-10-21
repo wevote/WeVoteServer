@@ -9,6 +9,7 @@ from django.db.models import F, Q
 from election.models import ElectionManager
 from exception.models import handle_exception, handle_record_found_more_than_one_exception
 from geopy.geocoders import get_geocoder_for_service
+from geopy.exc import GeocoderQuotaExceeded
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
 from polling_location.models import PollingLocationManager
@@ -881,12 +882,11 @@ class BallotReturnedManager(models.Model):
         except Exception as e:
             status = "UNABLE_TO_UPDATE_BALLOT_RETURNED_WITH_NORMALIZED_VALUES_EXCEPTION"
             success = False
-            ballot_returned = BallotReturned()
 
         results = {
-            'status':   status,
-            'success':  success,
-            'ballot_returned': ballot_returned,
+            'status':                   status,
+            'success':                  success,
+            'ballot_returned':          ballot_returned,
         }
         return results
 
@@ -902,8 +902,15 @@ class BallotReturnedManager(models.Model):
         ballot_returned_found = False
         ballot_returned = None
 
-        google_client = get_geocoder_for_service('google')()
-        location = google_client.geocode(text_for_map_search)
+        if not self.google_client:
+            self.google_client = get_geocoder_for_service('google')()
+
+        try:
+            location = self.google_client.geocode(text_for_map_search)
+        except GeocoderQuotaExceeded:
+            self.google_client = get_geocoder_for_service('google')()
+            location = self.google_client.geocode(text_for_map_search)
+
         if location is None:
             status = 'Could not find location matching "{}"'.format(text_for_map_search)
         else:
@@ -991,6 +998,68 @@ class BallotReturnedManager(models.Model):
             'status':                       status,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
             'new_ballot_returned_created':  new_ballot_returned_created,
+        }
+        return results
+
+    def populate_latitude_and_longitude_for_ballot_returned(self, ballot_returned_object):
+        """
+        We use the google geocoder in partnership with geoip
+        :param ballot_returned_object:
+        :return:
+        """
+        status = ""
+        # We try to use existing google_client
+        if not hasattr(self, 'google_client') or not self.google_client:
+            self.google_client = get_geocoder_for_service('google')()
+
+        if not hasattr(ballot_returned_object, "normalized_line1"):
+            results = {
+                'status': "POPULATE_LATITUDE_AND_LONGITUDE-NOT_A_BALLOT_RETURNED_OBJECT ",
+                'success': False,
+            }
+            return results
+
+        if not positive_value_exists(ballot_returned_object.normalized_line1) or not \
+                positive_value_exists(ballot_returned_object.normalized_city) or not \
+                positive_value_exists(ballot_returned_object.normalized_state) or not \
+                positive_value_exists(ballot_returned_object.normalized_zip):
+            # We require all four values
+            results = {
+                'status': "POPULATE_LATITUDE_AND_LONGITUDE-MISSING_REQUIRED_ADDRESS_INFO ",
+                'success': False,
+            }
+            return results
+
+        full_ballot_address = '{}, {}, {} {}'.format(
+            ballot_returned_object.normalized_line1,
+            ballot_returned_object.normalized_city,
+            ballot_returned_object.normalized_state,
+            ballot_returned_object.normalized_zip)
+        try:
+            location = self.google_client.geocode(full_ballot_address)
+        except GeocoderQuotaExceeded:
+            self.google_client = get_geocoder_for_service('google')()
+            location = self.google_client.geocode(full_ballot_address)
+
+        if location is None:
+            results = {
+                'status': "POPULATE_LATITUDE_AND_LONGITUDE-LOCATION_NOT_RETURNED_FROM_GEOCODER ",
+                'success': False,
+            }
+            return results
+
+        try:
+            ballot_returned_object.latitude, ballot_returned_object.longitude = location.latitude, location.longitude
+            ballot_returned_object.save()
+            status += "BALLOT_RETURNED_SAVED_WITH_LATITUDE_AND_LONGITUDE "
+            success = True
+        except Exception as e:
+            status += "BALLOT_RETURNED_NOT_SAVED_WITH_LATITUDE_AND_LONGITUDE "
+            success = False
+
+        results = {
+            'status': status,
+            'success': success,
         }
         return results
 
