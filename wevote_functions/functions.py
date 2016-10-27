@@ -541,16 +541,20 @@ def positive_value_exists(value):
                 return bool(len(value))
             if isinstance(value, datetime.date):
                 return bool(value is not None)
+            if isinstance(value, str):
+                return bool(len(value))
         else:
             # Python 2 code in this block
             if isinstance(value, types.ListType):
                 return bool(len(value))
             if isinstance(value, types.DictType):
                 return bool(len(value))
+            if isinstance(value, basestring):
+                return bool(len(value))
             # TODO We aren't checking for datetime format and need to
 
         value = float(value)
-        if value < 0:
+        if value <= 0:
             return False
     except ValueError:
         pass

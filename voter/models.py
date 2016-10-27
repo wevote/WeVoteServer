@@ -8,6 +8,7 @@ from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # Pe
 from django.core.validators import RegexValidator
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_saved_exception
+from twitter.models import TwitterUserManager
 from validate_email import validate_email
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, generate_voter_device_id, get_voter_device_id, \
@@ -31,6 +32,31 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 # See AUTH_USER_MODEL in config/base.py
 class VoterManager(BaseUserManager):
+    def clear_out_collisions_for_linked_organization_we_vote_id(self, current_voter_we_vote_id,
+                                                                organization_we_vote_id):
+        status = ""
+        success = True
+        collision_results = self.retrieve_voter_by_organization_we_vote_id(
+            organization_we_vote_id)
+        if collision_results['voter_found']:
+            collision_voter = collision_results['voter']
+            if collision_voter.we_vote_id != current_voter_we_vote_id:
+                # Release the linked_organization_we_vote_id from collision_voter so it can be used on voter
+                try:
+                    collision_voter.linked_organization_we_vote_id = None
+                    collision_voter.save()
+
+                    # TODO DALE UPDATE positions to remove voter_we_vote_id
+                    # Since we are disconnecting the organization from the voter, do we want to go through
+                    # positions and split them apart?
+                except Exception as e:
+                    success = False
+                    status += " UNABLE_TO_UPDATE_COLLISION_VOTER_WITH_EMPTY_ORGANIZATION_WE_VOTE_ID"
+        results = {
+            'success':  success,
+            'status':   status
+        }
+        return results
 
     def create_user(self, email=None, username=None, password=None):
         """
@@ -210,6 +236,26 @@ class VoterManager(BaseUserManager):
         voter_id = ''
         email = ''
         voter_we_vote_id = ''
+
+        twitter_user_manager = TwitterUserManager()
+        twitter_retrieve_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_user_id(twitter_id)
+        if twitter_retrieve_results['twitter_link_to_voter_found']:
+            twitter_link_to_voter = twitter_retrieve_results['twitter_link_to_voter']
+            voter_we_vote_id = twitter_link_to_voter.voter_we_vote_id
+
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
+
+    def retrieve_voter_by_twitter_id_old(self, twitter_id):
+        """
+        This is a function we want to eventually deprecate as we move away from storing the twitter_id
+        in the voter table
+        :param twitter_id:
+        :return:
+        """
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
         twitter_request_token = ''
         facebook_id = 0
         voter_manager = VoterManager()
@@ -290,17 +336,41 @@ class VoterManager(BaseUserManager):
                 voter_id = voter_on_stage.id
                 success = True
             elif positive_value_exists(facebook_id):
+                # TODO DALE Remove voter.facebook_id value - We are removing direct retrieve based on this field
                 voter_on_stage = Voter.objects.get(
                     facebook_id=facebook_id)
                 # If still here, we found an existing voter
                 voter_id = voter_on_stage.id
                 success = True
             elif positive_value_exists(twitter_id):
-                voter_on_stage = Voter.objects.get(
-                    twitter_id=twitter_id)
-                # If still here, we found an existing voter
-                voter_id = voter_on_stage.id
-                success = True
+                # TODO DALE Remove voter.twitter_id value - We are removing direct retrieve based on this field
+                # We put this in an extra try block because there might be multiple voters with twitter_id
+                try:
+                    voter_on_stage = Voter.objects.get(
+                        twitter_id=twitter_id)
+                    # If still here, we found a single existing voter
+                    voter_id = voter_on_stage.id
+                    success = True
+                except Voter.MultipleObjectsReturned as e:
+                    # If here, there are multiple voters with twitter_id
+                    voter_queryset = Voter.objects.all()
+                    # voter_queryset = voter_queryset.filter(Q(email__iexact=email) |
+                    #                                        Q(facebook_email__iexact=email))
+                    voter_queryset = voter_queryset.filter(Q(twitter_id=twitter_id))
+                    voter_queryset = voter_queryset.order_by("-id")  # Take the latest voter record
+                    voter_list = list(voter_queryset[:1])
+                    if len(voter_list):
+                        voter_on_stage = voter_list[0]
+                        voter_id = voter_on_stage.id
+                        success = True
+                    else:
+                        voter_on_stage = Voter()
+                        voter_id = 0
+                        success = True
+                except Voter.DoesNotExist as e:
+                    error_result = True
+                    exception_does_not_exist = True
+                    success = True
             elif positive_value_exists(organization_we_vote_id):
                 voter_on_stage = Voter.objects.get(
                     linked_organization_we_vote_id__iexact=organization_we_vote_id)
@@ -423,6 +493,7 @@ class VoterManager(BaseUserManager):
         """
         try:
             voter_to_save = False
+            # TODO DALE Remove voter.twitter_id value
             if hasattr(twitter_user_object, "id") and positive_value_exists(twitter_user_object.id):
                 voter.twitter_id = twitter_user_object.id
                 voter_to_save = True
@@ -464,12 +535,14 @@ class VoterManager(BaseUserManager):
         """
         This is used to store the cached values in the voter record from the twitter_auth_response object once
         voter agrees to a merge.
+        NOTE 2016-10-21 Do NOT save TwitterAuthResponse values -- only photo and "soft" data
         :param voter:
         :param twitter_auth_response:
         :return:
         """
         try:
             voter_to_save = False
+            # TODO DALE Remove voter.twitter_id value
             if hasattr(twitter_auth_response, "twitter_id") and positive_value_exists(twitter_auth_response.twitter_id):
                 voter.twitter_id = twitter_auth_response.twitter_id
                 voter_to_save = True
@@ -907,6 +980,7 @@ class Voter(AbstractBaseUser):
         return False
 
     def signed_in_facebook(self):
+        # TODO DALE Remove voter.facebook_id value
         if positive_value_exists(self.facebook_id):
             return True
         return False
@@ -915,6 +989,7 @@ class Voter(AbstractBaseUser):
         return False
 
     def signed_in_twitter(self):
+        # TODO DALE Remove voter.twitter_id value
         if positive_value_exists(self.twitter_id):
             return True
         return False

@@ -220,7 +220,8 @@ class OrganizationManager(models.Manager):
                 # Now that we have an organization to update, get supplemental data from Twitter if
                 # refresh_from_twitter is true
                 if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
-                    results = retrieve_twitter_user_info(organization_twitter_handle)
+                    twitter_user_id = 0
+                    results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
                     if results['success']:
                         twitter_json = results['twitter_json']
                         if positive_value_exists(twitter_json['id']):
@@ -361,7 +362,8 @@ class OrganizationManager(models.Manager):
                     # Now that we have an organization to update, get supplemental data from Twitter if
                     # refresh_from_twitter is true
                     if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
-                        results = retrieve_twitter_user_info(organization_twitter_handle)
+                        twitter_user_id = 0
+                        results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
                         if results['success']:
                             twitter_json = results['twitter_json']
                             if positive_value_exists(twitter_json['id']):
@@ -435,7 +437,8 @@ class OrganizationManager(models.Manager):
                 # Now that we have an organization to update, get supplemental data from Twitter if
                 # refresh_from_twitter is true
                 if positive_value_exists(organization_twitter_handle) and refresh_from_twitter:
-                    results = retrieve_twitter_user_info(organization_twitter_handle)
+                    twitter_user_id = 0
+                    results = retrieve_twitter_user_info(twitter_user_id, organization_twitter_handle)
                     if results['success']:
                         twitter_json = results['twitter_json']
                         if positive_value_exists(twitter_json['id']):

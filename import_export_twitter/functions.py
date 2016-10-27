@@ -5,6 +5,7 @@
 from config.base import get_environment_variable
 import tweepy
 import wevote_functions.admin
+from wevote_functions.functions import positive_value_exists
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -17,7 +18,7 @@ TWITTER_ACCESS_TOKEN = get_environment_variable("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = get_environment_variable("TWITTER_ACCESS_TOKEN_SECRET")
 
 
-def retrieve_twitter_user_info(twitter_handle):
+def retrieve_twitter_user_info(twitter_user_id, twitter_handle):
     auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
     auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
@@ -26,7 +27,10 @@ def retrieve_twitter_user_info(twitter_handle):
     twitter_handle_found = False
     twitter_json = []
     try:
-        twitter_user = api.get_user(twitter_handle)
+        if positive_value_exists(twitter_user_id):
+            twitter_user = api.get_user(user_id=twitter_user_id)
+        else:
+            twitter_user = api.get_user(screen_name=twitter_handle)
         twitter_json = twitter_user._json
         success = True
         status = 'TWITTER_RETRIEVE_SUCCESSFUL'

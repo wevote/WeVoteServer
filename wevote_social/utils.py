@@ -14,6 +14,9 @@ def authenticate_associate_by_email(**kwargs):
     try:
         # Find the voter account that actually matches this twitter_id
         twitter_id = kwargs['uid']
+
+        # TODO DALE Remove voter.twitter_id value
+
         voter_manager = VoterManager()
         results = voter_manager.retrieve_voter_by_twitter_id(twitter_id)
         if results['voter_found']:
@@ -34,6 +37,9 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):  # TODO DALE
 
     if backend.name == 'twitter':
         # Twitter: Check to see if we have a voter with a matching twitter_id
+        # TODO DALE Remove voter.twitter_id value - Look in TwitterLinkToVoter for the voter_we_vote_id to use
+        # owner_of_twitter_id_voter_we_vote_id = ???
+        # local_user_matches = user and user.we_vote_id == owner_of_twitter_id_voter_we_vote_id
         local_user_matches = user and user.twitter_id == uid
     else:
         local_user_matches = user and user.email != details.get('email')
@@ -49,6 +55,7 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):  # TODO DALE
         if social:
             if social.user:
                 if backend.name == 'twitter':
+                    # if social.user.we_vote_id = owner_of_twitter_id_voter_we_vote_id
                     if social.user.twitter_id == uid:
                         voter_that_matches_auth = social.user
                         voter_found_that_matches_auth = True

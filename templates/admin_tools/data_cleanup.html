@@ -1,0 +1,46 @@
+{# templates/admin_tools/data_cleanup.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Data Cleanup Routines{% endblock %}
+
+{%  block content %}
+{% load template_filters %}
+<p><a href="{% url 'admin_tools:admin_home' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Admin Home</a></p>
+
+
+<h1>Data Cleanup Routines</h1>
+
+{% if election_list %}
+<div class="form-group">
+    <label for="google_civic_election_id" class="col-sm-3 control-label">Election</label>
+    <div class="col-sm-8">
+        {% for election in election_list %}
+            {% if election.google_civic_election_id|slugify == batch_description.google_civic_election_id|slugify %}
+                {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}{# End of if election_list #}
+
+<p>
+    <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Organization List Analysis</a><br />
+    <br />
+    <a href="{% url 'admin_tools:data_cleanup_position_list_analysis' %}">Position List Analysis</a><br />
+    <br />
+    <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">Voter List Analysis</a><br />
+    <br />
+    <a href="{% url 'admin_tools:data_cleanup_voter_hanging_data_process' %}">Voter Email Cleanup</a><br />
+
+</p>
+
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+{% endblock %}

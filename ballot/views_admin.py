@@ -429,7 +429,8 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
             ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
             ballot_returned_query = ballot_returned_query.filter(state_code=state_code)
-        ballot_returned_query = ballot_returned_query
+        # Limit to 200 because that is all that seems to store anyways with each call
+        ballot_returned_query = ballot_returned_query[:200]
 
         rate_limit_count = 0
         for ballot_returned in ballot_returned_query:

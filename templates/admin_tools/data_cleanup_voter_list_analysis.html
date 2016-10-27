@@ -1,16 +1,15 @@
-{# templates/voter/voter_list.html #}
+{# templates/admin_tools/data_cleanup_voter_list_analysis.html #}
 {% extends "template_base.html" %}
 
-{% block title %}Voters{% endblock %}
+{% block title %}Voter List Analysis{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+<a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a>
 
-<h1>Voters</h1>
+<h1>Voter List Analysis</h1>
 
-<a href="{% url 'voter:voter_edit' 0 %}">Create New Voter Account</a>
-
-{% if voter_list %}
+{% if voter_list_with_local_twitter_data %}
+ <h2>With twitter_id or twitter_screen_name</h2>
     <table border="1" cellpadding="10">
         <tr>
             <td>ID</td>
@@ -19,17 +18,20 @@
             <td>You</td>
             <td>Where</td>
             <td>FB?</td>
-            <td>Tw? (OLD)</td>
+            <td>Twitter Voter Table</td>
             <td>TwitterLinkToVoter</td>
+            <td>TwitterLinkToOrganization</td>
             <td>Email</td>
             <td>Admin</td>
             <td>Verified Volunteer</td>
+            <td>linked organization we_vote_id</td>
+            <td>Voter Positions Link to Other Orgs</td>
         </tr>
-    {% for voter in voter_list %}
+    {% for voter in voter_list_with_local_twitter_data %}
         <tr>
             <td>{{ voter.id }}</td>
             <td>
-                <a href="{% url 'voter:voter_edit' voter.id %}">
+                <a href="{% url 'voter:voter_edit' voter.id %}" target="_blank">
                     {{ voter.we_vote_id }}
                 </a>
             </td>
@@ -60,6 +62,15 @@
                 {{ voter.twitter_id_from_link_to_voter }}
             {% endif %}
             </td>
+            <!-- TwitterLinkToOrganization //-->
+            <td>
+            {% if voter.twitter_id_from_link_to_organization %}
+                {{ voter.organization_we_vote_id_from_link_to_organization }}<br />
+                @{{ voter.twitter_screen_name_from_link_to_organization }}<br />
+                {{ voter.twitter_id_from_link_to_organization }}
+           {% endif %}
+            {{ voter.twitter_link_to_organization_twitter_id_source_text }}
+            </td>
             <!-- Email //-->
             <td>
             {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
@@ -71,6 +82,21 @@
             <!-- Is verified volunteer? //-->
             <td>
             {% if voter.is_verified_volunteer %}Y{% else %}{% endif %}
+            </td>
+            <td>
+            {% if voter.linked_organization_we_vote_id %}
+                <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ voter.linked_organization_we_vote_id }}" target="_blank">
+                {{ voter.linked_organization_we_vote_id }}</a>
+            {% else %}{% endif %}
+            </td>
+            <td>
+                {% for other_organization in voter.links_to_other_organizations %}
+                    {% if other_organization.we_vote_id != voter.linked_organization_we_vote_id %}
+                    <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ other_organization.we_vote_id }}" target="_blank">
+                    {{ other_organization.we_vote_id }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
             </td>
         </tr>
     {% endfor %}

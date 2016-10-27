@@ -1,0 +1,169 @@
+{# templates/admin_tools/data_cleanup_position_list_analysis.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Position List Analysis{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a>
+
+<h1>Position List Analysis</h1>
+
+
+{% if election_list %}
+    <form name="data_cleanup_position_list_analysis_choose_election" method="get" action="{% url 'admin_tools:data_cleanup_position_list_analysis' %}">
+        {% csrf_token %}
+
+    <select id="google_civic_election_id" name="google_civic_election_id">
+        <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
+            -- Filter by Election --</option>
+    {% for election in election_list %}
+        <option value="{{ election.google_civic_election_id }}"
+                {% if election.google_civic_election_id|slugify == google_civic_election_id|slugify %} selected="selected"{% endif %}>
+            {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
+    {% endfor %}
+    </select>
+    </form>
+{% endif %}{# End of if election_list #}
+<br />
+
+
+{% if public_positions_without_organization %}
+    <h2>Public Positions without Organization We Vote Id</h2>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td></td>
+            <td>ID</td>
+            <td>Voter</td>
+            <td>Organization</td>
+            <td>Stance</td>
+            <td>Candidate/Measure</td>
+            <td>Election</td>
+        </tr>
+    {% for position in public_positions_without_organization %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ position.we_vote_id }}</td>
+            <td>{% if position.voter %}
+                <a href="{% url 'voter:voter_edit' position.voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ position.voter.we_vote_id }}
+                </a><br />
+                {% if position.voter.signed_in_with_email %}Email verified<br />{% endif %}
+                {% if position.voter.signed_in_facebook %}Facebook<br />{% endif %}
+                {% if position.voter.signed_in_twitter %}Twitter<br />{% endif %}
+            {% else %}
+                (voter missing)
+            {% endif %}</td>
+            <td>{% if position.organization %}
+                <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ position.organization.organization_name }} - {{ position.organization.we_vote_id }}
+                </a>
+            {% else %}
+                (organization missing)
+            {% endif %}</td>
+            <td>
+            {% if position.organization %}
+                <a href="{% url 'organization:organization_position_edit' position.organization.id position.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ position.get_stance_display }} - {{ position.statement_text }}</a>
+            {% else %}
+                {{ position.get_stance_display }} - {{ position.statement_text }}
+            {% endif %}
+            </td>
+            <td>
+                {% if position.candidate_campaign %}
+                {{ position.candidate_campaign.candidate_name }}
+                {% elif position.contest_measure %}
+                {{ position.contest_measure.measure_title }}
+                {% else %}
+                    (name unknown)
+                {% endif %}
+            </td>
+            <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% endif %}
+                {% if position.vote_smart_time_span %}{{ position.vote_smart_time_span }}{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+{% else %}
+    <p>(no positions found)</p>
+{% endif %}
+
+
+{% if positions_for_friends_without_organization %}
+    <h2>Positions for Friends without Organization We Vote Id</h2>
+    <table border="1" cellpadding="5" cellspacing="5">
+        <tr>
+            <td></td>
+            <td>ID</td>
+            <td>Voter</td>
+            <td>Organization</td>
+            <td>Stance</td>
+            <td>Candidate/Measure</td>
+            <td>Election</td>
+        </tr>
+    {% for position in positions_for_friends_without_organization %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ position.we_vote_id }}</td>
+            <td>{% if position.voter %}
+                <a href="{% url 'voter:voter_edit' position.voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ position.voter.we_vote_id }}
+                </a><br />
+                {% if position.voter.signed_in_with_email %}Email verified<br />{% endif %}
+                {% if position.voter.signed_in_facebook %}Facebook<br />{% endif %}
+                {% if position.voter.signed_in_twitter %}Twitter<br />{% endif %}
+            {% else %}
+                (voter missing)
+            {% endif %}</td>
+            <td>{% if position.organization %}
+                <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ position.organization.organization_name }} - {{ position.organization.we_vote_id }}
+                </a>
+            {% else %}
+                (organization missing)
+            {% endif %}</td>
+            <td>
+            {% if position.organization %}
+                <a href="{% url 'organization:organization_position_edit' position.organization.id position.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ position.get_stance_display }} - {{ position.statement_text }}</a>
+            {% else %}
+                {{ position.get_stance_display }} - {{ position.statement_text }}
+            {% endif %}
+            </td>
+            <td>
+                {% if position.candidate_campaign %}
+                {{ position.candidate_campaign.candidate_name }}
+                {% elif position.contest_measure %}
+                {{ position.contest_measure.measure_title }}
+                {% else %}
+                    (name unknown)
+                {% endif %}
+            </td>
+            <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% endif %}
+                {% if position.vote_smart_time_span %}{{ position.vote_smart_time_span }}{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+{% else %}
+    <p>(no positions found)</p>
+{% endif %}
+
+    <script>
+        $(function() {
+            $('#google_civic_election_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
+
+        <br />
+    <br />
+    <br />
+    <br />
+
+
+{% endblock %}

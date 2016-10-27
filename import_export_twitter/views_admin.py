@@ -132,7 +132,8 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
 
     # ######################################
     if organization.organization_twitter_handle:
-        results = retrieve_twitter_user_info(organization.organization_twitter_handle)
+        twitter_user_id = 0
+        results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
 
         if results['success']:
             save_results = organization_manager.update_organization_twitter_details(

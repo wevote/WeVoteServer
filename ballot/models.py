@@ -911,13 +911,18 @@ class BallotReturnedManager(models.Model):
         try:
             location = self.google_client.geocode(text_for_map_search)
         except GeocoderQuotaExceeded:
-            results = {
-                'status':                   "GeocoderQuotaExceeded ",
-                'geocoder_quota_exceeded':  True,
-                'ballot_returned_found':    ballot_returned_found,
-                'ballot_returned':          ballot_returned,
-            }
-            return results
+            # If we have exceeded our account, try without a maps key
+            try:
+                temp_google_client = get_geocoder_for_service('google')()
+                location = temp_google_client.geocode(text_for_map_search)
+            except GeocoderQuotaExceeded:
+                results = {
+                    'status': "GeocoderQuotaExceeded ",
+                    'geocoder_quota_exceeded': True,
+                    'ballot_returned_found': ballot_returned_found,
+                    'ballot_returned': ballot_returned,
+                }
+                return results
 
         if location is None:
             status = 'Could not find location matching "{}"'.format(text_for_map_search)

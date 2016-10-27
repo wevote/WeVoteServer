@@ -66,7 +66,8 @@ def refresh_twitter_candidate_details(candidate_campaign):
 
     if candidate_campaign.candidate_twitter_handle:
         status = "TWITTER_CANDIDATE_DETAILS-REACHING_OUT_TO_TWITTER"
-        results = retrieve_twitter_user_info(candidate_campaign.candidate_twitter_handle)
+        twitter_user_id = 0
+        results = retrieve_twitter_user_info(twitter_user_id, candidate_campaign.candidate_twitter_handle)
 
         if results['success']:
             status = "TWITTER_CANDIDATE_DETAILS_RETRIEVED_FROM_TWITTER"
@@ -96,7 +97,8 @@ def refresh_twitter_organization_details(organization):
 
     if organization.organization_twitter_handle:
         status = "ORGANIZATION_TWITTER_DETAILS-REACHING_OUT_TO_TWITTER"
-        results = retrieve_twitter_user_info(organization.organization_twitter_handle)
+        twitter_user_id = 0
+        results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
 
         if results['success']:
             status = "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER"
@@ -286,11 +288,13 @@ def retrieve_twitter_data_for_all_organizations(state_code='', google_civic_elec
             retrieved_twitter_data = False
             if first_retrieve_only:
                 if not positive_value_exists(organization.twitter_followers_count):
-                    results = retrieve_twitter_user_info(organization.organization_twitter_handle)
+                    twitter_user_id = 0
+                    results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
                     retrieved_twitter_data = results['success']
                     number_of_twitter_accounts_queried += 1
             else:
-                results = retrieve_twitter_user_info(organization.organization_twitter_handle)
+                twitter_user_id = 0
+                results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
                 retrieved_twitter_data = results['success']
                 number_of_twitter_accounts_queried += 1
 
@@ -867,7 +871,7 @@ def twitter_sign_in_request_voter_info_for_api(voter_device_id, return_url):
 
 def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     """
-
+    We are asking for the results of the most recent Twitter authentication
     :param voter_device_id:
     :return:
     """
@@ -972,17 +976,21 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         voter_we_vote_id_attached_to_twitter = twitter_link_to_voter.voter_we_vote_id
         twitter_secret_key = twitter_link_to_voter.secret_key
         existing_twitter_account_found = True
+        # TODO DALE Remove all remaining voter.twitter_id values
     else:
         # See if we need to heal the data - look in the voter table for any records with a twitter_user_id
         voter_manager = VoterManager()
-        voter_results = voter_manager.retrieve_voter_by_twitter_id(twitter_auth_response.twitter_id)
+        voter_results = voter_manager.retrieve_voter_by_twitter_id_old(twitter_auth_response.twitter_id)
         if voter_results['voter_found']:
-            voter_with_twitter_user_id = voter_results['voter']
-            voter_we_vote_id_attached_to_twitter = voter_with_twitter_user_id.we_vote_id
+            voter_with_twitter_id = voter_results['voter']
+            voter_we_vote_id_attached_to_twitter = voter_with_twitter_id.we_vote_id
             if positive_value_exists(voter_we_vote_id_attached_to_twitter):
                 save_results = twitter_user_manager.create_twitter_link_to_voter(
                     twitter_auth_response.twitter_id, voter_we_vote_id_attached_to_twitter)
                 status += " " + save_results['status']
+                if save_results['success']:
+                    # TODO DALE Remove all remaining voter.twitter_id values
+                    pass
 
     json_data = {
         'success':                              success,
@@ -1045,6 +1053,8 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     twitter_user_manager = TwitterUserManager()
     twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter(voter.we_vote_id)
     if twitter_results['twitter_link_to_voter_found']:
+        # We are surprised to be here because when we looked in YYY function, we didn't find a Twitter account
+        # linked to this voter
         error_results = {
             'status':                   "TWITTER_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
             'success':                  False,
@@ -1086,6 +1096,8 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     status += results['status'] + ", "
     success = results['success']
     voter = results['voter']
+
+    # TODO DALE UPDATE organization positions to add voter_we_vote_id
 
     results = {
         'success':                  success,

@@ -9,10 +9,14 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
+from organization.models import Organization
+from position.models import PositionEntered, PositionForFriends
+from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter
 from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority, voter_setup
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id, set_voter_api_device_id, \
@@ -243,20 +247,192 @@ def voter_edit_view(request, voter_id):
     voter_id = convert_to_int(voter_id)
     voter_on_stage = Voter()
     voter_on_stage_found = False
+    twitter_id_from_link_to_voter = 0
     try:
         voter_on_stage = Voter.objects.get(id=voter_id)
         voter_on_stage_found = True
     except Voter.MultipleObjectsReturned as e:
         handle_record_found_more_than_one_exception(e, logger=logger)
     except Voter.DoesNotExist:
-        # This is fine, create new
+        # This is fine
         pass
 
     if voter_on_stage_found:
+        # Get TwitterLinkToVoter
+        try:
+            twitter_link_to_voter = TwitterLinkToVoter.objects.get(
+                voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
+            if positive_value_exists(twitter_link_to_voter.twitter_id):
+                twitter_id_from_link_to_voter = twitter_link_to_voter.twitter_id
+                voter_on_stage.twitter_id_from_link_to_voter = twitter_link_to_voter.twitter_id
+                # We reach out for the twitter_screen_name
+                voter_on_stage.twitter_screen_name_from_link_to_voter = \
+                    twitter_link_to_voter.fetch_twitter_handle_locally_or_remotely()
+        except TwitterLinkToVoter.DoesNotExist:
+            pass
+
+        # Get TwitterLinkToOrganization
+        try:
+            if positive_value_exists(twitter_id_from_link_to_voter):
+                twitter_id_to_search = twitter_id_from_link_to_voter
+                twitter_link_to_organization_twitter_id_source_text = "FROM_TWITTER_LINK_TO_VOTER"
+            else:
+                twitter_id_to_search = voter_on_stage.twitter_id
+                twitter_link_to_organization_twitter_id_source_text = "FROM_VOTER_RECORD"
+
+            if positive_value_exists(twitter_id_to_search):
+                twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
+                    twitter_id=twitter_id_to_search)
+                if positive_value_exists(twitter_link_to_organization.twitter_id):
+                    voter_on_stage.organization_we_vote_id_from_link_to_organization = \
+                        twitter_link_to_organization.organization_we_vote_id
+                    voter_on_stage.twitter_id_from_link_to_organization = twitter_link_to_organization.twitter_id
+                    # We reach out for the twitter_screen_name
+                    voter_on_stage.twitter_screen_name_from_link_to_organization = \
+                        twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely()
+                    voter_on_stage.twitter_link_to_organization_twitter_id_source_text = \
+                        twitter_link_to_organization_twitter_id_source_text
+        except TwitterLinkToOrganization.DoesNotExist:
+            pass
+
+        # ########################################
+        # Looks for voters that have the same Twitter data
+        at_least_one_voter_twitter_value_found = False
+        voter_twitter_filters = []
+        if positive_value_exists(voter_on_stage.twitter_id):
+            new_filter = Q(twitter_id=voter_on_stage.twitter_id)
+            voter_twitter_filters.append(new_filter)
+            at_least_one_voter_twitter_value_found = True
+        if positive_value_exists(voter_on_stage.twitter_screen_name):
+            new_filter = Q(twitter_screen_name__iexact=voter_on_stage.twitter_screen_name)
+            voter_twitter_filters.append(new_filter)
+            at_least_one_voter_twitter_value_found = True
+
+        voter_list_duplicate_twitter_updated = []
+        if at_least_one_voter_twitter_value_found:
+            voter_list_duplicate_twitter = Voter.objects.all()
+            # Add the first query
+            final_filters = []
+            if len(voter_twitter_filters):
+                final_filters = voter_twitter_filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in voter_twitter_filters:
+                    final_filters |= item
+
+            voter_list_duplicate_twitter = voter_list_duplicate_twitter.filter(final_filters)
+            voter_list_duplicate_twitter = voter_list_duplicate_twitter.exclude(id=voter_id)
+            voter_list_duplicate_twitter = voter_list_duplicate_twitter[:100]
+
+            for one_duplicate_voter in voter_list_duplicate_twitter:
+                try:
+                    twitter_link_to_voter = TwitterLinkToVoter.objects.get(
+                        voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
+                    if positive_value_exists(twitter_link_to_voter.twitter_id):
+                        one_duplicate_voter.twitter_id_from_link_to_voter = twitter_link_to_voter.twitter_id
+                        # We reach out for the twitter_screen_name
+                        one_duplicate_voter.twitter_screen_name_from_link_to_voter = \
+                            twitter_link_to_voter.fetch_twitter_handle_locally_or_remotely()
+                except TwitterLinkToVoter.DoesNotExist:
+                    pass
+
+                voter_list_duplicate_twitter_updated.append(one_duplicate_voter)
+
+        # ########################################
+        # Looks for orgs that have the same Twitter data
+        # (excluding the org connected by linked_organization_we_vote_id)
+        org_twitter_filters = []
+        at_least_one_twitter_value_found = False
+        if positive_value_exists(voter_on_stage.twitter_id):
+            new_filter = Q(twitter_user_id=voter_on_stage.twitter_id)
+            org_twitter_filters.append(new_filter)
+            at_least_one_twitter_value_found = True
+        if positive_value_exists(voter_on_stage.twitter_screen_name):
+            new_filter = Q(organization_twitter_handle__iexact=voter_on_stage.twitter_screen_name)
+            org_twitter_filters.append(new_filter)
+            at_least_one_twitter_value_found = True
+
+        organization_list_with_duplicate_twitter_updated = []
+        voter_list_duplicate_twitter_updated = []
+        final_filters = []
+        if at_least_one_twitter_value_found:
+            # Add the first query
+            if len(org_twitter_filters):
+                final_filters = org_twitter_filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in org_twitter_filters:
+                    final_filters |= item
+
+            organization_list_with_duplicate_twitter = Organization.objects.all()
+            organization_list_with_duplicate_twitter = organization_list_with_duplicate_twitter.filter(final_filters)
+            organization_list_with_duplicate_twitter = organization_list_with_duplicate_twitter.exclude(
+                we_vote_id=voter_on_stage.linked_organization_we_vote_id)
+
+            for one_duplicate_organization in organization_list_with_duplicate_twitter:
+                try:
+                    linked_voter = Voter.objects.get(
+                        linked_organization_we_vote_id__iexact=one_duplicate_organization.we_vote_id)
+                    one_duplicate_organization.linked_voter = linked_voter
+                except Voter.DoesNotExist:
+                    pass
+
+                organization_list_with_duplicate_twitter_updated.append(one_duplicate_organization)
+
+        # ####################################
+        # Find the voter that has this organization as their linked_organization_we_vote_id
+        linked_organization_we_vote_id_list_updated = []
+        linked_organization_we_vote_id_list = Organization.objects.all()
+        linked_organization_we_vote_id_list = linked_organization_we_vote_id_list.filter(
+            we_vote_id__iexact=voter_on_stage.linked_organization_we_vote_id)
+
+        for one_linked_organization in linked_organization_we_vote_id_list:
+            try:
+                linked_voter = Voter.objects.get(
+                    linked_organization_we_vote_id__iexact=one_linked_organization.we_vote_id)
+                one_linked_organization.linked_voter = linked_voter
+            except Voter.DoesNotExist:
+                pass
+
+            linked_organization_we_vote_id_list_updated.append(one_linked_organization)
+
+        # Do some checks on all of the public positions owned by this voter
+        position_filters = []
+        new_filter = Q(voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
+        position_filters.append(new_filter)
+        if positive_value_exists(voter_on_stage.linked_organization_we_vote_id):
+            new_filter = Q(organization_we_vote_id__iexact=voter_on_stage.linked_organization_we_vote_id)
+            position_filters.append(new_filter)
+
+        final_position_filters = []
+        if len(position_filters):
+            final_position_filters = position_filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in position_filters:
+                final_position_filters |= item
+
+        # PositionEntered
+        public_positions_owned_by_this_voter = PositionEntered.objects.all()
+        public_positions_owned_by_this_voter = public_positions_owned_by_this_voter.filter(final_position_filters)
+        # We limit these to 20 since we are doing other lookups against this data
+        public_positions_owned_by_this_voter = public_positions_owned_by_this_voter[:20]
+
+        # PositionForFriends
+        positions_for_friends_owned_by_this_voter = PositionForFriends.objects.all()
+        positions_for_friends_owned_by_this_voter = positions_for_friends_owned_by_this_voter.filter(final_position_filters)
+        # We limit these to 20 since we are doing other lookups against this data
+        positions_for_friends_owned_by_this_voter = positions_for_friends_owned_by_this_voter[:20]
+
         template_values = {
-            'messages_on_stage':    messages_on_stage,
-            'voter_id':             voter_on_stage.id,
-            'voter':                voter_on_stage,
+            'messages_on_stage':                    messages_on_stage,
+            'voter_id':                             voter_on_stage.id,
+            'voter':                                voter_on_stage,
+            'voter_list_duplicate_twitter':         voter_list_duplicate_twitter_updated,
+            'organization_list_with_duplicate_twitter': organization_list_with_duplicate_twitter_updated,
+            'linked_organization_we_vote_id_list':  linked_organization_we_vote_id_list_updated,
+            'public_positions_owned_by_this_voter': public_positions_owned_by_this_voter,
+            'positions_for_friends_owned_by_this_voter':    positions_for_friends_owned_by_this_voter,
         }
     else:
         template_values = {

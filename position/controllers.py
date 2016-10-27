@@ -2,12 +2,13 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PositionEntered, PositionManager, PositionListManager, ANY_STANCE, NO_STANCE, \
+from .models import PositionEntered, PositionForFriends, PositionManager, PositionListManager, ANY_STANCE, NO_STANCE, \
     FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY, SHOW_PUBLIC, THIS_ELECTION_ONLY, ALL_OTHER_ELECTIONS, ALL_ELECTIONS
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.contrib import messages
+from django.db.models import Q
 from django.http import HttpResponse
 from election.models import fetch_election_state
 from exception.models import handle_record_not_saved_exception
@@ -15,7 +16,7 @@ from follow.models import FollowOrganizationManager, FollowOrganizationList
 from friend.models import FriendManager
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
-from organization.models import OrganizationManager
+from organization.models import Organization, OrganizationManager
 import json
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
@@ -27,6 +28,84 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 WE_VOTE_API_KEY = get_environment_variable("WE_VOTE_API_KEY")
 POSITIONS_SYNC_URL = get_environment_variable("POSITIONS_SYNC_URL")
+
+
+def find_organizations_referenced_in_positions_for_this_voter(voter):
+    related_organizations = []
+
+    position_filters = []
+    final_position_filters = []
+    if positive_value_exists(voter.we_vote_id):
+        new_position_filter = Q(voter_we_vote_id__iexact=voter.we_vote_id)
+        position_filters.append(new_position_filter)
+    if positive_value_exists(voter.id):
+        new_position_filter = Q(voter_id=voter.id)
+        position_filters.append(new_position_filter)
+    if positive_value_exists(voter.linked_organization_we_vote_id):
+        new_position_filter = Q(organization_we_vote_id=voter.linked_organization_we_vote_id)
+        position_filters.append(new_position_filter)
+
+    if len(position_filters):
+        final_position_filters = position_filters.pop()
+
+        # ...and "OR" the remaining items in the list
+        for item in position_filters:
+            final_position_filters |= item
+
+    organization_filters = []
+    organization_ids_found = []
+    organization_we_vote_ids_found = []
+
+    # PositionEntered
+    position_list_query = PositionEntered.objects.all()
+    position_list_query = position_list_query.filter(final_position_filters)
+
+    for one_position in position_list_query:
+        # Find organization(s) linked in one_position
+        if positive_value_exists(one_position.organization_id) and \
+                one_position.organization_id not in organization_ids_found:
+            organization_ids_found.append(one_position.organization_id)
+            new_organization_filter = Q(id=one_position.organization_id)
+            organization_filters.append(new_organization_filter)
+        if positive_value_exists(one_position.organization_we_vote_id) and \
+                one_position.organization_we_vote_id not in organization_we_vote_ids_found:
+            organization_we_vote_ids_found.append(one_position.organization_we_vote_id)
+            new_organization_filter = Q(we_vote_id__iexact=one_position.organization_we_vote_id)
+            organization_filters.append(new_organization_filter)
+
+    # PositionForFriends
+    position_list_query = PositionForFriends.objects.all()
+    position_list_query = position_list_query.filter(final_position_filters)
+
+    for one_position in position_list_query:
+        # Find organization(s) linked in one_position
+        if positive_value_exists(one_position.organization_id) and \
+                one_position.organization_id not in organization_ids_found:
+            organization_ids_found.append(one_position.organization_id)
+            new_organization_filter = Q(id=one_position.organization_id)
+            organization_filters.append(new_organization_filter)
+        if positive_value_exists(one_position.organization_we_vote_id) and \
+                one_position.organization_we_vote_id not in organization_we_vote_ids_found:
+            organization_we_vote_ids_found.append(one_position.organization_we_vote_id)
+            new_organization_filter = Q(we_vote_id__iexact=one_position.organization_we_vote_id)
+            organization_filters.append(new_organization_filter)
+
+    # Now that we have a list of all possible organization_id or organization_we_vote_id entries, retrieve all
+    if len(organization_filters):
+        final_organization_filters = organization_filters.pop()
+
+        # ...and "OR" the remaining items in the list
+        for item in organization_filters:
+            final_organization_filters |= item
+
+        # Finally, retrieve all of the organizations from any of these positions
+        organization_list_query = Organization.objects.all()
+        organization_list_query = organization_list_query.filter(final_organization_filters)
+
+        for organization in organization_list_query:
+            related_organizations.append(organization)
+
+    return related_organizations
 
 
 def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,

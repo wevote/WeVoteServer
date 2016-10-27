@@ -9,15 +9,46 @@ from import_export_twitter.functions import retrieve_twitter_user_info
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
 
+class TwitterLinkToOrganization(models.Model):
+    """
+    This is the link between a Twitter account and an organization
+    """
+    organization_we_vote_id = models.CharField(verbose_name="we vote id for the org owner", max_length=255, unique=True)
+    twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, unique=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=False, auto_now=True)
+
+    def fetch_twitter_handle_locally_or_remotely(self):
+        twitter_handle = ""
+        twitter_user_manager = TwitterUserManager()
+        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id)
+
+        if twitter_results['twitter_user_found']:
+            twitter_user = twitter_results['twitter_user']
+            twitter_handle = twitter_user.twitter_handle
+
+        return twitter_handle
+
+
 class TwitterLinkToVoter(models.Model):
     """
     This is the link between a Twitter account and a We Vote voter account
     """
-    voter_we_vote_id = models.CharField(verbose_name="we vote id for the email owner", max_length=255, unique=True)
+    voter_we_vote_id = models.CharField(verbose_name="we vote id for the voter owner", max_length=255, unique=True)
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=False, unique=True)
     secret_key = models.CharField(
         verbose_name="secret key to verify ownership twitter account", max_length=255, null=False, unique=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=False, auto_now=True)
+
+    def fetch_twitter_handle_locally_or_remotely(self):
+        twitter_handle = ""
+        twitter_user_manager = TwitterUserManager()
+        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id)
+
+        if twitter_results['twitter_user_found']:
+            twitter_user = twitter_results['twitter_user']
+            twitter_handle = twitter_user.twitter_handle
+
+        return twitter_handle
 
 
 class TwitterUser(models.Model):
@@ -46,6 +77,42 @@ class TwitterUserManager(models.Model):
     def __unicode__(self):
         return "TwitterUserManager"
 
+    def create_twitter_link_to_organization(self, twitter_id, organization_we_vote_id):
+        if not positive_value_exists(twitter_id) or not \
+                positive_value_exists(organization_we_vote_id):
+            twitter_link_to_organization = TwitterLinkToOrganization()
+            results = {
+                'success':                              False,
+                'status': 'CREATE_TWITTER_LINK_TO_ORGANIZATION_FAILED-MISSING_REQUIRED_VARIABLES',
+                'twitter_link_to_organization_saved':   False,
+                'twitter_link_to_organization':         twitter_link_to_organization,
+            }
+            return results
+
+        # Any attempts to save a twitter_link using either twitter_id or voter_we_vote_id that already
+        #  exist in the table will fail, since those fields are required to be unique.
+        try:
+            twitter_link_to_organization = TwitterLinkToOrganization.objects.create(
+                twitter_id=twitter_id,
+                organization_we_vote_id=organization_we_vote_id,
+            )
+            twitter_link_to_organization_saved = True
+            success = True
+            status = "TWITTER_LINK_TO_ORGANIZATION_CREATED"
+        except Exception as e:
+            twitter_link_to_organization_saved = False
+            twitter_link_to_organization = TwitterLinkToOrganization()
+            success = False
+            status = "TWITTER_LINK_TO_ORGANIZATION_NOT_CREATED"
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'twitter_link_to_organization_saved':   twitter_link_to_organization_saved,
+            'twitter_link_to_organization':         twitter_link_to_organization,
+        }
+        return results
+
     def create_twitter_link_to_voter(self, twitter_id, voter_we_vote_id):
 
         # Any attempts to save a twitter_link using either twitter_id or voter_we_vote_id that already
@@ -61,6 +128,8 @@ class TwitterUserManager(models.Model):
             twitter_link_to_voter_saved = True
             success = True
             status = "TWITTER_LINK_TO_VOTER_CREATED"
+
+            # TODO DALE Remove voter.twitter_id value here?
         except Exception as e:
             twitter_link_to_voter_saved = False
             twitter_link_to_voter = TwitterLinkToVoter()
@@ -71,6 +140,97 @@ class TwitterUserManager(models.Model):
             'success':                      success,
             'status':                       status,
             'twitter_link_to_voter_saved':  twitter_link_to_voter_saved,
+            'twitter_link_to_voter':        twitter_link_to_voter,
+        }
+        return results
+
+    def retrieve_twitter_link_to_organization_from_twitter_user_id(self, twitter_user_id):
+        return self.retrieve_twitter_link_to_organization(twitter_user_id)
+
+    def retrieve_twitter_link_to_organization_from_twitter_handle(self, twitter_handle):
+        twitter_user_id = 0
+        return self.retrieve_twitter_link_to_organization(twitter_user_id, twitter_handle)
+
+    def retrieve_twitter_link_to_organization_from_organization_we_vote_id(self, organization_we_vote_id):
+        twitter_user_id = 0
+        twitter_handle = ""
+        return self.retrieve_twitter_link_to_organization(twitter_user_id, twitter_handle, organization_we_vote_id)
+
+    def retrieve_twitter_link_to_organization(self, twitter_id=0, twitter_handle='', organization_we_vote_id=''):
+        """
+
+        :param twitter_id:
+        :param twitter_handle:
+        :param organization_we_vote_id:
+        :return:
+        """
+        twitter_link_to_organization = TwitterLinkToOrganization()
+        twitter_link_to_organization_id = 0
+
+        try:
+            if positive_value_exists(twitter_id):
+                twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
+                    twitter_id=twitter_id,
+                )
+                twitter_link_to_organization_id = twitter_link_to_organization.id
+                twitter_link_to_organization_found = True
+                success = True
+                status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID"
+            elif positive_value_exists(twitter_handle):
+                twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
+                    twitter_handle__iexact=twitter_handle,
+                )
+                twitter_link_to_organization_id = twitter_link_to_organization.id
+                twitter_link_to_organization_found = True
+                success = True
+                status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_HANDLE"
+            elif positive_value_exists(organization_we_vote_id):
+                twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
+                    organization_we_vote_id__iexact=organization_we_vote_id,
+                )
+                twitter_link_to_organization_id = twitter_link_to_organization.id
+                twitter_link_to_organization_found = True
+                success = True
+                status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_ORGANIZATION_WE_VOTE_ID"
+            else:
+                twitter_link_to_organization_found = False
+                success = False
+                status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_VARIABLES_MISSING"
+        except TwitterLinkToVoter.DoesNotExist:
+            twitter_link_to_organization_found = False
+            success = True
+            status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_NOT_FOUND"
+        except Exception as e:
+            twitter_link_to_organization_found = False
+            success = False
+            status = 'FAILED retrieve_twitter_link_to_organization'
+
+        results = {
+            'success':      success,
+            'status':       status,
+            'twitter_link_to_organization_found':   twitter_link_to_organization_found,
+            'twitter_link_to_organization_id':      twitter_link_to_organization_id,
+            'twitter_link_to_organization':         twitter_link_to_organization,
+        }
+        return results
+
+    def retrieve_twitter_link_to_voter_from_twitter_user_id(self, twitter_user_id):
+        return self.retrieve_twitter_link_to_voter(twitter_user_id)
+
+    def retrieve_twitter_link_to_voter_from_twitter_handle(self, twitter_handle):
+        twitter_user_id = 0
+        twitter_user_results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle)
+        if twitter_user_results['twitter_user_found']:
+            twitter_user = twitter_user_results['twitter_user']
+            if positive_value_exists(twitter_user.twitter_id):
+                return self.retrieve_twitter_link_to_voter(twitter_user.twitter_id)
+
+        twitter_link_to_voter = TwitterLinkToVoter()
+        results = {
+            'success':                      False,
+            'status':                       "COULD_NOT_FIND_TWITTER_ID_FROM_TWITTER_HANDLE",
+            'twitter_link_to_voter_found':  False,
+            'twitter_link_to_voter_id':     0,
             'twitter_link_to_voter':        twitter_link_to_voter,
         }
         return results
@@ -143,24 +303,31 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def retrieve_twitter_user_locally_or_remotely(self, twitter_handle):
+    def retrieve_twitter_user_locally_or_remotely(self, twitter_user_id, twitter_handle=''):
+        """
+        We use this routine to quickly store and retrieve twitter user information, whether it is already in the
+        database, or if we have to reach out to Twitter to get it.
+        :param twitter_user_id:
+        :param twitter_handle:
+        :return:
+        """
         twitter_user_found = False
         twitter_user = TwitterUser()
         success = False
         status = "TWITTER_USER_NOT_FOUND"
 
         # Is this twitter_handle already stored locally? If so, return that
-        twitter_results = self.retrieve_twitter_user(twitter_handle)
+        twitter_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle)
         if twitter_results['twitter_user_found']:
             return twitter_results
 
         # If here, we want to reach out to Twitter to get info for this twitter_handle
-        twitter_results = retrieve_twitter_user_info(twitter_handle)
+        twitter_results = retrieve_twitter_user_info(twitter_user_id, twitter_handle)
         if twitter_results['twitter_handle_found']:
             twitter_save_results = self.save_new_twitter_user_from_twitter_json(twitter_results['twitter_json'])
             if twitter_save_results['twitter_user_found']:
                 # If saved, pull the fresh results from the database and return
-                twitter_second_results = self.retrieve_twitter_user(twitter_handle)
+                twitter_second_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle)
                 if twitter_second_results['twitter_user_found']:
                     return twitter_second_results
 
@@ -172,13 +339,18 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def retrieve_twitter_user(self, twitter_handle):
+    def retrieve_twitter_user(self, twitter_user_id, twitter_handle=''):
         twitter_user_on_stage = TwitterUser()
         twitter_user_found = False
         success = False
 
         try:
-            if positive_value_exists(twitter_handle):
+            if positive_value_exists(twitter_user_id):
+                status = "RETRIEVE_TWITTER_USER_FOUND_WITH_TWITTER_USER_ID"
+                twitter_user_on_stage = TwitterUser.objects.get(twitter_id=twitter_user_id)
+                twitter_user_found = True
+                success = True
+            elif positive_value_exists(twitter_handle):
                 status = "RETRIEVE_TWITTER_USER_FOUND_WITH_HANDLE"
                 twitter_user_on_stage = TwitterUser.objects.get(twitter_handle__iexact=twitter_handle)
                 twitter_user_found = True
@@ -272,6 +444,8 @@ class TwitterUserManager(models.Model):
                                     more_info_credit,
                                     google_civic_election_id
                                     ):
+
+        # TODO DALE Remove voter.twitter_id value
         # Does a twitter_user entry already exist?
         twitter_user_manager = TwitterUserManager()
         results = twitter_user_manager.retrieve_twitter_user(twitter_id, twitter_user_we_vote_id,
