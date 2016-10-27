@@ -4,14 +4,19 @@
 {% block title %}Voter List Analysis{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a>
+<a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a><br />
+<br />
+<a href="{% url 'voter:voter_list' %}">< Back to Voters</a><br />
 
 <h1>Voter List Analysis</h1>
 
 {% if voter_list_with_local_twitter_data %}
- <h2>With twitter_id or twitter_screen_name</h2>
+ <h2>With twitter_id, twitter_screen_name or email</h2>
+    <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}?create_twitter_link_to_voter=1">
+    Create TwitterLinkToVoter for all records that don't have collisions.</a>
     <table border="1" cellpadding="10">
         <tr>
+            <td></td>
             <td>ID</td>
             <td>We Vote ID</td>
             <td>Who</td>
@@ -29,6 +34,7 @@
         </tr>
     {% for voter in voter_list_with_local_twitter_data %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td>{{ voter.id }}</td>
             <td>
                 <a href="{% url 'voter:voter_edit' voter.id %}" target="_blank">
@@ -57,6 +63,15 @@
             </td>
             <!-- TwitterLinkToVoter //-->
             <td>
+            {% if voter.duplicate_twitter_data_found %}
+                <strong>DUPLICATE VOTER TWITTER DATA FOUND</strong>
+            {% elif voter.twitter_id or voter.twitter_screen_name %}
+                {% if not voter.twitter_id_from_link_to_voter %}
+                <a href="{% url 'voter:voter_edit' voter.id %}?create_twitter_link_to_voter=1" target="_blank">
+                Create TwitterLinkToVoter
+                </a>
+                {% endif %}
+            {% endif %}
             {% if voter.twitter_id_from_link_to_voter %}
                 @{{ voter.twitter_screen_name_from_link_to_voter }}<br />
                 {{ voter.twitter_id_from_link_to_voter }}
@@ -73,7 +88,24 @@
             </td>
             <!-- Email //-->
             <td>
-            {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
+            {% if voter.email %}
+                voter.email: {{ voter.email }}<br />
+                {{ voter.primary_email_we_vote_id|default_if_none:"" }}
+                {% if not voter.email_ownership_is_verified %}
+                    NOT_VERIFIED
+                {% endif %}
+                <br />
+            {% endif %}
+            {% if voter.linked_emails %}
+                -------<br />
+                {% for one_email in voter.linked_emails %}
+                    {% if one_email.email_ownership_is_verified %}
+                    <strong>{{ one_email.normalized_email_address }}::{{ one_email.we_vote_id }}</strong><br />
+                    {% else %}
+                    {{ one_email.normalized_email_address }}::{{ one_email.we_vote_id }}<br />
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
             </td>
             <!-- Is site administrator? //-->
             <td>
