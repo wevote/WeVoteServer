@@ -133,13 +133,14 @@ class GoogleCivicApiCounterManager(models.Model):
         daily_summaries = []
         day_on_stage = date.today()  # TODO: We need to work out the timezone questions
         number_found = 0
-        maximum_attempts = 30
+        days_to_display = 30
+        maximum_attempts = 45
         attempt_count = 0
 
         try:
             # Limit the number of times this runs to EITHER 1) 5 positive numbers
             #  OR 2) 30 days in the past, whichever comes first
-            while number_found <= 5 and attempt_count <= maximum_attempts:
+            while number_found <= days_to_display and attempt_count <= maximum_attempts:
                 attempt_count += 1
                 counter_queryset = GoogleCivicApiCounter.objects.all()
                 if positive_value_exists(kind_of_action):

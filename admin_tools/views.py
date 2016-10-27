@@ -786,9 +786,17 @@ def data_cleanup_voter_list_analysis_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    create_twitter_link_to_voter = request.GET.get('create_twitter_link_to_voter', False)
+
+    status_print_list = ""
+    create_twitter_link_to_voter_possible = 0
+    create_twitter_link_to_voter_added = 0
+    create_twitter_link_to_voter_not_added = 0
+    twitter_user_manager = TwitterUserManager()
+
     voter_list_with_local_twitter_data = Voter.objects.all()
-    voter_list_with_local_twitter_data = voter_list_with_local_twitter_data.exclude(
-        Q(twitter_id=None) | Q(twitter_screen_name=None))
+    voter_list_with_local_twitter_data = voter_list_with_local_twitter_data.filter(
+        ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None))
     voter_list_with_local_twitter_data = voter_list_with_local_twitter_data[:100]
 
     voter_list_with_local_twitter_data_updated = []
@@ -831,16 +839,80 @@ def data_cleanup_voter_list_analysis_view(request):
         except TwitterLinkToOrganization.DoesNotExist:
             pass
 
+        # Do any other voters have this Twitter data? If not, we can create a TwitterLinkToVoter entry.
+        duplicate_twitter_data_found = False
+        voter_raw_filters = []
+        if positive_value_exists(one_linked_voter.twitter_id):
+            new_voter_filter = Q(twitter_id=one_linked_voter.twitter_id)
+            voter_raw_filters.append(new_voter_filter)
+        if positive_value_exists(one_linked_voter.twitter_screen_name):
+            new_voter_filter = Q(twitter_screen_name__iexact=one_linked_voter.twitter_screen_name)
+            voter_raw_filters.append(new_voter_filter)
+
+        if len(voter_raw_filters):
+            final_voter_filters = voter_raw_filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in voter_raw_filters:
+                final_voter_filters |= item
+
+            duplicate_twitter_data_voter_list = Voter.objects.all()
+            duplicate_twitter_data_voter_list = duplicate_twitter_data_voter_list.filter(final_voter_filters)
+            duplicate_twitter_data_voter_list = duplicate_twitter_data_voter_list.exclude(
+                we_vote_id__iexact=one_linked_voter.we_vote_id)
+            duplicate_twitter_data_found = positive_value_exists(len(duplicate_twitter_data_voter_list))
+            one_linked_voter.duplicate_twitter_data_found = duplicate_twitter_data_found
+
+        if twitter_id_from_link_to_voter or duplicate_twitter_data_found:
+            # Do not offer the create_twitter_link
+            pass
+        else:
+            if positive_value_exists(one_linked_voter.twitter_id) \
+                    or positive_value_exists(one_linked_voter.twitter_screen_name):
+                if create_twitter_link_to_voter:
+                    # If here, we want to create a TwitterLinkToVoter
+                    create_results = twitter_user_manager.create_twitter_link_to_voter(one_linked_voter.twitter_id,
+                                                                                       one_linked_voter.we_vote_id)
+                    if positive_value_exists(create_results['twitter_link_to_voter_saved']):
+                        create_twitter_link_to_voter_added += 1
+                        twitter_link_to_voter = create_results['twitter_link_to_voter']
+                        if positive_value_exists(twitter_link_to_voter.twitter_id):
+                            one_linked_voter.twitter_id_from_link_to_voter = twitter_link_to_voter.twitter_id
+                            # We reach out for the twitter_screen_name
+                            one_linked_voter.twitter_screen_name_from_link_to_voter = \
+                                twitter_link_to_voter.fetch_twitter_handle_locally_or_remotely()
+                            one_linked_voter.twitter_link_to_organization_twitter_id_source_text += \
+                                " JUST ALTERED"
+                    else:
+                        create_twitter_link_to_voter_not_added += 1
+                else:
+                    create_twitter_link_to_voter_possible += 1
+
         one_linked_voter.links_to_other_organizations = \
             find_organizations_referenced_in_positions_for_this_voter(one_linked_voter)
 
+        email_address_list = EmailAddress.objects.all()
+        email_address_list = email_address_list.filter(voter_we_vote_id__iexact=one_linked_voter.we_vote_id)
+        one_linked_voter.linked_emails = email_address_list
+
         voter_list_with_local_twitter_data_updated.append(one_linked_voter)
+
+    status_print_list += "create_twitter_link_to_voter_possible: " + \
+                         str(create_twitter_link_to_voter_possible) + "<br />"
+    if positive_value_exists(create_twitter_link_to_voter_added):
+        status_print_list += "create_twitter_link_to_voter_added: " + \
+                             str(create_twitter_link_to_voter_added) + "<br />"
+    if positive_value_exists(create_twitter_link_to_voter_not_added):
+        status_print_list += "create_twitter_link_to_voter_not_added: " + \
+                             str(create_twitter_link_to_voter_not_added) + "<br />"
+
+    messages.add_message(request, messages.INFO, status_print_list)
 
     messages_on_stage = get_messages(request)
 
     template_values = {
-        'messages_on_stage':                    messages_on_stage,
-        'voter_list_with_local_twitter_data':   voter_list_with_local_twitter_data_updated,
+        'messages_on_stage':                        messages_on_stage,
+        'voter_list_with_local_twitter_data':       voter_list_with_local_twitter_data_updated,
     }
     response = render(request, 'admin_tools/data_cleanup_voter_list_analysis.html', template_values)
 

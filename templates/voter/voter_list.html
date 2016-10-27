@@ -4,7 +4,9 @@
 {% block title %}Voters{% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a>
+<a href="{% url 'admin_tools:admin_home' %}">< Back to Admin Home</a><br />
+<br />
+<a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">Go to Voter List Analysis ></a><br />
 
 <h1>Voters</h1>
 

@@ -16,7 +16,7 @@ from exception.models import handle_record_found_more_than_one_exception, handle
     handle_record_not_saved_exception
 from organization.models import Organization
 from position.models import PositionEntered, PositionForFriends
-from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter
+from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority, voter_setup
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id, set_voter_api_device_id, \
@@ -158,6 +158,8 @@ def voter_edit_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    # NOTE: create_twitter_link_to_voter is processed in voter_edit_view
+
     voter_on_stage = Voter()
     at_least_one_value_changed = False
 
@@ -243,11 +245,14 @@ def voter_edit_view(request, voter_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    messages_on_stage = get_messages(request)
+    create_twitter_link_to_voter = request.GET.get('create_twitter_link_to_voter', False)
+
     voter_id = convert_to_int(voter_id)
     voter_on_stage = Voter()
     voter_on_stage_found = False
     twitter_id_from_link_to_voter = 0
+    twitter_id_from_link_to_voter_for_another_voter = False
+    twitter_user_manager = TwitterUserManager()
     try:
         voter_on_stage = Voter.objects.get(id=voter_id)
         voter_on_stage_found = True
@@ -321,22 +326,24 @@ def voter_edit_view(request, voter_id):
                     final_filters |= item
 
             voter_list_duplicate_twitter = voter_list_duplicate_twitter.filter(final_filters)
-            voter_list_duplicate_twitter = voter_list_duplicate_twitter.exclude(id=voter_id)
+            voter_list_duplicate_twitter = voter_list_duplicate_twitter.exclude(id=voter_on_stage.id)
             voter_list_duplicate_twitter = voter_list_duplicate_twitter[:100]
 
             for one_duplicate_voter in voter_list_duplicate_twitter:
                 try:
-                    twitter_link_to_voter = TwitterLinkToVoter.objects.get(
-                        voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
-                    if positive_value_exists(twitter_link_to_voter.twitter_id):
-                        one_duplicate_voter.twitter_id_from_link_to_voter = twitter_link_to_voter.twitter_id
+                    twitter_link_to_another_voter = TwitterLinkToVoter.objects.get(
+                        voter_we_vote_id__iexact=one_duplicate_voter.we_vote_id)
+                    if positive_value_exists(twitter_link_to_another_voter.twitter_id):
+                        twitter_id_from_link_to_voter_for_another_voter = True
+                        one_duplicate_voter.twitter_id_from_link_to_voter = twitter_link_to_another_voter.twitter_id
                         # We reach out for the twitter_screen_name
                         one_duplicate_voter.twitter_screen_name_from_link_to_voter = \
-                            twitter_link_to_voter.fetch_twitter_handle_locally_or_remotely()
+                            twitter_link_to_another_voter.fetch_twitter_handle_locally_or_remotely()
                 except TwitterLinkToVoter.DoesNotExist:
                     pass
 
                 voter_list_duplicate_twitter_updated.append(one_duplicate_voter)
+            list(voter_list_duplicate_twitter_updated)
 
         # ########################################
         # Looks for orgs that have the same Twitter data
@@ -353,7 +360,6 @@ def voter_edit_view(request, voter_id):
             at_least_one_twitter_value_found = True
 
         organization_list_with_duplicate_twitter_updated = []
-        voter_list_duplicate_twitter_updated = []
         final_filters = []
         if at_least_one_twitter_value_found:
             # Add the first query
@@ -420,9 +426,36 @@ def voter_edit_view(request, voter_id):
 
         # PositionForFriends
         positions_for_friends_owned_by_this_voter = PositionForFriends.objects.all()
-        positions_for_friends_owned_by_this_voter = positions_for_friends_owned_by_this_voter.filter(final_position_filters)
+        positions_for_friends_owned_by_this_voter = \
+            positions_for_friends_owned_by_this_voter.filter(final_position_filters)
         # We limit these to 20 since we are doing other lookups against this data
         positions_for_friends_owned_by_this_voter = positions_for_friends_owned_by_this_voter[:20]
+
+        if create_twitter_link_to_voter:
+            if not twitter_id_from_link_to_voter \
+                    and not twitter_id_from_link_to_voter_for_another_voter:
+                # If here, we want to create a TwitterLinkToVoter
+                create_results = twitter_user_manager.create_twitter_link_to_voter(voter_on_stage.twitter_id,
+                                                                                   voter_on_stage.we_vote_id)
+                messages.add_message(request, messages.INFO, 'TwitterLinkToVoter created:' +
+                                     " " + create_results['status'])
+                if positive_value_exists(create_results['twitter_link_to_voter_saved']):
+                    twitter_link_to_voter = create_results['twitter_link_to_voter']
+                    if positive_value_exists(twitter_link_to_voter.twitter_id):
+                        voter_on_stage.twitter_id_from_link_to_voter = twitter_link_to_voter.twitter_id
+                        # We reach out for the twitter_screen_name
+                        voter_on_stage.twitter_screen_name_from_link_to_voter = \
+                            twitter_link_to_voter.fetch_twitter_handle_locally_or_remotely()
+            else:
+                if twitter_id_from_link_to_voter:
+                    messages.add_message(request, messages.ERROR, 'TwitterLinkToVoter could not be created: '
+                                         'There is already a TwitterLinkToVoter for this voter.')
+                if twitter_id_from_link_to_voter_for_another_voter:
+                    messages.add_message(request, messages.ERROR,
+                                         'TwitterLinkToVoter could not be created: '
+                                         'There is already a TwitterLinkToVoter for ANOTHER voter.')
+
+        messages_on_stage = get_messages(request)
 
         template_values = {
             'messages_on_stage':                    messages_on_stage,
