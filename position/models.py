@@ -371,6 +371,17 @@ class PositionEntered(models.Model):
             return
         return organization
 
+    def voter(self):
+        if not self.voter_we_vote_id:
+            return
+        try:
+            voter = Voter.objects.get(we_vote_id=self.voter_we_vote_id)
+        except Voter.MultipleObjectsReturned as e:
+            return
+        except Voter.DoesNotExist:
+            return
+        return voter
+
 
 class PositionForFriends(models.Model):
     """
@@ -675,6 +686,17 @@ class PositionForFriends(models.Model):
         except Organization.DoesNotExist:
             return
         return organization
+
+    def voter(self):
+        if not self.voter_we_vote_id:
+            return
+        try:
+            voter = Voter.objects.get(we_vote_id=self.voter_we_vote_id)
+        except Voter.MultipleObjectsReturned as e:
+            return
+        except Voter.DoesNotExist:
+            return
+        return voter
 
 
 class PositionListManager(models.Model):

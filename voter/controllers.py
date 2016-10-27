@@ -158,6 +158,7 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
     elif positive_value_exists(from_voter.twitter_id):
         create_results = twitter_user_manager.create_twitter_link_to_voter(from_voter.twitter_id, to_voter.we_vote_id)
         status += " " + create_results['status']
+        # TODO DALE Remove voter.twitter_id value
 
     # Transfer data in voter records
     temp_twitter_id = 0
@@ -169,7 +170,7 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
         success = True
         status += "TO_VOTER_ALREADY_HAS_TWITTER_ID "
     elif positive_value_exists(from_voter.twitter_id):
-        # Remove info from the from_voter and then move facebook info to the to_voter
+        # Remove info from the from_voter and then move Twitter info to the to_voter
         try:
             # Copy values
             temp_twitter_id = from_voter.twitter_id
@@ -625,6 +626,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 voter_manager.update_voter_with_twitter_link_verified(
                     twitter_owner_voter,
                     twitter_auth_response.twitter_id)
+                # TODO DALE Remove voter.twitter_id value
 
             else:
                 error_results = {
@@ -765,6 +767,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         try:
             voter.linked_organization_we_vote_id = None
             voter.save()
+            # All positions should have already been moved with move_positions_to_another_voter
+
         except Exception as e:
             # Fail silently
             pass

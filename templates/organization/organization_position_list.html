@@ -8,6 +8,8 @@
 
 <p><a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Organizations</a></p>
 <p><a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">< Back to Voter Guides</a></p>
+<p><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}&google_civic_election_id={{ google_civic_election_id }}">
+    Analyze Organization Data ></a></p>
 
 {% if organization %}
 <h1>{{ organization.organization_name  }}</h1>

@@ -1,0 +1,193 @@
+{# templates/admin_tools/data_cleanup_organization_list_analysis.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Organization List Analysis{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a>
+
+<h1>Organization List Analysis</h1>
+
+
+{% if organizations_with_unique_twitter_data %}
+<h2>Organizations with Unique Twitter Data (Local Data)</h2>
+    <p>This list does not include organizations with correct TwitterLinkToVoter and TwitterLinkToOrganization.</p>
+
+    <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}?create_twitter_link_to_organization=1">Create TwitterLinkToOrganization Entries Now</a><br />
+
+    <table cellpadding="5" cellspacing="5" border="1">
+        <tr>
+            <td></td>
+            <td></td>
+            <td>Organization</td>
+            <td>organization_twitter_handle</td>
+            <td>Voter Smart ID</td>
+            <td>State</td>
+            <td>Voter from linked_organization_we_vote_id</td>
+            <td>TwitterLinkToOrganization</td>
+            <td>TwitterLinkToVoter</td>
+            <td></td>
+        </tr>
+    {% for organization in organizations_with_unique_twitter_data %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{% if organization.organization_photo_url %}
+                <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
+                    <img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
+            <td><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
+                {{ organization.organization_name }}</a></td>
+            <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
+                ({{ organization.twitter_followers_count }} followers)<br />{% endif %}
+                {% if organization.twitter_user_id %}{{ organization.twitter_user_id }}{% endif %}
+            </td>
+            <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
+            <td>{{ organization.state_served_code }}</td>
+            <td>
+                {% if organization.linked_voter %}
+                <a href="{% url 'voter:voter_edit' organization.linked_voter.id %}" target="_blank">{{ organization.linked_voter.we_vote_id }}</a><br />
+                {% endif %}
+                {% if organization.twitter_link_mismatch %}
+                    <strong>twitter_link_mismatch is TRUE</strong>
+                {% endif %}
+            </td>
+            <td>
+                {% if organization.organization_we_vote_id_from_link_to_organization %}
+                {{ organization.organization_we_vote_id_from_link_to_organization }}<br />
+                {% endif %}
+                {% if organization.twitter_id_from_link_to_organization %}
+                twitter_id: {{ organization.twitter_id_from_link_to_organization }}<br />
+                {% endif %}
+                {% if organization.twitter_screen_name_from_link_to_organization %}
+                fetched twitter_handle: {{ organization.twitter_screen_name_from_link_to_organization }}<br />
+                {% endif %}
+            </td>
+            <td>
+                {% if organization.voter_we_vote_id_from_link_to_voter %}
+                {{ organization.voter_we_vote_id_from_link_to_voter }}<br />
+                {% endif %}
+                {% if organization.twitter_id_from_link_to_voter %}
+                twitter_id: {{ organization.twitter_id_from_link_to_voter }}<br />
+                {% endif %}
+                {% if organization.twitter_screen_name_from_link_to_voter %}
+                fetched twitter_handle: {{ organization.twitter_screen_name_from_link_to_voter }}<br />
+                {% endif %}
+            </td>
+            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no organizations with unique Twitter data found)</p>
+{% endif %}
+
+
+<h2>Organizations with Twitter Collision (Local Data)</h2>
+{% if organizations_with_a_twitter_collision %}
+    <table cellpadding="5" cellspacing="5" border="1">
+        <tr>
+            <td></td>
+            <td></td>
+            <td>Organization</td>
+            <td>organization_twitter_handle</td>
+            <td>Voter Smart ID</td>
+            <td>State</td>
+            <td>Voter from linked_organization_we_vote_id</td>
+            <td></td>
+        </tr>
+    {% for organization in organizations_with_a_twitter_collision %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{% if organization.organization_photo_url %}
+                <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
+                    <img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
+            <td><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
+                {{ organization.organization_name }}</a></td>
+            <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
+                ({{ organization.twitter_followers_count }} followers)<br />{% endif %}
+                {% if organization.twitter_user_id %}{{ organization.twitter_user_id }}{% endif %}
+            </td>
+            <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
+            <td>{{ organization.state_served_code }}</td>
+            <td>{% if organization.linked_voter %}
+                <a href="{% url 'voter:voter_edit' organization.linked_voter.id %}" target="_blank">{{ organization.linked_voter.we_vote_id }}</a>
+            {% endif %}</td>
+            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no organizations found)</p>
+{% endif %}
+<br />
+
+
+{% if organizations_with_correctly_linked_twitter_data %}
+<h2>Organizations with Correctly Linked Twitter Data</h2>
+    <p></p>
+
+    <table cellpadding="5" cellspacing="5" border="1">
+        <tr>
+            <td></td>
+            <td></td>
+            <td>Organization</td>
+            <td>organization_twitter_handle</td>
+            <td>Voter Smart ID</td>
+            <td>State</td>
+            <td>Voter from linked_organization_we_vote_id</td>
+            <td>TwitterLinkToOrganization</td>
+            <td>TwitterLinkToVoter</td>
+            <td></td>
+        </tr>
+    {% for organization in organizations_with_correctly_linked_twitter_data %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{% if organization.organization_photo_url %}
+                <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
+                    <img src="{{ organization.organization_photo_url }}" width="73px" /></a>{% endif %}</td>
+            <td><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
+                {{ organization.organization_name }}</a></td>
+            <td>{% if organization.organization_twitter_handle %}{{ organization.organization_twitter_handle }} <br />
+                ({{ organization.twitter_followers_count }} followers)<br />{% endif %}
+                {% if organization.twitter_user_id %}{{ organization.twitter_user_id }}{% endif %}
+            </td>
+            <td>{% if organization.vote_smart_id %}{{ organization.vote_smart_id }}{% endif %}</td>
+            <td>{{ organization.state_served_code }}</td>
+            <td>
+                {% if organization.linked_voter %}
+                <a href="{% url 'voter:voter_edit' organization.linked_voter.id %}" target="_blank">{{ organization.linked_voter.we_vote_id }}</a><br />
+                {% endif %}
+                {% if organization.twitter_link_mismatch %}
+                    <strong>twitter_link_mismatch is TRUE</strong>
+                {% endif %}
+            </td>
+            <td>
+                {% if organization.organization_we_vote_id_from_link_to_organization %}
+                {{ organization.organization_we_vote_id_from_link_to_organization }}<br />
+                {% endif %}
+                {% if organization.twitter_id_from_link_to_organization %}
+                twitter_id: {{ organization.twitter_id_from_link_to_organization }}<br />
+                {% endif %}
+                {% if organization.twitter_screen_name_from_link_to_organization %}
+                fetched twitter_handle: {{ organization.twitter_screen_name_from_link_to_organization }}<br />
+                {% endif %}
+            </td>
+            <td>
+                {% if organization.voter_we_vote_id_from_link_to_voter %}
+                {{ organization.voter_we_vote_id_from_link_to_voter }}<br />
+                {% endif %}
+                {% if organization.twitter_id_from_link_to_voter %}
+                twitter_id: {{ organization.twitter_id_from_link_to_voter }}<br />
+                {% endif %}
+                {% if organization.twitter_screen_name_from_link_to_voter %}
+                fetched twitter_handle: {{ organization.twitter_screen_name_from_link_to_voter }}<br />
+                {% endif %}
+            </td>
+            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>(no organizations with unique Twitter data found)</p>
+{% endif %}
+
+{% endblock %}

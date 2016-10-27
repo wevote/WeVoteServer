@@ -85,7 +85,9 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
     # Reach out to Twitter (or our Twitter account cache) to retrieve some information we can display
     if not positive_value_exists(owner_found):
         twitter_user_manager = TwitterUserManager()
-        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(twitter_handle)
+        twitter_user_id = 0
+        twitter_results = \
+            twitter_user_manager.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle)
 
         if twitter_results['twitter_user_found']:
             twitter_user = twitter_results['twitter_user']
