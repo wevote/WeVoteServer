@@ -299,7 +299,7 @@ def voter_edit_view(request, voter_id):
         try:
             if positive_value_exists(twitter_id_from_link_to_voter):
                 twitter_id_to_search = twitter_id_from_link_to_voter
-                twitter_link_to_organization_twitter_id_source_text = "FROM TWITTER_LINK_TO_VOTER"
+                twitter_link_to_organization_twitter_id_source_text = "FROM TW_LINK_TO_VOTER"
             else:
                 twitter_id_to_search = voter_on_stage.twitter_id
                 twitter_link_to_organization_twitter_id_source_text = "FROM VOTER RECORD"

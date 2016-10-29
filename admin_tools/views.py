@@ -15,6 +15,7 @@ from django.shortcuts import render
 from election.models import Election
 from election.controllers import elections_import_from_sample_file
 from email_outbound.models import EmailAddress
+from friend.models import FriendManager
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
 from import_export_vote_smart.models import VoteSmartApiCounterManager
@@ -210,7 +211,7 @@ def data_cleanup_organization_analysis_view(request):
         voter_list_duplicate_twitter = voter_list_duplicate_twitter.filter(final_voter_filters)
         voter_list_duplicate_twitter = voter_list_duplicate_twitter.exclude(
             linked_organization_we_vote_id__iexact=organization.we_vote_id)
-        voter_list_duplicate_twitter = voter_list_duplicate_twitter[:100]
+        voter_list_duplicate_twitter = voter_list_duplicate_twitter
 
         for one_duplicate_voter in voter_list_duplicate_twitter:
             try:
@@ -799,12 +800,13 @@ def data_cleanup_voter_list_analysis_view(request):
     create_twitter_link_to_voter_not_added = 0
     facebook_manager = FacebookManager()
     twitter_user_manager = TwitterUserManager()
+    friend_manager = FriendManager()
 
     voter_list_with_local_twitter_data = Voter.objects.all()
     voter_list_with_local_twitter_data = voter_list_with_local_twitter_data.filter(
         ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None) | ~Q(facebook_id=None) |
         ~Q(fb_username=None))
-    voter_list_with_local_twitter_data = voter_list_with_local_twitter_data[:100]
+    voter_list_with_local_twitter_data = voter_list_with_local_twitter_data
 
     voter_list_with_local_twitter_data_updated = []
     for one_linked_voter in voter_list_with_local_twitter_data:
@@ -842,7 +844,7 @@ def data_cleanup_voter_list_analysis_view(request):
             one_linked_voter.twitter_link_to_organization_status = ""
             if positive_value_exists(twitter_id_from_link_to_voter):
                 twitter_id_to_search = twitter_id_from_link_to_voter
-                twitter_link_to_organization_twitter_id_source_text = "FROM TWITTER_LINK_TO_VOTER"
+                twitter_link_to_organization_twitter_id_source_text = "FROM TW_LINK_TO_VOTER"
             else:
                 twitter_id_to_search = one_linked_voter.twitter_id
                 twitter_link_to_organization_twitter_id_source_text = "FROM VOTER RECORD"
@@ -959,8 +961,24 @@ def data_cleanup_voter_list_analysis_view(request):
         email_address_list = email_address_list.filter(voter_we_vote_id__iexact=one_linked_voter.we_vote_id)
         one_linked_voter.linked_emails = email_address_list
 
+        # Friend statistics
+        one_linked_voter.current_friends_count = \
+            friend_manager.fetch_current_friends_count(one_linked_voter.we_vote_id)
+        one_linked_voter.friend_invitations_sent_by_me_count = \
+            friend_manager.fetch_friend_invitations_sent_by_me_count(one_linked_voter.we_vote_id)
+        one_linked_voter.friend_invitations_sent_to_me_count = \
+            friend_manager.fetch_friend_invitations_sent_to_me_count(one_linked_voter.we_vote_id)
+
         voter_list_with_local_twitter_data_updated.append(one_linked_voter)
 
+    status_print_list += "create_facebook_link_to_voter_possible: " + \
+                         str(create_facebook_link_to_voter_possible) + "<br />"
+    if positive_value_exists(create_facebook_link_to_voter_added):
+        status_print_list += "create_facebook_link_to_voter_added: " + \
+                             str(create_facebook_link_to_voter_added) + "<br />"
+    if positive_value_exists(create_facebook_link_to_voter_not_added):
+        status_print_list += "create_facebook_link_to_voter_not_added: " + \
+                             str(create_facebook_link_to_voter_not_added) + "<br />"
     status_print_list += "create_twitter_link_to_voter_possible: " + \
                          str(create_twitter_link_to_voter_possible) + "<br />"
     if positive_value_exists(create_twitter_link_to_voter_added):
