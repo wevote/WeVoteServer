@@ -11,7 +11,7 @@
 <h1>Voter List Analysis</h1>
 
 {% if voter_list_with_local_twitter_data %}
- <h2>With twitter_id, twitter_screen_name or email</h2>
+ <h2>With twitter_id, twitter_screen_name, facebook_id or email</h2>
     <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}?create_twitter_link_to_voter=1">
     Create TwitterLinkToVoter for all records that don't have collisions.</a>
     <table border="1" cellpadding="10">
@@ -23,13 +23,15 @@
             <td>You</td>
             <td>Where</td>
             <td>FB?</td>
-            <td>Twitter Voter Table</td>
+            <td>Voter Table</td>
+            <td>FacebookLinkToVoter</td>
             <td>TwitterLinkToVoter</td>
             <td>TwitterLinkToOrganization</td>
             <td>Email</td>
             <td>Admin</td>
             <td>Verified Volunteer</td>
             <td>linked organization we_vote_id</td>
+            <td>Positions</td>
             <td>Voter Positions Link to Other Orgs</td>
         </tr>
     {% for voter in voter_list_with_local_twitter_data %}
@@ -55,11 +57,31 @@
             <td>
             {% if voter.fb_username %}Y{% else %}{% endif %}
             </td>
-            <!-- Twitter? OLD //-->
+            <!-- Voter table data: Twitter? Facebook? //-->
             <td>
-            {% if voter.twitter_id %}@{{ voter.twitter_screen_name }}<br />
-                {{ voter.twitter_id }}
-            {% else %}{% endif %}
+            {% if voter.twitter_id %}
+                @{{ voter.twitter_screen_name }}<br />
+                tw: {{ voter.twitter_id }}<br />
+            {% endif %}
+            {% if voter.facebook_id or voter.fb_username %}
+                fb: {{ voter.fb_username|default_if_none:"" }},
+                {{ voter.facebook_id|default_if_none:"" }}
+            {% endif %}
+            </td>
+            <!-- FacebookLinkToVoter //-->
+            <td>
+            {% if voter.duplicate_facebook_data_found %}
+                <strong>DUPLICATE VOTER FACEBOOK DATA FOUND</strong>
+            {% elif voter.facebook_id %}
+                {% if not voter.facebook_id_from_link_to_voter %}
+                <a href="{% url 'voter:voter_edit' voter.id %}?create_facebook_link_to_voter=1" target="_blank">
+                Create FacebookLinkToVoter
+                </a>
+                {% endif %}
+            {% endif %}
+            {% if voter.facebook_id_from_link_to_voter %}
+                fb: {{ voter.facebook_id_from_link_to_voter }}
+            {% endif %}
             </td>
             <!-- TwitterLinkToVoter //-->
             <td>
@@ -119,7 +141,12 @@
             {% if voter.linked_organization_we_vote_id %}
                 <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ voter.linked_organization_we_vote_id }}" target="_blank">
                 {{ voter.linked_organization_we_vote_id }}</a>
-            {% else %}{% endif %}
+            {% endif %}
+            </td>
+            <td>
+            {% if voter.positions_count %}
+                {{ voter.positions_count }}
+            {% endif %}
             </td>
             <td>
                 {% for other_organization in voter.links_to_other_organizations %}
