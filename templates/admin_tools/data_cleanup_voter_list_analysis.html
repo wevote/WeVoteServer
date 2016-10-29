@@ -19,32 +19,30 @@
             <td></td>
             <td>ID</td>
             <td>We Vote ID</td>
-            <td>Who</td>
             <td>You</td>
             <td>Where</td>
             <td>FB?</td>
             <td>Voter Table</td>
             <td>FacebookLinkToVoter</td>
             <td>TwitterLinkToVoter</td>
-            <td>TwitterLinkToOrganization</td>
+            <td>TwitterLinkToOrg</td>
             <td>Email</td>
             <td>Admin</td>
             <td>Verified Volunteer</td>
             <td>linked organization we_vote_id</td>
             <td>Positions</td>
             <td>Voter Positions Link to Other Orgs</td>
+            <td>Friends & Invitations</td>
         </tr>
     {% for voter in voter_list_with_local_twitter_data %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ voter.id }}</td>
             <td>
+                {{ voter.get_full_name|default_if_none:"" }}
                 <a href="{% url 'voter:voter_edit' voter.id %}" target="_blank">
                     {{ voter.we_vote_id }}
                 </a>
-            </td>
-            <td>
-            {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }}{% endif %}
             </td>
             <!-- Is this you? //-->
             <td>
@@ -122,9 +120,9 @@
                 -------<br />
                 {% for one_email in voter.linked_emails %}
                     {% if one_email.email_ownership_is_verified %}
-                    <strong>{{ one_email.normalized_email_address }}::{{ one_email.we_vote_id }}</strong><br />
+                    <strong>{{ one_email.normalized_email_address }}: :{{ one_email.we_vote_id }}</strong><br />
                     {% else %}
-                    {{ one_email.normalized_email_address }}::{{ one_email.we_vote_id }}<br />
+                    {{ one_email.normalized_email_address }}: :{{ one_email.we_vote_id }}<br />
                     {% endif %}
                 {% endfor %}
             {% endif %}
@@ -152,10 +150,21 @@
                 {% for other_organization in voter.links_to_other_organizations %}
                     {% if other_organization.we_vote_id != voter.linked_organization_we_vote_id %}
                     <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ other_organization.we_vote_id }}" target="_blank">
-                    {{ other_organization.we_vote_id }}
+                    BAD {{ other_organization.we_vote_id }}
                     </a>
                     {% endif %}
                 {% endfor %}
+            </td>
+            <td>
+            {% if voter.current_friends_count %}
+                Friends:&nbsp;{{ voter.current_friends_count }}<br />
+            {% endif %}
+            {% if voter.friend_invitations_sent_by_me_count %}
+                From:&nbsp;{{ voter.friend_invitations_sent_by_me_count }}<br />
+            {% endif %}
+            {% if voter.friend_invitations_sent_to_me_count %}
+                To: {{ voter.friend_invitations_sent_to_me_count }}<br />
+            {% endif %}
             </td>
         </tr>
     {% endfor %}
