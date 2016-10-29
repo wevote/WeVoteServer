@@ -427,6 +427,13 @@ class FriendManager(models.Model):
         }
         return results
 
+    def fetch_current_friends_count(self, voter_we_vote_id):
+        results = self.retrieve_current_friends(voter_we_vote_id)
+        if results['current_friend_list_found']:
+            current_friend_list = results['current_friend_list']
+            return len(current_friend_list)
+        return 0
+
     def retrieve_current_friends(self, voter_we_vote_id):
         current_friend_list = []  # The entries from CurrentFriend table
         current_friend_list_found = False
@@ -960,6 +967,13 @@ class FriendManager(models.Model):
         }
         return results
 
+    def fetch_friend_invitations_sent_by_me_count(self, voter_we_vote_id):
+        results = self.retrieve_friend_invitations_sent_by_me(voter_we_vote_id)
+        if results['friend_list_found']:
+            friend_list = results['friend_list']
+            return len(friend_list)
+        return 0
+
     def retrieve_friend_invitations_sent_by_me(self, sender_voter_we_vote_id):
         friend_list_found = False
         friend_list = []
@@ -1071,6 +1085,13 @@ class FriendManager(models.Model):
             'friend_list':              friend_list,
         }
         return results
+
+    def fetch_friend_invitations_sent_to_me_count(self, voter_we_vote_id):
+        results = self.retrieve_friend_invitations_sent_to_me(voter_we_vote_id)
+        if results['friend_list_found']:
+            friend_list = results['friend_list']
+            return len(friend_list)
+        return 0
 
     def retrieve_friend_invitations_sent_to_me(self, recipient_voter_we_vote_id):
         friend_list_found = False
