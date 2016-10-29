@@ -14,7 +14,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
-from organization.models import Organization
+from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
+from organization.models import Organization, OrganizationManager
 from position.models import PositionEntered, PositionForFriends
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority, voter_setup
@@ -245,13 +246,21 @@ def voter_edit_view(request, voter_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    create_facebook_link_to_voter = request.GET.get('create_facebook_link_to_voter', False)
     create_twitter_link_to_voter = request.GET.get('create_twitter_link_to_voter', False)
+    cross_link_all_voter_positions = request.GET.get('cross_link_all_voter_positions', False)
 
     voter_id = convert_to_int(voter_id)
     voter_on_stage = Voter()
     voter_on_stage_found = False
+    facebook_id_from_link_to_voter = 0
+    facebook_id_from_link_to_voter_for_another_voter = False
     twitter_id_from_link_to_voter = 0
     twitter_id_from_link_to_voter_for_another_voter = False
+    positions_cross_linked = 0
+    positions_not_cross_linked = 0
+    status_print_list = ""
+    facebook_manager = FacebookManager()
     twitter_user_manager = TwitterUserManager()
     try:
         voter_on_stage = Voter.objects.get(id=voter_id)
@@ -263,6 +272,16 @@ def voter_edit_view(request, voter_id):
         pass
 
     if voter_on_stage_found:
+        # Get FacebookLinkToVoter
+        try:
+            facebook_link_to_voter = FacebookLinkToVoter.objects.get(
+                voter_we_vote_id__iexact=voter_on_stage.we_vote_id)
+            if positive_value_exists(facebook_link_to_voter.facebook_user_id):
+                facebook_id_from_link_to_voter = facebook_link_to_voter.facebook_user_id
+                voter_on_stage.facebook_id_from_link_to_voter = facebook_link_to_voter.facebook_user_id
+        except FacebookLinkToVoter.DoesNotExist:
+            pass
+
         # Get TwitterLinkToVoter
         try:
             twitter_link_to_voter = TwitterLinkToVoter.objects.get(
@@ -280,10 +299,10 @@ def voter_edit_view(request, voter_id):
         try:
             if positive_value_exists(twitter_id_from_link_to_voter):
                 twitter_id_to_search = twitter_id_from_link_to_voter
-                twitter_link_to_organization_twitter_id_source_text = "FROM_TWITTER_LINK_TO_VOTER"
+                twitter_link_to_organization_twitter_id_source_text = "FROM TWITTER_LINK_TO_VOTER"
             else:
                 twitter_id_to_search = voter_on_stage.twitter_id
-                twitter_link_to_organization_twitter_id_source_text = "FROM_VOTER_RECORD"
+                twitter_link_to_organization_twitter_id_source_text = "FROM VOTER RECORD"
 
             if positive_value_exists(twitter_id_to_search):
                 twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
@@ -299,6 +318,44 @@ def voter_edit_view(request, voter_id):
                         twitter_link_to_organization_twitter_id_source_text
         except TwitterLinkToOrganization.DoesNotExist:
             pass
+
+        # ########################################
+        # Looks for other voters that have the same Facebook data
+        at_least_one_voter_facebook_value_found = False
+        voter_facebook_filters = []
+        if positive_value_exists(voter_on_stage.facebook_id):
+            new_filter = Q(facebook_id=voter_on_stage.facebook_id)
+            voter_facebook_filters.append(new_filter)
+            at_least_one_voter_facebook_value_found = True
+
+        voter_list_duplicate_facebook_updated = []
+        if at_least_one_voter_facebook_value_found:
+            voter_list_duplicate_facebook = Voter.objects.all()
+            # Add the first query
+            final_filters = []
+            if len(voter_facebook_filters):
+                final_filters = voter_facebook_filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in voter_facebook_filters:
+                    final_filters |= item
+
+            voter_list_duplicate_facebook = voter_list_duplicate_facebook.filter(final_filters)
+            voter_list_duplicate_facebook = voter_list_duplicate_facebook.exclude(id=voter_on_stage.id)
+            voter_list_duplicate_facebook = voter_list_duplicate_facebook[:100]
+
+            for one_duplicate_voter in voter_list_duplicate_facebook:
+                try:
+                    facebook_link_to_another_voter = FacebookLinkToVoter.objects.get(
+                        voter_we_vote_id__iexact=one_duplicate_voter.we_vote_id)
+                    if positive_value_exists(facebook_link_to_another_voter.facebook_id):
+                        facebook_id_from_link_to_voter_for_another_voter = True
+                        one_duplicate_voter.facebook_id_from_link_to_voter = facebook_link_to_another_voter.facebook_id
+                except FacebookLinkToVoter.DoesNotExist:
+                    pass
+
+                voter_list_duplicate_facebook_updated.append(one_duplicate_voter)
+            list(voter_list_duplicate_facebook_updated)
 
         # ########################################
         # Looks for voters that have the same Twitter data
@@ -421,15 +478,101 @@ def voter_edit_view(request, voter_id):
         # PositionEntered
         public_positions_owned_by_this_voter = PositionEntered.objects.all()
         public_positions_owned_by_this_voter = public_positions_owned_by_this_voter.filter(final_position_filters)
-        # We limit these to 20 since we are doing other lookups against this data
-        public_positions_owned_by_this_voter = public_positions_owned_by_this_voter[:20]
 
         # PositionForFriends
         positions_for_friends_owned_by_this_voter = PositionForFriends.objects.all()
         positions_for_friends_owned_by_this_voter = \
             positions_for_friends_owned_by_this_voter.filter(final_position_filters)
-        # We limit these to 20 since we are doing other lookups against this data
-        positions_for_friends_owned_by_this_voter = positions_for_friends_owned_by_this_voter[:20]
+
+        if cross_link_all_voter_positions and voter_on_stage.linked_organization_we_vote_id \
+                and not twitter_id_from_link_to_voter_for_another_voter:
+            organization_manager = OrganizationManager()
+            linked_organization_id = \
+                organization_manager.fetch_organization_id(voter_on_stage.linked_organization_we_vote_id)
+            if positive_value_exists(linked_organization_id):
+                for one_public_position in public_positions_owned_by_this_voter:
+                    voter_info_saved = False
+                    voter_info_not_saved = False
+                    organization_info_saved = False
+                    organization_info_not_saved = False
+                    # Update the voter information
+                    if not one_public_position.voter_id \
+                            or not positive_value_exists(one_public_position.voter_we_vote_id):
+                        try:
+                            one_public_position.voter_id = voter_on_stage.id
+                            one_public_position.voter_we_vote_id = voter_on_stage.we_vote_id
+                            one_public_position.save()
+                            voter_info_saved = True
+                        except Exception as e:
+                            voter_info_not_saved = True
+                    # Update the organization information
+                    if not one_public_position.organization_id \
+                            or not positive_value_exists(one_public_position.organization_we_vote_id):
+                        try:
+                            one_public_position.organization_id = linked_organization_id
+                            one_public_position.organization_we_vote_id = voter_on_stage.linked_organization_we_vote_id
+                            one_public_position.save()
+                            organization_info_saved = True
+                        except Exception as e:
+                            organization_info_not_saved = True
+
+                    if voter_info_saved or organization_info_saved:
+                        positions_cross_linked += 1
+                    if voter_info_not_saved or organization_info_not_saved:
+                        positions_not_cross_linked += 1
+
+                for one_position_for_friends in positions_for_friends_owned_by_this_voter:
+                    voter_info_saved = False
+                    voter_info_not_saved = False
+                    organization_info_saved = False
+                    organization_info_not_saved = False
+                    # Update the voter information
+                    if not one_position_for_friends.voter_id \
+                            or not positive_value_exists(one_position_for_friends.voter_we_vote_id):
+                        try:
+                            one_position_for_friends.voter_id = voter_on_stage.id
+                            one_position_for_friends.voter_we_vote_id = voter_on_stage.we_vote_id
+                            one_position_for_friends.save()
+                            voter_info_saved = True
+                        except Exception as e:
+                            voter_info_not_saved = True
+                    # Update the organization information
+                    if not one_position_for_friends.organization_id \
+                            or not positive_value_exists(one_position_for_friends.organization_we_vote_id):
+                        try:
+                            one_position_for_friends.organization_id = linked_organization_id
+                            one_position_for_friends.organization_we_vote_id = \
+                                voter_on_stage.linked_organization_we_vote_id
+                            one_position_for_friends.save()
+                            organization_info_saved = True
+                        except Exception as e:
+                            organization_info_not_saved = True
+
+                    if voter_info_saved or organization_info_saved:
+                        positions_cross_linked += 1
+                    if voter_info_not_saved or organization_info_not_saved:
+                        positions_not_cross_linked += 1
+
+        if create_facebook_link_to_voter:
+            if not facebook_id_from_link_to_voter \
+                    and not facebook_id_from_link_to_voter_for_another_voter:
+                # If here, we want to create a TwitterLinkToVoter
+                create_results = facebook_manager.create_facebook_link_to_voter(voter_on_stage.facebook_id,
+                                                                                voter_on_stage.we_vote_id)
+                messages.add_message(request, messages.INFO, 'FacebookLinkToVoter created:' +
+                                     " " + create_results['status'])
+                if positive_value_exists(create_results['facebook_link_to_voter_saved']):
+                    facebook_link_to_voter = create_results['facebook_link_to_voter']
+                    if positive_value_exists(facebook_link_to_voter.facebook_user_id):
+                        voter_on_stage.facebook_id_from_link_to_voter = facebook_link_to_voter.facebook_user_id
+            else:
+                if facebook_id_from_link_to_voter:
+                    messages.add_message(request, messages.ERROR, 'FacebookLinkToVoter could not be created: '
+                                         'There is already a FacebookLinkToVoter for this voter.')
+                if facebook_id_from_link_to_voter_for_another_voter:
+                    messages.add_message(request, messages.ERROR,
+                                         'FacebookLinkToVoter could not be created: '
+                                         'There is already a FacebookLinkToVoter for ANOTHER voter.')
 
         if create_twitter_link_to_voter:
             if not twitter_id_from_link_to_voter \
@@ -455,12 +598,20 @@ def voter_edit_view(request, voter_id):
                                          'TwitterLinkToVoter could not be created: '
                                          'There is already a TwitterLinkToVoter for ANOTHER voter.')
 
+        if positive_value_exists(positions_cross_linked):
+            status_print_list += "positions_cross_linked: " + str(positions_cross_linked) + "<br />"
+        if positive_value_exists(positions_not_cross_linked):
+            status_print_list += "positions_not_cross_linked: " + str(positions_not_cross_linked) + "<br />"
+
+        messages.add_message(request, messages.INFO, status_print_list)
+
         messages_on_stage = get_messages(request)
 
         template_values = {
             'messages_on_stage':                    messages_on_stage,
             'voter_id':                             voter_on_stage.id,
             'voter':                                voter_on_stage,
+            'voter_list_duplicate_facebook':        voter_list_duplicate_facebook_updated,
             'voter_list_duplicate_twitter':         voter_list_duplicate_twitter_updated,
             'organization_list_with_duplicate_twitter': organization_list_with_duplicate_twitter_updated,
             'linked_organization_we_vote_id_list':  linked_organization_we_vote_id_list_updated,
@@ -468,6 +619,7 @@ def voter_edit_view(request, voter_id):
             'positions_for_friends_owned_by_this_voter':    positions_for_friends_owned_by_this_voter,
         }
     else:
+        messages_on_stage = get_messages(request)
         template_values = {
             'messages_on_stage':    messages_on_stage,
             'voter_id':             0,

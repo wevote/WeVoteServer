@@ -36,6 +36,13 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
 {% if voter %}voter.twitter_id: {{ voter.twitter_id|default_if_none:"" }}{% endif %}
     <br />
 
+<label for="facebook_id_from_link_to_voter_id">facebook_id_from_link_to_voter:</label>
+{% if voter.facebook_id_from_link_to_voter %}
+    {{ voter.facebook_id_from_link_to_voter }},
+    {{ voter.facebook_link_to_voter_facebook_id_source_text }}
+{% endif %}
+<br />
+
 <label for="twitter_screen_name_from_link_to_voter_id">twitter_screen_name_from_link_to_voter:</label>
 {% if voter.twitter_screen_name_from_link_to_voter or voter.twitter_id_from_link_to_voter %}
     {{ voter.twitter_screen_name_from_link_to_voter|default_if_none:"" }},
@@ -119,6 +126,92 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
 {% endif %}
 
 
+{% if voter_list_duplicate_facebook %}
+ <h2>BAD: Other Voters with Duplicate (Local) Twitter Info</h2>
+    <table border="1" cellpadding="10">
+        <tr>
+            <td>ID</td>
+            <td>We Vote ID</td>
+            <td>Who</td>
+            <td>You</td>
+            <td>Where</td>
+            <td>FB?</td>
+            <td>Tw? (OLD)</td>
+            <td>TwitterLinkToVoter</td>
+            <td>Email</td>
+            <td>Admin</td>
+            <td>Verified Volunteer</td>
+            <td>linked_organization_we_vote_id</td>
+        </tr>
+    {% for duplicate_facebook_voter in voter_list_duplicate_facebook %}
+        <tr>
+            <td>{{ duplicate_facebook_voter.id }}</td>
+            <td>
+                <a href="{% url 'voter:voter_edit' duplicate_facebook_voter.id %}" target="_blank">
+                    {{ duplicate_facebook_voter.we_vote_id }}
+                </a>
+            </td>
+            <td>
+            {% if duplicate_facebook_voter.first_name %}{{ duplicate_facebook_voter.first_name }} {% endif %}{% if duplicate_facebook_voter.last_name %}{{ duplicate_facebook_voter.last_name }}{% endif %}
+            </td>
+            <!-- Is this you? //-->
+            <td>
+            {% if duplicate_facebook_voter.id == voter_id_signed_in %}*ME*{% else %}{% endif %}
+            </td>
+            <td>
+                &nbsp;
+            </td>
+            <!-- Facebook? //-->
+            <td>
+            {% if duplicate_facebook_voter.fb_username %}Y{% else %}{% endif %}
+            </td>
+            <!-- Twitter? OLD //-->
+            <td>
+            {% if duplicate_facebook_voter.facebook_id %}
+                {{ duplicate_facebook_voter.facebook_id }}
+            {% else %}{% endif %}
+            </td>
+            <!-- Twitter? NEW //-->
+            <td>
+            {% if duplicate_facebook_voter.facebook_id_from_link_to_voter %}
+                <strong>BAD: TwitterLinkToVoter TO ANOTHER VOTER</strong>
+                {{ duplicate_facebook_voter.facebook_id_from_link_to_voter }}
+            {% else %}{% endif %}
+            </td>
+            <!-- Email //-->
+            <td>
+            {% if duplicate_facebook_voter.email %}{{ duplicate_facebook_voter.email }}{% else %}{% endif %}
+            </td>
+            <!-- Is site administrator? //-->
+            <td>
+            {% if duplicate_facebook_voter.is_admin %}Y{% else %}{% endif %}
+            </td>
+            <!-- Is verified volunteer? //-->
+            <td>
+            {% if duplicate_facebook_voter.is_verified_volunteer %}Y{% else %}{% endif %}
+            </td>
+            <td>
+            {% if duplicate_facebook_voter.linked_organization_we_vote_id %}
+                <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ duplicate_facebook_voter.linked_organization_we_vote_id }}" target="_blank">
+                {{ duplicate_facebook_voter.linked_organization_we_vote_id }}</a>
+            {% else %}{% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    {% if voter.facebook_id_from_link_to_voter or voter.facebook_id %}
+    <h3>GOOD: No other voters found with duplicate local Facebook info</h3>
+    {% endif %}
+    {% if not voter.facebook_id_from_link_to_voter and voter.facebook_id %}
+    <a href="{% url 'voter:voter_edit' voter_id %}?create_facebook_link_to_voter=1" target="_blank">
+    Create FacebookLinkToVoter
+    </a>
+    {% endif %}
+{% endif %}
+
+
+
 {% if voter_list_duplicate_twitter %}
  <h2>BAD: Other Voters with Duplicate (Local) Twitter Info</h2>
     <table border="1" cellpadding="10">
@@ -195,14 +288,15 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
     {% endfor %}
     </table>
 {% else %}
+    {% if voter.twitter_id_from_link_to_voter or voter.twitter_id %}
     <h3>GOOD: No other voters found with duplicate local Twitter info</h3>
-    {% if not voter.twitter_id_from_link_to_voter %}
+    {% endif %}
+    {% if not voter.twitter_id_from_link_to_voter and voter.twitter_id %}
     <a href="{% url 'voter:voter_edit' voter_id %}?create_twitter_link_to_voter=1" target="_blank">
     Create TwitterLinkToVoter
     </a>
     {% endif %}
 {% endif %}
-
 
 
 {% if organization_list_with_duplicate_twitter %}
@@ -243,7 +337,15 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
     {% endfor %}
     </table>
 {% else %}
+    {% if voter.twitter_id_from_link_to_voter or voter.twitter_id %}
     <h3>GOOD: No other organizations found with duplicate local Twitter info (aside from TwitterLinkToOrganization)</h3>
+    {% endif %}
+{% endif %}
+
+{% if voter.linked_organization_we_vote_id and not organization_list_with_duplicate_twitter and not voter_list_duplicate_twitter %}
+    <h3><a href="{% url 'voter:voter_edit' voter.id %}?cross_link_all_voter_positions=1" target="_blank">
+        Add voter_we_vote_id and organization_we_vote_id To All Positions
+    </a></h3>
 {% endif %}
 
 
@@ -275,7 +377,7 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
                 (voter missing)
             {% endif %}</td>
             <td>{% if position.organization %}
-                <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{  position.organization.we_vote_id }}"
                    target="_blank">
                 {{ position.organization.organization_name }} - {{ position.organization.we_vote_id }}
                 </a>
@@ -338,7 +440,7 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
                 (voter missing)
             {% endif %}</td>
             <td>{% if position.organization %}
-                <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?google_civic_election_id={{ google_civic_election_id }}&organization_we_vote_id={{  position.organization.we_vote_id }}"
                    target="_blank">
                 {{ position.organization.organization_name }} - {{ position.organization.we_vote_id }}
                 </a>

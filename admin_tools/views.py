@@ -15,14 +15,15 @@ from django.shortcuts import render
 from election.models import Election
 from election.controllers import elections_import_from_sample_file
 from email_outbound.models import EmailAddress
+from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
 from import_export_vote_smart.models import VoteSmartApiCounterManager
 from office.controllers import offices_import_from_sample_file
 from organization.controllers import organizations_import_from_sample_file
 from organization.models import Organization, OrganizationManager
 from polling_location.controllers import import_and_save_all_polling_locations_data
-from position.controllers import find_organizations_referenced_in_positions_for_this_voter, \
-    positions_import_from_sample_file
+from position.controllers import fetch_positions_count_for_this_voter, \
+    find_organizations_referenced_in_positions_for_this_voter, positions_import_from_sample_file
 from position.models import PositionEntered, PositionForFriends
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import Voter, VoterDeviceLinkManager, VoterManager, voter_has_authority, voter_setup
@@ -786,21 +787,43 @@ def data_cleanup_voter_list_analysis_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
+    create_facebook_link_to_voter = request.GET.get('create_facebook_link_to_voter', False)
     create_twitter_link_to_voter = request.GET.get('create_twitter_link_to_voter', False)
 
     status_print_list = ""
+    create_facebook_link_to_voter_possible = 0
+    create_facebook_link_to_voter_added = 0
+    create_facebook_link_to_voter_not_added = 0
     create_twitter_link_to_voter_possible = 0
     create_twitter_link_to_voter_added = 0
     create_twitter_link_to_voter_not_added = 0
+    facebook_manager = FacebookManager()
     twitter_user_manager = TwitterUserManager()
 
     voter_list_with_local_twitter_data = Voter.objects.all()
     voter_list_with_local_twitter_data = voter_list_with_local_twitter_data.filter(
-        ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None))
+        ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None) | ~Q(facebook_id=None) |
+        ~Q(fb_username=None))
     voter_list_with_local_twitter_data = voter_list_with_local_twitter_data[:100]
 
     voter_list_with_local_twitter_data_updated = []
     for one_linked_voter in voter_list_with_local_twitter_data:
+
+        # {{voter.facebook_username_from_link_to_voter}} < br / >
+        # {{voter.facebook_id_from_link_to_voter}}
+
+        # Get FacebookLinkToVoter
+        facebook_id_from_link_to_voter = 0
+        try:
+            facebook_link_to_voter = FacebookLinkToVoter.objects.get(
+                voter_we_vote_id__iexact=one_linked_voter.we_vote_id)
+            if positive_value_exists(facebook_link_to_voter.facebook_user_id):
+                facebook_id_from_link_to_voter = facebook_link_to_voter.facebook_user_id
+                one_linked_voter.facebook_id_from_link_to_voter = facebook_link_to_voter.facebook_user_id
+        except FacebookLinkToVoter.DoesNotExist:
+            pass
+
+        # Get TwitterLinkToVoter
         twitter_id_from_link_to_voter = 0
         try:
             twitter_link_to_voter = TwitterLinkToVoter.objects.get(
@@ -819,10 +842,10 @@ def data_cleanup_voter_list_analysis_view(request):
             one_linked_voter.twitter_link_to_organization_status = ""
             if positive_value_exists(twitter_id_from_link_to_voter):
                 twitter_id_to_search = twitter_id_from_link_to_voter
-                twitter_link_to_organization_twitter_id_source_text = "FROM_TWITTER_LINK_TO_VOTER"
+                twitter_link_to_organization_twitter_id_source_text = "FROM TWITTER_LINK_TO_VOTER"
             else:
                 twitter_id_to_search = one_linked_voter.twitter_id
-                twitter_link_to_organization_twitter_id_source_text = "FROM_VOTER_RECORD"
+                twitter_link_to_organization_twitter_id_source_text = "FROM VOTER RECORD"
 
             if positive_value_exists(twitter_id_to_search):
                 twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
@@ -838,6 +861,46 @@ def data_cleanup_voter_list_analysis_view(request):
                         twitter_link_to_organization_twitter_id_source_text
         except TwitterLinkToOrganization.DoesNotExist:
             pass
+
+        # Do any other voters have this Facebook data? If not, we can create a FacebookLinkToVoter entry.
+        duplicate_facebook_data_found = False
+        voter_raw_filters = []
+        if positive_value_exists(one_linked_voter.facebook_id):
+            new_voter_filter = Q(facebook_id=one_linked_voter.facebook_id)
+            voter_raw_filters.append(new_voter_filter)
+
+        if len(voter_raw_filters):
+            final_voter_filters = voter_raw_filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in voter_raw_filters:
+                final_voter_filters |= item
+
+            duplicate_facebook_data_voter_list = Voter.objects.all()
+            duplicate_facebook_data_voter_list = duplicate_facebook_data_voter_list.filter(final_voter_filters)
+            duplicate_facebook_data_voter_list = duplicate_facebook_data_voter_list.exclude(
+                we_vote_id__iexact=one_linked_voter.we_vote_id)
+            duplicate_facebook_data_found = positive_value_exists(len(duplicate_facebook_data_voter_list))
+            one_linked_voter.duplicate_facebook_data_found = duplicate_facebook_data_found
+
+        if facebook_id_from_link_to_voter or duplicate_facebook_data_found:
+            # Do not offer the create_facebook_link
+            pass
+        else:
+            if positive_value_exists(one_linked_voter.facebook_id):
+                if create_facebook_link_to_voter:
+                    # If here, we want to create a FacebookLinkToVoter
+                    create_results = facebook_manager.create_facebook_link_to_voter(one_linked_voter.facebook_id,
+                                                                                    one_linked_voter.we_vote_id)
+                    if positive_value_exists(create_results['facebook_link_to_voter_saved']):
+                        create_facebook_link_to_voter_added += 1
+                        facebook_link_to_voter = create_results['facebook_link_to_voter']
+                        if positive_value_exists(facebook_link_to_voter.facebook_user_id):
+                            one_linked_voter.facebook_id_from_link_to_voter = facebook_link_to_voter.facebook_user_id
+                    else:
+                        create_facebook_link_to_voter_not_added += 1
+                else:
+                    create_facebook_link_to_voter_possible += 1
 
         # Do any other voters have this Twitter data? If not, we can create a TwitterLinkToVoter entry.
         duplicate_twitter_data_found = False
@@ -890,6 +953,7 @@ def data_cleanup_voter_list_analysis_view(request):
 
         one_linked_voter.links_to_other_organizations = \
             find_organizations_referenced_in_positions_for_this_voter(one_linked_voter)
+        one_linked_voter.positions_count = fetch_positions_count_for_this_voter(one_linked_voter)
 
         email_address_list = EmailAddress.objects.all()
         email_address_list = email_address_list.filter(voter_we_vote_id__iexact=one_linked_voter.we_vote_id)
