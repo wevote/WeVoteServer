@@ -948,8 +948,7 @@ def data_cleanup_voter_list_analysis_view(request):
                             # We reach out for the twitter_screen_name
                             one_linked_voter.twitter_screen_name_from_link_to_voter = \
                                 twitter_link_to_voter.fetch_twitter_handle_locally_or_remotely()
-                            one_linked_voter.twitter_link_to_organization_twitter_id_source_text += \
-                                " JUST ALTERED"
+                            one_linked_voter.twitter_link_to_organization_twitter_id_source_text = " JUST ALTERED"
                     else:
                         create_twitter_link_to_voter_not_added += 1
                 else:
