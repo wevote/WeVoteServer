@@ -50,7 +50,7 @@ class OrganizationManager(models.Manager):
             organization = Organization
         return organization
 
-    def create_organization(self, organization_name, organization_website, organization_twitter_handle,
+    def create_organization(self, organization_name, organization_website='', organization_twitter_handle='',
                             organization_email='', organization_facebook='', organization_image=''):
         try:
             organization = self.create(organization_name=organization_name,
@@ -61,15 +61,18 @@ class OrganizationManager(models.Manager):
                                        organization_image=organization_image)
             status = "CREATE_ORGANIZATION_SUCCESSFUL"
             success = True
+            organization_created = True
         except Exception as e:
             handle_record_not_saved_exception(e, logger=logger)
             organization = Organization
             status = "CREATE_ORGANIZATION_FAILED"
             success = False
+            organization_created = False
         results = {
-            'success':      success,
-            'status':       status,
-            'organization': organization,
+            'success':              success,
+            'status':               status,
+            'organization':         organization,
+            'organization_created': organization_created,
         }
         return results
 
@@ -82,7 +85,15 @@ class OrganizationManager(models.Manager):
     def retrieve_organization_from_vote_smart_id(self, vote_smart_id):
         return self.retrieve_organization(0, '', vote_smart_id)
 
-    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None):
+    def retrieve_organization_from_twitter_user_id_old(self, twitter_user_id):
+        """
+        We will phase this out
+        :param twitter_user_id:
+        :return:
+        """
+        return self.retrieve_organization(0, '', '', twitter_user_id)
+
+    def retrieve_organization(self, organization_id, we_vote_id=None, vote_smart_id=None, twitter_user_id=None):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
@@ -105,6 +116,11 @@ class OrganizationManager(models.Manager):
                 organization_on_stage = Organization.objects.get(vote_smart_id=vote_smart_id)
                 organization_on_stage_id = organization_on_stage.id
                 status = "ORGANIZATION_FOUND_WITH_VOTE_SMART_ID"
+            elif positive_value_exists(twitter_user_id):
+                status = "ERROR_RETRIEVING_ORGANIZATION_WITH_TWITTER_ID"
+                organization_on_stage = Organization.objects.get(twitter_user_id=twitter_user_id)
+                organization_on_stage_id = organization_on_stage.id
+                status = "ORGANIZATION_FOUND_WITH_TWITTER_ID"
         except Organization.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger)
             error_result = True

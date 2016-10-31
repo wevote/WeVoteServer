@@ -15,9 +15,9 @@
 {% if voter_list %}
     <table border="1" cellpadding="10">
         <tr>
+            <td></td>
             <td>ID</td>
             <td>We Vote ID</td>
-            <td>Who</td>
             <td>You</td>
             <td>Where</td>
             <td>FB?</td>
@@ -29,14 +29,13 @@
         </tr>
     {% for voter in voter_list %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td>{{ voter.id }}</td>
             <td>
+                {{ voter.get_full_name|default_if_none:"" }}
                 <a href="{% url 'voter:voter_edit' voter.id %}">
                     {{ voter.we_vote_id }}
                 </a>
-            </td>
-            <td>
-            {% if voter.first_name %}{{ voter.first_name }} {% endif %}{% if voter.last_name %}{{ voter.last_name }}{% endif %}
             </td>
             <!-- Is this you? //-->
             <td>

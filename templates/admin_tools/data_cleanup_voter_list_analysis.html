@@ -20,8 +20,6 @@
             <td>ID</td>
             <td>We Vote ID</td>
             <td>You</td>
-            <td>Where</td>
-            <td>FB?</td>
             <td>Voter Table</td>
             <td>FacebookLinkToVoter</td>
             <td>TwitterLinkToVoter</td>
@@ -42,18 +40,12 @@
                 {{ voter.get_full_name|default_if_none:"" }}
                 <a href="{% url 'voter:voter_edit' voter.id %}" target="_blank">
                     {{ voter.we_vote_id }}
-                </a>
+                </a><br />
+                {{ voter.text_for_map_search|default_if_none:"" }}
             </td>
             <!-- Is this you? //-->
             <td>
             {% if voter.id == voter_id_signed_in %}*ME*{% else %}{% endif %}
-            </td>
-            <td>
-                &nbsp;
-            </td>
-            <!-- Facebook? //-->
-            <td>
-            {% if voter.fb_username %}Y{% else %}{% endif %}
             </td>
             <!-- Voter table data: Twitter? Facebook? //-->
             <td>

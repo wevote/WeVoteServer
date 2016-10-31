@@ -1050,8 +1050,8 @@ class PositionListManager(models.Model):
 
     def retrieve_all_positions_for_organization(self, organization_id, organization_we_vote_id,
                                                 stance_we_are_looking_for, friends_vs_public,
-                                                filter_for_voter, filter_out_voter, voter_device_id,
-                                                google_civic_election_id, state_code):
+                                                filter_for_voter=False, filter_out_voter=False, voter_device_id='',
+                                                google_civic_election_id=0, state_code=''):
         """
         Return a position list with all of the organization's positions.
         Incoming filters include: stance_we_are_looking_for, friends_vs_public, filter_for_voter, filter_out_voter,
@@ -1163,7 +1163,6 @@ class PositionListManager(models.Model):
                     voter = results['voter']
                     current_voter_we_vote_id = voter.we_vote_id
 
-                voter_manager = VoterManager()
                 # We need organization_we_vote_id, so look it up if only organization_id was passed in
                 if not organization_we_vote_id:
                     organization_manager = OrganizationManager()

@@ -496,25 +496,21 @@ def voter_edit_view(request, voter_id):
                     organization_info_saved = False
                     organization_info_not_saved = False
                     # Update the voter information
-                    if not one_public_position.voter_id \
-                            or not positive_value_exists(one_public_position.voter_we_vote_id):
-                        try:
-                            one_public_position.voter_id = voter_on_stage.id
-                            one_public_position.voter_we_vote_id = voter_on_stage.we_vote_id
-                            one_public_position.save()
-                            voter_info_saved = True
-                        except Exception as e:
-                            voter_info_not_saved = True
+                    try:
+                        one_public_position.voter_id = voter_on_stage.id
+                        one_public_position.voter_we_vote_id = voter_on_stage.we_vote_id
+                        one_public_position.save()
+                        voter_info_saved = True
+                    except Exception as e:
+                        voter_info_not_saved = True
                     # Update the organization information
-                    if not one_public_position.organization_id \
-                            or not positive_value_exists(one_public_position.organization_we_vote_id):
-                        try:
-                            one_public_position.organization_id = linked_organization_id
-                            one_public_position.organization_we_vote_id = voter_on_stage.linked_organization_we_vote_id
-                            one_public_position.save()
-                            organization_info_saved = True
-                        except Exception as e:
-                            organization_info_not_saved = True
+                    try:
+                        one_public_position.organization_id = linked_organization_id
+                        one_public_position.organization_we_vote_id = voter_on_stage.linked_organization_we_vote_id
+                        one_public_position.save()
+                        organization_info_saved = True
+                    except Exception as e:
+                        organization_info_not_saved = True
 
                     if voter_info_saved or organization_info_saved:
                         positions_cross_linked += 1
@@ -527,26 +523,21 @@ def voter_edit_view(request, voter_id):
                     organization_info_saved = False
                     organization_info_not_saved = False
                     # Update the voter information
-                    if not one_position_for_friends.voter_id \
-                            or not positive_value_exists(one_position_for_friends.voter_we_vote_id):
-                        try:
-                            one_position_for_friends.voter_id = voter_on_stage.id
-                            one_position_for_friends.voter_we_vote_id = voter_on_stage.we_vote_id
-                            one_position_for_friends.save()
-                            voter_info_saved = True
-                        except Exception as e:
-                            voter_info_not_saved = True
+                    try:
+                        one_position_for_friends.voter_id = voter_on_stage.id
+                        one_position_for_friends.voter_we_vote_id = voter_on_stage.we_vote_id
+                        one_position_for_friends.save()
+                        voter_info_saved = True
+                    except Exception as e:
+                        voter_info_not_saved = True
                     # Update the organization information
-                    if not one_position_for_friends.organization_id \
-                            or not positive_value_exists(one_position_for_friends.organization_we_vote_id):
-                        try:
-                            one_position_for_friends.organization_id = linked_organization_id
-                            one_position_for_friends.organization_we_vote_id = \
-                                voter_on_stage.linked_organization_we_vote_id
-                            one_position_for_friends.save()
-                            organization_info_saved = True
-                        except Exception as e:
-                            organization_info_not_saved = True
+                    try:
+                        one_position_for_friends.organization_id = linked_organization_id
+                        one_position_for_friends.organization_we_vote_id = voter_on_stage.linked_organization_we_vote_id
+                        one_position_for_friends.save()
+                        organization_info_saved = True
+                    except Exception as e:
+                        organization_info_not_saved = True
 
                     if voter_info_saved or organization_info_saved:
                         positions_cross_linked += 1

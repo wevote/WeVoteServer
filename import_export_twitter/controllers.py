@@ -8,7 +8,8 @@ from .functions import retrieve_twitter_user_info
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
 from import_export_twitter.models import TwitterAuthManager
-from organization.controllers import update_social_media_statistics_in_other_tables
+from organization.controllers import move_organization_to_another_complete, \
+    update_social_media_statistics_in_other_tables
 from organization.models import Organization, OrganizationManager
 import re
 from socket import timeout
@@ -1016,7 +1017,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     return json_data
 
 
-def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwitterSaveToCurrentAccount  # TODO DALE
+def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwitterSaveToCurrentAccount
     """
 
     :param voter_device_id:
@@ -1051,10 +1052,10 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     voter = results['voter']
 
     twitter_user_manager = TwitterUserManager()
-    twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter(voter.we_vote_id)
+    twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter(0, voter.we_vote_id)
     if twitter_results['twitter_link_to_voter_found']:
-        # We are surprised to be here because when we looked in YYY function, we didn't find a Twitter account
-        # linked to this voter
+        # We are surprised to be here because we try to only call this routine from the WebApp if the Twitter Account
+        #  isn't currently linked to any voter
         error_results = {
             'status':                   "TWITTER_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
             'success':                  False,
@@ -1067,7 +1068,7 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     auth_response_results = twitter_auth_manager.retrieve_twitter_auth_response(voter_device_id)
     if not auth_response_results['twitter_auth_response_found']:
         error_results = {
-            'status':                   "TWITTER_OWNER_VOTER_FOUND_WHEN_NOT_EXPECTED",
+            'status':                   "TWITTER_AUTH_RESPONSE_COULD_NOT_BE_FOUND",
             'success':                  False,
             'voter_device_id':          voter_device_id,
             'twitter_account_created':  twitter_account_created,
@@ -1075,6 +1076,20 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
         return error_results
 
     twitter_auth_response = auth_response_results['twitter_auth_response']
+
+    # Make sure this Twitter id isn't linked to another voter
+    twitter_collision_results = twitter_user_manager.retrieve_twitter_link_to_voter(twitter_auth_response.twitter_id)
+    if twitter_collision_results['twitter_link_to_voter_found']:
+        # If we are here, then there is in fact a twitter_link_to_voter tied to another voter account
+        # We are surprised to be here because we try to only call this routine from the WebApp if the Twitter Account
+        #  isn't currently linked to any voter
+        error_results = {
+            'status':                   "TWITTER_OWNER_VOTER_FOUND_FOR_ANOTHER_VOTER_WHEN_NOT_EXPECTED",
+            'success':                  False,
+            'voter_device_id':          voter_device_id,
+            'twitter_account_created':  twitter_account_created,
+        }
+        return error_results
 
     link_results = twitter_user_manager.create_twitter_link_to_voter(twitter_auth_response.twitter_id,
                                                                      voter.we_vote_id)
@@ -1097,7 +1112,80 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
     success = results['success']
     voter = results['voter']
 
-    # TODO DALE UPDATE organization positions to add voter_we_vote_id
+    # Now find out if there is an organization already linked to this Twitter account
+    twitter_results = twitter_user_manager.retrieve_twitter_link_to_organization(voter.we_vote_id)
+    if twitter_results['twitter_link_to_organization_found']:
+        twitter_link_to_organization = twitter_results['twitter_link_to_organization']
+
+        # If here, we know that this organization is not linked to another voter, so we can update the
+        #  voter to connect to this organization
+        # Is this voter already linked to another organization?
+        if voter.linked_organization_we_vote_id:
+            # We need to merge the twitter_link_to_organization.organization_we_vote_id with
+            #  voter.linked_organization_we_vote_id
+            if positive_value_exists(twitter_link_to_organization.organization_we_vote_id) and \
+                    positive_value_exists(voter.linked_organization_we_vote_id) and \
+                    twitter_link_to_organization.organization_we_vote_id != voter.linked_organization_we_vote_id:
+                # We are here, so we know that we found a twitter_link_to_organization, but it doesn't match
+                # the org linked to this voter. So we want to merge these two organizations.
+                twitter_link_to_organization_organization_id = 0  # We calculate this in move_organization...
+                voter_linked_to_organization_organization_id = 0  # We calculate this in move_organization...
+                move_organization_to_another_complete_results = move_organization_to_another_complete(
+                    twitter_link_to_organization_organization_id,
+                    twitter_link_to_organization.organization_we_vote_id,
+                    voter_linked_to_organization_organization_id,
+                    voter.linked_organization_we_vote_id,
+                    voter.id, voter.we_vote_id
+                )
+                status += " " + move_organization_to_another_complete_results['status']
+                # We do not need to change voter.linked_organization_we_vote_id since we merged into that organization
+        else:
+            # Connect voter.linked_organization_we_vote_id with twitter_link_to_organization.organization_we_vote_id
+            try:
+                voter.linked_organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
+                voter.save()
+            except Exception as e:
+                success = False
+                status += "VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_NOT_UPDATED "
+    else:
+        # If here, we know that a twitter_link_to_organization does not exist
+        # 1) Try to find existing organization with twitter_user_id
+        organization_manager = OrganizationManager()
+        organization_from_twitter_id_old_results = organization_manager.retrieve_organization_from_twitter_user_id_old(
+            twitter_auth_response.twitter_id
+        )
+        new_organization_ready = False
+        if organization_from_twitter_id_old_results['organization_found']:
+            new_organization = organization_from_twitter_id_old_results['organization']
+            new_organization_ready = True
+        else:
+            # 2) Create organization with twitter_user_id
+            organization_name = voter.get_full_name()
+            organization_website = ""
+            organization_twitter_handle = ""
+            create_results = organization_manager.create_organization(
+                organization_name, organization_website, organization_twitter_handle)
+            if create_results['organization_created']:
+                # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
+                new_organization = create_results['organization']
+                new_organization_ready = True
+            else:
+                new_organization = Organization()
+                status += "NEW_ORGANIZATION_COULD_NOT_BE_CREATED "
+
+        if new_organization_ready:
+            try:
+                voter.linked_organization_we_vote_id = new_organization.organization_we_vote_id
+                voter.save()
+                # Create TwitterLinkToOrganization
+                results = twitter_user_manager.create_twitter_link_to_organization(
+                    twitter_auth_response.twitter_id, voter.linked_organization_we_vote_id)
+                if results['twitter_link_to_organization_saved']:
+                    status += "TwitterLinkToOrganization_CREATED_AFTER_ORGANIZATION_CREATE "
+                else:
+                    status += "TwitterLinkToOrganization_NOT_CREATED_AFTER_ORGANIZATION_CREATE "
+            except Exception as e:
+                status += "UNABLE_TO_UPDATE_VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_OR_CREATE_TWITTER_LINK_TO_ORG "
 
     results = {
         'success':                  success,

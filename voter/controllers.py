@@ -14,10 +14,10 @@ from friend.models import FriendManager
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.models import TwitterAuthManager
 import json
-from organization.controllers import move_organization_data_to_another_organization
+from organization.controllers import move_organization_to_another_complete
 from organization.models import OrganizationManager
 from position.controllers import move_positions_to_another_voter
-from twitter.models import TwitterUserManager
+from twitter.models import TwitterLinkToVoter, TwitterUserManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
 
@@ -60,8 +60,7 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
             success = True
             status += "FROM_VOTER_FACEBOOK_LINK_MOVED "
         except Exception as e:
-            # Fail silently
-            pass
+            status += "FROM_VOTER_FACEBOOK_LINK_COULD_NOT_BE_MOVED "
     elif positive_value_exists(from_voter.facebook_id):
         create_results = facebook_manager.create_facebook_link_to_voter(from_voter.facebook_id, to_voter.we_vote_id)
         status += " " + create_results['status']
@@ -91,8 +90,7 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
             from_voter.save()
             status += "FROM_VOTER_FACEBOOK_DATA_REMOVED "
         except Exception as e:
-            # Fail silently
-            status += "FROM_VOTER_FACEBOOK_DATA_NOT_REMOVED "
+            status += "FROM_VOTER_FACEBOOK_DATA_COULD_NOT_BE_REMOVED "
 
         try:
             # Now move values to new entry and save
@@ -103,8 +101,7 @@ def move_facebook_info_to_another_voter(from_voter, to_voter):
             to_voter.save()
             status += "TO_VOTER_FACEBOOK_DATA_SAVED "
         except Exception as e:
-            # Fail silently
-            status += "TO_VOTER_FACEBOOK_DATA_NOT_SAVED "
+            status += "TO_VOTER_FACEBOOK_DATA_COULD_NOT_BE_SAVED "
 
     else:
         success = True
@@ -125,7 +122,7 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
 
     if not hasattr(from_voter, "we_vote_id") or not positive_value_exists(from_voter.we_vote_id) \
             or not hasattr(to_voter, "we_vote_id") or not positive_value_exists(to_voter.we_vote_id):
-        status += "MOVE_TWITTER_INFO_MISSING_FROM_OR_TO_VOTER_ID "
+        status += "MOVE_TWITTER_INFO_MISSING_FROM_OR_TO_VOTER_WE_VOTE_ID "
         results = {
             'status': status,
             'success': success,
@@ -140,11 +137,14 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
     from_voter_twitter_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
         from_voter.we_vote_id)
 
-    # Move facebook_link_to_voter
+    # Move twitter_link_to_voter
     if to_voter_twitter_results['twitter_link_to_voter_found']:
-        # Don't try to move from the from_voter
-        success = True
-        status += "TO_VOTER_ALREADY_HAS_TWITTER_LINK "
+        if from_voter_twitter_results['twitter_link_to_voter_found']:
+            success = False
+            status += "FROM_AND_TO_VOTER_BOTH_HAVE_TWITTER_LINKS "
+        else:
+            success = True
+            status += "TO_VOTER_ALREADY_HAS_TWITTER_LINK "
     elif from_voter_twitter_results['twitter_link_to_voter_found']:
         from_voter_twitter_link = from_voter_twitter_results['twitter_link_to_voter']
         try:
@@ -156,9 +156,17 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
             # Fail silently
             status += "FROM_VOTER_TWITTER_LINK_NOT_MOVED "
     elif positive_value_exists(from_voter.twitter_id):
-        create_results = twitter_user_manager.create_twitter_link_to_voter(from_voter.twitter_id, to_voter.we_vote_id)
-        status += " " + create_results['status']
-        # TODO DALE Remove voter.twitter_id value
+        # If this is the only voter with twitter_id, heal the data and create a TwitterLinkToVoter entry
+        voter_manager = VoterManager()
+        duplicate_twitter_results = voter_manager.retrieve_voter_by_twitter_id_old(from_voter.twitter_id)
+        if duplicate_twitter_results['voter_found']:
+            # If here, we know that this was the only voter with this twitter_id
+            test_duplicate_voter = duplicate_twitter_results['voter']
+            if test_duplicate_voter.we_vote_id == from_voter.we_vote_id:
+                create_results = twitter_user_manager.create_twitter_link_to_voter(from_voter.twitter_id,
+                                                                                   to_voter.we_vote_id)
+                status += " " + create_results['status']
+                # TODO DALE Remove voter.twitter_id value
 
     # Transfer data in voter records
     temp_twitter_id = 0
@@ -171,6 +179,7 @@ def move_twitter_info_to_another_voter(from_voter, to_voter):
         status += "TO_VOTER_ALREADY_HAS_TWITTER_ID "
     elif positive_value_exists(from_voter.twitter_id):
         # Remove info from the from_voter and then move Twitter info to the to_voter
+        # TODO DALE When we stop using voter.twitter_id altogether, we can remove this code
         try:
             # Copy values
             temp_twitter_id = from_voter.twitter_id
@@ -448,6 +457,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     to_voter_id = 0
     to_voter_we_vote_id = ""
     email_manager = EmailManager()
+
+    # ############# EMAIL SIGN IN #####################################
     if positive_value_exists(email_secret_key):
         email_results = email_manager.retrieve_email_address_object_from_secret_key(email_secret_key)
         if email_results['email_address_object_found']:
@@ -491,6 +502,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         to_voter_id = email_owner_voter.id
         to_voter_we_vote_id = email_owner_voter.we_vote_id
         new_owner_voter = email_owner_voter
+
+    # ############# FACEBOOK SIGN IN #####################################
     elif positive_value_exists(facebook_secret_key):
         facebook_manager = FacebookManager()
         facebook_results = facebook_manager.retrieve_facebook_link_to_voter_from_facebook_secret_key(
@@ -547,38 +560,46 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         status += " " + save_facebook_results['status']
         facebook_owner_voter = save_facebook_results['voter']
 
-        # ##### Make the facebook_email the primary email for facebook_owner_voter TODO DALE
-        # Does facebook_owner_voter already have a primary email? If not, update it
-        if not facebook_owner_voter.email_ownership_is_verified:
-            if positive_value_exists(facebook_auth_response.facebook_email):
-                # Check to make sure there isn't an account already using the facebook_email
-                temp_voter_we_vote_id = ""
-                email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-                    temp_voter_we_vote_id, facebook_auth_response.facebook_email)
-                if not email_results['email_address_object_found']:
-                    # See if an unverified email exists for this voter
-                    email_address_object_we_vote_id = ""
-                    email_retrieve_results = email_manager.retrieve_email_address_object(
-                        facebook_auth_response.facebook_email, email_address_object_we_vote_id,
-                        facebook_owner_voter.we_vote_id)
-                    if email_retrieve_results['email_address_object_found']:
-                        email_address_object = email_retrieve_results['email_address_object']
-                        email_address_object = email_manager.update_email_address_object_to_be_verified(
-                            email_address_object)
-                    else:
-                        email_ownership_is_verified = True
-                        email_create_results = email_manager.create_email_address(
-                            facebook_auth_response.facebook_email, facebook_owner_voter.we_vote_id,
-                            email_ownership_is_verified)
-                        if email_create_results['email_address_object_saved']:
-                            email_address_object = email_create_results['email_address_object']
-                    try:
-                        # Attach the email_address_object to facebook_owner_voter
-                        voter_manager.update_voter_email_ownership_verified(facebook_owner_voter,
-                                                                            email_address_object)
-                    except Exception as e:
-                        # Fail silently
-                        pass
+        # ##### Store the facebook_email as a verified email for facebook_owner_voter
+        if positive_value_exists(facebook_auth_response.facebook_email):
+            # Check to make sure there isn't an account already using the facebook_email
+            facebook_email_address_verified = False
+            temp_voter_we_vote_id = ""
+            email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+                temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+            if email_results['email_address_object_found']:
+                # If here, then it turns out the facebook_email is verified, and we can
+                #   update_voter_email_ownership_verified if a verified email is already stored in the voter record
+                email_address_object = email_results['email_address_object']
+                facebook_email_address_verified = True
+            else:
+                # See if an unverified email exists for this voter
+                email_address_object_we_vote_id = ""
+                email_retrieve_results = email_manager.retrieve_email_address_object(
+                    facebook_auth_response.facebook_email, email_address_object_we_vote_id,
+                    facebook_owner_voter.we_vote_id)
+                if email_retrieve_results['email_address_object_found']:
+                    email_address_object = email_retrieve_results['email_address_object']
+                    email_address_object = email_manager.update_email_address_object_as_verified(
+                        email_address_object)
+                    facebook_email_address_verified = True
+                else:
+                    email_ownership_is_verified = True
+                    email_create_results = email_manager.create_email_address(
+                        facebook_auth_response.facebook_email, facebook_owner_voter.we_vote_id,
+                        email_ownership_is_verified)
+                    if email_create_results['email_address_object_saved']:
+                        email_address_object = email_create_results['email_address_object']
+                        facebook_email_address_verified = True
+
+            # Does facebook_owner_voter already have a primary email? If not, update it
+            if not facebook_owner_voter.email_ownership_is_verified and facebook_email_address_verified:
+                try:
+                    # Attach the email_address_object to facebook_owner_voter
+                    voter_manager.update_voter_email_ownership_verified(facebook_owner_voter,
+                                                                        email_address_object)
+                except Exception as e:
+                    status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY "
 
         # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
         # We are going to make the email_owner_voter the new master
@@ -587,8 +608,11 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         to_voter_id = facebook_owner_voter.id
         to_voter_we_vote_id = facebook_owner_voter.we_vote_id
         new_owner_voter = facebook_owner_voter
+
+    # ############# TWITTER SIGN IN #####################################
     elif positive_value_exists(twitter_secret_key):
         twitter_user_manager = TwitterUserManager()
+        twitter_link_to_voter = TwitterLinkToVoter()
         twitter_user_results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_secret_key(
             twitter_secret_key)
         if twitter_user_results['twitter_link_to_voter_found']:
@@ -601,6 +625,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 twitter_owner_voter = twitter_owner_voter_results['voter']
 
         if not twitter_owner_voter_found:
+            # Since we are in the "voterMergeTwoAccounts" we don't want to try to create
+            #  another TwitterLinkToVoter entry
             error_results = {
                 'status': "TWITTER_OWNER_VOTER_NOT_FOUND",
                 'success': False,
@@ -622,12 +648,11 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             # If here, we probably have some bad data and need to update the voter record to reflect that
             #  it is signed in with Twitter
             if auth_response_results['twitter_auth_response_found']:
-                # Get the recent twitter_id
+                # Save the Twitter Id in the voter record
                 voter_manager.update_voter_with_twitter_link_verified(
                     twitter_owner_voter,
                     twitter_auth_response.twitter_id)
                 # TODO DALE Remove voter.twitter_id value
-
             else:
                 error_results = {
                     'status': "CURRENT_VOTER_AND_TWITTER_OWNER_VOTER_ARE_SAME",
@@ -646,6 +671,133 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         status += " " + save_twitter_results['status']
         twitter_owner_voter = save_twitter_results['voter']
 
+        # Make sure we have a twitter_link_to_organization entry for the destination voter
+        if positive_value_exists(twitter_owner_voter.linked_organization_we_vote_id):
+            twitter_link_to_organization_results = \
+                twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+                    twitter_owner_voter.linked_organization_we_vote_id)
+            # Do we have an existing organization linked to this twitter_id?
+            if twitter_link_to_organization_results['twitter_link_to_organization_found']:
+                twitter_link_to_organization = twitter_link_to_organization_results['twitter_link_to_organization']
+                # Make sure the twitter_id in twitter_link_to_voter matches the one in twitter_link_to_organization
+                if twitter_link_to_voter.twitter_id == twitter_link_to_organization.twitter_id:
+                    # We are happy
+                    pass
+                else:
+                    # We are here, so we know that we found a twitter_link_to_organization, but it doesn't match
+                    # the org linked to this voter. So we want to merge these two organizations.
+                    # Since linked_organization_we_vote_id must be unique, and this organization came from
+                    #  that value, we don't have to look to see if any other voters "claim" this organization.
+                    # Merge twitter_owner_voter.linked_organization_we_vote_id
+                    #  with twitter_link_to_organization.organization_we_vote_id
+                    # MERGE Positions
+                    if positive_value_exists(twitter_owner_voter.linked_organization_we_vote_id) and \
+                            positive_value_exists(twitter_link_to_organization.organization_we_vote_id) and \
+                            twitter_owner_voter.linked_organization_we_vote_id != \
+                            twitter_link_to_organization.organization_we_vote_id:
+                        twitter_link_to_organization_organization_id = 0  # We calculate this in move_organization...
+                        twitter_owner_voter_linked_organization_id = 0  # We calculate this in move_organization...
+                        move_organization_to_another_complete_results = move_organization_to_another_complete(
+                            twitter_owner_voter_linked_organization_id,
+                            twitter_owner_voter.linked_organization_we_vote_id,
+                            twitter_link_to_organization_organization_id,
+                            twitter_link_to_organization.organization_we_vote_id,
+                            twitter_owner_voter.id, twitter_owner_voter.we_vote_id
+                        )
+                        status += " " + move_organization_to_another_complete_results['status']
+                        if move_organization_to_another_complete_results['success']:
+                            try:
+                                twitter_owner_voter.linked_organization_we_vote_id = \
+                                    twitter_link_to_organization.organization_we_vote_id
+                                twitter_owner_voter.save()
+                            except Exception as e:
+                                status += "UNABLE_TO_UPDATE_LINKED_ORGANIZATION_WE_VOTE_ID "
+            else:
+                # If we don't have an organization linked to this twitter_id...
+                # Check to see if there is a LinkToOrganization entry that matches this twitter_id
+                twitter_link_to_organization_results = \
+                    twitter_user_manager.retrieve_twitter_link_to_organization(twitter_link_to_voter.twitter_id)
+                # Do we have an existing organization linked to this twitter_id?
+                if twitter_link_to_organization_results['twitter_link_to_organization_found']:
+                    twitter_link_to_organization = twitter_link_to_organization_results['twitter_link_to_organization']
+                    # Because we are here, we know that the twitter_owner_voter.linked_organization_we_vote_id
+                    # doesn't have a TwitterLinkToOrganization entry that matched the organization_we_vote_id.
+                    # But we did find another organization linked to that Twitter id, so we need to merge
+                    # Merge twitter_owner_voter.linked_organization_we_vote_id
+                    #  with twitter_link_to_organization.organization_we_vote_id
+                    #  and make sure twitter_owner_voter.linked_organization_we_vote_id is correct at the end
+                    # MERGE Positions
+                    if positive_value_exists(twitter_owner_voter.linked_organization_we_vote_id) and \
+                            positive_value_exists(twitter_link_to_organization.organization_we_vote_id) and \
+                            twitter_owner_voter.linked_organization_we_vote_id != \
+                            twitter_link_to_organization.organization_we_vote_id:
+                        twitter_link_to_organization_organization_id = 0  # We calculate this in move_organization...
+                        twitter_owner_voter_linked_organization_id = 0  # We calculate this in move_organization...
+                        move_organization_to_another_complete_results = move_organization_to_another_complete(
+                            twitter_owner_voter_linked_organization_id,
+                            twitter_owner_voter.linked_organization_we_vote_id,
+                            twitter_link_to_organization_organization_id,
+                            twitter_link_to_organization.organization_we_vote_id,
+                            twitter_owner_voter.id, twitter_owner_voter.we_vote_id
+                        )
+                        status += " " + move_organization_to_another_complete_results['status']
+                        if move_organization_to_another_complete_results['success']:
+                            try:
+                                twitter_owner_voter.linked_organization_we_vote_id = \
+                                    twitter_link_to_organization.organization_we_vote_id
+                                twitter_owner_voter.save()
+                            except Exception as e:
+                                status += "UNABLE_TO_UPDATE_LINKED_ORGANIZATION_WE_VOTE_ID "
+                else:
+                    # Create TwitterLinkToOrganization and for the org
+                    # in twitter_owner_voter.linked_organization_we_vote_id
+                    results = twitter_user_manager.create_twitter_link_to_organization(
+                        twitter_link_to_voter.twitter_id, twitter_owner_voter.linked_organization_we_vote_id)
+                    if results['twitter_link_to_organization_saved']:
+                        status += "TwitterLinkToOrganization_CREATED "
+                    else:
+                        status += "TwitterLinkToOrganization_NOT_CREATED "
+        else:
+            # In this branch, no need to merge organizations
+            # Check to see if TwitterLinkToOrganization entry exists that matches this twitter_id
+            twitter_link_to_organization_results = \
+                twitter_user_manager.retrieve_twitter_link_to_organization(twitter_link_to_voter.twitter_id)
+            # Do we have an existing organization linked to this twitter_id?
+            if twitter_link_to_organization_results['twitter_link_to_organization_found']:
+                twitter_link_to_organization = twitter_link_to_organization_results['twitter_link_to_organization']
+                try:
+                    twitter_owner_voter.linked_organization_we_vote_id = \
+                        twitter_link_to_organization.organization_we_vote_id
+                    twitter_owner_voter.save()
+                except Exception as e:
+                    status += "UNABLE_TO_TWITTER_LINK_ORGANIZATION_TO_VOTER "
+            else:
+                # Create new organization
+                organization_manager = OrganizationManager()
+                organization_name = twitter_owner_voter.get_full_name()
+                organization_website = ""
+                organization_twitter_handle = ""
+                create_results = organization_manager.create_organization(
+                    organization_name, organization_website, organization_twitter_handle)
+                if create_results['organization_created']:
+                    # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
+                    organization = create_results['organization']
+                    try:
+                        twitter_owner_voter.linked_organization_we_vote_id = organization.we_vote_id
+                        twitter_owner_voter.save()
+                        # Create TwitterLinkToOrganization
+                        results = twitter_user_manager.create_twitter_link_to_organization(
+                            twitter_link_to_voter.twitter_id, twitter_owner_voter.linked_organization_we_vote_id)
+                        if results['twitter_link_to_organization_saved']:
+                            status += "TwitterLinkToOrganization_CREATED_AFTER_ORGANIZATION_CREATE "
+                        else:
+                            status += "TwitterLinkToOrganization_NOT_CREATED_AFTER_ORGANIZATION_CREATE "
+                    except Exception as e:
+                        status += "UNABLE_TO_LINK_NEW_ORGANIZATION_TO_VOTER "
+
+        # Make sure we end up with the organization referred to in twitter_link_to_organization ends up as
+        # voter.linked_organization_we_vote_id
+
         # Now we have voter (from voter_device_id) and email_owner_voter (from email_secret_key)
         # We are going to make the email_owner_voter the new master
         from_voter_id = voter.id
@@ -653,6 +805,8 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         to_voter_id = twitter_owner_voter.id
         to_voter_we_vote_id = twitter_owner_voter.we_vote_id
         new_owner_voter = twitter_owner_voter
+
+    # ############# INVITATION SIGN IN #####################################
     elif positive_value_exists(invitation_secret_key):
         friend_manager = FriendManager()
         for_merge_accounts = True
@@ -710,6 +864,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
         if from_linked_organization_results['organization_found']:
             from_linked_organization = from_linked_organization_results['organization']
             from_voter_linked_organization_id = from_linked_organization.id
+
     to_voter_linked_organization_we_vote_id = new_owner_voter.linked_organization_we_vote_id
     to_voter_linked_organization_id = 0
     if positive_value_exists(to_voter_linked_organization_we_vote_id):
@@ -729,29 +884,19 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     # Transfer positions from voter to new_owner_voter
     move_positions_results = move_positions_to_another_voter(
         from_voter_id, from_voter_we_vote_id,
-        to_voter_id, to_voter_we_vote_id, to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
+        to_voter_id, to_voter_we_vote_id,
+        to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
     status += " " + move_positions_results['status']
 
-    if from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
-        # If anyone is following the old voter's organization, move those followers to the new voter's organization
-        move_organization_followers_results = move_organization_followers_to_another_organization(
+    if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
+            positive_value_exists(to_voter_linked_organization_we_vote_id) and \
+            from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
+        move_organization_to_another_complete_results = move_organization_to_another_complete(
             from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
-            to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
-        status += " " + move_organization_followers_results['status']
-
-        # There might be some useful information in the from_voter's organization that needs to be moved
-        move_organization_results = move_organization_data_to_another_organization(
-            from_voter_linked_organization_we_vote_id, to_voter_linked_organization_we_vote_id)
-        status += " " + move_organization_results['status']
-
-        # Finally, delete the from_voter's organization
-        if move_organization_results['data_transfer_complete']:
-            from_organization = move_organization_results['from_organization']
-            try:
-                from_organization.delete()
-            except Exception as e:
-                # Fail silently
-                pass
+            to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id,
+            to_voter_id, to_voter_we_vote_id
+        )
+        status += " " + move_organization_to_another_complete_results['status']
 
     # Transfer friends from voter to new_owner_voter
     move_friends_results = move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
@@ -768,7 +913,6 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
             voter.linked_organization_we_vote_id = None
             voter.save()
             # All positions should have already been moved with move_positions_to_another_voter
-
         except Exception as e:
             # Fail silently
             pass

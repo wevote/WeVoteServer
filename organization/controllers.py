@@ -7,10 +7,12 @@ from config.base import get_environment_variable
 from django.contrib import messages
 from django.http import HttpResponse
 from exception.models import handle_record_not_found_exception
+from follow.controllers import move_follow_entries_to_another_voter, move_organization_followers_to_another_organization
 from follow.models import FollowOrganizationManager, FollowOrganizationList, FOLLOW_IGNORE, FOLLOWING, STOP_FOLLOWING
 from import_export_facebook.models import FacebookManager
 import json
 from organization.models import Organization
+from position.controllers import move_positions_to_another_organization, move_positions_to_another_voter
 import requests
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
@@ -163,6 +165,67 @@ def move_organization_data_to_another_organization(from_organization_we_vote_id,
         'from_organization': from_organization,
         'to_organization': to_organization,
         'data_transfer_complete': data_transfer_complete,
+    }
+    return results
+
+
+def move_organization_to_another_complete(from_organization_id, from_organization_we_vote_id,
+                                          to_organization_id, to_organization_we_vote_id,
+                                          to_voter_id, to_voter_we_vote_id):
+    status = ""
+    success = True
+
+    # Make sure we have both from_organization values
+    organization_manager = OrganizationManager()
+    if positive_value_exists(from_organization_id) and not positive_value_exists(from_organization_we_vote_id):
+        from_organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(from_organization_id)
+    elif positive_value_exists(from_organization_we_vote_id) and not positive_value_exists(from_organization_id):
+        from_organization_id = organization_manager.fetch_organization_id(from_organization_we_vote_id)
+
+    # Make sure we have both to_organization values
+    if positive_value_exists(to_organization_id) and not positive_value_exists(to_organization_we_vote_id):
+        to_organization_we_vote_id = organization_manager.fetch_we_vote_id_from_local_id(to_organization_id)
+    elif positive_value_exists(to_organization_we_vote_id) and not positive_value_exists(to_organization_id):
+        to_organization_id = organization_manager.fetch_organization_id(to_organization_we_vote_id)
+
+    # Make sure we have both to_voter values
+    voter_manager = VoterManager()
+    if positive_value_exists(to_voter_id) and not positive_value_exists(to_voter_we_vote_id):
+        to_voter_we_vote_id = voter_manager.fetch_we_vote_id_from_local_id(to_voter_id)
+    elif positive_value_exists(to_voter_we_vote_id) and not positive_value_exists(to_voter_id):
+        to_voter_id = voter_manager.fetch_local_id_from_we_vote_id(to_voter_we_vote_id)
+
+    # If anyone is following the old voter's organization, move those followers to the new voter's organization
+    move_organization_followers_results = move_organization_followers_to_another_organization(
+        from_organization_id, from_organization_we_vote_id,
+        to_organization_id, to_organization_we_vote_id)
+    status += " " + move_organization_followers_results['status']
+
+    # Transfer positions from "from" organization to the "to" organization
+    move_positions_to_another_org_results = move_positions_to_another_organization(
+        from_organization_id, from_organization_we_vote_id,
+        to_organization_id, to_organization_we_vote_id,
+        to_voter_id, to_voter_we_vote_id)
+    status += " " + move_positions_to_another_org_results['status']
+
+    # There might be some useful information in the from_voter's organization that needs to be moved
+    move_organization_results = move_organization_data_to_another_organization(
+        from_organization_we_vote_id, to_organization_we_vote_id)
+    status += " " + move_organization_results['status']
+
+    # Finally, delete the from_voter's organization
+    if move_organization_results['data_transfer_complete']:
+        from_organization = move_organization_results['from_organization']
+        try:
+            from_organization.delete()
+        except Exception as e:
+            status += "UNABLE_TO_DELETE_FROM_ORGANIZATION "
+
+    # We need to make sure to update voter.linked_organization_we_vote_id outside of this routine
+
+    results = {
+        'status': status,
+        'success': success,
     }
     return results
 
@@ -800,52 +863,69 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
         organization = save_results['organization']
         status = save_results['status']
 
-        # Now update the voter record with the organization_we_vote_id
-        if voter_found:
-            # Does this voter have the same Twitter handle as this organization? If so, link this organization to
-            #  this particular voter
-            twitter_user_manager = TwitterUserManager()
-            results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_handle(
-                organization.organization_twitter_handle)
-            if results['twitter_link_to_voter_found']:
-                twitter_link_to_voter = results['twitter_link_to_voter']
-                # Check to make sure another voter isn't hanging onto this organization_we_vote_id
-                # TODO DALE UPDATE linked_organization_we_vote_id
-                voter_manager.clear_out_collisions_for_linked_organization_we_vote_id(organization.we_vote_id)
-                try:
-                    voter.linked_organization_we_vote_id = organization.we_vote_id
-                    voter.save()
-
-                    # TODO DALE UPDATE linked_organization_we_vote_id
-                    # TODO DALE UPDATE positions to add voter_we_vote_id - Any position with
-                    # the organization_we_vote_id should get the voter_we_vote_id added,
-                    # and any position with the voter_we_vote_id should get the organization_we_vote_id added
-                except Exception as e:
-                    success = False
-                    status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_TWITTER "
-            else:
-                # Does the facebook_id for the voter and org match?
-                facebook_id_matches = positive_value_exists(voter.facebook_id) \
-                    and voter.facebook_id == organization.facebook_id
-
-                if facebook_id_matches:
-                    # Check to make sure another voter isn't hanging onto this organization_we_vote_id
-                    # TODO DALE UPDATE linked_organization_we_vote_id
-                    voter_manager.clear_out_collisions_for_linked_organization_we_vote_id(organization.we_vote_id)
-                    try:
-                        voter.linked_organization_we_vote_id = organization.we_vote_id
-                        voter.save()
-
-                        # TODO DALE UPDATE linked_organization_we_vote_id
-                        # TODO DALE UPDATE positions to add voter_we_vote_id - Any position with
-                        # the organization_we_vote_id should get the voter_we_vote_id added,
-                        # and any position with the voter_we_vote_id should get the organization_we_vote_id added
-                    except Exception as e:
-                        success = False
-                        status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_FACEBOOK "
-                # If not, then this is a volunteer or admin setting up an organization
+        # Create TwitterLinkToOrganization
+        twitter_user_manager = TwitterUserManager()
+        retrieve_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(
+            organization.twitter_user_id, organization.organization_twitter_handle)
+        if retrieve_results['twitter_user_found']:
+            twitter_user = retrieve_results['twitter_user']
+            if positive_value_exists(twitter_user.twitter_id):
+                link_to_organization_results = \
+                    twitter_user_manager.retrieve_twitter_link_to_organization(twitter_user.twitter_id)
+                if link_to_organization_results['twitter_link_to_organization_found']:
+                    # TwitterLinkToOrganization already exists
+                    pass
                 else:
-                    status += " DID_NOT_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID-VOTER_NOT_FOUND"
+                    # Create a TwitterLinkToOrganization entry
+                    twitter_user_manager.create_twitter_link_to_organization(twitter_user.twitter_id,
+                                                                             organization.we_vote_id)
+
+            # TODO DALE 2016-10-30 I am not sure we want this code here in this routine.
+            # # Now update the voter record with the organization_we_vote_id
+            # if voter_found:
+            #     # Does this voter have the same Twitter handle as this organization? If so, link this organization to
+            #     #  this particular voter
+            #     results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_handle(
+            #         organization.organization_twitter_handle)
+            #     if results['twitter_link_to_voter_found']:
+            #         twitter_link_to_voter = results['twitter_link_to_voter']
+            #         # Check to make sure another voter isn't hanging onto this organization_we_vote_id
+            #         # TODO DALE UPDATE linked_organization_we_vote_id
+            #         voter_manager.clear_out_collisions_for_linked_organization_we_vote_id(organization.we_vote_id)
+            #         try:
+            #             voter.linked_organization_we_vote_id = organization.we_vote_id
+            #             voter.save()
+            #
+            #             # TODO DALE UPDATE linked_organization_we_vote_id
+            #             # TODO DALE UPDATE positions to add voter_we_vote_id - Any position with
+            #             # the organization_we_vote_id should get the voter_we_vote_id added,
+            #             # and any position with the voter_we_vote_id should get the organization_we_vote_id added
+            #         except Exception as e:
+            #             success = False
+            #             status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_TWITTER "
+            #     else:
+            #         # Does the facebook_id for the voter and org match?
+            #         facebook_id_matches = positive_value_exists(voter.facebook_id) \
+            #             and voter.facebook_id == organization.facebook_id
+            #
+            #         if facebook_id_matches:
+            #             # Check to make sure another voter isn't hanging onto this organization_we_vote_id
+            #             # TODO DALE UPDATE linked_organization_we_vote_id
+            #             voter_manager.clear_out_collisions_for_linked_organization_we_vote_id(organization.we_vote_id)
+            #             try:
+            #                 voter.linked_organization_we_vote_id = organization.we_vote_id
+            #                 voter.save()
+            #
+            #                 # TODO DALE UPDATE linked_organization_we_vote_id
+            #                 # TODO DALE UPDATE positions to add voter_we_vote_id - Any position with
+            #                 # the organization_we_vote_id should get the voter_we_vote_id added,
+            #                 # and any position with the voter_we_vote_id should get the organization_we_vote_id added
+            #             except Exception as e:
+            #                 success = False
+            #                 status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_FACEBOOK "
+            #         # If not, then this is a volunteer or admin setting up an organization
+            #         else:
+            #             status += " DID_NOT_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID-VOTER_NOT_FOUND"
 
         results = {
             'success':                      success,
