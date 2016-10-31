@@ -127,10 +127,14 @@
             <td>
             {% if voter.is_verified_volunteer %}Y{% else %}{% endif %}
             </td>
+            <!-- Has linked organization or is_signed_in //-->
             <td>
             {% if voter.linked_organization_we_vote_id %}
                 <a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ voter.linked_organization_we_vote_id }}" target="_blank">
                 {{ voter.linked_organization_we_vote_id }}</a>
+            {% elif voter.is_signed_in %}
+                <a href="{% url 'voter:voter_edit' voter.id %}?create_organization_for_voter=1" target="_blank">
+                Create Organization</a>
             {% endif %}
             </td>
             <td>
