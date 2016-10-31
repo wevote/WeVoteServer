@@ -976,7 +976,7 @@ class Voter(AbstractBaseUser):
             return self.twitter_profile_image_url_https
         return ''
 
-    def signed_in_personal(self):
+    def is_signed_in(self):
         if self.signed_in_with_email() or self.signed_in_facebook() or self.signed_in_twitter():
             return True
         return False

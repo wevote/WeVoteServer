@@ -53,12 +53,15 @@ class OrganizationManager(models.Manager):
     def create_organization(self, organization_name, organization_website='', organization_twitter_handle='',
                             organization_email='', organization_facebook='', organization_image=''):
         try:
-            organization = self.create(organization_name=organization_name,
-                                       organization_website=organization_website,
-                                       organization_twitter_handle=organization_twitter_handle,
-                                       organization_email=organization_email,
-                                       organization_facebook=organization_facebook,
-                                       organization_image=organization_image)
+            if not positive_value_exists(organization_name):
+                organization_name = ""
+            organization = Organization.create(organization_name=organization_name,
+                                               organization_website=organization_website,
+                                               organization_twitter_handle=organization_twitter_handle,
+                                               organization_email=organization_email,
+                                               organization_facebook=organization_facebook,
+                                               organization_image=organization_image)
+            organization.save()  # We do this so the we_vote_id is created
             status = "CREATE_ORGANIZATION_SUCCESSFUL"
             success = True
             organization_created = True

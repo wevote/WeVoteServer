@@ -247,6 +247,7 @@ def voter_edit_view(request, voter_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     create_facebook_link_to_voter = request.GET.get('create_facebook_link_to_voter', False)
+    create_organization_for_voter = request.GET.get('create_organization_for_voter', False)
     create_twitter_link_to_voter = request.GET.get('create_twitter_link_to_voter', False)
     cross_link_all_voter_positions = request.GET.get('cross_link_all_voter_positions', False)
 
@@ -261,6 +262,7 @@ def voter_edit_view(request, voter_id):
     positions_not_cross_linked = 0
     status_print_list = ""
     facebook_manager = FacebookManager()
+    organization_manager = OrganizationManager()
     twitter_user_manager = TwitterUserManager()
     try:
         voter_on_stage = Voter.objects.get(id=voter_id)
@@ -449,12 +451,15 @@ def voter_edit_view(request, voter_id):
         linked_organization_we_vote_id_list = linked_organization_we_vote_id_list.filter(
             we_vote_id__iexact=voter_on_stage.linked_organization_we_vote_id)
 
+        linked_organization_found = False
         for one_linked_organization in linked_organization_we_vote_id_list:
             try:
                 linked_voter = Voter.objects.get(
                     linked_organization_we_vote_id__iexact=one_linked_organization.we_vote_id)
                 one_linked_organization.linked_voter = linked_voter
+                linked_organization_found = True
             except Voter.DoesNotExist:
+                linked_organization_found = False
                 pass
 
             linked_organization_we_vote_id_list_updated.append(one_linked_organization)
@@ -486,7 +491,6 @@ def voter_edit_view(request, voter_id):
 
         if cross_link_all_voter_positions and voter_on_stage.linked_organization_we_vote_id \
                 and not twitter_id_from_link_to_voter_for_another_voter:
-            organization_manager = OrganizationManager()
             linked_organization_id = \
                 organization_manager.fetch_organization_id(voter_on_stage.linked_organization_we_vote_id)
             if positive_value_exists(linked_organization_id):
@@ -588,6 +592,36 @@ def voter_edit_view(request, voter_id):
                     messages.add_message(request, messages.ERROR,
                                          'TwitterLinkToVoter could not be created: '
                                          'There is already a TwitterLinkToVoter for ANOTHER voter.')
+
+        if create_organization_for_voter:
+            do_not_create_organization = linked_organization_found
+            if do_not_create_organization:
+                do_not_create_organization_message = "Organization could not be created. "
+                if linked_organization_found:
+                    do_not_create_organization_message += "Linked organization found. "
+
+                messages.add_message(request, messages.ERROR, do_not_create_organization_message)
+            else:
+                organization_name = voter_on_stage.get_full_name()
+                create_results = organization_manager.create_organization(organization_name)
+                if create_results['organization_created']:
+                    organization = create_results['organization']
+                    try:
+                        voter_on_stage.linked_organization_we_vote_id = organization.we_vote_id
+                        voter_on_stage.save()
+                        status_print_list += "Organization created.<br />"
+
+                        if twitter_id_from_link_to_voter:
+                            results = twitter_user_manager.create_twitter_link_to_organization(
+                                twitter_id_from_link_to_voter, organization.we_vote_id)
+                            if results['twitter_link_to_organization_saved']:
+                                twitter_link_to_organization = results['twitter_link_to_organization']
+
+                    except Exception as e:
+                        messages.add_message(request, messages.ERROR,
+                                             "Could not update voter.linked_organization_we_vote_id.")
+                else:
+                    messages.add_message(request, messages.ERROR, "Could not create organization.")
 
         if positive_value_exists(positions_cross_linked):
             status_print_list += "positions_cross_linked: " + str(positions_cross_linked) + "<br />"

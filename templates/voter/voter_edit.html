@@ -22,7 +22,13 @@
 {% if voter %}
 <p>Voter ID: {{ voter.id }}<br />
 We Vote ID: {{ voter.we_vote_id }}<br />
-linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_if_none:"" }}</p>
+is_signed_in: {{ voter.is_signed_in }}<br />
+linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_if_none:"" }}
+{% if not voter.linked_organization_we_vote_id %}
+     <a href="{% url 'voter:voter_edit' voter.id %}?create_organization_for_voter=1">
+         Create Organization</a>
+{% endif %}
+</p>
 {% endif %}
 
 <label for="first_name_id">First Name</label>
