@@ -318,9 +318,10 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
     # Find private positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = FRIENDS_ONLY
-    from_position_private_list = position_list_manager.retrieve_all_positions_for_voter(
+    from_position_private_list_results = position_list_manager.retrieve_all_positions_for_voter(
         from_voter_id, from_voter_we_vote_id,
         stance_we_are_looking_for, friends_vs_public)
+    from_position_private_list = from_position_private_list_results['position_list']
 
     position_we_vote_id = ""
     # We don't want the organization_id to affect the retrieve
@@ -370,9 +371,10 @@ def move_positions_to_another_voter(from_voter_id, from_voter_we_vote_id,
                 status += "MOVE_TO_ANOTHER_VOTER-UNABLE_TO_SAVE_FRIENDS_ONLY_ORGANIZATION_UPDATE2 "
                 position_entries_not_moved += 1
 
-    from_position_private_list_remaining = position_list_manager.retrieve_all_positions_for_voter(
+    from_position_private_list_remaining_results = position_list_manager.retrieve_all_positions_for_voter(
         from_voter_id, from_voter_we_vote_id,
         stance_we_are_looking_for, friends_vs_public)
+    from_position_private_list_remaining = from_position_private_list_remaining_results['position_list']
     for from_position_entry in from_position_private_list_remaining:
         # Delete the remaining position values
         try:
