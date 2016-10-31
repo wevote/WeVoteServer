@@ -8,6 +8,7 @@ from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)  # Pe
 from django.core.validators import RegexValidator
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_saved_exception
+from import_export_facebook.models import FacebookManager
 from twitter.models import TwitterUserManager
 from validate_email import validate_email
 import wevote_functions.admin
@@ -352,21 +353,10 @@ class VoterManager(BaseUserManager):
                     voter_id = voter_on_stage.id
                     success = True
                 except Voter.MultipleObjectsReturned as e:
-                    # If here, there are multiple voters with twitter_id
-                    voter_queryset = Voter.objects.all()
-                    # voter_queryset = voter_queryset.filter(Q(email__iexact=email) |
-                    #                                        Q(facebook_email__iexact=email))
-                    voter_queryset = voter_queryset.filter(Q(twitter_id=twitter_id))
-                    voter_queryset = voter_queryset.order_by("-id")  # Take the latest voter record
-                    voter_list = list(voter_queryset[:1])
-                    if len(voter_list):
-                        voter_on_stage = voter_list[0]
-                        voter_id = voter_on_stage.id
-                        success = True
-                    else:
-                        voter_on_stage = Voter()
-                        voter_id = 0
-                        success = True
+                    # If there are multiple entries, we do not want to guess which one to use here
+                    voter_on_stage = Voter()
+                    voter_id = 0
+                    success = False
                 except Voter.DoesNotExist as e:
                     error_result = True
                     exception_does_not_exist = True
@@ -776,18 +766,30 @@ class VoterManager(BaseUserManager):
         return results
 
     def update_voter_with_twitter_link_verified(self, voter, twitter_id):
+        """
+        I think this was originally built with the idea that we would cache the Twitter ID in the
+        voter record for quick lookup. As of 2016-10-29 I don't think we can cache the twitter_id reliably
+        because of the complexities of merging accounts and the chances for errors. So we should deprecate this.
+        :param voter:
+        :param twitter_id:
+        :return:
+        """
         should_save_voter = False
         voter_updated = False
 
         try:
-            voter.twitter_id = twitter_id
-            should_save_voter = True
+            if positive_value_exists(twitter_id):
+                voter.twitter_id = twitter_id
+                should_save_voter = True
 
             if should_save_voter:
                 voter.save()
                 voter_updated = True
-            status = "UPDATED_VOTER_WITH_TWITTER_LINK"
-            success = True
+                status = "UPDATED_VOTER_WITH_TWITTER_LINK"
+                success = True
+            else:
+                status = "NOT_UPDATED_VOTER_WITH_TWITTER_LINK"
+                success = False
         except Exception as e:
             status = "UNABLE_TO_UPDATE_VOTER_WITH_TWITTER_LINK"
             success = False
@@ -980,18 +982,24 @@ class Voter(AbstractBaseUser):
         return False
 
     def signed_in_facebook(self):
-        # TODO DALE Remove voter.facebook_id value
-        if positive_value_exists(self.facebook_id):
-            return True
+        facebook_manager = FacebookManager()
+        facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(0, self.we_vote_id)
+        if facebook_link_results['facebook_link_to_voter_found']:
+            facebook_link_to_voter = facebook_link_results['facebook_link_to_voter']
+            if positive_value_exists(facebook_link_to_voter.facebook_user_id):
+                return True
         return False
 
     def signed_in_google(self):
         return False
 
     def signed_in_twitter(self):
-        # TODO DALE Remove voter.twitter_id value
-        if positive_value_exists(self.twitter_id):
-            return True
+        twitter_user_manager = TwitterUserManager()
+        twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(0, self.we_vote_id)
+        if twitter_link_results['twitter_link_to_voter_found']:
+            twitter_link_to_voter = twitter_link_results['twitter_link_to_voter']
+            if positive_value_exists(twitter_link_to_voter.twitter_id):
+                return True
         return False
 
     def signed_in_with_email(self):
@@ -1361,42 +1369,6 @@ class VoterAddressManager(models.Model):
     def __unicode__(self):
         return "VoterAddressManager"
 
-    def retrieve_ballot_address_from_voter_id(self, voter_id):
-        voter_address_id = 0
-        address_type = BALLOT_ADDRESS
-        voter_address_manager = VoterAddressManager()
-        return voter_address_manager.retrieve_address(voter_address_id, voter_id, address_type)
-
-    def retrieve_ballot_map_text_from_voter_id(self, voter_id):
-        results = self.retrieve_ballot_address_from_voter_id(voter_id)
-
-        ballot_map_text = ''
-        if results['voter_address_found']:
-            voter_address = results['voter_address']
-            minimum_normalized_address_data_exists = positive_value_exists(
-                voter_address.normalized_city) or positive_value_exists(
-                    voter_address.normalized_state) or positive_value_exists(voter_address.normalized_zip)
-            if minimum_normalized_address_data_exists:
-                ballot_map_text += voter_address.normalized_line1 \
-                    if positive_value_exists(voter_address.normalized_line1) else ''
-                ballot_map_text += ", " \
-                    if positive_value_exists(voter_address.normalized_line1) \
-                    and positive_value_exists(voter_address.normalized_city) \
-                    else ''
-                ballot_map_text += voter_address.normalized_city \
-                    if positive_value_exists(voter_address.normalized_city) else ''
-                ballot_map_text += ", " \
-                    if positive_value_exists(voter_address.normalized_city) \
-                    and positive_value_exists(voter_address.normalized_state) \
-                    else ''
-                ballot_map_text += voter_address.normalized_state \
-                    if positive_value_exists(voter_address.normalized_state) else ''
-                ballot_map_text += " " + voter_address.normalized_zip \
-                    if positive_value_exists(voter_address.normalized_zip) else ''
-            elif positive_value_exists(voter_address.text_for_map_search):
-                ballot_map_text += voter_address.text_for_map_search
-        return ballot_map_text
-
     def retrieve_address(self, voter_address_id, voter_id=0, address_type=''):
         error_result = False
         exception_does_not_exist = False
@@ -1458,6 +1430,42 @@ class VoterAddressManager(models.Model):
         }
         return results
 
+    def retrieve_ballot_address_from_voter_id(self, voter_id):
+        voter_address_id = 0
+        address_type = BALLOT_ADDRESS
+        voter_address_manager = VoterAddressManager()
+        return voter_address_manager.retrieve_address(voter_address_id, voter_id, address_type)
+
+    def retrieve_ballot_map_text_from_voter_id(self, voter_id):
+        results = self.retrieve_ballot_address_from_voter_id(voter_id)
+
+        ballot_map_text = ''
+        if results['voter_address_found']:
+            voter_address = results['voter_address']
+            minimum_normalized_address_data_exists = positive_value_exists(
+                voter_address.normalized_city) or positive_value_exists(
+                    voter_address.normalized_state) or positive_value_exists(voter_address.normalized_zip)
+            if minimum_normalized_address_data_exists:
+                ballot_map_text += voter_address.normalized_line1 \
+                    if positive_value_exists(voter_address.normalized_line1) else ''
+                ballot_map_text += ", " \
+                    if positive_value_exists(voter_address.normalized_line1) \
+                    and positive_value_exists(voter_address.normalized_city) \
+                    else ''
+                ballot_map_text += voter_address.normalized_city \
+                    if positive_value_exists(voter_address.normalized_city) else ''
+                ballot_map_text += ", " \
+                    if positive_value_exists(voter_address.normalized_city) \
+                    and positive_value_exists(voter_address.normalized_state) \
+                    else ''
+                ballot_map_text += voter_address.normalized_state \
+                    if positive_value_exists(voter_address.normalized_state) else ''
+                ballot_map_text += " " + voter_address.normalized_zip \
+                    if positive_value_exists(voter_address.normalized_zip) else ''
+            elif positive_value_exists(voter_address.text_for_map_search):
+                ballot_map_text += voter_address.text_for_map_search
+        return ballot_map_text
+
     # # TODO TEST THIS
     # def retrieve_addresses(self, voter_id):
     #     error_result = False
@@ -1481,6 +1489,15 @@ class VoterAddressManager(models.Model):
     #         'number_of_addresses':      number_of_addresses,
     #     }
     #     return results
+
+    def retrieve_text_for_map_search_from_voter_id(self, voter_id):
+        results = self.retrieve_ballot_address_from_voter_id(voter_id)
+
+        text_for_map_search = ''
+        if results['voter_address_found']:
+            voter_address = results['voter_address']
+            text_for_map_search = voter_address.text_for_map_search
+        return text_for_map_search
 
     def update_or_create_voter_address(self, voter_id, address_type, raw_address_text):
         """

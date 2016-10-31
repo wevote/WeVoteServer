@@ -27,7 +27,8 @@ from position.controllers import fetch_positions_count_for_this_voter, \
     find_organizations_referenced_in_positions_for_this_voter, positions_import_from_sample_file
 from position.models import PositionEntered, PositionForFriends
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
-from voter.models import Voter, VoterDeviceLinkManager, VoterManager, voter_has_authority, voter_setup
+from voter.models import Voter, VoterAddressManager, VoterDeviceLinkManager, VoterManager, voter_has_authority, \
+    voter_setup
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
 
@@ -798,6 +799,7 @@ def data_cleanup_voter_list_analysis_view(request):
     create_twitter_link_to_voter_possible = 0
     create_twitter_link_to_voter_added = 0
     create_twitter_link_to_voter_not_added = 0
+    voter_address_manager = VoterAddressManager()
     facebook_manager = FacebookManager()
     twitter_user_manager = TwitterUserManager()
     friend_manager = FriendManager()
@@ -811,8 +813,8 @@ def data_cleanup_voter_list_analysis_view(request):
     voter_list_with_local_twitter_data_updated = []
     for one_linked_voter in voter_list_with_local_twitter_data:
 
-        # {{voter.facebook_username_from_link_to_voter}} < br / >
-        # {{voter.facebook_id_from_link_to_voter}}
+        one_linked_voter.text_for_map_search = \
+            voter_address_manager.retrieve_text_for_map_search_from_voter_id(one_linked_voter.id)
 
         # Get FacebookLinkToVoter
         facebook_id_from_link_to_voter = 0

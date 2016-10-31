@@ -4,6 +4,7 @@
 
 from django.contrib.auth import logout
 from social.apps.django_app.views import _do_login
+from twitter.models import TwitterUserManager
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
 
@@ -14,8 +15,6 @@ def authenticate_associate_by_email(**kwargs):
     try:
         # Find the voter account that actually matches this twitter_id
         twitter_id = kwargs['uid']
-
-        # TODO DALE Remove voter.twitter_id value
 
         voter_manager = VoterManager()
         results = voter_manager.retrieve_voter_by_twitter_id(twitter_id)
@@ -30,21 +29,27 @@ def authenticate_associate_by_email(**kwargs):
 
 # We replace the default social_user pipeline entry so we can switch to an existing account:
 # http://www.scriptscoop.net/t/08c148b90d9a/python-authalreadyassociated-exception-in-django-social-auth.html (jacob)
-def social_user(backend, uid, details, user=None, *args, **kwargs):  # TODO DALE Upgrade this to use TwitterAuthResponse
+def social_user(backend, uid, details, user=None, *args, **kwargs):
+    twitter_user_manager = TwitterUserManager()
     voter_manager = VoterManager()
     provider = backend.name
     social = backend.strategy.storage.user.get_social_auth(provider, uid)
 
     if backend.name == 'twitter':
         # Twitter: Check to see if we have a voter with a matching twitter_id
-        # TODO DALE Remove voter.twitter_id value - Look in TwitterLinkToVoter for the voter_we_vote_id to use
-        # owner_of_twitter_id_voter_we_vote_id = ???
-        # local_user_matches = user and user.we_vote_id == owner_of_twitter_id_voter_we_vote_id
-        local_user_matches = user and user.twitter_id == uid
+        results = voter_manager.retrieve_voter_by_twitter_id(uid)
+        if results['voter_found']:
+            user = results['voter']
+            local_user_matches = True
+        else:
+            local_user_matches = False
+        # Was this:
+        # local_user_matches = user and user.twitter_id == uid
     else:
         local_user_matches = user and user.email != details.get('email')
     switch_user = not local_user_matches
     if switch_user:
+        # When logging into the Admin site we don't have to worry about merging current data with Twitter account
         # Logout the current Django user
         logout(backend.strategy.request)
 
@@ -84,6 +89,7 @@ def social_user(backend, uid, details, user=None, *args, **kwargs):  # TODO DALE
                     if results['success']:
                         social.user = results['voter']
                         user = results['voter']
+                        twitter_link_results = twitter_user_manager.create_twitter_link_to_voter(uid, user.we_vote_id)
 
     return {'social': social,
             'user': user,

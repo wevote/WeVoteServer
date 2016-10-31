@@ -93,37 +93,45 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     voter = results['voter']
 
     # ##### Make the facebook_email the primary email for the current voter
-    # Does the current voter already have a primary email?
-    if not voter.email_ownership_is_verified:
-        email_manager = EmailManager()
-        if positive_value_exists(facebook_auth_response.facebook_email):
-            # Check to make sure there isn't an account already using the facebook_email
-            temp_voter_we_vote_id = ""
-            email_results = email_manager.retrieve_primary_email_with_ownership_verified(
-                temp_voter_we_vote_id, facebook_auth_response.facebook_email)
-            if not email_results['email_address_object_found']:
-                # See if an unverified email exists for this voter
-                email_address_object_we_vote_id = ""
-                email_retrieve_results = email_manager.retrieve_email_address_object(
-                    facebook_auth_response.facebook_email, email_address_object_we_vote_id,
-                    voter.we_vote_id)
-                if email_retrieve_results['email_address_object_found']:
-                    email_address_object = email_retrieve_results['email_address_object']
-                    email_address_object = email_manager.update_email_address_object_to_be_verified(
-                        email_address_object)
-                else:
-                    email_ownership_is_verified = True
-                    email_create_results = email_manager.create_email_address(
-                        facebook_auth_response.facebook_email, voter.we_vote_id,
-                        email_ownership_is_verified)
-                    if email_create_results['email_address_object_saved']:
-                        email_address_object = email_create_results['email_address_object']
-                try:
-                    # Attach the email_address_object to voter
-                    voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
-                except Exception as e:
-                    # Fail silently
-                    pass
+    email_manager = EmailManager()
+    if positive_value_exists(facebook_auth_response.facebook_email):
+        # Check to make sure there isn't an account already using the facebook_email
+        facebook_email_address_verified = False
+        temp_voter_we_vote_id = ""
+        email_results = email_manager.retrieve_primary_email_with_ownership_verified(
+            temp_voter_we_vote_id, facebook_auth_response.facebook_email)
+        if email_results['email_address_object_found']:
+            # If here, then it turns out the facebook_email is verified, and we can
+            #   update_voter_email_ownership_verified if a verified email is already stored in the voter record
+            email_address_object = email_results['email_address_object']
+            facebook_email_address_verified = True
+        else:
+            # See if an unverified copy of this email exists for this voter
+            email_address_object_we_vote_id = ""
+            email_retrieve_results = email_manager.retrieve_email_address_object(
+                facebook_auth_response.facebook_email, email_address_object_we_vote_id,
+                voter.we_vote_id)
+            if email_retrieve_results['email_address_object_found']:
+                email_address_object = email_retrieve_results['email_address_object']
+                email_address_object = email_manager.update_email_address_object_as_verified(
+                    email_address_object)
+                facebook_email_address_verified = True
+            else:
+                email_ownership_is_verified = True
+                email_create_results = email_manager.create_email_address(
+                    facebook_auth_response.facebook_email, voter.we_vote_id,
+                    email_ownership_is_verified)
+                if email_create_results['email_address_object_saved']:
+                    email_address_object = email_create_results['email_address_object']
+                    facebook_email_address_verified = True
+
+        # Does the current voter already have a primary email?
+        if not voter.email_ownership_is_verified and facebook_email_address_verified:
+            try:
+                # Attach the email_address_object to voter
+                voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
+            except Exception as e:
+                status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY "
 
     results = {
         'success':                  success,
