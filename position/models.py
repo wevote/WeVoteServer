@@ -1347,7 +1347,13 @@ class PositionListManager(models.Model):
         if stance_we_are_looking_for not \
                 in (ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
             position_list = []
-            return position_list
+            results = {
+                'status':               'STANCE_WE_ARE_LOOKING_FOR_NOT_VALID',
+                'success':              False,
+                'position_list_found':  False,
+                'position_list':        position_list,
+            }
+            return results
 
         retrieve_friends_positions = friends_vs_public in (FRIENDS_ONLY, FRIENDS_AND_PUBLIC)
         retrieve_public_positions = friends_vs_public in (PUBLIC_ONLY, FRIENDS_AND_PUBLIC)
