@@ -227,10 +227,9 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
     # Find public positions for the "from_voter" that we are moving away from
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = PUBLIC_ONLY
-    from_position_public_results = position_list_manager.retrieve_all_positions_for_organization(
+    from_position_public_list = position_list_manager.retrieve_all_positions_for_organization(
         from_organization_id, from_organization_we_vote_id,
         stance_we_are_looking_for, friends_vs_public)
-    from_position_public_list = from_position_public_results['position_list']
 
     for from_position_entry in from_position_public_list:
         # See if the "to_organization" already has the same entry
@@ -279,10 +278,9 @@ def move_positions_to_another_organization(from_organization_id, from_organizati
             except Exception as e:
                 position_entries_not_moved += 1
 
-    from_position_public_results = position_list_manager.retrieve_all_positions_for_organization(
+    from_position_public_list_remaining = position_list_manager.retrieve_all_positions_for_organization(
         from_organization_id, from_organization_we_vote_id,
         stance_we_are_looking_for, friends_vs_public)
-    from_position_public_list_remaining = from_position_public_results['position_list']
     for from_position_entry in from_position_public_list_remaining:
         # Delete the remaining position values
         try:
