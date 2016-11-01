@@ -16,6 +16,7 @@ from exception.models import handle_record_found_more_than_one_exception, handle
     handle_record_not_saved_exception
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from organization.models import Organization, OrganizationManager
+from position.controllers import merge_duplicate_positions_for_voter
 from position.models import PositionEntered, PositionForFriends
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority, voter_setup
@@ -250,6 +251,7 @@ def voter_edit_view(request, voter_id):
     create_organization_for_voter = request.GET.get('create_organization_for_voter', False)
     create_twitter_link_to_voter = request.GET.get('create_twitter_link_to_voter', False)
     cross_link_all_voter_positions = request.GET.get('cross_link_all_voter_positions', False)
+    merge_duplicate_positions = request.GET.get('merge_duplicate_positions', False)
 
     voter_id = convert_to_int(voter_id)
     voter_on_stage = Voter()
@@ -350,9 +352,10 @@ def voter_edit_view(request, voter_id):
                 try:
                     facebook_link_to_another_voter = FacebookLinkToVoter.objects.get(
                         voter_we_vote_id__iexact=one_duplicate_voter.we_vote_id)
-                    if positive_value_exists(facebook_link_to_another_voter.facebook_id):
+                    if positive_value_exists(facebook_link_to_another_voter.facebook_user_id):
                         facebook_id_from_link_to_voter_for_another_voter = True
-                        one_duplicate_voter.facebook_id_from_link_to_voter = facebook_link_to_another_voter.facebook_id
+                        one_duplicate_voter.facebook_id_from_link_to_voter = \
+                            facebook_link_to_another_voter.facebook_user_id
                 except FacebookLinkToVoter.DoesNotExist:
                     pass
 
@@ -484,10 +487,18 @@ def voter_edit_view(request, voter_id):
         public_positions_owned_by_this_voter = PositionEntered.objects.all()
         public_positions_owned_by_this_voter = public_positions_owned_by_this_voter.filter(final_position_filters)
 
+        if merge_duplicate_positions:
+            public_positions_owned_by_this_voter = \
+                merge_duplicate_positions_for_voter(public_positions_owned_by_this_voter)
+
         # PositionForFriends
         positions_for_friends_owned_by_this_voter = PositionForFriends.objects.all()
         positions_for_friends_owned_by_this_voter = \
             positions_for_friends_owned_by_this_voter.filter(final_position_filters)
+
+        if merge_duplicate_positions:
+            positions_for_friends_owned_by_this_voter = \
+                merge_duplicate_positions_for_voter(positions_for_friends_owned_by_this_voter)
 
         if cross_link_all_voter_positions and voter_on_stage.linked_organization_we_vote_id \
                 and not twitter_id_from_link_to_voter_for_another_voter:

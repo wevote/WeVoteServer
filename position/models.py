@@ -11,6 +11,7 @@ from django.db.models import Q
 from election.models import Election
 from exception.models import handle_exception, handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
+from friend.models import FriendManager
 from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureManager
 from office.models import ContestOfficeManager
 from organization.models import Organization, OrganizationManager
@@ -1090,7 +1091,8 @@ class PositionListManager(models.Model):
 
         if retrieve_public_positions:
             try:
-                public_positions_list = PositionEntered.objects.order_by('-vote_smart_time_span',
+                public_positions_list = PositionEntered.objects.order_by('ballot_item_display_name',
+                                                                         '-vote_smart_time_span',
                                                                          '-google_civic_election_id')
                 if positive_value_exists(organization_id):
                     public_positions_list = public_positions_list.filter(organization_id=organization_id)
@@ -1185,15 +1187,21 @@ class PositionListManager(models.Model):
                         organization_voter_we_vote_id.lower() == current_voter_we_vote_id.lower():
                     # If the current viewer is looking at own entry, then show what should be shown to friends
                     voter_is_friend_of_organization = True
-                else:
-                    # TODO DALE Check to see if current voter is in list of friends
-                    voter_is_friend_of_organization = False  # Temp hard coding
+                elif positive_value_exists(current_voter_we_vote_id):
+                    friend_manager = FriendManager()
+                    friend_results = friend_manager.retrieve_friends_we_vote_id_list(current_voter_we_vote_id)
+                    if friend_results['friends_we_vote_id_list_found']:
+                        friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+                        # Check to see if current voter is in list of friends
+                        if organization_voter_we_vote_id in friends_we_vote_id_list:
+                            voter_is_friend_of_organization = True
 
                 friends_positions_list = []
                 if voter_is_friend_of_organization:
                     # If here, then the viewer is a friend with the organization. Look up positions that
                     #  are only shown to friends.
-                    friends_positions_list = PositionForFriends.objects.order_by('-vote_smart_time_span',
+                    friends_positions_list = PositionForFriends.objects.order_by('ballot_item_display_name',
+                                                                                 '-vote_smart_time_span',
                                                                                  '-google_civic_election_id')
                     # Get the entries saved by the organization's voter account
                     if positive_value_exists(organization_voter_local_id):

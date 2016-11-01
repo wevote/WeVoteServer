@@ -1045,6 +1045,7 @@ class Organization(models.Model):
 
     organization_type = models.CharField(
         verbose_name="type of org", max_length=1, choices=ORGANIZATION_TYPE_CHOICES, default=UNKNOWN)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     organization_endorsements_api_url = models.URLField(verbose_name='url of endorsements importer', blank=True, null=True)
 

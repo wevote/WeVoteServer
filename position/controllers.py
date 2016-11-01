@@ -16,6 +16,7 @@ from follow.models import FollowOrganizationManager, FollowOrganizationList
 from friend.models import FriendManager
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
+from operator import itemgetter
 from organization.models import Organization, OrganizationManager
 import json
 import requests
@@ -144,6 +145,50 @@ def fetch_positions_count_for_this_voter(voter):
     total_positions_count = position_entered_count + position_for_friends_count
 
     return total_positions_count
+
+
+def merge_duplicate_positions_for_voter(position_list_for_one_voter):
+
+    removed = []
+    included = []
+    position_list_for_one_voter_to_return = []
+    for one_position in position_list_for_one_voter:
+        for position_to_compare in position_list_for_one_voter:
+            if one_position.we_vote_id != position_to_compare.we_vote_id and \
+                    one_position.we_vote_id not in removed and position_to_compare not in removed:
+                if positive_value_exists(one_position.candidate_campaign_we_vote_id) and \
+                        positive_value_exists(position_to_compare.candidate_campaign_we_vote_id) and \
+                        one_position.candidate_campaign_we_vote_id == position_to_compare.candidate_campaign_we_vote_id:
+                    # These need to be merged
+                    combine_two_positions_for_voter(position_to_compare, one_position)
+                    removed.append(position_to_compare.we_vote_id)
+                elif positive_value_exists(one_position.contest_measure_we_vote_id) and \
+                        positive_value_exists(position_to_compare.contest_measure_we_vote_id) and \
+                        one_position.contest_measure_we_vote_id == position_to_compare.contest_measure_we_vote_id:
+                    # These need to be merged
+                    combine_two_positions_for_voter(position_to_compare, one_position)
+                    removed.append(position_to_compare.we_vote_id)
+                    try:
+                        # position_to_compare.delete()
+                        pass
+                    except Exception in e:
+                        pass
+                # We should end up with only the non-duplicate positions
+                if one_position.we_vote_id not in included:
+                    position_list_for_one_voter_to_return.append(one_position)
+                    included.append(one_position.we_vote_id)
+
+    return position_list_for_one_voter_to_return
+
+
+def combine_two_positions_for_voter(from_position, to_position):
+    """
+    We want to move all values over to the "to_position"
+    :param from_position:
+    :param to_position:
+    :return:
+    """
+    return True
 
 
 def move_positions_to_another_organization(from_organization_id, from_organization_we_vote_id,
@@ -1349,7 +1394,9 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                 one_position = position_manager.refresh_cached_position_info(one_position)
             one_position_dict_for_api = {
                 'position_we_vote_id':          one_position.we_vote_id,
-                'ballot_item_display_name':     one_position.ballot_item_display_name,  # Candidate name or Measure
+                'ballot_item_display_name':
+                    one_position.ballot_item_display_name
+                    if positive_value_exists(one_position.ballot_item_display_name) else "",  # Candidate or Measure
                 'ballot_item_image_url_https':  one_position.ballot_item_image_url_https,
                 'ballot_item_twitter_handle':   one_position.ballot_item_twitter_handle,
                 'ballot_item_political_party':  one_position.political_party,
@@ -1379,6 +1426,11 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             position_list.append(one_position_dict_for_api)
 
     # Now change the sort order
+    if len(position_list):
+        sorted_position_list = sorted(position_list, key=itemgetter('ballot_item_display_name'))
+        # Add reverse=True to sort descending
+    else:
+        sorted_position_list = []
 
     status += ' POSITION_LIST_FOR_OPINION_MAKER_SUCCEEDED'
     success = True
@@ -1395,7 +1447,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         'is_ignoring':                      is_ignoring,
         'google_civic_election_id':         google_civic_election_id,
         'state_code':                       state_code,
-        'position_list':                    position_list,
+        'position_list':                    sorted_position_list,
         'filter_for_voter':                 filter_for_voter,
         'filter_out_voter':                 filter_out_voter,
         'friends_vs_public':                friends_vs_public,

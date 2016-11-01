@@ -804,10 +804,10 @@ def data_cleanup_voter_list_analysis_view(request):
     twitter_user_manager = TwitterUserManager()
     friend_manager = FriendManager()
 
-    voter_list_with_local_twitter_data = Voter.objects.all()
+    voter_list_with_local_twitter_data = Voter.objects.order_by('-id', '-date_last_changed')
     voter_list_with_local_twitter_data = voter_list_with_local_twitter_data.filter(
         ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None) | ~Q(facebook_id=None) |
-        ~Q(fb_username=None))
+        ~Q(fb_username=None) | ~Q(linked_organization_we_vote_id=None))
     voter_list_with_local_twitter_data = voter_list_with_local_twitter_data
 
     voter_list_with_local_twitter_data_updated = []

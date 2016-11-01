@@ -838,6 +838,8 @@ class Voter(AbstractBaseUser):
     middle_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(verbose_name='last name', max_length=255, null=True, blank=True)
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_verified_volunteer = models.BooleanField(default=False)
