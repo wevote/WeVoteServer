@@ -24,7 +24,7 @@
 We Vote ID: {{ voter.we_vote_id }}<br />
 is_signed_in: {{ voter.is_signed_in }}<br />
 linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_if_none:"" }}
-{% if not voter.linked_organization_we_vote_id %}
+{% if not voter.linked_organization_we_vote_id and voter.is_signed_in or public_positions_owned_by_this_voter %}
      <a href="{% url 'voter:voter_edit' voter.id %}?create_organization_for_voter=1">
          Create Organization</a>
 {% endif %}
@@ -123,7 +123,8 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
             <td>{% if organization.linked_voter %}
                 <a href="{% url 'voter:voter_edit' organization.linked_voter.id %}" target="_blank">{{ organization.linked_voter.we_vote_id }}</a>
             {% endif %}</td>
-            <td><a href="{% url 'organization:organization_edit' organization.id %}" style="font-size: .65em">{{ organization.we_vote_id }}</a></td>
+            <td><a href="{% url 'admin_tools:data_cleanup_organization_analysis' %}?organization_we_vote_id={{ organization.we_vote_id }}" target="_blank">
+                {{ organization.we_vote_id }}</a></td>
         </tr>
     {% endfor %}
     </table>
@@ -357,6 +358,9 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
 
 {% if public_positions_owned_by_this_voter %}
     <h2>Public Positions Owned By This Voter</h2>
+     <a href="{% url 'voter:voter_edit' voter.id %}?merge_duplicate_positions=1">
+         Merge Duplicate Positions</a>
+
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td></td>
@@ -420,6 +424,8 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
 
 {% if positions_for_friends_owned_by_this_voter %}
     <h2>Positions For Friends Owned By This Voter</h2>
+     <a href="{% url 'voter:voter_edit' voter.id %}?merge_duplicate_positions=1">
+         Merge Duplicate Positions</a>
     <table border="1" cellpadding="5" cellspacing="5">
         <tr>
             <td></td>
