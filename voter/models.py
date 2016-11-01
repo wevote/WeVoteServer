@@ -309,11 +309,6 @@ class VoterManager(BaseUserManager):
                 success = True
             elif email is not '' and email is not None:
                 voter_queryset = Voter.objects.all()
-                # TODO DALE: Currently facebook_email is not a unique entry.
-                # TODO DALE: We need to clean up the facebook sign in code to deal with this, and move the
-                # facebook_email into "email"
-                # voter_queryset = voter_queryset.filter(Q(email__iexact=email) |
-                #                                        Q(facebook_email__iexact=email))
                 voter_queryset = voter_queryset.filter(Q(email__iexact=email))
                 voter_list = list(voter_queryset[:1])
                 if len(voter_list):

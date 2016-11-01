@@ -614,7 +614,15 @@ def voter_edit_view(request, voter_id):
                 messages.add_message(request, messages.ERROR, do_not_create_organization_message)
             else:
                 organization_name = voter_on_stage.get_full_name()
-                create_results = organization_manager.create_organization(organization_name)
+                organization_website = ""
+                organization_twitter_handle = ""
+                organization_email = ""
+                organization_facebook = ""
+                organization_image = voter_on_stage.voter_photo_url()
+                organization_manager = OrganizationManager()
+                create_results = organization_manager.create_organization(
+                    organization_name, organization_website, organization_twitter_handle,
+                    organization_email, organization_facebook, organization_image)
                 if create_results['organization_created']:
                     organization = create_results['organization']
                     try:

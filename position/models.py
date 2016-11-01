@@ -662,6 +662,19 @@ class PositionForFriends(models.Model):
             return
         return candidate_campaign
 
+    def contest_measure(self):
+        if not self.contest_measure_id:
+            return
+        try:
+            contest_measure = ContestMeasure.objects.get(id=self.contest_measure_id)
+        except ContestMeasure.MultipleObjectsReturned as e:
+            handle_record_found_more_than_one_exception(e, logger=logger)
+            logger.error("position.candidate_campaign Found multiple")
+            return
+        except ContestMeasure.DoesNotExist:
+            return
+        return contest_measure
+
     def election(self):
         if not self.google_civic_election_id:
             return
@@ -4279,6 +4292,21 @@ class PositionManager(models.Model):
                                                                          position_object.organization_we_vote_id)
                     if results['organization_found']:
                         organization = results['organization']
+
+                        # Make sure we have an organization name
+                        if not positive_value_exists(organization.organization_name):
+                            try:
+                                linked_voter = Voter.objects.get(
+                                    linked_organization_we_vote_id__iexact=organization.we_vote_id)
+                                if linked_voter.get_full_name():
+                                    try:
+                                        organization.organization_name = linked_voter.get_full_name()
+                                        organization.save()
+                                    except Exception as e:
+                                        pass
+                            except Voter.DoesNotExist:
+                                pass
+
                         if not positive_value_exists(position_object.speaker_display_name):
                             # speaker_display_name is missing so look it up from source
                             position_object.speaker_display_name = organization.organization_name
@@ -4290,6 +4318,7 @@ class PositionManager(models.Model):
                         if not positive_value_exists(position_object.speaker_twitter_handle):
                             # speaker_twitter_handle is missing so look it up from source
                             position_object.speaker_twitter_handle = organization.organization_twitter_handle
+                            # TODO DALE Upgrade to look in TwitterUser for the speaker_twitter_handle
                             position_change = True
                 except Exception as e:
                     pass
@@ -4319,6 +4348,7 @@ class PositionManager(models.Model):
                         if not positive_value_exists(position_object.speaker_twitter_handle):
                             # speaker_twitter_handle is missing so look it up from source
                             position_object.speaker_twitter_handle = voter.twitter_screen_name
+                            # TODO DALE Upgrade to look in TwitterUser for the speaker_twitter_handle
                             position_change = True
                 except Exception as e:
                     pass
