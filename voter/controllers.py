@@ -773,12 +773,16 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                     status += "UNABLE_TO_TWITTER_LINK_ORGANIZATION_TO_VOTER "
             else:
                 # Create new organization
-                organization_manager = OrganizationManager()
                 organization_name = twitter_owner_voter.get_full_name()
                 organization_website = ""
                 organization_twitter_handle = ""
+                organization_email = ""
+                organization_facebook = ""
+                organization_image = twitter_owner_voter.voter_photo_url()
+                organization_manager = OrganizationManager()
                 create_results = organization_manager.create_organization(
-                    organization_name, organization_website, organization_twitter_handle)
+                    organization_name, organization_website, organization_twitter_handle,
+                    organization_email, organization_facebook, organization_image)
                 if create_results['organization_created']:
                     # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                     organization = create_results['organization']
@@ -1454,6 +1458,12 @@ def refresh_voter_primary_email_cached_information_by_voter_we_vote_id(voter_we_
 
 
 def voter_sign_out_for_api(voter_device_id, sign_out_all_devices=False):  # voterSignOut
+    """
+    This gives us a chance to clean up some data
+    :param voter_device_id:
+    :param sign_out_all_devices:
+    :return:
+    """
     status = ""
 
     voter_device_link_manager = VoterDeviceLinkManager()

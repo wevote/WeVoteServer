@@ -2,8 +2,9 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import PositionEntered, PositionForFriends, PositionManager, PositionListManager, ANY_STANCE, NO_STANCE, \
-    FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY, SHOW_PUBLIC, THIS_ELECTION_ONLY, ALL_OTHER_ELECTIONS, ALL_ELECTIONS
+from .models import PositionEntered, PositionForFriends, PositionManager, PositionListManager, ANY_STANCE, \
+    FRIENDS_AND_PUBLIC, FRIENDS_ONLY, PUBLIC_ONLY, SHOW_PUBLIC, THIS_ELECTION_ONLY, ALL_OTHER_ELECTIONS, \
+    ALL_ELECTIONS, SUPPORT, OPPOSE, INFORMATION_ONLY, NO_STANCE
 from ballot.models import OFFICE, CANDIDATE, MEASURE
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
@@ -156,23 +157,16 @@ def merge_duplicate_positions_for_voter(position_list_for_one_voter):
         for position_to_compare in position_list_for_one_voter:
             if one_position.we_vote_id != position_to_compare.we_vote_id and \
                     one_position.we_vote_id not in removed and position_to_compare not in removed:
-                if positive_value_exists(one_position.candidate_campaign_we_vote_id) and \
-                        positive_value_exists(position_to_compare.candidate_campaign_we_vote_id) and \
-                        one_position.candidate_campaign_we_vote_id == position_to_compare.candidate_campaign_we_vote_id:
+                if do_these_match(one_position, position_to_compare, "candidate_campaign_we_vote_id"):
                     # These need to be merged
-                    combine_two_positions_for_voter(position_to_compare, one_position)
+                    combine_two_positions_for_voter_and_save(position_to_compare, one_position)
                     removed.append(position_to_compare.we_vote_id)
-                elif positive_value_exists(one_position.contest_measure_we_vote_id) and \
-                        positive_value_exists(position_to_compare.contest_measure_we_vote_id) and \
-                        one_position.contest_measure_we_vote_id == position_to_compare.contest_measure_we_vote_id:
+                if do_these_match(one_position, position_to_compare, "contest_measure_we_vote_id"):
                     # These need to be merged
-                    combine_two_positions_for_voter(position_to_compare, one_position)
+                    one_position = combine_two_positions_for_voter_and_save(position_to_compare, one_position)
                     removed.append(position_to_compare.we_vote_id)
-                    try:
-                        # position_to_compare.delete()
-                        pass
-                    except Exception in e:
-                        pass
+                    # We do not add one_position to the "removed" list because there might be more
+                    #  position_to_compare duplicates
                 # We should end up with only the non-duplicate positions
                 if one_position.we_vote_id not in included:
                     position_list_for_one_voter_to_return.append(one_position)
@@ -181,14 +175,94 @@ def merge_duplicate_positions_for_voter(position_list_for_one_voter):
     return position_list_for_one_voter_to_return
 
 
-def combine_two_positions_for_voter(from_position, to_position):
+def combine_two_positions_for_voter_and_save(from_position, to_position):
     """
-    We want to move all values over to the "to_position"
+    We want to move all values over to the "to_position". If anything gets in the way of a merge, it fails silently
+    and returns the original to_position.
     :param from_position:
     :param to_position:
     :return:
     """
-    return True
+
+    # If these two positions are not for the same ballot item, and for the same person, we do not proceed
+    if do_these_match(from_position, to_position, "candidate_campaign_we_vote_id"):
+        # This is good
+        pass
+    elif do_these_match(from_position, to_position, "contest_measure_we_vote_id"):
+        # This is good
+        pass
+    else:
+        return to_position
+
+    if do_these_match(from_position, to_position, "voter_we_vote_id") or \
+            do_these_match(from_position, to_position, "organization_we_vote_id"):
+        # This is required
+        pass
+    else:
+        # We only want to merge duplicate positions for a voter or organization - at least one of them must match
+        return to_position
+
+    # If here we have made sure that we can proceed without damaging data
+    # Voter entered data
+    to_position.statement_html = return_most_likely_data(from_position, to_position, "statement_html")
+    to_position.statement_text = return_most_likely_data(from_position, to_position, "statement_text")
+    to_position.volunteer_certified = return_most_likely_data(from_position, to_position, "volunteer_certified")
+    if positive_value_exists(getattr(from_position, "stance")) and \
+            positive_value_exists(getattr(to_position, "stance")):
+        if to_position.stance in (SUPPORT, OPPOSE):
+            # Leave to_position.stance as-is
+            pass
+        elif from_position.stance in (SUPPORT, OPPOSE):
+            to_position.stance = from_position.stance
+        elif to_position.stance in (INFORMATION_ONLY, NO_STANCE):
+            # Leave to_position.stance as-is
+            pass
+        elif from_position.stance in (INFORMATION_ONLY, NO_STANCE):
+            to_position.stance = from_position.stance
+        else:
+            # Leave to_position.stance alone
+            pass
+    elif positive_value_exists(getattr(from_position, "stance")):
+        to_position.stance = getattr(from_position, "stance")
+    elif positive_value_exists(getattr(to_position, "stance")):
+        to_position.stance = getattr(to_position, "stance")
+
+    # Cached data like: ballot_item_display_name, ballot_item_image_url_https, ballot_item_twitter_handle,
+    #  contest_office_name,
+    position_manager = PositionManager()
+    to_position = position_manager.refresh_cached_position_info(to_position)
+
+    try:
+        to_position.save()
+        try:
+            from_position.delete()
+            pass
+        except Exception as e:
+            pass
+    except Exception as e:
+        pass
+
+    return to_position
+
+
+def do_these_match(from_position, to_position, attribute):
+    if positive_value_exists(getattr(from_position, attribute)) and \
+            positive_value_exists(getattr(to_position, attribute)):
+        if getattr(from_position, attribute) == getattr(to_position, attribute):
+            return True
+    return False
+
+
+def return_most_likely_data(from_position, to_position, attribute):
+    if positive_value_exists(getattr(from_position, attribute)) and \
+            positive_value_exists(getattr(to_position, attribute)):
+        # Merge
+        pass
+    elif positive_value_exists(getattr(from_position, attribute)):
+        return getattr(from_position, attribute)
+    elif positive_value_exists(getattr(to_position, attribute)):
+        return getattr(to_position, attribute)
+    return getattr(to_position, attribute)
 
 
 def move_positions_to_another_organization(from_organization_id, from_organization_we_vote_id,

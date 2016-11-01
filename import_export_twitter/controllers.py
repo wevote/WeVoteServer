@@ -1163,8 +1163,13 @@ def voter_twitter_save_to_current_account_for_api(voter_device_id):  # voterTwit
             organization_name = voter.get_full_name()
             organization_website = ""
             organization_twitter_handle = ""
+            organization_email = ""
+            organization_facebook = ""
+            organization_image = voter.voter_photo_url()
+            organization_manager = OrganizationManager()
             create_results = organization_manager.create_organization(
-                organization_name, organization_website, organization_twitter_handle)
+                organization_name, organization_website, organization_twitter_handle,
+                organization_email, organization_facebook, organization_image)
             if create_results['organization_created']:
                 # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
                 new_organization = create_results['organization']

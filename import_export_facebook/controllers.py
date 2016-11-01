@@ -4,7 +4,12 @@
 
 from config.base import get_environment_variable
 from email_outbound.models import EmailManager
+from follow.controllers import move_follow_entries_to_another_voter
+from friend.controllers import move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from import_export_facebook.models import FacebookManager
+from organization.controllers import move_organization_to_another_complete
+from organization.models import OrganizationManager
+from position.controllers import move_positions_to_another_voter
 from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import is_voter_device_id_valid, positive_value_exists
@@ -92,7 +97,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     success = results['success']
     voter = results['voter']
 
-    # ##### Make the facebook_email the primary email for the current voter
+    # ##### Make the facebook_email an email for the current voter (and possibly the primary email)
     email_manager = EmailManager()
     if positive_value_exists(facebook_auth_response.facebook_email):
         # Check to make sure there isn't an account already using the facebook_email
@@ -132,6 +137,34 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
                 voter_manager.update_voter_email_ownership_verified(voter, email_address_object)
             except Exception as e:
                 status += "UNABLE_TO_MAKE_FACEBOOK_EMAIL_THE_PRIMARY "
+
+    # Does this voter already have an organization associated with their account?
+    if positive_value_exists(voter.linked_organization_we_vote_id):
+        # TODO DALE Do we need to do anything if they already have a linked_organization_we_vote_id?
+        pass
+    else:
+        organization_name = voter.get_full_name()
+        organization_website = ""
+        organization_twitter_handle = ""
+        organization_email = ""
+        organization_facebook = ""
+        organization_image = voter.voter_photo_url()
+        organization_manager = OrganizationManager()
+        create_results = organization_manager.create_organization(
+            organization_name, organization_website, organization_twitter_handle,
+            organization_email, organization_facebook, organization_image)
+        if create_results['organization_created']:
+            # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
+            new_organization = create_results['organization']
+            # Connect voter.linked_organization_we_vote_id with new organization
+            try:
+                voter.linked_organization_we_vote_id = new_organization.we_vote_id
+                voter.save()
+            except Exception as e:
+                success = False
+                status += "VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_NOT_UPDATED "
+        else:
+            status += "NEW_ORGANIZATION_COULD_NOT_BE_CREATED "
 
     results = {
         'success':                  success,
@@ -291,6 +324,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
     facebook_secret_key = ""
     voter_we_vote_id_attached_to_facebook = ""
     voter_manager = VoterManager()
+    organization_manager = OrganizationManager()
 
     facebook_link_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_auth_response.facebook_user_id)
     if facebook_link_results['facebook_link_to_voter_found']:
@@ -335,6 +369,83 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             if save_results['facebook_link_to_voter_saved']:
                 facebook_link_to_voter = save_results['facebook_link_to_voter']
                 facebook_secret_key = facebook_link_to_voter.secret_key
+
+                facebook_linked_voter_results = \
+                    voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id_attached_to_facebook_email)
+                if facebook_linked_voter_results['voter_found']:
+                    facebook_linked_voter = facebook_linked_voter_results['voter']
+
+                    # Map
+                    from_voter_id = voter.id
+                    from_voter_we_vote_id = voter.we_vote_id
+                    from_voter_linked_organization_id = 0
+                    from_voter_linked_organization_we_vote_id = ""
+                    to_voter_id = facebook_linked_voter.id
+                    to_voter_we_vote_id = facebook_linked_voter.we_vote_id
+                    to_voter_linked_organization_id = 0
+                    to_voter_linked_organization_we_vote_id = ""
+
+                    # Transfer the organizations the from_voter is following to the to_voter
+                    move_follow_results = move_follow_entries_to_another_voter(from_voter_id, to_voter_id,
+                                                                               to_voter_we_vote_id)
+                    status += " " + move_follow_results['status']
+
+                    # Transfer positions from the from_voter to the to_voter
+                    if positive_value_exists(facebook_linked_voter.linked_organization_we_vote_id):
+                        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                            facebook_linked_voter.linked_organization_we_vote_id)
+                        if organization_results['organization_found']:
+                            facebook_linked_organization = organization_results['organization']
+                            to_voter_linked_organization_id = facebook_linked_organization.id
+                            to_voter_linked_organization_we_vote_id = facebook_linked_organization.we_vote_id
+                            move_positions_results = move_positions_to_another_voter(
+                                from_voter_id, from_voter_we_vote_id,
+                                to_voter_id, to_voter_we_vote_id,
+                                to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id)
+                            status += " " + move_positions_results['status']
+
+                    # Does the current voter have an organization?
+                    if positive_value_exists(voter.linked_organization_we_vote_id):
+                        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                            voter.linked_organization_we_vote_id)
+                        if organization_results['organization_found']:
+                            from_voter_organization = organization_results['organization']
+                            from_voter_linked_organization_we_vote_id = from_voter_organization.we_vote_id
+
+                        if positive_value_exists(from_voter_linked_organization_we_vote_id) and \
+                                positive_value_exists(to_voter_linked_organization_we_vote_id) and \
+                                from_voter_linked_organization_we_vote_id != to_voter_linked_organization_we_vote_id:
+                            move_organization_to_another_complete_results = move_organization_to_another_complete(
+                                from_voter_linked_organization_id, from_voter_linked_organization_we_vote_id,
+                                to_voter_linked_organization_id, to_voter_linked_organization_we_vote_id,
+                                to_voter_id, to_voter_we_vote_id
+                            )
+                            status += " " + move_organization_to_another_complete_results['status']
+
+                        # We only run these routines if the current voter has an organization, since an org is required
+                        #  to have friends or invitations
+
+                        # Transfer friends from voter to new_owner_voter
+                        move_friends_results = move_friends_to_another_voter(from_voter_we_vote_id, to_voter_we_vote_id)
+                        status += " " + move_friends_results['status']
+
+                        # Transfer friend invitations from voter to email_owner_voter
+                        move_friend_invitations_results = move_friend_invitations_to_another_voter(
+                            from_voter_we_vote_id, to_voter_we_vote_id)
+                        status += " " + move_friend_invitations_results['status']
+
+                    # And finally, relink the current voter_device_id to to_voter
+                    voter_device_link_manager = VoterDeviceLinkManager()
+                    results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+
+                    if results['voter_device_link_found']:
+                        voter_device_link = results['voter_device_link']
+
+                        update_link_results = voter_device_link_manager.update_voter_device_link(voter_device_link,
+                                                                                                 facebook_linked_voter)
+                        if update_link_results['voter_device_link_updated']:
+                            success = True
+                            status += " FACEBOOK_SAVE_TO_CURRENT_ACCOUNT_VOTER_DEVICE_LINK_UPDATED"
         else:
             voter_we_vote_id_attached_to_facebook_email = ""
 

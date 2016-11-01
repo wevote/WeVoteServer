@@ -397,9 +397,11 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
             <td>
             {% if position.organization %}
                 <a href="{% url 'organization:organization_position_edit' position.organization.id position.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{{ position.get_stance_display }} - {{ position.statement_text }}</a>
+                   target="_blank">{{ position.get_stance_display }}
+                   {% if position.statement_text %} - {{ position.statement_text }}{% endif %}</a>
             {% else %}
-                {{ position.get_stance_display }} - {{ position.statement_text }}
+                {{ position.get_stance_display }}
+                   {% if position.statement_text %} - {{ position.statement_text }}{% endif %}
             {% endif %}
             </td>
             <td>
@@ -462,9 +464,11 @@ linked_organization_we_vote_id: {{ voter.linked_organization_we_vote_id|default_
             <td>
             {% if position.organization %}
                 <a href="{% url 'organization:organization_position_edit' position.organization.id position.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
-                   target="_blank">{{ position.get_stance_display }} - {{ position.statement_text }}</a>
+                   target="_blank">{{ position.get_stance_display }}
+                    {% if position.statement_text %} - {{ position.statement_text }}{% endif %}</a>
             {% else %}
-                {{ position.get_stance_display }} - {{ position.statement_text }}
+                {{ position.get_stance_display }}
+                {% if position.statement_text %} - {{ position.statement_text }}{% endif %}
             {% endif %}
             </td>
             <td>
