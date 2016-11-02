@@ -321,8 +321,8 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                                                                           maximum_number_to_retrieve,
                                                                           'twitter_followers_count', 'desc')
             success = results['success']
-            status = results['status']
             voter_guide_list = results['voter_guide_list']
+            status = results['status'] + ", len(voter_guide_list): " + len(voter_guide_list)
         else:
             results = retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string,
                                                                       maximum_number_to_retrieve,
@@ -349,6 +349,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
         position = PositionEntered()
         for voter_guide in voter_guide_list:
             if positive_value_exists(voter_guide.organization_we_vote_id) \
+                    and positive_value_exists(linked_organization_we_vote_id) \
                     and linked_organization_we_vote_id == voter_guide.organization_we_vote_id:
                 # Do not return your own voter guide to follow
                 continue
