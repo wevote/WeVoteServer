@@ -761,6 +761,23 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                               organization_twitter_handle, organization_facebook, organization_image,
                               refresh_from_twitter,
                               facebook_id, facebook_email, facebook_profile_image_url_https):
+    """
+    DALE NOTE: I believe we only use this to save an organization in order to link it to a voter
+    :param voter_device_id:
+    :param organization_id:
+    :param organization_we_vote_id:
+    :param organization_name:
+    :param organization_email:
+    :param organization_website:
+    :param organization_twitter_handle:
+    :param organization_facebook:
+    :param organization_image:
+    :param refresh_from_twitter:
+    :param facebook_id:
+    :param facebook_email:
+    :param facebook_profile_image_url_https:
+    :return:
+    """
     organization_id = convert_to_int(organization_id)
     organization_we_vote_id = organization_we_vote_id.strip().lower()
 
@@ -880,52 +897,42 @@ def organization_save_for_api(voter_device_id, organization_id, organization_we_
                     twitter_user_manager.create_twitter_link_to_organization(twitter_user.twitter_id,
                                                                              organization.we_vote_id)
 
-            # TODO DALE 2016-10-30 I am not sure we want this code here in this routine.
-            # # Now update the voter record with the organization_we_vote_id
-            # if voter_found:
-            #     # Does this voter have the same Twitter handle as this organization? If so, link this organization to
-            #     #  this particular voter
-            #     results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_handle(
-            #         organization.organization_twitter_handle)
-            #     if results['twitter_link_to_voter_found']:
-            #         twitter_link_to_voter = results['twitter_link_to_voter']
-            #         # Check to make sure another voter isn't hanging onto this organization_we_vote_id
-            #         # TODO DALE UPDATE linked_organization_we_vote_id
-            #         voter_manager.clear_out_collisions_for_linked_organization_we_vote_id(organization.we_vote_id)
-            #         try:
-            #             voter.linked_organization_we_vote_id = organization.we_vote_id
-            #             voter.save()
-            #
-            #             # TODO DALE UPDATE linked_organization_we_vote_id
-            #             # TODO DALE UPDATE positions to add voter_we_vote_id - Any position with
-            #             # the organization_we_vote_id should get the voter_we_vote_id added,
-            #             # and any position with the voter_we_vote_id should get the organization_we_vote_id added
-            #         except Exception as e:
-            #             success = False
-            #             status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_TWITTER "
-            #     else:
-            #         # Does the facebook_id for the voter and org match?
-            #         facebook_id_matches = positive_value_exists(voter.facebook_id) \
-            #             and voter.facebook_id == organization.facebook_id
-            #
-            #         if facebook_id_matches:
-            #             # Check to make sure another voter isn't hanging onto this organization_we_vote_id
-            #             # TODO DALE UPDATE linked_organization_we_vote_id
-            #             voter_manager.clear_out_collisions_for_linked_organization_we_vote_id(organization.we_vote_id)
-            #             try:
-            #                 voter.linked_organization_we_vote_id = organization.we_vote_id
-            #                 voter.save()
-            #
-            #                 # TODO DALE UPDATE linked_organization_we_vote_id
-            #                 # TODO DALE UPDATE positions to add voter_we_vote_id - Any position with
-            #                 # the organization_we_vote_id should get the voter_we_vote_id added,
-            #                 # and any position with the voter_we_vote_id should get the organization_we_vote_id added
-            #             except Exception as e:
-            #                 success = False
-            #                 status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_FACEBOOK "
-            #         # If not, then this is a volunteer or admin setting up an organization
-            #         else:
-            #             status += " DID_NOT_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID-VOTER_NOT_FOUND"
+        # Now update the voter record with the organization_we_vote_id
+        if voter_found:
+            # Does this voter have the same Twitter handle as this organization? If so, link this organization to
+            #  this particular voter
+            results = twitter_user_manager.retrieve_twitter_link_to_voter_from_twitter_handle(
+                organization.organization_twitter_handle)
+            if results['twitter_link_to_voter_found']:
+                twitter_link_to_voter = results['twitter_link_to_voter']
+                # Check to make sure another voter isn't hanging onto this organization_we_vote_id
+                # TODO DALE UPDATE linked_organization_we_vote_id
+                voter_manager.clear_out_collisions_for_linked_organization_we_vote_id(voter.we_vote_id,
+                                                                                      organization.we_vote_id)
+                try:
+                    voter.linked_organization_we_vote_id = organization.we_vote_id
+                    voter.save()
+
+                    # TODO DALE UPDATE positions to add voter_we_vote_id - Any position with
+                    # the organization_we_vote_id should get the voter_we_vote_id added,
+                    # and any position with the voter_we_vote_id should get the organization_we_vote_id added
+                except Exception as e:
+                    success = False
+                    status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_TWITTER "
+            elif positive_value_exists(facebook_id):
+                # Check to make sure another voter isn't hanging onto this organization_we_vote_id
+                voter_manager.clear_out_collisions_for_linked_organization_we_vote_id(voter.we_vote_id,
+                                                                                      organization.we_vote_id)
+                try:
+                    voter.linked_organization_we_vote_id = organization.we_vote_id
+                    voter.save()
+
+                    # TODO DALE UPDATE positions to add voter_we_vote_id - Any position with
+                    # the organization_we_vote_id should get the voter_we_vote_id added,
+                    # and any position with the voter_we_vote_id should get the organization_we_vote_id added
+                except Exception as e:
+                    success = False
+                    status += " UNABLE_TO_UPDATE_VOTER_WITH_ORGANIZATION_WE_VOTE_ID_FROM_FACEBOOK "
 
         results = {
             'success':                      success,

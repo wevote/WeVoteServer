@@ -9,6 +9,7 @@ from config.base import get_environment_variable
 from email_outbound.controllers import schedule_email_with_email_outbound_description, schedule_verification_email
 from email_outbound.models import EmailAddress, EmailManager, FRIEND_INVITATION_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
 import json
+from organization.models import OrganizationManager
 from validate_email import validate_email
 from voter.models import Voter, VoterManager
 import wevote_functions.admin
@@ -496,6 +497,27 @@ def friend_invitation_by_email_verify_for_api(voter_device_id, invitation_secret
         else:
             success = False
             status = " friend_invitation_email_link_found CREATE_OR_UPDATE_CURRENT_FRIEND_FAILED"
+
+        # And finally, create an organization for this brand new signed-in voter so they can create public opinions
+        organization_name = voter.get_full_name()
+        organization_website = ""
+        organization_twitter_handle = ""
+        organization_email = ""
+        organization_facebook = ""
+        organization_image = voter.voter_photo_url()
+        organization_manager = OrganizationManager()
+        create_results = organization_manager.create_organization(
+            organization_name, organization_website, organization_twitter_handle,
+            organization_email, organization_facebook, organization_image)
+        if create_results['organization_created']:
+            # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
+            organization = create_results['organization']
+            try:
+                voter.linked_organization_we_vote_id = organization.we_vote_id
+                voter.save()
+                status += "VOTER_AND_ORGANIZATION_CREATED_FROM_FRIEND_INVITATION "
+            except Exception as e:
+                status += "UNABLE_CREATE_AND_LINK_VOTER_FROM_FRIEND_INVITATION "
 
     invitation_secret_key_belongs_to_this_voter = \
         voter_we_vote_id == voter_we_vote_id_accepting_invitation
