@@ -322,7 +322,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                                                                           'twitter_followers_count', 'desc')
             success = results['success']
             voter_guide_list = results['voter_guide_list']
-            status = results['status'] + ", len(voter_guide_list): " + len(voter_guide_list)
+            status = results['status'] + ", len(voter_guide_list): " + str(len(voter_guide_list)) + " "
         else:
             results = retrieve_voter_guides_to_follow_generic_for_api(voter_id, search_string,
                                                                       maximum_number_to_retrieve,
