@@ -7,7 +7,9 @@ from django.db import models
 from django.db.models import Q
 from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
+from import_export_facebook.models import FacebookManager
 from import_export_twitter.functions import retrieve_twitter_user_info
+from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_org_integer, fetch_site_unique_id_prefix
@@ -319,7 +321,31 @@ class OrganizationManager(models.Manager):
                 found_with_status = ''
                 organization_on_stage_found = False
 
-                # 3) facebook_id exists? Try to find it. If not, go to step 4
+                # 3a) FacebookLinkToVoter exists? If not, go to step 3b
+                if not organization_on_stage_found and positive_value_exists(facebook_id):
+                    facebook_manager = FacebookManager()
+                    facebook_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id)
+                    if facebook_results['facebook_link_to_voter_found']:
+                        facebook_link_to_voter = facebook_results['facebook_link_to_voter']
+                        voter_manager = VoterManager()
+                        voter_results = \
+                            voter_manager.retrieve_voter_by_we_vote_id(facebook_link_to_voter.voter_we_vote_id)
+                        if voter_results['voter_found']:
+                            voter = voter_results['voter']
+                            if positive_value_exists(voter.linked_organization_we_vote_id):
+                                try:
+                                    organization_on_stage = Organization.objects.get(
+                                        we_vote_id=voter.linked_organization_we_vote_id)
+                                    organization_on_stage_found = True
+                                    found_with_status = "FOUND_WITH_FACEBOOK_LINK_TO_VOTER"
+                                except Organization.MultipleObjectsReturned as e:
+                                    exception_multiple_object_returned = True
+                                    logger.warn("Organization.MultipleObjectsReturned FACEBOOK_LINK_TO_VOTER")
+                                except Organization.DoesNotExist as e:
+                                    # Not a problem -- an organization matching this facebook_id wasn't found
+                                    exception_does_not_exist = True
+
+                # 3b) facebook_id exists? Try to find it. If not, go to step 4
                 if not organization_on_stage_found and positive_value_exists(facebook_id):
                     try:
                         organization_on_stage = Organization.objects.get(
