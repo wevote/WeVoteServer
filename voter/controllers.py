@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from email_outbound.controllers import move_email_address_entries_to_another_voter
 from email_outbound.models import EmailManager
 from follow.controllers import move_follow_entries_to_another_voter, move_organization_followers_to_another_organization
-from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, \
+from friend.controllers import fetch_friend_invitation_recipient_voter_we_vote_id, friend_accepted_invitation_send, \
     move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
 from import_export_facebook.models import FacebookManager
@@ -813,12 +813,15 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
     # ############# INVITATION SIGN IN #####################################
     elif positive_value_exists(invitation_secret_key):
         friend_manager = FriendManager()
+        invitation_owner_voter = Voter()
         for_merge_accounts = True
+        sender_voter_we_vote_id = ""
         friend_invitation_results = friend_manager.retrieve_friend_invitation_from_secret_key(
             invitation_secret_key, for_merge_accounts)
-        if not friend_invitation_results['friend_invitation_found']:
+        if friend_invitation_results['friend_invitation_found']:
             friend_invitation = friend_invitation_results['friend_invitation']
             recipient_voter_we_vote_id = fetch_friend_invitation_recipient_voter_we_vote_id(friend_invitation)
+            sender_voter_we_vote_id = friend_invitation.sender_voter_we_vote_id
 
             invitation_owner_voter_results = voter_manager.retrieve_voter_by_we_vote_id(recipient_voter_we_vote_id)
             if invitation_owner_voter_results['voter_found']:
@@ -849,6 +852,11 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 'invitation_owner_voter_found': invitation_owner_voter_found,
             }
             return error_results
+
+        # We want to send an email letting the original inviter know that the person accepted
+        accepting_voter_we_vote_id = invitation_owner_voter.we_vote_id
+        original_sender_we_vote_id = sender_voter_we_vote_id
+        friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_we_vote_id)
 
         # Now we have voter (from voter_device_id) and invitation_owner_voter (from invitation_secret_key)
         # We are going to make the email_owner_voter the new master
