@@ -712,9 +712,6 @@ def friend_invite_response_for_api(voter_device_id, kind_of_invite_response, oth
     :param recipient_voter_email:
     :return:
     """
-    success = False
-    status = "IN_DEVELOPMENT"
-
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         error_results = {
@@ -1044,6 +1041,7 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
             else:
                 status += "to_sender_invitation_found found, EmailLink Sender entries not moved "
                 # friend_invitation_entries_not_moved += 1
+                # TODO DALE Shouldn't we delete the from_sender_entry?
 
     # ###############################
     # FriendInvitationVoterLink
@@ -1082,6 +1080,7 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
             else:
                 status += "to_sender_invitation_found found, VoterLink Sender entries not moved "
                 # friend_invitation_entries_not_moved += 1
+                # TODO DALE Shouldn't we delete the from_sender_entry?
 
     # RECIPIENT entries
     # FROM RECIPIENT: Invitations sent TO the from_voter from others
@@ -1119,6 +1118,7 @@ def move_friend_invitations_to_another_voter(from_voter_we_vote_id, to_voter_we_
             else:
                 status += "to_sender_invitation_found found, Recipient entries not moved "
                 # friend_invitation_entries_not_moved += 1
+                # TODO DALE Shouldn't we delete the from_sender_entry?
     status += " FRIEND_INVITATIONS moved: " + str(friend_invitation_entries_moved) + \
               ", not moved: " + str(friend_invitation_entries_not_moved)
 
