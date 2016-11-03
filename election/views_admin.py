@@ -48,6 +48,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
 
     try:
         if positive_value_exists(election_local_id):
@@ -65,17 +66,18 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
 
     # Check to see if we have polling location data related to the region(s) covered by this election
     # We request the ballot data for each polling location as a way to build up our local data
-    state = election_on_stage.get_election_state()
-    if not positive_value_exists(state):  # TODO DALE Temp for 2016
-        state = "CA"
+    if not positive_value_exists(state_code):
+        state_code = election_on_stage.get_election_state()
+        if not positive_value_exists(state_code):
+            state_code = "CA"  # TODO DALE Temp for 2016
 
     try:
         polling_location_count_query = PollingLocation.objects.all()
-        polling_location_count_query = polling_location_count_query.filter(state__iexact=state)
+        polling_location_count_query = polling_location_count_query.filter(state__iexact=state_code)
         polling_location_count = polling_location_count_query.count()
 
         polling_location_list = PollingLocation.objects.all()
-        polling_location_list = polling_location_list.filter(state__iexact=state)
+        polling_location_list = polling_location_list.filter(state__iexact=state_code)
         # We used to have a limit of 500 ballots to pull per election, but now retrieve all
         # Ordering by "location_name" creates a bit of (locational) random order
         polling_location_list = polling_location_list.order_by('location_name')  # [:500]  For testing smaller batches
@@ -85,7 +87,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                              'No polling locations exist for the state \'{state}\'. '
                              'Data needed from VIP.'.format(
                                  election_name=election_on_stage.election_name,
-                                 state=state))
+                                 state=state_code))
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     if polling_location_count == 0:
@@ -93,7 +95,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
                              'Could not retrieve ballot data for the {election_name}. '
                              'No polling locations returned for the state \'{state}\'. (error 2)'.format(
                                  election_name=election_on_stage.election_name,
-                                 state=state))
+                                 state=state_code))
         return HttpResponseRedirect(reverse('election:election_summary', args=(election_local_id,)))
 
     ballots_retrieved = 0

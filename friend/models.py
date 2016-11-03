@@ -671,10 +671,7 @@ class FriendManager(models.Model):
         if current_friend_list_found:
             voter_manager = VoterManager()
             for current_friend_entry in current_friend_list:
-                if current_friend_entry.viewer_voter_we_vote_id == voter_we_vote_id:
-                    we_vote_id_of_friend = current_friend_entry.viewee_voter_we_vote_id
-                else:
-                    we_vote_id_of_friend = current_friend_entry.viewer_voter_we_vote_id
+                we_vote_id_of_friend = current_friend_entry.fetch_other_voter_we_vote_id(voter_we_vote_id)
                 # This is the voter you are friends with
                 friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(we_vote_id_of_friend)
                 if friend_voter_results['voter_found']:
@@ -1111,6 +1108,16 @@ class FriendManager(models.Model):
             return len(friend_list)
         return 0
 
+    def fetch_friend_invitations_sent_by_me_we_vote_id_list(self, sender_voter_we_vote_id):
+        results = self.retrieve_friend_invitations_sent_by_me(sender_voter_we_vote_id)
+        we_vote_id_list = []
+        if results['friend_list_found']:
+            friend_list = results['friend_list']
+            for friend_invitation in friend_list:
+                if hasattr(friend_invitation, "recipient_voter_we_vote_id"):
+                    we_vote_id_list.append(friend_invitation.recipient_voter_we_vote_id)
+        return we_vote_id_list
+
     def retrieve_friend_invitations_sent_by_me(self, sender_voter_we_vote_id):
         friend_list_found = False
         friend_list = []
@@ -1229,6 +1236,16 @@ class FriendManager(models.Model):
             friend_list = results['friend_list']
             return len(friend_list)
         return 0
+
+    def fetch_friend_invitations_sent_to_me_we_vote_id_list(self, sender_voter_we_vote_id):
+        results = self.retrieve_friend_invitations_sent_to_me(sender_voter_we_vote_id)
+        we_vote_id_list = []
+        if results['friend_list_found']:
+            friend_list = results['friend_list']
+            for friend_invitation in friend_list:
+                if hasattr(friend_invitation, "recipient_voter_we_vote_id"):
+                    we_vote_id_list.append(friend_invitation.recipient_voter_we_vote_id)
+        return we_vote_id_list
 
     def retrieve_friend_invitations_sent_to_me(self, recipient_voter_we_vote_id):
         friend_list_found = False
@@ -1517,19 +1534,40 @@ class FriendManager(models.Model):
             suggested_friend_list_found = False
             status = 'FAILED retrieve_suggested_friend_list_as_voters '
 
+        friend_results = self.retrieve_friends_we_vote_id_list(voter_we_vote_id)
+        friends_we_vote_id_list = []
+        if friend_results['friends_we_vote_id_list_found']:
+            friends_we_vote_id_list = friend_results['friends_we_vote_id_list']
+
+        invitations_sent_by_me_we_vote_id_list = self.fetch_friend_invitations_sent_by_me_we_vote_id_list(
+            voter_we_vote_id)
+
+        invitations_sent_to_me_we_vote_id_list = self.fetch_friend_invitations_sent_to_me_we_vote_id_list(
+            voter_we_vote_id)
+
         filtered_suggested_friend_list_we_vote_ids = {}
         if suggested_friend_list_found:
             voter_manager = VoterManager()
             for suggested_friend_entry in suggested_friend_list:
-                if suggested_friend_entry.viewer_voter_we_vote_id == voter_we_vote_id:
-                    we_vote_id_of_friend = suggested_friend_entry.viewee_voter_we_vote_id
-                else:
-                    we_vote_id_of_friend = suggested_friend_entry.viewer_voter_we_vote_id
+                we_vote_id_of_friend = suggested_friend_entry.fetch_other_voter_we_vote_id(voter_we_vote_id)
+
+                if we_vote_id_of_friend in friends_we_vote_id_list:
+                    # If this person is already a friend, don't suggest as a friend
+                    continue
+
+                if we_vote_id_of_friend in invitations_sent_by_me_we_vote_id_list:
+                    # If we already sent them an invite, don't suggest as a friend
+                    continue
+
+                if we_vote_id_of_friend in invitations_sent_to_me_we_vote_id_list:
+                    # If we have already been sent an invite from them, don't suggest as a friend
+                    continue
+
                 # Create a dictionary of we_vote_ids with the number of times a friend is suggested
                 if hasattr(filtered_suggested_friend_list_we_vote_ids, we_vote_id_of_friend):
                     filtered_suggested_friend_list_we_vote_ids[we_vote_id_of_friend] += 1
                 else:
-                    filtered_suggested_friend_list_we_vote_ids[we_vote_id_of_friend] = 0
+                    filtered_suggested_friend_list_we_vote_ids[we_vote_id_of_friend] = 1
 
             ordered_suggested_friend_list_we_vote_ids = sorted(filtered_suggested_friend_list_we_vote_ids)
             for we_vote_id_of_friend in ordered_suggested_friend_list_we_vote_ids:
