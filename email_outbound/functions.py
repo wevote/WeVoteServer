@@ -2,7 +2,8 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import FRIEND_INVITATION_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, VERIFY_EMAIL_ADDRESS_TEMPLATE
+from .models import FRIEND_ACCEPTED_INVITATION_TEMPLATE, FRIEND_INVITATION_TEMPLATE, LINK_TO_SIGN_IN_TEMPLATE, \
+    VERIFY_EMAIL_ADDRESS_TEMPLATE
 from django.template.loader import get_template
 from django.template import Context
 import json
@@ -19,6 +20,11 @@ def get_template_filename(kind_of_email_template, text_or_html):
             return "friend_invitation.html"
         else:
             return "friend_invitation.txt"
+    elif kind_of_email_template == FRIEND_ACCEPTED_INVITATION_TEMPLATE:
+        if text_or_html == "HTML":
+            return "friend_accepted_invitation.html"
+        else:
+            return "friend_accepted_invitation.txt"
     elif kind_of_email_template == LINK_TO_SIGN_IN_TEMPLATE:
         if text_or_html == "HTML":
             return "link_to_sign_in.html"
@@ -35,6 +41,8 @@ def get_template_filename(kind_of_email_template, text_or_html):
 def merge_message_content_with_template(kind_of_email_template, template_variables_in_json):
     success = True
     status = ""
+    message_text = ""
+    message_html = ""
 
     # Transfer JSON template variables back into a dict
     template_variables_dict = json.loads(template_variables_in_json)
@@ -53,8 +61,14 @@ def merge_message_content_with_template(kind_of_email_template, template_variabl
     else:
         subject = "From We Vote"
 
-    message_text = text_template.render(template_variables_object)
-    message_html = html_template.render(template_variables_object)
+    try:
+        message_text = text_template.render(template_variables_object)
+        status += "RENDERED_TEXT_TEMPLATE "
+        message_html = html_template.render(template_variables_object)
+        status += "RENDERED_HTML_TEMPLATE "
+    except Exception as e:
+        status += "FAILED_RENDERING_TEMPLATE "
+        success = False
 
     results = {
         'success':      success,

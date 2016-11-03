@@ -430,6 +430,7 @@ class FriendManager(models.Model):
         # TODO: If 2, check to see if these two are already friends so we can return success if
         #  kind_of_invite_response == ACCEPT_INVITATION
 
+        friend_invitation_accepted = False
         friend_invitation_deleted = False
         friend_invitation_saved = False
 
@@ -459,6 +460,12 @@ class FriendManager(models.Model):
                 results = friend_manager.create_or_update_current_friend(sender_voter.we_vote_id, voter.we_vote_id)
                 success = results['success']
                 status = results['status']
+
+                friend_manager.update_suggested_friends_starting_with_one_voter(sender_voter.we_vote_id)
+                friend_manager.update_suggested_friends_starting_with_one_voter(voter.we_vote_id)
+
+                if results['current_friend_created']:
+                    friend_invitation_accepted = True
 
                 # And then delete the friend_invitation_voter_link
                 if results['current_friend_found'] or results['current_friend_created']:
@@ -502,6 +509,7 @@ class FriendManager(models.Model):
             'friend_invitation_found':      friend_invitation_found,
             'friend_invitation_deleted':    friend_invitation_deleted,
             'friend_invitation_saved':      friend_invitation_saved,
+            'friend_invitation_accepted':   friend_invitation_accepted,
         }
         return results
 
@@ -1584,6 +1592,42 @@ class FriendManager(models.Model):
             'voter_we_vote_id':     voter_we_vote_id,
             'friend_list_found':    friend_list_found,
             'friend_list':          friend_list,
+        }
+        return results
+
+    def update_suggested_friends_starting_with_one_voter(self, starting_voter_we_vote_id):
+        """
+
+        :param starting_voter_we_vote_id:
+        :return:
+        """
+        all_friends_one_person_results = self.retrieve_current_friends(starting_voter_we_vote_id)
+        suggested_friend_created_count = 0
+        if all_friends_one_person_results['current_friend_list_found']:
+            current_friend_list = all_friends_one_person_results['current_friend_list']
+            # For each friend on this list, suggest every other friend as a possible friend
+            for one_current_friend_to_suggest in current_friend_list:
+                first_voter_we_vote_id = one_current_friend_to_suggest.fetch_other_voter_we_vote_id(
+                    starting_voter_we_vote_id)
+                for second_current_friend_to_suggest in current_friend_list:
+                    second_voter_we_vote_id = second_current_friend_to_suggest.fetch_other_voter_we_vote_id(
+                        starting_voter_we_vote_id)
+                    if positive_value_exists(first_voter_we_vote_id) and \
+                            positive_value_exists(second_voter_we_vote_id) and \
+                            first_voter_we_vote_id != second_voter_we_vote_id:
+                        # Are they already friends?
+                        already_friend_results = self.retrieve_current_friend(first_voter_we_vote_id,
+                                                                              second_voter_we_vote_id)
+                        if not already_friend_results['current_friend_found']:
+                            suggested_friend_results = self.create_or_update_suggested_friend(first_voter_we_vote_id,
+                                                                                              second_voter_we_vote_id)
+                            if suggested_friend_results['suggested_friend_created']:
+                                suggested_friend_created_count += 1
+
+        results = {
+            'status':                           "UPDATE_SUGGESTED_FRIENDS_COMPLETED ",
+            'success':                          True,
+            'suggested_friend_created_count':   suggested_friend_created_count,
         }
         return results
 

@@ -8,12 +8,14 @@ from wevote_functions.functions import extract_email_addresses_from_string, gene
     positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_last_email_integer, fetch_site_unique_id_prefix
 
+FRIEND_ACCEPTED_INVITATION_TEMPLATE = 'FRIEND_ACCEPTED_INVITATION_TEMPLATE'
 FRIEND_INVITATION_TEMPLATE = 'FRIEND_INVITATION_TEMPLATE'
 GENERIC_EMAIL_TEMPLATE = 'GENERIC_EMAIL_TEMPLATE'
 LINK_TO_SIGN_IN_TEMPLATE = 'LINK_TO_SIGN_IN_TEMPLATE'
 VERIFY_EMAIL_ADDRESS_TEMPLATE = 'VERIFY_EMAIL_ADDRESS_TEMPLATE'
 KIND_OF_EMAIL_TEMPLATE_CHOICES = (
     (GENERIC_EMAIL_TEMPLATE,  'Generic Email'),
+    (FRIEND_ACCEPTED_INVITATION_TEMPLATE, 'Accept an invitation to be a Friend'),
     (FRIEND_INVITATION_TEMPLATE, 'Invite Friend'),
     (LINK_TO_SIGN_IN_TEMPLATE, 'Link to sign in.'),
     (VERIFY_EMAIL_ADDRESS_TEMPLATE, 'Verify Senders Email Address'),
@@ -618,9 +620,11 @@ class EmailManager(models.Model):
     def send_scheduled_email(self, email_scheduled):
         success = True
         status = ""
-        if not positive_value_exists(email_scheduled.sender_voter_email):
-            status += "MISSING_SENDER_VOTER_EMAIL"
-            success = False
+
+        # DALE 2016-11-3 sender_voter_email is no longer required, because we use a system email
+        # if not positive_value_exists(email_scheduled.sender_voter_email):
+        #     status += "MISSING_SENDER_VOTER_EMAIL"
+        #     success = False
 
         if not positive_value_exists(email_scheduled.recipient_voter_email):
             status += "MISSING_RECIPIENT_VOTER_EMAIL"
