@@ -26,7 +26,6 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     :return:
     """
     status = ""
-    success = False
     facebook_account_created = False
 
     # Get voter_id from the voter_device_id
@@ -141,7 +140,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     # Does this voter already have an organization associated with their account?
     if positive_value_exists(voter.linked_organization_we_vote_id):
         # TODO DALE Do we need to do anything if they already have a linked_organization_we_vote_id?
-        pass
+        status += "VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_ALREADY_EXISTS: " + voter.linked_organization_we_vote_id + " "
     else:
         organization_name = voter.get_full_name()
         organization_website = ""
@@ -160,6 +159,7 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
             try:
                 voter.linked_organization_we_vote_id = new_organization.we_vote_id
                 voter.save()
+                status += "VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_UPDATED "
             except Exception as e:
                 success = False
                 status += "VOTER_LINKED_ORGANIZATION_WE_VOTE_ID_NOT_UPDATED "
@@ -358,10 +358,6 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             email_address_object = email_results['email_address_object']
             voter_we_vote_id_attached_to_facebook_email = email_address_object.voter_we_vote_id
 
-            # DALE NOTE: I don't believe it is necessary to retrieve the voter_with_facebook_email
-            # voter_results = voter_manager.retrieve_voter_by_we_vote_id(voter_we_vote_id_attached_to_facebook_email)
-            # if voter_results['voter_found']:
-            #     voter_with_facebook_email = voter_results['voter']
             save_results = facebook_manager.create_facebook_link_to_voter(
                 facebook_auth_response.facebook_user_id, voter_we_vote_id_attached_to_facebook_email)
             status += " " + save_results['status']

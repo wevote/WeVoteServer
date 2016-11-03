@@ -558,7 +558,8 @@ def retrieve_voter_guides_to_follow_by_ballot_item(voter_id, kind_of_ballot_item
 def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_election_id, search_string,
                                                         maximum_number_to_retrieve=0, sort_by='', sort_order=''):
     voter_guide_list_found = False
-
+    status = ""
+    status += "voter_id: " + str(voter_id) + " "
     # Start with orgs followed and ignored by this voter
     follow_organization_list_manager = FollowOrganizationList()
     organizations_followed_by_voter = \
@@ -616,11 +617,16 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
 
             org_list_found_by_google_civic_election_id.append(one_position.organization_we_vote_id)
 
+    status += " len(org_list_found_by_google_civic_election_id): " + \
+              str(len(org_list_found_by_google_civic_election_id))
+
     # First, retrieve the voter_guides stored by org and google_civic_election_id
     if positive_value_exists(len(org_list_found_by_google_civic_election_id)):
         voter_guide_results = voter_guide_list_manager.retrieve_voter_guides_to_follow_by_election(
             google_civic_election_id, org_list_found_by_google_civic_election_id, search_string,
             maximum_number_to_retrieve, sort_by, sort_order)
+
+        status += voter_guide_results['status'] + " "
 
         if voter_guide_results['voter_guide_list_found']:
             voter_guide_list_from_election_id = voter_guide_results['voter_guide_list']

@@ -781,7 +781,7 @@ class VoterGuideListManager(models.Model):
 
             if len(voter_guide_list):
                 voter_guide_list_found = True
-                status = 'VOTER_GUIDE_FOUND'
+                status = 'VOTER_GUIDES_FOUND'
             else:
                 status = 'NO_VOTER_GUIDES_FOUND'
             success = True
@@ -790,6 +790,10 @@ class VoterGuideListManager(models.Model):
             status = 'voterGuidesToFollowRetrieve: Unable to retrieve voter guides from db. ' \
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
+
+        status += "len(organization_we_vote_id_list): " + str(len(organization_we_vote_id_list)) + " :: "
+        for one_we_vote_id in organization_we_vote_id_list:
+            status += one_we_vote_id + " "
 
         results = {
             'success':                      success,

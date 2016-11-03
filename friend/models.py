@@ -33,7 +33,7 @@ FRIEND_INVITATIONS_SENT_TO_ME = 'FRIEND_INVITATIONS_SENT_TO_ME'
 FRIEND_INVITATIONS_SENT_BY_ME = 'FRIEND_INVITATIONS_SENT_BY_ME'
 FRIENDS_IN_COMMON = 'FRIENDS_IN_COMMON'
 IGNORED_FRIEND_INVITATIONS = 'IGNORED_FRIEND_INVITATIONS'
-SUGGESTED_FRIENDS = 'SUGGESTED_FRIENDS'
+SUGGESTED_FRIEND_LIST = 'SUGGESTED_FRIEND_LIST'
 
 
 class CurrentFriend(models.Model):
@@ -254,7 +254,80 @@ class FriendManager(models.Model):
         }
         return results
 
+    def retrieve_suggested_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
+        suggested_friend = CurrentFriend()
+        # Note that the direction of the friendship does not matter
+        try:
+            suggested_friend = SuggestedFriend.objects.get(
+                viewer_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                viewee_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+            )
+            suggested_friend_found = True
+            success = True
+            status = "SUGGESTED_FRIEND_UPDATED_OR_CREATED"
+        except SuggestedFriend.DoesNotExist:
+            # No data found. Try again below
+            success = True
+            suggested_friend_found = False
+            status = 'NO_SUGGESTED_FRIEND_RETRIEVED_DoesNotExist'
+        except Exception as e:
+            suggested_friend_found = False
+            suggested_friend = SuggestedFriend()
+            success = False
+            status = "SUGGESTED_FRIEND_NOT_UPDATED_OR_CREATED"
+
+        if not suggested_friend_found and success:
+            try:
+                suggested_friend = SuggestedFriend.objects.get(
+                    viewer_voter_we_vote_id__iexact=recipient_voter_we_vote_id,
+                    viewee_voter_we_vote_id__iexact=sender_voter_we_vote_id,
+                )
+                suggested_friend_found = True
+                success = True
+                status = "SUGGESTED_FRIEND_UPDATED_OR_CREATED"
+            except SuggestedFriend.DoesNotExist:
+                # No data found. Try again below
+                success = True
+                suggested_friend_found = False
+                status = 'NO_SUGGESTED_FRIEND_RETRIEVED2_DoesNotExist'
+            except Exception as e:
+                suggested_friend_found = False
+                suggested_friend = CurrentFriend()
+                success = False
+                status = "SUGGESTED_FRIEND_NOT_UPDATED_OR_CREATED"
+
+        results = {
+            'success': success,
+            'status': status,
+            'suggested_friend_found': suggested_friend_found,
+            'suggested_friend': suggested_friend,
+        }
+        return results
+
     def create_or_update_current_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
+
+        if not positive_value_exists(sender_voter_we_vote_id) or not positive_value_exists(recipient_voter_we_vote_id):
+            current_friend = CurrentFriend()
+            results = {
+                'success':                  False,
+                'status':                   "ONE_OR_MORE_FRIEND_NOT_A_VALID_VALUE",
+                'current_friend_found':     False,
+                'current_friend_created':   False,
+                'current_friend':           current_friend,
+            }
+            return results
+
+        if sender_voter_we_vote_id == recipient_voter_we_vote_id:
+            current_friend = CurrentFriend()
+            results = {
+                'success':                  False,
+                'status':                   "BOTH_FRIEND_ENTRIES_ARE_THE_SAME",
+                'current_friend_found':     False,
+                'current_friend_created':   False,
+                'current_friend':           current_friend,
+            }
+            return results
+
         current_friend_created = False
 
         results = self.retrieve_current_friend(sender_voter_we_vote_id, recipient_voter_we_vote_id)
@@ -287,6 +360,65 @@ class FriendManager(models.Model):
             'current_friend_found':     current_friend_found,
             'current_friend_created':   current_friend_created,
             'current_friend':           current_friend,
+        }
+        return results
+
+    def create_or_update_suggested_friend(self, sender_voter_we_vote_id, recipient_voter_we_vote_id):
+
+        if not positive_value_exists(sender_voter_we_vote_id) or not positive_value_exists(recipient_voter_we_vote_id):
+            suggested_friend = SuggestedFriend()
+            results = {
+                'success':                  False,
+                'status':                   "ONE_OR_MORE_SUGGESTED_FRIEND_NOT_A_VALID_VALUE",
+                'suggested_friend_found':   False,
+                'suggested_friend_created': False,
+                'suggested_friend':         suggested_friend,
+            }
+            return results
+
+        if sender_voter_we_vote_id == recipient_voter_we_vote_id:
+            suggested_friend = SuggestedFriend()
+            results = {
+                'success':                  False,
+                'status':                   "BOTH_SUGGESTED_FRIEND_ENTRIES_ARE_THE_SAME",
+                'suggested_friend_found':   False,
+                'suggested_friend_created': False,
+                'suggested_friend':         suggested_friend,
+            }
+            return results
+
+        suggested_friend_created = False
+
+        results = self.retrieve_suggested_friend(sender_voter_we_vote_id, recipient_voter_we_vote_id)
+        suggested_friend_found = results['suggested_friend_found']
+        suggested_friend = results['suggested_friend']
+        success = results['success']
+        status = results['status']
+
+        if suggested_friend_found:
+            # We don't need to actually do anything
+            pass
+        else:
+            try:
+                suggested_friend = SuggestedFriend.objects.create(
+                    viewer_voter_we_vote_id=sender_voter_we_vote_id,
+                    viewee_voter_we_vote_id=recipient_voter_we_vote_id,
+                )
+                suggested_friend_created = True
+                success = True
+                status = "SUGGESTED_FRIEND_CREATED"
+            except Exception as e:
+                suggested_friend_created = False
+                suggested_friend = SuggestedFriend()
+                success = False
+                status = "SUGGESTED_FRIEND_NOT_CREATED"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'suggested_friend_found':   suggested_friend_found,
+            'suggested_friend_created': suggested_friend_created,
+            'suggested_friend':         suggested_friend,
         }
         return results
 
@@ -488,6 +620,11 @@ class FriendManager(models.Model):
         return results
 
     def retrieve_current_friends_as_voters(self, voter_we_vote_id):
+        """
+        This function is used to return the current friends of the viewer as a list of voters via the api.
+        :param voter_we_vote_id:
+        :return:
+        """
         current_friend_list = []  # The entries from CurrentFriend table
         friend_list_found = False
         friend_list = []  # A list of friends, returned as voter entries
@@ -1272,3 +1409,162 @@ class FriendManager(models.Model):
             'current_friend_deleted':       current_friend_deleted,
         }
         return results
+
+    def retrieve_suggested_friend_list(self, voter_we_vote_id):
+        """
+        A list of SuggestedFriend table entries.
+        :param voter_we_vote_id:
+        :return:
+        """
+        suggested_friend_list = []  # The entries from SuggestedFriend table
+        suggested_friend_list_found = False
+
+        if not positive_value_exists(voter_we_vote_id):
+            success = False
+            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'voter_we_vote_id':             voter_we_vote_id,
+                'suggested_friend_list_found':    suggested_friend_list_found,
+                'suggested_friend_list':          suggested_friend_list,
+            }
+            return results
+
+        try:
+            suggested_friend_queryset = SuggestedFriend.objects.all()
+            suggested_friend_queryset = suggested_friend_queryset.filter(
+                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            suggested_friend_queryset = suggested_friend_queryset.order_by('-date_last_changed')
+            suggested_friend_list = suggested_friend_queryset
+
+            if len(suggested_friend_list):
+                success = True
+                suggested_friend_list_found = True
+                status = 'SUGGESTED_FRIEND_LIST_RETRIEVED'
+            else:
+                success = True
+                suggested_friend_list_found = False
+                status = 'NO_SUGGESTED_FRIEND_LIST_RETRIEVED'
+        except SuggestedFriend.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            suggested_friend_list_found = False
+            status = 'NO_SUGGESTED_FRIEND_LIST_RETRIEVED_DoesNotExist'
+            suggested_friend_list = []
+        except Exception as e:
+            success = False
+            suggested_friend_list_found = False
+            status = 'FAILED retrieve_suggested_friend_list '
+            suggested_friend_list = []
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_we_vote_id':             voter_we_vote_id,
+            'suggested_friend_list_found':    suggested_friend_list_found,
+            'suggested_friend_list':          suggested_friend_list,
+        }
+        return results
+
+    def retrieve_suggested_friend_list_as_voters(self, voter_we_vote_id):
+        """
+        This function is used to return the current friends of the viewer as a list of voters via the api.
+        :param voter_we_vote_id:
+        :return:
+        """
+        suggested_friend_list = []  # The entries from SuggestedFriend table
+        friend_list_found = False
+        friend_list = []  # A list of friends, returned as voter entries
+
+        if not positive_value_exists(voter_we_vote_id):
+            success = False
+            status = 'VALID_VOTER_WE_VOTE_ID_MISSING'
+            results = {
+                'success': success,
+                'status': status,
+                'voter_we_vote_id': voter_we_vote_id,
+                'friend_list_found': friend_list_found,
+                'friend_list': friend_list,
+            }
+            return results
+
+        try:
+            suggested_friend_queryset = SuggestedFriend.objects.all()
+            suggested_friend_queryset = suggested_friend_queryset.filter(
+                Q(viewer_voter_we_vote_id__iexact=voter_we_vote_id) |
+                Q(viewee_voter_we_vote_id__iexact=voter_we_vote_id))
+            suggested_friend_queryset = suggested_friend_queryset.order_by('-date_last_changed')
+            suggested_friend_list = suggested_friend_queryset
+
+            if len(suggested_friend_list):
+                success = True
+                suggested_friend_list_found = True
+                status = 'SUGGESTED_FRIEND_LIST_AS_VOTERS_RETRIEVED'
+            else:
+                success = True
+                suggested_friend_list_found = False
+                status = 'NO_SUGGESTED_FRIEND_LIST_AS_VOTERS_RETRIEVED'
+        except SuggestedFriend.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            suggested_friend_list_found = False
+            status = 'NO_SUGGESTED_FRIEND_LIST_AS_VOTERS_RETRIEVED_DoesNotExist'
+            friend_list = []
+        except Exception as e:
+            success = False
+            suggested_friend_list_found = False
+            status = 'FAILED retrieve_suggested_friend_list_as_voters '
+
+        filtered_suggested_friend_list_we_vote_ids = {}
+        if suggested_friend_list_found:
+            voter_manager = VoterManager()
+            for suggested_friend_entry in suggested_friend_list:
+                if suggested_friend_entry.viewer_voter_we_vote_id == voter_we_vote_id:
+                    we_vote_id_of_friend = suggested_friend_entry.viewee_voter_we_vote_id
+                else:
+                    we_vote_id_of_friend = suggested_friend_entry.viewer_voter_we_vote_id
+                # Create a dictionary of we_vote_ids with the number of times a friend is suggested
+                if hasattr(filtered_suggested_friend_list_we_vote_ids, we_vote_id_of_friend):
+                    filtered_suggested_friend_list_we_vote_ids[we_vote_id_of_friend] += 1
+                else:
+                    filtered_suggested_friend_list_we_vote_ids[we_vote_id_of_friend] = 0
+
+            ordered_suggested_friend_list_we_vote_ids = sorted(filtered_suggested_friend_list_we_vote_ids)
+            for we_vote_id_of_friend in ordered_suggested_friend_list_we_vote_ids:
+                # This is the voter you are friends with
+                friend_voter_results = voter_manager.retrieve_voter_by_we_vote_id(we_vote_id_of_friend)
+                if friend_voter_results['voter_found']:
+                    friend_voter = friend_voter_results['voter']
+                    friend_list.append(friend_voter)
+                    friend_list_found = True
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'voter_we_vote_id':     voter_we_vote_id,
+            'friend_list_found':    friend_list_found,
+            'friend_list':          friend_list,
+        }
+        return results
+
+
+class SuggestedFriend(models.Model):
+    """
+    This table stores possible friend connections.
+    """
+    viewer_voter_we_vote_id = models.CharField(
+        verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False)
+    viewee_voter_we_vote_id = models.CharField(
+        verbose_name="voter we vote id person 2", max_length=255, null=True, blank=True, unique=False)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
+    def fetch_other_voter_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.viewer_voter_we_vote_id:
+            return self.viewee_voter_we_vote_id
+        elif one_we_vote_id == self.viewee_voter_we_vote_id:
+            return self.viewer_voter_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
