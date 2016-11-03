@@ -17,7 +17,9 @@ Hello {{ recipient_name }},
 Hello,
 {% endif %}
 
-{% if sender_name %}{{sender_name}}{% else %}{{sender_email_address}{% endif %} wants to be friends with you on We Vote.
+{% if sender_name %}{{ sender_name }}{% else %}{{ sender_email_address }}{% endif %} wants to be friends with you on We Vote.
+{% if invitation_message %}
+"{{ invitation_message }}"{% endif %}
 
 Thank you,
 The We Vote Team

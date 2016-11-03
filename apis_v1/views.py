@@ -12,10 +12,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
 from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
-    friend_invite_response_for_api, friend_list_for_api
+    friend_invitation_by_we_vote_id_send_for_api, friend_invite_response_for_api, friend_list_for_api
 from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
     FRIEND_INVITATIONS_PROCESSED, FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, \
-    FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS, ACCEPT_INVITATION, IGNORE_INVITATION, \
+    SUGGESTED_FRIEND_LIST, \
+    FRIENDS_IN_COMMON, IGNORED_FRIEND_INVITATIONS, ACCEPT_INVITATION, IGNORE_INVITATION, \
     UNFRIEND_CURRENT_FRIEND
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_facebook.controllers import facebook_disconnect_for_api, \
@@ -229,6 +230,24 @@ def friend_invitation_by_email_verify_view(request):  # friendInvitationByEmailV
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
+def friend_invitation_by_we_vote_id_send_view(request):  # friendInvitationByWeVoteIdSend
+    """
+
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    invitation_message = request.GET.get('invitation_message', "")
+    other_voter_we_vote_id = request.GET.get('other_voter_we_vote_id', "")
+    results = friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we_vote_id, invitation_message)
+    json_data = {
+        'status':                               results['status'],
+        'success':                              results['success'],
+        'voter_device_id':                      voter_device_id,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
 def friend_invite_response_view(request):  # friendInviteResponse
     """
     :param request:
@@ -265,7 +284,7 @@ def friend_list_view(request):  # friendList
     kind_of_list = request.GET.get('kind_of_list', CURRENT_FRIENDS)
     if kind_of_list in(CURRENT_FRIENDS, FRIEND_INVITATIONS_PROCESSED,
                        FRIEND_INVITATIONS_SENT_TO_ME, FRIEND_INVITATIONS_SENT_BY_ME, FRIENDS_IN_COMMON,
-                       IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIENDS):
+                       IGNORED_FRIEND_INVITATIONS, SUGGESTED_FRIEND_LIST):
         kind_of_list_we_are_looking_for = kind_of_list
     else:
         kind_of_list_we_are_looking_for = CURRENT_FRIENDS

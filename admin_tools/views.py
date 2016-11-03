@@ -15,7 +15,7 @@ from django.shortcuts import render
 from election.models import Election
 from election.controllers import elections_import_from_sample_file
 from email_outbound.models import EmailAddress
-from friend.models import FriendManager
+from friend.models import CurrentFriend, FriendManager
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
 from import_export_vote_smart.models import VoteSmartApiCounterManager
@@ -791,6 +791,7 @@ def data_cleanup_voter_list_analysis_view(request):
 
     create_facebook_link_to_voter = request.GET.get('create_facebook_link_to_voter', False)
     create_twitter_link_to_voter = request.GET.get('create_twitter_link_to_voter', False)
+    updated_suggested_friends = request.GET.get('updated_suggested_friends', False)
 
     status_print_list = ""
     create_facebook_link_to_voter_possible = 0
@@ -803,6 +804,32 @@ def data_cleanup_voter_list_analysis_view(request):
     facebook_manager = FacebookManager()
     twitter_user_manager = TwitterUserManager()
     friend_manager = FriendManager()
+
+    if updated_suggested_friends:
+        current_friends_results = CurrentFriend.objects.all()
+
+        for one_current_friend in current_friends_results:
+            # Start with one_current_friend.viewee_voter_we_vote_id, get a list of all of that voter's friends
+            all_friends_one_person_results = \
+                friend_manager.retrieve_current_friends(one_current_friend.viewee_voter_we_vote_id)
+            if all_friends_one_person_results['current_friend_list_found']:
+                current_friend_list = all_friends_one_person_results['current_friend_list']
+                # For each friend on this list, suggest every other friend as a possible friend
+                for one_current_friend_to_suggest in current_friend_list:
+                    first_voter_we_vote_id = one_current_friend_to_suggest.fetch_other_voter_we_vote_id(
+                        one_current_friend.viewee_voter_we_vote_id)
+                    for second_current_friend_to_suggest in current_friend_list:
+                        second_voter_we_vote_id = second_current_friend_to_suggest.fetch_other_voter_we_vote_id(
+                            one_current_friend.viewee_voter_we_vote_id)
+                        if positive_value_exists(first_voter_we_vote_id) and \
+                                positive_value_exists(second_voter_we_vote_id) and \
+                                first_voter_we_vote_id != second_voter_we_vote_id:
+                            # Are they already friends?
+                            already_friend_results = friend_manager.retrieve_current_friend(first_voter_we_vote_id,
+                                                                                            second_voter_we_vote_id)
+                            if not already_friend_results['current_friend_found']:
+                                friend_manager.create_or_update_suggested_friend(first_voter_we_vote_id,
+                                                                                 second_voter_we_vote_id)
 
     voter_list_with_local_twitter_data = Voter.objects.order_by('-id', '-date_last_changed')
     voter_list_with_local_twitter_data = voter_list_with_local_twitter_data.filter(
