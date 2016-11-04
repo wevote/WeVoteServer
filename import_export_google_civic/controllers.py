@@ -746,7 +746,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         }
         return results
 
-    google_civic_election_id = 0
+    google_civic_election_id = 5000  # TODO DALE TESTING A PROBLEM
     status = ''
     success = False
     election_date_text = ''
