@@ -163,6 +163,12 @@
             {% if voter.friend_invitations_sent_to_me_count %}
                 To: {{ voter.friend_invitations_sent_to_me_count }}<br />
             {% endif %}
+            {% if voter.suggested_friend_list_count %}
+                Sugg: {{ voter.suggested_friend_list_count }}<br />
+            {% endif %}
+            {% if voter.organizations_followed_count %}
+                Foll: {{ voter.organizations_followed_count }}<br />
+            {% endif %}
             </td>
         </tr>
     {% endfor %}
