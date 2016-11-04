@@ -260,6 +260,11 @@ class FollowOrganizationList(models.Model):
     """
     A way to retrieve all of the follow_organization information
     """
+
+    def fetch_follow_organization_by_voter_id_count(self, voter_id):
+        follow_organization_list = self.retrieve_follow_organization_by_voter_id(voter_id)
+        return len(follow_organization_list)
+
     def retrieve_follow_organization_by_voter_id(self, voter_id):
         # Retrieve a list of follow_organization entries for this voter
         follow_organization_list_found = False

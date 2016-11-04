@@ -15,6 +15,7 @@ from django.shortcuts import render
 from election.models import Election
 from election.controllers import elections_import_from_sample_file
 from email_outbound.models import EmailAddress
+from follow.models import FollowOrganizationList
 from friend.models import CurrentFriend, FriendManager
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
@@ -815,6 +816,7 @@ def data_cleanup_voter_list_analysis_view(request):
                 one_current_friend.viewer_voter_we_vote_id)
             if results['suggested_friend_created_count']:
                 suggested_friend_created_count += results['suggested_friend_created_count']
+
             # Then do the other side of the friendship - the viewee
             results = friend_manager.update_suggested_friends_starting_with_one_voter(
                 one_current_friend.viewee_voter_we_vote_id)
@@ -986,6 +988,11 @@ def data_cleanup_voter_list_analysis_view(request):
             friend_manager.fetch_friend_invitations_sent_by_me_count(one_linked_voter.we_vote_id)
         one_linked_voter.friend_invitations_sent_to_me_count = \
             friend_manager.fetch_friend_invitations_sent_to_me_count(one_linked_voter.we_vote_id)
+        one_linked_voter.suggested_friend_list_count = \
+            friend_manager.fetch_suggested_friends_count(one_linked_voter.we_vote_id)
+        follow_list_manager = FollowOrganizationList()
+        one_linked_voter.organizations_followed_count = \
+            follow_list_manager.fetch_follow_organization_by_voter_id_count(one_linked_voter.id)
 
         voter_list_with_local_twitter_data_updated.append(one_linked_voter)
 

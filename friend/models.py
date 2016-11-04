@@ -574,6 +574,13 @@ class FriendManager(models.Model):
             return len(current_friend_list)
         return 0
 
+    def fetch_suggested_friends_count(self, voter_we_vote_id):
+        results = self.retrieve_suggested_friend_list(voter_we_vote_id)
+        if results['suggested_friend_list_found']:
+            suggested_friend_list = results['suggested_friend_list']
+            return len(suggested_friend_list)
+        return 0
+
     def retrieve_current_friends(self, voter_we_vote_id):
         current_friend_list = []  # The entries from CurrentFriend table
         current_friend_list_found = False
