@@ -496,7 +496,14 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
         results = voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_id,
                                                                        google_civic_election_id)
 
-        if not positive_value_exists(voter_ballot_saved.election_description_text) \
+        if len(results['ballot_item_list']) == 0:
+            try:
+                voter_ballot_saved.delete()
+                # TODO DALE DELETE ANY EXISTING BALLOT ITEMS??
+                status += "DELETED_VOTER_BALLOT_SAVED_WITH_EMPTY_BALLOT_ITEM_LIST "
+            except Exception as e:
+                status += "UNABLE_TO_DELETE_VOTER_BALLOT_SAVED "
+        elif not positive_value_exists(voter_ballot_saved.election_description_text) \
                 or not positive_value_exists(voter_ballot_saved.election_date_text()):
             try:
                 election_manager = ElectionManager()
@@ -625,7 +632,7 @@ def generate_ballot_data(voter_device_link, voter_address):
     use_test_election = False
     results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,
                                                                     use_test_election)
-    if results['google_civic_election_id']:
+    if results['google_civic_election_id'] and results['contests_retrieved']:
         is_from_substituted_address = False
         substituted_address_nearby = ''
         is_from_test_address = False

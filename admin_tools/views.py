@@ -830,7 +830,9 @@ def data_cleanup_voter_list_analysis_view(request):
     voter_list_with_local_twitter_data = voter_list_with_local_twitter_data
 
     voter_list_with_local_twitter_data_updated = []
+    number_of_voters_found = 0
     for one_linked_voter in voter_list_with_local_twitter_data:
+        number_of_voters_found += 1
 
         one_linked_voter.text_for_map_search = \
             voter_address_manager.retrieve_text_for_map_search_from_voter_id(one_linked_voter.id)
@@ -997,7 +999,7 @@ def data_cleanup_voter_list_analysis_view(request):
         voter_list_with_local_twitter_data_updated.append(one_linked_voter)
 
     status_print_list += "create_facebook_link_to_voter_possible: " + \
-                         str(create_facebook_link_to_voter_possible) + "<br />"
+                         str(create_facebook_link_to_voter_possible) + ", "
     if positive_value_exists(create_facebook_link_to_voter_added):
         status_print_list += "create_facebook_link_to_voter_added: " + \
                              str(create_facebook_link_to_voter_added) + "<br />"
@@ -1005,13 +1007,15 @@ def data_cleanup_voter_list_analysis_view(request):
         status_print_list += "create_facebook_link_to_voter_not_added: " + \
                              str(create_facebook_link_to_voter_not_added) + "<br />"
     status_print_list += "create_twitter_link_to_voter_possible: " + \
-                         str(create_twitter_link_to_voter_possible) + "<br />"
+                         str(create_twitter_link_to_voter_possible) + ", "
     if positive_value_exists(create_twitter_link_to_voter_added):
         status_print_list += "create_twitter_link_to_voter_added: " + \
                              str(create_twitter_link_to_voter_added) + "<br />"
     if positive_value_exists(create_twitter_link_to_voter_not_added):
         status_print_list += "create_twitter_link_to_voter_not_added: " + \
                              str(create_twitter_link_to_voter_not_added) + "<br />"
+    status_print_list += "number_of_voters_found: " + \
+                         str(number_of_voters_found) + "<br />"
     if positive_value_exists(suggested_friend_created_count):
         status_print_list += "suggested_friend_created_count: " + \
                              str(suggested_friend_created_count) + "<br />"
