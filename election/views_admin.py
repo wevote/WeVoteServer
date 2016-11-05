@@ -28,7 +28,7 @@ from rest_framework.response import Response
 import time
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, get_voter_device_id, positive_value_exists
+from wevote_functions.functions import convert_to_int, get_voter_device_id, positive_value_exists, STATE_CODE_MAP
 from wevote_settings.models import fetch_next_we_vote_election_id_integer
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -326,7 +326,13 @@ def election_summary_view(request, election_local_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    messages_on_stage = get_messages(request)
+    state_code = request.GET.get('state_code', '')
+    status_print_list = ""
+    ballot_returned_count = 0
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
     election_local_id = convert_to_int(election_local_id)
     election_on_stage_found = False
     election_on_stage = Election()
@@ -343,20 +349,34 @@ def election_summary_view(request, election_local_id):
     if election_on_stage_found:
         ballot_returned_list_manager = BallotReturnedListManager()
         ballot_returned_list_results = ballot_returned_list_manager.retrieve_ballot_returned_list_for_election(
-            election_on_stage.google_civic_election_id)
+            election_on_stage.google_civic_election_id, state_code)
 
         if ballot_returned_list_results['success']:
             ballot_returned_list = ballot_returned_list_results['ballot_returned_list']
+            ballot_returned_count = len(ballot_returned_list)
+            if not positive_value_exists(state_code):
+                ballot_returned_list = ballot_returned_list[:1000]
         else:
             ballot_returned_list = []
+
+        status_print_list += "ballot_returned_count: " + str(ballot_returned_count) + "<br />"
+        messages.add_message(request, messages.INFO, status_print_list)
+        messages_on_stage = get_messages(request)
+
         template_values = {
-            'messages_on_stage':    messages_on_stage,
-            'election':             election_on_stage,
             'ballot_returned_list': ballot_returned_list,
+            'election':             election_on_stage,
+            'messages_on_stage':    messages_on_stage,
+            'state_code':           state_code,
+            'state_list':           sorted_state_list,
         }
     else:
+        messages_on_stage = get_messages(request)
+
         template_values = {
-            'messages_on_stage': messages_on_stage,
+            'messages_on_stage':    messages_on_stage,
+            'state_code':           state_code,
+            'state_list':           sorted_state_list,
         }
     return render(request, 'election/election_summary.html', template_values)
 

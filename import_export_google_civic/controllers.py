@@ -17,6 +17,7 @@ from election.models import ElectionManager
 import json
 from measure.models import ContestMeasureManager
 from office.models import ContestOfficeManager
+from polling_location.models import PollingLocationManager
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterAddressManager
 from wevote_functions.functions import convert_state_text_to_state_code, convert_to_int, \
@@ -611,13 +612,25 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
     ballot_returned = BallotReturned()
     is_test_election = True if positive_value_exists(google_civic_election_id) \
         and convert_to_int(google_civic_election_id) == 2000 else False
+
+    # Make sure we have this polling_location
+    polling_location_manager = PollingLocationManager()
+    results = polling_location_manager.retrieve_polling_location_by_id(0, polling_location_we_vote_id)
+    polling_location_latitude = None
+    polling_location_longitude = None
+    if results['polling_location_found']:
+        polling_location = results['polling_location']
+        polling_location_latitude = polling_location.latitude
+        polling_location_longitude = polling_location.longitude
+
     if success and positive_value_exists(voter_address_dict) and not is_test_election:
         ballot_returned_manager = BallotReturnedManager()
         if positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
             results = ballot_returned_manager.retrieve_ballot_returned_from_voter_id(voter_id, google_civic_election_id)
             if results['ballot_returned_found']:
                 update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
-                    voter_address_dict, results['ballot_returned'])
+                    voter_address_dict, results['ballot_returned'],
+                    polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = True  # If the update fails, we just return the original ballot_returned object
                 ballot_returned = update_results['ballot_returned']
             else:
@@ -632,14 +645,16 @@ def store_one_ballot_from_google_civic_api(one_ballot_json, voter_id=0, polling_
                 polling_location_we_vote_id, google_civic_election_id)
             if results['ballot_returned_found']:
                 update_results = ballot_returned_manager.update_ballot_returned_with_normalized_values(
-                    voter_address_dict, results['ballot_returned'])
+                    voter_address_dict, results['ballot_returned'],
+                    polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = True  # If the update fails, we just return the original ballot_returned object
                 ballot_returned = update_results['ballot_returned']
             else:
                 create_results = ballot_returned_manager.create_ballot_returned_with_normalized_values(
                     voter_address_dict,
                     election_date_text, election_description_text,
-                    google_civic_election_id, 0, polling_location_we_vote_id)
+                    google_civic_election_id, 0, polling_location_we_vote_id,
+                    polling_location_latitude, polling_location_longitude)
                 ballot_returned_found = create_results['ballot_returned_found']
                 ballot_returned = create_results['ballot_returned']
         # Currently we don't report the success or failure of storing ballot_returned
