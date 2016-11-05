@@ -406,8 +406,11 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
     state_code = request.GET.get('state_code', "")
 
     latitude_and_longitude_updated_count = 0
+    polling_location_updated_count = 0
+    polling_location_not_updated_count = 0
 
     ballot_returned_manager = BallotReturnedManager()
+    polling_location_manager = PollingLocationManager()
     if positive_value_exists(ballot_returned_id):
         # Find existing ballot_returned
         if positive_value_exists(ballot_returned_id):
@@ -422,13 +425,40 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
             except Exception as e:
                 pass
     else:
+        # Write the lat/long data that we have back to the polling location table
+        ballot_returned_query = BallotReturned.objects.order_by('id')
+        ballot_returned_query = ballot_returned_query.exclude(latitude=None)  # Exclude empty entries
+        ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id=None)
+        if positive_value_exists(google_civic_election_id):
+            ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
+        for ballot_returned in ballot_returned_query:
+            if positive_value_exists(ballot_returned.polling_location_we_vote_id) \
+                    and ballot_returned.latitude \
+                    and ballot_returned.longitude:
+                results = polling_location_manager.retrieve_polling_location_by_id(
+                    0, ballot_returned.polling_location_we_vote_id)
+                if results['polling_location_found']:
+                    polling_location = results['polling_location']
+                    if not polling_location.latitude or \
+                            not polling_location.longitude:
+                        try:
+                            polling_location.latitude = ballot_returned.latitude
+                            polling_location.longitude = ballot_returned.longitude
+                            polling_location.save()
+                            polling_location_updated_count += 1
+                        except Exception as e:
+                            polling_location_not_updated_count += 1
+
+        # Now gather the list of ballot_returned entries that need to be updated
         ballot_returned_query = BallotReturned.objects.order_by('id')
         ballot_returned_query = ballot_returned_query.filter(latitude=None)
         ballot_returned_query = ballot_returned_query.exclude(polling_location_we_vote_id=None)
         if positive_value_exists(google_civic_election_id):
             ballot_returned_query = ballot_returned_query.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
-            ballot_returned_query = ballot_returned_query.filter(state_code=state_code)
+            ballot_returned_query = ballot_returned_query.filter(normalized_state__iexact=state_code)
         # Limit to 200 because that is all that seems to store anyways with each call
         ballot_returned_query = ballot_returned_query[:200]
 
@@ -438,6 +468,7 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
             ballot_returned_results = ballot_returned_manager.populate_latitude_and_longitude_for_ballot_returned(
                  ballot_returned)
             if ballot_returned_results['success']:
+                # Keep track of the limit to how many we can request per second
                 latitude_and_longitude_updated_count += 1
                 if rate_limit_count >= 10:
                     time.sleep(1)
@@ -446,8 +477,17 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
             if ballot_returned_results['geocoder_quota_exceeded']:
                 break
 
-    messages.add_message(request, messages.INFO, 'BallotReturned entries updated with lat/long info: ' +
-                         str(latitude_and_longitude_updated_count))
+    status_print_list = ""
+
+    status_print_list += "BallotReturned entries updated with lat/long info: " + \
+                         str(latitude_and_longitude_updated_count) + "<br />"
+    if positive_value_exists(polling_location_updated_count) \
+            or positive_value_exists(polling_location_not_updated_count):
+        status_print_list += "polling_location_updated_count: " + str(polling_location_updated_count) + ", "
+        status_print_list += "polling_location_not_updated_count: " + str(polling_location_not_updated_count) + " "
+        status_print_list += "<br />"
+
+    messages.add_message(request, messages.INFO, status_print_list)
 
     if positive_value_exists(google_civic_election_id):
         election_manager = ElectionManager()
@@ -455,7 +495,8 @@ def update_ballot_returned_with_latitude_and_longitude_view(request):
         if election_results['election_found']:
             election = election_results['election']
             local_election_id = election.id
-            return HttpResponseRedirect(reverse('election:election_summary', args=(local_election_id,)))
+            return HttpResponseRedirect(reverse('election:election_summary', args=(local_election_id,)) +
+                                        "?state_code=" + state_code)
 
-    return HttpResponseRedirect(reverse('election:election_list', args=()))
+    return HttpResponseRedirect(reverse('election:election_list', args=()) + "?state_code=" + state_code)
 

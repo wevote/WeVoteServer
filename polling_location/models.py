@@ -33,6 +33,9 @@ class PollingLocation(models.Model):
     state = models.CharField(max_length=255, blank=True, null=True, verbose_name='state returned from VIP')
     zip_long = models.CharField(max_length=255, blank=True, null=True,
                                 verbose_name='raw text zip returned from VIP, 9 characters')
+    # We write latitude/longitude back to the PollingLocation table when we get it for the BallotReturned table
+    latitude = models.FloatField(null=True, verbose_name='latitude returned from Google')
+    longitude = models.FloatField(null=True, verbose_name='longitude returned from Google')
 
     def get_formatted_zip(self):
         return extract_zip_formatted_from_zip9(self.zip_long)
@@ -79,7 +82,7 @@ class PollingLocationManager(models.Model):
 
     def update_or_create_polling_location(self, we_vote_id,
                                           polling_location_id, location_name, polling_hours_text, directions_text,
-                                          line1, line2, city, state, zip_long):
+                                          line1, line2, city, state, zip_long, latitude='', longitude=''):
         """
         Either update or create an polling_location entry.
         """
@@ -132,6 +135,10 @@ class PollingLocationManager(models.Model):
                         'city': city.strip() if city else '',
                         'zip_long': zip_long,
                     }
+                    if positive_value_exists(latitude):
+                        updated_values['latitude'] = latitude
+                    if positive_value_exists(longitude):
+                        updated_values['longitude'] = longitude
                     new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
                         we_vote_id__iexact=we_vote_id, defaults=updated_values)
                 else:
@@ -150,6 +157,10 @@ class PollingLocationManager(models.Model):
                     }
                     # We use polling_location_id + state to find prior entries since I am not sure polling_location_id's
                     #  are unique from state-to-state
+                    if positive_value_exists(latitude):
+                        updated_values['latitude'] = latitude
+                    if positive_value_exists(longitude):
+                        updated_values['longitude'] = longitude
                     new_polling_location, new_polling_location_created = PollingLocation.objects.update_or_create(
                         polling_location_id__exact=polling_location_id, state=state, defaults=updated_values)
                 success = True

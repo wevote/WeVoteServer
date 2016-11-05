@@ -49,19 +49,37 @@
     </p>
 {% endif %}
 
+<form name="state_code_form" method="get" action="{% url 'election:election_summary' election.id %}">
+    {% csrf_token %}
+
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="" {% if '' == state_code %} selected="selected"{% endif %}>
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+    {% endif %}{# End of if state_list #}
+</form>
 
 {% if election.google_civic_election_id|convert_to_int < 1000000 %}
     <p>
-    <a href="{% url 'election:election_all_ballots_retrieve' election.id %}">Retrieve Ballot Data for this Election</a><br />
-    Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
-    together the measures, races and candidates.
-    (<a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}">Update Lat/Long</a>)
+    <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}">
+        Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
+        Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
+        together the measures, races and candidates.
+        (<a href="{% url 'ballot:update_ballot_returned_latitude_and_longitude' %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}">Update Lat/Long{% if state_code %} for {{ state_code }}{% endif %}</a>)
     </p>
 {% endif %}
 
 {% if ballot_returned_list %}
     <h5>Ballot Returned Entries</h5>
+
     These are ballots that voters can find from WebApp.<br />
+
     <table border="1" cellpadding="10">
         <tr>
             <td></td>
@@ -94,5 +112,12 @@
     Please visit the <a href="{% url 'election:election_list' %}">Election List</a> page.
 
 {% endif %}
+    <script>
+        $(function() {
+            $('#state_code_id').change(function() {
+                this.form.submit();
+            });
+        });
+    </script>
 
 {% endblock %}

@@ -762,7 +762,8 @@ class BallotReturnedManager(models.Model):
     def create_ballot_returned_with_normalized_values(self, google_civic_address_dict,
                                                       election_date_text, election_description_text,
                                                       google_civic_election_id,
-                                                      voter_id=0, polling_location_we_vote_id=''):
+                                                      voter_id=0, polling_location_we_vote_id='',
+                                                      latitude='', longitude=''):
         # Protect against ever saving test elections in the BallotReturned table
         if positive_value_exists(google_civic_election_id) and convert_to_int(google_civic_election_id) == 2000:
             results = {
@@ -805,6 +806,9 @@ class BallotReturnedManager(models.Model):
                 if 'zip' in google_civic_address_dict:
                     ballot_returned.normalized_zip = google_civic_address_dict['zip']
                     text_for_map_search += ballot_returned.normalized_zip
+                if latitude or longitude:
+                    ballot_returned.latitude = latitude
+                    ballot_returned.longitude = longitude
 
                 ballot_returned.text_for_map_search = text_for_map_search
 
@@ -855,7 +859,8 @@ class BallotReturnedManager(models.Model):
             return True
         return False
 
-    def update_ballot_returned_with_normalized_values(self, google_civic_address_dict, ballot_returned):
+    def update_ballot_returned_with_normalized_values(self, google_civic_address_dict, ballot_returned,
+                                                      latitude='', longitude=''):
         try:
             text_for_map_search = ''
             if self.is_ballot_returned_different(google_civic_address_dict, ballot_returned):
@@ -872,6 +877,9 @@ class BallotReturnedManager(models.Model):
                 if 'zip' in google_civic_address_dict:
                     ballot_returned.normalized_zip = google_civic_address_dict['zip']
                     text_for_map_search += ballot_returned.normalized_zip
+                if latitude or longitude:
+                    ballot_returned.latitude = latitude
+                    ballot_returned.longitude = longitude
 
                 ballot_returned.text_for_map_search = text_for_map_search
 
@@ -1091,14 +1099,18 @@ class BallotReturnedListManager(models.Model):
     A way to work with a list of ballot_returned entries
     """
 
-    def retrieve_ballot_returned_list_for_election(self, google_civic_election_id):
+    def retrieve_ballot_returned_list_for_election(self, google_civic_election_id, state_code=''):
         google_civic_election_id = convert_to_int(google_civic_election_id)
         ballot_returned_list = []
         ballot_returned_list_found = False
         try:
             ballot_returned_queryset = BallotReturned.objects.all()
-            ballot_returned_list = ballot_returned_queryset.filter(
+            ballot_returned_queryset = ballot_returned_queryset.filter(
                 google_civic_election_id=google_civic_election_id)
+            if positive_value_exists(state_code):
+                ballot_returned_queryset = ballot_returned_queryset.filter(normalized_state__iexact=state_code)
+
+            ballot_returned_list = ballot_returned_queryset
 
             if len(ballot_returned_list):
                 ballot_returned_list_found = True
