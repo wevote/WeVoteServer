@@ -25,7 +25,9 @@
     {% endif %}
     <p>Polling Location We Vote ID: {{ ballot_returned.polling_location_we_vote_id }}</p>
     <p>Election: {{ google_civic_election_id }}{% if election %} ({{ election.election_name }}){% endif %}<br />
-    Date: {{ election.election_day_text }}</p>
+    Date: {{ election.election_day_text }}<br />
+    Latitude/Longitude: {{ ballot_returned.latitude }} / {{ ballot_returned.longitude }}<br />
+    </p>
 
     <h4>Existing Ballot Items</h4>
     {% for ballot_item in ballot_item_list %}

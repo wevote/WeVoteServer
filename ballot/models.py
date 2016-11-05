@@ -1227,6 +1227,69 @@ class VoterBallotSavedManager(models.Model):
     def __unicode__(self):
         return "VoterBallotSavedManager"
 
+    def delete_voter_ballot_saved_by_voter_id(self, voter_id, google_civic_election_id):
+        voter_ballot_saved_id = 0
+        return self.delete_voter_ballot_saved(voter_ballot_saved_id, voter_id, google_civic_election_id)
+
+    def delete_voter_ballot_saved(self, voter_ballot_saved_id, voter_id=0, google_civic_election_id=0,
+                                  text_for_map_search=''):
+        """
+
+        :param voter_ballot_saved_id:
+        :param voter_id:
+        :param google_civic_election_id:
+        :param text_for_map_search:
+        :return:
+        """
+        voter_ballot_saved_found = False
+        voter_ballot_saved_deleted = False
+        voter_ballot_saved = None
+        status = ""
+
+        try:
+            if positive_value_exists(voter_ballot_saved_id):
+                voter_ballot_saved = VoterBallotSaved.objects.get(id=voter_ballot_saved_id)
+                # If still here, we found an existing voter_ballot_saved
+                voter_ballot_saved_found = True
+                success = True
+                status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_BALLOT_SAVED_ID "
+            elif positive_value_exists(voter_id) and positive_value_exists(google_civic_election_id):
+                voter_ballot_saved = VoterBallotSaved.objects.get(
+                    voter_id=voter_id, google_civic_election_id=google_civic_election_id)
+                # If still here, we found an existing voter_ballot_saved
+                voter_ballot_saved_found = True
+                success = True
+                status += "VOTER_BALLOT_SAVED_FOUND_FROM_VOTER_ID_AND_GOOGLE_CIVIC "
+            else:
+                voter_ballot_saved_found = False
+                success = False
+                status += "COULD_NOT_RETRIEVE_VOTER_BALLOT_SAVED-MISSING_VARIABLES "
+
+        except VoterBallotSaved.MultipleObjectsReturned as e:
+            success = False
+            status += "MULTIPLE_VOTER_BALLOT_SAVED_FOUND-MUST_DELETE_ALL "
+        except VoterBallotSaved.DoesNotExist:
+            success = True
+            status += "VOTER_BALLOT_SAVED_NOT_FOUND1 "
+
+        if voter_ballot_saved_found:
+            try:
+                voter_ballot_saved.delete()
+                status += "DELETED "
+                voter_ballot_saved_deleted = True
+            except Exception as e:
+                success = False
+                status += "NOT_DELETED "
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'voter_ballot_saved_deleted': voter_ballot_saved_deleted,
+            'voter_ballot_saved_found': voter_ballot_saved_found,
+            'voter_ballot_saved':       voter_ballot_saved,
+        }
+        return results
+
     def retrieve_voter_ballot_saved_by_id(self, voter_ballot_saved_id):
         return self.retrieve_voter_ballot_saved(voter_ballot_saved_id)
 

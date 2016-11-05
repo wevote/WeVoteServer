@@ -9,7 +9,8 @@
 # -*- coding: UTF-8 -*-
 
 from .models import GoogleCivicApiCounterManager
-from ballot.models import BallotItemManager, BallotItemListManager, BallotReturned, BallotReturnedManager
+from ballot.models import BallotItemManager, BallotItemListManager, BallotReturned, BallotReturnedManager, \
+    VoterBallotSavedManager
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from election.models import ElectionManager
@@ -489,6 +490,10 @@ def retrieve_one_ballot_from_google_civic_api(text_for_map_search, incoming_goog
             success = True
             google_civic_election_id = structured_json['election']['id']
 
+    # TODO DALE We can get a google_civic_election_id back even though we don't have contest data.
+    #  If we get a google_civic_election_id back but no contest data, reach out again with the google_civic_election_id
+    #  so we can then get contest data
+
     # Use Google Civic API call counter to track the number of queries we are doing each day
     google_civic_api_counter_manager = GoogleCivicApiCounterManager()
     google_civic_api_counter_manager.create_counter_entry('ballot', google_civic_election_id)
@@ -746,7 +751,8 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         }
         return results
 
-    google_civic_election_id = 5000  # TODO DALE TESTING A PROBLEM
+    google_civic_election_id = 5000  # TODO DALE TESTING A PROBLEM - when we remove this, update
+    #  retrieve_one_ballot_from_google_civic_api to go back for a second look once we have google_civic_election_id
     status = ''
     success = False
     election_date_text = ''
@@ -758,6 +764,17 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
         # Retrieve it from voter address
         voter_address_manager = VoterAddressManager()
         text_for_map_search = voter_address_manager.retrieve_ballot_map_text_from_voter_id(voter_id)
+
+    # We want to remove all prior ballot items, so we make room for store_one_ballot_from_google_civic_api to save
+    #  ballot items
+    if positive_value_exists(google_civic_election_id):
+        voter_ballot_saved_manager = VoterBallotSavedManager()
+        voter_ballot_saved_results = voter_ballot_saved_manager.delete_voter_ballot_saved(
+            0, voter_id, google_civic_election_id)
+
+        ballot_item_list_manager = BallotItemListManager()
+        # We include a google_civic_election_id, so only the ballot info for this election is removed
+        ballot_item_list_manager.delete_all_ballot_items_for_voter(voter_id, google_civic_election_id)
 
     if positive_value_exists(text_for_map_search):
         one_ballot_results = retrieve_one_ballot_from_google_civic_api(
