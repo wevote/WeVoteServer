@@ -498,6 +498,7 @@ def voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_i
 
         if len(results['ballot_item_list']) == 0:
             try:
+                # Heal the data
                 voter_ballot_saved.delete()
                 # TODO DALE DELETE ANY EXISTING BALLOT ITEMS??
                 status += "DELETED_VOTER_BALLOT_SAVED_WITH_EMPTY_BALLOT_ITEM_LIST "
