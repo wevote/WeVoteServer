@@ -326,13 +326,6 @@ def election_summary_view(request, election_local_id):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    state_code = request.GET.get('state_code', '')
-    status_print_list = ""
-    ballot_returned_count = 0
-
-    state_list = STATE_CODE_MAP
-    sorted_state_list = sorted(state_list.items())
-
     election_local_id = convert_to_int(election_local_id)
     election_on_stage_found = False
     election_on_stage = Election()
@@ -346,8 +339,25 @@ def election_summary_view(request, election_local_id):
         # This is fine, proceed anyways
         pass
 
+    state_code = request.GET.get('state_code', '')
+    status_print_list = ""
+    ballot_returned_count = 0
+    ballot_returned_list_manager = BallotReturnedListManager()
+
+    state_list = STATE_CODE_MAP
+    state_list_modified = {}
+    for one_state_code, one_state_name in state_list.items():
+        ballot_returned_count = ballot_returned_list_manager.fetch_ballot_returned_list_count_for_election(
+            election_on_stage.google_civic_election_id, one_state_code)
+
+        state_name_modified = one_state_name
+        if positive_value_exists(ballot_returned_count):
+            state_name_modified += " - " + str(ballot_returned_count)
+        state_list_modified[one_state_code] = state_name_modified
+
+    sorted_state_list = sorted(state_list_modified.items())
+
     if election_on_stage_found:
-        ballot_returned_list_manager = BallotReturnedListManager()
         ballot_returned_list_results = ballot_returned_list_manager.retrieve_ballot_returned_list_for_election(
             election_on_stage.google_civic_election_id, state_code)
 
