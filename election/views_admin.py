@@ -41,6 +41,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
     1) Polling locations (so we can use those addresses to retrieve a representative set of ballots)
     2) Cycle through a portion of those polling locations, enough that we are caching all of the possible ballot items
     :param request:
+    :param election_local_id:
     :return:
     """
     authority_required = {'admin'}  # admin, verified_volunteer
@@ -80,7 +81,7 @@ def election_all_ballots_retrieve_view(request, election_local_id=0):
         polling_location_list = polling_location_list.filter(state__iexact=state_code)
         # We used to have a limit of 500 ballots to pull per election, but now retrieve all
         # Ordering by "location_name" creates a bit of (locational) random order
-        polling_location_list = polling_location_list.order_by('location_name')  # [:500]  For testing smaller batches
+        polling_location_list = polling_location_list.order_by('location_name')[:500]  # Limiting for full country pull
     except PollingLocation.DoesNotExist:
         messages.add_message(request, messages.INFO,
                              'Could not retrieve ballot data for the {election_name}. '

@@ -21,7 +21,7 @@
 
     </p>
 
-    <p><a href="{% url 'polling_location:import_polling_locations_process' %}?polling_location_state={{ polling_location_state }}">
+    <p><a href="{% url 'polling_location:import_polling_locations_process' %}?polling_location_state={{ polling_location_state }}" target="_blank">
         Import Polling Locations File{% if polling_location_state %} (for "{{ polling_location_state }}"){% endif %}</a>
         (this can take 60-90 seconds)</p>
 

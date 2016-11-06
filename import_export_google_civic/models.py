@@ -150,7 +150,7 @@ class GoogleCivicApiCounterManager(models.Model):
 
                 # Find the number of these entries on that particular day
                 counter_queryset = counter_queryset.filter(datetime_of_action__contains=day_on_stage)
-                api_call_count = len(counter_queryset)
+                api_call_count = counter_queryset.count()
 
                 # If any api calls were found on that date, pass it out for display
                 if positive_value_exists(api_call_count):
