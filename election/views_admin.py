@@ -502,6 +502,7 @@ def election_summary_view(request, election_local_id):
         if show_offices_and_candidates:
             ballot_returned_list_modified = []
             office_list_manager = ContestOfficeListManager()
+            ballot_returned_list = ballot_returned_list[:200]
             for one_ballot_returned in ballot_returned_list:
                 candidates_count = 0
                 offices_count = 0
