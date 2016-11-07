@@ -939,6 +939,7 @@ class BallotReturnedManager(models.Model):
             # address has format "line_1, state zip, USA"
             state = address.split(', ')[-2][:2]
             ballot = BallotReturned.objects.\
+                exclude(polling_location_we_vote_id=None).\
                 filter(normalized_state=state).\
                 annotate(distance=(F('latitude') - location.latitude) ** 2 +
                                   (F('longitude') - location.longitude) ** 2).\
