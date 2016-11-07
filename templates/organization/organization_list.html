@@ -24,7 +24,10 @@
 <p><a href="{% url 'voter_guide:voter_guide_search' %}?google_civic_election_id={{ google_civic_election_id }}">
     Add New Organization / Voter Guide</a>.
     Vote Smart special interest groups
-    <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.</p>
+    <a href="{% url 'import_export_vote_smart:vote_smart_special_interest_group_list' %}">here</a>.
+
+    <a href="{% url 'admin_tools:data_cleanup_organization_list_analysis' %}">Organization List Analysis</a>
+</p>
 
 <p>
     <a href="{% url 'import_export_twitter:scrape_social_media_from_all_organizations' %}?organization_state={{ organization_state }}">

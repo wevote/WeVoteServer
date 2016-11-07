@@ -6,6 +6,7 @@ from .controllers import ballot_items_import_from_master_server, ballot_returned
 from .models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager
 from .serializers import BallotItemSerializer, BallotReturnedSerializer
 from admin_tools.views import redirect_to_sign_in_page
+from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
 from office.models import ContestOffice, ContestOfficeManager
 from django.http import HttpResponseRedirect
@@ -184,6 +185,8 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
 
     messages_on_stage = get_messages(request)
     ballot_item_list = []
+    ballot_item_list_modified = []
+    candidate_campaign_list_manager = CandidateCampaignListManager()
     if ballot_returned_found:
         # Get a list of ballot_items stored at this location
         ballot_item_list_manager = BallotItemListManager()
@@ -192,6 +195,17 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
                 ballot_returned.polling_location_we_vote_id, google_civic_election_id)
             if results['ballot_item_list_found']:
                 ballot_item_list = results['ballot_item_list']
+                ballot_item_list_modified = []
+                for one_ballot_item in ballot_item_list:
+                    if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
+                        candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
+                            0, one_ballot_item.contest_office_we_vote_id)
+                        if candidate_results['candidate_list_found']:
+                            candidate_list = candidate_results['candidate_list']
+                            one_ballot_item.candidates_string = ""
+                            for one_candidate in candidate_list:
+                                one_ballot_item.candidates_string += one_candidate.display_candidate_name() + ", "
+                    ballot_item_list_modified.append(one_ballot_item)
 
     template_values = {
         'messages_on_stage':            messages_on_stage,
@@ -206,7 +220,7 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
         'polling_location_list':        polling_location_list,
         'polling_location_city':        polling_location_city,
         'polling_location_zip':         polling_location_zip,
-        'ballot_item_list':             ballot_item_list,
+        'ballot_item_list':             ballot_item_list_modified,
         'google_civic_election_id':     google_civic_election_id,
     }
     return render(request, 'ballot/ballot_item_list_edit.html', template_values)

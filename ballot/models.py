@@ -701,6 +701,7 @@ class BallotReturnedManager(models.Model):
                                                         voter_id=0, polling_location_we_vote_id=''):
         """
         Search by voter_id (or polling_location_we_vote_id) + google_civic_election_id to see if have an entry
+        :param ballot_returned_id:
         :param google_civic_election_id:
         :param voter_id:
         :param polling_location_we_vote_id:
