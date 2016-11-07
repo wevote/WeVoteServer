@@ -401,6 +401,15 @@ class ContestOfficeListManager(models.Model):
 
     def retrieve_all_offices_for_upcoming_election(self, google_civic_election_id=0,
                                                    return_list_of_objects=False):
+        office_list = []
+        return self.retrieve_offices(google_civic_election_id, office_list, return_list_of_objects)
+
+    def retrieve_offices_by_list(self, office_list, return_list_of_objects=False):
+        google_civic_election_id = 0
+        return self.retrieve_offices(google_civic_election_id, office_list, return_list_of_objects)
+
+    def retrieve_offices(self, google_civic_election_id=0, office_list=[],
+                         return_list_of_objects=False):
         office_list_objects = []
         office_list_light = []
         office_list_found = False
@@ -412,6 +421,9 @@ class ContestOfficeListManager(models.Model):
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
+            if len(office_list):
+                office_queryset = office_queryset.filter(
+                    we_vote_id__in=office_list)
             office_queryset = office_queryset.order_by("office_name")
             office_list_objects = office_queryset
 

@@ -67,7 +67,7 @@
 
 {% if election.google_civic_election_id|convert_to_int < 1000000 %}
     <p>
-    <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}">
+    <a href="{% url 'election:election_all_ballots_retrieve' election.id %}?state_code={{ state_code }}" target="_blank">
         Retrieve Ballot Data for this Election{% if state_code %} (for {{ state_code }}){% endif %}</a><br />
         Reach out to Google Civic API and ask for ballots from many polling locations so we can stitch
         together the measures, races and candidates.
@@ -88,6 +88,8 @@
             <td>Text for Map Search</td>
             <td>Voter Id</td>
             <td>Lat/Long?</td>
+            <td><a href="{% url 'election:election_summary' election.id %}?google_civic_election_id={{ election.google_civic_election_id }}&state_code={{ state_code }}&show_offices_and_candidates=1">
+                Offices & Candidates</a></td>
             <td>&nbsp;</td>
         </tr>
     {% for ballot_returned in ballot_returned_list %}
@@ -98,6 +100,7 @@
             <td>{{ ballot_returned.text_for_map_search }}</td>
             <td>{% if ballot_returned.voter_id != 0 %}{{ ballot_returned.voter_id }}{% endif %}</td>
             <td>{% if ballot_returned.latitude %}yes{% endif %}</td>
+            <td>{% if ballot_returned.office_and_candidate_text %}{{ ballot_returned.office_and_candidate_text }}{% endif %}</td>
             <td><a href="{% url 'ballot:ballot_item_list_edit' ballot_returned.id %}">(edit)</a></td>
         </tr>
     {% endfor %}
