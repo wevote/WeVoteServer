@@ -685,33 +685,33 @@ def generate_ballot_data(voter_device_link, voter_address):
         return results
 
     # 3) Get test ballot data from Google Civic
-    use_test_election = True
-    results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,
-                                                                    use_test_election)
-    if results['google_civic_election_id']:
-        is_from_substituted_address = False
-        substituted_address_nearby = ''
-        is_from_test_address = True
+    # use_test_election = True
+    # results = voter_ballot_items_retrieve_from_google_civic_for_api(voter_device_id, text_for_map_search,
+    #                                                                 use_test_election)
+    # if results['google_civic_election_id']:
+    #     is_from_substituted_address = False
+    #     substituted_address_nearby = ''
+    #     is_from_test_address = True
         # Since this is a test address, we don't want to save the google_civic_election_id (of 2000)
         # with the voter_address
-        save_results = voter_ballot_saved_manager.create_voter_ballot_saved(
-            voter_id,
-            results['google_civic_election_id'],
-            results['election_date_text'],
-            results['election_description_text'],
-            results['text_for_map_search'],
-            substituted_address_nearby,
-            is_from_substituted_address,
-            is_from_test_address
-        )
-        results = {
-            'status':                   save_results['status'],
-            'success':                  save_results['success'],
-            'google_civic_election_id': save_results['google_civic_election_id'],
-            'voter_ballot_saved_found': save_results['voter_ballot_saved_found'],
-            'voter_ballot_saved':       save_results['voter_ballot_saved'],
-        }
-        return results
+    #     save_results = voter_ballot_saved_manager.create_voter_ballot_saved(
+    #         voter_id,
+    #         results['google_civic_election_id'],
+    #         results['election_date_text'],
+    #         results['election_description_text'],
+    #         results['text_for_map_search'],
+    #         substituted_address_nearby,
+    #         is_from_substituted_address,
+    #         is_from_test_address
+    #     )
+    #     results = {
+    #         'status':                   save_results['status'],
+    #         'success':                  save_results['success'],
+    #         'google_civic_election_id': save_results['google_civic_election_id'],
+    #         'voter_ballot_saved_found': save_results['voter_ballot_saved_found'],
+    #         'voter_ballot_saved':       save_results['voter_ballot_saved'],
+    #     }
+    #     return results
 
     results = {
         'status':                   "UNABLE_TO_GENERATE_BALLOT_DATA",
