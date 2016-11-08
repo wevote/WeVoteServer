@@ -301,6 +301,10 @@ def process_contest_office_from_structured_json(
         if positive_value_exists(special):
             updated_contest_office_values["special"] = special
         contest_office_manager = ContestOfficeManager()
+        # TODO DALE Note that Vermont data in 2016 did not provide district_id. The unique value was in the
+        # district_name. So all "VT State Senator" candidates were lumped into a single office. But I believe
+        # Presidential races don't have either district_id or district_name, so we can't require one.
+        # Perhaps have a special case for "district" -> "scope": "stateUpper"/"stateLower" vs. "scope": "statewide"
         update_or_create_contest_office_results = contest_office_manager.update_or_create_contest_office(
             we_vote_id, maplight_id, google_civic_election_id, office_name, state_code, district_id,
             updated_contest_office_values)
@@ -343,8 +347,13 @@ def process_contest_office_from_structured_json(
             measure_subtitle, local_ballot_order, contest_office_id, contest_office_we_vote_id)
         # We leave off these and rely on default empty values: contest_measure_id, contest_measure_we_vote_id
 
-    # Note: We do not need to connect the candidates with the voter here for a ballot item
-    process_candidates_from_structured_json(
+    # Note: We do not need to connect the candidates with the voter here for a ballot item  # TODO DALE Actually we do
+    # For VT, They don't have a district id, so all candidates were lumped together.
+    # TODO DALE Note that Vermont data in 2016 did not provide district_id. The unique value was in the
+    # district_name. So all "VT State Senator" candidates were lumped into a single office. But I believe
+    # Presidential races don't have either district_id or district_name, so we can't require one.
+    # Perhaps have a special case for "district" -> "scope": "stateUpper"/"stateLower" vs. "scope": "statewide"
+    candidates_results = process_candidates_from_structured_json(
         candidates_structured_json, google_civic_election_id, ocd_division_id, state_code, contest_office_id,
         contest_office_we_vote_id)
 
@@ -817,7 +826,7 @@ def voter_ballot_items_retrieve_from_google_civic_for_api(
                 ballot_item_list_manager = BallotItemListManager()
                 # We include a google_civic_election_id, so only the ballot info for this election is removed
                 google_civic_election_id_to_delete = one_ballot_json['election']['id']  # '0' would mean "delete all"
-                if positive_value_exists(google_civic_election_id_to_delete):
+                if positive_value_exists(google_civic_election_id_to_delete) and positive_value_exists(voter_id):
                     ballot_item_list_manager.delete_all_ballot_items_for_voter(
                         voter_id, google_civic_election_id_to_delete)
 

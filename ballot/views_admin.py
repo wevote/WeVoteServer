@@ -197,12 +197,12 @@ def ballot_item_list_edit_view(request, ballot_returned_id):
                 ballot_item_list = results['ballot_item_list']
                 ballot_item_list_modified = []
                 for one_ballot_item in ballot_item_list:
+                    one_ballot_item.candidates_string = ""
                     if positive_value_exists(one_ballot_item.contest_office_we_vote_id):
                         candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_office(
                             0, one_ballot_item.contest_office_we_vote_id)
                         if candidate_results['candidate_list_found']:
                             candidate_list = candidate_results['candidate_list']
-                            one_ballot_item.candidates_string = ""
                             for one_candidate in candidate_list:
                                 one_ballot_item.candidates_string += one_candidate.display_candidate_name() + ", "
                     ballot_item_list_modified.append(one_ballot_item)

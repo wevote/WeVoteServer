@@ -2,8 +2,10 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from candidate.controllers import candidates_import_from_sample_file
 from config.base import get_environment_variable, LOGIN_URL
+from ballot.models import BallotReturned
+from candidate.models import CandidateCampaign
+from candidate.controllers import candidates_import_from_sample_file
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -16,11 +18,13 @@ from election.models import Election
 from election.controllers import elections_import_from_sample_file
 from email_outbound.models import EmailAddress
 from follow.models import FollowOrganizationList
-from friend.models import CurrentFriend, FriendManager
+from friend.models import CurrentFriend, FriendManager, SuggestedFriend
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
 from import_export_vote_smart.models import VoteSmartApiCounterManager
+from measure.models import ContestMeasure
 from office.controllers import offices_import_from_sample_file
+from office.models import ContestOffice
 from organization.controllers import organizations_import_from_sample_file
 from organization.models import Organization, OrganizationManager
 from polling_location.controllers import import_and_save_all_polling_locations_data
@@ -28,8 +32,8 @@ from position.controllers import fetch_positions_count_for_this_voter, \
     find_organizations_referenced_in_positions_for_this_voter, positions_import_from_sample_file
 from position.models import PositionEntered, PositionForFriends
 from twitter.models import TwitterLinkToOrganization, TwitterLinkToVoter, TwitterUserManager
-from voter.models import Voter, VoterAddressManager, VoterDeviceLinkManager, VoterManager, voter_has_authority, \
-    voter_setup
+from voter.models import Voter, VoterAddress, VoterAddressManager, VoterDeviceLinkManager, VoterManager, \
+    voter_has_authority, voter_setup
 from wevote_functions.functions import convert_to_int, delete_voter_api_device_id_cookie, generate_voter_device_id, \
     get_voter_api_device_id, positive_value_exists, set_voter_api_device_id, STATE_CODE_MAP
 
@@ -823,15 +827,15 @@ def data_cleanup_voter_list_analysis_view(request):
             if results['suggested_friend_created_count']:
                 suggested_friend_created_count += results['suggested_friend_created_count']
 
-    voter_list_with_local_twitter_data = Voter.objects.order_by('-id', '-date_last_changed')
-    voter_list_with_local_twitter_data = voter_list_with_local_twitter_data.filter(
+    voter_list_with_sign_in_data = Voter.objects.order_by('-id', '-date_last_changed')
+    voter_list_with_sign_in_data = voter_list_with_sign_in_data.filter(
         ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None) | ~Q(facebook_id=None) |
         ~Q(fb_username=None) | ~Q(linked_organization_we_vote_id=None))
-    voter_list_with_local_twitter_data = voter_list_with_local_twitter_data
+    voter_list_with_sign_in_data = voter_list_with_sign_in_data
 
-    voter_list_with_local_twitter_data_updated = []
+    voter_list_with_sign_in_data_updated = []
     number_of_voters_found = 0
-    for one_linked_voter in voter_list_with_local_twitter_data:
+    for one_linked_voter in voter_list_with_sign_in_data:
         number_of_voters_found += 1
 
         one_linked_voter.text_for_map_search = \
@@ -996,7 +1000,7 @@ def data_cleanup_voter_list_analysis_view(request):
         one_linked_voter.organizations_followed_count = \
             follow_list_manager.fetch_follow_organization_by_voter_id_count(one_linked_voter.id)
 
-        voter_list_with_local_twitter_data_updated.append(one_linked_voter)
+        voter_list_with_sign_in_data_updated.append(one_linked_voter)
 
     status_print_list += "create_facebook_link_to_voter_possible: " + \
                          str(create_facebook_link_to_voter_possible) + ", "
@@ -1025,10 +1029,165 @@ def data_cleanup_voter_list_analysis_view(request):
     messages_on_stage = get_messages(request)
 
     template_values = {
-        'messages_on_stage':                        messages_on_stage,
-        'voter_list_with_local_twitter_data':       voter_list_with_local_twitter_data_updated,
+        'messages_on_stage':                  messages_on_stage,
+        'voter_list_with_sign_in_data':       voter_list_with_sign_in_data_updated,
     }
     response = render(request, 'admin_tools/data_cleanup_voter_list_analysis.html', template_values)
+
+    return response
+
+
+@login_required
+def data_voter_statistics_view(request):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    status_print_list = ""
+    create_facebook_link_to_voter_possible = 0
+    create_facebook_link_to_voter_added = 0
+
+    # ####################################
+    # Information about Total Voters
+    # ####################################
+    current_friend_query = CurrentFriend.objects.all()
+    current_friend_count = current_friend_query.count()
+
+    voter_list_with_sign_in_data = Voter.objects.all()
+    voter_list_with_sign_in_data = voter_list_with_sign_in_data.filter(
+        ~Q(twitter_id=None) | ~Q(twitter_screen_name=None) | ~Q(email=None) | ~Q(facebook_id=None) |
+        ~Q(fb_username=None) | ~Q(linked_organization_we_vote_id=None))
+    voter_list_with_sign_in_data_count = voter_list_with_sign_in_data.count()
+
+    suggested_friend_query = SuggestedFriend.objects.all()
+    suggested_friend_count = suggested_friend_query.count()
+
+    # ####################################
+    # Statistics by Election
+    # ####################################
+    election_statistics = []
+    election_query = Election.objects.order_by('-google_civic_election_id')
+    number_of_voters_found = 0
+    for one_election in election_query:
+        if not positive_value_exists(one_election.google_civic_election_id):
+            # Skip this entry if missing google_civic_election_id
+            continue
+        election_values_exist = False
+        # ################################
+        # For this election, how many addresses were saved?
+        address_query = VoterAddress.objects.all()
+        address_query = address_query.filter(google_civic_election_id=one_election.google_civic_election_id)
+        one_election.voter_address_count = address_query.count()
+        if positive_value_exists(one_election.voter_address_count):
+            election_values_exist = True
+
+        # ################################
+        # For this election, how many BallotReturned entries were saved for voters?
+        ballot_returned_query = BallotReturned.objects.all()
+        ballot_returned_query = ballot_returned_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        ballot_returned_query = ballot_returned_query.exclude(
+            voter_id=0)
+        ballot_returned_query = ballot_returned_query.exclude(
+            voter_id=None)
+        one_election.voter_ballot_returned_count = ballot_returned_query.count()
+        if positive_value_exists(one_election.voter_ballot_returned_count):
+            election_values_exist = True
+
+        # ################################
+        # For this election, how many Public PositionEntered entries were saved by voters?
+        voter_position_entered_query = PositionEntered.objects.all()
+        voter_position_entered_query = voter_position_entered_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        voter_position_entered_query = voter_position_entered_query.exclude(
+            voter_we_vote_id=None)
+        one_election.voter_position_entered_count = voter_position_entered_query.count()
+        if positive_value_exists(one_election.voter_position_entered_count):
+            election_values_exist = True
+
+        # ################################
+        # For this election, how many Public PositionForFriends entries were saved by voters?
+        voter_position_for_friends_query = PositionForFriends.objects.all()
+        voter_position_for_friends_query = voter_position_for_friends_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        one_election.voter_position_for_friends_count = voter_position_for_friends_query.count()
+        if positive_value_exists(one_election.voter_position_for_friends_count):
+            election_values_exist = True
+
+        # NOT VOTER SPECIFIC
+
+        # ################################
+        # For this election, how many BallotReturned entries were saved for polling locations?
+        ballot_returned_query = BallotReturned.objects.all()
+        ballot_returned_query = ballot_returned_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        ballot_returned_query = ballot_returned_query.exclude(
+            polling_location_we_vote_id=None)
+        one_election.polling_location_ballot_returned_count = ballot_returned_query.count()
+        # if positive_value_exists(one_election.polling_location_ballot_returned_count):
+        #     election_values_exist = True
+
+        # ################################
+        # For this election, how many Public PositionEntered entries were for organizations?
+        organization_position_entered_query = PositionEntered.objects.all()
+        organization_position_entered_query = organization_position_entered_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        organization_position_entered_query = organization_position_entered_query.exclude(
+            organization_we_vote_id=None)
+        one_election.organization_position_entered_count = organization_position_entered_query.count()
+        # if positive_value_exists(one_election.organization_position_entered_count):
+        #     election_values_exist = True
+
+        # ################################
+        # For this election, how many ContestOffices
+        contest_office_query = ContestOffice.objects.all()
+        contest_office_query = contest_office_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        one_election.number_of_offices = contest_office_query.count()
+        # if positive_value_exists(one_election.number_of_offices):
+        #     election_values_exist = True
+
+        # ################################
+        # For this election, how many CandidateCampaign
+        candidate_campaign_query = CandidateCampaign.objects.all()
+        candidate_campaign_query = candidate_campaign_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        one_election.number_of_candidates = candidate_campaign_query.count()
+        # if positive_value_exists(one_election.number_of_candidates):
+        #     election_values_exist = True
+
+        # ################################
+        # For this election, how many ContestMeasures
+        contest_measure_query = ContestMeasure.objects.all()
+        contest_measure_query = contest_measure_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        one_election.number_of_measures = contest_measure_query.count()
+        # if positive_value_exists(one_election.number_of_measures):
+        #     election_values_exist = True
+
+        if election_values_exist:
+            election_statistics.append(one_election)
+
+    # status_print_list += "create_facebook_link_to_voter_possible: " + \
+    #                      str(create_facebook_link_to_voter_possible) + ", "
+    # if positive_value_exists(create_facebook_link_to_voter_added):
+    #     status_print_list += "create_facebook_link_to_voter_added: " + \
+    #                          str(create_facebook_link_to_voter_added) + "<br />"
+    # status_print_list += "number_of_voters_found: " + \
+    #                      str(number_of_voters_found) + "<br />"
+
+    messages.add_message(request, messages.INFO, status_print_list)
+
+    messages_on_stage = get_messages(request)
+
+    template_values = {
+        'messages_on_stage':                    messages_on_stage,
+        'current_friend_count':                 current_friend_count,
+        'election_statistics':                  election_statistics,
+        'suggested_friend_count':               suggested_friend_count,
+        'voter_list_with_sign_in_data_count':   voter_list_with_sign_in_data_count,
+    }
+    response = render(request, 'admin_tools/data_voter_statistics.html', template_values)
 
     return response
 

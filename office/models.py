@@ -220,6 +220,11 @@ class ContestOfficeManager(models.Model):
             # OR office_name, we need to check both before we try to create a new entry
             contest_office_found = False
             try:
+                # TODO DALE Note that Vermont data in 2016 did not provide district_id. The unique value was in the
+                # district_name. So all "VT State Senator" candidates were lumped into a single office. But I believe
+                # Presidential races don't have either district_id or district_name, so we can't require one.
+                # Perhaps have a special case for "district" -> "scope": "stateUpper"/"stateLower"
+                # vs. "scope": "statewide"
                 if positive_value_exists(district_id):
                     contest_office_on_stage = ContestOffice.objects.get(
                         google_civic_election_id__exact=google_civic_election_id,

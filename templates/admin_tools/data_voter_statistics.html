@@ -1,0 +1,116 @@
+{# templates/admin_tools/data_voter_statistics.html #}
+{% extends "template_base.html" %}
+
+{% block title %}Voter Statistics{% endblock %}
+
+{%  block content %}
+<a href="{% url 'admin_tools:data_cleanup' %}">< Back to Data Cleanup Home</a><br />
+<br />
+<a href="{% url 'voter:voter_list' %}">< Back to Voters</a><br />
+
+<h1>Voter Statistics</h1>
+
+<div class="container">
+  <table class="table table-bordered table-condensed" style="width: auto;">
+    <thead>
+      <tr>
+        <th>&nbsp;</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Current Friend Count</td>
+        <td>{{ current_friend_count }}</td>
+      </tr>
+      <tr>
+        <td>Voter List with Sign In Data</td>
+        <td>{{ voter_list_with_sign_in_data_count }}</td>
+      </tr>
+      <tr>
+        <td>Suggested Friend Count</td>
+        <td>{{ suggested_friend_count }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<h2>Election Statistics</h2>
+
+<div class="container">
+  <table class="table table-bordered table-condensed" style="width: auto;">
+    <thead>
+      <tr>
+        <th>&nbsp;</th>
+        {% for one_election in election_statistics %}
+        <th>{{ one_election.election_name }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Voters with Addresses</strong>.</td>
+        {% for one_election in election_statistics %}
+        <td>{{ one_election.voter_address_count }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td><strong>Voters with Saved Ballots</strong>.</td>
+        {% for one_election in election_statistics %}
+        <td>{{ one_election.voter_ballot_returned_count }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td><strong>Voters Positions - Public</strong>.</td>
+        {% for one_election in election_statistics %}
+        <td>{{ one_election.voter_position_entered_count }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td><strong>Voter Positions - Friends Only</strong>.</td>
+        {% for one_election in election_statistics %}
+        <td>{{ one_election.voter_position_for_friends_count }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <th>&nbsp;</th>
+        <th colspan="{{ election_statistics|length }}">Not Voter Specific</th>
+      </tr>
+      <tr>
+        <td><strong>Polling Locations with Ballot Data</strong>.</td>
+        {% for one_election in election_statistics %}
+        <td>{{ one_election.polling_location_ballot_returned_count }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td><strong>Organizational Positions - Public</strong>.</td>
+        {% for one_election in election_statistics %}
+        <td>{{ one_election.organization_position_entered_count }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td><strong>Offices Count</strong>.</td>
+        {% for one_election in election_statistics %}
+        <td>{{ one_election.number_of_offices }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td><strong>Candidates Count</strong>.</td>
+        {% for one_election in election_statistics %}
+        <td>{{ one_election.number_of_candidates }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td><strong>Measures Count</strong>.</td>
+        {% for one_election in election_statistics %}
+        <td>{{ one_election.number_of_measures }}</td>
+        {% endfor %}
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<br />
+
+{% endblock %}
