@@ -438,6 +438,7 @@ class ContestMeasureList(models.Model):
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
+            measure_queryset = measure_queryset.order_by("measure_title")
             # We never expect more than 300 measures for one election
             measure_list_objects = measure_queryset[:300]
 
