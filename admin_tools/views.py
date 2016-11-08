@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from config.base import get_environment_variable, LOGIN_URL
-from ballot.models import BallotReturned
+from ballot.models import BallotReturned, VoterBallotSaved
 from candidate.models import CandidateCampaign
 from candidate.controllers import candidates_import_from_sample_file
 from django.contrib import messages
@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.core.urlresolvers import reverse
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from election.models import Election
@@ -1082,6 +1082,17 @@ def data_voter_statistics_view(request):
             election_values_exist = True
 
         # ################################
+        # For this election, how many BallotSaved entries were saved for voters?
+        ballot_saved_query = VoterBallotSaved.objects.all()
+        ballot_saved_query = ballot_saved_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        ballot_saved_query = ballot_saved_query.exclude(
+            voter_id=0)
+        one_election.voter_ballot_saved_count = ballot_saved_query.count()
+        if positive_value_exists(one_election.voter_ballot_saved_count):
+            election_values_exist = True
+
+        # ################################
         # For this election, how many BallotReturned entries were saved for voters?
         ballot_returned_query = BallotReturned.objects.all()
         ballot_returned_query = ballot_returned_query.filter(
@@ -1095,6 +1106,18 @@ def data_voter_statistics_view(request):
             election_values_exist = True
 
         # ################################
+        # For this election, how many individual voters saved at least one Public PositionEntered entry?
+        voter_position_entered_query = PositionEntered.objects.all()
+        voter_position_entered_query = voter_position_entered_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        voter_position_entered_query = voter_position_entered_query.exclude(
+            voter_we_vote_id=None)
+        voter_position_entered_query = voter_position_entered_query.values("voter_we_vote_id").distinct()
+        one_election.voters_with_public_positions_count = voter_position_entered_query.count()
+        if positive_value_exists(one_election.voters_with_public_positions_count):
+            election_values_exist = True
+
+        # ################################
         # For this election, how many Public PositionEntered entries were saved by voters?
         voter_position_entered_query = PositionEntered.objects.all()
         voter_position_entered_query = voter_position_entered_query.filter(
@@ -1103,6 +1126,18 @@ def data_voter_statistics_view(request):
             voter_we_vote_id=None)
         one_election.voter_position_entered_count = voter_position_entered_query.count()
         if positive_value_exists(one_election.voter_position_entered_count):
+            election_values_exist = True
+
+        # ################################
+        # For this election, how many individual voters saved at least one PositionForFriends entry?
+        voter_position_for_friends_query = PositionForFriends.objects.all()
+        voter_position_for_friends_query = voter_position_for_friends_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        voter_position_for_friends_query = voter_position_for_friends_query.exclude(
+            voter_we_vote_id=None)
+        voter_position_for_friends_query = voter_position_for_friends_query.values("voter_we_vote_id").distinct()
+        one_election.voters_with_positions_for_friends_count = voter_position_for_friends_query.count()
+        if positive_value_exists(one_election.voters_with_positions_for_friends_count):
             election_values_exist = True
 
         # ################################
@@ -1125,6 +1160,19 @@ def data_voter_statistics_view(request):
             polling_location_we_vote_id=None)
         one_election.polling_location_ballot_returned_count = ballot_returned_query.count()
         # if positive_value_exists(one_election.polling_location_ballot_returned_count):
+        #     election_values_exist = True
+
+        # ################################
+        # For this election, how many organizations shared at least one Public PositionEntered entry?
+        organization_position_entered_query = PositionEntered.objects.all()
+        organization_position_entered_query = organization_position_entered_query.filter(
+            google_civic_election_id=one_election.google_civic_election_id)
+        organization_position_entered_query = organization_position_entered_query.exclude(
+            organization_we_vote_id=None)
+        organization_position_entered_query = \
+            organization_position_entered_query.values("organization_we_vote_id").distinct()
+        one_election.organizations_with_public_positions_count = organization_position_entered_query.count()
+        # if positive_value_exists(one_election.organizations_with_public_positions_count):
         #     election_values_exist = True
 
         # ################################
