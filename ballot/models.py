@@ -626,7 +626,7 @@ class BallotReturned(models.Model):
     This is a generated table with a summary of address + election combinations returned ballot data
     """
     # The unique id of the voter for which this ballot was retrieved
-    voter_id = models.IntegerField(verbose_name="the voter unique id", default=0, null=False, blank=False)
+    voter_id = models.IntegerField(verbose_name="the voter unique id", null=True, blank=True)
     # The polling location for which this ballot was retrieved
     polling_location_we_vote_id = models.CharField(
         verbose_name="we vote permanent id of the polling location", max_length=255, default=None, null=True,

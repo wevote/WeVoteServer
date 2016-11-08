@@ -10,7 +10,7 @@
 
 <h1>Voter List Analysis</h1>
 
-{% if voter_list_with_local_twitter_data %}
+{% if voter_list_with_sign_in_data %}
  <h2>With twitter_id, twitter_screen_name, facebook_id or email</h2>
     <a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}?create_twitter_link_to_voter=1">
     Create TwitterLinkToVoter for all records that don't have collisions.</a><br />
@@ -34,7 +34,7 @@
             <td>Voter Positions Link to Other Orgs</td>
             <td>Friends & Invitations</td>
         </tr>
-    {% for voter in voter_list_with_local_twitter_data %}
+    {% for voter in voter_list_with_sign_in_data %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ voter.id }}</td>
