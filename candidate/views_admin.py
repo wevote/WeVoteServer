@@ -27,7 +27,7 @@ from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
-    positive_value_exists
+    positive_value_exists, STATE_CODE_MAP
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -96,15 +96,24 @@ def candidate_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     candidate_search = request.GET.get('candidate_search', '')
+    state_code = request.GET.get('state_code', '')
+    show_all = request.GET.get('show_all', False)
+
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+
     candidate_list = []
+    candidate_list_count = 0
 
     try:
         candidate_list = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            candidate_list = candidate_list.filter(state_code__iexact=state_code)
 
         filters = []
         if positive_value_exists(candidate_search):
@@ -132,11 +141,22 @@ def candidate_list_view(request):
                     final_filters |= item
 
                 candidate_list = candidate_list.filter(final_filters)
+        candidate_list = candidate_list.order_by('candidate_name')
+        candidate_list_count = candidate_list.count()
 
-        candidate_list = candidate_list.order_by('candidate_name')[:200]
+        if not positive_value_exists(show_all):
+            candidate_list = candidate_list[:200]
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
         pass
+
+    status_print_list = ""
+    status_print_list += "candidate_list_count: " + \
+                         str(candidate_list_count) + " "
+
+    messages.add_message(request, messages.INFO, status_print_list)
+
+    messages_on_stage = get_messages(request)
 
     election_list = Election.objects.order_by('-election_day_text')
 
@@ -145,6 +165,8 @@ def candidate_list_view(request):
         'candidate_list':           candidate_list,
         'candidate_search':         candidate_search,
         'election_list':            election_list,
+        'state_code':               state_code,
+        'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'candidate/candidate_list.html', template_values)
@@ -238,6 +260,7 @@ def candidate_edit_view(request, candidate_id):
     ballot_guide_official_statement = request.GET.get('ballot_guide_official_statement', False)
     vote_smart_id = request.GET.get('vote_smart_id', False)
     maplight_id = request.GET.get('maplight_id', False)
+    state_code = request.GET.get('state_code', "")
 
     messages_on_stage = get_messages(request)
     candidate_id = convert_to_int(candidate_id)
@@ -298,6 +321,7 @@ def candidate_edit_view(request, candidate_id):
             'office_list':              contest_office_list,
             'contest_office_id':        contest_office_id,
             'google_civic_election_id': google_civic_election_id,
+            'state_code':               state_code,
             # Incoming variables, not saved yet
             'candidate_name':                   candidate_name,
             'google_civic_candidate_name':      google_civic_candidate_name,

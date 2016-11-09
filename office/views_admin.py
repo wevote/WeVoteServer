@@ -17,11 +17,12 @@ from election.models import Election, ElectionManager
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from office.models import ContestOfficeListManager
+from position.models import OPPOSE, PositionListManager, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -69,24 +70,41 @@ def office_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
+    show_all = request.GET.get('show_all', False)
 
     office_list_manager = ContestOfficeListManager()
     updated_office_list = []
-    results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, True)
+    office_list_count = 0
+    results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, state_code, True)
     if results['office_list_found']:
         office_list = results['office_list_objects']
         for office in office_list:
             office.candidate_count = fetch_candidate_count_for_office(office.id)
             updated_office_list.append(office)
 
+            office_list_count = len(updated_office_list)
+
     election_list = Election.objects.order_by('-election_day_text')
 
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    status_print_list = ""
+    status_print_list += "office_list_count: " + \
+                         str(office_list_count) + " "
+
+    messages.add_message(request, messages.INFO, status_print_list)
+
+    messages_on_stage = get_messages(request)
+
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'office_list': updated_office_list,
-        'election_list': election_list,
+        'messages_on_stage':        messages_on_stage,
+        'office_list':              updated_office_list,
+        'election_list':            election_list,
+        'state_code':               state_code,
+        'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'office/office_list.html', template_values)
@@ -99,10 +117,11 @@ def office_new_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', "")
 
     office_list_manager = ContestOfficeListManager()
     updated_office_list = []
-    results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, True)
+    results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id, state_code, True)
     if results['office_list_found']:
         office_list = results['office_list_objects']
         for office in office_list:
@@ -243,6 +262,7 @@ def office_summary_view(request, office_id):
     office_id = convert_to_int(office_id)
     office_on_stage_found = False
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', "")
     try:
         office_on_stage = ContestOffice.objects.get(id=office_id)
         office_on_stage_found = True
@@ -253,23 +273,46 @@ def office_summary_view(request, office_id):
         # This is fine, create new
         pass
 
+    candidate_list_modified = []
+    position_list_manager = PositionListManager()
     try:
         candidate_list = CandidateCampaign.objects.filter(contest_office_id=office_id)
         if positive_value_exists(google_civic_election_id):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
         candidate_list = candidate_list.order_by('candidate_name')
+        support_total = 0
+        for one_candidate in candidate_list:
+            # Find the count of Voters that support this candidate (Organizations are not included in this)
+            one_candidate.support_count = position_list_manager.fetch_voter_positions_count_for_candidate_campaign(
+                one_candidate.id, "", SUPPORT)
+            one_candidate.oppose_count = position_list_manager.fetch_voter_positions_count_for_candidate_campaign(
+                one_candidate.id, "", OPPOSE)
+            support_total += one_candidate.support_count
+
+        for one_candidate in candidate_list:
+            if positive_value_exists(support_total):
+                percentage_of_support_number = one_candidate.support_count / support_total * 100
+                one_candidate.percentage_of_support = "%.1f" % percentage_of_support_number
+
+            candidate_list_modified.append(one_candidate)
+
     except CandidateCampaign.DoesNotExist:
         # This is fine, create new
         pass
 
     election_list = Election.objects.order_by('-election_day_text')
 
+    if positive_value_exists(google_civic_election_id):
+        election = Election.objects.get(google_civic_election_id=google_civic_election_id)
+
     if office_on_stage_found:
         template_values = {
-            'messages_on_stage': messages_on_stage,
-            'office': office_on_stage,
-            'candidate_list': candidate_list,
-            'election_list': election_list,
+            'messages_on_stage':        messages_on_stage,
+            'office':                   office_on_stage,
+            'candidate_list':           candidate_list_modified,
+            'state_code':               state_code,
+            'election':                 election,
+            'election_list':            election_list,
             'google_civic_election_id': google_civic_election_id,
         }
     else:

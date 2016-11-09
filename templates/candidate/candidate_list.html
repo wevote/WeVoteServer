@@ -11,14 +11,14 @@
 
     <p>Jump to:
 
-    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">Measures</a> -
-    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">Offices</a> -
-    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">Candidates</a> -
-    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}">Politicians</a> -
-    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">Organizations</a> -
-    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">Public Opinions / Positions</a> -
-    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">Voter Guides</a> -
-    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}">Polling Locations</a></p>
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Candidates</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Public Opinions / Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a></p>
 
     </p>
 
@@ -36,8 +36,25 @@
     </select>
     {% endif %}{# End of if election_list #}
 
+    {% if state_list %}
+        <select id="state_code_id" name="state_code">
+            <option value="">
+                -- Filter by State Served --</option>
+        {% for key, state in state_list %}
+            <option value="{{ key }}"
+                    {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+                {{ state }}</option>
+        {% endfor %}
+        </select>
+        {% if state_code != "" %}
+        <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+            show all</a>
+        {% endif %}
+    {% endif %}{# End of if state_list #}
+
 {% if candidate_list %}
     {% if google_civic_election_id %}
+
     <p>
         Prepare: <a href="{% url 'candidate:find_and_remove_duplicate_candidates' %}?google_civic_election_id={{ google_civic_election_id }}" >
             Find and Remove Duplicate Candidates for this Election</a> (about 1 minute)<br />
@@ -97,17 +114,17 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 {% if candidate.candidate_photo_url %}
-                <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}">
+                <a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                     <img src='{{ candidate.candidate_photo_url }}' height="25px" />
                 </a>
                 {% endif %}
             </td>
-            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ candidate.candidate_name }}</a></td>
+            <td><a href="{% url 'candidate:candidate_edit' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ candidate.candidate_name }}</a></td>
             <td>{{ candidate.get_candidate_state }}</td>
             <td>{{ candidate.election.election_name }} - {{ candidate.election.google_civic_election_id }}</td>
             <td>
         {% if candidate.office %}
-                <a href="{% url 'office:office_summary' candidate.office.id %}">{{ candidate.office.office_name }}
+                <a href="{% url 'office:office_summary' candidate.office.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ candidate.office.office_name }}
                 {% if candidate.office.district_id %}
                     - District {{ candidate.office.district_id }}
                 {% endif %}
@@ -147,11 +164,16 @@
 {% endif %}
 
     <script>
-        $(function() {
-            $('#google_civic_election_id').change(function() {
-                this.form.submit();
-            });
+    $(function() {
+        $('#google_civic_election_id').change(function() {
+            this.form.submit();
         });
+    });
+    $(function() {
+        $('#state_code_id').change(function() {
+            this.form.submit();
+        });
+    });
     </script>
 
 {% endblock %}

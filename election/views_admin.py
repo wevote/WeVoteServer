@@ -642,8 +642,9 @@ def election_migration_view(request):
         if results['election_found']:
             we_vote_election = results['election']
 
+            state_code = ""
             return_list_of_objects = True
-            results = office_list_manager.retrieve_all_offices_for_upcoming_election(we_vote_election_id,
+            results = office_list_manager.retrieve_all_offices_for_upcoming_election(we_vote_election_id, state_code,
                                                                                      return_list_of_objects)
             if results['office_list_found']:
                 we_vote_election_office_list = results['office_list_objects']
@@ -679,8 +680,10 @@ def election_migration_view(request):
         if results['election_found']:
             google_civic_election = results['election']
 
+            state_code = ""
             return_list_of_objects = True
             results = office_list_manager.retrieve_all_offices_for_upcoming_election(google_civic_election_id,
+                                                                                     state_code,
                                                                                      return_list_of_objects)
             if results['office_list_found']:
                 google_civic_election_office_list = results['office_list_objects']

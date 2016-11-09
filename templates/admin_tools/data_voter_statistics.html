@@ -70,7 +70,7 @@
         {% endfor %}
       </tr>
       <tr>
-        <td><strong>Voter Positions - Total Public</strong>. The aggregate number of publicly visible positions
+        <td><strong>Total Voter Positions - Public</strong>. The aggregate number of publicly visible positions
         that were entered by all voters.</td>
         {% for one_election in election_statistics %}
         <td>{{ one_election.voter_position_entered_count }}</td>
@@ -78,13 +78,13 @@
       </tr>
       <tr>
         <td><strong>Voters with Friends Only Positions</strong>. The number of voters who shared one or more positions
-        with friends. (i.e., positions that were not public.</td>
+        with friends. (i.e., positions that were not public.)</td>
         {% for one_election in election_statistics %}
         <td>{{ one_election.voters_with_positions_for_friends_count }}</td>
         {% endfor %}
       </tr>
       <tr>
-        <td><strong>Voter Positions - Total Friends Only</strong>. The aggregate number of "friends only" positions
+        <td><strong>Total Voter Positions - Friends Only</strong>. The aggregate number of "friends only" positions
         that were entered by all voters.</td>
         {% for one_election in election_statistics %}
         <td>{{ one_election.voter_position_for_friends_count }}</td>
@@ -108,7 +108,7 @@
         {% endfor %}
       </tr>
       <tr>
-        <td><strong>Organizational Positions - Public</strong>.</td>
+        <td><strong>Total Organizational Positions - Public</strong>.</td>
         {% for one_election in election_statistics %}
         <td>{{ one_election.organization_position_entered_count }}</td>
         {% endfor %}
