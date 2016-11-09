@@ -404,16 +404,17 @@ class ContestOfficeListManager(models.Model):
     def __unicode__(self):
         return "ContestOfficeListManager"
 
-    def retrieve_all_offices_for_upcoming_election(self, google_civic_election_id=0,
+    def retrieve_all_offices_for_upcoming_election(self, google_civic_election_id=0, state_code="",
                                                    return_list_of_objects=False):
         office_list = []
-        return self.retrieve_offices(google_civic_election_id, office_list, return_list_of_objects)
+        return self.retrieve_offices(google_civic_election_id, state_code, office_list, return_list_of_objects)
 
     def retrieve_offices_by_list(self, office_list, return_list_of_objects=False):
         google_civic_election_id = 0
-        return self.retrieve_offices(google_civic_election_id, office_list, return_list_of_objects)
+        state_code = ""
+        return self.retrieve_offices(google_civic_election_id, state_code, office_list, return_list_of_objects)
 
-    def retrieve_offices(self, google_civic_election_id=0, office_list=[],
+    def retrieve_offices(self, google_civic_election_id=0, state_code="", office_list=[],
                          return_list_of_objects=False):
         office_list_objects = []
         office_list_light = []
@@ -426,6 +427,8 @@ class ContestOfficeListManager(models.Model):
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
+            if positive_value_exists(state_code):
+                office_queryset = office_queryset.filter(state_code__iexact=state_code)
             if len(office_list):
                 office_queryset = office_queryset.filter(
                     we_vote_id__in=office_list)

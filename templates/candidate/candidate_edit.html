@@ -5,7 +5,7 @@
 
 {%  block content %}
 {% load template_filters %}
-<a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">
+<a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
     < Back to Candidates</a>
 
 <h1>{% if candidate %}Edit Candidate "{{ candidate.candidate_name }}"{% else %}New Candidate{% endif %}</h1>
@@ -164,7 +164,8 @@
     </div>
 </div>
 
-<p><a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">cancel</a>
+<p><a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
+    cancel</a>
 <input name="submit_text" type="submit" value="{% if candidate %}Update Candidate{% else %}Save New Candidate{% endif %}" /></p>
 </form>
 

@@ -10,21 +10,20 @@
 
     <p>Jump to:
 
-    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}">Measures</a> -
-    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}">Offices</a> -
-    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}">Candidates</a> -
-    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}">Politicians</a> -
-    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}">Organizations</a> -
-    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}">Public Opinions / Positions</a> -
-    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}">Voter Guides</a> -
-    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}">Polling Locations</a></p>
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Measures</a> -
+    <a href="{% url 'office:office_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Offices</a> -
+    <a href="{% url 'candidate:candidate_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Candidates</a> -
+    <a href="{% url 'politician:politician_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Politicians</a> -
+    <a href="{% url 'organization:organization_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Organizations</a> -
+    <a href="{% url 'position:position_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Public Opinions / Positions</a> -
+    <a href="{% url 'voter_guide:voter_guide_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Voter Guides</a> -
+    <a href="{% url 'polling_location:polling_location_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">Polling Locations</a></p>
 
     </p>
 
-{% if election_list %}
     <form name="organization_position_choose_election" method="get" action="{% url 'measure:measure_list' %}">
-        {% csrf_token %}
-
+    {% csrf_token %}
+{% if election_list %}
     <select id="google_civic_election_id" name="google_civic_election_id">
         <option value="0" {% if 0 == google_civic_election_id %} selected="selected"{% endif %}>
             -- Filter by Election --</option>
@@ -34,9 +33,23 @@
             {{ election.election_name }} - {{ election.google_civic_election_id }} - {{ election.election_day_text }}</option>
     {% endfor %}
     </select>
-    </form>
 {% endif %}{# End of if election_list #}
 
+{% if state_list %}
+    <select id="state_code_id" name="state_code">
+        <option value="">
+            -- Filter by State Served --</option>
+    {% for key, state in state_list %}
+        <option value="{{ key }}"
+                {% if key|lower == state_code|lower %} selected="selected"{% endif %}>
+            {{ state }}</option>
+    {% endfor %}
+    </select>
+    {% if state_code != "" %}
+    <a href="{% url 'measure:measure_list' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}&show_all=1">
+        show all</a>
+    {% endif %}
+{% endif %}{# End of if state_list #}
 
 {% if measure_list %}
     <table border="1" cellpadding="5" cellspacing="5">
@@ -45,15 +58,23 @@
             <td>Measure Title</td>
             <td>State</td>
             <td>We Vote ID</td>
+        {% if google_civic_election_id %}
+            <td>Support</td>
+            <td>Oppose</td>
+        {% endif %}
             <td>&nbsp;</td>
         </tr>
     {% for measure in measure_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'measure:measure_summary' measure.id %}?google_civic_election_id={{ google_civic_election_id }}">{{ measure.measure_title }}</a></td>
+            <td><a href="{% url 'measure:measure_summary' measure.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">{{ measure.measure_title }}</a></td>
             <td>{{ measure.state_code }}</td>
             <td>{{ measure.we_vote_id }}</td>
-            <td><a href="{% url 'measure:measure_edit' measure.id %}?google_civic_election_id={{ google_civic_election_id }}" style="font-size: .65em">edit</a></td>
+        {% if google_civic_election_id %}
+            <td>{% if measure.support_count %}{{ measure.support_count }}<br />{{ measure.percentage_of_support }}%{% endif %}</td>
+            <td>{% if measure.oppose_count %}{{ measure.oppose_count }}<br />{{ measure.percentage_of_oppose }}%{% endif %}</td>
+        {% endif %}
+            <td><a href="{% url 'measure:measure_edit' measure.id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}" style="font-size: .65em">edit</a></td>
         </tr>
     {% endfor %}
     </table>
@@ -66,15 +87,21 @@
 {% else %}
     <p>(no measures found)</p>
 {% endif %}
+    </form>
 
 <p><a href="{% url 'measure:measure_new' %}?google_civic_election_id={{ google_civic_election_id }}">Add New Measure</a></p>
 
     <script>
-        $(function() {
-            $('#google_civic_election_id').change(function() {
-                this.form.submit();
-            });
+    $(function() {
+        $('#google_civic_election_id').change(function() {
+            this.form.submit();
         });
+    });
+    $(function() {
+        $('#state_code_id').change(function() {
+            this.form.submit();
+        });
+    });
     </script>
 
 {% endblock %}

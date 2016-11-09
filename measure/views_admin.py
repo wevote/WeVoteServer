@@ -16,11 +16,12 @@ from django.shortcuts import render
 from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
+from position.models import OPPOSE, PositionListManager, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
-from wevote_functions.functions import convert_to_int, positive_value_exists
+from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -67,24 +68,65 @@ def measure_list_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    messages_on_stage = get_messages(request)
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
 
+    measure_list_count = 0
+    position_list_manager = PositionListManager()
+    measure_list_modified = []
     try:
         measure_list = ContestMeasure.objects.order_by('measure_title')
         if positive_value_exists(google_civic_election_id):
             measure_list = measure_list.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            measure_list = measure_list.filter(state_code__iexact=state_code)
+        measure_list_count = measure_list.count()
+
+        if positive_value_exists(google_civic_election_id):
+            for one_measure in measure_list:
+                support_and_oppose_total = 0
+                # Find the count of Voters that support this candidate (Organizations are not included in this)
+                one_measure.support_count = position_list_manager.fetch_voter_positions_count_for_contest_measure(
+                    one_measure.id, "", SUPPORT)
+                one_measure.oppose_count = position_list_manager.fetch_voter_positions_count_for_contest_measure(
+                    one_measure.id, "", OPPOSE)
+                support_and_oppose_total += one_measure.support_count
+                support_and_oppose_total += one_measure.oppose_count
+
+                if positive_value_exists(support_and_oppose_total):
+                    percentage_of_oppose_number = one_measure.oppose_count / support_and_oppose_total * 100
+                    one_measure.percentage_of_oppose = "%d" % percentage_of_oppose_number
+                    percentage_of_support_number = one_measure.support_count / support_and_oppose_total * 100
+                    one_measure.percentage_of_support = "%d" % percentage_of_support_number
+
+                measure_list_modified.append(one_measure)
+        else:
+            measure_list_modified = measure_list
+
     except ContestMeasure.DoesNotExist:
         # This is fine
-        measure_list = ContestMeasure()
+        measure_list_modified = ContestMeasure()
         pass
 
     election_list = Election.objects.order_by('-election_day_text')
 
+    state_list = STATE_CODE_MAP
+    sorted_state_list = sorted(state_list.items())
+
+    status_print_list = ""
+    status_print_list += "measure_list_count: " + \
+                         str(measure_list_count) + " "
+
+    messages.add_message(request, messages.INFO, status_print_list)
+
+    messages_on_stage = get_messages(request)
+
     template_values = {
-        'messages_on_stage': messages_on_stage,
-        'measure_list': measure_list,
-        'election_list': election_list,
+        'messages_on_stage':        messages_on_stage,
+        'measure_list':             measure_list_modified,
+        'election_list':            election_list,
+        'state_code':               state_code,
+        'state_list':               sorted_state_list,
         'google_civic_election_id': google_civic_election_id,
     }
     return render(request, 'measure/measure_list.html', template_values)

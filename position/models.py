@@ -772,6 +772,219 @@ class PositionListManager(models.Model):
 
         return positions_not_followed_by_voter
 
+    def fetch_voter_positions_count_for_candidate_campaign(
+            self, candidate_campaign_id, candidate_campaign_we_vote_id='', stance_we_are_looking_for=ANY_STANCE):
+        """
+        We are only retrieving voter positions, not positions of organizations.
+        :param candidate_campaign_id:
+        :param candidate_campaign_we_vote_id:
+        :param stance_we_are_looking_for:
+        :return:
+        """
+        if stance_we_are_looking_for not \
+                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            return 0
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
+        #  which means we want to return all stances
+
+        if not positive_value_exists(candidate_campaign_id) and not \
+                positive_value_exists(candidate_campaign_we_vote_id):
+            return 0
+
+        # Retrieve the support positions for this candidate_campaign
+        total_count = 0
+        # Public Positions
+        try:
+            public_position_list = PositionEntered.objects.all()
+            public_position_list = public_position_list.exclude(voter_we_vote_id=None)  # Don't include if no we_vote_id
+
+            if positive_value_exists(candidate_campaign_id):
+                public_position_list = public_position_list.filter(candidate_campaign_id=candidate_campaign_id)
+            else:
+                public_position_list = public_position_list.filter(
+                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                    public_position_list = public_position_list.filter(
+                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+                else:
+                    public_position_list = public_position_list.filter(stance=stance_we_are_looking_for)
+
+            # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
+            if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                revised_public_position_list = []
+                for one_position in public_position_list:
+                    if stance_we_are_looking_for == SUPPORT:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_positive_rating():  # This was "is_support"
+                                revised_public_position_list.append(one_position)
+                        else:
+                            revised_public_position_list.append(one_position)
+                    elif stance_we_are_looking_for == OPPOSE:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_negative_rating():  # This was "is_oppose"
+                                revised_public_position_list.append(one_position)
+                        else:
+                            revised_public_position_list.append(one_position)
+                public_position_list = revised_public_position_list
+
+            total_count += len(public_position_list)
+        except Exception as e:
+            pass
+
+        # Friends-only Positions
+        try:
+            friends_only_position_list = PositionForFriends.objects.all()
+            friends_only_position_list = friends_only_position_list.exclude(voter_we_vote_id=None)  # No we_vote_id
+
+            if positive_value_exists(candidate_campaign_id):
+                friends_only_position_list = friends_only_position_list.filter(
+                    candidate_campaign_id=candidate_campaign_id)
+            else:
+                friends_only_position_list = friends_only_position_list.filter(
+                    candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                    friends_only_position_list = friends_only_position_list.filter(
+                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+                else:
+                    friends_only_position_list = friends_only_position_list.filter(stance=stance_we_are_looking_for)
+
+            # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
+            if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                revised_friends_only_position_list = []
+                for one_position in friends_only_position_list:
+                    if stance_we_are_looking_for == SUPPORT:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_positive_rating():  # This was "is_support"
+                                revised_friends_only_position_list.append(one_position)
+                        else:
+                            revised_friends_only_position_list.append(one_position)
+                    elif stance_we_are_looking_for == OPPOSE:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_negative_rating():  # This was "is_oppose"
+                                revised_friends_only_position_list.append(one_position)
+                        else:
+                            revised_friends_only_position_list.append(one_position)
+                friends_only_position_list = revised_friends_only_position_list
+
+            total_count += len(friends_only_position_list)
+        except Exception as e:
+            pass
+
+        return total_count
+
+    def fetch_voter_positions_count_for_contest_measure(
+            self, contest_measure_id, contest_measure_we_vote_id='', stance_we_are_looking_for=ANY_STANCE):
+        """
+        We are only retrieving voter positions, not positions of organizations.
+        :param contest_measure_id:
+        :param contest_measure_we_vote_id:
+        :param stance_we_are_looking_for:
+        :return:
+        """
+        if stance_we_are_looking_for not \
+                in(ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING):
+            return 0
+
+        # Note that one of the incoming options for stance_we_are_looking_for is 'ANY_STANCE'
+        #  which means we want to return all stances
+
+        if not positive_value_exists(contest_measure_id) and not \
+                positive_value_exists(contest_measure_we_vote_id):
+            return 0
+
+        # Retrieve the support positions for this contest_measure
+        total_count = 0
+        # Public Positions
+        try:
+            public_position_list = PositionEntered.objects.all()
+            public_position_list = public_position_list.exclude(voter_we_vote_id=None)  # Don't include if no we_vote_id
+
+            if positive_value_exists(contest_measure_id):
+                public_position_list = public_position_list.filter(contest_measure_id=contest_measure_id)
+            else:
+                public_position_list = public_position_list.filter(
+                    contest_measure_we_vote_id=contest_measure_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                    public_position_list = public_position_list.filter(
+                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+                else:
+                    public_position_list = public_position_list.filter(stance=stance_we_are_looking_for)
+
+            # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
+            if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                revised_public_position_list = []
+                for one_position in public_position_list:
+                    if stance_we_are_looking_for == SUPPORT:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_positive_rating():  # This was "is_support"
+                                revised_public_position_list.append(one_position)
+                        else:
+                            revised_public_position_list.append(one_position)
+                    elif stance_we_are_looking_for == OPPOSE:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_negative_rating():  # This was "is_oppose"
+                                revised_public_position_list.append(one_position)
+                        else:
+                            revised_public_position_list.append(one_position)
+                public_position_list = revised_public_position_list
+
+            total_count += len(public_position_list)
+        except Exception as e:
+            pass
+
+        # Friends-only Positions
+        try:
+            friends_only_position_list = PositionForFriends.objects.all()
+            friends_only_position_list = friends_only_position_list.exclude(voter_we_vote_id=None)  # No we_vote_id
+
+            if positive_value_exists(contest_measure_id):
+                friends_only_position_list = friends_only_position_list.filter(contest_measure_id=contest_measure_id)
+            else:
+                friends_only_position_list = friends_only_position_list.filter(
+                    contest_measure_we_vote_id=contest_measure_we_vote_id)
+            # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
+            if stance_we_are_looking_for != ANY_STANCE:
+                # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
+                if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                    friends_only_position_list = friends_only_position_list.filter(
+                        Q(stance=stance_we_are_looking_for) | Q(stance=PERCENT_RATING))  # | Q(stance=GRADE_RATING))
+                else:
+                    friends_only_position_list = friends_only_position_list.filter(stance=stance_we_are_looking_for)
+
+            # Now filter out the positions that have a percent rating that doesn't match the stance_we_are_looking_for
+            if stance_we_are_looking_for == SUPPORT or stance_we_are_looking_for == OPPOSE:
+                revised_friends_only_position_list = []
+                for one_position in friends_only_position_list:
+                    if stance_we_are_looking_for == SUPPORT:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_positive_rating():  # This was "is_support"
+                                revised_friends_only_position_list.append(one_position)
+                        else:
+                            revised_friends_only_position_list.append(one_position)
+                    elif stance_we_are_looking_for == OPPOSE:
+                        if one_position.stance == PERCENT_RATING:
+                            if one_position.is_negative_rating():  # This was "is_oppose"
+                                revised_friends_only_position_list.append(one_position)
+                        else:
+                            revised_friends_only_position_list.append(one_position)
+                friends_only_position_list = revised_friends_only_position_list
+
+            total_count += len(friends_only_position_list)
+        except Exception as e:
+            pass
+
+        return total_count
+
     def fetch_positions_count_for_voter_guide(self, organization_we_vote_id, google_civic_election_id,
                                               retrieve_public_positions=True, stance_we_are_looking_for=ANY_STANCE):
         # Don't proceed unless we have a correct stance identifier
