@@ -23,7 +23,7 @@ from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, 
     STILL_DECIDING, SUPPORT
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from voter.models import retrieve_voter_authority, voter_has_authority
+from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
@@ -375,12 +375,14 @@ def organization_position_list_view(request, organization_id):
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', '')
 
     organization_on_stage = Organization()
+    organization_we_vote_id = ""
     organization_on_stage_found = False
     try:
         organization_query = Organization.objects.filter(id=organization_id)
         if organization_query.count():
             organization_on_stage = organization_query[0]
             organization_on_stage_found = True
+            organization_we_vote_id = organization_on_stage.we_vote_id
     except Exception as e:
         handle_record_not_found_exception(e, logger=logger)
         organization_on_stage_found = False
@@ -404,6 +406,13 @@ def organization_position_list_view(request, organization_id):
         except Exception as e:
             organization_position_list = []
 
+        voter_manager = VoterManager()
+        voter_results = voter_manager.retrieve_voter_by_organization_we_vote_id(organization_we_vote_id)
+        if voter_results['voter_found']:
+            voter = voter_results['voter']
+        else:
+            voter = None
+
         for one_position in organization_position_list:
             position_manager = PositionManager()
             one_position = position_manager.refresh_cached_position_info(one_position)
@@ -418,6 +427,7 @@ def organization_position_list_view(request, organization_id):
                 'election_list':                election_list,
                 'google_civic_election_id':     google_civic_election_id,
                 'candidate_we_vote_id':         candidate_we_vote_id,
+                'voter':                        voter,
             }
         else:
             template_values = {
@@ -426,6 +436,7 @@ def organization_position_list_view(request, organization_id):
                 'election_list':                election_list,
                 'google_civic_election_id':     google_civic_election_id,
                 'candidate_we_vote_id':         candidate_we_vote_id,
+                'voter':                        voter,
             }
     return render(request, 'organization/organization_position_list.html', template_values)
 

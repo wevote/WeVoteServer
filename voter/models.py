@@ -923,6 +923,9 @@ class Voter(AbstractBaseUser):
         if not positive_value_exists(full_name) and positive_value_exists(self.email):
             full_name = self.email.split("@", 1)[0]
 
+        if not positive_value_exists(full_name):
+            full_name = "Voter-" + self.we_vote_id
+
         return full_name
 
     def get_short_name(self):

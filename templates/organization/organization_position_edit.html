@@ -10,7 +10,7 @@
     <p><a href="{% url 'organization:organization_position_list' organization.id %}?google_civic_election_id={{ google_civic_election_id }}">
         < Back to Organization Positions</a></p>
 
-<h1>{% if not organization_position %}Enter Position for {% endif %}{{ organization.organization_name }}{% if organization_position %}<br />
+<h1>{% if not organization_position %}Enter Position for {% endif %}{% if organization.organization_name %}{{ organization.organization_name }}{% else %}(org name missing){% endif %}{% if organization_position %}<br />
 Position on {{ organization_position.ballot_item_display_name }}{% endif %}</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 

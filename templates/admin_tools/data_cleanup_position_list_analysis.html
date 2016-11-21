@@ -34,7 +34,9 @@
             <td></td>
             <td>ID</td>
             <td>Voter</td>
+            <td>Voter Id</td>
             <td>Organization</td>
+            <td>Org Id</td>
             <td>Stance</td>
             <td>Candidate/Measure</td>
             <td>Election</td>
@@ -54,6 +56,12 @@
             {% else %}
                 (voter missing)
             {% endif %}</td>
+            <td>{% if position.voter %}
+                <a href="{% url 'voter:voter_edit' position.voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ position.voter.id }}
+                </a>
+            {% endif %}</td>
             <td>{% if position.organization %}
                 <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">
@@ -61,6 +69,12 @@
                 </a>
             {% else %}
                 (organization missing)
+            {% endif %}</td>
+            <td>{% if position.organization %}
+                <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ position.organization.id }}
+                </a>
             {% endif %}</td>
             <td>
             {% if position.organization %}
@@ -79,14 +93,14 @@
                     (name unknown)
                 {% endif %}
             </td>
-            <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% endif %}
+            <td>{% if position.election.election_day_text %}{{ position.election.election_day_text }}{% else %}{{ position.election.google_civic_election_id }}{% endif %}
                 {% if position.vote_smart_time_span %}{{ position.vote_smart_time_span }}{% endif %}</td>
         </tr>
     {% endfor %}
     </table>
 
 {% else %}
-    <p>(no positions found)</p>
+    <p>(no "Public Positions without Organization We Vote Id" found)</p>
 {% endif %}
 
 
@@ -97,7 +111,9 @@
             <td></td>
             <td>ID</td>
             <td>Voter</td>
+            <td>Voter Id</td>
             <td>Organization</td>
+            <td>Org Id</td>
             <td>Stance</td>
             <td>Candidate/Measure</td>
             <td>Election</td>
@@ -117,6 +133,12 @@
             {% else %}
                 (voter missing)
             {% endif %}</td>
+            <td>{% if position.voter %}
+                <a href="{% url 'voter:voter_edit' position.voter.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ position.voter.id }}
+                </a>
+            {% endif %}</td>
             <td>{% if position.organization %}
                 <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">
@@ -124,6 +146,12 @@
                 </a>
             {% else %}
                 (organization missing)
+            {% endif %}</td>
+            <td>{% if position.organization %}
+                <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">
+                {{ position.organization.id }}
+                </a>
             {% endif %}</td>
             <td>
             {% if position.organization %}
@@ -149,7 +177,7 @@
     </table>
 
 {% else %}
-    <p>(no positions found)</p>
+    <p>(no "Positions for Friends without Organization We Vote Id" found)</p>
 {% endif %}
 
     <script>
