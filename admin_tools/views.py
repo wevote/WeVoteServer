@@ -512,9 +512,14 @@ def data_cleanup_position_list_analysis_view(request):
     voter_we_vote_id_added = 0
     voter_we_vote_id_added_failed = 0
 
+    organization_manager = OrganizationManager()
+    voter_manager = VoterManager()
+
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     election_list = Election.objects.order_by('-election_day_text')
 
+    # #######################
+    # REPAIR CODE
     # PositionEntered: Find Positions that have an organization_id but not an organization_we_vote_id and repair
     public_positions_with_organization_id_only = PositionEntered.objects.all()
     if positive_value_exists(google_civic_election_id):
@@ -525,9 +530,8 @@ def data_cleanup_position_list_analysis_view(request):
     public_positions_with_organization_id_only = public_positions_with_organization_id_only.filter(
         Q(organization_we_vote_id=None) | Q(organization_we_vote_id=""))
     # We limit these to 20 since we are doing other lookup
-    public_positions_with_organization_id_only = public_positions_with_organization_id_only[:20]
+    public_positions_with_organization_id_only = public_positions_with_organization_id_only[:200]
     for one_position in public_positions_with_organization_id_only:
-        organization_manager = OrganizationManager()
         results = organization_manager.retrieve_organization_from_id(one_position.organization_id)
         if results['organization_found']:
             try:
@@ -548,9 +552,8 @@ def data_cleanup_position_list_analysis_view(request):
     public_positions_with_organization_id_only = public_positions_with_organization_id_only.filter(
         Q(organization_we_vote_id=None) | Q(organization_we_vote_id=""))
     # We limit these to 20 since we are doing other lookup
-    public_positions_with_organization_id_only = public_positions_with_organization_id_only[:20]
+    public_positions_with_organization_id_only = public_positions_with_organization_id_only[:200]
     for one_position in public_positions_with_organization_id_only:
-        organization_manager = OrganizationManager()
         results = organization_manager.retrieve_organization_from_id(one_position.organization_id)
         if results['organization_found']:
             try:
@@ -571,9 +574,8 @@ def data_cleanup_position_list_analysis_view(request):
     public_positions_with_voter_id_only = public_positions_with_voter_id_only.filter(
         Q(voter_we_vote_id=None) | Q(voter_we_vote_id=""))
     # We limit these to 20 since we are doing other lookup
-    public_positions_with_voter_id_only = public_positions_with_voter_id_only[:20]
+    public_positions_with_voter_id_only = public_positions_with_voter_id_only[:200]
     for one_position in public_positions_with_voter_id_only:
-        voter_manager = VoterManager()
         results = voter_manager.retrieve_voter_by_id(one_position.voter_id)
         if results['voter_found']:
             try:
@@ -585,18 +587,17 @@ def data_cleanup_position_list_analysis_view(request):
                 voter_we_vote_id_added_failed += 1
 
     # PositionForFriends: Find Positions that have a voter_id but not a voter_we_vote_id
-    public_positions_with_voter_id_only = PositionForFriends.objects.all()
+    positions_for_friends_with_voter_id_only = PositionForFriends.objects.all()
     if positive_value_exists(google_civic_election_id):
-        public_positions_with_voter_id_only = public_positions_with_voter_id_only.filter(
+        positions_for_friends_with_voter_id_only = positions_for_friends_with_voter_id_only.filter(
             google_civic_election_id=google_civic_election_id)
-    public_positions_with_voter_id_only = \
-        public_positions_with_voter_id_only.filter(voter_id__gt=0)
-    public_positions_with_voter_id_only = public_positions_with_voter_id_only.filter(
+    positions_for_friends_with_voter_id_only = \
+        positions_for_friends_with_voter_id_only.filter(voter_id__gt=0)
+    positions_for_friends_with_voter_id_only = positions_for_friends_with_voter_id_only.filter(
         Q(voter_we_vote_id=None) | Q(voter_we_vote_id=""))
     # We limit these to 20 since we are doing other lookup
-    public_positions_with_voter_id_only = public_positions_with_voter_id_only[:20]
-    for one_position in public_positions_with_voter_id_only:
-        voter_manager = VoterManager()
+    positions_for_friends_with_voter_id_only = positions_for_friends_with_voter_id_only[:200]
+    for one_position in positions_for_friends_with_voter_id_only:
         results = voter_manager.retrieve_voter_by_id(one_position.voter_id)
         if results['voter_found']:
             try:
@@ -606,6 +607,45 @@ def data_cleanup_position_list_analysis_view(request):
                 voter_we_vote_id_added += 1
             except Exception as e:  # Look for positions where:
                 voter_we_vote_id_added_failed += 1
+
+    # Heal data: Make sure that we have a google_civic_election_id for all positions
+    # PositionEntered: Find Positions that have a candidate_we_vote_id, or contest_measure_we_vote_id,
+    # but no google_civic_election_id, and update with the correct google_civic_election_id
+    public_positions_without_election_id = PositionEntered.objects.all()
+    public_positions_without_election_id = public_positions_without_election_id.exclude(
+        google_civic_election_id=None)
+    public_positions_without_election_id_count = public_positions_without_election_id.count()
+    # We limit these to x so we don't time-out the page
+    # public_positions_without_election_id = public_positions_without_election_id[:200]
+    # for one_position in public_positions_without_election_id:  # TODO DALE IMPLEMENT
+    #     results = voter_manager.retrieve_voter_by_id(one_position.voter_id)
+    #     if results['voter_found']:
+    #         try:
+    #             voter = results['voter']
+    #             one_position.google_civic_election_id =
+    #             one_position.save()
+    #             google_civic_id_added_to_public_position += 1
+    #         except Exception as e:
+    #             pass
+
+    # PositionForFriends: Find Positions that have a candidate_we_vote_id, or contest_measure_we_vote_id,
+    # but no google_civic_election_id, and update with the correct google_civic_election_id
+    positions_for_friends_without_election_id = PositionForFriends.objects.all()
+    positions_for_friends_without_election_id = positions_for_friends_without_election_id.exclude(
+        google_civic_election_id=None)
+    positions_for_friends_without_election_id_count = positions_for_friends_without_election_id.count()
+    # We limit these to x so we don't time-out the page
+    # positions_for_friends_without_election_id = positions_for_friends_without_election_id[:200]
+    # for one_position in public_positions_with_voter_id_only:  # TODO DALE IMPLEMENT
+    #     results = voter_manager.retrieve_voter_by_id(one_position.voter_id)
+    #     if results['voter_found']:
+    #         try:
+    #             voter = results['voter']
+    #             one_position.voter_we_vote_id = voter.we_vote_id
+    #             one_position.save()
+    #             voter_we_vote_id_added += 1
+    #         except Exception as e:  # Look for positions where:
+    #             voter_we_vote_id_added_failed += 1
 
     # *) voter_we_vote_id doesn't match organization_we_vote_id
     # *) In public position table, an organization_we_vote_id doesn't exist
@@ -618,8 +658,11 @@ def data_cleanup_position_list_analysis_view(request):
             google_civic_election_id=google_civic_election_id)
     public_positions_without_organization = public_positions_without_organization.filter(
         Q(organization_we_vote_id=None) | Q(organization_we_vote_id=""))
+    # Exclude positions without a connection to a voter
+    public_positions_without_organization = public_positions_without_organization.exclude(
+        Q(voter_we_vote_id=None) | Q(voter_we_vote_id=""))
     # We limit these to 20 since we are doing other lookup
-    public_positions_without_organization = public_positions_without_organization[:20]
+    public_positions_without_organization = public_positions_without_organization[:200]
 
     # PositionsForFriends without organization_we_vote_id
     positions_for_friends_without_organization = PositionForFriends.objects.all()
@@ -629,7 +672,7 @@ def data_cleanup_position_list_analysis_view(request):
     positions_for_friends_without_organization = positions_for_friends_without_organization.filter(
         Q(organization_we_vote_id=None) | Q(organization_we_vote_id=""))
     # We limit these to 20 since we are doing other lookup
-    positions_for_friends_without_organization = positions_for_friends_without_organization[:20]
+    positions_for_friends_without_organization = positions_for_friends_without_organization[:200]
 
     position_list_analysis_message = ""
     position_list_analysis_message += "organization_we_vote_id_added: " + \
@@ -640,6 +683,10 @@ def data_cleanup_position_list_analysis_view(request):
                                       str(voter_we_vote_id_added) + "<br />"
     position_list_analysis_message += "voter_we_vote_id_added_failed: " + \
                                       str(voter_we_vote_id_added_failed) + "<br />"
+    position_list_analysis_message += "public_positions_without_election_id_count: " + \
+                                      str(public_positions_without_election_id_count) + "<br />"
+    position_list_analysis_message += "positions_for_friends_without_election_id_count: " + \
+                                      str(positions_for_friends_without_election_id_count) + "<br />"
 
     messages.add_message(request, messages.INFO, position_list_analysis_message)
 

@@ -1334,33 +1334,40 @@ class PositionListManager(models.Model):
                     else:
                         public_positions_list = public_positions_list.filter(stance=stance_we_are_looking_for)
 
-                # Gather the we_vote_ids for all positions in this election
+                # Gather the we_vote_ids for all positions in this election TODO DALE REPLACE THIS
                 public_only = True
-                we_vote_ids_for_all_positions_for_this_election = []
+                # we_vote_ids_for_all_positions_for_this_election = []
                 google_civic_election_id_local_scope = 0
                 if positive_value_exists(filter_for_voter) or positive_value_exists(filter_out_voter):
                     results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
                     google_civic_election_id_local_scope = results['google_civic_election_id']
-                    if positive_value_exists(google_civic_election_id_local_scope):
-                        all_positions_for_this_election = self.retrieve_all_positions_for_election(
-                            google_civic_election_id_local_scope, stance_we_are_looking_for, public_only)
-                        for one_position in all_positions_for_this_election:
-                            we_vote_ids_for_all_positions_for_this_election.append(one_position.we_vote_id)
+                    # TODO DALE REMOVE OLD APPROACH
+                    # if positive_value_exists(google_civic_election_id_local_scope):
+                    #     all_positions_for_this_election = self.retrieve_all_positions_for_election(
+                    #         google_civic_election_id_local_scope, stance_we_are_looking_for, public_only)
+                    #     for one_position in all_positions_for_this_election:
+                    #         we_vote_ids_for_all_positions_for_this_election.append(one_position.we_vote_id)
 
                 # We can filter by only one of these
                 if positive_value_exists(filter_for_voter):  # This is the default option
                     if positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items in this election
+                        # TODO DALE OLD
+                        # public_positions_list = public_positions_list.filter(
+                        #     we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
                         public_positions_list = public_positions_list.filter(
-                            we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
+                            google_civic_election_id=google_civic_election_id_local_scope)
                     else:
                         # If no election is found for the voter, don't show any positions
                         public_positions_list = []
                 elif positive_value_exists(filter_out_voter):
                     if positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items NOT in this election
+                        # TODO DALE OLD
+                        # public_positions_list = public_positions_list.exclude(
+                        #     we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
                         public_positions_list = public_positions_list.exclude(
-                            we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
+                            google_civic_election_id=google_civic_election_id_local_scope)
                     else:
                         # Leave the position_list as is.
                         pass
@@ -1450,31 +1457,36 @@ class PositionListManager(models.Model):
                     # Gather the ids for all positions in this election so we can figure out which positions
                     # relate to the election the voter is currently looking at, vs. for all other elections
                     public_only = False
-                    we_vote_ids_for_all_positions_for_this_election = []
+                    # we_vote_ids_for_all_positions_for_this_election = []
                     google_civic_election_id_local_scope = 0
                     if positive_value_exists(filter_for_voter) or positive_value_exists(filter_out_voter):
                         results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
                         google_civic_election_id_local_scope = results['google_civic_election_id']
-                        if positive_value_exists(google_civic_election_id_local_scope):
-                            all_positions_for_this_election = self.retrieve_all_positions_for_election(
-                                google_civic_election_id_local_scope, stance_we_are_looking_for, public_only)
-                            for one_position in all_positions_for_this_election:
-                                we_vote_ids_for_all_positions_for_this_election.append(one_position.we_vote_id)
+                        # TODO DALE REMOVE OLD APPROACH
+                        # if positive_value_exists(google_civic_election_id_local_scope):
+                        #     all_positions_for_this_election = self.retrieve_all_positions_for_election(
+                        #         google_civic_election_id_local_scope, stance_we_are_looking_for, public_only)
+                        #     for one_position in all_positions_for_this_election:
+                        #         we_vote_ids_for_all_positions_for_this_election.append(one_position.we_vote_id)
 
                     # We can filter by only one of these
                     if positive_value_exists(filter_for_voter):  # This is the default option
                         if positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items in this election
+                            # friends_positions_list = friends_positions_list.filter(
+                            #     we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
                             friends_positions_list = friends_positions_list.filter(
-                                we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
+                                google_civic_election_id=google_civic_election_id_local_scope)
                         else:
                             # If no election is found for the voter, don't show any positions
                             friends_positions_list = []
                     elif positive_value_exists(filter_out_voter):
                         if positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items NOT in this election
+                            # friends_positions_list = friends_positions_list.exclude(
+                            #     we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
                             friends_positions_list = friends_positions_list.exclude(
-                                we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
+                                google_civic_election_id=google_civic_election_id_local_scope)
                         else:
                             # Leave the position_list as is.
                             pass

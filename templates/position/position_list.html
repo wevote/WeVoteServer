@@ -60,11 +60,12 @@
     {% for position in position_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ position.we_vote_id }}</td>
+            <td><a href="{% url 'organization:organization_position_edit' position.organization.id position.we_vote_id %}?google_civic_election_id={{ google_civic_election_id }}"
+                   target="_blank">{{ position.we_vote_id }}</a></td>
             <td>{% if position.organization %}
                 <a href="{% url 'organization:organization_position_list' position.organization.id %}?google_civic_election_id={{ google_civic_election_id }}"
                    target="_blank">
-                {{ position.organization.organization_name }}
+                {% if position.organization.organization_name %}{{ position.organization.organization_name }}{% else %}(no org name){% endif %}
                 </a>
             {% else %}
                 (organization name missing)
