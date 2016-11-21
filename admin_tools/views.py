@@ -661,6 +661,7 @@ def data_cleanup_position_list_analysis_view(request):
     # Exclude positions without a connection to a voter
     public_positions_without_organization = public_positions_without_organization.exclude(
         Q(voter_we_vote_id=None) | Q(voter_we_vote_id=""))
+    public_positions_without_organization_count = public_positions_without_organization.count()
     # We limit these to 20 since we are doing other lookup
     public_positions_without_organization = public_positions_without_organization[:200]
 
@@ -671,6 +672,7 @@ def data_cleanup_position_list_analysis_view(request):
             google_civic_election_id=google_civic_election_id)
     positions_for_friends_without_organization = positions_for_friends_without_organization.filter(
         Q(organization_we_vote_id=None) | Q(organization_we_vote_id=""))
+    positions_for_friends_without_organization_count = positions_for_friends_without_organization.count()
     # We limit these to 20 since we are doing other lookup
     positions_for_friends_without_organization = positions_for_friends_without_organization[:200]
 
@@ -683,6 +685,10 @@ def data_cleanup_position_list_analysis_view(request):
                                       str(voter_we_vote_id_added) + "<br />"
     position_list_analysis_message += "voter_we_vote_id_added_failed: " + \
                                       str(voter_we_vote_id_added_failed) + "<br />"
+    position_list_analysis_message += "public_positions_without_organization_count: " + \
+                                      str(public_positions_without_organization_count) + "<br />"
+    position_list_analysis_message += "positions_for_friends_without_organization_count: " + \
+                                      str(positions_for_friends_without_organization_count) + "<br />"
     position_list_analysis_message += "public_positions_without_election_id_count: " + \
                                       str(public_positions_without_election_id_count) + "<br />"
     position_list_analysis_message += "positions_for_friends_without_election_id_count: " + \
