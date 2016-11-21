@@ -1334,27 +1334,15 @@ class PositionListManager(models.Model):
                     else:
                         public_positions_list = public_positions_list.filter(stance=stance_we_are_looking_for)
 
-                # Gather the we_vote_ids for all positions in this election TODO DALE REPLACE THIS
-                public_only = True
-                # we_vote_ids_for_all_positions_for_this_election = []
                 google_civic_election_id_local_scope = 0
                 if positive_value_exists(filter_for_voter) or positive_value_exists(filter_out_voter):
                     results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
                     google_civic_election_id_local_scope = results['google_civic_election_id']
-                    # TODO DALE REMOVE OLD APPROACH
-                    # if positive_value_exists(google_civic_election_id_local_scope):
-                    #     all_positions_for_this_election = self.retrieve_all_positions_for_election(
-                    #         google_civic_election_id_local_scope, stance_we_are_looking_for, public_only)
-                    #     for one_position in all_positions_for_this_election:
-                    #         we_vote_ids_for_all_positions_for_this_election.append(one_position.we_vote_id)
 
                 # We can filter by only one of these
                 if positive_value_exists(filter_for_voter):  # This is the default option
                     if positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items in this election
-                        # TODO DALE OLD
-                        # public_positions_list = public_positions_list.filter(
-                        #     we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
                         public_positions_list = public_positions_list.filter(
                             google_civic_election_id=google_civic_election_id_local_scope)
                     else:
@@ -1363,9 +1351,6 @@ class PositionListManager(models.Model):
                 elif positive_value_exists(filter_out_voter):
                     if positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items NOT in this election
-                        # TODO DALE OLD
-                        # public_positions_list = public_positions_list.exclude(
-                        #     we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
                         public_positions_list = public_positions_list.exclude(
                             google_civic_election_id=google_civic_election_id_local_scope)
                     else:
@@ -1456,25 +1441,15 @@ class PositionListManager(models.Model):
 
                     # Gather the ids for all positions in this election so we can figure out which positions
                     # relate to the election the voter is currently looking at, vs. for all other elections
-                    public_only = False
-                    # we_vote_ids_for_all_positions_for_this_election = []
                     google_civic_election_id_local_scope = 0
                     if positive_value_exists(filter_for_voter) or positive_value_exists(filter_out_voter):
                         results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
                         google_civic_election_id_local_scope = results['google_civic_election_id']
-                        # TODO DALE REMOVE OLD APPROACH
-                        # if positive_value_exists(google_civic_election_id_local_scope):
-                        #     all_positions_for_this_election = self.retrieve_all_positions_for_election(
-                        #         google_civic_election_id_local_scope, stance_we_are_looking_for, public_only)
-                        #     for one_position in all_positions_for_this_election:
-                        #         we_vote_ids_for_all_positions_for_this_election.append(one_position.we_vote_id)
 
                     # We can filter by only one of these
                     if positive_value_exists(filter_for_voter):  # This is the default option
                         if positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items in this election
-                            # friends_positions_list = friends_positions_list.filter(
-                            #     we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
                             friends_positions_list = friends_positions_list.filter(
                                 google_civic_election_id=google_civic_election_id_local_scope)
                         else:
@@ -1483,15 +1458,13 @@ class PositionListManager(models.Model):
                     elif positive_value_exists(filter_out_voter):
                         if positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items NOT in this election
-                            # friends_positions_list = friends_positions_list.exclude(
-                            #     we_vote_id__in=we_vote_ids_for_all_positions_for_this_election)
                             friends_positions_list = friends_positions_list.exclude(
                                 google_civic_election_id=google_civic_election_id_local_scope)
                         else:
                             # Leave the position_list as is.
                             pass
                     elif positive_value_exists(google_civic_election_id):
-                        # Please note that this option doesn't catch Vote Smart ratings, which are not
+                        # Please note that this option doesn't catch Vote Smart ratings (yet), which are not
                         # linked by google_civic_election_id
                         # We are only using this if google_civic_election_id was passed
                         # into retrieve_all_positions_for_organization
@@ -1916,49 +1889,42 @@ class PositionListManager(models.Model):
             position_list = []
             return position_list
 
+        # DALE 2016-11-20 We now count on every position having a google_civic_election_id
         # We aren't going to search directly on google_civic_election_id, but instead assemble a list of the items
         #  on the ballot and then retrieve positions relating to any of those ballot_items (candidates or measures)
-        # TODO DALE Running this code every time is not scalable. We should cache a link between positions and the
-        #  elections that we can use to look up when we need the link.
-
-        # Candidate related positions
-        candidate_campaign_we_vote_ids = []
-        candidate_campaign_list_manager = CandidateCampaignListManager()
-        candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_upcoming_election(
-            google_civic_election_id)
-        if candidate_results['candidate_list_found']:
-            candidate_list_light = candidate_results['candidate_list_light']
-            for one_candidate in candidate_list_light:
-                candidate_campaign_we_vote_ids.append(one_candidate['candidate_we_vote_id'])
-
-        # Measure related positions
-        contest_measure_we_vote_ids = []
-        contest_measure_list_manager = ContestMeasureList()
-        measure_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(
-            google_civic_election_id)
-        if measure_results['measure_list_found']:
-            measure_list_light = measure_results['measure_list_light']
-            for one_measure in measure_list_light:
-                contest_measure_we_vote_ids.append(one_measure['measure_we_vote_id'])
+        # # Candidate related positions
+        # candidate_campaign_we_vote_ids = []
+        # candidate_campaign_list_manager = CandidateCampaignListManager()
+        # candidate_results = candidate_campaign_list_manager.retrieve_all_candidates_for_upcoming_election(
+        #     google_civic_election_id)
+        # if candidate_results['candidate_list_found']:
+        #     candidate_list_light = candidate_results['candidate_list_light']
+        #     for one_candidate in candidate_list_light:
+        #         candidate_campaign_we_vote_ids.append(one_candidate['candidate_we_vote_id'])
+        #
+        # # Measure related positions
+        # contest_measure_we_vote_ids = []
+        # contest_measure_list_manager = ContestMeasureList()
+        # measure_results = contest_measure_list_manager.retrieve_all_measures_for_upcoming_election(
+        #     google_civic_election_id)
+        # if measure_results['measure_list_found']:
+        #     measure_list_light = measure_results['measure_list_light']
+        #     for one_measure in measure_list_light:
+        #         contest_measure_we_vote_ids.append(one_measure['measure_we_vote_id'])
 
         position_list_found = False
         try:
             if public_only:
                 # Only return public positions
                 position_list = PositionEntered.objects.order_by('date_entered')
-                # TODO DALE 2016-08-30 I believe this is out of date because I *think* we have public positions
-                # with a value in voter_id
-                # We are removing old entries from voters that should be private
-                # position_list = position_list.filter(
-                #     Q(voter_id__isnull=True) |
-                #     Q(voter_id__exact=0))
             else:
                 # Only return PositionForFriends entries
                 position_list = PositionForFriends.objects.order_by('date_entered')
-            position_list = position_list.filter(
-                Q(candidate_campaign_we_vote_id__in=candidate_campaign_we_vote_ids) |
-                Q(contest_measure_we_vote_id__in=contest_measure_we_vote_ids))
-            # position_list = position_list.filter(contest_measure_we_vote_id=contest_measure_we_vote_id)
+            position_list = position_list.filter(google_civic_election_id=google_civic_election_id)
+            # OLD Approach
+            # position_list = position_list.filter(
+            #     Q(candidate_campaign_we_vote_id__in=candidate_campaign_we_vote_ids) |
+            #     Q(contest_measure_we_vote_id__in=contest_measure_we_vote_ids))
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY" it means we want to not filter down the list

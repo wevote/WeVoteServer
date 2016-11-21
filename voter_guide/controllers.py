@@ -608,7 +608,6 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     # This is a list of orgs that the voter isn't following or ignoring
     org_list_found_by_google_civic_election_id = []
     for one_position in positions_list_minus_ignored_and_followed:
-        # If the
         if positive_value_exists(one_position.organization_we_vote_id) and \
                 positive_value_exists(one_position.google_civic_election_id):
             # Make sure we haven't already recorded that we want to retrieve the voter_guide for this org
