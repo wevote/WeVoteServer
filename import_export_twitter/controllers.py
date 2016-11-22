@@ -96,6 +96,7 @@ def refresh_twitter_organization_details(organization):
         }
         return results
 
+    # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
     if organization.organization_twitter_handle:
         status = "ORGANIZATION_TWITTER_DETAILS-REACHING_OUT_TO_TWITTER"
         twitter_user_id = 0
@@ -285,6 +286,7 @@ def retrieve_twitter_data_for_all_organizations(state_code='', google_civic_elec
     for organization in organization_list:
         # ######################################
         # If we have a Twitter handle for this org, refresh the data
+        # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
         if organization.organization_twitter_handle:
             retrieved_twitter_data = False
             if first_retrieve_only:

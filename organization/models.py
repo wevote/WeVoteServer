@@ -9,6 +9,7 @@ from exception.models import handle_exception, \
     handle_record_found_more_than_one_exception, handle_record_not_saved_exception
 from import_export_facebook.models import FacebookManager
 from import_export_twitter.functions import retrieve_twitter_user_info
+from twitter.models import TwitterUserManager
 from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists
@@ -57,6 +58,7 @@ class OrganizationManager(models.Manager):
         try:
             if not positive_value_exists(organization_name):
                 organization_name = ""
+            # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
             organization = Organization.create(organization_name=organization_name,
                                                organization_website=organization_website,
                                                organization_twitter_handle=organization_twitter_handle,
@@ -202,6 +204,7 @@ class OrganizationManager(models.Manager):
         organization_twitter_search = organization_twitter_search.strip() if organization_twitter_search else False
         organization_name = organization_name.strip() if organization_name else False
         organization_website = organization_website.strip() if organization_website else False
+        # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
         organization_twitter_handle = organization_twitter_handle.strip() if organization_twitter_handle else False
         organization_email = organization_email.strip() if organization_email else False
         organization_facebook = organization_facebook.strip() if organization_facebook else False
@@ -629,6 +632,7 @@ class OrganizationManager(models.Manager):
         status = "ENTERING_UPDATE_ORGANIZATION_TWITTER_DETAILS"
         values_changed = False
 
+        # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
         if organization:
             if positive_value_exists(twitter_json['id']):
                 if convert_to_int(twitter_json['id']) != organization.twitter_user_id:
@@ -767,7 +771,7 @@ class OrganizationListManager(models.Manager):
                 #                     [Q(organization_name__icontains=word) for word in organization_name_list])
                 filters.append(new_filter)
 
-            if positive_value_exists(organization_twitter_handle):
+            if positive_value_exists(organization_twitter_handle):  # TODO DALE TwitterLinkToOrganization instead?
                 new_filter = Q(organization_twitter_handle__icontains=organization_twitter_handle)
                 filters.append(new_filter)
 
@@ -895,34 +899,52 @@ class OrganizationListManager(models.Manager):
     def retrieve_organizations_from_non_unique_identifiers(self, twitter_handle):
         organization_list_objects = []
         organization_list_found = False
+        success = False
+        status = ""
         twitter_handle_filtered = extract_twitter_handle_from_text_string(twitter_handle)
 
-        try:
-            organization_queryset = Organization.objects.all()
-            organization_queryset = organization_queryset.filter(
-                organization_twitter_handle__iexact=twitter_handle_filtered)
-            # If multiple organizations claim the same Twitter handle, select the one with... ??
-            # organization_queryset = organization_queryset.order_by('-twitter_followers_count')
-
-            organization_list_objects = organization_queryset
-
-            if len(organization_list_objects):
+        # See if we have linked an organization to this Twitter handle
+        twitter_user_manager = TwitterUserManager()
+        results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_handle(
+            twitter_handle_filtered)
+        if results['twitter_link_to_organization_found']:
+            twitter_link_to_organization = results['twitter_link_to_organization']
+            organization_manager = OrganizationManager()
+            organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+                twitter_link_to_organization.organization_we_vote_id)
+            if organization_results['organization_found']:
+                organization = organization_results['organization']
                 organization_list_found = True
-                status = 'ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE'
+                organization_list_objects.append(organization)
                 success = True
-            else:
-                status = 'NO_ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE'
+                status = "ORGANIZATION_FOUND_FROM_TWITTER_LINK_TO_ORGANIZATION"
+        else:
+            try:
+                organization_queryset = Organization.objects.all()
+                organization_queryset = organization_queryset.filter(
+                    organization_twitter_handle__iexact=twitter_handle_filtered)
+                # If multiple organizations claim the same Twitter handle, select the one with... ??
+                # organization_queryset = organization_queryset.order_by('-twitter_followers_count')
+
+                organization_list_objects = organization_queryset
+
+                if len(organization_list_objects):
+                    organization_list_found = True
+                    status = 'ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE'
+                    success = True
+                else:
+                    status = 'NO_ORGANIZATIONS_RETRIEVED_FROM_TWITTER_HANDLE'
+                    success = True
+            except Organization.DoesNotExist:
+                # No organizations found. Not a problem.
+                status = 'NO_ORGANIZATIONS_FOUND_FROM_TWITTER_HANDLE_DoesNotExist'
+                organization_list_objects = []
                 success = True
-        except Organization.DoesNotExist:
-            # No organizations found. Not a problem.
-            status = 'NO_ORGANIZATIONS_FOUND_FROM_TWITTER_HANDLE_DoesNotExist'
-            organization_list_objects = []
-            success = True
-        except Exception as e:
-            handle_exception(e, logger=logger)
-            status = 'FAILED retrieve_organizations_from_non_unique_identifiers ' \
-                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
-            success = False
+            except Exception as e:
+                handle_exception(e, logger=logger)
+                status = 'FAILED retrieve_organizations_from_non_unique_identifiers ' \
+                         '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
+                success = False
 
         results = {
             'success':                  success,

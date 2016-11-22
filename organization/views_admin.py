@@ -91,6 +91,7 @@ def organization_list_view(request):
 
     messages_on_stage = get_messages(request)
     organization_list_query = Organization.objects.all()
+    organization_list_query = organization_list_query.order_by('organization_name')
     if positive_value_exists(organization_state_code):
         organization_list_query = organization_list_query.filter(state_served_code__iexact=organization_state_code)
 
@@ -117,8 +118,30 @@ def organization_list_view(request):
                 final_filters |= item
 
             organization_list_query = organization_list_query.filter(final_filters)
+    else:
+        # This is the default organization list
+        filters = []
 
-    organization_list_query = organization_list_query.order_by('organization_name')
+        new_filter = Q(organization_name="")
+        filters.append(new_filter)
+
+        new_filter = Q(organization_name__startswith="Voter-")
+        filters.append(new_filter)
+
+        new_filter = Q(organization_name__startswith="wv")
+        filters.append(new_filter)
+
+        # Add the first query
+        if len(filters):
+            final_filters = filters.pop()
+
+            # ...and "OR" the remaining items in the list
+            for item in filters:
+                final_filters |= item
+
+            # NOTE this is "exclude"
+            organization_list_query = organization_list_query.exclude(final_filters)
+        organization_list_query = organization_list_query[:1000]
 
     organization_list = organization_list_query
 

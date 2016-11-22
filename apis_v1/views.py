@@ -401,12 +401,12 @@ def organization_save_view(request):  # organizationSave
             # Does this voter have the same Twitter handle as this organization? If so, link this organization to
             #  this particular voter
             if positive_value_exists(voter.facebook_id) \
-                    and voter.facebook_id == facebook_id:
+                    and voter.facebook_id == facebook_id:  # TODO DALE Update to use FacebookLinkToVoter
                 # This will fail if the organization's facebook_id isn't passed in as a variable
                 voter_owns_facebook_id = True
 
             # Does this voter have the same Twitter handle as this organization? If so, link this organization to
-            #  this particular voter
+            #  this particular voter  # TODO DALE Update to use TwitterLinkToVoter
             if positive_value_exists(voter.twitter_screen_name) \
                     and voter.twitter_screen_name.lower() == organization_twitter_handle.lower():
                 # This will fail if the organization's twitter handle isn't passed in as a variable

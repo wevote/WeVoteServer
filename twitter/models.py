@@ -149,14 +149,18 @@ class TwitterUserManager(models.Model):
 
     def retrieve_twitter_link_to_organization_from_twitter_handle(self, twitter_handle):
         twitter_user_id = 0
-        return self.retrieve_twitter_link_to_organization(twitter_user_id, twitter_handle)
+        results = self.retrieve_twitter_user_locally_or_remotely(twitter_user_id, twitter_handle)
+        if results['twitter_user_found']:
+            twitter_user = results['twitter_user']
+            twitter_user_id = twitter_user.twitter_id
+
+        return self.retrieve_twitter_link_to_organization(twitter_user_id)
 
     def retrieve_twitter_link_to_organization_from_organization_we_vote_id(self, organization_we_vote_id):
         twitter_user_id = 0
-        twitter_handle = ""
-        return self.retrieve_twitter_link_to_organization(twitter_user_id, twitter_handle, organization_we_vote_id)
+        return self.retrieve_twitter_link_to_organization(twitter_user_id, organization_we_vote_id)
 
-    def retrieve_twitter_link_to_organization(self, twitter_id=0, twitter_handle='', organization_we_vote_id=''):
+    def retrieve_twitter_link_to_organization(self, twitter_id=0, organization_we_vote_id=''):
         """
 
         :param twitter_id:
@@ -176,14 +180,6 @@ class TwitterUserManager(models.Model):
                 twitter_link_to_organization_found = True
                 success = True
                 status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_USER_ID"
-            elif positive_value_exists(twitter_handle):
-                twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
-                    twitter_handle__iexact=twitter_handle,
-                )
-                twitter_link_to_organization_id = twitter_link_to_organization.id
-                twitter_link_to_organization_found = True
-                success = True
-                status = "RETRIEVE_TWITTER_LINK_TO_ORGANIZATION_FOUND_BY_TWITTER_HANDLE"
             elif positive_value_exists(organization_we_vote_id):
                 twitter_link_to_organization = TwitterLinkToOrganization.objects.get(
                     organization_we_vote_id__iexact=organization_we_vote_id,
