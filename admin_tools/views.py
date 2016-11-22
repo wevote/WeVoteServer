@@ -616,7 +616,7 @@ def data_cleanup_position_list_analysis_view(request):
     # but no google_civic_election_id, and update with the correct google_civic_election_id
     public_positions_without_election_id = PositionEntered.objects.all()
     public_positions_without_election_id = public_positions_without_election_id.filter(
-        google_civic_election_id=None)
+        Q(google_civic_election_id=None) | Q(google_civic_election_id=0))
     public_positions_without_election_id_count = public_positions_without_election_id.count()
     google_civic_id_added_to_public_position = 0
     google_civic_id_not_added_to_public_position = 0
@@ -640,14 +640,14 @@ def data_cleanup_position_list_analysis_view(request):
         # Now get the updated count
         public_positions_without_election_id = PositionEntered.objects.all()
         public_positions_without_election_id = public_positions_without_election_id.filter(
-            google_civic_election_id=None)
+            Q(google_civic_election_id=None) | Q(google_civic_election_id=0))
         public_positions_without_election_id_count = public_positions_without_election_id.count()
 
     # PositionForFriends: Find Positions that have a candidate_we_vote_id, or contest_measure_we_vote_id,
     # but no google_civic_election_id, and update with the correct google_civic_election_id
     positions_for_friends_without_election_id = PositionForFriends.objects.all()
     positions_for_friends_without_election_id = positions_for_friends_without_election_id.filter(
-        google_civic_election_id=None)
+        Q(google_civic_election_id=None) | Q(google_civic_election_id=0))
     positions_for_friends_without_election_id_count = positions_for_friends_without_election_id.count()
     google_civic_id_added_to_friends_position = 0
     google_civic_id_not_added_to_friends_position = 0
@@ -671,7 +671,7 @@ def data_cleanup_position_list_analysis_view(request):
         # Now get the updated count
         positions_for_friends_without_election_id = PositionForFriends.objects.all()
         positions_for_friends_without_election_id = positions_for_friends_without_election_id.filter(
-            google_civic_election_id=None)
+            Q(google_civic_election_id=None) | Q(google_civic_election_id=0))
         positions_for_friends_without_election_id_count = positions_for_friends_without_election_id.count()
 
     # *) voter_we_vote_id doesn't match organization_we_vote_id
