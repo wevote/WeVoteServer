@@ -4,7 +4,7 @@
 
 from config.base import get_environment_variable, LOGIN_URL
 from ballot.models import BallotReturned, VoterBallotSaved
-from candidate.models import CandidateCampaign
+from candidate.models import CandidateCampaign, CandidateCampaignManager
 from candidate.controllers import candidates_import_from_sample_file
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -512,11 +512,14 @@ def data_cleanup_position_list_analysis_view(request):
     voter_we_vote_id_added = 0
     voter_we_vote_id_added_failed = 0
 
+    candidate_manager = CandidateCampaignManager()
     organization_manager = OrganizationManager()
     voter_manager = VoterManager()
 
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     election_list = Election.objects.order_by('-election_day_text')
+
+    add_election_id = request.GET.get('add_election_id', False)
 
     # #######################
     # REPAIR CODE
@@ -612,40 +615,64 @@ def data_cleanup_position_list_analysis_view(request):
     # PositionEntered: Find Positions that have a candidate_we_vote_id, or contest_measure_we_vote_id,
     # but no google_civic_election_id, and update with the correct google_civic_election_id
     public_positions_without_election_id = PositionEntered.objects.all()
-    public_positions_without_election_id = public_positions_without_election_id.exclude(
+    public_positions_without_election_id = public_positions_without_election_id.filter(
         google_civic_election_id=None)
     public_positions_without_election_id_count = public_positions_without_election_id.count()
-    # We limit these to x so we don't time-out the page
-    # public_positions_without_election_id = public_positions_without_election_id[:200]
-    # for one_position in public_positions_without_election_id:  # TODO DALE IMPLEMENT
-    #     results = voter_manager.retrieve_voter_by_id(one_position.voter_id)
-    #     if results['voter_found']:
-    #         try:
-    #             voter = results['voter']
-    #             one_position.google_civic_election_id =
-    #             one_position.save()
-    #             google_civic_id_added_to_public_position += 1
-    #         except Exception as e:
-    #             pass
+    google_civic_id_added_to_public_position = 0
+    google_civic_id_not_added_to_public_position = 0
+    if add_election_id:
+        # We limit these to x so we don't time-out the page
+        public_positions_without_election_id = public_positions_without_election_id[:1000]
+        for one_position in public_positions_without_election_id:
+            if positive_value_exists(one_position.candidate_campaign_id):
+                # Retrieve the candidate and get the election it is for
+                candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(
+                    one_position.candidate_campaign_id)
+                if candidate_results['candidate_campaign_found']:
+                    candidate = candidate_results['candidate_campaign']
+                    if positive_value_exists(candidate.google_civic_election_id):
+                        try:
+                            one_position.google_civic_election_id = candidate.google_civic_election_id
+                            one_position.save()
+                            google_civic_id_added_to_public_position += 1
+                        except Exception as e:
+                            google_civic_id_not_added_to_public_position += 1
+        # Now get the updated count
+        public_positions_without_election_id = PositionEntered.objects.all()
+        public_positions_without_election_id = public_positions_without_election_id.filter(
+            google_civic_election_id=None)
+        public_positions_without_election_id_count = public_positions_without_election_id.count()
 
     # PositionForFriends: Find Positions that have a candidate_we_vote_id, or contest_measure_we_vote_id,
     # but no google_civic_election_id, and update with the correct google_civic_election_id
     positions_for_friends_without_election_id = PositionForFriends.objects.all()
-    positions_for_friends_without_election_id = positions_for_friends_without_election_id.exclude(
+    positions_for_friends_without_election_id = positions_for_friends_without_election_id.filter(
         google_civic_election_id=None)
     positions_for_friends_without_election_id_count = positions_for_friends_without_election_id.count()
-    # We limit these to x so we don't time-out the page
-    # positions_for_friends_without_election_id = positions_for_friends_without_election_id[:200]
-    # for one_position in public_positions_with_voter_id_only:  # TODO DALE IMPLEMENT
-    #     results = voter_manager.retrieve_voter_by_id(one_position.voter_id)
-    #     if results['voter_found']:
-    #         try:
-    #             voter = results['voter']
-    #             one_position.voter_we_vote_id = voter.we_vote_id
-    #             one_position.save()
-    #             voter_we_vote_id_added += 1
-    #         except Exception as e:  # Look for positions where:
-    #             voter_we_vote_id_added_failed += 1
+    google_civic_id_added_to_friends_position = 0
+    google_civic_id_not_added_to_friends_position = 0
+    if add_election_id:
+        # We limit these to x so we don't time-out the page
+        positions_for_friends_without_election_id = positions_for_friends_without_election_id[:1000]
+        for one_position in positions_for_friends_without_election_id:
+            if positive_value_exists(one_position.candidate_campaign_id):
+                # Retrieve the candidate and get the election it is for
+                candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(
+                    one_position.candidate_campaign_id)
+                if candidate_results['candidate_campaign_found']:
+                    candidate = candidate_results['candidate_campaign']
+                    if positive_value_exists(candidate.google_civic_election_id):
+                        try:
+                            one_position.google_civic_election_id = candidate.google_civic_election_id
+                            one_position.save()
+                            google_civic_id_added_to_friends_position += 1
+                        except Exception as e:
+                            google_civic_id_not_added_to_friends_position += 1
+        # Now get the updated count
+        positions_for_friends_without_election_id = PositionForFriends.objects.all()
+        positions_for_friends_without_election_id = positions_for_friends_without_election_id.filter(
+            google_civic_election_id=None)
+        positions_for_friends_without_election_id_count = positions_for_friends_without_election_id.count()
 
     # *) voter_we_vote_id doesn't match organization_we_vote_id
     # *) In public position table, an organization_we_vote_id doesn't exist
@@ -694,7 +721,33 @@ def data_cleanup_position_list_analysis_view(request):
     position_list_analysis_message += "positions_for_friends_without_election_id_count: " + \
                                       str(positions_for_friends_without_election_id_count) + "<br />"
 
+    position_list_success = False
+    position_list_success_message = ""
+    if google_civic_id_added_to_public_position:
+        position_list_success = True
+        position_list_success_message += "google_civic_id_added_to_public_position: " + \
+                                         str(google_civic_id_added_to_public_position) + "<br />"
+    if google_civic_id_added_to_friends_position:
+        position_list_success = True
+        position_list_success_message += "google_civic_id_added_to_friends_position: " + \
+                                         str(google_civic_id_added_to_friends_position) + "<br />"
+
+    position_list_error = False
+    position_list_error_message = ""
+    if google_civic_id_not_added_to_public_position:
+        position_list_error = True
+        position_list_error_message += "google_civic_id_not_added_to_public_position: " + \
+                                       str(google_civic_id_not_added_to_public_position) + "<br />"
+    if google_civic_id_not_added_to_friends_position:
+        position_list_error = True
+        position_list_error_message += "google_civic_id_not_added_to_friends_position: " + \
+                                       str(google_civic_id_not_added_to_friends_position) + "<br />"
+
     messages.add_message(request, messages.INFO, position_list_analysis_message)
+    if position_list_success:
+        messages.add_message(request, messages.SUCCESS, position_list_success_message)
+    if position_list_error:
+        messages.add_message(request, messages.ERROR, position_list_error_message)
 
     messages_on_stage = get_messages(request)
 
@@ -705,6 +758,8 @@ def data_cleanup_position_list_analysis_view(request):
         'public_positions_without_organization':        public_positions_without_organization,
         'positions_for_friends_without_organization':   positions_for_friends_without_organization,
         'public_positions_with_organization_id_only':   public_positions_with_organization_id_only,
+        'public_positions_without_election_id_count':   public_positions_without_election_id_count,
+        'positions_for_friends_without_election_id_count':  positions_for_friends_without_election_id_count,
     }
     response = render(request, 'admin_tools/data_cleanup_position_list_analysis.html', template_values)
 

@@ -131,6 +131,7 @@ def scrape_website_for_social_media_view(request, organization_id, force_retriev
         organization.organization_twitter_handle = twitter_handle  # Store it temporarily
 
     # ######################################
+    # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
     if organization.organization_twitter_handle:
         twitter_user_id = 0
         results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)

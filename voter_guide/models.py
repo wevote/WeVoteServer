@@ -55,7 +55,7 @@ class VoterGuideManager(models.Manager):
                 organization_found = True
                 organization = results['organization']
 
-            # Now update voter_guide
+            # Now update voter_guide  # TODO DALE Get from TwitterLinkToOrganization, not organization_twitter_handle
             try:
                 if organization_found:
                     updated_values = {
@@ -114,7 +114,7 @@ class VoterGuideManager(models.Manager):
                 organization_found = True
                 organization = results['organization']
 
-            # Now update voter_guide
+            # Now update voter_guide  # TODO DALE Get from TwitterLinkToOrganization, not organization_twitter_handle
             try:
                 if organization_found:
                     if organization.twitter_followers_count is None:
