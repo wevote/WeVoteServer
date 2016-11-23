@@ -1138,7 +1138,8 @@ class PositionListManager(models.Model):
             if positive_value_exists(candidate_campaign_id):
                 position_list = position_list.filter(candidate_campaign_id=candidate_campaign_id)
             else:
-                position_list = position_list.filter(candidate_campaign_we_vote_id=candidate_campaign_we_vote_id)
+                position_list = position_list.filter(
+                    candidate_campaign_we_vote_id__iexact=candidate_campaign_we_vote_id)
             # SUPPORT, STILL_DECIDING, INFORMATION_ONLY, NO_STANCE, OPPOSE, PERCENT_RATING
             if stance_we_are_looking_for != ANY_STANCE:
                 # If we passed in the stance "ANY_STANCE" it means we want to not filter down the list
@@ -3195,6 +3196,29 @@ class PositionManager(models.Model):
             'position_data_transferred':    data_transferred,
         }
         return results
+
+    def position_speaker_name_needs_repair(self, position, speaker_display_name):
+        """
+        See also organization_name_needs_repair
+        :param position:
+        :param speaker_display_name:
+        :return:
+        """
+        if not hasattr(position, 'speaker_display_name'):
+            return False
+        if not positive_value_exists(speaker_display_name):
+            # Repair not needed if there isn't a speaker_display_name to change to
+            return False
+        if speaker_display_name.startswith("Voter-") \
+                or speaker_display_name.startswith("null") \
+                or speaker_display_name is "" \
+                or speaker_display_name.startswith("wv"):
+            # Repair not needed if the speaker_display_name is a temporary name too
+            return False
+        if speaker_display_name != position.speaker_display_name:
+            # If the position.speaker_display_name doesn't match the incoming speaker_display_name
+            return True
+        return False
 
     def toggle_on_voter_support_for_candidate_campaign(self, voter_id, candidate_campaign_id):
         stance = SUPPORT
