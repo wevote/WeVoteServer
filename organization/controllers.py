@@ -13,6 +13,7 @@ from import_export_facebook.models import FacebookManager
 import json
 from organization.models import Organization
 from position.controllers import move_positions_to_another_organization, move_positions_to_another_voter
+from position.models import PositionListManager
 import requests
 from twitter.models import TwitterUserManager
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager, Voter
@@ -708,6 +709,13 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
 
     if results['organization_found']:
         organization = results['organization']
+
+        # Heal data: If the organization_name is a placeholder name, repair it with fresh data
+        if organization_manager.organization_name_needs_repair(organization):
+            organization = organization_manager.repair_organization(organization)
+            position_list_manager = PositionListManager()
+            position_list_manager.refresh_cached_position_info_for_organization(organization_we_vote_id)
+
         json_data = {
             'success': True,
             'status': results['status'],

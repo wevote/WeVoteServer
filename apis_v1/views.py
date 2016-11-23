@@ -31,6 +31,7 @@ from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api, organizations_followed_retrieve_for_api
+from organization.models import OrganizationManager
 from position.controllers import position_list_for_ballot_item_for_api, position_list_for_opinion_maker_for_api, \
     position_list_for_voter_for_api, \
     position_retrieve_for_api, position_save_for_api, voter_all_positions_retrieve_for_api, \
@@ -398,18 +399,20 @@ def organization_save_view(request):  # organizationSave
         if voter_results['voter_found']:
             voter = voter_results['voter']
 
-            # Does this voter have the same Twitter handle as this organization? If so, link this organization to
+            # Does this voter have the same Facebook id as this organization? If so, link this organization to
             #  this particular voter
-            if positive_value_exists(voter.facebook_id) \
-                    and voter.facebook_id == facebook_id:  # TODO DALE Update to use FacebookLinkToVoter
-                # This will fail if the organization's facebook_id isn't passed in as a variable
+            voter_facebook_id = voter_manager.fetch_facebook_id_from_voter_we_vote_id(voter.we_vote_id)
+            if positive_value_exists(voter_facebook_id) \
+                    and positive_value_exists(facebook_id) \
+                    and voter_facebook_id == facebook_id:
                 voter_owns_facebook_id = True
 
             # Does this voter have the same Twitter handle as this organization? If so, link this organization to
-            #  this particular voter  # TODO DALE Update to use TwitterLinkToVoter
-            if positive_value_exists(voter.twitter_screen_name) \
-                    and voter.twitter_screen_name.lower() == organization_twitter_handle.lower():
-                # This will fail if the organization's twitter handle isn't passed in as a variable
+            #  this particular voter
+            voter_twitter_handle = voter_manager.fetch_twitter_handle_from_voter_we_vote_id(voter.we_vote_id)
+            if positive_value_exists(voter_twitter_handle) \
+                    and positive_value_exists(organization_twitter_handle) \
+                    and voter_twitter_handle.lower() == organization_twitter_handle.lower():
                 voter_owns_twitter_handle = True
 
     if not voter_is_admin_or_verified_volunteer:

@@ -22,7 +22,7 @@ from friend.models import CurrentFriend, FriendManager, SuggestedFriend
 from import_export_facebook.models import FacebookLinkToVoter, FacebookManager
 from import_export_google_civic.models import GoogleCivicApiCounterManager
 from import_export_vote_smart.models import VoteSmartApiCounterManager
-from measure.models import ContestMeasure
+from measure.models import ContestMeasure, ContestMeasureManager
 from office.controllers import offices_import_from_sample_file
 from office.models import ContestOffice
 from organization.controllers import organizations_import_from_sample_file
@@ -513,6 +513,7 @@ def data_cleanup_position_list_analysis_view(request):
     voter_we_vote_id_added_failed = 0
 
     candidate_manager = CandidateCampaignManager()
+    measure_manager = ContestMeasureManager()
     organization_manager = OrganizationManager()
     voter_manager = VoterManager()
 
@@ -520,6 +521,7 @@ def data_cleanup_position_list_analysis_view(request):
     election_list = Election.objects.order_by('-election_day_text')
 
     add_election_id = request.GET.get('add_election_id', False)
+    add_organization_to_position_owner = request.GET.get('add_organization_to_position_owner', False)
 
     # #######################
     # REPAIR CODE
@@ -622,7 +624,7 @@ def data_cleanup_position_list_analysis_view(request):
     google_civic_id_not_added_to_public_position = 0
     if add_election_id:
         # We limit these to x so we don't time-out the page
-        public_positions_without_election_id = public_positions_without_election_id[:1000]
+        public_positions_without_election_id = public_positions_without_election_id[:2000]
         for one_position in public_positions_without_election_id:
             if positive_value_exists(one_position.candidate_campaign_id):
                 # Retrieve the candidate and get the election it is for
@@ -637,6 +639,25 @@ def data_cleanup_position_list_analysis_view(request):
                             google_civic_id_added_to_public_position += 1
                         except Exception as e:
                             google_civic_id_not_added_to_public_position += 1
+                    else:
+                        google_civic_id_not_added_to_public_position += 1
+            elif positive_value_exists(one_position.contest_measure_id):
+                # Retrieve the measure and get the election it is for
+                measure_results = measure_manager.retrieve_contest_measure_from_id(
+                    one_position.contest_measure_id)
+                if measure_results['contest_measure_found']:
+                    measure = measure_results['contest_measure']
+                    if positive_value_exists(measure.google_civic_election_id):
+                        try:
+                            one_position.google_civic_election_id = measure.google_civic_election_id
+                            one_position.save()
+                            google_civic_id_added_to_public_position += 1
+                        except Exception as e:
+                            google_civic_id_not_added_to_public_position += 1
+                    else:
+                        google_civic_id_not_added_to_public_position += 1
+            else:
+                google_civic_id_not_added_to_public_position += 1
         # Now get the updated count
         public_positions_without_election_id = PositionEntered.objects.all()
         public_positions_without_election_id = public_positions_without_election_id.filter(
@@ -653,7 +674,7 @@ def data_cleanup_position_list_analysis_view(request):
     google_civic_id_not_added_to_friends_position = 0
     if add_election_id:
         # We limit these to x so we don't time-out the page
-        positions_for_friends_without_election_id = positions_for_friends_without_election_id[:1000]
+        positions_for_friends_without_election_id = positions_for_friends_without_election_id[:2000]
         for one_position in positions_for_friends_without_election_id:
             if positive_value_exists(one_position.candidate_campaign_id):
                 # Retrieve the candidate and get the election it is for
@@ -668,6 +689,29 @@ def data_cleanup_position_list_analysis_view(request):
                             google_civic_id_added_to_friends_position += 1
                         except Exception as e:
                             google_civic_id_not_added_to_friends_position += 1
+                    else:
+                        google_civic_id_not_added_to_friends_position += 1
+                else:
+                    google_civic_id_not_added_to_friends_position += 1
+            elif positive_value_exists(one_position.contest_measure_id):
+                # Retrieve the measure and get the election it is for
+                measure_results = measure_manager.retrieve_contest_measure_from_id(
+                    one_position.contest_measure_id)
+                if measure_results['contest_measure_found']:
+                    measure = measure_results['contest_measure']
+                    if positive_value_exists(measure.google_civic_election_id):
+                        try:
+                            one_position.google_civic_election_id = measure.google_civic_election_id
+                            one_position.save()
+                            google_civic_id_added_to_friends_position += 1
+                        except Exception as e:
+                            google_civic_id_not_added_to_friends_position += 1
+                    else:
+                        google_civic_id_not_added_to_friends_position += 1
+                else:
+                    google_civic_id_not_added_to_friends_position += 1
+            else:
+                google_civic_id_not_added_to_friends_position += 1
         # Now get the updated count
         positions_for_friends_without_election_id = PositionForFriends.objects.all()
         positions_for_friends_without_election_id = positions_for_friends_without_election_id.filter(
@@ -691,6 +735,9 @@ def data_cleanup_position_list_analysis_view(request):
     public_positions_without_organization_count = public_positions_without_organization.count()
     # We limit these to 20 since we are doing other lookup
     public_positions_without_organization = public_positions_without_organization[:200]
+    if add_organization_to_position_owner:
+        for one_position in public_positions_without_organization:
+            add_organization_to_position_owner_local(one_position.voter_id, one_position)
 
     # PositionsForFriends without organization_we_vote_id
     positions_for_friends_without_organization = PositionForFriends.objects.all()
@@ -702,6 +749,9 @@ def data_cleanup_position_list_analysis_view(request):
     positions_for_friends_without_organization_count = positions_for_friends_without_organization.count()
     # We limit these to 20 since we are doing other lookup
     positions_for_friends_without_organization = positions_for_friends_without_organization[:200]
+    if add_organization_to_position_owner:
+        for one_position in positions_for_friends_without_organization:
+            add_organization_to_position_owner_local(one_position.voter_id, one_position)
 
     position_list_analysis_message = ""
     position_list_analysis_message += "organization_we_vote_id_added: " + \
@@ -764,6 +814,81 @@ def data_cleanup_position_list_analysis_view(request):
     response = render(request, 'admin_tools/data_cleanup_position_list_analysis.html', template_values)
 
     return response
+
+
+def add_organization_to_position_owner_local(voter_id, one_position):
+    """
+    This is a local function used in the data_cleanup_position_list_analysis_view
+    :param voter_id:
+    :param one_position:
+    :return:
+    """
+    organization_manager = OrganizationManager()
+    voter_manager = VoterManager()
+    if not positive_value_exists(voter_id):
+        return
+    # if one_position.voter_id in organization_already_created_for_voter:
+    #     continue
+    voter_results = voter_manager.retrieve_voter(voter_id)
+    if not voter_results['voter_found']:
+        return
+    voter = voter_results['voter']
+    # If here, we know that we have a voter
+    # Is there a linked_organization_we_vote_id from the voter record?
+    if positive_value_exists(voter.linked_organization_we_vote_id):
+        # If we are here, then we know this voter already has an organization that needs to be linked
+        organization_results = organization_manager.retrieve_organization_from_we_vote_id(
+            voter.linked_organization_we_vote_id)
+        if organization_results['organization_found']:
+            organization = organization_results['organization']
+            try:
+                one_position.organization_id = organization.id
+                one_position.organization_we_vote_id = organization.we_vote_id
+                one_position.save()
+                return
+            except Exception as e:
+                return
+
+    # If there isn't a linked_organization_we_vote_id, check to see if this voter has a TwitterLinkedToVoter
+    # entry that matches an OrganizationLinkedToVoter entry
+    voter_twitter_id = voter_manager.fetch_twitter_id_from_voter_we_vote_id(voter.we_vote_id)
+    organization_second_results = organization_manager.retrieve_organization_from_twitter_user_id(
+        voter_twitter_id)
+    if organization_second_results['organization_found']:
+        organization = organization_second_results['organization']
+        try:
+            voter.linked_organization_we_vote_id = organization.we_vote_id
+            voter.save()
+            try:
+                one_position.organization_id = organization.id
+                one_position.organization_we_vote_id = organization.we_vote_id
+                one_position.save()
+                return
+            except Exception as e:
+                return
+        except Exception as e:
+            pass
+
+    # If not, create a new organization
+    organization_name = voter.get_full_name()
+    organization_website = ""
+    organization_twitter_handle = ""
+    organization_email = ""
+    organization_facebook = ""
+    organization_image = voter.voter_photo_url()
+    create_results = organization_manager.create_organization(
+        organization_name, organization_website, organization_twitter_handle,
+        organization_email, organization_facebook, organization_image)
+    if create_results['organization_created']:
+        organization = create_results['organization']
+        try:
+            voter.linked_organization_we_vote_id = organization.we_vote_id
+            voter.save()
+        except Exception as e:
+            pass
+    else:
+        pass
+    return
 
 
 @login_required

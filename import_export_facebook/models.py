@@ -208,6 +208,14 @@ class FacebookManager(models.Model):
         }
         return results
 
+    def fetch_facebook_id_from_voter_we_vote_id(self, voter_we_vote_id):
+        facebook_user_id = 0
+        facebook_results = self.retrieve_facebook_link_to_voter(facebook_user_id, voter_we_vote_id)
+        if facebook_results['facebook_link_to_voter_found']:
+            facebook_link_to_voter = facebook_results['facebook_link_to_voter']
+            facebook_user_id = facebook_link_to_voter.facebook_user_id
+        return facebook_user_id
+
     def retrieve_facebook_link_to_voter_from_voter_we_vote_id(self, voter_we_vote_id):
         facebook_user_id = 0
         facebook_secret_key = ""

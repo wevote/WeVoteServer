@@ -334,7 +334,7 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         facebook_secret_key = facebook_link_to_voter.secret_key
     else:
         # See if we need to heal the data - look in the voter table for any records with a facebook_user_id
-        voter_results = voter_manager.retrieve_voter_by_facebook_id(facebook_auth_response.facebook_user_id)
+        voter_results = voter_manager.retrieve_voter_by_facebook_id_old(facebook_auth_response.facebook_user_id)
         if voter_results['voter_found']:
             voter_with_facebook_user_id = voter_results['voter']
             voter_we_vote_id_attached_to_facebook = voter_with_facebook_user_id.we_vote_id

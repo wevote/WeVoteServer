@@ -201,6 +201,33 @@ class VoterManager(BaseUserManager):
         else:
             return 0
 
+    def fetch_facebook_id_from_voter_we_vote_id(self, voter_we_vote_id):
+        if positive_value_exists(voter_we_vote_id):
+            facebook_manager = FacebookManager()
+            facebook_id = facebook_manager.fetch_facebook_id_from_voter_we_vote_id(voter_we_vote_id)
+        else:
+            facebook_id = 0
+
+        return facebook_id
+
+    def fetch_twitter_id_from_voter_we_vote_id(self, voter_we_vote_id):
+        if positive_value_exists(voter_we_vote_id):
+            twitter_user_manager = TwitterUserManager()
+            voter_twitter_id = twitter_user_manager.fetch_twitter_id_from_voter_we_vote_id(voter_we_vote_id)
+        else:
+            voter_twitter_id = ''
+
+        return voter_twitter_id
+
+    def fetch_twitter_handle_from_voter_we_vote_id(self, voter_we_vote_id):
+        if positive_value_exists(voter_we_vote_id):
+            twitter_user_manager = TwitterUserManager()
+            voter_twitter_handle = twitter_user_manager.fetch_twitter_handle_from_voter_we_vote_id(voter_we_vote_id)
+        else:
+            voter_twitter_handle = ''
+
+        return voter_twitter_handle
+
     def retrieve_voter_by_id(self, voter_id):
         email = ''
         voter_we_vote_id = ''
@@ -226,6 +253,25 @@ class VoterManager(BaseUserManager):
         return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id, twitter_request_token)
 
     def retrieve_voter_by_facebook_id(self, facebook_id):
+        voter_id = ''
+        email = ''
+        voter_we_vote_id = ''
+
+        facebook_manager = FacebookManager()
+        facebook_retrieve_results = facebook_manager.retrieve_facebook_link_to_voter(facebook_id)
+        if facebook_retrieve_results['facebook_link_to_voter_found']:
+            facebook_link_to_voter = facebook_retrieve_results['facebook_link_to_voter']
+            voter_we_vote_id = facebook_link_to_voter.voter_we_vote_id
+
+        voter_manager = VoterManager()
+        return voter_manager.retrieve_voter(voter_id, email, voter_we_vote_id)
+
+    def retrieve_voter_by_facebook_id_old(self, facebook_id):
+        """
+        This method should only be used to heal old data.
+        :param facebook_id:
+        :return:
+        """
         voter_id = ''
         email = ''
         voter_we_vote_id = ''
@@ -332,6 +378,8 @@ class VoterManager(BaseUserManager):
                 voter_id = voter_on_stage.id
                 success = True
             elif positive_value_exists(facebook_id):
+                # 2016-11-22 This is only used to heal data. When retrieving by facebook_id,
+                # we use the FacebookLinkToVoter table
                 # TODO DALE Remove voter.facebook_id value - We are removing direct retrieve based on this field
                 voter_on_stage = Voter.objects.get(
                     facebook_id=facebook_id)
@@ -339,6 +387,8 @@ class VoterManager(BaseUserManager):
                 voter_id = voter_on_stage.id
                 success = True
             elif positive_value_exists(twitter_id):
+                # 2016-11-22 This is only used to heal data. When retrieving by twitter_id,
+                # we use the TwitterLinkToVoter table
                 # TODO DALE Remove voter.twitter_id value - We are removing direct retrieve based on this field
                 # We put this in an extra try block because there might be multiple voters with twitter_id
                 try:

@@ -9,7 +9,12 @@
 <h1>Position List Analysis</h1>
 
 {% if positions_for_friends_without_election_id_count or public_positions_without_election_id_count %}
-    <a href="{% url 'admin_tools:data_cleanup_position_list_analysis' %}?add_election_id=1">Add Election Id to Positions Missing It</a><br />
+    <a href="{% url 'admin_tools:data_cleanup_position_list_analysis' %}?add_election_id=1">
+        Add Election Id to Positions Missing It</a>,
+    <a href="{% url 'admin_tools:data_cleanup_position_list_analysis' %}?add_organization_to_position_owner=1">
+        Add Organization Voters & Positions Missing It</a>,
+
+    <br />
 {% endif %}
 {% if election_list %}
     <form name="data_cleanup_position_list_analysis_choose_election" method="get" action="{% url 'admin_tools:data_cleanup_position_list_analysis' %}">
