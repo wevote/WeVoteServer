@@ -210,6 +210,11 @@ class OrganizationManager(models.Manager):
             return ''
 
     def organization_name_needs_repair(self, organization):
+        """
+        See also position_speaker_name_needs_repair
+        :param organization:
+        :return:
+        """
         if not hasattr(organization, 'organization_name'):
             return False
         if organization.organization_name.startswith("Voter-") \

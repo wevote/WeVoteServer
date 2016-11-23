@@ -22,7 +22,7 @@ from organization.models import Organization, OrganizationManager
 import json
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
-from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE
+from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE, VOTER, UNKNOWN_VOTER_GUIDE, VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, is_voter_device_id_valid, positive_value_exists
 
@@ -1428,6 +1428,7 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     position_list = []
+    all_elections_that_have_positions = []
     for one_position in position_list_raw:
         # Whose position is it?
         missing_ballot_item_image = False
@@ -1460,12 +1461,16 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
 
         if one_position_success:
             # Make sure we have this data to display. If we don't, refresh PositionEntered table from other tables.
-            if not positive_value_exists(one_position.ballot_item_display_name) \
+            if position_manager.position_speaker_name_needs_repair(one_position, opinion_maker_display_name):
+                force_update = True
+            else:
+                force_update = False
+            if force_update or not positive_value_exists(one_position.ballot_item_display_name) \
                     or not positive_value_exists(one_position.state_code) \
                     or not positive_value_exists(one_position.speaker_image_url_https) \
                     or missing_ballot_item_image \
                     or missing_office_information:
-                one_position = position_manager.refresh_cached_position_info(one_position)
+                one_position = position_manager.refresh_cached_position_info(one_position, force_update)
             one_position_dict_for_api = {
                 'position_we_vote_id':          one_position.we_vote_id,
                 'ballot_item_display_name':
@@ -1499,12 +1504,24 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             }
             position_list.append(one_position_dict_for_api)
 
+            if positive_value_exists(one_position.google_civic_election_id) \
+                    and one_position.google_civic_election_id not in all_elections_that_have_positions:
+                all_elections_that_have_positions.append(one_position.google_civic_election_id)
+
     # Now change the sort order
     if len(position_list):
         sorted_position_list = sorted(position_list, key=itemgetter('ballot_item_display_name'))
         # Add reverse=True to sort descending
     else:
         sorted_position_list = []
+
+    # Now make sure a voter_guide entry exists for the organization for each election
+    voter_guide_manager = VoterGuideManager()
+    if positive_value_exists(opinion_maker_we_vote_id) and len(all_elections_that_have_positions):
+        for one_google_civic_election_id in all_elections_that_have_positions:
+            if not voter_guide_manager.voter_guide_exists(opinion_maker_we_vote_id, one_google_civic_election_id):
+                voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+                    opinion_maker_we_vote_id, one_google_civic_election_id)
 
     status += ' POSITION_LIST_FOR_OPINION_MAKER_SUCCEEDED'
     success = True

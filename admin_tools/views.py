@@ -738,6 +738,19 @@ def data_cleanup_position_list_analysis_view(request):
     if add_organization_to_position_owner:
         for one_position in public_positions_without_organization:
             add_organization_to_position_owner_local(one_position.voter_id, one_position)
+        # Update this data for display
+        public_positions_without_organization = PositionEntered.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            public_positions_without_organization = public_positions_without_organization.filter(
+                google_civic_election_id=google_civic_election_id)
+        public_positions_without_organization = public_positions_without_organization.filter(
+            Q(organization_we_vote_id=None) | Q(organization_we_vote_id=""))
+        # Exclude positions without a connection to a voter
+        public_positions_without_organization = public_positions_without_organization.exclude(
+            Q(voter_we_vote_id=None) | Q(voter_we_vote_id=""))
+        public_positions_without_organization_count = public_positions_without_organization.count()
+        # We limit these to 20 since we are doing other lookup
+        public_positions_without_organization = public_positions_without_organization[:200]
 
     # PositionsForFriends without organization_we_vote_id
     positions_for_friends_without_organization = PositionForFriends.objects.all()
@@ -752,6 +765,16 @@ def data_cleanup_position_list_analysis_view(request):
     if add_organization_to_position_owner:
         for one_position in positions_for_friends_without_organization:
             add_organization_to_position_owner_local(one_position.voter_id, one_position)
+        # Update this data for display
+        positions_for_friends_without_organization = PositionForFriends.objects.all()
+        if positive_value_exists(google_civic_election_id):
+            positions_for_friends_without_organization = positions_for_friends_without_organization.filter(
+                google_civic_election_id=google_civic_election_id)
+        positions_for_friends_without_organization = positions_for_friends_without_organization.filter(
+            Q(organization_we_vote_id=None) | Q(organization_we_vote_id=""))
+        positions_for_friends_without_organization_count = positions_for_friends_without_organization.count()
+        # We limit these to 20 since we are doing other lookup
+        positions_for_friends_without_organization = positions_for_friends_without_organization[:200]
 
     position_list_analysis_message = ""
     position_list_analysis_message += "organization_we_vote_id_added: " + \
