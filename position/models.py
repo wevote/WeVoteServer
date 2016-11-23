@@ -1275,6 +1275,15 @@ class PositionListManager(models.Model):
             position_list_filtered = []
             return position_list_filtered
 
+    def refresh_cached_position_info_for_organization(self, organization_we_vote_id):
+        position_manager = PositionManager()
+        public_positions_list = PositionEntered.objects.all()
+        public_positions_list = public_positions_list.filter(organization_we_vote_id=organization_we_vote_id)
+        force_update = True
+        for one_position in public_positions_list:
+            position_manager.refresh_cached_position_info(one_position, force_update)
+        return True
+
     def retrieve_all_positions_for_organization(self, organization_id, organization_we_vote_id,
                                                 stance_we_are_looking_for, friends_vs_public,
                                                 filter_for_voter=False, filter_out_voter=False, voter_device_id='',
@@ -4461,11 +4470,12 @@ class PositionManager(models.Model):
         }
         return results
 
-    def refresh_cached_position_info(self, position_object):
+    def refresh_cached_position_info(self, position_object, force_update=False):
         """
         The position tables cache information from other tables. This function reaches out to the source tables
         and copies over the latest information to the position tables.
         :param position_object:
+        :param force_update:
         :return:
         """
         position_change = False
@@ -4474,7 +4484,8 @@ class PositionManager(models.Model):
         if positive_value_exists(position_object.organization_we_vote_id):
             if not positive_value_exists(position_object.speaker_display_name) \
                     or not positive_value_exists(position_object.speaker_image_url_https) \
-                    or not positive_value_exists(position_object.speaker_twitter_handle):
+                    or not positive_value_exists(position_object.speaker_twitter_handle) \
+                    or force_update:
                 try:
                     # We need to look in the organization table for speaker_display_name & speaker_image_url_https
                     organization_manager = OrganizationManager()
@@ -4498,18 +4509,20 @@ class PositionManager(models.Model):
                             except Voter.DoesNotExist:
                                 pass
 
-                        if not positive_value_exists(position_object.speaker_display_name):
+                        if not positive_value_exists(position_object.speaker_display_name) or force_update:
                             # speaker_display_name is missing so look it up from source
                             position_object.speaker_display_name = organization.organization_name
                             position_change = True
-                        if not positive_value_exists(position_object.speaker_image_url_https):
+                        if not positive_value_exists(position_object.speaker_image_url_https) or force_update:
                             # speaker_image_url_https is missing so look it up from source
                             position_object.speaker_image_url_https = organization.organization_photo_url()
                             position_change = True
-                        if not positive_value_exists(position_object.speaker_twitter_handle):
+                        if not positive_value_exists(position_object.speaker_twitter_handle) or force_update:
+                            organization_twitter_handle = \
+                                organization_manager.fetch_twitter_handle_from_organization_we_vote_id(
+                                    organization.we_vote_id)
                             # speaker_twitter_handle is missing so look it up from source
-                            position_object.speaker_twitter_handle = organization.organization_twitter_handle
-                            # TODO DALE Upgrade to look in TwitterUser for the speaker_twitter_handle
+                            position_object.speaker_twitter_handle = organization_twitter_handle
                             position_change = True
                 except Exception as e:
                     pass
@@ -4517,29 +4530,31 @@ class PositionManager(models.Model):
             if not positive_value_exists(position_object.speaker_display_name) \
                     or not positive_value_exists(position_object.voter_we_vote_id) \
                     or not positive_value_exists(position_object.speaker_image_url_https) \
-                    or not positive_value_exists(position_object.speaker_twitter_handle):
+                    or not positive_value_exists(position_object.speaker_twitter_handle) \
+                    or force_update:
                 try:
                     # We need to look in the voter table for speaker_display_name
                     voter_manager = VoterManager()
                     results = voter_manager.retrieve_voter_by_id(position_object.voter_id)
                     if results['voter_found']:
                         voter = results['voter']
-                        if not positive_value_exists(position_object.speaker_display_name):
+                        if not positive_value_exists(position_object.speaker_display_name) or force_update:
                             # speaker_display_name is missing so look it up from source
                             position_object.speaker_display_name = voter.get_full_name()
                             position_change = True
-                        if not positive_value_exists(position_object.voter_we_vote_id):
+                        if not positive_value_exists(position_object.voter_we_vote_id) or force_update:
                             # speaker_we_vote_id is missing so look it up from source
                             position_object.voter_we_vote_id = voter.we_vote_id
                             position_change = True
-                        if not positive_value_exists(position_object.speaker_image_url_https):
+                        if not positive_value_exists(position_object.speaker_image_url_https) or force_update:
                             # speaker_image_url_https is missing so look it up from source
                             position_object.speaker_image_url_https = voter.voter_photo_url()
                             position_change = True
-                        if not positive_value_exists(position_object.speaker_twitter_handle):
+                        if not positive_value_exists(position_object.speaker_twitter_handle) or force_update:
                             # speaker_twitter_handle is missing so look it up from source
-                            position_object.speaker_twitter_handle = voter.twitter_screen_name
-                            # TODO DALE Upgrade to look in TwitterUser for the speaker_twitter_handle
+                            voter_twitter_handle = voter_manager.fetch_twitter_handle_from_voter_we_vote_id(
+                                voter.we_vote_id)
+                            position_object.speaker_twitter_handle = voter_twitter_handle
                             position_change = True
                 except Exception as e:
                     pass
@@ -4562,7 +4577,8 @@ class PositionManager(models.Model):
                     or not positive_value_exists(position_object.state_code) \
                     or not positive_value_exists(position_object.political_party) \
                     or not positive_value_exists(position_object.politician_id) \
-                    or not positive_value_exists(position_object.politician_we_vote_id):
+                    or not positive_value_exists(position_object.politician_we_vote_id) \
+                    or force_update:
                 try:
                     # We need to look in the voter table for speaker_display_name
                     results = candidate_campaign_manager.retrieve_candidate_campaign(
@@ -4572,37 +4588,37 @@ class PositionManager(models.Model):
                         # Cache for further down
                         contest_office_id = candidate.contest_office_id
                         contest_office_we_vote_id = candidate.contest_office_we_vote_id
-                        if not positive_value_exists(position_object.contest_office_id):
+                        if not positive_value_exists(position_object.contest_office_id) or force_update:
                             position_object.contest_office_id = contest_office_id
                             position_change = True
-                        if not positive_value_exists(position_object.contest_office_we_vote_id):
+                        if not positive_value_exists(position_object.contest_office_we_vote_id) or force_update:
                             position_object.contest_office_we_vote_id = contest_office_we_vote_id
                             position_change = True
-                        if not positive_value_exists(position_object.ballot_item_display_name):
+                        if not positive_value_exists(position_object.ballot_item_display_name) or force_update:
                             # ballot_item_display_name is missing so look it up from source
                             position_object.ballot_item_display_name = candidate.display_candidate_name()
                             position_change = True
-                        if not positive_value_exists(position_object.ballot_item_image_url_https):
+                        if not positive_value_exists(position_object.ballot_item_image_url_https) or force_update:
                             # ballot_item_image_url_https is missing so look it up from source
                             position_object.ballot_item_image_url_https = candidate.candidate_photo_url()
                             position_change = True
-                        if not positive_value_exists(position_object.ballot_item_twitter_handle):
+                        if not positive_value_exists(position_object.ballot_item_twitter_handle) or force_update:
                             # ballot_item_image_twitter_handle is missing so look it up from source
                             position_object.ballot_item_twitter_handle = candidate.candidate_twitter_handle
                             position_change = True
-                        if not positive_value_exists(position_object.state_code):
+                        if not positive_value_exists(position_object.state_code) or force_update:
                             # state_code is missing so look it up from source
                             position_object.state_code = candidate.get_candidate_state()
                             position_change = True
-                        if not positive_value_exists(position_object.political_party):
+                        if not positive_value_exists(position_object.political_party) or force_update:
                             # political_party is missing so look it up from source
                             position_object.political_party = candidate.political_party_display()
                             position_change = True
-                        if not positive_value_exists(position_object.politician_id):
+                        if not positive_value_exists(position_object.politician_id) or force_update:
                             # politician_id is missing so look it up from source
                             position_object.politician_id = candidate.politician_id
                             position_change = True
-                        if not positive_value_exists(position_object.politician_we_vote_id):
+                        if not positive_value_exists(position_object.politician_we_vote_id) or force_update:
                             # politician_we_vote_id is missing so look it up from source
                             position_object.politician_we_vote_id = candidate.politician_we_vote_id
                             position_change = True
@@ -4615,7 +4631,8 @@ class PositionManager(models.Model):
                     or position_object.ballot_item_display_name == "None" \
                     or positive_value_exists(position_object.ballot_item_image_url_https) \
                     or positive_value_exists(position_object.ballot_item_twitter_handle) \
-                    or not positive_value_exists(position_object.state_code):
+                    or not positive_value_exists(position_object.state_code) \
+                    or force_update:
                 try:
                     # We need to look in the voter table for speaker_display_name
                     contest_measure_manager = ContestMeasureManager()
@@ -4624,19 +4641,20 @@ class PositionManager(models.Model):
                     if results['contest_measure_found']:
                         contest_measure = results['contest_measure']
                         if not positive_value_exists(position_object.ballot_item_display_name) \
-                                or position_object.ballot_item_display_name == "None":
+                                or position_object.ballot_item_display_name == "None" \
+                                or force_update:
                             # ballot_item_display_name is missing so look it up from source
                             position_object.ballot_item_display_name = contest_measure.measure_title
                             position_change = True
-                        if positive_value_exists(position_object.ballot_item_image_url_https):
+                        if positive_value_exists(position_object.ballot_item_image_url_https) or force_update:
                             # ballot_item_image_url_https should not exist for measures
                             position_object.ballot_item_image_url_https = ""
                             position_change = True
-                        if positive_value_exists(position_object.ballot_item_twitter_handle):
+                        if positive_value_exists(position_object.ballot_item_twitter_handle) or force_update:
                             # ballot_item_image_twitter_handle should not exist for measures
                             position_object.ballot_item_twitter_handle = ""
                             position_change = True
-                        if not positive_value_exists(position_object.state_code):
+                        if not positive_value_exists(position_object.state_code) or force_update:
                             # state_code is missing so look it up from source
                             position_object.state_code = contest_measure.state_code
                             position_change = True
@@ -4650,7 +4668,8 @@ class PositionManager(models.Model):
         if check_for_missing_office_data:
             if not positive_value_exists(position_object.contest_office_id) \
                     or not positive_value_exists(position_object.contest_office_we_vote_id) \
-                    or not positive_value_exists(position_object.contest_office_name):
+                    or not positive_value_exists(position_object.contest_office_name) \
+                    or force_update:
                 if not positive_value_exists(position_object.contest_office_id) \
                         and not positive_value_exists(position_object.contest_office_we_vote_id):
                     if not contest_office_id or not contest_office_we_vote_id:
@@ -4678,13 +4697,13 @@ class PositionManager(models.Model):
 
                 if office_found:
                     office_object = results['contest_office']
-                    if not positive_value_exists(position_object.contest_office_id):
+                    if not positive_value_exists(position_object.contest_office_id) or force_update:
                         position_object.contest_office_id = office_object.id
                         position_change = True
-                    if not positive_value_exists(position_object.contest_office_we_vote_id):
+                    if not positive_value_exists(position_object.contest_office_we_vote_id) or force_update:
                         position_object.contest_office_we_vote_id = office_object.we_vote_id
                         position_change = True
-                    if not positive_value_exists(position_object.contest_office_name):
+                    if not positive_value_exists(position_object.contest_office_name) or force_update:
                         position_object.contest_office_name = office_object.office_name
                         position_change = True
 

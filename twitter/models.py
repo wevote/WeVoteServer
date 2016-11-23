@@ -17,6 +17,17 @@ class TwitterLinkToOrganization(models.Model):
     twitter_id = models.BigIntegerField(verbose_name="twitter big integer id", null=True, unique=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=False, auto_now=True)
 
+    def fetch_twitter_id_locally_or_remotely(self):
+        twitter_id = 0
+        twitter_user_manager = TwitterUserManager()
+        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id)
+
+        if twitter_results['twitter_user_found']:
+            twitter_user = twitter_results['twitter_user']
+            twitter_id = twitter_user.twitter_id
+
+        return twitter_id
+
     def fetch_twitter_handle_locally_or_remotely(self):
         twitter_handle = ""
         twitter_user_manager = TwitterUserManager()
@@ -38,6 +49,17 @@ class TwitterLinkToVoter(models.Model):
     secret_key = models.CharField(
         verbose_name="secret key to verify ownership twitter account", max_length=255, null=False, unique=True)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=False, auto_now=True)
+
+    def fetch_twitter_id_locally_or_remotely(self):
+        twitter_id = 0
+        twitter_user_manager = TwitterUserManager()
+        twitter_results = twitter_user_manager.retrieve_twitter_user_locally_or_remotely(self.twitter_id)
+
+        if twitter_results['twitter_user_found']:
+            twitter_user = twitter_results['twitter_user']
+            twitter_id = twitter_user.twitter_id
+
+        return twitter_id
 
     def fetch_twitter_handle_locally_or_remotely(self):
         twitter_handle = ""
@@ -155,6 +177,42 @@ class TwitterUserManager(models.Model):
             twitter_user_id = twitter_user.twitter_id
 
         return self.retrieve_twitter_link_to_organization(twitter_user_id)
+
+    def fetch_twitter_handle_from_organization_we_vote_id(self, organization_we_vote_id):
+        organization_twitter_handle = ''
+        twitter_results = self.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+            organization_we_vote_id)
+        if twitter_results['twitter_link_to_organization_found']:
+            twitter_link_to_organization = twitter_results['twitter_link_to_organization']
+            organization_twitter_handle = twitter_link_to_organization.fetch_twitter_handle_locally_or_remotely()
+        return organization_twitter_handle
+
+    def fetch_twitter_id_from_organization_we_vote_id(self, organization_we_vote_id):
+        organization_twitter_id = 0
+        twitter_results = self.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+            organization_we_vote_id)
+        if twitter_results['twitter_link_to_organization_found']:
+            twitter_link_to_organization = twitter_results['twitter_link_to_organization']
+            organization_twitter_id = twitter_link_to_organization.fetch_twitter_id_locally_or_remotely()
+        return organization_twitter_id
+
+    def fetch_twitter_handle_from_voter_we_vote_id(self, voter_we_vote_id):
+        voter_twitter_handle = ''
+        twitter_results = self.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
+            voter_we_vote_id)
+        if twitter_results['twitter_link_to_voter_found']:
+            twitter_link_to_voter = twitter_results['twitter_link_to_voter']
+            voter_twitter_handle = twitter_link_to_voter.fetch_twitter_handle_locally_or_remotely()
+        return voter_twitter_handle
+
+    def fetch_twitter_id_from_voter_we_vote_id(self, voter_we_vote_id):
+        voter_twitter_id = 0
+        twitter_results = self.retrieve_twitter_link_to_voter_from_voter_we_vote_id(
+            voter_we_vote_id)
+        if twitter_results['twitter_link_to_voter_found']:
+            twitter_link_to_voter = twitter_results['twitter_link_to_voter']
+            voter_twitter_id = twitter_link_to_voter.fetch_twitter_id_locally_or_remotely()
+        return voter_twitter_id
 
     def retrieve_twitter_link_to_organization_from_organization_we_vote_id(self, organization_we_vote_id):
         twitter_user_id = 0

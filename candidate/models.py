@@ -754,36 +754,47 @@ class CandidateCampaignManager(models.Model):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(id=candidate_campaign_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
+                candidate_campaign_found = True
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_ID"
             elif positive_value_exists(candidate_campaign_we_vote_id):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(we_vote_id=candidate_campaign_we_vote_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
+                candidate_campaign_found = True
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_WE_VOTE_ID"
             elif positive_value_exists(candidate_maplight_id):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(maplight_id=candidate_maplight_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
+                candidate_campaign_found = True
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_MAPLIGHT_ID"
             elif positive_value_exists(candidate_vote_smart_id):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(vote_smart_id=candidate_vote_smart_id)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
+                candidate_campaign_found = True
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_VOTE_SMART_ID"
             elif positive_value_exists(candidate_name):
                 candidate_campaign_on_stage = CandidateCampaign.objects.get(candidate_name=candidate_name)
                 candidate_campaign_id = candidate_campaign_on_stage.id
                 candidate_campaign_we_vote_id = candidate_campaign_on_stage.we_vote_id
+                candidate_campaign_found = True
                 status = "RETRIEVE_CANDIDATE_FOUND_BY_NAME"
             else:
+                candidate_campaign_found = False
                 status = "RETRIEVE_CANDIDATE_SEARCH_INDEX_MISSING"
         except CandidateCampaign.MultipleObjectsReturned as e:
+            candidate_campaign_found = False
             handle_record_found_more_than_one_exception(e, logger=logger)
             exception_multiple_object_returned = True
             status = "RETRIEVE_CANDIDATE_MULTIPLE_OBJECTS_RETURNED"
         except CandidateCampaign.DoesNotExist:
+            candidate_campaign_found = False
             exception_does_not_exist = True
             status = "RETRIEVE_CANDIDATE_NOT_FOUND"
+        except Exception as e:
+            candidate_campaign_found = False
+            status = "RETRIEVE_CANDIDATE_NOT_FOUND_EXCEPTION"
 
         results = {
             'success':                  True if convert_to_int(candidate_campaign_id) > 0 else False,
@@ -791,7 +802,7 @@ class CandidateCampaignManager(models.Model):
             'error_result':             error_result,
             'DoesNotExist':             exception_does_not_exist,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'candidate_campaign_found': True if convert_to_int(candidate_campaign_id) else False,
+            'candidate_campaign_found': candidate_campaign_found,
             'candidate_campaign_id':    convert_to_int(candidate_campaign_id),
             'candidate_campaign_we_vote_id':    candidate_campaign_we_vote_id,
             'candidate_campaign':       candidate_campaign_on_stage,

@@ -92,6 +92,19 @@ class OrganizationManager(models.Manager):
     def retrieve_organization_from_vote_smart_id(self, vote_smart_id):
         return self.retrieve_organization(0, '', vote_smart_id)
 
+    def retrieve_organization_from_twitter_user_id(self, twitter_user_id):
+        organization_we_vote_id = ''
+
+        twitter_user_manager = TwitterUserManager()
+        twitter_retrieve_results = twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
+            twitter_user_id)
+        if twitter_retrieve_results['twitter_link_to_organization_found']:
+            twitter_link_to_organization = twitter_retrieve_results['twitter_link_to_organization']
+            organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
+
+        organization_id = 0
+        return self.retrieve_organization(organization_id, organization_we_vote_id)
+
     def retrieve_organization_from_twitter_user_id_old(self, twitter_user_id):
         """
         We will phase this out
@@ -165,6 +178,26 @@ class OrganizationManager(models.Manager):
                 return results['organization_id']
         return 0
 
+    def fetch_twitter_id_from_organization_we_vote_id(self, organization_we_vote_id):
+        if positive_value_exists(organization_we_vote_id):
+            twitter_user_manager = TwitterUserManager()
+            organization_twitter_id = twitter_user_manager.fetch_twitter_id_from_organization_we_vote_id(
+                organization_we_vote_id)
+        else:
+            organization_twitter_id = 0
+
+        return organization_twitter_id
+
+    def fetch_twitter_handle_from_organization_we_vote_id(self, organization_we_vote_id):
+        if positive_value_exists(organization_we_vote_id):
+            twitter_user_manager = TwitterUserManager()
+            organization_twitter_handle = twitter_user_manager.fetch_twitter_handle_from_organization_we_vote_id(
+                organization_we_vote_id)
+        else:
+            organization_twitter_handle = ''
+
+        return organization_twitter_handle
+
     def fetch_we_vote_id_from_local_id(self, organization_id):
         if positive_value_exists(organization_id):
             results = self.retrieve_organization(organization_id)
@@ -175,6 +208,44 @@ class OrganizationManager(models.Manager):
                 return ''
         else:
             return ''
+
+    def organization_name_needs_repair(self, organization):
+        if not hasattr(organization, 'organization_name'):
+            return False
+        if organization.organization_name.startswith("Voter-") \
+                or organization.organization_name.startswith("null") \
+                or organization.organization_name is "" \
+                or organization.organization_name.startswith("wv"):
+            return True
+        return False
+
+    def repair_organization(self, organization):
+        if not hasattr(organization, 'organization_name'):
+            return organization
+
+        # Is there a Twitter handle linked to this organization? If so, update the information.
+        twitter_user_manager = TwitterUserManager()
+        twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_organization_from_organization_we_vote_id(
+            organization.we_vote_id)
+        if twitter_link_results['twitter_link_to_organization_found']:
+            twitter_link_to_organization = twitter_link_results['twitter_link_to_organization']
+
+            twitter_results = \
+                twitter_user_manager.retrieve_twitter_user_locally_or_remotely(twitter_link_to_organization.twitter_id)
+
+            if twitter_results['twitter_user_found']:
+                twitter_user = twitter_results['twitter_user']
+                try:
+                    organization.organization_name = twitter_user.twitter_name
+                    organization.twitter_description = twitter_user.twitter_description
+                    organization.twitter_followers_count = twitter_user.twitter_followers_count
+                    organization.twitter_profile_image_url_https = twitter_user.twitter_profile_image_url_https
+                    organization.organization_website = twitter_user.twitter_url
+                    organization.twitter_name = twitter_user.twitter_name
+                    organization.save()
+                except Exception as e:
+                    pass
+        return organization
 
     # We can use any of these four unique identifiers:
     #   organization.id, we_vote_id, organization_website, organization_twitter_handle
