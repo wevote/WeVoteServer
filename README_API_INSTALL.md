@@ -17,7 +17,11 @@ Create a place to put all of the code from Github:
 
     $ mkdir /Users/<YOUR NAME HERE>/PythonProjects/
 
-Retrieve “WeVoteServer” into that folder.
+Retrieve “WeVoteServer” into that folder:
+
+1. Create a fork of wevote/WebApp.git. You can do this from https://github.com/wevote/WebApp with the "Fork" button  
+(upper right of screen)
+
 
 ## Installing Python 3
 
@@ -32,7 +36,7 @@ This allows you to run python3 and pip3.
 
 Add the following to .bash_profile, save and quit:
 
-    alias virtualenv3='~/Library/Python/3.4/bin/virtualenv'
+    alias virtualenv3='~/Library/Python/3.5/bin/virtualenv'
 
 Update the current Terminal window to use the alias you just saved:
 
@@ -43,12 +47,12 @@ outside of "PythonProjects" folder:
 
     $ mkdir /Users/<YOUR NAME HERE>/PythonEnvironments/
     $ cd /Users/<YOUR NAME HERE>/PythonEnvironments/
-    $ virtualenv3 WeVoteServer3.4
+    $ virtualenv3 WeVoteServer3.5
 
 Now activate this new virtual environment for WeVoteServer:
 
     $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
-    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.4/bin/activate
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.5/bin/activate
     $ pip install -r requirements.txt
     $ python manage.py runserver
 

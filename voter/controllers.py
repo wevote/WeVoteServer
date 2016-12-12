@@ -1124,6 +1124,7 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             status = 'VOTER_CREATED'
         else:
             status = 'VOTER_FOUND'
+
         json_data = {
             'status':                           status,
             'success':                          True,
