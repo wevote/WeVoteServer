@@ -2,7 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-from .models import CandidateCampaignListManager, CandidateCampaignManager
+from .models import CandidateCampaignListManager, CandidateCampaign, CandidateCampaignManager
 from ballot.models import CANDIDATE
 from config.base import get_environment_variable
 from django.contrib import messages
@@ -60,6 +60,116 @@ def candidates_import_from_master_server(request, google_civic_election_id=''):
     import_results['duplicates_removed'] = duplicates_removed
 
     return import_results
+
+
+def find_duplicate_candidate(we_vote_candidate, ignore_candidate_id_list=[]):
+    if not hasattr(we_vote_candidate, 'google_civic_election_id'):
+        error_results = {
+            'success':                              False,
+            'status':                               "FIND_DUPLICATE_CANDIDATE_MISSING_CANDIDATE_OBJECT",
+            'candidate_merge_possibility_found':    False,
+        }
+        return error_results
+
+    if not positive_value_exists(we_vote_candidate.google_civic_election_id):
+        error_results = {
+            'success':                              False,
+            'status':                               "FIND_DUPLICATE_CANDIDATE_MISSING_GOOGLE_CIVIC_ELECTION_ID",
+            'candidate_merge_possibility_found':    False,
+        }
+        return error_results
+
+    # Search for other candidates within this election that match name and election
+    candidate_campaign_list_manager = CandidateCampaignListManager()
+    try:
+        candidate_duplicates_query = CandidateCampaign.objects.order_by('candidate_name')
+        candidate_duplicates_query = candidate_duplicates_query.filter(
+            google_civic_election_id=we_vote_candidate.google_civic_election_id)
+        candidate_duplicates_query = candidate_duplicates_query.filter(
+            candidate_name=we_vote_candidate.candidate_name)
+        candidate_duplicates_query = candidate_duplicates_query.exclude(id=we_vote_candidate.id)
+        number_of_duplicates = candidate_duplicates_query.count()
+        if number_of_duplicates >= 1:
+            # Only deal with merging the incoming candidate and the first on found
+            candidate_duplicate_list = candidate_duplicates_query
+
+            # What are the conflicts we will encounter when trying to merge these candidates?
+            # ASK_VOTER = Ask voter which one to use
+            # MATCHING = Values already match. Nothing to do
+            # CANDIDATE1 = Use the value from Candidate 1
+            # CANDIDATE2 = Use the value from Candidate 2
+            candidate_merge_conflict_values = figure_out_conflict_values(we_vote_candidate, candidate_duplicate_list[0])
+
+            results = {
+                'success':                              True,
+                'status':                               "FIND_DUPLICATE_CANDIDATE_DUPLICATES_FOUND",
+                'candidate_merge_possibility_found':    True,
+                'candidate_merge_possibility':          candidate_duplicate_list[0],
+                'candidate_merge_conflict_values':      candidate_merge_conflict_values,
+            }
+            return results
+        else:
+            results = {
+                'success': True,
+                'status': "FIND_DUPLICATE_CANDIDATE_NO_DUPLICATES_FOUND",
+                'candidate_merge_possibility_found':    False,
+            }
+            return results
+
+    except CandidateCampaign.DoesNotExist:
+        pass
+    except Exception as e:
+        pass
+
+    results = {
+        'success':                              True,
+        'status':                               "FIND_DUPLICATE_CANDIDATE_NO_DUPLICATES_FOUND",
+        'candidate_merge_possibility_found':    False,
+    }
+    return results
+
+
+def figure_out_conflict_values(candidate1, candidate2):
+    candidate_merge_conflict_values = {
+        'candidate_name': 'ASK_VOTER',
+        'maplight_id': 'MATCHING',
+    }
+    return candidate_merge_conflict_values
+
+
+def merge_duplicate_candidates(candidate1, candidate2, merge_conflict_values):
+    # If we can automatically merge, we should do it
+    # is_automatic_merge_ok_results = candidate_campaign_list_manager.is_automatic_merge_ok(
+    #     we_vote_candidate, candidate_duplicate_list[0])
+    # if is_automatic_merge_ok_results['automatic_merge_ok']:
+    #     automatic_merge_results = candidate_campaign_list_manager.do_automatic_merge(
+    #         we_vote_candidate, candidate_duplicate_list[0])
+    #     if automatic_merge_results['success']:
+    #         number_of_duplicate_candidates_processed += 1
+    #     else:
+    #         number_of_duplicate_candidates_failed += 1
+    # else:
+        # # If we cannot automatically merge, direct to a page where we can look at the two side-by-side
+        # message = "Google Civic Election ID: {election_id}, " \
+        #           "{num_of_duplicate_candidates_processed} duplicates processed, " \
+        #           "{number_of_duplicate_candidates_failed} duplicate merges failed, " \
+        #           "{number_of_duplicates_could_not_process} could not be processed because 3 exist " \
+        #           "".format(election_id=google_civic_election_id,
+        #                     num_of_duplicate_candidates_processed=number_of_duplicate_candidates_processed,
+        #                     number_of_duplicate_candidates_failed=number_of_duplicate_candidates_failed,
+        #                     number_of_duplicates_could_not_process=number_of_duplicates_could_not_process)
+        #
+        # messages.add_message(request, messages.INFO, message)
+        #
+        # message = "{is_automatic_merge_ok_results_status} " \
+        #           "".format(is_automatic_merge_ok_results_status=is_automatic_merge_ok_results['status'])
+        # messages.add_message(request, messages.ERROR, message)
+
+    results = {
+        'success':                              True,
+        'status':                               "FIND_DUPLICATE_CANDIDATE_NO_DUPLICATES_FOUND",
+    }
+    return results
 
 
 def filter_candidates_structured_json_for_local_duplicates(structured_json):

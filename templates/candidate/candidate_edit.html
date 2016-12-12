@@ -32,7 +32,12 @@
                 {{ candidate.politician_we_vote_id }}</a>
             {% endif %}
             {% if not candidate.politician_we_vote_id %}
-                (<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}">match to politician</a>)
+                (<a href="{% url 'candidate:candidate_politician_match' %}?candidate_id={{ candidate.id }}&google_civic_election_id={{ google_civic_election_id }}"
+                    >match to politician</a>)
+            {% endif %}
+            {% if candidate.candidate_merge_possibility_found %}
+                (<a href="{% url 'candidate:find_duplicate_candidate' candidate.id %}?google_civic_election_id={{ google_civic_election_id }}"
+                    >merge with duplicate candidate</a>)
             {% endif %}
 
         {% else %}

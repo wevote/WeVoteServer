@@ -3,7 +3,8 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import candidates_import_from_master_server, candidates_import_from_sample_file, \
-    candidate_politician_match, retrieve_candidate_photos, retrieve_candidate_politician_match_options
+    candidate_politician_match, find_duplicate_candidate, \
+    retrieve_candidate_photos, retrieve_candidate_politician_match_options
 from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from .serializers import CandidateCampaignSerializer
 from admin_tools.views import redirect_to_sign_in_page
@@ -312,6 +313,9 @@ def candidate_edit_view(request, candidate_id):
         except Exception as e:
             handle_record_not_found_exception(e, logger=logger)
             contest_office_list = []
+
+        # Was a candidate_merge_possibility_found?
+        candidate_on_stage.candidate_merge_possibility_found = True  # TODO DALE Make dynamic
 
         template_values = {
             'messages_on_stage':        messages_on_stage,
@@ -761,8 +765,6 @@ def find_and_remove_duplicate_candidates_view(request):
     number_of_duplicate_candidates_failed = 0
     number_of_duplicates_could_not_process = 0
 
-    # TODO DALE Consider moving to candidate_campaign_list.find_and_remove_duplicate_candidates ?
-
     # We only want to process if a google_civic_election_id comes in
     if not positive_value_exists(google_civic_election_id):
         messages.add_message(request, messages.ERROR, "Google Civic Election ID required.")
@@ -776,61 +778,107 @@ def find_and_remove_duplicate_candidates_view(request):
         pass
 
     # Loop through all of the candidates in this election
-    candidate_campaign_list_manager = CandidateCampaignListManager()
     for we_vote_candidate in candidate_list:
-        # Search for other candidates within this election that match name and election
-        try:
-            candidate_duplicates_query = CandidateCampaign.objects.order_by('candidate_name')
-            candidate_duplicates_query = candidate_duplicates_query.filter(
-                google_civic_election_id=google_civic_election_id)
-            candidate_duplicates_query = candidate_duplicates_query.filter(
-                candidate_name=we_vote_candidate.candidate_name)
-            candidate_duplicates_query = candidate_duplicates_query.exclude(id=we_vote_candidate.id)
-            number_of_duplicates = candidate_duplicates_query.count()
-            if number_of_duplicates > 1:
-                # Our system can't deal with this yet
-                number_of_duplicates_could_not_process += 1
-                pass
-            elif number_of_duplicates == 1:
-                candidate_duplicate_list = candidate_duplicates_query
+        results = find_duplicate_candidate(we_vote_candidate)
 
-                # If we can automatically merge, we should do it
-                is_automatic_merge_ok_results = candidate_campaign_list_manager.is_automatic_merge_ok(
-                    we_vote_candidate, candidate_duplicate_list[0])
-                if is_automatic_merge_ok_results['automatic_merge_ok']:
-                    automatic_merge_results = candidate_campaign_list_manager.do_automatic_merge(
-                        we_vote_candidate, candidate_duplicate_list[0])
-                    if automatic_merge_results['success']:
-                        number_of_duplicate_candidates_processed += 1
-                    else:
-                        number_of_duplicate_candidates_failed += 1
-                else:
-                    # If we cannot automatically merge, direct to a page where we can look at the two side-by-side
-                    message = "Google Civic Election ID: {election_id}, " \
-                              "{num_of_duplicate_candidates_processed} duplicates processed, " \
-                              "{number_of_duplicate_candidates_failed} duplicate merges failed, " \
-                              "{number_of_duplicates_could_not_process} could not be processed because 3 exist " \
-                              "".format(election_id=google_civic_election_id,
-                                        num_of_duplicate_candidates_processed=number_of_duplicate_candidates_processed,
-                                        number_of_duplicate_candidates_failed=number_of_duplicate_candidates_failed,
-                                        number_of_duplicates_could_not_process=number_of_duplicates_could_not_process)
+        # If we find candidates to merge, stop and ask for confirmation
+        if results['candidate_merge_possibility_found']:
+            messages_on_stage = get_messages(request)
+            template_values = {
+                'messages_on_stage': messages_on_stage,
+                'candidate_option1': we_vote_candidate,
+                'candidate_option2': results['candidate_merge_possibility'],
+            }
+            return render(request, 'candidate/candidate_merge.html', template_values)
 
-                    messages.add_message(request, messages.INFO, message)
+    # message = "Google Civic Election ID: {election_id}, " \
+    #           "{number_of_duplicate_candidates_processed} duplicates processed, " \
+    #           "{number_of_duplicate_candidates_failed} duplicate merges failed, " \
+    #           "{number_of_duplicates_could_not_process} could not be processed because 3 exist " \
+    #           "".format(election_id=google_civic_election_id,
+    #                     number_of_duplicate_candidates_processed=number_of_duplicate_candidates_processed,
+    #                     number_of_duplicate_candidates_failed=number_of_duplicate_candidates_failed,
+    #                     number_of_duplicates_could_not_process=number_of_duplicates_could_not_process)
 
-                    message = "{is_automatic_merge_ok_results_status} " \
-                              "".format(is_automatic_merge_ok_results_status=is_automatic_merge_ok_results['status'])
-                    messages.add_message(request, messages.ERROR, message)
+    messages.add_message(request, messages.INFO, message)
 
-                    messages_on_stage = get_messages(request)
-                    template_values = {
-                        'messages_on_stage': messages_on_stage,
-                        'candidate_option1': we_vote_candidate,
-                        'candidate_option2': candidate_duplicate_list[0],
-                    }
-                    return render(request, 'candidate/candidate_merge.html', template_values)
+    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}".format(
+        var=google_civic_election_id))
 
-        except CandidateCampaign.DoesNotExist:
-            pass
+
+@login_required
+def find_duplicate_candidate_view(request, candidate_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    candidate_list = []
+
+    number_of_duplicate_candidates_processed = 0
+    number_of_duplicate_candidates_failed = 0
+    number_of_duplicates_could_not_process = 0
+
+    google_civic_election_id = 0
+
+    candidate_manager = CandidateCampaignManager()
+    candidate_results = candidate_manager.retrieve_candidate_campaign_from_id(candidate_id)
+    if not candidate_results['candidate_campaign_found']:
+        messages.add_message(request, messages.ERROR, "Candidate not found.")
+        return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
+                                    "?google_civic_election_id=" + str(google_civic_election_id))
+
+    candidate = candidate_results['candidate_campaign']
+
+    if not positive_value_exists(google_civic_election_id):
+        messages.add_message(request, messages.ERROR, "Candidate must have an election_id in order to merge.")
+        return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)))
+
+    results = find_duplicate_candidate(candidate)
+
+    if results['candidate_merge_possibility_found']:
+        # If we find candidates to merge, ask for confirmation
+        messages_on_stage = get_messages(request)
+        template_values = {
+            'messages_on_stage': messages_on_stage,
+            'candidate_option1': candidate,
+            'candidate_option2': results['candidate_merge_possibility'],
+        }
+        return render(request, 'candidate/candidate_merge.html', template_values)
+
+    # # If we can automatically merge, we should do it
+    # is_automatic_merge_ok_results = candidate_campaign_list_manager.is_automatic_merge_ok(
+    #     we_vote_candidate, candidate_duplicate_list[0])
+    # if is_automatic_merge_ok_results['automatic_merge_ok']:
+    #     automatic_merge_results = candidate_campaign_list_manager.do_automatic_merge(
+    #         we_vote_candidate, candidate_duplicate_list[0])
+    #     if automatic_merge_results['success']:
+    #         number_of_duplicate_candidates_processed += 1
+    #     else:
+    #         number_of_duplicate_candidates_failed += 1
+    # else:
+    #     # If we cannot automatically merge, direct to a page where we can look at the two side-by-side
+    #     message = "Google Civic Election ID: {election_id}, " \
+    #               "{num_of_duplicate_candidates_processed} duplicates processed, " \
+    #               "{number_of_duplicate_candidates_failed} duplicate merges failed, " \
+    #               "{number_of_duplicates_could_not_process} could not be processed because 3 exist " \
+    #               "".format(election_id=google_civic_election_id,
+    #                         num_of_duplicate_candidates_processed=number_of_duplicate_candidates_processed,
+    #                         number_of_duplicate_candidates_failed=number_of_duplicate_candidates_failed,
+    #                         number_of_duplicates_could_not_process=number_of_duplicates_could_not_process)
+    #
+    #     messages.add_message(request, messages.INFO, message)
+    #
+    #     message = "{is_automatic_merge_ok_results_status} " \
+    #               "".format(is_automatic_merge_ok_results_status=is_automatic_merge_ok_results['status'])
+    #     messages.add_message(request, messages.ERROR, message)
+    #
+    #     messages_on_stage = get_messages(request)
+    #     template_values = {
+    #         'messages_on_stage': messages_on_stage,
+    #         'candidate_option1': we_vote_candidate,
+    #         'candidate_option2': candidate_duplicate_list[0],
+    #     }
+    #     return render(request, 'candidate/candidate_merge.html', template_values)
 
     message = "Google Civic Election ID: {election_id}, " \
               "{number_of_duplicate_candidates_processed} duplicates processed, " \
@@ -843,8 +891,9 @@ def find_and_remove_duplicate_candidates_view(request):
 
     messages.add_message(request, messages.INFO, message)
 
-    return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}".format(
-        var=google_civic_election_id))
+    return HttpResponseRedirect(reverse('candidate:candidate_edit', args=(candidate_id,)) +
+                                "?google_civic_election_id={var}".format(
+                                var=google_civic_election_id))
 
 
 @login_required
