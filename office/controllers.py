@@ -29,7 +29,7 @@ def offices_import_from_sample_file():
     return offices_import_from_structured_json(structured_json)
 
 
-def offices_import_from_master_server(request, google_civic_election_id=''):
+def offices_import_from_master_server(request, google_civic_election_id='', state_code=''):
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -40,6 +40,7 @@ def offices_import_from_master_server(request, google_civic_election_id=''):
         "key": WE_VOTE_API_KEY,
         "format":   'json',
         "google_civic_election_id": google_civic_election_id,
+        "state_code": state_code,
     })
     structured_json = json.loads(request.text)
 
