@@ -27,6 +27,7 @@ eggs/
 lib/
 lib64/
 parts/
+python*
 sdist/
 var/
 venv/
