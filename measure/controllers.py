@@ -104,7 +104,7 @@ def measure_retrieve_for_api(measure_id, measure_we_vote_id):  # measureRetrieve
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def measures_import_from_master_server(request, google_civic_election_id):
+def measures_import_from_master_server(request, google_civic_election_id, state_code=''):
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -116,6 +116,7 @@ def measures_import_from_master_server(request, google_civic_election_id):
         "key": WE_VOTE_API_KEY,  # This comes from an environment variable
         "format":   'json',
         "google_civic_election_id": google_civic_election_id,
+        "state_code": state_code,
     })
     structured_json = json.loads(request.text)
     results = filter_measures_structured_json_for_local_duplicates(structured_json)
