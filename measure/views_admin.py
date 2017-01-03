@@ -30,10 +30,13 @@ logger = wevote_functions.admin.get_logger(__name__)
 class MeasuresSyncOutView(APIView):
     def get(self, request, format=None):
         google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+        state_code = request.GET.get('state_code', '')
 
         contest_measure_list = ContestMeasure.objects.all()
         if positive_value_exists(google_civic_election_id):
             contest_measure_list = contest_measure_list.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            contest_measure_list = contest_measure_list.filter(state_code__iexact=state_code)
 
         serializer = ContestMeasureSerializer(contest_measure_list, many=True)
         return Response(serializer.data)
@@ -44,7 +47,7 @@ def measures_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    results = measures_import_from_master_server(request, google_civic_election_id)
+    results = measures_import_from_master_server(request, google_civic_election_id, state_code)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])
