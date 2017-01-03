@@ -19,17 +19,20 @@ Create a place to put all of the code from Github:
 
 Retrieve “WeVoteServer” into that folder:
 
-1. Create a fork of wevote/WebApp.git. You can do this from https://github.com/wevote/WebApp with the "Fork" button  
+1. Create a fork of wevote/WeVoteServer.git. You can do this from https://github.com/wevote/WeVoteServer with the "Fork" button  
 (upper right of screen)
 
+1. Change into your local WeVoteServer repository folder, and set up a remote for upstream:  
+`$ git remote add upstream git@github.com:wevote/WeVoteServer.git`  
 
-## Installing Python 3
+
+## Installing Python 3 on Mac (See below for Ubuntu)
 
 Mac instructions (Based on [this](http://joebergantine.com/blog/2015/apr/30/installing-python-2-and-python-3-alongside-each-ot/))
 
-Install Python 3.4 from package: https://www.python.org/downloads/ 
+Install the latest Python 3.x from package: https://www.python.org/downloads/ 
 This allows you to run python3 and pip3. 
-(Software gets installed into /Library/Frameworks/Python.framework/Versions/3.4/bin/.)
+(Software gets installed into /Library/Frameworks/Python.framework/Versions/3.5/bin/.)
 
     $ pip3 install --user virtualenv
     $ vim ~/.bash_profile
@@ -53,6 +56,56 @@ Now activate this new virtual environment for WeVoteServer:
 
     $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
     $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.5/bin/activate
+    $ export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
+    
+## Installing Python 3 on Ubuntu
+
+Taken from here:
+https://www.digitalocean.com/community/tutorials/how-to-install-the-django-web-framework-on-ubuntu-16-04#install-through-pip-in-a-virtualenv
+    
+Perhaps the most flexible way to install Django on your system is with the virtualenv tool. This tool allows you to create virtual Python environments where you can install any Python packages you want without affecting the rest of the system. This allows you to select Python packages on a per-project basis regardless of conflicts with other project's requirements.
+
+We will begin by installing pip from the Ubuntu repositories. Refresh your local package index before starting:
+
+    sudo apt-get update
+    
+If you plan on using version 2 of Python, you can install pip by typing:
+
+    sudo apt-get install python-pip
+
+If, instead, you plan on using version 3 of Python, you can install pip by typing:
+
+    sudo apt-get install python3-pip
+    
+Once pip is installed, you can use it to install the virtualenv package. If you installed the Python 2 pip, you can type:
+
+    sudo pip install virtualenv
+
+If you installed the Python 3 version of pip, you should type this instead:
+
+    sudo pip3 install virtualenv
+
+Now, whenever you start a new project, you can create a virtual environment for it. Start by creating and moving into a new project directory:
+
+    mkdir ~/newproject
+    cd ~/newproject
+
+Now, create a virtual environment within the project directory by typing:
+
+    virtualenv newenv
+    
+## Installing Postgres
+    
+Install the latest version of Postgres for your machine (see instructions further down on this page as well):
+ 
+MAC: Download and install the DMG from [http://postgresapp.com/](http://postgresapp.com/)
+ 
+OTHER: Go to [https://www.postgresql.org/download/](https://www.postgresql.org/download/).
+
+Install PGAdmin4. Go to [https://www.pgadmin.org/download/](https://www.pgadmin.org/download/).
+
+Then run these comments from your virtual environment for WeVoteServer:
+    
     $ pip install -r requirements.txt
     $ python manage.py runserver
 
@@ -82,7 +135,7 @@ For Mac, download and install the DMG from [http://postgresapp.com/](http://post
 
 Run this on your command line:
 
-    export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/9.4/bin
+    export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/latest/bin
 
 Start up the command line for postgres (there is an 'open psql' button/navigation item if you installed postgresapp.
 Run these commands:
@@ -101,9 +154,9 @@ Install Postgres:
 
 Follow [these instructions](https://help.ubuntu.com/community/PostgreSQL)
 
-## Setup - Install PG Admin III
+## Setup - Install pgAdmin 4
 
-We recommend installing pgAdmin3 as a WYSIWYG database administration tool.
+We recommend installing pgAdmin 4 as a WYSIWYG database administration tool.
 NOTE: You may need to turn off the restriction in "Security & Privacy" on "unidentified developers"
 to allow this tool to be installed.
 See: http://blog.tcs.de/program-cant-be-opened-because-it-is-from-an-unidentified-developer/
@@ -112,6 +165,8 @@ In pgadmin add a server. You can use your sign in name as the server name.
 
 
 ## Setup - Environment Variables Configuration - config/environment_variables.json
+
+NOTE: IMPORTANT STEP
 
 Copy "config/environment_variables-template.json" to "config/environment_variables.json". 
 You will configure many variables for your local environment in this file. 
@@ -144,6 +199,17 @@ Start by changing directories into your WeVoteServer folder:
     $ git clone https://github.com/maxmind/geoip-api-c.git
     $ cd geoip-api-c
     $ ./bootstrap
+    
+If you have problems with ./bootstrap command, try this. On OS X 10.10.5 I got an error 
+(autoreconf: command not found), and had to do this first. For directions on installing "brew" see
+[http://brew.sh/](http://brew.sh/):
+    
+    $ brew install automake
+    $ brew install libtool
+
+If you had to install "brew", try this again.
+
+    $ ./bootstrap
     $ ./configure
     $ make
     
@@ -154,10 +220,6 @@ These errors won't prevent geoip from working.
     $ make install
     $ cd ..
     
-On OS X 10.10.5 I got an error (autoreconf: command not found), and had to do this first:
-    
-    $ brew install automake
-    $ brew install libtool
     
     
 #### “libGeoIP.so.1: cannot open..."
@@ -202,12 +264,12 @@ Transfer it to the live API server:
 If you would like to match the local database settings from the "config/environment_variables.json" file,
 (Search for "DATABASES"):
 
-    createdb WeVoteServerDB
+    $ createdb WeVoteServerDB
 
 Populate your database with the latest database tables:
 
-    python manage.py makemigrations
-    python manage.py migrate
+    $ python manage.py makemigrations
+    $ python manage.py migrate
 
 Create the initial database:
 
@@ -248,7 +310,7 @@ text string like "wv01voter1234" next to it, note the we_vote_id number.
 
 ### Give yourself Admin rights via PGAdmin
 
-Open PG Admin III and navigate to:
+Open pgAdmin 4 and navigate to:
 
     Server Groups > Servers > WeVoteServerDB 
 
