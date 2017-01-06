@@ -1067,6 +1067,8 @@ def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
         'twitter_sign_in_verified':                results['twitter_sign_in_verified'],
         'twitter_sign_in_failed':                  results['twitter_sign_in_failed'],
         'twitter_secret_key':                      results['twitter_secret_key'],
+        #'twitter_who_i_follow_saved':              results['twitter_who_i_follow_saved'],
+        #'twitter_who_i_follow':                    results['twitter_who_i_follow'],
         # There are more values we currently aren't returning
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
