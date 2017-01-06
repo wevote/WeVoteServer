@@ -3,11 +3,16 @@
 # -*- coding: UTF-8 -*-
 
 # See also WeVoteServer/import_export_twitter/models.py for the code that interfaces with twitter (or other) servers
-
+import tweepy
 from django.db import models
+
+from config.base import get_environment_variable
 from import_export_twitter.functions import retrieve_twitter_user_info
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 
+TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
+TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
+TWITTER_FRIENDS_IDS_MAX_LIMIT = 5000
 
 class TwitterLinkToOrganization(models.Model):
     """
@@ -540,10 +545,65 @@ class TweetFavorite(models.Model):
 # This should be the master table
 class TwitterWhoIFollow(models.Model):
     """
-    Other Twitter handles that I follow, from the perspective of handle_of_me
+    Other Twitter ids that I follow, from the perspective of twitter id of me
     """
-    handle_of_me = models.CharField(max_length=15, verbose_name='from this twitter handle\'s perspective...')
-    handle_i_follow = models.CharField(max_length=15, verbose_name='twitter handle being followed')
+    twitter_id_of_me = models.BigIntegerField(verbose_name="twitter id of viewer", null=False, unique=False)
+    twitter_id_i_follow = models.BigIntegerField(verbose_name="twitter id of the friend", null=False, unique=False)
+
+    def retrieve_twitter_ids_i_follow(self, twitter_auth_response):
+
+        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+        auth.set_access_token(twitter_auth_response.twitter_access_token, twitter_auth_response.twitter_access_secret)
+        api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True)
+
+        twitter_cursor_state = TwitterCursorState()
+        results = twitter_cursor_state.retrieve_twitter_cursor_state(api, twitter_auth_response)
+
+        if len(results['twitter_ids_i_follow']) == 0 or results['success'] is False :
+            return results['twitter_ids_i_follow']
+        twitter_ids_i_follow = results['twitter_ids_i_follow']
+
+        while results['next_cursor_position'] != api.get_user(id=twitter_auth_response.twitter_id).friends_count:
+            results = twitter_cursor_state.retrieve_twitter_cursor_state(api, twitter_auth_response, results['next_cursor_position'])
+            twitter_ids_i_follow.extend(results['twitter_ids_i_follow'])
+
+        return twitter_ids_i_follow
+
+
+class TwitterCursorState(models.Model):
+    """
+    Should retrieve the friends who i follow from the previous cursor state
+    #TODO anisha Need to maintain previous sign in cursor state
+    (can be done by storing cursor state in a new table or by adding a new attribute in TwitterWhoIFollow)
+    """
+    def retrieve_twitter_cursor_state(self, api, twitter_auth_response, next_cursor_position=0):
+        try:
+            twitter_ids_i_follow = list()
+            cursor = tweepy.Cursor(api.friends_ids, id=twitter_auth_response.twitter_id, count=TWITTER_FRIENDS_IDS_MAX_LIMIT, since_id=next_cursor_position)
+            for twitter_ids in cursor.pages():
+                next_cursor_position += len(twitter_ids)
+                twitter_ids_i_follow.extend(twitter_ids)
+            results = {
+                'success':              True,
+                'status':               'TWITTER_CURSOR_STATE_COMPLETED',
+                'next_cursor_position': next_cursor_position,
+                'twitter_ids_i_follow': twitter_ids_i_follow,
+                }
+        except tweepy.error.TweepError as error_instance:
+            results = {
+                'success':              False,
+                'status':               'TWITTER_CURSOR_STATE_TWEEPY_ERROR: {}'.format(error_instance.reason),
+                'next_cursor_position': 0,
+                'twitter_ids_i_follow': twitter_ids_i_follow,
+                }
+        except tweepy.RateLimitError:
+            results = {
+                'success': False,
+                'status': 'TWITTER_CURSOR_STATE_RATE_LIMIT_ERROR ',
+                'next_cursor_position': 0,
+                'twitter_ids_i_follow': twitter_ids_i_follow,
+            }
+        return results
 
 
 # This is a we vote copy (for speed) of Twitter handles that follow me. We should have self-healing scripts that set up
