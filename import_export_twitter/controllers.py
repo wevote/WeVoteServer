@@ -14,7 +14,7 @@ from organization.models import Organization, OrganizationManager
 import re
 from socket import timeout
 import tweepy
-from twitter.models import TwitterUserManager, TwitterWhoIFollow
+from twitter.models import TwitterUserManager
 import urllib.request
 from voter.models import VoterDeviceLinkManager, VoterManager
 import wevote_functions.admin
@@ -903,8 +903,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
             'twitter_request_secret':               "",
             'twitter_request_token':                "",
             'twitter_screen_name':                  "",
-            'twitter_who_i_follow_saved':           False,
-            'twitter_who_i_follow':                 "",
+            # 'twitter_who_i_follow':                 "",
         }
         return error_results
     voter = voter_results['voter']
@@ -936,8 +935,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
             'twitter_request_secret':               "",
             'twitter_request_token':                "",
             'twitter_screen_name':                  "",
-            'twitter_who_i_follow_saved':           False,
-            'twitter_who_i_follow':                 "",
+            # 'twitter_who_i_follow':                 "",
         }
         return error_results
 
@@ -966,8 +964,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
             'twitter_request_secret':               "",
             'twitter_request_token':                "",
             'twitter_screen_name':                  "",
-            'twitter_who_i_follow_saved':           False,
-            'twitter_who_i_follow':                 "",
+            # 'twitter_who_i_follow':                 "",
         }
         return error_results
 
@@ -1001,27 +998,15 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
                     # TODO DALE Remove all remaining voter.twitter_id values
                     pass
 
-    twitter_who_i_follow = TwitterWhoIFollow()
-    twitter_ids_i_follow = twitter_who_i_follow.retrieve_twitter_ids_i_follow(twitter_auth_response)
-    try:
-        for twitter_id_i_follow in twitter_ids_i_follow:
-            # TODO anisha Need to check how to get reference for all twitter_who_i_follow
-            twitter_who_i_follow = TwitterWhoIFollow.objects.update_or_create(
-                twitter_id_of_me = twitter_auth_response.twitter_id,
-                twitter_id_i_follow = twitter_id_i_follow,
-                defaults = {
-                    'twitter_id_of_me': twitter_auth_response.twitter_id,
-                    'twitter_id_i_follow': twitter_id_i_follow
-                    }
-                )
-        twitter_who_i_follow_saved = True
-        success = True
-        status += " TWITTER_WHO_I_FOLLOW_CREATED"
-    except Exception as e:
-        twitter_who_i_follow_saved = False
-        twitter_who_i_follow = TwitterWhoIFollow()
-        success = False
-        status += " TWITTER_WHO_I_FOLLOW_NOT_CREATED"
+    twitter_ids_i_follow_results = twitter_user_manager.retrieve_twitter_ids_i_follow(
+        twitter_auth_response.twitter_id, twitter_auth_response.twitter_access_token,
+        twitter_auth_response.twitter_access_secret)
+    status += ' ' + twitter_ids_i_follow_results['status']
+    twitter_ids_i_follow = twitter_ids_i_follow_results['twitter_ids_i_follow']
+    if twitter_ids_i_follow_results['success']:
+        twitter_who_i_follow_results = twitter_user_manager.create_twitter_who_i_follow(
+            twitter_auth_response.twitter_id, twitter_ids_i_follow)
+        status += ' ' + twitter_who_i_follow_results['status']
 
     json_data = {
         'success':                              success,
@@ -1043,9 +1028,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         'twitter_request_secret':               twitter_auth_response.twitter_request_secret,
         'twitter_request_token':                twitter_auth_response.twitter_request_token,
         'twitter_screen_name':                  twitter_auth_response.twitter_screen_name,
-        # 'twitter_who_i_follow_saved':         twitter_who_i_follow_saved,
         # 'twitter_who_i_follow':               twitter_ids_i_follow,
-
     }
     return json_data
 
