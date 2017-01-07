@@ -551,8 +551,9 @@ def voter_facebook_sign_in_save_for_api(voter_device_id,  # voterFacebookSignInS
     success = auth_data_results['success']
     status += auth_data_results['status']
 
-    minimum_data_saved = positive_value_exists(facebook_email) | \
-        positive_value_exists(facebook_profile_image_url_https)
+    # Is this the last save for this Facebook user?
+    minimum_data_saved = positive_value_exists(facebook_profile_image_url_https)
+    # positive_value_exists(facebook_email)
 
     json_data = {
         'status':                   status,

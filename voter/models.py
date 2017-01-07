@@ -1186,31 +1186,40 @@ class VoterDeviceLinkManager(models.Model):
         error_result = False
         exception_does_not_exist = False
         exception_multiple_object_returned = False
+        status = ""
         voter_device_link_on_stage = VoterDeviceLink()
 
         try:
             if positive_value_exists(voter_device_id):
+                status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_ID"
                 voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_device_id=voter_device_id)
                 voter_device_link_id = voter_device_link_on_stage.id
             elif positive_value_exists(voter_id):
+                status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_ID"
                 voter_device_link_on_stage = VoterDeviceLink.objects.get(voter_id=voter_id)
                 # If still here, we found an existing position
                 voter_device_link_id = voter_device_link_on_stage.id
             elif positive_value_exists(voter_device_link_id):
+                status += " RETRIEVE_VOTER_DEVICE_LINK-GET_BY_VOTER_DEVICE_LINK_ID"
                 voter_device_link_on_stage = VoterDeviceLink.objects.get(id=voter_device_link_id)
                 # If still here, we found an existing position
                 voter_device_link_id = voter_device_link_on_stage.id
             else:
                 voter_device_link_id = 0
+                status += " RETRIEVE_VOTER_DEVICE_LINK-MISSING_REQUIRED_SEARCH_VARIABLES"
         except VoterDeviceLink.MultipleObjectsReturned as e:
             handle_record_found_more_than_one_exception(e, logger=logger)
             error_result = True
             exception_multiple_object_returned = True
+            status += " RETRIEVE_VOTER_DEVICE_LINK-MULTIPLE_OBJECTS_RETURNED"
         except VoterDeviceLink.DoesNotExist:
             error_result = True
             exception_does_not_exist = True
+            status += " RETRIEVE_VOTER_DEVICE_LINK-DOES_NOT_EXIST"
 
         results = {
+            'success':                      True if not error_result else False,
+            'status':                       status,
             'error_result':                 error_result,
             'DoesNotExist':                 exception_does_not_exist,
             'MultipleObjectsReturned':      exception_multiple_object_returned,
