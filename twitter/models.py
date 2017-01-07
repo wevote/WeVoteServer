@@ -13,6 +13,8 @@ from wevote_functions.functions import convert_to_int, generate_random_string, p
 TWITTER_CONSUMER_KEY = get_environment_variable("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = get_environment_variable("TWITTER_CONSUMER_SECRET")
 TWITTER_FRIENDS_IDS_MAX_LIMIT = 5000
+TWITTER_API_NAME_FRIENDS_ID = "friends_ids"
+
 
 class TwitterLinkToOrganization(models.Model):
     """
@@ -227,7 +229,6 @@ class TwitterUserManager(models.Model):
         """
 
         :param twitter_id:
-        :param twitter_handle:
         :param organization_we_vote_id:
         :return:
         """
@@ -431,6 +432,145 @@ class TwitterUserManager(models.Model):
         }
         return results
 
+    def retrieve_twitter_ids_i_follow(self, twitter_id_of_me, twitter_access_token, twitter_access_secret):
+        """
+        We use this routine to retrieve twitter ids who i follow and updating the next cursor state in
+        TwitterCursorState table
+        :param twitter_id_of_me:
+        :param twitter_access_token:
+        :param twitter_access_secret:
+        :return: twitter_ids_i_follow
+        """
+        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+        auth.set_access_token(twitter_access_token, twitter_access_secret)
+        api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True)
+
+        twitter_next_cursor_state_results = self.retrieve_twitter_next_cursor_state(twitter_id_of_me)
+        status = twitter_next_cursor_state_results['status']
+        twitter_next_cursor = twitter_next_cursor_state_results['twitter_next_cursor']
+        if TWITTER_FRIENDS_IDS_MAX_LIMIT <= twitter_next_cursor:
+            twitter_next_cursor = 0
+
+        twitter_ids_i_follow = list()
+        try:
+            cursor = tweepy.Cursor(
+                api.friends_ids, id=twitter_id_of_me, count=TWITTER_FRIENDS_IDS_MAX_LIMIT, since_id=twitter_next_cursor)
+            for twitter_ids in cursor.pages():
+                twitter_next_cursor += len(twitter_ids)
+                twitter_ids_i_follow.extend(twitter_ids)
+            success = True
+            twitter_next_cursor_state = self.create_twitter_next_cursor_state(
+                twitter_id_of_me, TWITTER_API_NAME_FRIENDS_ID, twitter_next_cursor)
+            status = status + ' ' + twitter_next_cursor_state['status']
+        except tweepy.RateLimitError:
+            success = False
+            status += ' RETRIEVE_TWITTER_IDS_I_FOLLOW_RATE_LIMIT_ERROR '
+        except tweepy.error.TweepError as error_instance:
+            success = 'RETRIEVE_TWITTER_IDS_I_FOLLOW_TWEEPY_ERROR: {} '.format(error_instance.reason)
+
+        results = {
+            'success':              success,
+            'status':               status + ' RETRIEVE_TWITTER_IDS_I_FOLLOW_COMPLETED',
+            'twitter_next_cursor':  twitter_next_cursor,
+            'twitter_ids_i_follow': twitter_ids_i_follow,
+        }
+        return results
+
+    def retrieve_twitter_next_cursor_state(self, twitter_id_of_me):
+        """
+        We use this subroutine to get twitter next cursor value from TwitterCursorState table
+        :param twitter_id_of_me:
+        :return: twitter_next_cursor
+        """
+        try:
+            twitter_next_cursor_state = TwitterCursorState.objects.get(
+                twitter_id_of_me=twitter_id_of_me,)
+            twitter_next_cursor = twitter_next_cursor_state.twitter_next_cursor
+            success = True
+            status = "RETRIEVE_TWITTER_NEXT_CURSOR_FOUND_WITH_TWITTER_ID"
+        except TwitterCursorState.DoesNotExist:
+            twitter_next_cursor = 0
+            twitter_next_cursor_state = TwitterCursorState()
+            success = True
+            status = "RETRIEVE_TWITTER_NEXT_CURSOR_NONE_FOUND"
+
+        results = {
+            'success':              success,
+            'status':               status,
+            'twitter_next_cursor':  twitter_next_cursor,
+            'twitter_cursor_state': twitter_next_cursor_state,
+        }
+        return results
+
+    def create_twitter_who_i_follow(self, twitter_id_of_me, twitter_ids_i_follow):
+        """
+        We use this subroutine to create or update TwitterWhoIFollow table with twitter ids i follow.
+        :param twitter_id_of_me:
+        :param twitter_ids_i_follow:
+        :return:
+        """
+        twitter_who_i_follow = TwitterWhoIFollow()
+        try:
+            for twitter_id_i_follow in twitter_ids_i_follow:
+                # TODO anisha Need to check how to get reference for all twitter_who_i_follow
+                twitter_who_i_follow, created = TwitterWhoIFollow.objects.update_or_create(
+                    twitter_id_of_me=twitter_id_of_me,
+                    twitter_id_i_follow=twitter_id_i_follow,
+                    defaults={
+                        'twitter_id_of_me':     twitter_id_of_me,
+                        'twitter_id_i_follow':  twitter_id_i_follow
+                    }
+                )
+            twitter_who_i_follow_saved = True
+            success = True
+            status = "TWITTER_WHO_I_FOLLOW_CREATED"
+        except Exception:
+            twitter_who_i_follow_saved = False
+            twitter_who_i_follow = TwitterWhoIFollow()
+            success = False
+            status = "TWITTER_WHO_I_FOLLOW_NOT_CREATED"
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'twitter_who_i_follow_saved':   twitter_who_i_follow_saved,
+            'twitter_who_i_follow':         twitter_who_i_follow,
+            }
+        return results
+
+    def create_twitter_next_cursor_state(self, twitter_id_of_me, twitter_api_name, twitter_next_cursor):
+        """
+        We use this subroutine to create or update TwitterCursorState table with next cursor value
+        :param twitter_id_of_me:
+        :param twitter_api_name:
+        :param twitter_next_cursor:
+        :return:
+        """
+        try:
+            twitter_next_cursor_state, created = TwitterCursorState.objects.update_or_create(
+                twitter_id_of_me=twitter_id_of_me,
+                twitter_api_name__iexact=twitter_api_name,
+                defaults={
+                    'twitter_id_of_me':     twitter_id_of_me,
+                    'twitter_api_name':     twitter_api_name,
+                    'twitter_next_cursor':  twitter_next_cursor,
+                }
+            )
+            twitter_next_cursor_state_saved = True
+            success = True
+            status = "TWITTER_NEXT_CURSOR_STATE_CREATED"
+        except Exception:
+            twitter_next_cursor_state_saved = False
+            twitter_next_cursor_state = TwitterCursorState()
+            success = False
+            status = "TWITTER_NEXT_CURSOR_STATE_NOT_CREATED"
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'twitter_next_cursor_state_saved':  twitter_next_cursor_state_saved,
+            'twitter_cursor_state':             twitter_next_cursor_state,
+        }
+        return results
+
     def save_new_twitter_user_from_twitter_json(self, twitter_json):
 
         if 'screen_name' not in twitter_json:
@@ -550,60 +690,14 @@ class TwitterWhoIFollow(models.Model):
     twitter_id_of_me = models.BigIntegerField(verbose_name="twitter id of viewer", null=False, unique=False)
     twitter_id_i_follow = models.BigIntegerField(verbose_name="twitter id of the friend", null=False, unique=False)
 
-    def retrieve_twitter_ids_i_follow(self, twitter_auth_response):
-
-        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
-        auth.set_access_token(twitter_auth_response.twitter_access_token, twitter_auth_response.twitter_access_secret)
-        api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True)
-
-        twitter_cursor_state = TwitterCursorState()
-        results = twitter_cursor_state.retrieve_twitter_cursor_state(api, twitter_auth_response)
-
-        if len(results['twitter_ids_i_follow']) == 0 or results['success'] is False :
-            return results['twitter_ids_i_follow']
-        twitter_ids_i_follow = results['twitter_ids_i_follow']
-
-        while results['next_cursor_position'] != api.get_user(id=twitter_auth_response.twitter_id).friends_count:
-            results = twitter_cursor_state.retrieve_twitter_cursor_state(api, twitter_auth_response, results['next_cursor_position'])
-            twitter_ids_i_follow.extend(results['twitter_ids_i_follow'])
-
-        return twitter_ids_i_follow
-
 
 class TwitterCursorState(models.Model):
     """
-    Should retrieve the friends who i follow from the previous cursor state
-    #TODO anisha Need to maintain previous sign in cursor state
-    (can be done by storing cursor state in a new table or by adding a new attribute in TwitterWhoIFollow)
+    Maintaining next cursor state of twitter ids that i follow
     """
-    def retrieve_twitter_cursor_state(self, api, twitter_auth_response, next_cursor_position=0):
-        try:
-            twitter_ids_i_follow = list()
-            cursor = tweepy.Cursor(api.friends_ids, id=twitter_auth_response.twitter_id, count=TWITTER_FRIENDS_IDS_MAX_LIMIT, since_id=next_cursor_position)
-            for twitter_ids in cursor.pages():
-                next_cursor_position += len(twitter_ids)
-                twitter_ids_i_follow.extend(twitter_ids)
-            results = {
-                'success':              True,
-                'status':               'TWITTER_CURSOR_STATE_COMPLETED',
-                'next_cursor_position': next_cursor_position,
-                'twitter_ids_i_follow': twitter_ids_i_follow,
-                }
-        except tweepy.error.TweepError as error_instance:
-            results = {
-                'success':              False,
-                'status':               'TWITTER_CURSOR_STATE_TWEEPY_ERROR: {}'.format(error_instance.reason),
-                'next_cursor_position': 0,
-                'twitter_ids_i_follow': twitter_ids_i_follow,
-                }
-        except tweepy.RateLimitError:
-            results = {
-                'success': False,
-                'status': 'TWITTER_CURSOR_STATE_RATE_LIMIT_ERROR ',
-                'next_cursor_position': 0,
-                'twitter_ids_i_follow': twitter_ids_i_follow,
-            }
-        return results
+    twitter_id_of_me = models.BigIntegerField(verbose_name="twitter id of viewer", null=False, unique=False)
+    twitter_api_name = models.CharField(verbose_name="twitter api name", max_length=255, null=False, unique=False)
+    twitter_next_cursor = models.BigIntegerField(verbose_name="twitter next cursor state", null=False, unique=False)
 
 
 # This is a we vote copy (for speed) of Twitter handles that follow me. We should have self-healing scripts that set up
