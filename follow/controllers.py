@@ -109,7 +109,7 @@ def move_organization_followers_to_another_organization(from_organization_id, fr
 
 def organization_suggestion_tasks_for_api(voter_device_id,
                                           kind_of_suggestion_task=UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW,
-                                          kind_of_follow_task=''):  # OrganizationSuggestionList
+                                          kind_of_follow_task=''):  # organizationSuggestionList
     """
     organizationSuggestionTasks API Endpoint
     :param kind_of_suggestion_task:
