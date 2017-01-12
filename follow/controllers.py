@@ -1,13 +1,17 @@
 # follow/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
-from .models import FollowOrganizationList, FollowOrganizationManager
 from django.http import HttpResponse
 from email_outbound.models import EmailManager
 import json
+from .models import FollowOrganizationList, FollowOrganizationManager, UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, \
+    UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS, UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, \
+    UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW, UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER, \
+    UPDATE_SUGGESTIONS_ALL
+from voter.models import VoterManager
 import wevote_functions.admin
 from wevote_functions.functions import generate_voter_device_id, is_voter_device_id_valid, positive_value_exists
+from twitter.models import TwitterLinkToOrganization, TwitterUserManager
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -101,3 +105,95 @@ def move_organization_followers_to_another_organization(from_organization_id, fr
         'follow_entries_not_moved': follow_entries_not_moved,
     }
     return results
+
+
+def organization_suggestion_tasks_for_api(voter_device_id,
+                                          kind_of_suggestion_task=UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW,
+                                          kind_of_follow_task=''):  # OrganizationSuggestionList
+    """
+    organizationSuggestionTasks API Endpoint
+    :param kind_of_suggestion_task:
+    :type kind_of_follow_task:
+    :param voter_device_id:
+    :return:
+    """
+    success = False
+    status = ''
+    organization_suggestion_task_completed = False
+    organization_suggestion_list = []
+
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        error_results = {
+            'status':                               results['status'],
+            'success':                              False,
+            'voter_device_id':                      voter_device_id,
+            'kind_of_suggestion_task':              kind_of_suggestion_task,
+            'kind_of_follow_task':                  kind_of_follow_task,
+            'organization_suggestion_tasks_found':  organization_suggestion_task_completed,
+            'organization_suggestion_list':         organization_suggestion_list,
+        }
+        return error_results
+
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
+        error_results = {
+            'status':                               "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
+            'success':                              False,
+            'voter_device_id':                      voter_device_id,
+            'kind_of_suggestion_task':              kind_of_suggestion_task,
+            'kind_of_follow_task':                  kind_of_follow_task,
+            'organization_suggestion_tasks_found':  organization_suggestion_task_completed,
+            'organization_suggestion_list':        organization_suggestion_list,
+        }
+        return error_results
+    voter = voter_results['voter']
+    voter_we_vote_id = voter.we_vote_id
+    twitter_id_of_me = voter.twitter_id
+
+    follow_organization_manager = FollowOrganizationManager()
+    twitter_user_manager = TwitterUserManager()
+
+    if kind_of_suggestion_task == UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW:
+        twitter_who_i_follow_list_results = twitter_user_manager.retrieve_twitter_who_i_follow_list(twitter_id_of_me)
+        status += twitter_who_i_follow_list_results['status']
+        if twitter_who_i_follow_list_results['twitter_who_i_follow_list_found']:
+            twitter_who_i_follow_list = twitter_who_i_follow_list_results['twitter_who_i_follow_list']
+            for twitter_who_i_follow_entry in twitter_who_i_follow_list:
+                # searching each twitter_id_i_follow in TwitterLinkToOrganization table
+                twitter_id_i_follow = twitter_who_i_follow_entry.twitter_id_i_follow
+                twitter_organization_retrieve_results = twitter_user_manager.\
+                    retrieve_twitter_link_to_organization_from_twitter_user_id(twitter_id_i_follow)
+                if twitter_organization_retrieve_results['twitter_link_to_organization_found']:
+                    # organization_found = True
+                    # twitter_who_i_follow_update_results = twitter_user_manager.create_twitter_who_i_follow(
+                    #    twitter_id_of_me, twitter_who_i_follow_entry.twitter_id_i_follow, organization_found)
+                    # status = ' ' + twitter_who_i_follow_update_results['status']
+                    twitter_link_to_organization = twitter_organization_retrieve_results['twitter_link_to_organization']
+                    organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
+                    twitter_suggested_organization_updated_results = follow_organization_manager.\
+                        create_or_update_suggested_organization_to_follow(voter_we_vote_id, organization_we_vote_id,
+                                                                          from_twitter=True)
+                    status += ' ' + twitter_suggested_organization_updated_results['status']
+                    if twitter_suggested_organization_updated_results['suggested_organization_to_follow_saved']:
+                        twitter_suggested_organization_to_follow = twitter_suggested_organization_updated_results[
+                            'suggested_organization_to_follow']
+                        one_suggested_organization = {
+                            "organization_we_vote_id": twitter_suggested_organization_to_follow.organization_we_vote_id,
+                        }
+                        success = twitter_suggested_organization_updated_results['success']
+                        organization_suggestion_list.append(one_suggested_organization)
+
+        organization_suggestion_task_saved = True if len(organization_suggestion_list) else False
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'voter_device_id':                      voter_device_id,
+            'kind_of_suggestion_task':              kind_of_suggestion_task,
+            'kind_of_follow_task':                  kind_of_follow_task,
+            'organization_suggestion_task_saved':   organization_suggestion_task_saved,
+            'organization_suggestion_list':         organization_suggestion_list,
+        }
+        return results

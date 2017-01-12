@@ -20,6 +20,18 @@ FOLLOWING_CHOICES = (
     (FOLLOW_IGNORE,     'Ignoring'),
 )
 
+# Kinds of lists of suggested organization
+UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW = 'UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW'
+UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW = 'UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW'
+UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER = 'UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER'
+UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS = 'UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS'
+UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER = 'UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER'
+UPDATE_SUGGESTIONS_ALL = 'UPDATE_SUGGESTIONS_ALL'
+
+FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW = 'FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW'
+FOLLOW_SUGGESTIONS_FROM_FRIENDS = 'FOLLOW_SUGGESTIONS_FROM_FRIENDS'
+FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON_TWITTER = 'FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON_TWITTER'
+
 logger = wevote_functions.admin.get_logger(__name__)
 
 
@@ -255,6 +267,43 @@ class FollowOrganizationManager(models.Model):
 
         return self.retrieve_follow_organization(0, voter_id, organization_id, organization_we_vote_id)
 
+    def create_or_update_suggested_organization_to_follow(self, viewer_voter_we_vote_id, organization_we_vote_id,
+                                                          from_twitter=False):
+        """
+        Create or update the SuggestedOrganizationToFollow table with suggested organizations from twitter ids i follow
+        or organization of my friends follow.
+        :param viewer_voter_we_vote_id:
+        :param organization_we_vote_id:
+        :param from_twitter:
+        :return:
+        """
+        try:
+            suggested_organization_to_follow, created = SuggestedOrganizationToFollow.objects.update_or_create(
+                viewer_voter_we_vote_id=viewer_voter_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
+                from_twitter=from_twitter,
+                defaults={
+                    'viewer_voter_we_vote_id':  viewer_voter_we_vote_id,
+                    'organization_we_vote_id':  organization_we_vote_id,
+                    'from_twitter':             from_twitter
+                }
+            )
+            suggested_organization_to_follow_saved = True
+            success = True
+            status = "SUGGESTED_ORGANIZATION_TO_FOLLOW_UPDATED"
+        except Exception:
+            suggested_organization_to_follow_saved = False
+            suggested_organization_to_follow = SuggestedOrganizationToFollow()
+            success = False
+            status = "SUGGESTED_ORGANIZATION_TO_FOLLOW_NOT_UPDATED"
+        results = {
+            'success':                                  success,
+            'status':                                   status,
+            'suggested_organization_to_follow_saved':   suggested_organization_to_follow_saved,
+            'suggested_organization_to_follow':         suggested_organization_to_follow,
+        }
+        return results
+
 
 class FollowOrganizationList(models.Model):
     """
@@ -370,3 +419,24 @@ class FollowOrganizationList(models.Model):
         else:
             follow_organization_list = {}
             return follow_organization_list
+
+
+class SuggestedOrganizationToFollow(models.Model):
+    """
+    This table stores possible suggested organization from twitter ids i follow or organization of my friends follow.
+    """
+    viewer_voter_we_vote_id = models.CharField(
+        verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False)
+    organization_we_vote_id = models.CharField(
+        verbose_name="organization we vote id person 2", max_length=255, null=True, blank=True, unique=False)
+    from_twitter = models.BooleanField(verbose_name="from twitter", default=False)
+    date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
+
+    def fetch_other_organization_we_vote_id(self, one_we_vote_id):
+        if one_we_vote_id == self.viewer_voter_we_vote_id:
+            return self.viewee_voter_we_vote_id
+        elif one_we_vote_id == self.viewee_voter_we_vote_id:
+            return self.viewer_voter_we_vote_id
+        else:
+            # If the we_vote_id passed in wasn't found, don't return another we_vote_id
+            return ""
