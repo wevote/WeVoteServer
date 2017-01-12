@@ -432,7 +432,7 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def retrieve_twitter_ids_i_follow(self, twitter_id_of_me, twitter_access_token, twitter_access_secret):
+    def search_twitter_ids_i_follow(self, twitter_id_of_me, twitter_access_token, twitter_access_secret):
         """
         We use this routine to retrieve twitter ids who i follow and updating the next cursor state in
         TwitterCursorState table
@@ -476,6 +476,59 @@ class TwitterUserManager(models.Model):
         }
         return results
 
+    def retrieve_twitter_who_i_follow_list(self, twitter_id_of_me):
+        """
+        Reterive twitter ids who i follow from TwitterWhoIFollow table.
+        :param twitter_id_of_me:
+        :return:
+        """
+        status = ""
+        twitter_who_i_follow_list = []
+
+        if not positive_value_exists(twitter_id_of_me):
+            success = False
+            status = 'RETRIEVE_TWITTER_WHO_I_FOLLOW-MISSING_TWITTER_ID '
+            results = {
+                'success':                          success,
+                'status':                           status,
+                'twitter_who_i_follow_list_found':  False,
+                'twitter_who_i_follow_list':        [],
+            }
+            return results
+
+        try:
+            twitter_who_i_follow_queryset = TwitterWhoIFollow.objects.all()
+            twitter_who_i_follow_queryset = twitter_who_i_follow_queryset.filter(
+                twitter_id_of_me=twitter_id_of_me)
+            twitter_who_i_follow_list = twitter_who_i_follow_queryset
+
+            if len(twitter_who_i_follow_list):
+                success = True
+                twitter_who_i_follow_list_found = True
+                status += ' TWITTER_WHO_I_FOLLOW_LIST_RETRIEVED '
+            else:
+                success = True
+                twitter_who_i_follow_list_found = False
+                status += ' NO_TWIITER_WHO_I_FOLLOW_LIST_RETRIEVED '
+        except TwitterWhoIFollow.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            twitter_who_i_follow_list_found = False
+            status += ' NO_TWIITER_WHO_I_FOLLOW_LIST_RETRIEVED_DoesNotExist '
+            twitter_who_i_follow_list = []
+        except Exception as e:
+            success = False
+            twitter_who_i_follow_list_found = False
+            status += ' FAILED retrieve_twitter_who_i_follow0_list TwitterWhoIFollow '
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'twitter_who_i_follow_list_found':  twitter_who_i_follow_list_found,
+            'twitter_who_i_follow_list':        twitter_who_i_follow_list,
+        }
+        return results
+
     def retrieve_twitter_next_cursor_state(self, twitter_id_of_me):
         """
         We use this subroutine to get twitter next cursor value from TwitterCursorState table
@@ -502,9 +555,10 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def create_twitter_who_i_follow(self, twitter_id_of_me, twitter_ids_i_follow):
+    def create_twitter_who_i_follow(self, twitter_id_of_me, twitter_ids_i_follow, organization_found=False):
         """
         We use this subroutine to create or update TwitterWhoIFollow table with twitter ids i follow.
+        :param organization_found:
         :param twitter_id_of_me:
         :param twitter_ids_i_follow:
         :return:
@@ -516,9 +570,11 @@ class TwitterUserManager(models.Model):
                 twitter_who_i_follow, created = TwitterWhoIFollow.objects.update_or_create(
                     twitter_id_of_me=twitter_id_of_me,
                     twitter_id_i_follow=twitter_id_i_follow,
+                    # organization_found=organization_found,
                     defaults={
                         'twitter_id_of_me':     twitter_id_of_me,
                         'twitter_id_i_follow':  twitter_id_i_follow
+                        # 'organization_found': organization_found
                     }
                 )
             twitter_who_i_follow_saved = True
@@ -689,7 +745,8 @@ class TwitterWhoIFollow(models.Model):
     """
     twitter_id_of_me = models.BigIntegerField(verbose_name="twitter id of viewer", null=False, unique=False)
     twitter_id_i_follow = models.BigIntegerField(verbose_name="twitter id of the friend", null=False, unique=False)
-
+    # organization_found = models.BooleanField(verbose_name="organization found in twitterLinkToOrganization",
+    #                                          default=False)
 
 class TwitterCursorState(models.Model):
     """

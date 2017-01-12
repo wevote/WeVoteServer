@@ -1,7 +1,6 @@
 # apis_v1/views_docs.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
 from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_retrieve_doc, \
     ballot_items_sync_out_doc, ballot_returned_sync_out_doc, \
     candidate_retrieve_doc, \
@@ -14,6 +13,7 @@ from .documentation_source import ballot_item_options_retrieve_doc, ballot_item_
     organization_count_doc, organizations_followed_retrieve_doc, \
     organization_follow_doc, organization_follow_ignore_doc, organization_stop_following_doc, \
     organization_retrieve_doc, organization_save_doc, organization_search_doc, organizations_sync_out_doc, \
+    organization_suggestion_tasks_doc, \
     polling_locations_sync_out_doc, \
     position_like_count_doc, position_list_for_ballot_item_doc, position_list_for_opinion_maker_doc, \
     position_list_for_voter_doc, position_oppose_count_for_ballot_item_doc, \
@@ -353,6 +353,16 @@ def organizations_sync_out_doc_view(request):
     """
     url_root = WE_VOTE_SERVER_ROOT_URL
     template_values = organizations_sync_out_doc.organizations_sync_out_doc_template_values(url_root)
+    template_values['voter_api_device_id'] = get_voter_api_device_id(request)
+    return render(request, 'apis_v1/api_doc_page.html', template_values)
+
+
+def organization_suggestion_tasks_doc_view(request):
+    """
+    Show documentation about organizationSuggestionTasks
+    """
+    url_root = WE_VOTE_SERVER_ROOT_URL
+    template_values = organization_suggestion_tasks_doc.organization_suggestion_tasks_doc_template_values(url_root)
     template_values['voter_api_device_id'] = get_voter_api_device_id(request)
     return render(request, 'apis_v1/api_doc_page.html', template_values)
 

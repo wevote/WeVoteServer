@@ -1,7 +1,11 @@
 # apis_v1/views.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from follow.models import UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW, \
+    UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER, UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS, \
+    UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, UPDATE_SUGGESTIONS_ALL, \
+    FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON_TWITTER, FOLLOW_SUGGESTIONS_FROM_FRIENDS, \
+    FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
     organization_stop_following, voter_count
 from ballot.controllers import ballot_item_options_retrieve_for_api, choose_election_from_existing_data, \
@@ -11,6 +15,7 @@ from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
+from follow.controllers import organization_suggestion_tasks_for_api
 from friend.controllers import friend_invitation_by_email_send_for_api, friend_invitation_by_email_verify_for_api, \
     friend_invitation_by_we_vote_id_send_for_api, friend_invite_response_for_api, friend_list_for_api
 from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, DELETE_INVITATION_VOTER_SENT_BY_ME, \
@@ -467,6 +472,40 @@ def organization_search_view(request):
                                        organization_twitter_handle=organization_twitter_handle,
                                        organization_website=organization_website,
                                        organization_email=organization_email)
+
+
+def organization_suggestion_tasks_view(request):
+    """
+    This will provide list of suggested organizations to follow.
+    These suggestions are generated from twitter ids i follow, or organization of my friends follow.
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    kind_of_suggestion_task = request.GET.get('kind_of_suggestion_task', UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW)
+    kind_of_follow_task = request.GET.get('kind_of_follow_task', '')
+    if kind_of_suggestion_task not in(UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW,
+                                      UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW,
+                                      UPDATE_SUGGESTIONS_FROM_WHAT_FRIENDS_FOLLOW_ON_TWITTER,
+                                      UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS,
+                                      UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, UPDATE_SUGGESTIONS_ALL):
+        kind_of_suggestion_task = UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW
+    if kind_of_follow_task not in (FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, FOLLOW_SUGGESTIONS_FROM_FRIENDS,
+                                   FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON_TWITTER):
+        kind_of_follow_task = ''
+    results = organization_suggestion_tasks_for_api(voter_device_id=voter_device_id,
+                                                    kind_of_suggestion_task=kind_of_suggestion_task,
+                                                    kind_of_follow_task=kind_of_follow_task)
+    json_data = {
+        'status':                               results['status'],
+        'success':                              results['success'],
+        'voter_device_id':                      voter_device_id,
+        'kind_of_suggestion_task':              kind_of_suggestion_task,
+        'kind_of_follow_task':                  kind_of_follow_task,
+        'organization_suggestion_task_saved':   results['organization_suggestion_task_saved'],
+        'organization_suggestion_task':         results['organization_suggestion_task'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def organizations_followed_retrieve_api_view(request):
