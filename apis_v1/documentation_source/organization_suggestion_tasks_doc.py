@@ -2,8 +2,6 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
-# This is a template (starting point) for creating documentation for individual APIs
-
 
 def organization_suggestion_tasks_doc_template_values(url_root):
     """
@@ -49,10 +47,6 @@ def organization_suggestion_tasks_doc_template_values(url_root):
             'code':         'VALID_VOTER_ID_MISSING',
             'description':  'Cannot proceed. A valid voter_id was not found.',
         },
-        # {
-        #     'code':         '',
-        #     'description':  '',
-        # },
     ]
 
     try_now_link_variables_dict = {
