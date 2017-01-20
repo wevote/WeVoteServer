@@ -531,7 +531,7 @@ def positive_value_exists(value):
     :return: bool
     """
     try:
-        if value in [None, '', 'None', False, 'False', 'false']:
+        if value in [None, '', 'None', False, 'False', 'false', '0']:
             return False
         if sys.version_info > (3, 0):
             # Python 3 code in this block
