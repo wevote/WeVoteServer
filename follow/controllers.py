@@ -119,18 +119,18 @@ def organization_suggestion_tasks_for_api(voter_device_id,
     """
     success = False
     status = ''
-    organization_suggestion_task_completed = False
+    organization_suggestion_task_saved = False
     organization_suggestion_list = []
 
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         error_results = {
             'status':                               results['status'],
-            'success':                              False,
+            'success':                              success,
             'voter_device_id':                      voter_device_id,
             'kind_of_suggestion_task':              kind_of_suggestion_task,
             'kind_of_follow_task':                  kind_of_follow_task,
-            'organization_suggestion_tasks_found':  organization_suggestion_task_completed,
+            'organization_suggestion_task_saved':   organization_suggestion_task_saved,
             'organization_suggestion_list':         organization_suggestion_list,
         }
         return error_results
@@ -141,12 +141,12 @@ def organization_suggestion_tasks_for_api(voter_device_id,
     if not positive_value_exists(voter_id):
         error_results = {
             'status':                               "VOTER_NOT_FOUND_FROM_VOTER_DEVICE_ID",
-            'success':                              False,
+            'success':                              success,
             'voter_device_id':                      voter_device_id,
             'kind_of_suggestion_task':              kind_of_suggestion_task,
             'kind_of_follow_task':                  kind_of_follow_task,
-            'organization_suggestion_tasks_found':  organization_suggestion_task_completed,
-            'organization_suggestion_list':        organization_suggestion_list,
+            'organization_suggestion_task_saved':   organization_suggestion_task_saved,
+            'organization_suggestion_list':         organization_suggestion_list,
         }
         return error_results
     voter = voter_results['voter']
@@ -185,8 +185,9 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                         }
                         success = twitter_suggested_organization_updated_results['success']
                         organization_suggestion_list.append(one_suggested_organization)
+                status += ' ' + twitter_organization_retrieve_results['status']
 
-        organization_suggestion_task_saved = True if len(organization_suggestion_list) else False
+            organization_suggestion_task_saved = True if len(organization_suggestion_list) else False
         results = {
             'success':                              success,
             'status':                               status,
