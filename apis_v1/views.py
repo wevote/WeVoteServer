@@ -497,13 +497,14 @@ def organization_suggestion_tasks_view(request):
                                                     kind_of_suggestion_task=kind_of_suggestion_task,
                                                     kind_of_follow_task=kind_of_follow_task)
     json_data = {
-        'status':                               results['status'],
-        'success':                              results['success'],
-        'voter_device_id':                      voter_device_id,
-        'kind_of_suggestion_task':              kind_of_suggestion_task,
-        'kind_of_follow_task':                  kind_of_follow_task,
-        'organization_suggestion_task_saved':   results['organization_suggestion_task_saved'],
-        'organization_suggestion_list':         results['organization_suggestion_list'],
+        'status':                                   results['status'],
+        'success':                                  results['success'],
+        'voter_device_id':                          voter_device_id,
+        'kind_of_suggestion_task':                  kind_of_suggestion_task,
+        'kind_of_follow_task':                      kind_of_follow_task,
+        'organization_suggestion_task_saved':       results['organization_suggestion_task_saved'],
+        'organization_suggestion_list':             results['organization_suggestion_list'],
+        'organization_suggestion_followed_list':    results['organization_suggestion_followed_list']
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

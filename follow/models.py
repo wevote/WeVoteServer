@@ -45,6 +45,9 @@ class FollowOrganization(models.Model):
     # Is this person following or ignoring this organization?
     following_status = models.CharField(max_length=15, choices=FOLLOWING_CHOICES, default=FOLLOWING)
 
+    # Is this person automatically following the suggested twitter organization?
+    auto_followed_from_twitter_suggestion = models.BooleanField(verbose_name='', default=False)
+
     # The date the voter followed or stopped following this organization
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
@@ -101,6 +104,80 @@ class FollowOrganizationManager(models.Model):
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, following_status)
+
+    def toogle_twitter_following_organization(self, voter_id, organization_we_vote_id,
+                                              auto_followed_from_twitter_suggestion=False):
+        """
+        if user is not following this organization but following on twitter then automatically follow this
+        suggested organization else if user is following then don't give suggestion for this organization
+        :param voter_id:
+        :param organization_we_vote_id:
+        :param auto_followed_from_twitter_suggestion:
+        :return:
+        """
+        follow_organization_manager = FollowOrganizationManager()
+        results = follow_organization_manager.retrieve_follow_organization(0, voter_id, 0, organization_we_vote_id)
+        status = ''
+        follow_suggested_organization_on_stage_found = False
+        follow_suggested_organization_on_stage = FollowOrganization()
+        if results['follow_organization_found']:
+            follow_suggested_organization_on_stage = results['follow_organization']
+            if follow_suggested_organization_on_stage.following_status == FOLLOWING:
+            # Update this follow_organization entry with new values - we do not delete because we might be able to use
+                try:
+                    follow_suggested_organization_on_stage.auto_followed_from_twitter_suggestion = \
+                        auto_followed_from_twitter_suggestion
+                    # We don't need to update here because set set auto_now=True in the field
+                    # follow_organization_on_stage.date_last_changed =
+                    follow_suggested_organization_on_stage.save()
+                    follow_suggested_organization_on_stage_found = True
+                    status = 'UPDATE auto_followed_from_twitter_suggestion: %s' %auto_followed_from_twitter_suggestion
+                except Exception as e:
+                    status = 'FAILED_TO_UPDATE auto_followed_from_twitter_suggestion: %s' %auto_followed_from_twitter_suggestion
+                    handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
+        elif results['MultipleObjectsReturned']:
+            logger.warn("follow_organization: delete all but one and take it over?")
+            status = 'TOGGLE_TWITTER_FOLLOWING MultipleObjectsReturned auto_followed_from_twitter_suggestion: %s'\
+                     %auto_followed_from_twitter_suggestion
+        elif results['DoesNotExist']:
+            try:
+                # Create new follow_organization entry
+                # First make sure that organization_id is for a valid organization
+                organization_manager = OrganizationManager()
+                results = organization_manager.retrieve_organization(0, organization_we_vote_id)
+                organization_id = results['organization_id']
+                if results['organization_found']:
+                    following_status = FOLLOWING
+                    organization = results['organization']
+                    follow_suggested_organization_on_stage = FollowOrganization(
+                        voter_id=voter_id,
+                        organization_id=organization_id,
+                        organization_we_vote_id=organization.we_vote_id,
+                        following_status=following_status,
+                        auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion,
+                        # We don't need to update here because set set auto_now=True in the field
+                        # date_last_changed =
+                    )
+                    follow_suggested_organization_on_stage.save()
+                    follow_suggested_organization_on_stage_found = True
+                    status = 'CREATE auto_followed_from_twitter_suggestion: %s' %auto_followed_from_twitter_suggestion
+                else:
+                    status = 'ORGANIZATION_NOT_FOUND_ON_CREATE auto_followed_from_twitter_suggestion: %s' \
+                             %auto_followed_from_twitter_suggestion
+            except Exception as e:
+                status = 'FAILED_TO_UPDATE auto_followed_from_twitter_suggestion: %s' \
+                         %auto_followed_from_twitter_suggestion
+                handle_record_not_saved_exception (e, logger=logger, exception_message_optional=status)
+        else:
+            status = results['status']
+
+        results = {
+            'success': True if follow_suggested_organization_on_stage_found else False,
+            'status': status,
+            'follow_suggested_organization_on_stage_found': follow_suggested_organization_on_stage_found,
+            'follow_suggested_organization_on_stage': follow_suggested_organization_on_stage,
+        }
+        return results
 
     def toggle_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id, following_status):
         # Does a follow_organization entry exist from this voter already exist?
@@ -281,7 +358,6 @@ class FollowOrganizationManager(models.Model):
             suggested_organization_to_follow, created = SuggestedOrganizationToFollow.objects.update_or_create(
                 viewer_voter_we_vote_id=viewer_voter_we_vote_id,
                 organization_we_vote_id=organization_we_vote_id,
-                from_twitter=from_twitter,
                 defaults={
                     'viewer_voter_we_vote_id':  viewer_voter_we_vote_id,
                     'organization_we_vote_id':  organization_we_vote_id,
@@ -301,6 +377,45 @@ class FollowOrganizationManager(models.Model):
             'status':                                   status,
             'suggested_organization_to_follow_saved':   suggested_organization_to_follow_saved,
             'suggested_organization_to_follow':         suggested_organization_to_follow,
+        }
+        return results
+
+    def retrieve_suggested_organization_to_follow_list(self, viewer_voter_we_vote_id, from_twitter=False):
+        """
+        Retrieving suggested organizations who i follow from SuggestedOrganizationToFollow table.
+        :param viewer_voter_we_vote_id:
+        :param from_twitter:
+        :return:
+        """
+        suggested_organization_to_follow_list = []
+        try:
+            suggested_organization_to_follow_queryset = SuggestedOrganizationToFollow.objects.all()
+            suggested_organization_to_follow_list = suggested_organization_to_follow_queryset.filter(
+                viewer_voter_we_vote_id__iexact=viewer_voter_we_vote_id,
+                from_twitter=from_twitter)
+            if len(suggested_organization_to_follow_list):
+                success = True
+                suggested_organization_to_follow_list_found = True
+                status = "SUGGESTED_ORGANIZATION_TO_FOLLOW_RETRIEVED"
+            else:
+                success = True
+                suggested_organization_to_follow_list_found = False
+                status = "NO_SUGGESTED_ORGANIZATION_TO_FOLLOW_LIST_RETRIEVED"
+        except SuggestedOrganizationToFollow.DoesNotExist:
+            # No data found. Try again below
+            success = True
+            suggested_organization_to_follow_list_found = False
+            status = 'NO_SUGGESTED_ORGANIZATION_TO_FOLLOW_LIST_RETRIEVED_DoesNotExist'
+        except Exception as e:
+            success = False
+            suggested_organization_to_follow_list_found = False
+            status = "SUGGESTED_ORGANIZATION_TO_FOLLOW_LIST_NOT_RETRIEVED"
+
+        results = {
+            'success':                                      success,
+            'status':                                       status,
+            'suggested_organization_to_follow_list_found':  suggested_organization_to_follow_list_found,
+            'suggested_organization_to_follow_list':        suggested_organization_to_follow_list,
         }
         return results
 
@@ -429,14 +544,14 @@ class SuggestedOrganizationToFollow(models.Model):
         verbose_name="voter we vote id person 1", max_length=255, null=True, blank=True, unique=False)
     organization_we_vote_id = models.CharField(
         verbose_name="organization we vote id person 2", max_length=255, null=True, blank=True, unique=False)
+    # organization_we_vote_id_making_suggestion = models.CharField(
+    #    verbose_name="organization we vote id making decision", max_length=255, null=True, blank=True, unique=False)
     from_twitter = models.BooleanField(verbose_name="from twitter", default=False)
     date_last_changed = models.DateTimeField(verbose_name='date last changed', null=True, auto_now=True)
 
     def fetch_other_organization_we_vote_id(self, one_we_vote_id):
         if one_we_vote_id == self.viewer_voter_we_vote_id:
             return self.viewee_voter_we_vote_id
-        elif one_we_vote_id == self.viewee_voter_we_vote_id:
-            return self.viewer_voter_we_vote_id
         else:
             # If the we_vote_id passed in wasn't found, don't return another we_vote_id
             return ""
