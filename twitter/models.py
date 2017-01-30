@@ -432,7 +432,7 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def search_twitter_ids_i_follow(self, twitter_id_of_me, twitter_access_token, twitter_access_secret):
+    def retrieve_twitter_ids_i_follow_from_twitter(self, twitter_id_of_me, twitter_access_token, twitter_access_secret):
         """
         We use this routine to retrieve twitter ids who i follow and updating the next cursor state in
         TwitterCursorState table
@@ -555,7 +555,7 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def create_twitter_who_i_follow(self, twitter_id_of_me, twitter_ids_i_follow, organization_found=False):
+    def create_twitter_who_i_follow_entries(self, twitter_id_of_me, twitter_ids_i_follow, organization_found=False):
         """
         We use this subroutine to create or update TwitterWhoIFollow table with twitter ids i follow.
         :param organization_found:

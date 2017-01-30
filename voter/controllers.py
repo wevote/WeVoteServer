@@ -1125,6 +1125,68 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
         else:
             status = 'VOTER_FOUND'
 
+        if voter.is_signed_in() and not positive_value_exists(voter.linked_organization_we_vote_id):
+            existing_organization_for_this_voter_found = False
+            create_twitter_link_to_organization = False
+            organization_twitter_handle = ""
+            twitter_link_to_voter_twitter_id = 0
+
+            # Is this voter associated with a Twitter account?
+            # If so, check to see if an organization entry exists for this voter.
+            twitter_user_manager = TwitterUserManager()
+            twitter_link_results = twitter_user_manager.retrieve_twitter_link_to_voter(0, voter.we_vote_id)
+            if twitter_link_results['twitter_link_to_voter_found']:
+                twitter_link_to_voter = twitter_link_results['twitter_link_to_voter']
+                if positive_value_exists(twitter_link_to_voter.twitter_id):
+                    twitter_link_to_voter_twitter_id = twitter_link_to_voter.twitter_id
+                    # Since we know this voter has authenticated for a Twitter account,
+                    #  check to see if there is an organization associated with this Twitter account
+                    # If an existing TwitterLinkToOrganization is found, link this org to this voter
+                    twitter_org_link_results = \
+                        twitter_user_manager.retrieve_twitter_link_to_organization_from_twitter_user_id(
+                            twitter_link_to_voter.twitter_id)
+                    if twitter_org_link_results['twitter_link_to_organization_found']:
+                        twitter_link_to_organization = twitter_org_link_results['twitter_link_to_organization']
+                        if positive_value_exists(twitter_link_to_organization.organization_we_vote_id):
+                            try:
+                                voter.linked_organization_we_vote_id = \
+                                    twitter_link_to_organization.organization_we_vote_id
+                                voter.save()
+                                existing_organization_for_this_voter_found = True
+
+                            except Exception as e:
+                                status += "UNABLE_TO_SAVE_LINKED_ORGANIZATION_FROM_TWITTER_LINK_TO_VOTER "
+                    else:
+                        # If an existing TwitterLinkToOrganization was not found,
+                        # create the organization below, and then create TwitterLinkToOrganization
+                        organization_twitter_handle = twitter_link_to_voter.fetch_twitter_handle_locally_or_remotely()
+                        create_twitter_link_to_organization = True
+
+            if not existing_organization_for_this_voter_found:
+                # If we are here, we need to create an organization for this voter
+                organization_name = voter.get_full_name()
+                organization_website = ""
+                organization_email = ""
+                organization_facebook = ""
+                organization_image = voter.voter_photo_url()
+                organization_manager = OrganizationManager()
+                create_results = organization_manager.create_organization(
+                    organization_name, organization_website, organization_twitter_handle,
+                    organization_email, organization_facebook, organization_image)
+                if create_results['organization_created']:
+                    # Add value to twitter_owner_voter.linked_organization_we_vote_id when done.
+                    organization = create_results['organization']
+                    try:
+                        voter.linked_organization_we_vote_id = organization.we_vote_id
+                        voter.save()
+
+                        if create_twitter_link_to_organization:
+                            twitter_user_manager.create_twitter_link_to_organization(twitter_link_to_voter_twitter_id,
+                                                                                     organization.we_vote_id)
+
+                    except Exception as e:
+                        status += "UNABLE_TO_CREATE_NEW_ORGANIZATION_TO_VOTER_FROM_RETRIEVE_VOTER "
+
         json_data = {
             'status':                           status,
             'success':                          True,

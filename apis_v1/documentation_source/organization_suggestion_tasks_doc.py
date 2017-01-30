@@ -5,7 +5,7 @@
 
 def organization_suggestion_tasks_doc_template_values(url_root):
     """
-    Show documentation about organizationSuggestionList
+    Show documentation about organizationSuggestionTask
     """
     required_query_parameter_list = [
         {
