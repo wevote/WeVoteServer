@@ -111,7 +111,7 @@ def move_organization_followers_to_another_organization(from_organization_id, fr
 
 def organization_suggestion_tasks_for_api(voter_device_id,
                                           kind_of_suggestion_task=UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW,
-                                          kind_of_follow_task=''):  # organizationSuggestionList
+                                          kind_of_follow_task=''):  # organizationSuggestionTasks
     """
     organizationSuggestionTasks API Endpoint
     :param kind_of_suggestion_task:
@@ -182,7 +182,7 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                 success = twitter_organization_retrieve_results['success']
                 if twitter_organization_retrieve_results['twitter_link_to_organization_found']:
                     # organization_found = True
-                    # twitter_who_i_follow_update_results = twitter_user_manager.create_twitter_who_i_follow(
+                    # twitter_who_i_follow_update_results = twitter_user_manager.create_twitter_who_i_follow_entries(
                     #    twitter_id_of_me, twitter_who_i_follow_entry.twitter_id_i_follow, organization_found)
                     # status = ' ' + twitter_who_i_follow_update_results['status']
                     twitter_link_to_organization = twitter_organization_retrieve_results['twitter_link_to_organization']
@@ -251,7 +251,8 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                         success = twitter_organization_retrieve_results['success']
                         if twitter_organization_retrieve_results['twitter_link_to_organization_found']:
                             # organization_found = True
-                            # twitter_who_i_follow_update_results = twitter_user_manager.create_twitter_who_i_follow(
+                            # twitter_who_i_follow_update_results = \
+                            #    twitter_user_manager.create_twitter_who_i_follow_entries(
                             #    twitter_id_of_me, twitter_who_i_follow_entry.twitter_id_i_follow, organization_found)
                             # status = ' ' + twitter_who_i_follow_update_results['status']
                             twitter_link_to_organization = twitter_organization_retrieve_results[
