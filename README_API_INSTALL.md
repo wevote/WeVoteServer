@@ -93,7 +93,35 @@ Now, whenever you start a new project, you can create a virtual environment for 
 Now, create a virtual environment within the project directory by typing:
 
     virtualenv newenv
-    
+
+## Installing Python on Windows
+Install the Python 3.4 from package: https://www.python.org/downloads/ This allows you to run python3 and pip3.
+Note: Installing Python 3.6 ran into some issues with usaddress package from requirements.txt file.
+
+    $ pip3 install --user virtualenv
+    $ vim ~/.bash_profile
+
+Add the following to .bash_profile, save and quit:
+
+    alias virtualenv3='<Python Installation Directory, default is C:\Python3.4>/Scripts/virtualenv.exe'
+
+Update the current Terminal window to use the alias you just saved:
+
+    $ source ~/.bash_profile
+
+Create a place for the virtual environment to live on your hard drive. We recommend installing it
+outside of "PythonProjects" folder:
+
+    $ mkdir /Users/<YOUR NAME HERE>/PythonEnvironments/
+    $ cd /Users/<YOUR NAME HERE>/PythonEnvironments/
+    $ virtualenv3 WeVoteServer3.5
+
+Now activate this new virtual environment for WeVoteServer:
+
+    $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
+    $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.5/bin/activate
+    $ export PATH="<Postgres Installation Path:default is C:\Program Files\Postgres>/<version-number>/bin:$PATH"
+
 ## Installing Postgres
     
 Install the latest version of Postgres for your machine (see instructions further down on this page as well):
@@ -145,10 +173,24 @@ Run these commands:
 
 ### METHOD 2 (Windows)
 
-Install Postgres:
+Install Postgres and pgAdmin 4 from https://www.postgresql.org/download/windows/. Choose the first option, Interactive installer by EnterpriseDB
 
-    $ sudo port install postgresql94
-    $ sudo port install postgresql94-server
+After installing Postgres, edit requirements.txt file under WeVoteServer directory with following changes:
+psycopg2==2.6 change to psycopg2==2.6.2
+py3dns==3.1.0 change to py3dns==3.1.1.a0
+
+Save the changes and execute below commands:
+    $ pip install -r requirements.txt
+    $ python manage.py runserver
+
+## Setup - pgAdmin 4
+In Windows, pgAdmin 4 is installed along with Postgres. From the Start Menu, search for pgAdmin 4 application and click to open it.
+
+In pgadmin add a server - WeVoteServer
+
+PGAdmin 4 issues:
+pgAdmin 4 will ask for password when you open it post installation or when you try to add a new server. Windows installation of Postgres does not ask to setup user "postgres". A workaround for this issue is mentioned on this link: http://serverfault.com/questions/110154/whats-the-default-superuser-username-password-for-postgres-after-a-new-install
+Editing the file file <PostgreSQL PATH>\data\pg_hba.conf temporarily is recommended.
 
 ### METHOD 3 (linux Ubuntu)
 
@@ -219,8 +261,12 @@ These errors won't prevent geoip from working.
     $ make check
     $ make install
     $ cd ..
-    
-    
+
+### Windows installation
+In Windows, on trying to execute bootstrap command, you may get error such as "autoreconf not found"
+You will need to install a Unix/POSIX environment on Windows like Cygwin, Msys or Mingw. Mingw does not have POSIX compatibility support for sockets.
+Note: The compilation of geo-ip C library did not go through for me. Ran into POSIX socket related compilation issues when I tried to use mingw library.
+
     
 #### “libGeoIP.so.1: cannot open..."
 On Amazon Linux (Fedora), if you get a “libGeoIP.so.1: cannot open shared object No such file or directory” error 
