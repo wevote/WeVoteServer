@@ -168,7 +168,10 @@ def organization_suggestion_tasks_for_api(voter_device_id,
     # Not getting twitter_id during first Calling from webapp due to which not geting suggestions from twitter who
     # i follow however successfully retrieved in second call
     if kind_of_suggestion_task == UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW:
-        twitter_who_i_follow_list_results = twitter_user_manager.retrieve_twitter_who_i_follow_list (twitter_id_of_me)
+        # If here, we want to
+        # A) get all of the twitter_ids of all twitter accounts I follow (on Twitter)
+        # B) then check to see if any of those twitter accounts have voter guides on We Vote
+        twitter_who_i_follow_list_results = twitter_user_manager.retrieve_twitter_who_i_follow_list(twitter_id_of_me)
         status += twitter_who_i_follow_list_results['status']
         success = twitter_who_i_follow_list_results['success']
         if twitter_who_i_follow_list_results['twitter_who_i_follow_list_found']:
@@ -181,10 +184,6 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                 status += ' ' + twitter_organization_retrieve_results['status']
                 success = twitter_organization_retrieve_results['success']
                 if twitter_organization_retrieve_results['twitter_link_to_organization_found']:
-                    # organization_found = True
-                    # twitter_who_i_follow_update_results = twitter_user_manager.create_twitter_who_i_follow_entries(
-                    #    twitter_id_of_me, twitter_who_i_follow_entry.twitter_id_i_follow, organization_found)
-                    # status = ' ' + twitter_who_i_follow_update_results['status']
                     twitter_link_to_organization = twitter_organization_retrieve_results['twitter_link_to_organization']
                     organization_we_vote_id = twitter_link_to_organization.organization_we_vote_id
                     twitter_suggested_organization_updated_results = follow_organization_manager.\
@@ -275,8 +274,10 @@ def organization_suggestion_tasks_for_api(voter_device_id,
     # Not getting twitter_id during first Calling from webapp due to which not geting suggestions from twitter who
     # i follow however successfully retrieved in second call
     if kind_of_follow_task == FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW:
+        # If here, we want to retrieve from the local database all of the organizations that we are following on Twitter
+        auto_followed_from_twitter_suggestion = True
         suggested_organization_to_follow_list_results = follow_organization_manager. \
-            retrieve_suggested_organization_to_follow_list(voter_we_vote_id, from_twitter=True)
+            retrieve_suggested_organization_to_follow_list(voter_we_vote_id, auto_followed_from_twitter_suggestion)
         status += suggested_organization_to_follow_list_results['status']
         success = suggested_organization_to_follow_list_results['success']
         if suggested_organization_to_follow_list_results['suggested_organization_to_follow_list_found']:
@@ -284,18 +285,17 @@ def organization_suggestion_tasks_for_api(voter_device_id,
                 suggested_organization_to_follow_list_results['suggested_organization_to_follow_list']
             for suggested_organization_to_follow_entry in suggested_organization_to_follow_list:
                 organization_we_vote_id = suggested_organization_to_follow_entry.organization_we_vote_id
-                toogle_twitter_following_organization_results = follow_organization_manager.\
-                    toogle_twitter_following_organization(voter_id, organization_we_vote_id,
-                                                          auto_followed_from_twitter_suggestion=True)
-                status += ' ' + toogle_twitter_following_organization_results['status']
-                success = toogle_twitter_following_organization_results['success']
-                if toogle_twitter_following_organization_results['follow_suggested_organization_on_stage_found']:
-                    follow_suggested_organization_on_stage = toogle_twitter_following_organization_results[
-                        'follow_suggested_organization_on_stage']
+                toggle_on_results = follow_organization_manager.\
+                    toggle_on_voter_following_organization(voter_id, 0, organization_we_vote_id,
+                                                           auto_followed_from_twitter_suggestion)
+                status += ' ' + toggle_on_results['status']
+                success = toggle_on_results['success']
+                if toggle_on_results['follow_organization_found']:
+                    follow_suggested_organization = toggle_on_results['follow_organization']
                     one_suggested_organization = {
-                        "organization_we_vote_id": follow_suggested_organization_on_stage.organization_we_vote_id,
+                        "organization_we_vote_id": follow_suggested_organization.organization_we_vote_id,
                     }
-                    organization_suggestion_followed_list.append (one_suggested_organization)
+                    organization_suggestion_followed_list.append(one_suggested_organization)
     '''
     elif kind_of_follow_task == FOLLOW_SUGGESTIONS_FROM_FRIENDS:
         suggested_organization_to_follow_list_results = follow_organization_manager. \

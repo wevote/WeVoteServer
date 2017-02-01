@@ -995,6 +995,7 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
                     # TODO DALE Remove all remaining voter.twitter_id values
                     pass
 
+    # Now that voter is signed in, reach out to twitter to get up to 5000 ids of other twitter users
     twitter_ids_i_follow_results = twitter_user_manager.retrieve_twitter_ids_i_follow_from_twitter(
         twitter_auth_response.twitter_id, twitter_auth_response.twitter_access_token,
         twitter_auth_response.twitter_access_secret)

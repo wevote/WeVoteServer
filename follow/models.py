@@ -87,11 +87,12 @@ class FollowOrganizationManager(models.Model):
     def __unicode__(self):
         return "FollowOrganizationManager"
 
-    def toggle_on_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id):
+    def toggle_on_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id,
+                                               auto_followed_from_twitter_suggestion=False):
         following_status = FOLLOWING
         follow_organization_manager = FollowOrganizationManager()
         return follow_organization_manager.toggle_voter_following_organization(
-            voter_id, organization_id, organization_we_vote_id, following_status)
+            voter_id, organization_id, organization_we_vote_id, following_status, auto_followed_from_twitter_suggestion)
 
     def toggle_off_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id):
         following_status = STOP_FOLLOWING
@@ -105,81 +106,8 @@ class FollowOrganizationManager(models.Model):
         return follow_organization_manager.toggle_voter_following_organization(
             voter_id, organization_id, organization_we_vote_id, following_status)
 
-    def toogle_twitter_following_organization(self, voter_id, organization_we_vote_id,
-                                              auto_followed_from_twitter_suggestion=False):
-        """
-        if user is not following this organization but following on twitter then automatically follow this
-        suggested organization else if user is following then don't give suggestion for this organization
-        :param voter_id:
-        :param organization_we_vote_id:
-        :param auto_followed_from_twitter_suggestion:
-        :return:
-        """
-        follow_organization_manager = FollowOrganizationManager()
-        results = follow_organization_manager.retrieve_follow_organization(0, voter_id, 0, organization_we_vote_id)
-        status = ''
-        follow_suggested_organization_on_stage_found = False
-        follow_suggested_organization_on_stage = FollowOrganization()
-        if results['follow_organization_found']:
-            follow_suggested_organization_on_stage = results['follow_organization']
-            if follow_suggested_organization_on_stage.following_status == FOLLOWING:
-            # Update this follow_organization entry with new values - we do not delete because we might be able to use
-                try:
-                    follow_suggested_organization_on_stage.auto_followed_from_twitter_suggestion = \
-                        auto_followed_from_twitter_suggestion
-                    # We don't need to update here because set set auto_now=True in the field
-                    # follow_organization_on_stage.date_last_changed =
-                    follow_suggested_organization_on_stage.save()
-                    follow_suggested_organization_on_stage_found = True
-                    status = 'UPDATE auto_followed_from_twitter_suggestion: %s' %auto_followed_from_twitter_suggestion
-                except Exception as e:
-                    status = 'FAILED_TO_UPDATE auto_followed_from_twitter_suggestion: %s' %auto_followed_from_twitter_suggestion
-                    handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
-        elif results['MultipleObjectsReturned']:
-            logger.warn("follow_organization: delete all but one and take it over?")
-            status = 'TOGGLE_TWITTER_FOLLOWING MultipleObjectsReturned auto_followed_from_twitter_suggestion: %s'\
-                     %auto_followed_from_twitter_suggestion
-        elif results['DoesNotExist']:
-            try:
-                # Create new follow_organization entry
-                # First make sure that organization_id is for a valid organization
-                organization_manager = OrganizationManager()
-                results = organization_manager.retrieve_organization(0, organization_we_vote_id)
-                organization_id = results['organization_id']
-                if results['organization_found']:
-                    following_status = FOLLOWING
-                    organization = results['organization']
-                    follow_suggested_organization_on_stage = FollowOrganization(
-                        voter_id=voter_id,
-                        organization_id=organization_id,
-                        organization_we_vote_id=organization.we_vote_id,
-                        following_status=following_status,
-                        auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion,
-                        # We don't need to update here because set set auto_now=True in the field
-                        # date_last_changed =
-                    )
-                    follow_suggested_organization_on_stage.save()
-                    follow_suggested_organization_on_stage_found = True
-                    status = 'CREATE auto_followed_from_twitter_suggestion: %s' %auto_followed_from_twitter_suggestion
-                else:
-                    status = 'ORGANIZATION_NOT_FOUND_ON_CREATE auto_followed_from_twitter_suggestion: %s' \
-                             %auto_followed_from_twitter_suggestion
-            except Exception as e:
-                status = 'FAILED_TO_UPDATE auto_followed_from_twitter_suggestion: %s' \
-                         %auto_followed_from_twitter_suggestion
-                handle_record_not_saved_exception (e, logger=logger, exception_message_optional=status)
-        else:
-            status = results['status']
-
-        results = {
-            'success': True if follow_suggested_organization_on_stage_found else False,
-            'status': status,
-            'follow_suggested_organization_on_stage_found': follow_suggested_organization_on_stage_found,
-            'follow_suggested_organization_on_stage': follow_suggested_organization_on_stage,
-        }
-        return results
-
-    def toggle_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id, following_status):
+    def toggle_voter_following_organization(self, voter_id, organization_id, organization_we_vote_id, following_status,
+                                            auto_followed_from_twitter_suggestion=False):
         # Does a follow_organization entry exist from this voter already exist?
         follow_organization_manager = FollowOrganizationManager()
         results = follow_organization_manager.retrieve_follow_organization(0, voter_id,
@@ -193,7 +121,17 @@ class FollowOrganizationManager(models.Model):
 
             # Update this follow_organization entry with new values - we do not delete because we might be able to use
             try:
-                follow_organization_on_stage.following_status = following_status
+                if auto_followed_from_twitter_suggestion:
+                    # If here we are auto-following because the voter follows this organization on Twitter
+                    if follow_organization_on_stage.following_status == "STOP_FOLLOWING" or \
+                                    follow_organization_on_stage.following_status == "FOLLOW_IGNORE":
+                        # Do not follow again
+                        pass
+                    else:
+                        follow_organization_on_stage.following_status = following_status
+                else:
+                    follow_organization_on_stage.following_status = following_status
+                    follow_organization_on_stage.auto_followed_from_twitter_suggestion = False
                 # We don't need to update here because set set auto_now=True in the field
                 # follow_organization_on_stage.date_last_changed =
                 follow_organization_on_stage.save()
@@ -222,9 +160,9 @@ class FollowOrganizationManager(models.Model):
                         organization_id=organization.id,
                         organization_we_vote_id=organization.we_vote_id,
                         following_status=following_status,
-                        # We don't need to update here because set set auto_now=True in the field
-                        # date_last_changed =
                     )
+                    if auto_followed_from_twitter_suggestion:
+                        follow_organization_on_stage.auto_followed_from_twitter_suggestion = True
                     follow_organization_on_stage.save()
                     follow_organization_on_stage_id = follow_organization_on_stage.id
                     follow_organization_on_stage_found = True
