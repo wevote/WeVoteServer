@@ -6,6 +6,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from email_outbound.models import SEND_STATUS_CHOICES, TO_BE_PROCESSED
 from wevote_functions.functions import generate_random_string, positive_value_exists
+import facebook
 
 FRIEND_INVITATION_FACEBOOK_TEMPLATE = 'FRIEND_INVITATION_FACEBOOK_TEMPLATE'
 GENERIC_EMAIL_FACEBOOK_TEMPLATE = 'GENERIC_EMAIL_FACEBOOK_TEMPLATE'
@@ -81,6 +82,44 @@ class FacebookMessageOutboundDescription(models.Model):
                                                  null=True, blank=True)
     recipient_fb_username = models.CharField(unique=True, max_length=20, validators=[alphanumeric], null=True)
     send_status = models.CharField(max_length=50, choices=SEND_STATUS_CHOICES, default=TO_BE_PROCESSED)
+
+
+class FacebookUser(models.Model):
+    """
+    My facebook friends details, from the perspective of facebook id of me
+    """
+    facebook_user_id = models.BigIntegerField(verbose_name="facebook id of user", null=False, unique=False)
+    facebook_user_name = models.CharField(
+        verbose_name="User name from Facebook", max_length=255, null=True, blank=True, unique=False)
+    facebook_user_first_name = models.CharField(
+        verbose_name="User's first_name from Facebook", max_length=255, null=True, blank=True, unique=False)
+    facebook_user_middle_name = models.CharField(
+        verbose_name="User's middle_name from Facebook", max_length=255, null=True, blank=True, unique=False)
+    facebook_user_location_id = models.BigIntegerField(
+        verbose_name="location id of Facebook user", null=True, unique=False)
+    facebook_user_location_name = models.CharField(
+        verbose_name="User's location name from Facebook", max_length=255, null=True, blank=True, unique=False)
+    facebook_user_gender = models.CharField(
+        verbose_name="User's gender from Facebook", max_length=255, null=True, blank=True, unique=False)
+    facebook_user_birthday = models.CharField(
+        verbose_name="User's birthday from Facebook", max_length=255, null=True, blank=True, unique=False)
+    facebook_user_last_name = models.CharField(
+        verbose_name="User's last_name from Facebook", max_length=255, null=True, blank=True, unique=False)
+    facebook_user_cover_source = models.URLField(verbose_name='url of cover image from facebook', blank=True, null=True)
+    facebook_user_about = models.CharField(
+        verbose_name="User's About from Facebook", max_length=255, null=True, blank=True, unique=False)
+    facebook_user_is_verified = models.BooleanField(
+        verbose_name="User is verfired from Facebook", default=False)
+    facebook_user_friend_total_count = models.BigIntegerField(
+        verbose_name="total count of friends from facebook", null=True, unique=False)
+
+
+class FacebookFriendsOfMe(models.Model):
+    """
+    My facebook friends ids, from the perspective of facebook id of me
+    """
+    facebook_id_of_me = models.BigIntegerField(verbose_name="facebook id of viewer", null=False, unique=False)
+    facebook_id_of_my_friend = models.BigIntegerField(verbose_name="facebook id of my friend", null=False, unique=False)
 
 
 class FacebookManager(models.Model):
@@ -166,6 +205,82 @@ class FacebookManager(models.Model):
             'facebook_auth_response_created': created,
             'facebook_auth_response': facebook_auth_response,
         }
+        return results
+
+    def create_or_update_facebook_friends_of_me(self, facebook_id_of_me, facebook_id_of_my_friend):
+        """
+        We use this subroutine to create or update FacebookFriendsOfMe table with my friends facebook id.
+        :param facebook_id_of_me:
+        :param facebook_ids_of_my_friend:
+        :return:
+        """
+        facebook_friends_of_me = FacebookFriendsOfMe()
+        try:
+            facebook_friends_of_me, created = FacebookFriendsOfMe.objects.update_or_create(
+                facebook_id_of_me=facebook_id_of_me,
+                facebook_id_of_my_friend=facebook_id_of_my_friend,
+                defaults={
+                    'facebook_id_of_me':        facebook_id_of_me,
+                    'facebook_id_of_my_friend': facebook_id_of_my_friend
+                }
+            )
+            facebook_friends_of_me_saved = True
+            success = True
+            status = "FACEBOOK_FRIENDS_OF_ME_CREATED"
+        except Exception:
+            facebook_friends_of_me_saved = False
+            facebook_friends_of_me = FacebookFriendsOfMe()
+            success = False
+            status = "FACEBOOK_FRIENDS_OF_ME_NOT_CREATED"
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'facebook_friends_of_me_saved': facebook_friends_of_me_saved,
+            'facebook_friends_of_me':       facebook_friends_of_me,
+            }
+        return results
+
+    def create_or_update_facebook_user(self, facebook_user_entry):
+        """
+        We use this subroutine to create or update FacebookUser table with my friends details.
+        :param facebook_users:
+        :return:
+        """
+        facebook_user = FacebookUser()
+        try:
+            # for facebook_user_entry in facebook_users:
+            facebook_user, created = FacebookUser.objects.update_or_create(
+                facebook_user_id=facebook_user_entry['facebook_user_id'],
+                defaults={
+                    'facebook_user_id':                 facebook_user_entry['facebook_user_id'],
+                    'facebook_user_name':               facebook_user_entry['facebook_user_name'],
+                    'facebook_user_first_name':         facebook_user_entry['facebook_user_first_name'],
+                    'facebook_user_middle_name':        facebook_user_entry['facebook_user_middle_name'],
+                    'facebook_user_last_name':          facebook_user_entry['facebook_user_last_name'],
+                    'facebook_user_location_id':        facebook_user_entry['facebook_user_location_id'],
+                    'facebook_user_location_name':      facebook_user_entry['facebook_user_location_name'],
+                    'facebook_user_gender':             facebook_user_entry['facebook_user_gender'],
+                    'facebook_user_birthday':           facebook_user_entry['facebook_user_birthday'],
+                    'facebook_user_cover_source':       facebook_user_entry['facebook_user_cover_source'],
+                    'facebook_user_about':              facebook_user_entry['facebook_user_about'],
+                    'facebook_user_is_verified':        facebook_user_entry['facebook_user_is_verified'],
+                    'facebook_user_friend_total_count': facebook_user_entry['facebook_user_friend_total_count'],
+                }
+            )
+            facebook_user_saved = True
+            success = True
+            status = "FACEBOOK_USERS_CREATED"
+        except Exception as e:
+            facebook_user_saved = False
+            facebook_user = FacebookUser()
+            success = False
+            status = "FACEBOOK_USERS_NOT_CREATED"
+        results = {
+            'success':              success,
+            'status':               status,
+            'facebook_user_saved':  facebook_user_saved,
+            'facebook_user':        facebook_user,
+            }
         return results
 
     def retrieve_facebook_auth_response(self, voter_device_id):
@@ -281,5 +396,228 @@ class FacebookManager(models.Model):
             'facebook_link_to_voter_found': facebook_link_to_voter_found,
             'facebook_link_to_voter_id': facebook_link_to_voter_id,
             'facebook_link_to_voter': facebook_link_to_voter,
+        }
+        return results
+
+    def extract_facebook_details_data(self, facebook_friend_api_details_entry):
+        """
+        Extracting facebook friend details with required fields
+        :param facebook_friend_api_details_entry:
+        :return:
+        """
+        facebook_friend_dict = {}
+        facebook_friend_dict['facebook_user_id'] = (facebook_friend_api_details_entry.get('id')
+                                                    if 'id' in facebook_friend_api_details_entry.keys() else None)
+        facebook_friend_dict['facebook_user_name'] = (facebook_friend_api_details_entry.get('name')
+                                                      if 'name' in facebook_friend_api_details_entry.keys() else "")
+        facebook_friend_dict['facebook_user_first_name'] = (facebook_friend_api_details_entry.get('first_name')
+                                                            if 'first_name' in facebook_friend_api_details_entry.keys()
+                                                            else "")
+        facebook_friend_dict['facebook_user_middle_name'] = (facebook_friend_api_details_entry.get('middle_name')
+                                                             if 'middle_name' in facebook_friend_api_details_entry.
+                                                             keys() else "")
+        facebook_friend_dict['facebook_user_last_name'] = (facebook_friend_api_details_entry.get('last_name')
+                                                           if 'last_name' in facebook_friend_api_details_entry.keys()
+                                                           else "")
+        facebook_friend_dict['facebook_user_location_id'] = (facebook_friend_api_details_entry.get('location').get('id')
+                                                             if 'location' in facebook_friend_api_details_entry.keys()
+                                                                and facebook_friend_api_details_entry.
+                                                             get('location', {}).get('id', {}) else None)
+        facebook_friend_dict['facebook_user_location_name'] = (facebook_friend_api_details_entry.get('location').get(
+            'name') if 'location' in facebook_friend_api_details_entry.keys() and facebook_friend_api_details_entry.get(
+            'location', {}).get('name', {}) else "")
+        facebook_friend_dict['facebook_user_gender'] = (facebook_friend_api_details_entry.get('gender')
+                                                        if 'gender' in facebook_friend_api_details_entry.keys() else "")
+        facebook_friend_dict['facebook_user_birthday'] = (facebook_friend_api_details_entry.get('birthday')
+                                                          if 'birthday' in facebook_friend_api_details_entry.keys()
+                                                          else "")
+        facebook_friend_dict['facebook_user_cover_source'] = (facebook_friend_api_details_entry.get('cover').get(
+            'source') if 'cover' in facebook_friend_api_details_entry.keys() and facebook_friend_api_details_entry.get(
+            'cover', {}).get('source', {}) else "")
+        facebook_friend_dict['facebook_user_about'] = (facebook_friend_api_details_entry.get('about')
+                                                       if 'about' in facebook_friend_api_details_entry.keys() else "")
+        facebook_friend_dict['facebook_user_is_verified'] = (facebook_friend_api_details_entry.get('is_verified')
+                                                             if 'is_verified' in facebook_friend_api_details_entry.
+                                                             keys() else "")
+        return facebook_friend_dict
+
+    def retrieve_facebook_friends_from_facebook(self, voter_device_id):
+        """
+        We use this routine to retrieve my facebook friends details and updating FacebookFriendsOfMe table
+        :param voter_device_id:
+        :return: facebook_friends_list
+        """
+        success = False
+        status = ''
+        facebook_friends_list_found = False
+        facebook_users_list = []
+        # required fields need to be updated in FacebookUser table
+        facebook_api_fields = "id, name, first_name, middle_name, last_name, location{id, name}, gender, birthday, " \
+                              "cover{source}, about, is_verified, friends{id, name, first_name, middle_name, " \
+                              "last_name, location{id, name}, gender, birthday, cover{source}, about, is_verified} "
+        auth_response_results = self.retrieve_facebook_auth_response(voter_device_id)
+        if not auth_response_results['facebook_auth_response_found']:
+            error_results = {
+                'status':                       "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
+                'success':                      success,
+                'facebook_friends_list_found':  facebook_friends_list_found,
+                'facebook_users_list':        facebook_users_list,
+            }
+            return error_results
+
+        facebook_auth_response = auth_response_results['facebook_auth_response']
+        try:
+            facebook_graph = facebook.GraphAPI(facebook_auth_response.facebook_access_token)
+            facebook_friends_api_details = facebook_graph.get_connections(id=facebook_auth_response.facebook_user_id,
+                                                                 connection_name="friends", fields=facebook_api_fields)
+
+            # graph.get_connections returns three dictionary keys i.e. data, paging, summary,
+            # here data key contains list of friends with the given fields values and paging contains cursors positions
+            # and summary contains total_count of your friends, for ex:
+            # {"data": [{"name": "Micheal", "first_name": "Micheal", "id": "16086981492"},
+            # {"name": "John", "first_name": "John", "id": "1263984"],
+            # "paging": {"cursors": {"before": "QVFmc0QVBsZAk1KWmNwRVFoRzB1MGFDWlpoa3J0NFR6VTQZD",
+            # "after": "QVFIUlAzdGplaWV5YTZAmeUNCNzVuRk1iPZAnhUNjltUldoSjR5aWZAxdGJ2UktEUHQzNWpBeHRmcEkZD"}},
+            # "summary": {'total_count': 10}}
+            for facebook_friend_api_details_entry in facebook_friends_api_details.get('data', []):
+                # Extract required details for each facebook friend and then updating FacebookFriendsOfMe table
+                facebook_friend_dict = self.extract_facebook_details_data(facebook_friend_api_details_entry)
+                facebook_friend_dict['facebook_user_friend_total_count'] = (
+                    facebook_friend_api_details_entry.get('friends').get('summary').get('total_count')
+                    if facebook_friend_api_details_entry.get('friends', {}).get('summary', {}).get('total_count', {})
+                    else None)
+                facebook_users_list.append(facebook_friend_dict)
+                facebook_friends_saved_results = self.create_or_update_facebook_friends_of_me(
+                    facebook_auth_response.facebook_user_id, facebook_friend_dict.get('facebook_user_id'))
+                status += ' ' + facebook_friends_saved_results['status']
+
+                # Extract Friend's friend details
+                if facebook_friend_api_details_entry.get('friends', {}).get('data', []):
+                    for facebook_friends_friend_details_entry in \
+                            facebook_friend_api_details_entry.get('friends', {}).get('data', []):
+                        facebook_friends_friend_dict = self.extract_facebook_details_data(
+                            facebook_friends_friend_details_entry)
+                        facebook_friends_friend_dict['facebook_user_friend_total_count'] = None
+                        facebook_users_list.append(facebook_friends_friend_dict)
+
+            success = True
+            status += " " + "FACEBOOK_FRIENDS_LIST_FOUND"
+            facebook_friends_list_found = True
+        except Exception as e:
+            success = False
+            status += " " + "FACEBOOK_FRIENDS_LIST_NOT_FOUND"
+            facebook_friends_list_found = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'facebook_friends_list_found':  facebook_friends_list_found,
+            'facebook_users_list':          facebook_users_list,
+        }
+        return results
+
+    def retrieve_facebook_friends_of_me_list(self, facebook_id_of_me):
+        """
+        Reterive my friends facebook ids from FacebookFriendsOfMe table.
+        :param facebook_id_of_me:
+        :return:
+        """
+        status = ""
+        facebook_friends_of_me_list = []
+
+        if not positive_value_exists(facebook_id_of_me):
+            success = False
+            status = 'RETRIEVE_FACEBOOK_FRIENDS_OF_ME-MISSING_FACEBOOK_ID '
+            results = {
+                'success':                              success,
+                'status':                               status,
+                'facebook_friends_of_me_list_found':    False,
+                'facebook_friends_of_me_list':          [],
+            }
+            return results
+
+        try:
+            facebook_friends_of_me_queryset = FacebookFriendsOfMe.objects.all()
+            facebook_friends_of_me_queryset = facebook_friends_of_me_queryset.filter(
+                facebook_id_of_me=facebook_id_of_me)
+            facebook_friends_of_me_list = facebook_friends_of_me_queryset
+
+            if len(facebook_friends_of_me_list):
+                success = True
+                facebook_friends_of_me_list_found = True
+                status += ' FACEBOOK_FRIENDS_OF_ME_LIST_RETRIEVED '
+            else:
+                success = True
+                facebook_friends_of_me_list_found = False
+                status += ' NO_FACEBOOK_FRIENDS_OF_ME_LIST_RETRIEVED '
+        except FacebookFriendsOfMe.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            facebook_friends_of_me_list_found = False
+            status += ' NO_FACEBOOK_FRIENDS_OF_ME_LIST_RETRIEVED_DoesNotExist '
+            facebook_friends_of_me_list = []
+        except Exception as e:
+            success = False
+            facebook_friends_of_me_list_found = False
+            status += ' FAILED retrieve_facebook_friends_of_me_list FacebookFriendsOfMe '
+
+        results = {
+            'success':                              success,
+            'status':                               status,
+            'facebook_friends_of_me_list_found':    facebook_friends_of_me_list_found,
+            'facebook_friends_of_me_list':          facebook_friends_of_me_list,
+        }
+        return results
+
+    def retrieve_facebook_user_list(self, facebook_id_of_me):
+        """
+        Reterive facebook user ids from FacebookUser table.
+        :param facebook_id_of_me:
+        :return:
+        """
+        status = ""
+        facebook_user_list = []
+
+        if not positive_value_exists(facebook_id_of_me):
+            success = False
+            status = 'RETRIEVE_FACEBOOK_USERS-MISSING_FACEBOOK_ID '
+            results = {
+                'success':                  success,
+                'status':                   status,
+                'facebook_user_list_found': False,
+                'facebook_user_list':       [],
+            }
+            return results
+
+        try:
+            facebook_user_queryset = FacebookUser.objects.all()
+            facebook_user_queryset = facebook_user_queryset.filter(
+                facebook_id_of_me=facebook_id_of_me)
+            facebook_user_list = facebook_user_queryset
+
+            if len(facebook_user_list):
+                success = True
+                facebook_user_list_found = True
+                status += ' FACEBOOK_USER_LIST_RETRIEVED '
+            else:
+                success = True
+                facebook_user_list_found = False
+                status += ' NO_FACEBOOK_USER_LIST_RETRIEVED '
+        except FacebookUser.DoesNotExist:
+            # No data found. Not a problem.
+            success = True
+            facebook_user_list_found = False
+            status += ' NO_FACEBOOK_USER_LIST_RETRIEVED_DoesNotExist '
+            facebook_user_list = []
+        except Exception as e:
+            success = False
+            facebook_user_list_found = False
+            status += ' FAILED retrieve_facebook_user_list FacebookUser '
+
+        results = {
+            'success':                     success,
+            'status':                      status,
+            'facebook_user_list_found':    facebook_user_list_found,
+            'facebook_user_list':          facebook_user_list,
         }
         return results

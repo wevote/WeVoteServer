@@ -26,7 +26,7 @@ from friend.models import CURRENT_FRIENDS, DELETE_INVITATION_EMAIL_SENT_BY_ME, D
 from geoip.controllers import voter_location_retrieve_from_ip_for_api
 from import_export_facebook.controllers import facebook_disconnect_for_api, \
     voter_facebook_save_to_current_account_for_api, \
-    voter_facebook_sign_in_retrieve_for_api, voter_facebook_sign_in_save_for_api
+    voter_facebook_sign_in_retrieve_for_api, voter_facebook_sign_in_save_for_api, facebook_friends_action_for_api
 from import_export_google_civic.controllers import voter_ballot_items_retrieve_from_google_civic_for_api
 from import_export_twitter.controllers import twitter_sign_in_start_for_api, \
     twitter_sign_in_request_access_token_for_api, twitter_sign_in_request_voter_info_for_api, \
@@ -160,6 +160,24 @@ def device_id_generate_view(request):  # deviceIdGenerate
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
+
+def facebook_friends_action_view(request):  # facebookFriendsActions
+    """
+    Retrieve Suggested facebook friends
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = facebook_friends_action_for_api(voter_device_id)
+    json_data = {
+        'status':                           results['status'],
+        'success':                          results['success'],
+        'voter_device_id':                  voter_device_id,
+        'facebook_friend_suggestion_found': results['facebook_friend_suggestion_found'],
+        'facebook_suggested_friend_count':  results['facebook_suggested_friend_count'],
+        'facebook_friends_suggested':       results['facebook_friends_suggested'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 def facebook_disconnect_view(request):
     """

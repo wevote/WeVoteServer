@@ -6,6 +6,7 @@ from config.base import get_environment_variable
 from email_outbound.models import EmailManager
 from follow.controllers import move_follow_entries_to_another_voter
 from friend.controllers import move_friend_invitations_to_another_voter, move_friends_to_another_voter
+from friend.models import FriendManager
 from import_export_facebook.models import FacebookManager
 from organization.controllers import move_organization_to_another_complete
 from organization.models import OrganizationManager
@@ -171,6 +172,90 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
         'status':                   status,
         'voter_device_id':          voter_device_id,
         'facebook_account_created': facebook_account_created,
+    }
+    return results
+
+
+def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
+    """
+    :param voter_device_id:
+    :return:
+    """
+    status = ''
+    success = False
+    facebook_friend_suggested = ''
+    facebook_friend_suggestion_found = False
+    facebook_suggested_friend_count = 0
+    # Get voter_id from the voter_device_id
+    results = is_voter_device_id_valid(voter_device_id)
+    if not results['success']:
+        error_results = {
+            'status':                           "VALID_VOTER_DEVICE_ID_MISSING",
+            'success':                          success,
+            'voter_device_id':                  voter_device_id,
+            'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
+            'facebook_suggested_friend_count':  facebook_suggested_friend_count,
+            'facebook_friend_suggested':        facebook_friend_suggested,
+        }
+        return error_results
+
+    facebook_manager = FacebookManager()
+    auth_response_results = facebook_manager.retrieve_facebook_auth_response(voter_device_id)
+    if not auth_response_results['facebook_auth_response_found']:
+        error_results = {
+            'status':                           "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
+            'success':                          success,
+            'voter_device_id':                  voter_device_id,
+            'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
+            'facebook_suggested_friend_count':  facebook_suggested_friend_count,
+            'facebook_friend_suggested':        facebook_friend_suggested,
+        }
+        return error_results
+
+    facebook_friends_from_facebook_results = facebook_manager.retrieve_facebook_friends_from_facebook(voter_device_id)
+    facebook_users_list = facebook_friends_from_facebook_results['facebook_users_list']
+    status += facebook_friends_from_facebook_results['status']
+    success = facebook_friends_from_facebook_results['success']
+    if facebook_friends_from_facebook_results['facebook_friends_list_found']:
+        # Update FacebookUser table with all users
+        for facebook_user_entry in facebook_users_list:
+            facebook_user_update_results = facebook_manager.create_or_update_facebook_user(facebook_user_entry)
+            status += ' ' + facebook_user_update_results['status']
+            success = facebook_user_update_results['success']
+
+    # finding facebook_link_to_voter for all users and then updating SuggestedFriend table
+    facebook_auth_response = auth_response_results['facebook_auth_response']
+    my_facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
+        facebook_auth_response.facebook_user_id)
+    status += ' ' + my_facebook_link_to_voter_results['status']
+    if my_facebook_link_to_voter_results['facebook_link_to_voter_found']:
+        friend_manager = FriendManager()
+        viewer_voter_we_vote_id = my_facebook_link_to_voter_results['facebook_link_to_voter'].voter_we_vote_id
+        for facebook_user_entry in facebook_users_list:
+            facebook_user_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
+                facebook_user_entry['facebook_user_id'])
+            status += ' ' + facebook_user_link_to_voter_results['status']
+            if facebook_user_link_to_voter_results['facebook_link_to_voter_found']:
+                viewee_voter_we_vote_id = facebook_user_link_to_voter_results['facebook_link_to_voter'].voter_we_vote_id
+                # Are they already friends?
+                already_friend_results = friend_manager.retrieve_current_friend(viewer_voter_we_vote_id,
+                                                                                viewee_voter_we_vote_id)
+                if not already_friend_results['current_friend_found']:
+                    update_suggested_friend_results = friend_manager.create_or_update_suggested_friend(
+                        viewer_voter_we_vote_id, viewee_voter_we_vote_id)
+                    facebook_suggested_friend_count += 1
+                    facebook_friend_suggestion_found = update_suggested_friend_results['success']
+    else:
+        # TODO if facebook_link_to_voter does not exist then check how to add those friends in SuggestedFriend
+        pass
+
+    results = {
+        'status':                           status,
+        'success':                          success,
+        'voter_device_id':                  voter_device_id,
+        'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
+        'facebook_suggested_friend_count':  facebook_suggested_friend_count,
+        'facebook_friends_suggested':       facebook_users_list,
     }
     return results
 
