@@ -478,7 +478,7 @@ class TwitterUserManager(models.Model):
 
     def retrieve_twitter_who_i_follow_list(self, twitter_id_of_me):
         """
-        Reterive twitter ids who i follow from TwitterWhoIFollow table.
+        Retrieve twitter ids that twitter_id_of_me follows from TwitterWhoIFollow table.
         :param twitter_id_of_me:
         :return:
         """
