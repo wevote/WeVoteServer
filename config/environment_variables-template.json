@@ -25,6 +25,15 @@
   "_comment":                       "*** LOG_FILE_LEVEL is the level of logging written to the log file",
   "LOG_FILE_LEVEL":                 "ERROR",
 
+  "_comment":                       "Image server settings",
+  "AWS_ACCESS_KEY_ID":              "",
+  "AWS_SECRET_ACCESS_KEY":          "",
+  "AWS_STORAGE_BUCKET_NAME":        "",
+  "PROFILE_IMAGE_TINY_WIDTH":       "20",
+  "PROFILE_IMAGE_TINY_HEIGHT":      "20",
+  "PROFILE_IMAGE_MEDIUM_WIDTH":     "80",
+  "PROFILE_IMAGE_MEDIUM_HEIGHT":    "80",
+
   "_comment":                       "Email server settings",
   "EMAIL_HOST":                     "smtp.sendgrid.net",
   "EMAIL_HOST_USER":                "sendgrid_username",
