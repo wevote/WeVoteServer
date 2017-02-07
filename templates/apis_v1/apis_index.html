@@ -1,23 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="chekov" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>We Vote APIs, v1</title>
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700|Material+Icons" rel="stylesheet">
+    <link href="{% static "apis_v1/apis_v1.css" %}" rel="stylesheet">
+    <meta content="We Vote API Server" property="og:site_name">
+    <meta content="website" property="og:type">
+    <meta content="https://api.wevoteusa.org/apis/v1/docs/" property="og:url">
+    <meta content="en" property="og:locale">
+    <title>We Vote APIs v1</title>
+    <meta content="We Vote APIs v1" property="og:title"/>
+    </meta>
+    </meta>
+    </meta>
+    </meta>
+    </meta>
+    </link>
+    </link>
+    </meta>
+    </meta>
 </head>
-<body>
 
-<h1>We Vote APIs, v1</h1>
-<p>A list of available APIs. See also our API design
-    <a href="https://docs.google.com/document/d/1HNAk5hA-aj1VRCXSH0est6kLbfBs0cGc4fCb7zwUvLI/edit#"
-       target="_blank">google document</a>.
-    Find the <a href="/admin/">Admin tools here</a>.</p>
+<body class="devsite-doc-page devsite-header-no-upper-tabs" id="top_of_page">
+<div class="devsite-wrapper">
+    <header class="devsite-top-section nocontent">
+        <div class="devsite-top-logo-row-wrapper-wrapper">
+            <div class="devsite-top-logo-row-wrapper">
+                <div class="devsite-top-logo-row devsite-full-site-width">
+                    <div class="devsite-product-name-wrapper">
+                        <span class="devsite-product-name">
+                We Vote APIs v1
+                        </span>
+                    </div>
+                </div>
+             </div>
+          </div>
+      </div>
+      <div class="devsite-collapsible-section">
+        <div class="devsite-header-background devsite-full-site-width">
+        <div class="devsite-doc-set-nav-row devsite-full-site-width">
+              <li class="devsite-doc-set-nav-tab-container">
+              </li>
+         </div>
+         </div>
+      </div>
+  </header>
 
-<table border="1" cellpadding="5" cellspacing="1">
-    <thead>
-        <td>Method</td>
-        <td>Static</td>
-        <td>Description</td>
-    </thead>
+<div class="devsite-site-mask"></div>
+<nav class="devsite-nav-responsive devsite-nav nocontent" tabindex="0">
+<div class="devsite-nav-responsive-tabs-panel">
+    <nav class="devsite-nav-responsive-tabs devsite-nav">
+    </nav>
+</div>
+</nav>
+<div class="devsite-main-content clearfix">
+<h1 class="devsite-page-title" itemprop="name">
+    <div>
+        <p><font color="#333333">Below is a list of our available APIs. You may also need:
+        <ul>
+            <li> our API design <a href="https://docs.google.com/document/d/1HNAk5hA-aj1VRCXSH0est6kLbfBs0cGc4fCb7zwUvLI/edit#" targe=""_blank">google document</a></li>
+            <li> Our <a href="/>admin/">admin tools</a></li>
+        </ul>
+        </font>
+    </div>
+    </p>
+<div>
+<table class="matchpre" id="request_parameters">
+<thead>
+<td>Method</td>
+<td>Static</td>
+<td>Description</td>
+</thead>
+
+<tbody>
     <tr>
         <td><a href="{% url 'apis_v1:searchAllDocs' %}">searchAll</a></td>
         <td></td>
@@ -555,14 +612,42 @@
 
     {###  ###}
     <tr>
-        <td colspan="3"><strong>Voter Language</strong></td>
-    </tr>
-
-    {###  ###}
-    <tr>
-        <td colspan="3"><strong>Messages</strong></td>
-    </tr>
+<td colspan="3"><strong>Voter Language</strong></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+</tr>
+<tr>
+<td colspan="3"><strong>Messages</strong></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+</tr>
+</tbody>
 </table>
 
+</div>
+
 </body>
+
+
+    <div class="devsite-content-footer nocontent">
+        <p>Except as otherwise noted, the content of this page is licensed under the
+          <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 License</a>.
+            Original version of the styling for this page created by the Google Civic API team. Thank you! </p>
+        <p class="devsite-content-footer-date"  itemprop="datePublished">
+              Last updated February 6, 2017.
+        </p>
+    </div>
+
+<footer class="devsite-utility-footer">
+  <nav class="devsite-utility-footer-nav devsite-nav devsite-full-site-width">
+    <span class="devsite-utility-footer-links">
+    </span>
+  </nav>
+</footer>
+
+
 </html>
