@@ -6,6 +6,8 @@ This is called from config/urls.py like this:
     url(r'^apis/v1/', include('apis_v1.urls', namespace="apis_v1")),
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.conf.urls import url
 from . import views
 from . import views_docs
@@ -291,4 +293,4 @@ urlpatterns = [
     url(r'^docs/voterTwitterSaveToCurrentAccount/$',
         views_docs.voter_twitter_save_to_current_account_doc_view, name='voterTwitterSaveToCurrentAccountDocs'),
     url(r'^docs/voterUpdate/$', views_docs.voter_update_doc_view, name='voterUpdateDocs'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
