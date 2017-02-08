@@ -864,3 +864,112 @@ def retrieve_voter_guides_followed(voter_id):  # voterGuidesFollowedRetrieve
         'voter_guide_list':             voter_guide_list,
     }
     return results
+
+def voter_guides_ignored_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0):
+    """
+    Start with the organizations followed and return a list of voter_guides. voterGuidesIgnoredRetrieve
+    See also organizations_followed_for_api, which returns a list of organizations.
+
+    :param voter_device_id:
+    :param maximum_number_to_retrieve:
+    :return:
+    """
+    if not positive_value_exists(voter_device_id):
+        json_data = {
+            'status': 'VALID_VOTER_DEVICE_ID_MISSING',
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
+            'voter_guides': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status': 'VALID_VOTER_ID_MISSING',
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'maximum_number_to_retrieve': maximum_number_to_retrieve,
+            'voter_guides': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = retrieve_voter_guides_ignored(voter_id)
+    status = results['status']
+    voter_guide_list = results['voter_guide_list']
+    voter_guides = []
+    if results['voter_guide_list_found']:
+        number_added_to_list = 0
+        for voter_guide in voter_guide_list:
+            one_voter_guide = {
+                'we_vote_id': voter_guide.we_vote_id,
+                'google_civic_election_id': voter_guide.google_civic_election_id,
+                'time_span': voter_guide.vote_smart_time_span,
+                'voter_guide_display_name': voter_guide.voter_guide_display_name(),
+                'voter_guide_image_url': voter_guide.voter_guide_image_url(),
+                'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
+                'organization_we_vote_id': voter_guide.organization_we_vote_id,
+                'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
+                'twitter_description': voter_guide.twitter_description,
+                'twitter_followers_count': voter_guide.twitter_followers_count,
+                'twitter_handle': voter_guide.twitter_handle,
+                'owner_voter_id': voter_guide.owner_voter_id,
+                'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
+            }
+            voter_guides.append(one_voter_guide.copy())
+            if positive_value_exists(maximum_number_to_retrieve):
+                number_added_to_list += 1
+                if number_added_to_list >= maximum_number_to_retrieve:
+                    break
+
+        if len(voter_guides):
+            status = 'VOTER_GUIDES_IGNORED_RETRIEVED'
+            success = True
+        else:
+            status = 'NO_VOTER_GUIDES_IGNORED_FOUND'
+            success = True
+    else:
+        success = False
+
+    json_data = {
+        'status': status,
+        'success': success,
+        'voter_device_id': voter_device_id,
+        'maximum_number_to_retrieve': maximum_number_to_retrieve,
+        'voter_guides': voter_guides,
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def retrieve_voter_guides_ignored(voter_id):  # voterGuidesIgnoredRetrieve
+    voter_guide_list_found = False
+
+    follow_organization_list_manager = FollowOrganizationList()
+    return_we_vote_id = True
+    organization_we_vote_ids_ignored_by_voter = \
+        follow_organization_list_manager.retrieve_ignore_organization_by_voter_id_simple_id_array(voter_id,
+                                                                                                  return_we_vote_id)
+
+    voter_guide_list_object = VoterGuideListManager()
+    results = voter_guide_list_object.retrieve_voter_guides_by_organization_list(
+        organization_we_vote_ids_ignored_by_voter)
+
+    voter_guide_list = []
+    if results['voter_guide_list_found']:
+        voter_guide_list = results['voter_guide_list']
+        status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_IGNORED'
+        success = True
+        if len(voter_guide_list):
+            voter_guide_list_found = True
+    else:
+        status = results['status']
+        success = False
+
+    results = {
+        'success':                      success,
+        'status':                       status,
+        'voter_guide_list_found':       voter_guide_list_found,
+        'voter_guide_list':             voter_guide_list,
+    }
+    return results
