@@ -354,6 +354,11 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 # Do not return your own voter guide to follow
                 continue
 
+            if hasattr(voter_guide, 'ballot_item_we_vote_ids_this_org_supports'):
+                ballot_item_we_vote_ids_this_org_supports = voter_guide.ballot_item_we_vote_ids_this_org_supports
+            else:
+                ballot_item_we_vote_ids_this_org_supports = []
+
             position_found = False
             one_voter_guide = {
                 'we_vote_id': voter_guide.we_vote_id,
@@ -368,6 +373,7 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                 'twitter_followers_count': voter_guide.twitter_followers_count,
                 'twitter_handle': voter_guide.twitter_handle,
                 'owner_voter_id': voter_guide.owner_voter_id,
+                'ballot_item_we_vote_ids_this_org_supports': ballot_item_we_vote_ids_this_org_supports,
                 'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             if positive_value_exists(ballot_item_we_vote_id):
@@ -687,6 +693,15 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
 
     if len(voter_guide_list):
         voter_guide_list_found = True
+        updated_voter_guide_list = []
+        for one_voter_guide in voter_guide_list:
+            # Augment the voter guide with
+            ballot_item_we_vote_ids_this_org_supports = []
+            ballot_item_we_vote_ids_this_org_supports.append("wv01cand3616")
+            one_voter_guide.ballot_item_we_vote_ids_this_org_supports = \
+                ballot_item_we_vote_ids_this_org_supports
+            updated_voter_guide_list.append(one_voter_guide)
+        voter_guide_list = updated_voter_guide_list
 
     results = {
         'success':                      success,
