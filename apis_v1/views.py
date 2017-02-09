@@ -67,7 +67,8 @@ from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, 
     VoterDeviceLink, VoterDeviceLinkManager, voter_has_authority, VoterManager
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
-    voter_guides_followed_retrieve_for_api, voter_guides_to_follow_retrieve_for_api
+    voter_guides_followed_retrieve_for_api, voter_guides_ignored_retrieve_for_api, \
+    voter_guides_to_follow_retrieve_for_api
 from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_bool, convert_to_int, generate_voter_device_id, get_voter_device_id, \
@@ -1752,10 +1753,17 @@ def voter_guide_possibility_save_view(request):
                                                 voter_guide_possibility_url=voter_guide_possibility_url)
 
 
-def voter_guides_followed_retrieve_view(request):
+def voter_guides_followed_retrieve_view(request):  # voterGuidesFollowedRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
     return voter_guides_followed_retrieve_for_api(voter_device_id=voter_device_id,
+                                                  maximum_number_to_retrieve=maximum_number_to_retrieve)
+
+
+def voter_guides_ignored_retrieve_view(request):  # voterGuidesIgnoredRetrieve
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
+    return voter_guides_ignored_retrieve_for_api(voter_device_id=voter_device_id,
                                                   maximum_number_to_retrieve=maximum_number_to_retrieve)
 
 
