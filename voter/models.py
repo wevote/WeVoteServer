@@ -1020,6 +1020,8 @@ class Voter(AbstractBaseUser):
         return self.is_admin
 
     def voter_photo_url(self):
+        # If we have facebook id, we might want to use this:
+        # https://graph.facebook.com/504209299/picture?type=square
         if self.facebook_profile_image_url_https:
             return self.facebook_profile_image_url_https
         elif self.twitter_profile_image_url_https:
