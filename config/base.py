@@ -88,6 +88,7 @@ INSTALLED_APPS = (
     'follow',
     'friend',
     'geoip',
+    'image',
     'import_export_batches',
     'import_export_facebook',
     'import_export_google_civic',
