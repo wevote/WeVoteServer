@@ -90,9 +90,9 @@
   "_comment":                       "django secret key",
   "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
 
-  "_comment":                       "Image server(Amazon Wed Service AWS s3)settings",
-  "AWS_ACCESS_KEY_ID":              "AKIAJ43PCQTC7QVA6S4A",
-  "AWS_SECRET_ACCESS_KEY":          "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",
+  "_comment":                       "Image server (Amazon Web Service AWS s3) settings",
+  "AWS_ACCESS_KEY_ID":              "",
+  "AWS_SECRET_ACCESS_KEY":          "",
   "AWS_REGION_NAME":                "us-west-2",
   "AWS_STORAGE_BUCKET_NAME":        "wevote-images",
   "PROFILE_IMAGE_TINY_WIDTH":       "20",
