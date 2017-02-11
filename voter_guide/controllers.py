@@ -623,8 +623,8 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
 
             org_list_found_by_google_civic_election_id.append(one_position.organization_we_vote_id)
 
-    status += " len(org_list_found_by_google_civic_election_id): " + \
-              str(len(org_list_found_by_google_civic_election_id))
+    # status += " len(org_list_found_by_google_civic_election_id): " + \
+    #           str(len(org_list_found_by_google_civic_election_id))
 
     # First, retrieve the voter_guides stored by org and google_civic_election_id
     if positive_value_exists(len(org_list_found_by_google_civic_election_id)):
@@ -632,14 +632,17 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
             google_civic_election_id, org_list_found_by_google_civic_election_id, search_string,
             maximum_number_to_retrieve, sort_by, sort_order)
 
-        status += voter_guide_results['status'] + " "
+        status += " " + voter_guide_results['status'] + " "
 
         if voter_guide_results['voter_guide_list_found']:
             voter_guide_list_from_election_id = voter_guide_results['voter_guide_list']
+            list_from_election_id_found = True
         else:
             voter_guide_list_from_election_id = []
+            list_from_election_id_found = False
     else:
         voter_guide_list_from_election_id = []
+        list_from_election_id_found = False
 
     # Second, retrieve the voter_guides stored by org & vote_smart_time_span
     # All positions were found above with position_list_manager.retrieve_all_positions_for_election
@@ -647,7 +650,6 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
     # Vote Smart ratings)
     maximum_number_of_guides_to_retrieve_by_time_span = \
         maximum_number_to_retrieve - len(voter_guide_list_from_election_id)
-    voter_guide_list = []
     if positive_value_exists(maximum_number_of_guides_to_retrieve_by_time_span):
         org_list_found_by_time_span = []
         orgs_we_need_found_by_position_and_time_span_list_of_dicts = []
@@ -678,18 +680,30 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
 
         if voter_guide_time_span_results['voter_guide_list_found']:
             voter_guide_list_from_time_span = voter_guide_time_span_results['voter_guide_list']
+            list_from_time_span_found = True
         else:
             voter_guide_list_from_time_span = []
+            list_from_time_span_found = False
+    else:
+        voter_guide_list_from_time_span = []
+        list_from_time_span_found = False
 
-        # Merge these two lists
-        # IFF we wanted to sort here:
-        # voter_guide_list = sorted(
-        #     chain(voter_guide_list_from_election_id, voter_guide_list_from_time_span),
-        #     key=attrgetter(sort_by))
-        # But we don't, we just want to combine them with existing order
+    # Merge these two lists
+    if list_from_election_id_found and list_from_time_span_found:
         voter_guide_list = list(chain(voter_guide_list_from_election_id, voter_guide_list_from_time_span))
+    elif list_from_election_id_found:
+        voter_guide_list = list(voter_guide_list_from_election_id)
+    elif list_from_time_span_found:
+        voter_guide_list = list(voter_guide_list_from_time_span)
+    else:
+        voter_guide_list = []
+    # IFF we wanted to sort here:
+    # voter_guide_list = sorted(
+    #     chain(voter_guide_list_from_election_id, voter_guide_list_from_time_span),
+    #     key=attrgetter(sort_by))
+    # But we don't, we just want to combine them with existing order
 
-    status = 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_ELECTION'
+    status += 'SUCCESSFUL_RETRIEVE_OF_VOTER_GUIDES_BY_ELECTION'
     success = True
 
     if len(voter_guide_list):
