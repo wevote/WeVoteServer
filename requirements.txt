@@ -1,5 +1,6 @@
 # As we approach deployment, we should probably move to different requirements files for local vs. production
 # See Chapt 5.5 in Two Scoops of Django
+boto3==1.4.4
 dj-database-url==0.3.0
 dj-static==0.0.6
 Django==1.8.8
@@ -12,6 +13,7 @@ djangorestframework==3.1.2
 elasticsearch>=1.0.0,<2.0.0
 facebook-sdk==2.0.0
 future==0.15.2
+geopy==1.11.0
 google-api-python-client==1.4.0
 gunicorn==19.3.0
 httplib2==0.9.1
@@ -23,7 +25,6 @@ pyasn1==0.1.7
 pyasn1-modules==0.0.5
 py3dns==3.1.0
 pygeoip==0.3.2
-geopy==1.11.0
 PyJWT==1.3.0
 python-openid==2.2.5
 python-social-auth==0.2.10
