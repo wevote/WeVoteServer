@@ -791,9 +791,9 @@ class VoterGuideListManager(models.Model):
                      '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
-        status += "len(organization_we_vote_id_list): " + str(len(organization_we_vote_id_list)) + " :: "
-        for one_we_vote_id in organization_we_vote_id_list:
-            status += one_we_vote_id + " "
+        # status += " len(organization_we_vote_id_list): " + str(len(organization_we_vote_id_list)) + " :: "
+        # for one_we_vote_id in organization_we_vote_id_list:
+        #     status += one_we_vote_id + " "
 
         results = {
             'success':                      success,
