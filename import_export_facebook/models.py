@@ -467,7 +467,7 @@ class FacebookManager(models.Model):
 
         facebook_auth_response = auth_response_results['facebook_auth_response']
         try:
-            facebook_graph = facebook.GraphAPI(facebook_auth_response.facebook_access_token, version='2.8')
+            facebook_graph = facebook.GraphAPI(facebook_auth_response.facebook_access_token, version='2.7')
             facebook_friends_api_details = facebook_graph.get_connections(id=facebook_auth_response.facebook_user_id,
                                                                  connection_name="friends", fields=facebook_api_fields)
 

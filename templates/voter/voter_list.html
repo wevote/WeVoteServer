@@ -11,6 +11,8 @@
 <h1>Voters</h1>
 
 <a href="{% url 'voter:voter_edit' 0 %}">Create New Voter Account</a>
+<br />
+<a href="{% url 'image:cache_images_locally_for_all_voters' %}">Cache images locally for signed in voter</a>
 
 {% if voter_list %}
     <table border="1" cellpadding="10">

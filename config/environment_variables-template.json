@@ -90,5 +90,15 @@
   "_comment":                       "django secret key",
   "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
 
+  "_comment":                       "Image server(Amazon Wed Service AWS s3)settings",
+  "AWS_ACCESS_KEY_ID":              "AKIAJ43PCQTC7QVA6S4A",
+  "AWS_SECRET_ACCESS_KEY":          "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",
+  "AWS_REGION_NAME":                "us-west-2",
+  "AWS_STORAGE_BUCKET_NAME":        "wevote-images",
+  "PROFILE_IMAGE_TINY_WIDTH":       "20",
+  "PROFILE_IMAGE_TINY_HEIGHT":      "20",
+  "PROFILE_IMAGE_MEDIUM_WIDTH":     "80",
+  "PROFILE_IMAGE_MEDIUM_HEIGHT":    "80",
+
   "_comment":                       "End of json_environment_variables.json"
 }

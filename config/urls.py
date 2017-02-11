@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'^e/', include('election.urls', namespace="election")),
     url(r'^follow/', include('follow.urls', namespace="follow")),
     url(r'^health/', views.health_view),  # A simple health check to make sure the site is running
+    url(r'^image/', include ('image.urls', namespace="image")),
     url(r'^import_export_batches/', include('import_export_batches.urls', namespace="import_export_batches")),
     url(r'^import_export_google_civic/', include(
         'import_export_google_civic.urls', namespace="import_export_google_civic")),

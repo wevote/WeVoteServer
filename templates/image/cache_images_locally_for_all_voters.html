@@ -1,0 +1,35 @@
+{# templates/image/cache_images_locally_for_all_voters.html #}
+{% extends "template_base.html" %}
+
+{% block title %}
+    {% if voter_we_vote_id %}{{ voter_we_vote_id }}
+    {% else %}No Voter Found {% endif %}voter_we_vote_id
+{% endblock %}
+
+{%  block content %}
+<h1>Cached images for signed in voter</h1>
+
+{% if voter_id %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <td>ID</td>
+            <td>We Vote ID</td>
+            <td>twitter_profile_image</td>
+            <td>twitter_background_image</td>
+            <td>twitter_banner_image</td>
+        </tr>
+
+        <tr>
+            <td>{{ voter_id }}</td>
+            <td>{{ voter_we_vote_id }}</td>
+            <td>{{ cached_twitter_prfile_image }}</td>
+            <td>{{ cached_twitter_background_image }}</td>
+            <td>{{ cached_twitter_banner_image }}</td>
+        </tr>
+    </table>
+{% else %}
+    <p>(no voters found)</p>
+{% endif %}
+<br />
+
+{% endblock %}
