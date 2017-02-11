@@ -2536,3 +2536,166 @@ def voter_position_visibility_save_for_api(  # voterPositionVisibilitySave
             'is_public_position':       is_public_position,
         }
         return json_data
+
+
+def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
+                                                                 organization_id, organization_we_vote_id,
+                                                                 stance_we_are_looking_for=SUPPORT,
+                                                                 google_civic_election_id=0,
+                                                                 state_code=''):
+    """
+    For each organization, we want to return a list of ballot_items that this organization has
+    an opinion about for the current election.
+    We also want to be able to limit the position list by google_civic_election_id.
+    """
+    is_following = False
+    is_ignoring = False
+    status = ''
+    position_list_raw = []
+
+    if not positive_value_exists(voter_id):
+        ballot_item_we_vote_ids_list = []
+        results = {
+            'status':                       "VALID_VOTER_ID_MISSING ",
+            'success':                      False,
+            'count':                        0,
+            'organization_id':              organization_id,
+            'organization_we_vote_id':      organization_we_vote_id,
+            'google_civic_election_id':     google_civic_election_id,
+            'state_code':                   state_code,
+            'ballot_item_we_vote_ids_list': ballot_item_we_vote_ids_list,
+        }
+        return results
+
+    position_list_manager = PositionListManager()
+    # Since we want to return the id and we_vote_id, and we don't know for sure that there are any positions
+    # for this opinion_maker, we retrieve the following so we can get the id and we_vote_id (per the request of
+    # the WebApp team)
+    organization_manager = OrganizationManager()
+    if positive_value_exists(organization_id):
+        results = organization_manager.retrieve_organization_from_id(organization_id)
+    else:
+        results = organization_manager.retrieve_organization_from_we_vote_id(organization_we_vote_id)
+
+    if results['organization_found']:
+        organization = results['organization']
+        opinion_maker_id = organization.id
+        opinion_maker_we_vote_id = organization.we_vote_id
+        opinion_maker_found = True
+
+        follow_organization_manager = FollowOrganizationManager()
+        voter_we_vote_id = ''
+        following_results = follow_organization_manager.retrieve_voter_following_org_status(
+            voter_id, voter_we_vote_id, opinion_maker_id, opinion_maker_we_vote_id)
+        if following_results['is_following']:
+            is_following = True
+        elif following_results['is_ignoring']:
+            is_ignoring = True
+
+        if is_following or is_ignoring:
+            ballot_item_we_vote_ids_list = []
+            results = {
+                'status': 'RETRIEVE_BALLOT_ITEM_WE_VOTE_IDS-ALREADY_FOLLOWING_OR_IGNORING',
+                'success': False,
+                'count': 0,
+                'organization_id': organization_id,
+                'organization_we_vote_id': organization_we_vote_id,
+                'google_civic_election_id': google_civic_election_id,
+                'state_code': state_code,
+                'ballot_item_we_vote_ids_list': ballot_item_we_vote_ids_list,
+            }
+            return results
+
+        friends_vs_public = PUBLIC_ONLY
+        show_positions_current_voter_election = True
+        exclude_positions_current_voter_election = False
+        voter_device_id = ''
+
+        position_list_raw = position_list_manager.retrieve_all_positions_for_organization(
+            organization_id, organization_we_vote_id, stance_we_are_looking_for, friends_vs_public,
+            show_positions_current_voter_election, exclude_positions_current_voter_election, voter_device_id,
+            google_civic_election_id)
+    else:
+        opinion_maker_found = False
+
+    if not opinion_maker_found:
+        ballot_item_we_vote_ids_list = []
+        results = {
+            'status':                       'RETRIEVE_BALLOT_ITEM_WE_VOTE_IDS-ORGANIZATION_NOT_FOUND',
+            'success':                      False,
+            'count':                        0,
+            'organization_id':              organization_id,
+            'organization_we_vote_id':      organization_we_vote_id,
+            'google_civic_election_id':     google_civic_election_id,
+            'state_code':                   state_code,
+            'ballot_item_we_vote_ids_list': ballot_item_we_vote_ids_list,
+        }
+        return results
+
+    # Now change the sort order
+    if len(position_list_raw):
+        sorted_position_list = position_list_raw
+        # TODO FIX: sorted_position_list = sorted(position_list_raw, key=itemgetter('ballot_item_display_name'))
+        # Add reverse=True to sort descending
+    else:
+        sorted_position_list = []
+
+    ballot_item_we_vote_ids_list = []
+    all_elections_that_have_positions = []
+    for one_position in sorted_position_list:
+        # Collect the ballot_item_we_vote_id
+        if positive_value_exists(one_position.candidate_campaign_we_vote_id):
+            # kind_of_ballot_item = CANDIDATE
+            # ballot_item_id = one_position.candidate_campaign_id
+            ballot_item_we_vote_id = one_position.candidate_campaign_we_vote_id
+            # if not positive_value_exists(one_position.contest_office_we_vote_id) \
+            #         or not positive_value_exists(one_position.contest_office_name):
+            #     missing_office_information = True
+            # if not positive_value_exists(one_position.ballot_item_image_url_https):
+            #     missing_ballot_item_image = True
+            one_position_success = True
+        elif positive_value_exists(one_position.contest_measure_we_vote_id):
+            # kind_of_ballot_item = MEASURE
+            # ballot_item_id = one_position.contest_measure_id
+            ballot_item_we_vote_id = one_position.contest_measure_we_vote_id
+            one_position_success = True
+        elif positive_value_exists(one_position.contest_office_we_vote_id):
+            # kind_of_ballot_item = OFFICE
+            # ballot_item_id = one_position.contest_office_id
+            ballot_item_we_vote_id = one_position.contest_office_we_vote_id
+            one_position_success = True
+        else:
+            # kind_of_ballot_item = "UNKNOWN_BALLOT_ITEM"
+            # ballot_item_id = None
+            ballot_item_we_vote_id = None
+            one_position_success = False
+
+        if one_position_success:
+            ballot_item_we_vote_ids_list.append(ballot_item_we_vote_id)
+
+            # if positive_value_exists(one_position.google_civic_election_id) \
+            #         and one_position.google_civic_election_id not in all_elections_that_have_positions:
+            #     all_elections_that_have_positions.append(one_position.google_civic_election_id)
+
+    # DALE 2017-02-10 Turning this off here for now -- may turn back on later
+    # # Now make sure a voter_guide entry exists for the organization for each election
+    # voter_guide_manager = VoterGuideManager()
+    # if positive_value_exists(opinion_maker_we_vote_id) and len(all_elections_that_have_positions):
+    #     for one_google_civic_election_id in all_elections_that_have_positions:
+    #         if not voter_guide_manager.voter_guide_exists(opinion_maker_we_vote_id, one_google_civic_election_id):
+    #             voter_guide_manager.update_or_create_organization_voter_guide_by_election_id(
+    #                 opinion_maker_we_vote_id, one_google_civic_election_id)
+
+    status += ' RETRIEVE_BALLOT_ITEM_WE_VOTE_IDS-SUCCESS'
+    success = True
+    results = {
+        'status':                       status,
+        'success':                      success,
+        'count':                        len(sorted_position_list),
+        'organization_id':              organization_id,
+        'organization_we_vote_id':      organization_we_vote_id,
+        'google_civic_election_id':     google_civic_election_id,
+        'state_code':                   state_code,
+        'ballot_item_we_vote_ids_list': ballot_item_we_vote_ids_list,
+    }
+    return results

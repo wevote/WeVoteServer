@@ -1287,18 +1287,20 @@ class PositionListManager(models.Model):
 
     def retrieve_all_positions_for_organization(self, organization_id, organization_we_vote_id,
                                                 stance_we_are_looking_for, friends_vs_public,
-                                                filter_for_voter=False, filter_out_voter=False, voter_device_id='',
+                                                show_positions_current_voter_election=False,
+                                                exclude_positions_current_voter_election=False, voter_device_id='',
                                                 google_civic_election_id=0, state_code=''):
         """
         Return a position list with all of the organization's positions.
-        Incoming filters include: stance_we_are_looking_for, friends_vs_public, filter_for_voter, filter_out_voter,
-          google_civic_election_id, state_code
+        Incoming filters include: stance_we_are_looking_for, friends_vs_public, show_positions_current_voter_election,
+          exclude_positions_current_voter_election, google_civic_election_id, state_code
         :param organization_id:
         :param organization_we_vote_id:
         :param stance_we_are_looking_for:
         :param friends_vs_public:
-        :param filter_for_voter: Show the positions relevant to the election the voter is currently looking at
-        :param filter_out_voter: Show positions for all elections the voter is NOT looking at
+        :param show_positions_current_voter_election: Show the positions relevant to the election the voter is
+          currently looking at
+        :param exclude_positions_current_voter_election: Show positions for all elections the voter is NOT looking at
         :param voter_device_id:
         :param google_civic_election_id:
         :param state_code:
@@ -1324,7 +1326,7 @@ class PositionListManager(models.Model):
         public_positions_list = []
         friends_positions_list = []
         position_list_found = False
-
+        public_query_exists = True
         if retrieve_public_positions:
             try:
                 public_positions_list = PositionEntered.objects.order_by('ballot_item_display_name',
@@ -1345,21 +1347,33 @@ class PositionListManager(models.Model):
                         public_positions_list = public_positions_list.filter(stance=stance_we_are_looking_for)
 
                 google_civic_election_id_local_scope = 0
-                if positive_value_exists(filter_for_voter) or positive_value_exists(filter_out_voter):
+                if positive_value_exists(show_positions_current_voter_election) \
+                        or positive_value_exists(exclude_positions_current_voter_election):
                     results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
                     google_civic_election_id_local_scope = results['google_civic_election_id']
 
                 # We can filter by only one of these
-                if positive_value_exists(filter_for_voter):  # This is the default option
-                    if positive_value_exists(google_civic_election_id_local_scope):
+                if positive_value_exists(show_positions_current_voter_election):  # This is the default option
+                    if positive_value_exists(google_civic_election_id):
+                        # Please note that this option doesn't catch Vote Smart ratings, which are not
+                        # linked by google_civic_election_id
+                        public_positions_list = public_positions_list.filter(
+                            google_civic_election_id=google_civic_election_id)
+                    elif positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items in this election
                         public_positions_list = public_positions_list.filter(
                             google_civic_election_id=google_civic_election_id_local_scope)
                     else:
                         # If no election is found for the voter, don't show any positions
                         public_positions_list = []
-                elif positive_value_exists(filter_out_voter):
-                    if positive_value_exists(google_civic_election_id_local_scope):
+                        public_query_exists = False
+                elif positive_value_exists(exclude_positions_current_voter_election):
+                    if positive_value_exists(google_civic_election_id):
+                        # Please note that this option doesn't catch Vote Smart ratings, which are not
+                        # linked by google_civic_election_id
+                        public_positions_list = public_positions_list.filter(
+                            google_civic_election_id=google_civic_election_id)
+                    elif positive_value_exists(google_civic_election_id_local_scope):
                         # Limit positions we can retrieve for an org to only the items NOT in this election
                         public_positions_list = public_positions_list.exclude(
                             google_civic_election_id=google_civic_election_id_local_scope)
@@ -1374,12 +1388,13 @@ class PositionListManager(models.Model):
                 elif positive_value_exists(state_code):
                     public_positions_list = public_positions_list.filter(state_code__iexact=state_code)
 
-                # And finally, make sure there is a stance, or text commentary -- exclude these cases
-                public_positions_list = public_positions_list.exclude(
-                    Q(stance__iexact=NO_STANCE) &
-                    (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
-                    (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
-                )
+                # And finally, make sure there is a stance, or text commentary -- exclude cases where there isn't
+                if public_query_exists:
+                    public_positions_list = public_positions_list.exclude(
+                        Q(stance__iexact=NO_STANCE) &
+                        (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
+                        (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+                    )
             except Exception as e:
                 handle_record_not_found_exception(e, logger=logger)
 
@@ -1425,6 +1440,7 @@ class PositionListManager(models.Model):
                             voter_is_friend_of_organization = True
 
                 friends_positions_list = []
+                friends_query_exists = True
                 if voter_is_friend_of_organization:
                     # If here, then the viewer is a friend with the organization. Look up positions that
                     #  are only shown to friends.
@@ -1452,12 +1468,13 @@ class PositionListManager(models.Model):
                     # Gather the ids for all positions in this election so we can figure out which positions
                     # relate to the election the voter is currently looking at, vs. for all other elections
                     google_civic_election_id_local_scope = 0
-                    if positive_value_exists(filter_for_voter) or positive_value_exists(filter_out_voter):
+                    if positive_value_exists(show_positions_current_voter_election) \
+                            or positive_value_exists(exclude_positions_current_voter_election):
                         results = figure_out_google_civic_election_id_voter_is_watching(voter_device_id)
                         google_civic_election_id_local_scope = results['google_civic_election_id']
 
                     # We can filter by only one of these
-                    if positive_value_exists(filter_for_voter):  # This is the default option
+                    if positive_value_exists(show_positions_current_voter_election):  # This is the default option
                         if positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items in this election
                             friends_positions_list = friends_positions_list.filter(
@@ -1465,7 +1482,8 @@ class PositionListManager(models.Model):
                         else:
                             # If no election is found for the voter, don't show any positions
                             friends_positions_list = []
-                    elif positive_value_exists(filter_out_voter):
+                            friends_query_exists = False
+                    elif positive_value_exists(exclude_positions_current_voter_election):
                         if positive_value_exists(google_civic_election_id_local_scope):
                             # Limit positions we can retrieve for an org to only the items NOT in this election
                             friends_positions_list = friends_positions_list.exclude(
@@ -1483,12 +1501,13 @@ class PositionListManager(models.Model):
                     elif positive_value_exists(state_code):
                         friends_positions_list = friends_positions_list.filter(state_code__iexact=state_code)
 
-                    # And finally, make sure there is a stance, or text commentary -- exclude these cases
-                    friends_positions_list = friends_positions_list.exclude(
-                        Q(stance__iexact=NO_STANCE) &
-                        (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
-                        (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
-                    )
+                    if friends_query_exists:
+                        # And finally, make sure there is a stance, or text commentary -- exclude cases when there isn't
+                        friends_positions_list = friends_positions_list.exclude(
+                            Q(stance__iexact=NO_STANCE) &
+                            (Q(statement_text__isnull=True) | Q(statement_text__exact='')) &
+                            (Q(statement_html__isnull=True) | Q(statement_html__exact=''))
+                        )
             except Exception as e:
                 handle_record_not_found_exception(e, logger=logger)
 

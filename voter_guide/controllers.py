@@ -10,7 +10,8 @@ from follow.models import FollowOrganizationList
 from itertools import chain
 import json
 from organization.models import OrganizationManager
-from position.models import ANY_STANCE, PositionEntered, PositionManager, PositionListManager
+from position.controllers import retrieve_ballot_item_we_vote_ids_for_organizations_to_follow
+from position.models import ANY_STANCE, PositionEntered, PositionManager, PositionListManager, SUPPORT
 import requests
 from voter.models import fetch_voter_id_from_voter_device_link, VoterManager
 from voter_guide.models import VoterGuideListManager, VoterGuideManager, VoterGuidePossibilityManager
@@ -695,9 +696,18 @@ def retrieve_voter_guides_to_follow_by_election_for_api(voter_id, google_civic_e
         voter_guide_list_found = True
         updated_voter_guide_list = []
         for one_voter_guide in voter_guide_list:
-            # Augment the voter guide with
-            ballot_item_we_vote_ids_this_org_supports = []
-            ballot_item_we_vote_ids_this_org_supports.append("wv01cand3616")
+            # Augment the voter guide with a list of ballot_item we_vote_id's that this org supports
+            stance_we_are_looking_for = SUPPORT
+            organization_id = 0
+            ballot_item_results = retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(
+                voter_id, organization_id, one_voter_guide.organization_we_vote_id, stance_we_are_looking_for,
+                google_civic_election_id)
+
+            if ballot_item_results['count']:
+                ballot_item_we_vote_ids_this_org_supports = ballot_item_results['ballot_item_we_vote_ids_list']
+            else:
+                ballot_item_we_vote_ids_this_org_supports = []
+
             one_voter_guide.ballot_item_we_vote_ids_this_org_supports = \
                 ballot_item_we_vote_ids_this_org_supports
             updated_voter_guide_list.append(one_voter_guide)
