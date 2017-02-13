@@ -1,13 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="chekov" lang="en">
 <head>
-    <meta charset="UTF-8">
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700|Material+Icons" rel="stylesheet">
+    <link href="{% static "apis_v1/apis_v1.css" %}" rel="stylesheet">
+    <meta content="We Vote API Server" property="og:site_name">
+    <meta content="website" property="og:type">
+    <meta content="en" property="og:locale">
     <title>{{ api_name }}</title>
+    <meta content="We Vote APIs: {{ api_name }}" property="og:title"/>
+    </meta>
+    </meta>
+    </meta>
+    </meta>
+    </link>
+    </link>
+    </meta>
+    </meta>
 </head>
-<body>
-<a href="{% url 'apis_v1:apisIndex'%}">< back to index</a>
+<body class="devsite-doc-page devsite-header-no-upper-tabs" id="top_of_page">
+<div class="devsite-wrapper">
+    <header class="devsite-top-section nocontent">
+        <div class="devsite-top-logo-row-wrapper-wrapper">
+            <div class="devsite-top-logo-row-wrapper">
+                <div class="devsite-top-logo-row devsite-full-site-width">
+                    <div class="devsite-product-name-wrapper">
+                        <span class="devsite-product-name">
+                {{ api_name }}
+                        </span>
+                    </div>
+                </div>
+             </div>
+          </div>
+      </div>
+      <div class="devsite-collapsible-section">
+        <div class="devsite-header-background devsite-full-site-width">
+        <div class="devsite-doc-set-nav-row devsite-full-site-width">
+              <li class="devsite-doc-set-nav-tab-container">
+              </li>
+         </div>
+         </div>
+      </div>
+  </header>
 
-<h1>{{ api_name }}</h1>
+
+<div class="devsite-site-mask">
+</div>
+
+<div class="devsite-main-content clearfix">
+<a href="{% url 'apis_v1:apisIndex'%}">< back to index</a>
+<h1 class="devsite-page-title" itemprop="name">
 <p>
     {{ api_introduction|safe }}
     {% load template_filters %}
@@ -48,11 +92,12 @@
                     <br />
                 {% endif %}
             {% endfor %}
+    <br>
             <input type="submit" value="Try it now">
         </form>
     </p>
 
-
+<br>
 <h2>HTTP request</h2>
 <p>{{ get_or_post }} {{ url_root }}/apis/v1/{{ api_slug }}</p>
 
