@@ -722,6 +722,21 @@ def generate_ballot_data(voter_device_link, voter_address):
     }
     return results
 
+def voter_ballot_list_retrieve_for_api(voter_id):
+    voter_ballot_saved_manager = VoterBallotSavedManager()
+
+    #If a voter_device_id was passed in, return a list of entries for that voter_id
+    if(voter_id):
+        voter_ballot_list_results = voter_ballot_saved_manager.retrieve_ballots_per_voter_id(voter_id)
+        if voter_ballot_list_results['voter_ballot_list_found']:
+            voter_ballot_list = voter_ballot_list_results['voter_ballot_list']
+            results = {
+                'status': "VOTER BALLOT LIST RETRIEVED",
+                'success': True,
+                'voter_ballot_list_found': True,
+                'voter_ballot_list': voter_ballot_list
+            }
+            return results
 
 def choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address):
     voter_id = voter_device_link.voter_id

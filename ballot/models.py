@@ -1259,6 +1259,31 @@ class VoterBallotSavedManager(models.Model):
     """
     """
 
+    def retrieve_ballots_per_voter_id(self, voter_id):
+        voter_ballot_list = []
+        voter_ballot_list_found = False
+        status = ""
+        success = False
+
+        if(voter_id):
+            voter_ballot_list_queryset = VoterBallotSaved.objects.all()
+            voter_ballot_list_queryset = voter_ballot_list_queryset.filter(voter_id=voter_id).count()
+            voter_ballot_list.append(voter_ballot_list_queryset)
+            if(voter_ballot_list_queryset > 0):
+                success = True
+                status += "VOTER BALLOT LIST RETRIEVED"
+                voter_ballot_list_found = True
+            else:
+                status = "VOTER BALLOT LIST NOT RETRIEVED - NO ENTRIES FOUND"
+
+        results = {
+            'success': success,
+            'status': status,
+            'voter_ballot_list_found': voter_ballot_list_found,
+            'voter_ballot_list': voter_ballot_list,
+        }
+        return results
+
     def __unicode__(self):
         return "VoterBallotSavedManager"
 
