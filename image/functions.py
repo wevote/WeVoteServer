@@ -33,6 +33,7 @@ def analyze_remote_url(image_url_https):
         image = Image.open(BytesIO(response.content))
         image_width, image_height = image.size
         image_format = image.format
+
     results = {
         'image_url_valid':              image_url_valid,
         'image_width':                  image_width,
@@ -40,5 +41,3 @@ def analyze_remote_url(image_url_https):
         'image_format':                 image_format.lower() if image_format is not None else image_format
     }
     return results
-
-
