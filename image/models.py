@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from config.base import get_environment_variable
+from datetime import date
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 from urllib.request import urlretrieve
@@ -46,6 +47,7 @@ class WeVoteImage(models.Model):
                                                    null=True, blank=True)
     we_vote_parent_image_id = models.BigIntegerField(verbose_name="Local id of parent image", null=True, blank=True)
     date_image_saved = models.DateTimeField(verbose_name="date when image saved on wevote", auto_now_add=True)
+    same_day_image_version = models.BigIntegerField(verbose_name="image version on same day", null=True, blank=True)
     is_active_version = models.BooleanField(verbose_name="True if image is newest", default=False)
     kind_of_image_twitter_background = models.BooleanField(verbose_name="image is twitter background", default=False)
     kind_of_image_twitter_banner = models.BooleanField(verbose_name="image is twitter banner", default=False)
@@ -75,23 +77,18 @@ class WeVoteImageManager(models.Model):
         """
         we_vote_image = WeVoteImage()
         try:
-            if positive_value_exists(voter_we_vote_id):
-                we_vote_image, created = WeVoteImage.objects.get_or_create(
-                    voter_we_vote_id=voter_we_vote_id,
-                    google_civic_election_id=google_civic_election_id,
-                    kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-                    kind_of_image_twitter_background=kind_of_image_twitter_background,
-                    kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-                    kind_of_image_profile_medium=kind_of_image_profile_medium,
-                    kind_of_image_profile_tiny=kind_of_image_profile_tiny,
-                )
-                we_vote_image_saved = True
-                success = True
-                status = "We_VOTE_IMAGE_CREATED"
-            else:
-                we_vote_image_saved = False
-                success = False
-                status = "WE_VOTE_IMAGE_NOT_CREATED_VOTER_WE_VOTE_ID_NOT_VALID"
+            we_vote_image = WeVoteImage.objects.create(
+                voter_we_vote_id=voter_we_vote_id,
+                google_civic_election_id=google_civic_election_id,
+                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                kind_of_image_twitter_background=kind_of_image_twitter_background,
+                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+                kind_of_image_profile_medium=kind_of_image_profile_medium,
+                kind_of_image_profile_tiny=kind_of_image_profile_tiny,
+            )
+            we_vote_image_saved = True
+            success = True
+            status = "We_VOTE_IMAGE_CREATED"
         except Exception as e:
             we_vote_image_saved = False
             success = False
@@ -172,7 +169,7 @@ class WeVoteImageManager(models.Model):
             we_vote_image.image_height = twitter_user_images_dict['analyze_image_url_results']['image_height']
             we_vote_image.source_image_still_valid = \
                 twitter_user_images_dict['analyze_image_url_results']['image_url_valid']
-
+            we_vote_image.same_day_image_version = twitter_user_images_dict['same_day_image_version']
             we_vote_image.save()
             success = True
             status = "SAVED_WE_VOTE_IMAGE_TWITTER_INFO"
@@ -224,42 +221,6 @@ class WeVoteImageManager(models.Model):
         :param we_vote_image_id:
         :return:
         """
-        we_vote_image_manager = WeVoteImageManager()
-        return we_vote_image_manager.retrieve_we_vote_image(we_vote_image_id, 0)
-
-    def retrieve_we_vote_image_from_voter_we_vote_id(self, voter_we_vote_id, kind_of_image_twitter_profile=False,
-                                                     kind_of_image_twitter_background=False,
-                                                     kind_of_image_twitter_banner=False,
-                                                     kind_of_image_profile_medium=False,
-                                                     kind_of_image_profile_tiny=False):
-        """
-        :param voter_we_vote_id:
-        :param kind_of_image_twitter_profile:
-        :param kind_of_image_twitter_background:
-        :param kind_of_image_twitter_banner:
-        :param kind_of_image_profile_medium:
-        :param kind_of_image_profile_tiny:
-        :return:
-        """
-        we_vote_image_id = 0
-        we_vote_image_manager = WeVoteImageManager()
-        return we_vote_image_manager.retrieve_we_vote_image(
-            we_vote_image_id, voter_we_vote_id, kind_of_image_twitter_profile, kind_of_image_twitter_background,
-            kind_of_image_twitter_banner, kind_of_image_profile_medium, kind_of_image_profile_tiny)
-
-    def retrieve_we_vote_image(self, we_vote_image_id, voter_we_vote_id, kind_of_image_twitter_profile=False,
-                               kind_of_image_twitter_background=False, kind_of_image_twitter_banner=False,
-                               kind_of_image_profile_medium=False, kind_of_image_profile_tiny=False):
-        """
-        :param we_vote_image_id:
-        :param voter_we_vote_id:
-        :param kind_of_image_twitter_profile:
-        :param kind_of_image_twitter_background:
-        :param kind_of_image_twitter_banner:
-        :param kind_of_image_profile_medium:
-        :param kind_of_image_profile_tiny:
-        :return:
-        """
         we_vote_image_on_stage = WeVoteImage()
         error_result = False
         exception_does_not_exist = False
@@ -270,16 +231,6 @@ class WeVoteImageManager(models.Model):
                 we_vote_image_on_stage = WeVoteImage.objects.get(
                     id=we_vote_image_id
                 )
-                we_vote_image_id = we_vote_image_on_stage.id
-                success = True
-            elif positive_value_exists(voter_we_vote_id):
-                we_vote_image_on_stage = WeVoteImage.objects.get(
-                    voter_we_vote_id__iexact=voter_we_vote_id,
-                    kind_of_image_twitter_profile=kind_of_image_twitter_profile,
-                    kind_of_image_twitter_background=kind_of_image_twitter_background,
-                    kind_of_image_twitter_banner=kind_of_image_twitter_banner,
-                    kind_of_image_profile_medium=kind_of_image_profile_medium,
-                    kind_of_image_profile_tiny=kind_of_image_profile_tiny)
                 we_vote_image_id = we_vote_image_on_stage.id
                 success = True
             else:
@@ -304,6 +255,110 @@ class WeVoteImageManager(models.Model):
             'we_vote_image_found':      True if we_vote_image_id > 0 else False,
             'we_vote_image_id':         we_vote_image_id,
             'we_vote_image':            we_vote_image_on_stage
+        }
+        return results
+
+    def retrieve_cached_we_vote_image_list(self, voter_we_vote_id, kind_of_image_twitter_profile=False,
+                                           kind_of_image_twitter_background=False, kind_of_image_twitter_banner=False,
+                                           kind_of_image_profile_medium=False, kind_of_image_profile_tiny=False):
+        """
+        :param voter_we_vote_id:
+        :param kind_of_image_twitter_profile:
+        :param kind_of_image_twitter_background:
+        :param kind_of_image_twitter_banner:
+        :param kind_of_image_profile_medium:
+        :param kind_of_image_profile_tiny:
+        :return:
+        """
+        we_vote_image_list = []
+        status = ""
+        try:
+            we_vote_image_queryset = WeVoteImage.objects.all()
+            we_vote_image_queryset = we_vote_image_queryset.filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                kind_of_image_twitter_background=kind_of_image_twitter_background,
+                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+                kind_of_image_profile_medium=kind_of_image_profile_medium,
+                kind_of_image_profile_tiny=kind_of_image_profile_tiny)
+            we_vote_image_list = we_vote_image_queryset
+
+            if len(we_vote_image_list):
+                success = True
+                we_vote_image_list_found = True
+                status += ' CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+            else:
+                success = True
+                we_vote_image_list_found = False
+                status += ' NO_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+
+        except WeVoteImage.DoesNotExist as e:
+            status += " WE_VOTE_IMAGE_DOES_NOT_EXIST "
+            success = True
+            we_vote_image_list_found = False
+        except Exception as e:
+            status += " FAILED_TO RETRIEVE_CACHED_WE_VOTE_IMAGE_LIST "
+            success = False
+            we_vote_image_list_found = False
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'we_vote_image_list_found': we_vote_image_list_found,
+            'we_vote_image_list':       we_vote_image_list
+        }
+        return results
+
+    def retrieve_todays_cached_we_vote_image_list(self, voter_we_vote_id, kind_of_image_twitter_profile=False,
+                                                  kind_of_image_twitter_background=False,
+                                                  kind_of_image_twitter_banner=False,
+                                                  kind_of_image_profile_medium=False,
+                                                  kind_of_image_profile_tiny=False):
+        """
+        :param voter_we_vote_id:
+        :param kind_of_image_twitter_profile:
+        :param kind_of_image_twitter_background:
+        :param kind_of_image_twitter_banner:
+        :param kind_of_image_profile_medium:
+        :param kind_of_image_profile_tiny:
+        :return:
+        """
+        we_vote_image_list = []
+        status = ""
+        today_date = date.today()
+        try:
+            we_vote_image_queryset = WeVoteImage.objects.all()
+            we_vote_image_queryset = we_vote_image_queryset.filter(
+                voter_we_vote_id__iexact=voter_we_vote_id,
+                date_image_saved__contains=today_date,
+                kind_of_image_twitter_profile=kind_of_image_twitter_profile,
+                kind_of_image_twitter_background=kind_of_image_twitter_background,
+                kind_of_image_twitter_banner=kind_of_image_twitter_banner,
+                kind_of_image_profile_medium=kind_of_image_profile_medium,
+                kind_of_image_profile_tiny=kind_of_image_profile_tiny)
+            we_vote_image_list = we_vote_image_queryset
+
+            if len(we_vote_image_list):
+                success = True
+                we_vote_image_list_found = True
+                status += ' TODAY_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+            else:
+                success = True
+                we_vote_image_list_found = False
+                status += ' NO_TODAY_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+
+        except WeVoteImage.DoesNotExist as e:
+            status += " WE_VOTE_IMAGE_DOES_NOT_EXIST "
+            success = True
+            we_vote_image_list_found = False
+        except Exception as e:
+            status += " FAILED_TO RETRIEVE_TODAY_CACHED_WE_VOTE_IMAGE_LIST "
+            success = False
+            we_vote_image_list_found = False
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'we_vote_image_list_found': we_vote_image_list_found,
+            'we_vote_image_list':       we_vote_image_list
         }
         return results
 
