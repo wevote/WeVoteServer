@@ -1535,15 +1535,26 @@ def voter_ballot_list_retrieve_view(request):
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    voter_id = 0
 
-    if (voter_device_id):
+    if positive_value_exists(voter_device_id):
         voter_device_link_manager = VoterDeviceLinkManager()
         voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+        voter_device_link = voter_device_link_results['voter_device_link']
         if voter_device_link_results['voter_device_link_found']:
-            voter_device_link = voter_device_link_results['voter_device_link']
             voter_id = voter_device_link.voter_id
 
-    results = voter_ballot_list_retrieve_for_api(voter_id = voter_id)
+    if not positive_value_exists(voter_id):
+        json_data = {
+            'status': "VOTER_ID_MISSING",
+            'success': False,
+            'voter_device_id': voter_device_id,
+            'voter_ballot_list_found': False,
+            'voter_ballot_list': [],
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    results = voter_ballot_list_retrieve_for_api(voter_id)
 
     json_data = {
         'status': results['status'],

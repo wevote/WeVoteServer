@@ -732,11 +732,12 @@ def generate_ballot_data(voter_device_link, voter_address):
     }
     return results
 
+
 def voter_ballot_list_retrieve_for_api(voter_id):
     voter_ballot_saved_manager = VoterBallotSavedManager()
     voter_ballot_list_for_json = []
 
-    #If a voter_device_id was passed in, return a list of entries for that voter_id
+    # If a voter_device_id was passed in, return a list of entries for that voter_id
     if positive_value_exists(voter_id):
         voter_ballot_list_results = voter_ballot_saved_manager.retrieve_ballots_per_voter_id(voter_id)
         if voter_ballot_list_results['voter_ballot_list_found']:
@@ -745,7 +746,7 @@ def voter_ballot_list_retrieve_for_api(voter_id):
                 one_voter_ballot_list = {
                     "google_civic_election_id":       one_ballot_entry.google_civic_election_id,
                     "election_description_text":      one_ballot_entry.election_description_text,
-                    "election_date":                  one_ballot_entry.election_date,
+                    "election_date":                  one_ballot_entry.election_date_text(),
                     "original_text_for_map_search":   one_ballot_entry.original_text_for_map_search
                 }
                 voter_ballot_list_for_json.append(one_voter_ballot_list)
