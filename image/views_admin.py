@@ -6,7 +6,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
-from image.controllers import migrate_remote_voter_image_urls_to_local_cache
+from image.controllers import cache_all_kind_of_images_locally_for_all_voter
 from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id
@@ -25,21 +25,12 @@ def cache_images_locally_for_all_voters_view(request):
     voter_id = convert_to_int(voter_id)
 
     messages_on_stage = get_messages(request)
-    '''
-    voter_list = Voter.objects.order_by('-is_admin', '-is_verified_volunteer', 'facebook_email', 'twitter_screen_name',
-                                        'last_name', 'first_name')
-    voter_list = voter_list[:200]
 
-    for voter in voter_list:
-        results = cache_images_locally_for_voter_api(voter.id)
-    '''
-    cache_all_kind_of_images_results = migrate_remote_voter_image_urls_to_local_cache(voter_id)
+    cache_images_locally_for_all_voters_results = cache_all_kind_of_images_locally_for_all_voter()
+
     template_values = {
         'messages_on_stage':                messages_on_stage,
-        'voter_id':                         voter_id,
-        'voter_we_vote_id':                 cache_all_kind_of_images_results['voter_we_vote_id'],
-        'cached_twitter_profile_image':      cache_all_kind_of_images_results['cached_twitter_profile_image'],
-        'cached_twitter_background_image':  cache_all_kind_of_images_results['cached_twitter_background_image'],
-        'cached_twitter_banner_image':      cache_all_kind_of_images_results['cached_twitter_banner_image'],
+        'cache_images_for_all_voters':      cache_images_locally_for_all_voters_results,
+        'voter_id_signed_in':               voter_id
     }
     return render(request, 'image/cache_images_locally_for_all_voters.html', template_values)

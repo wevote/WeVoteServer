@@ -9,23 +9,30 @@
 {%  block content %}
 <h1>Cached images for signed in voter</h1>
 
-{% if voter_id %}
+{% if cache_images_for_all_voters %}
     <table border="1" cellpadding="10">
         <tr>
-            <td>ID</td>
+            <td></td>
+            <td>Voter ID</td>
             <td>We Vote ID</td>
             <td>twitter_profile_image</td>
             <td>twitter_background_image</td>
             <td>twitter_banner_image</td>
         </tr>
 
+    {% for cache_images_for_a_voter in cache_images_for_all_voters %}
         <tr>
-            <td>{{ voter_id }}</td>
-            <td>{{ voter_we_vote_id }}</td>
-            <td>{{ cached_twitter_profile_image }}</td>
-            <td>{{ cached_twitter_background_image }}</td>
-            <td>{{ cached_twitter_banner_image }}</td>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if cache_images_for_a_voter.voter_id == voter_id_signed_in %}*ME*{% else %}{% endif %}
+            </td>
+            <td>{{ cache_images_for_a_voter.voter_we_vote_id }}</td>
+            <td>{{ cache_images_for_a_voter.cached_twitter_profile_image }}</td>
+            <td>{{ cache_images_for_a_voter.cached_twitter_background_image }}</td>
+            <td>{{ cache_images_for_a_voter.cached_twitter_banner_image }}</td>
         </tr>
+    {% endfor %}
+
     </table>
 {% else %}
     <p>(no voters found)</p>
