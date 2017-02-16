@@ -43,13 +43,23 @@ def ballot_items_import_from_master_server(request, google_civic_election_id):
         "format":                   'json',
         "google_civic_election_id": google_civic_election_id,
     })
-    structured_json = json.loads(request.text)
-    results = filter_ballot_items_structured_json_for_local_duplicates(structured_json)
-    filtered_structured_json = results['structured_json']
-    duplicates_removed = results['duplicates_removed']
+    try:
+        structured_json = json.loads(request.text)
+        results = filter_ballot_items_structured_json_for_local_duplicates(structured_json)
+        filtered_structured_json = results['structured_json']
+        duplicates_removed = results['duplicates_removed']
 
-    import_results = ballot_items_import_from_structured_json(filtered_structured_json)
-    import_results['duplicates_removed'] = duplicates_removed
+        import_results = ballot_items_import_from_structured_json(filtered_structured_json)
+        import_results['duplicates_removed'] = duplicates_removed
+    except Exception as e:
+        import_results = {
+            'success': False,
+            'status': "FAILED_TO_GET_JSON_FROM_MASTER_SERVER",
+            'saved': 0,
+            'updated': 0,
+            'not_processed': 0,
+            'duplicates_removed': 0
+        }
 
     return import_results
 
@@ -721,6 +731,39 @@ def generate_ballot_data(voter_device_link, voter_address):
         'voter_ballot_saved':       None,
     }
     return results
+
+def voter_ballot_list_retrieve_for_api(voter_id):
+    voter_ballot_saved_manager = VoterBallotSavedManager()
+    voter_ballot_list_for_json = []
+
+    #If a voter_device_id was passed in, return a list of entries for that voter_id
+    if positive_value_exists(voter_id):
+        voter_ballot_list_results = voter_ballot_saved_manager.retrieve_ballots_per_voter_id(voter_id)
+        if voter_ballot_list_results['voter_ballot_list_found']:
+            voter_ballot_list = voter_ballot_list_results['voter_ballot_list']
+            for one_ballot_entry in voter_ballot_list:
+                one_voter_ballot_list = {
+                    "google_civic_election_id":       one_ballot_entry.google_civic_election_id,
+                    "election_description_text":      one_ballot_entry.election_description_text,
+                    "election_date":                  one_ballot_entry.election_date,
+                    "original_text_for_map_search":   one_ballot_entry.original_text_for_map_search
+                }
+                voter_ballot_list_for_json.append(one_voter_ballot_list)
+            results = {
+                'status': "VOTER_BALLOT_LIST_RETRIEVED",
+                'success': True,
+                'voter_ballot_list_found': True,
+                'voter_ballot_list': voter_ballot_list_for_json
+            }
+            return results
+        else:
+            results = {
+                'status': "VOTER_BALLOT_LIST_NOT_RETRIEVED",
+                'success': True,
+                'voter_ballot_list_found': False,
+                'voter_ballot_list': voter_ballot_list_for_json
+            }
+        return results
 
 
 def choose_election_from_existing_data(voter_device_link, google_civic_election_id, voter_address):

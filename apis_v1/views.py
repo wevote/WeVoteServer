@@ -46,7 +46,7 @@ from position.models import ANY_STANCE, SUPPORT, STILL_DECIDING, INFORMATION_ONL
 from position_like.controllers import position_like_count_for_api, voter_position_like_off_save_for_api, \
     voter_position_like_on_save_for_api, voter_position_like_status_retrieve_for_api
 from quick_info.controllers import quick_info_retrieve_for_api
-from ballot.controllers import choose_election_and_prepare_ballot_data
+from ballot.controllers import choose_election_and_prepare_ballot_data, voter_ballot_list_retrieve_for_api
 from ballot.models import OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -1526,6 +1526,33 @@ def voter_ballot_items_retrieve_from_google_civic_view(request):
             )
 
     return HttpResponse(json.dumps(results), content_type='application/json')
+
+
+def voter_ballot_list_retrieve_view(request):
+    """
+    (voterBallotListRetrieve) Retrieve a list of election ballots per voter_id.
+    :param request:
+    :return:
+    """
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    if (voter_device_id):
+        voter_device_link_manager = VoterDeviceLinkManager()
+        voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(voter_device_id)
+        if voter_device_link_results['voter_device_link_found']:
+            voter_device_link = voter_device_link_results['voter_device_link']
+            voter_id = voter_device_link.voter_id
+
+    results = voter_ballot_list_retrieve_for_api(voter_id = voter_id)
+
+    json_data = {
+        'status': results['status'],
+        'success': results['success'],
+        'voter_device_id': voter_device_id,
+        'voter_ballot_list_found': results['voter_ballot_list_found'],
+        'voter_ballot_list': results['voter_ballot_list'],
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 def voter_count_view(request):
