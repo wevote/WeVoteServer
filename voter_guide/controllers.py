@@ -262,7 +262,7 @@ def voter_guide_possibility_save_for_api(voter_device_id, voter_guide_possibilit
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFollow
+def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFollowRetrieve
                                             kind_of_ballot_item='', ballot_item_we_vote_id='',
                                             google_civic_election_id=0, search_string='',
                                             maximum_number_to_retrieve=0):
