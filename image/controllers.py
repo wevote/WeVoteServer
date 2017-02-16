@@ -7,13 +7,14 @@ from .functions import analyze_remote_url
 from import_export_twitter.functions import retrieve_twitter_user_info
 from .models import WeVoteImageManager
 from twitter.models import TwitterUserManager
-from voter.models import VoterManager, VoterDeviceLinkManager
+from voter.models import VoterManager, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
 from wevote_functions.functions import positive_value_exists
 import requests
 import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
 HTTP_OK = 200
+TWITTER_USER_DOES_NOT_EXIST = "twitter user does not exist"
 TWITTER_URL_NOT_FOUND = "twitter url not found"
 IMAGE_ALREADY_CACHED = "image already cached"
 ALL_KIND_OF_IMAGE = ['kind_of_image_twitter_profile', 'kind_of_image_twitter_background',
@@ -26,22 +27,29 @@ TWITTER_BANNER_IMAGE_NAME = "twitter_banner_image"
 MASTER_IMAGE = "master"
 
 
-def cache_all_kind_of_images_locally_for_voter(voter_id):
+def cache_all_kind_of_images_locally_for_all_voter():
     """
-    Cache All kind of images locally for a voter such as profile, background
-    :param voter_id:
+    Cache all kind of images locally for all voters
     :return:
     """
-    pass
+    cache_images_locally_for_all_voters_results = []
+    voter_list = Voter.objects.all()
+    voter_list = voter_list[:200]
 
+    for voter in voter_list:
+        cache_images_for_a_voter_results = migrate_remote_voter_image_urls_to_local_cache(voter.id)
+        cache_images_locally_for_all_voters_results.append(cache_images_for_a_voter_results)
+
+    return cache_images_locally_for_all_voters_results
 
 def migrate_remote_voter_image_urls_to_local_cache(voter_id):
     """
-    Migrating vote image urls to local cache
+    Cache all kind of images locally for a voter such as profile, background
     :param voter_id:
     :return:
     """
     cache_all_kind_of_images_results = {
+        'voter_id':                         voter_id,
         'voter_we_vote_id':                 False,
         'cached_twitter_profile_image':     False,
         'cached_twitter_background_image':  False,
@@ -51,6 +59,7 @@ def migrate_remote_voter_image_urls_to_local_cache(voter_id):
     twitter_image_url_changed = False
     is_active_version = False
     we_vote_image_manager = WeVoteImageManager()
+    voter_address_manager = VoterAddressManager()
     voter_manager = VoterManager()
     voter_device_link_manager = VoterDeviceLinkManager()
 
@@ -63,9 +72,26 @@ def migrate_remote_voter_image_urls_to_local_cache(voter_id):
         cache_all_kind_of_images_results['voter_we_vote_id'] = voter.we_vote_id
         voter_device_link_results = voter_device_link_manager.retrieve_voter_device_link(0, voter_id)
         if voter_device_link_results['success']:
-            results = choose_election_from_existing_data(voter_device_link_results['voter_device_link'], 0, '')
+            voter_address_results = voter_address_manager.retrieve_address (0, voter_id)
+            if voter_address_results['voter_address_found']:
+                voter_address = voter_address_results['voter_address']
+            else:
+                voter_address = VoterAddress()
+
+            results = choose_election_from_existing_data(voter_device_link_results['voter_device_link'],
+                                                         0, voter_address)
             google_civic_election_id = results['google_civic_election_id']
     else:
+        return cache_all_kind_of_images_results
+
+    if not positive_value_exists(voter.twitter_id):
+        cache_all_kind_of_images_results = {
+            'voter_id':                         voter_id,
+            'voter_we_vote_id':                 voter.we_vote_id,
+            'cached_twitter_profile_image':     TWITTER_USER_DOES_NOT_EXIST,
+            'cached_twitter_background_image':  TWITTER_USER_DOES_NOT_EXIST,
+            'cached_twitter_banner_image':      TWITTER_USER_DOES_NOT_EXIST
+        }
         return cache_all_kind_of_images_results
 
     for kind_of_image in ALL_KIND_OF_IMAGE:
@@ -152,7 +178,7 @@ def migrate_remote_voter_image_urls_to_local_cache(voter_id):
                     voter.twitter_id, voter.twitter_screen_name, kind_of_image_twitter_banner=True)
                 if not twitter_profile_banner_url_https:
                     # new twitter profile image not found
-                    cache_all_kind_of_images_results['cached_twitter_background_image'] = \
+                    cache_all_kind_of_images_results['cached_twitter_banner_image'] = \
                         TWITTER_URL_NOT_FOUND
                     continue
                 twitter_image_url_changed = True
