@@ -6,7 +6,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
-from image.controllers import cache_all_kind_of_images_locally_for_voter
+from image.controllers import migrate_remote_voter_image_urls_to_local_cache
 from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id
@@ -33,12 +33,12 @@ def cache_images_locally_for_all_voters_view(request):
     for voter in voter_list:
         results = cache_images_locally_for_voter_api(voter.id)
     '''
-    cache_all_kind_of_images_results = cache_all_kind_of_images_locally_for_voter(voter_id)
+    cache_all_kind_of_images_results = migrate_remote_voter_image_urls_to_local_cache(voter_id)
     template_values = {
         'messages_on_stage':                messages_on_stage,
         'voter_id':                         voter_id,
         'voter_we_vote_id':                 cache_all_kind_of_images_results['voter_we_vote_id'],
-        'cached_twitter_prfile_image':      cache_all_kind_of_images_results['cached_twitter_prfile_image'],
+        'cached_twitter_profile_image':      cache_all_kind_of_images_results['cached_twitter_profile_image'],
         'cached_twitter_background_image':  cache_all_kind_of_images_results['cached_twitter_background_image'],
         'cached_twitter_banner_image':      cache_all_kind_of_images_results['cached_twitter_banner_image'],
     }
