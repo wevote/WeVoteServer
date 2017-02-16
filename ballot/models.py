@@ -1276,7 +1276,7 @@ class VoterBallotSavedManager(models.Model):
                 success = False
                 status += "VOTER_BALLOT_LIST_FAILED_TO_RETRIEVE"
         else:
-            status = "VOTER_BALLOT_LIST_NOT_RETRIEVED"
+            status += "VOTER_BALLOT_LIST_NOT_RETRIEVED"
 
         results = {
             'success': success,
