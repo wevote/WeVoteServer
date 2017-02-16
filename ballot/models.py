@@ -1265,16 +1265,18 @@ class VoterBallotSavedManager(models.Model):
         status = ""
         success = False
 
-        if(voter_id):
-            voter_ballot_list_queryset = VoterBallotSaved.objects.all()
-            voter_ballot_list_queryset = voter_ballot_list_queryset.filter(voter_id=voter_id).count()
-            voter_ballot_list.append(voter_ballot_list_queryset)
-            if(voter_ballot_list_queryset > 0):
+        if positive_value_exists(voter_id):
+            try:
+                voter_ballot_list_queryset = VoterBallotSaved.objects.filter(voter_id=voter_id)
+                voter_ballot_list = list(voter_ballot_list_queryset)
                 success = True
-                status += "VOTER BALLOT LIST RETRIEVED"
-                voter_ballot_list_found = True
-            else:
-                status = "VOTER BALLOT LIST NOT RETRIEVED - NO ENTRIES FOUND"
+                status += "VOTER_BALLOT_LIST_RETRIEVED"
+                voter_ballot_list_found = len(voter_ballot_list)
+            except Exception as e:
+                success = False
+                status += "VOTER_BALLOT_LIST_FAILED_TO_RETRIEVE"
+        else:
+            status = "VOTER_BALLOT_LIST_NOT_RETRIEVED"
 
         results = {
             'success': success,

@@ -1548,7 +1548,7 @@ def voter_ballot_list_retrieve_view(request):
     json_data = {
         'status': results['status'],
         'success': results['success'],
-        'voter_id': voter_id,
+        'voter_device_id': voter_device_id,
         'voter_ballot_list_found': results['voter_ballot_list_found'],
         'voter_ballot_list': results['voter_ballot_list'],
     }
