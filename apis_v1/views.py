@@ -1371,6 +1371,7 @@ def voter_address_save_view(request):  # voterAddressSave
     :return:
     """
     google_civic_election_id = 0
+    simple_save = request.GET.get('simple_save', False)
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     try:
@@ -1428,6 +1429,18 @@ def voter_address_save_view(request):  # voterAddressSave
     voter_address_manager = VoterAddressManager()
     voter_address_save_results = voter_address_manager.update_or_create_voter_address(
         voter_id, BALLOT_ADDRESS, text_for_map_search)
+
+    # If simple_save is passed in, only save address and then ßsend response
+    if positive_value_exists(simple_save):
+        success = voter_address_save_results['success'] and voter_address_save_results['voter_address_found']
+
+        json_data = {
+            'status': "SIMPLE_ADDRESS_SAVE",
+            'success': success,
+            'voter_device_id': voter_device_id,
+            'text_for_map_search': text_for_map_search,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     if voter_address_save_results['success'] and voter_address_save_results['voter_address_found']:
         # # Remove the former google_civic_election_id from this voter_device_id
