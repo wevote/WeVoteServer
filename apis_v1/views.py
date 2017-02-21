@@ -1385,20 +1385,22 @@ def voter_address_save_view(request):  # voterAddressSave
     device_id_results = is_voter_device_id_valid(voter_device_id)
     if not device_id_results['success']:
         json_data = {
-                'status': device_id_results['status'],
-                'success': False,
-                'voter_device_id': voter_device_id,
-                'text_for_map_search': text_for_map_search,
-            }
+            'status':               device_id_results['status'],
+            'success':              False,
+            'voter_device_id':      voter_device_id,
+            'text_for_map_search':  text_for_map_search,
+            'simple_save':          simple_save,
+        }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     if not address_variable_exists:
         json_data = {
-                'status': "MISSING_GET_VARIABLE-ADDRESS",
-                'success': False,
-                'voter_device_id': voter_device_id,
-                'text_for_map_search': text_for_map_search,
-            }
+            'status':               "MISSING_GET_VARIABLE-ADDRESS",
+            'success':              False,
+            'voter_device_id':      voter_device_id,
+            'text_for_map_search':  text_for_map_search,
+            'simple_save':          simple_save,
+        }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     # We retrieve voter_device_link
@@ -1409,19 +1411,21 @@ def voter_address_save_view(request):  # voterAddressSave
         voter_id = voter_device_link.voter_id
     else:
         json_data = {
-            'status': "VOTER_DEVICE_LINK_NOT_FOUND_FROM_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'text_for_map_search': text_for_map_search,
+            'status':               "VOTER_DEVICE_LINK_NOT_FOUND_FROM_DEVICE_ID",
+            'success':              False,
+            'voter_device_id':      voter_device_id,
+            'text_for_map_search':  text_for_map_search,
+            'simple_save':          simple_save,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     if not positive_value_exists(voter_id):
         json_data = {
-            'status': "VOTER_NOT_FOUND_FROM_DEVICE_ID",
-            'success': False,
-            'voter_device_id': voter_device_id,
-            'text_for_map_search': text_for_map_search,
+            'status':               "VOTER_NOT_FOUND_FROM_DEVICE_ID",
+            'success':              False,
+            'voter_device_id':      voter_device_id,
+            'text_for_map_search':  text_for_map_search,
+            'simple_save':          simple_save,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1435,10 +1439,11 @@ def voter_address_save_view(request):  # voterAddressSave
         success = voter_address_save_results['success'] and voter_address_save_results['voter_address_found']
 
         json_data = {
-            'status': "SIMPLE_ADDRESS_SAVE",
-            'success': success,
-            'voter_device_id': voter_device_id,
-            'text_for_map_search': text_for_map_search,
+            'status':               "SIMPLE_ADDRESS_SAVE",
+            'success':              success,
+            'voter_device_id':      voter_device_id,
+            'text_for_map_search':  text_for_map_search,
+            'simple_save':          True,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1470,6 +1475,7 @@ def voter_address_save_view(request):  # voterAddressSave
                     voter_device_link, google_civic_election_id)
 
     json_data = voter_ballot_items_retrieve_for_api(voter_device_id, google_civic_election_id)
+    json_data['simple_save'] = simple_save
 
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
