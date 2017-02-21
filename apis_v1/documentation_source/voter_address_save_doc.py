@@ -24,6 +24,11 @@ def voter_address_save_doc_template_values(url_root):
             'description':  'The address text a voter enters to identify the location tied to their ballot. '
                             '(Not mailing address.)',
         },
+        {
+            'name':         'simple_save',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'Just save the address without returning a ballot with the results.',
+        },
     ]
     optional_query_parameter_list = [
         # {
@@ -66,6 +71,7 @@ def voter_address_save_doc_template_values(url_root):
                    '  "voter_device_id": string (88 characters long),\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "text_for_map_search": string,\n' \
+                   '  "simple_save": boolean,\n' \
                    '  "substituted_address_nearby": string,\n' \
                    '  "ballot_found": boolean,\n' \
                    '  "ballot_caveat": string,\n' \
