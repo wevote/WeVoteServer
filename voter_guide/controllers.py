@@ -397,6 +397,17 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
                         position = results['position']
                         position_found = True
 
+                # Since a ballot_item_we_vote_id came in, we only want to return a voter guide if there is a
+                #  support, oppose, or a comment
+                if position_found:
+                    if position.is_support_or_positive_rating() or position.is_oppose_or_negative_rating() or \
+                            position.statement_text:
+                        # We can proceed
+                        pass
+                    else:
+                        # We shouldn't return a voter_guide in this case without support/oppose/or a comment
+                        continue
+
                 if position_found:
                     one_voter_guide['is_support'] = position.is_support()
                     one_voter_guide['is_positive_rating'] = position.is_positive_rating()

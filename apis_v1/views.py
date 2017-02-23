@@ -36,7 +36,6 @@ from measure.controllers import measure_retrieve_for_api
 from office.controllers import office_retrieve_for_api
 from organization.controllers import organization_retrieve_for_api, organization_save_for_api, \
     organization_search_for_api, organizations_followed_retrieve_for_api
-from organization.models import OrganizationManager
 from position.controllers import position_list_for_ballot_item_for_api, position_list_for_opinion_maker_for_api, \
     position_list_for_voter_for_api, \
     position_retrieve_for_api, position_save_for_api, voter_all_positions_retrieve_for_api, \
@@ -179,6 +178,7 @@ def facebook_friends_action_view(request):  # facebookFriendsActions
         'facebook_friends_suggested':       results['facebook_friends_suggested'],
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 def facebook_disconnect_view(request):
     """
@@ -1821,7 +1821,7 @@ def voter_guides_ignored_retrieve_view(request):  # voterGuidesIgnoredRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
     return voter_guides_ignored_retrieve_for_api(voter_device_id=voter_device_id,
-                                                  maximum_number_to_retrieve=maximum_number_to_retrieve)
+                                                 maximum_number_to_retrieve=maximum_number_to_retrieve)
 
 
 def voter_guides_to_follow_retrieve_view(request):  # voterGuidesToFollowRetrieve
