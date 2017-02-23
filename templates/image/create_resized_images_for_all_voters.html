@@ -1,0 +1,70 @@
+{# templates/image/create_resized_images_for_all_voters.html #}
+{% extends "template_base.html" %}
+
+{% block title %}
+    {% if voter_id_signed_in %}{{ voter_id_signed_in }}
+    {% else %}No Voter Found {% endif %}voter_id_signed_in
+{% endblock %}
+
+{%  block content %}
+<a href="{% url 'image:cache_images_locally_for_all_voters' %}">< Back to Cache images locally for all voters</a>
+<br />
+<h1>Created resized images for all voters</h1>
+
+{% if create_resized_images_for_all_voters %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <td></td>
+            <td>We Vote ID</td>
+            <td>medium_twitter_profile_image</td>
+            <td>tiny_twitter_profile_image</td>
+            <td>medium_twitter_background_image</td>
+            <td>tiny_twitter_background_image</td>
+            <td>medium_twitter_banner_image</td>
+            <td>tiny_twitter_banner_image</td>
+        </tr>
+
+    {% for create_resized_images_for_a_voter in create_resized_images_for_all_voters %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ create_resized_images_for_a_voter.voter_we_vote_id }}</td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_medium_twitter_profile_image %}
+                    {{ create_resized_images_for_a_voter.cached_medium_twitter_profile_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_tiny_twitter_profile_image %}
+                    {{ create_resized_images_for_a_voter.cached_tiny_twitter_profile_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_medium_twitter_background_image %}
+                    {{ create_resized_images_for_a_voter.cached_medium_twitter_background_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_tiny_twitter_background_image %}
+                    {{ create_resized_images_for_a_voter.cached_tiny_twitter_background_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_medium_twitter_banner_image %}
+                    {{ create_resized_images_for_a_voter.cached_medium_twitter_banner_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_tiny_twitter_banner_image %}
+                    {{ create_resized_images_for_a_voter.cached_tiny_twitter_banner_image }}
+                {% else %}{% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+
+    </table>
+{% else %}
+    <p>(no voters found)</p>
+{% endif %}
+<br />
+
+{% endblock %}

@@ -2,12 +2,16 @@
 {% extends "template_base.html" %}
 
 {% block title %}
-    {% if voter_we_vote_id %}{{ voter_we_vote_id }}
-    {% else %}No Voter Found {% endif %}voter_we_vote_id
+    {% if voter_id_signed_in %}{{ voter_id_signed_in }}
+    {% else %}No Voter Found {% endif %}voter_id_signed_in
 {% endblock %}
 
 {%  block content %}
-<h1>Cached images for signed in voter</h1>
+<a href="{% url 'voter:voter_list' %}">< Back to Voters</a><br />
+<br />
+<a href="{% url 'image:create_resized_images_for_all_voters' 0 %}">Create resized images for all voters</a>
+<br />
+<h1>Cached images for all voters</h1>
 
 {% if cache_images_for_all_voters %}
     <table border="1" cellpadding="10">
@@ -18,6 +22,7 @@
             <td>twitter_profile_image</td>
             <td>twitter_background_image</td>
             <td>twitter_banner_image</td>
+            <td></td>
         </tr>
 
     {% for cache_images_for_a_voter in cache_images_for_all_voters %}
@@ -30,6 +35,11 @@
             <td>{{ cache_images_for_a_voter.cached_twitter_profile_image }}</td>
             <td>{{ cache_images_for_a_voter.cached_twitter_background_image }}</td>
             <td>{{ cache_images_for_a_voter.cached_twitter_banner_image }}</td>
+            <td>
+                <a href="{% url 'image:create_resized_images_for_all_voters' cache_images_for_a_voter.voter_id %}">
+                    Create resized images
+                </a>
+            </td>
         </tr>
     {% endfor %}
 
