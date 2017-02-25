@@ -19,6 +19,21 @@ def friend_invitation_by_email_send_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
+            'name':         'email_address_array',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Array of Email address for friends to send the invitation to.',
+        },
+        {
+            'name':         'first_name_array',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Array of First Name for friends to send the invitation to.',
+        },
+        {
+            'name':         'last_name_array',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'Array of Last Name for friends to send the invitation to.',
+        },
+        {
             'name':         'email_addresses_raw',
             'value':        'string',  # boolean, integer, long, string
             'description':  'Email addresses to send the invitation to.',

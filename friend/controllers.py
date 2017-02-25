@@ -152,12 +152,34 @@ def friend_accepted_invitation_send(accepting_voter_we_vote_id, original_sender_
     return results
 
 
-def friend_invitation_by_email_send_for_api(voter_device_id, email_addresses_raw, invitation_message,
-                                            sender_email_address):
+def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array, first_name_array, last_name_array,
+                                            email_addresses_raw, invitation_message,
+                                            sender_email_address):  # friendInvitationByEmailSend
+    """
+
+    :param voter_device_id:
+    :param email_address_array:
+    :param first_name_array:
+    :param last_name_array:
+    :param email_addresses_raw:
+    :param invitation_message:
+    :param sender_email_address:
+    :return:
+    """
     success = False
     status = ""
     error_message_to_show_voter = ""
+    friend_email_address_dict = []
+    friend_email_address_array = {}
 
+    if email_address_array:
+        #reconstruct dictionary array from lists
+        for n in range(len(email_address_array)):
+           friend_email_address_array = dict({ 'first_name': first_name_array[n], 'last_name':last_name_array[n],
+                                               'email_address': email_address_array[n] })
+           friend_email_address_dict.append(friend_email_address_array)
+
+        #friend_email_address_details_tuple = list(zip(first_name_array, last_name_array, email_address_array))
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         error_results = {
