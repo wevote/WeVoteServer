@@ -700,7 +700,9 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def update_organization_twitter_details(self, organization, twitter_json):
+    def update_organization_twitter_details(self, organization, twitter_json, cached_twitter_profile_image_url_https,
+                                            cached_twitter_profile_background_image_url_https,
+                                            cached_twitter_profile_banner_url_https):
         """
         Update an organization entry with details retrieved from the Twitter API.
         """
@@ -728,20 +730,33 @@ class OrganizationManager(models.Manager):
                 if convert_to_int(twitter_json['followers_count']) != organization.twitter_followers_count:
                     organization.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
                     values_changed = True
-            if positive_value_exists(twitter_json['profile_image_url_https']):
+
+            if positive_value_exists(cached_twitter_profile_image_url_https):
+                organization.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+                values_changed = True
+            elif positive_value_exists(twitter_json['profile_image_url_https']):
                 if twitter_json['profile_image_url_https'] != organization.twitter_profile_image_url_https:
                     organization.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
                     values_changed = True
-            if 'profile_banner_url' in twitter_json and positive_value_exists(twitter_json['profile_banner_url']):
+
+            if positive_value_exists(cached_twitter_profile_banner_url_https):
+                organization.twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
+                values_changed = True
+            elif 'profile_banner_url' in twitter_json and positive_value_exists(twitter_json['profile_banner_url']):
                 if twitter_json['profile_banner_url'] != organization.twitter_profile_banner_url_https:
                     organization.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
                     values_changed = True
-            if positive_value_exists(twitter_json['profile_background_image_url_https']):
+
+            if positive_value_exists(cached_twitter_profile_background_image_url_https):
+                organization.twitter_profile_background_image_url_https = cached_twitter_profile_background_image_url_https
+                values_changed = True
+            elif positive_value_exists(twitter_json['profile_background_image_url_https']):
                 if twitter_json['profile_background_image_url_https'] != \
                         organization.twitter_profile_background_image_url_https:
                     organization.twitter_profile_background_image_url_https = \
                         twitter_json['profile_background_image_url_https']
                     values_changed = True
+
             if positive_value_exists(twitter_json['description']):
                 if twitter_json['description'] != organization.twitter_description:
                     organization.twitter_description = twitter_json['description']

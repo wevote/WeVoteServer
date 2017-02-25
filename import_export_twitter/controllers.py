@@ -3,10 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 # See also WeVoteServer/twitter/controllers.py for routines that manage internal twitter data
-
+from image.models import WeVoteImageManager
 from .functions import retrieve_twitter_user_info
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
+from image.controllers import migrate_latest_remote_image_urls_to_local_cache
 from import_export_twitter.models import TwitterAuthManager
 from organization.controllers import move_organization_to_another_complete, \
     update_social_media_statistics_in_other_tables
@@ -56,6 +57,11 @@ class GetOutOfLoopLocal(Exception):
 
 def refresh_twitter_candidate_details(candidate_campaign):
     candidate_campaign_manager = CandidateCampaignManager()
+    we_vote_image_manager = WeVoteImageManager()
+    twitter_user_manager = TwitterUserManager()
+    cached_twitter_profile_image_url_https = None
+    cached_twitter_profile_background_image_url_https = None
+    cached_twitter_profile_banner_url_https = None
 
     if not candidate_campaign:
         status = "TWITTER_CANDIDATE_DETAILS_NOT_RETRIEVED-CANDIDATE_MISSING"
@@ -72,11 +78,46 @@ def refresh_twitter_candidate_details(candidate_campaign):
 
         if results['success']:
             status = "TWITTER_CANDIDATE_DETAILS_RETRIEVED_FROM_TWITTER"
-            save_results = candidate_campaign_manager.update_candidate_twitter_details(
-                candidate_campaign, results['twitter_json'])
+
+            # caching refreshed new images to s3 aws
+            cache_candidate_images_results = migrate_latest_remote_image_urls_to_local_cache(
+                candidate_campaign.twitter_user_id, candidate_campaign.candidate_twitter_handle,
+                results['twitter_json'], candidate_id=candidate_campaign.id,
+                candidate_we_vote_id=candidate_campaign.we_vote_id)
+
+            # retrieve refreshed cache url
+            if cache_candidate_images_results['cached_twitter_profile_image']:
+                cached_we_vote_image_results = we_vote_image_manager.retrieve_master_we_vote_image_from_url(
+                    candidate_we_vote_id=candidate_campaign.we_vote_id,
+                    twitter_profile_image_url_https=results['twitter_json']['profile_image_url_https'])
+                if cached_we_vote_image_results['success']:
+                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+                    cached_twitter_profile_image_url_https = cached_we_vote_image.we_vote_image_url
+            if cache_candidate_images_results['cached_twitter_background_image']:
+                cached_we_vote_image_results = we_vote_image_manager.retrieve_master_we_vote_image_from_url(
+                    candidate_we_vote_id=candidate_campaign.we_vote_id,
+                    twitter_profile_background_image_url_https=results['twitter_json']
+                    ['profile_background_image_url_https'])
+                if cached_we_vote_image_results['success']:
+                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+                    cached_twitter_profile_background_image_url_https = cached_we_vote_image.we_vote_image_url
+            if cache_candidate_images_results['cached_twitter_banner_image']:
+                cached_we_vote_image_results = we_vote_image_manager.retrieve_master_we_vote_image_from_url(
+                    candidate_we_vote_id=candidate_campaign.we_vote_id,
+                    twitter_profile_banner_url_https=results['twitter_json']['profile_banner_url'])
+                if cached_we_vote_image_results['success']:
+                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+                    cached_twitter_profile_banner_url_https = cached_we_vote_image.we_vote_image_url
+
+            save_candidate_campaign_results = candidate_campaign_manager.update_candidate_twitter_details(
+                candidate_campaign, results['twitter_json'], cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https)
+            save_twitter_user_results = twitter_user_manager.update_twitter_user_details(
+                candidate_campaign.twitter_user_id, results['twitter_json'], cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https)
     else:
         status = "TWITTER_CANDIDATE_DETAILS-CLEARING_DETAILS"
-        save_results = candidate_campaign_manager.clear_candidate_twitter_details(candidate_campaign)
+        save_candidate_campaign_results = candidate_campaign_manager.clear_candidate_twitter_details(candidate_campaign)
 
     results = {
         'success':                  True,
@@ -87,6 +128,11 @@ def refresh_twitter_candidate_details(candidate_campaign):
 
 def refresh_twitter_organization_details(organization):
     organization_manager = OrganizationManager()
+    we_vote_image_manager = WeVoteImageManager()
+    twitter_user_manager = TwitterUserManager()
+    cached_twitter_profile_image_url_https = None
+    cached_twitter_profile_background_image_url_https = None
+    cached_twitter_profile_banner_url_https = None
 
     if not organization:
         status = "ORGANIZATION_TWITTER_DETAILS_NOT_RETRIEVED-ORG_MISSING"
@@ -104,17 +150,52 @@ def refresh_twitter_organization_details(organization):
 
         if results['success']:
             status = "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER"
-            save_results = organization_manager.update_organization_twitter_details(
-                organization, results['twitter_json'])
 
-            if save_results['success']:
+            # caching refreshed new images to s3 aws
+            cache_organization_images_results = migrate_latest_remote_image_urls_to_local_cache(
+                 organization.twitter_user_id, organization.organization_twitter_handle,
+                results['twitter_json'], organization_id=organization.id,
+                organization_we_vote_id=organization.we_vote_id)
+
+            # retrieve refreshed cache url
+            if cache_organization_images_results['cached_twitter_profile_image']:
+                cached_we_vote_image_results = we_vote_image_manager.retrieve_master_we_vote_image_from_url(
+                    organization_we_vote_id=organization.we_vote_id,
+                    twitter_profile_image_url_https=results['twitter_json']['profile_image_url_https'])
+                if cached_we_vote_image_results['success']:
+                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+                    cached_twitter_profile_image_url_https = cached_we_vote_image.we_vote_image_url
+            if cache_organization_images_results['cached_twitter_background_image']:
+                cached_we_vote_image_results = we_vote_image_manager.retrieve_master_we_vote_image_from_url(
+                    organization_we_vote_id=organization.we_vote_id,
+                    twitter_profile_background_image_url_https=results['twitter_json']
+                    ['profile_background_image_url_https'])
+                if cached_we_vote_image_results['success']:
+                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+                    cached_twitter_profile_background_image_url_https = cached_we_vote_image.we_vote_image_url
+            if cache_organization_images_results['cached_twitter_banner_image']:
+                cached_we_vote_image_results = we_vote_image_manager.retrieve_master_we_vote_image_from_url(
+                    organization_we_vote_id=organization.we_vote_id,
+                    twitter_profile_banner_url_https=results['twitter_json']['profile_banner_url'])
+                if cached_we_vote_image_results['success']:
+                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+                    cached_twitter_profile_banner_url_https = cached_we_vote_image.we_vote_image_url
+
+            save_organization_results = organization_manager.update_organization_twitter_details(
+                organization, results['twitter_json'], cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https)
+            save_twitter_user_results = twitter_user_manager.update_twitter_user_details(
+                organization.twitter_user_id, results['twitter_json'], cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https)
+
+            if save_organization_results['success']:
                 results = update_social_media_statistics_in_other_tables(organization)
                 status = "ORGANIZATION_TWITTER_DETAILS_RETRIEVED_FROM_TWITTER_AND_SAVED"
     else:
         status = "ORGANIZATION_TWITTER_DETAILS-CLEARING_DETAILS"
-        save_results = organization_manager.clear_organization_twitter_details(organization)
+        save_organization_results = organization_manager.clear_organization_twitter_details(organization)
 
-        if save_results['success']:
+        if save_organization_results['success']:
             results = update_social_media_statistics_in_other_tables(organization)
             status = "ORGANIZATION_TWITTER_DETAILS_CLEARED_FROM_DB"
 

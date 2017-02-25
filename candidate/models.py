@@ -985,7 +985,9 @@ class CandidateCampaignManager(models.Model):
         }
         return results
 
-    def update_candidate_twitter_details(self, candidate, twitter_json):
+    def update_candidate_twitter_details(self, candidate, twitter_json, cached_twitter_profile_image_url_https,
+                                         cached_twitter_profile_background_image_url_https,
+                                         cached_twitter_profile_banner_url_https):
         """
         Update a candidate entry with details retrieved from the Twitter API.
         """
@@ -1010,20 +1012,33 @@ class CandidateCampaignManager(models.Model):
                 if convert_to_int(twitter_json['followers_count']) != candidate.twitter_followers_count:
                     candidate.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
                     values_changed = True
-            if positive_value_exists(twitter_json['profile_image_url_https']):
+
+            if positive_value_exists(cached_twitter_profile_image_url_https):
+                candidate.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+                values_changed = True
+            elif positive_value_exists(twitter_json['profile_image_url_https']):
                 if twitter_json['profile_image_url_https'] != candidate.twitter_profile_image_url_https:
                     candidate.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
                     values_changed = True
-            if ('profile_banner_url' in twitter_json) and positive_value_exists(twitter_json['profile_banner_url']):
+
+            if positive_value_exists(cached_twitter_profile_banner_url_https):
+                candidate.twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
+                values_changed = True
+            elif ('profile_banner_url' in twitter_json) and positive_value_exists(twitter_json['profile_banner_url']):
                 if twitter_json['profile_banner_url'] != candidate.twitter_profile_banner_url_https:
                     candidate.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
                     values_changed = True
-            if positive_value_exists(twitter_json['profile_background_image_url_https']):
+
+            if positive_value_exists(cached_twitter_profile_background_image_url_https):
+                candidate.twitter_profile_background_image_url_https = cached_twitter_profile_background_image_url_https
+                values_changed = True
+            elif positive_value_exists(twitter_json['profile_background_image_url_https']):
                 if twitter_json['profile_background_image_url_https'] != \
                         candidate.twitter_profile_background_image_url_https:
                     candidate.twitter_profile_background_image_url_https = \
                         twitter_json['profile_background_image_url_https']
                     values_changed = True
+
             if positive_value_exists(twitter_json['description']):
                 if twitter_json['description'] != candidate.twitter_description:
                     candidate.twitter_description = twitter_json['description']
