@@ -6,7 +6,7 @@ from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
 from django.shortcuts import render
-from .controllers import cache_all_kind_of_images_locally_for_all_voter, create_resized_images_for_all_voters
+from .controllers import cache_all_kind_of_images_locally_for_all_voters, create_resized_images_for_all_voters
 from voter.models import fetch_voter_id_from_voter_device_link, voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, get_voter_api_device_id
@@ -26,7 +26,7 @@ def cache_images_locally_for_all_voters_view(request):
 
     messages_on_stage = get_messages(request)
 
-    cache_images_locally_for_all_voters_results = cache_all_kind_of_images_locally_for_all_voter()
+    cache_images_locally_for_all_voters_results = cache_all_kind_of_images_locally_for_all_voters()
 
     template_values = {
         'messages_on_stage':                messages_on_stage,

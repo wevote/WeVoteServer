@@ -627,7 +627,9 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def save_new_twitter_user_from_twitter_json(self, twitter_json):
+    def save_new_twitter_user_from_twitter_json(self, twitter_json, cached_twitter_profile_image_url_https=None,
+                                                cached_twitter_profile_background_image_url_https=None,
+                                                cached_twitter_profile_banner_url_https=None):
 
         if 'screen_name' not in twitter_json:
             results = {
@@ -646,12 +648,27 @@ class TwitterUserManager(models.Model):
             twitter_id = twitter_json['id'] if 'id' in twitter_json else ""
             twitter_location = twitter_json['location'] if 'location' in twitter_json else ""
             twitter_name = twitter_json['name'] if 'name' in twitter_json else ""
-            twitter_profile_background_image_url_https = twitter_json['profile_background_image_url_https'] \
-                if 'profile_background_image_url_https' in twitter_json else ""
-            twitter_profile_banner_url_https = twitter_json['profile_banner_url_https'] \
-                if 'profile_banner_url_https' in twitter_json else ""
-            twitter_profile_image_url_https = twitter_json['profile_image_url_https'] \
-                if 'profile_image_url_https' in twitter_json else ""
+
+            if positive_value_exists(cached_twitter_profile_background_image_url_https):
+                twitter_profile_background_image_url_https = cached_twitter_profile_background_image_url_https
+            elif 'profile_background_image_url_https' in twitter_json:
+                twitter_profile_background_image_url_https = twitter_json['profile_background_image_url_https']
+            else:
+                twitter_profile_background_image_url_https = ""
+
+            if positive_value_exists(cached_twitter_profile_banner_url_https):
+                twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
+            elif 'profile_banner_url' in twitter_json:
+                twitter_profile_banner_url_https = twitter_json['profile_banner_url']
+            else:
+                twitter_profile_banner_url_https = ""
+
+            if positive_value_exists(cached_twitter_profile_image_url_https):
+                twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+            elif 'profile_image_url_https' in twitter_json:
+                twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+            else:
+                twitter_profile_image_url_https = ""
             twitter_url = twitter_json['url'] if 'url' in twitter_json else ""
 
             twitter_user_on_stage = TwitterUser(
@@ -681,6 +698,105 @@ class TwitterUserManager(models.Model):
             'status':                   status,
             'twitter_user_found':       twitter_user_found,
             'twitter_user':             twitter_user_on_stage,
+        }
+        return results
+
+    def update_twitter_user_details(self, twitter_id, twitter_json, cached_twitter_profile_image_url_https,
+                                    cached_twitter_profile_background_image_url_https,
+                                    cached_twitter_profile_banner_url_https):
+        """
+        Update a twitter user entry with details retrieved from the Twitter API or
+        create a twitter user entry if not exists.
+        :param twitter_id:
+        :param twitter_json:
+        :param cached_twitter_profile_image_url_https:
+        :param cached_twitter_profile_background_image_url_https:
+        :param cached_twitter_profile_banner_url_https:
+        :return:
+        """
+        success = False
+        status = "ENTERING_UPDATE_TWITTER_USER_DETAILS"
+        values_changed = False
+
+        twitter_results = self.retrieve_twitter_user(twitter_id)
+        if twitter_results['twitter_user_found']:
+            # Twitter user already exists so update twitter user details
+            twitter_user = twitter_results['twitter_user']
+            if positive_value_exists(twitter_json['id']):
+                if convert_to_int(twitter_json['id']) != twitter_user.twitter_id:
+                    twitter_user.twitter_id = convert_to_int(twitter_json['id'])
+                    values_changed = True
+            if positive_value_exists(twitter_json['screen_name']):
+                if twitter_json['screen_name'] != twitter_user.twitter_handle:
+                    twitter_user.twitter_handle = twitter_json['screen_name']
+                    values_changed = True
+            if positive_value_exists(twitter_json['name']):
+                if twitter_json['name'] != twitter_user.twitter_name:
+                    twitter_user.twitter_name = twitter_json['name']
+                    values_changed = True
+            if positive_value_exists(twitter_json['url']):
+                if twitter_json['url'] != twitter_user.twitter_url:
+                    twitter_user.twitter_url = twitter_json['url']
+                    values_changed = True
+            if positive_value_exists(twitter_json['followers_count']):
+                if convert_to_int(twitter_json['followers_count']) != twitter_user.twitter_followers_count:
+                    twitter_user.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
+                    values_changed = True
+
+            if positive_value_exists(cached_twitter_profile_image_url_https):
+                twitter_user.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+                values_changed = True
+            elif positive_value_exists(twitter_json['profile_image_url_https']):
+                if twitter_json['profile_image_url_https'] != twitter_user.twitter_profile_image_url_https:
+                    twitter_user.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
+                    values_changed = True
+
+            if positive_value_exists(cached_twitter_profile_banner_url_https):
+                twitter_user.twitter_profile_banner_url_https = cached_twitter_profile_banner_url_https
+                values_changed = True
+            elif ('profile_banner_url' in twitter_json) and positive_value_exists(twitter_json['profile_banner_url']):
+                if twitter_json['profile_banner_url'] != twitter_user.twitter_profile_banner_url_https:
+                    twitter_user.twitter_profile_banner_url_https = twitter_json['profile_banner_url']
+                    values_changed = True
+
+            if positive_value_exists(cached_twitter_profile_background_image_url_https):
+                twitter_user.twitter_profile_background_image_url_https = \
+                    cached_twitter_profile_background_image_url_https
+                values_changed = True
+            elif positive_value_exists(twitter_json['profile_background_image_url_https']):
+                if twitter_json['profile_background_image_url_https'] != \
+                        twitter_user.twitter_profile_background_image_url_https:
+                    twitter_user.twitter_profile_background_image_url_https = \
+                        twitter_json['profile_background_image_url_https']
+                    values_changed = True
+
+            if positive_value_exists(twitter_json['description']):
+                if twitter_json['description'] != twitter_user.twitter_description:
+                    twitter_user.twitter_description = twitter_json['description']
+                    values_changed = True
+            if positive_value_exists(twitter_json['location']):
+                if twitter_json['location'] != twitter_user.twitter_location:
+                    twitter_user.twitter_location = twitter_json['location']
+                    values_changed = True
+
+            if values_changed:
+                twitter_user.save()
+                success = True
+                status = "SAVED_TWITTER_USER_DETAILS"
+            else:
+                success = True
+                status = "NO_CHANGES_SAVED_TO_USER_TWITTER_DETAILS"
+        else:
+            # Twitter user does not exist so create new twitter user with latest twitter details
+            twitter_save_results = self.save_new_twitter_user_from_twitter_json(
+                twitter_json, cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https)
+            twitter_user = twitter_save_results['twitter_user']
+
+        results = {
+            'success':          success,
+            'status':           status,
+            'twitter_user':     twitter_user,
         }
         return results
 
