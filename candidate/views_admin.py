@@ -802,7 +802,7 @@ def find_and_remove_duplicate_candidates_view(request):
     #                     number_of_duplicate_candidates_failed=number_of_duplicate_candidates_failed,
     #                     number_of_duplicates_could_not_process=number_of_duplicates_could_not_process)
 
-    messages.add_message(request, messages.INFO, message)
+    # messages.add_message(request, messages.INFO, message)
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) + "?google_civic_election_id={var}".format(
         var=google_civic_election_id))
