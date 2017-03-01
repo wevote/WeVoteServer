@@ -702,7 +702,9 @@ class OrganizationManager(models.Manager):
 
     def update_organization_twitter_details(self, organization, twitter_json, cached_twitter_profile_image_url_https,
                                             cached_twitter_profile_background_image_url_https,
-                                            cached_twitter_profile_banner_url_https):
+                                            cached_twitter_profile_banner_url_https,
+                                            we_vote_hosted_profile_image_url_medium,
+                                            we_vote_hosted_profile_image_url_tiny):
         """
         Update an organization entry with details retrieved from the Twitter API.
         """
@@ -756,6 +758,12 @@ class OrganizationManager(models.Manager):
                     organization.twitter_profile_background_image_url_https = \
                         twitter_json['profile_background_image_url_https']
                     values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                organization.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                values_changed=True
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                organization.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                values_changed = True
 
             if positive_value_exists(twitter_json['description']):
                 if twitter_json['description'] != organization.twitter_description:
@@ -1169,6 +1177,10 @@ class Organization(models.Model):
                                                        blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
+    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
+                                                              blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
+                                                            blank=True, null=True)
 
     wikipedia_page_id = models.BigIntegerField(verbose_name="pageid", null=True, blank=True)
     wikipedia_page_title = models.CharField(

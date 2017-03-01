@@ -701,9 +701,9 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def update_twitter_user_details(self, twitter_id, twitter_json, cached_twitter_profile_image_url_https,
-                                    cached_twitter_profile_background_image_url_https,
-                                    cached_twitter_profile_banner_url_https):
+    def update_or_create_twitter_user(self, twitter_id, twitter_json, cached_twitter_profile_image_url_https,
+                                      cached_twitter_profile_background_image_url_https,
+                                      cached_twitter_profile_banner_url_https):
         """
         Update a twitter user entry with details retrieved from the Twitter API or
         create a twitter user entry if not exists.
@@ -714,8 +714,6 @@ class TwitterUserManager(models.Model):
         :param cached_twitter_profile_banner_url_https:
         :return:
         """
-        success = False
-        status = "ENTERING_UPDATE_TWITTER_USER_DETAILS"
         values_changed = False
 
         twitter_results = self.retrieve_twitter_user(twitter_id)
@@ -786,19 +784,19 @@ class TwitterUserManager(models.Model):
             else:
                 success = True
                 status = "NO_CHANGES_SAVED_TO_USER_TWITTER_DETAILS"
+            results = {
+                'success':          success,
+                'status':           status,
+                'twitter_user':     twitter_user,
+            }
+            return results
+
         else:
             # Twitter user does not exist so create new twitter user with latest twitter details
             twitter_save_results = self.save_new_twitter_user_from_twitter_json(
                 twitter_json, cached_twitter_profile_image_url_https,
                 cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https)
-            twitter_user = twitter_save_results['twitter_user']
-
-        results = {
-            'success':          success,
-            'status':           status,
-            'twitter_user':     twitter_user,
-        }
-        return results
+            return twitter_save_results
 
     def delete_twitter_user(self, twitter_id):
         twitter_id = convert_to_int(twitter_id)

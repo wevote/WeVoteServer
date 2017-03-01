@@ -83,6 +83,10 @@ class PositionEntered(models.Model):
     # We cache the url to an image for the candidate, measure or office for rapid display
     ballot_item_image_url_https = models.URLField(verbose_name='url of https image for candidate, measure or office',
                                                   blank=True, null=True)
+    ballot_item_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for candidate,'
+                                                                      ' measure or office', blank=True, null=True)
+    ballot_item_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for candidate,'
+                                                                    ' measure or office', blank=True, null=True)
     ballot_item_twitter_handle = models.CharField(verbose_name='twitter screen_name for candidate, measure, or office',
                                                   max_length=255, null=True, unique=False)
 
@@ -92,6 +96,10 @@ class PositionEntered(models.Model):
     # We cache the url to an image for the org, voter, or public_figure for rapid display
     speaker_image_url_https = models.URLField(verbose_name='url of https image for org or person with position',
                                               blank=True, null=True)
+    speaker_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for org or '
+                                                                  'person with position', blank=True, null=True)
+    speaker_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for org or '
+                                                                'person with position', blank=True, null=True)
     speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
                                               max_length=255, null=True, unique=False)
 
@@ -1090,7 +1098,7 @@ class PositionListManager(models.Model):
     def retrieve_all_positions_for_candidate_campaign(self, retrieve_public_positions,
                                                       candidate_campaign_id, candidate_campaign_we_vote_id='',
                                                       stance_we_are_looking_for=ANY_STANCE, most_recent_only=True,
-                                                      friends_we_vote_id_list=False):
+                                                      friends_we_vote_id_list=False, retrieve_all_admin_override=False):
         """
         We do not attempt to retrieve public positions and friend's-only positions in the same call.
         :param retrieve_public_positions:
@@ -1117,7 +1125,7 @@ class PositionListManager(models.Model):
 
         # If retrieving PositionForFriends, make sure we have the necessary variables
         if not retrieve_public_positions:
-            if not friends_we_vote_id_list:
+            if not friends_we_vote_id_list and not retrieve_all_admin_override:
                 position_list = []
                 return position_list
             elif type(friends_we_vote_id_list) is list and len(friends_we_vote_id_list) == 0:
@@ -3721,6 +3729,126 @@ class PositionManager(models.Model):
             'position_we_vote_id':  position_we_vote_id,
             'position':             voter_position_on_stage,
             'is_public_position':   is_public_position
+        }
+        return results
+
+    def update_position_image_urls_from_candidate(self, position_object, candidate_campaign):
+        """
+        Update position_object with candidate image urls
+        :param position_object:
+        :param candidate_campaign:
+        :return:
+        """
+        values_changed = False
+        if positive_value_exists (candidate_campaign.candidate_photo_url ()) and \
+            position_object.ballot_item_image_url_https_medium != \
+                candidate_campaign.candidate_photo_url ():
+            position_object.ballot_item_image_url_https_medium = \
+                candidate_campaign.candidate_photo_url ()
+            values_changed = True
+        if positive_value_exists (candidate_campaign.we_vote_hosted_profile_image_url_medium) and \
+            position_object.ballot_item_image_url_https_medium != \
+                candidate_campaign.we_vote_hosted_profile_image_url_medium:
+            position_object.ballot_item_image_url_https_medium = \
+                candidate_campaign.we_vote_hosted_profile_image_url_medium
+            values_changed = True
+        if positive_value_exists (candidate_campaign.we_vote_hosted_profile_image_url_tiny) and \
+            position_object.ballot_item_image_url_https_tiny != \
+                candidate_campaign.we_vote_hosted_profile_image_url_tiny:
+            position_object.ballot_item_image_url_https_tiny = \
+                candidate_campaign.we_vote_hosted_profile_image_url_tiny
+            values_changed = True
+        if values_changed:
+            position_object.save()
+            success = True
+            status = "SAVED_POSITION_IMAGE_URLS"
+        else:
+            success = True
+            status = "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS"
+        results = {
+            'success':  success,
+            'status':   status,
+            'position': position_object
+        }
+        return results
+
+    def update_position_image_urls_from_organization(self, position_object, organization):
+        """
+        Update position_object with organization image urls
+        :param position_object:
+        :param organization:
+        :return:
+        """
+        values_changed = False
+        if positive_value_exists(organization.organization_photo_url()) and \
+            position_object.speaker_image_url_https != \
+                organization.organization_photo_url():
+            position_object.speaker_image_url_https = \
+                organization.organization_photo_url()
+            values_changed = True
+        if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium) and \
+            position_object.speaker_image_url_https_medium != \
+                organization.we_vote_hosted_profile_image_url_medium:
+            position_object.speaker_image_url_https_medium = \
+                organization.we_vote_hosted_profile_image_url_medium
+            values_changed = True
+        if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny) and \
+            position_object.speaker_image_url_https_tiny != \
+                organization.we_vote_hosted_profile_image_url_tiny:
+            position_object.speaker_image_url_https_tiny = \
+                organization.we_vote_hosted_profile_image_url_tiny
+            values_changed = True
+        if values_changed:
+            position_object.save()
+            success = True
+            status = "SAVED_POSITION_IMAGE_URLS"
+        else:
+            success = True
+            status = "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS"
+        results = {
+            'success':  success,
+            'status':   status,
+            'position': position_object
+        }
+        return results
+
+    def update_position_image_urls_from_voter(self, position_object, voter):
+        """
+        Update position_object with voter image urls
+        :param position_object:
+        :param voter:
+        :return:
+        """
+        values_changed = False
+        if positive_value_exists(voter.voter_photo_url()) and \
+            position_object.speaker_image_url_https != \
+                voter.voter_photo_url():
+            position_object.speaker_image_url_https = \
+                voter.voter_photo_url()
+            values_changed = True
+        if positive_value_exists(voter.we_vote_hosted_profile_image_url_medium) and \
+            position_object.speaker_image_url_https_medium != \
+                voter.we_vote_hosted_profile_image_url_medium:
+            position_object.speaker_image_url_https_medium = \
+                voter.we_vote_hosted_profile_image_url_medium
+            values_changed = True
+        if positive_value_exists(voter.we_vote_hosted_profile_image_url_tiny) and \
+            position_object.speaker_image_url_https_tiny != \
+                voter.we_vote_hosted_profile_image_url_tiny:
+            position_object.speaker_image_url_https_tiny = \
+                voter.we_vote_hosted_profile_image_url_tiny
+            values_changed = True
+        if values_changed:
+            position_object.save()
+            success = True
+            status = "SAVED_POSITION_IMAGE_URLS"
+        else:
+            success = True
+            status = "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS"
+        results = {
+            'success':  success,
+            'status':   status,
+            'position': position_object
         }
         return results
 

@@ -438,6 +438,10 @@ class CandidateCampaign(models.Model):
                                                        blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
+    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
+                                                              blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
+                                                            blank=True, null=True)
 
     google_plus_url = models.URLField(verbose_name='google plus url of candidate campaign', blank=True, null=True)
     youtube_url = models.URLField(verbose_name='youtube url of candidate campaign', blank=True, null=True)
@@ -987,7 +991,9 @@ class CandidateCampaignManager(models.Model):
 
     def update_candidate_twitter_details(self, candidate, twitter_json, cached_twitter_profile_image_url_https,
                                          cached_twitter_profile_background_image_url_https,
-                                         cached_twitter_profile_banner_url_https):
+                                         cached_twitter_profile_banner_url_https,
+                                         we_vote_hosted_profile_image_url_medium,
+                                         we_vote_hosted_profile_image_url_tiny):
         """
         Update a candidate entry with details retrieved from the Twitter API.
         """
@@ -1038,6 +1044,12 @@ class CandidateCampaignManager(models.Model):
                     candidate.twitter_profile_background_image_url_https = \
                         twitter_json['profile_background_image_url_https']
                     values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                values_changed=True
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                values_changed = True
 
             if positive_value_exists(twitter_json['description']):
                 if twitter_json['description'] != candidate.twitter_description:

@@ -101,6 +101,10 @@ class Politician(models.Model):
 
     politician_twitter_handle = models.CharField(
         verbose_name='politician twitter screen_name', max_length=255, null=True, unique=False)
+    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
+                                                              blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
+                                                            blank=True, null=True)
 
     # We override the save function so we can auto-generate we_vote_id
     def save(self, *args, **kwargs):
@@ -289,6 +293,81 @@ class PoliticianManager(models.Model):
         }
         return results
 
+    def update_politician_details_from_candidate(self, candidate):
+        """
+        Update a politician entry with details retrieved from candidate
+        :param candidate:
+        :return:
+        """
+        values_changed = False
+        politician_details = self.retrieve_politician(0, candidate.politician_we_vote_id)
+        politician = politician_details['politician']
+        if politician_details['success']:
+            # Politician found so update politicina details with candidate details
+            first_name = extract_first_name_from_full_name(candidate.candidate_name)
+            middle_name = extract_middle_name_from_full_name(candidate.candidate_name)
+            last_name = extract_last_name_from_full_name(candidate.candidate_name)
+            if positive_value_exists(first_name) and first_name != politician.first_name:
+                politician.first_name = first_name
+                values_changed = True
+            if positive_value_exists(last_name) and last_name != politician.last_name:
+                politician.last_name = last_name
+                values_changed = True
+            if positive_value_exists(middle_name) and middle_name != politician.middle_name:
+                politician.middle_name = middle_name
+                values_changed = True
+            if positive_value_exists(candidate.party):
+                if convert_to_political_party_constant(candidate.party) != politician.political_party:
+                    politician.political_party = convert_to_political_party_constant(candidate.party)
+                    values_changed = True
+            if positive_value_exists(candidate.vote_smart_id) and candidate.voter_smart_id != politician.vote_smart_id:
+                politician.vote_smart_id = candidate.vote_smart_id
+                values_changed = True
+            if positive_value_exists(candidate.maplight_id) and candidate.maplight_id != politician.maplight_id:
+                politician.maplight_id = candidate.maplight_id
+                values_changed = True
+            if positive_value_exists(candidate.candidate_name) and \
+                    candidate.candidate_name != politician.politician_name:
+                politician.politician_name = candidate.candidate_name
+                values_changed = True
+            if positive_value_exists(candidate.google_civic_candidate_name) and \
+                    candidate.google_civic_candidate_name != politician.google_civic_candidate_name:
+                politician.google_civic_candidate_name = candidate.google_civic_candidate_name
+                values_changed = True
+            if positive_value_exists(candidate.state_code) and candidate.state_code != politician.state_code:
+                politician.state_code = candidate.state_code
+                values_changed = True
+            if positive_value_exists(candidate.candidate_twitter_handle) and \
+                    candidate.candidate_twitter_handle != politician.politician_twitter_handle:
+                politician.politician_twitter_handle = candidate.candidate_twitter_handle
+                values_changed = True
+            if positive_value_exists(candidate.we_vote_hosted_profile_image_url_medium) and \
+                    candidate.we_vote_hosted_profile_image_url_medium != \
+                    politician.we_vote_hosted_profile_image_url_medium:
+                politician.we_vote_hosted_profile_image_url_medium = candidate.we_vote_hosted_profile_image_url_medium
+                values_changed = True
+            if positive_value_exists(candidate.we_vote_hosted_profile_image_url_tiny) and \
+                    candidate.we_vote_hosted_profile_image_url_tiny != politician.we_vote_hosted_profile_image_url_tiny:
+                politician.we_vote_hosted_profile_image_url_tiny = candidate.we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
+            if values_changed:
+                politician.save()
+                success = True
+                status = "SAVED_POLITICIAN_DETAILS"
+            else:
+                success = True
+                status = "NO_CHANGES_SAVED_TO_POLITICIAN_DETAILS"
+        else:
+            success = False
+            status = "POLITICIAN_NOT_FOUND"
+        results = {
+            'success':      success,
+            'status':       status,
+            'politician':   politician
+        }
+        return results
+
     def update_or_create_politician_from_candidate(self, candidate):
         """
         Take a We Vote candidate_campaign object, and map it to update_or_create_politician
@@ -302,16 +381,18 @@ class PoliticianManager(models.Model):
         political_party = convert_to_political_party_constant(candidate.party)
         # TODO Add all other identifiers from other systems
         updated_politician_values = {
-            'vote_smart_id':                candidate.vote_smart_id,
-            'maplight_id':                  candidate.maplight_id,
-            'politician_name':              candidate.candidate_name,
-            'google_civic_candidate_name':  candidate.google_civic_candidate_name,
-            'state_code':                   candidate.state_code,
-            'politician_twitter_handle':    candidate.candidate_twitter_handle,
-            'first_name':                   first_name,
-            'middle_name':                  middle_name,
-            'last_name':                    last_name,
-            'political_party':              political_party,
+            'vote_smart_id':                            candidate.vote_smart_id,
+            'maplight_id':                              candidate.maplight_id,
+            'politician_name':                          candidate.candidate_name,
+            'google_civic_candidate_name':              candidate.google_civic_candidate_name,
+            'state_code':                               candidate.state_code,
+            'politician_twitter_handle':                candidate.candidate_twitter_handle,
+            'we_vote_hosted_profile_image_url_medium':  candidate.we_vote_hosted_profile_image_url_medium,
+            'we_vote_hosted_profile_image_url_tiny':    candidate.we_vote_hosted_profile_image_url_tiny,
+            'first_name':                               first_name,
+            'middle_name':                              middle_name,
+            'last_name':                                last_name,
+            'political_party':                          political_party,
         }
 
         return self.update_or_create_politician(

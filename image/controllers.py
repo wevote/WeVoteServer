@@ -657,107 +657,131 @@ def create_resized_images_for_all_voters(voter_id):
 
     for we_vote_image in we_vote_image_list:
         # Iterate through all cached images
-        voter_we_vote_id = we_vote_image.voter_we_vote_id
-        google_civic_election_id = we_vote_image.google_civic_election_id
-        we_vote_parent_image_id = we_vote_image.id
-        twitter_id = we_vote_image.twitter_id
-        image_format = we_vote_image.we_vote_image_file_location.split(".")[-1]
-        create_resized_images_results = {
-            'voter_we_vote_id':                         voter_we_vote_id,
-            'cached_medium_twitter_profile_image':      False,
-            'cached_tiny_twitter_profile_image':        False,
-            'cached_medium_twitter_background_image':   False,
-            'cached_tiny_twitter_background_image':     False,
-            'cached_medium_twitter_banner_image':       False,
-            'cached_tiny_twitter_banner_image':         False
-        }
-
-        if we_vote_image.kind_of_image_twitter_profile:
-            twitter_image_url_https = we_vote_image.twitter_profile_image_url_https
-            # Check if medium or tiny image versions exist or not
-            medium_or_tiny_version_exists_results = check_medium_or_tiny_version_exists(
-                voter_we_vote_id=voter_we_vote_id, twitter_image_url_https=twitter_image_url_https,
-                kind_of_image_twitter_profile=True)
-            if not medium_or_tiny_version_exists_results['medium_image_version_exists']:
-                # medium version does not exist so resize image and cache it
-                cache_resized_image_locally_results = cache_resized_image_locally(
-                    google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
-                    voter_we_vote_id=voter_we_vote_id, twitter_id=twitter_id, image_format=image_format,
-                    kind_of_image_twitter_profile=True, kind_of_image_medium=True)
-                create_resized_images_results['cached_medium_twitter_profile_image'] = \
-                    cache_resized_image_locally_results['success']
-            else:
-                create_resized_images_results['cached_medium_twitter_profile_image'] = IMAGE_ALREADY_CACHED
-
-            if not medium_or_tiny_version_exists_results['tiny_image_version_exists']:
-                # tiny version does not exist so resize image and cache it
-                cache_resized_image_locally_results = cache_resized_image_locally(
-                    google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
-                    voter_we_vote_id=voter_we_vote_id, twitter_id=twitter_id, image_format=image_format,
-                    kind_of_image_twitter_profile=True, kind_of_image_tiny=True)
-                create_resized_images_results['cached_tiny_twitter_profile_image'] = \
-                    cache_resized_image_locally_results['success']
-            else:
-                create_resized_images_results['cached_tiny_twitter_profile_image'] = IMAGE_ALREADY_CACHED
-
-        elif we_vote_image.kind_of_image_twitter_background:
-            twitter_image_url_https = we_vote_image.twitter_profile_background_image_url_https
-            # Check if medium or tiny image versions exist or not
-            medium_or_tiny_version_exists_results = check_medium_or_tiny_version_exists(
-                voter_we_vote_id=voter_we_vote_id, twitter_image_url_https=twitter_image_url_https,
-                kind_of_image_twitter_background=True)
-            if not medium_or_tiny_version_exists_results['medium_image_version_exists']:
-                # medium version does not exist so resize image and cache it
-                cache_resized_image_locally_results = cache_resized_image_locally(
-                    google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
-                    voter_we_vote_id=voter_we_vote_id, twitter_id=twitter_id, image_format=image_format,
-                    kind_of_image_twitter_background=True, kind_of_image_medium=True)
-                create_resized_images_results['cached_medium_twitter_background_image'] = \
-                    cache_resized_image_locally_results['success']
-            else:
-                create_resized_images_results['cached_medium_twitter_background_image'] = IMAGE_ALREADY_CACHED
-
-            if not medium_or_tiny_version_exists_results['tiny_image_version_exists']:
-                # tiny version does not exist so resize image and cache it
-                cache_resized_image_locally_results = cache_resized_image_locally(
-                    google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
-                    voter_we_vote_id=voter_we_vote_id, twitter_id=twitter_id, image_format=image_format,
-                    kind_of_image_twitter_background=True, kind_of_image_tiny=True)
-                create_resized_images_results['cached_tiny_twitter_background_image'] = \
-                    cache_resized_image_locally_results['success']
-            else:
-                create_resized_images_results['cached_tiny_twitter_background_image'] = IMAGE_ALREADY_CACHED
-
-        elif we_vote_image.kind_of_image_twitter_banner:
-            twitter_image_url_https = we_vote_image.twitter_profile_banner_url_https
-            # Check if medium or tiny image versions exist or not
-            medium_or_tiny_version_exists_results = check_medium_or_tiny_version_exists(
-                voter_we_vote_id=voter_we_vote_id, twitter_image_url_https=twitter_image_url_https,
-                kind_of_image_twitter_banner=True)
-            if not medium_or_tiny_version_exists_results['medium_image_version_exists']:
-                # medium version does not exist so resize image and cache it
-                cache_resized_image_locally_results = cache_resized_image_locally(
-                    google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
-                    voter_we_vote_id=voter_we_vote_id, twitter_id=twitter_id, image_format=image_format,
-                    kind_of_image_twitter_banner=True, kind_of_image_medium=True)
-                create_resized_images_results['cached_medium_twitter_banner_image'] = \
-                    cache_resized_image_locally_results['success']
-            else:
-                create_resized_images_results['cached_medium_twitter_banner_image'] = IMAGE_ALREADY_CACHED
-
-            if not medium_or_tiny_version_exists_results['tiny_image_version_exists']:
-                # medium version does not exist so resize image and cache it
-                cache_resized_image_locally_results = cache_resized_image_locally(
-                    google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
-                    voter_we_vote_id=voter_we_vote_id, twitter_id=twitter_id, image_format=image_format,
-                    kind_of_image_twitter_banner=True, kind_of_image_tiny=True)
-                create_resized_images_results['cached_tiny_twitter_banner_image'] = \
-                    cache_resized_image_locally_results['success']
-            else:
-                create_resized_images_results['cached_tiny_twitter_banner_image'] = IMAGE_ALREADY_CACHED
+        create_resized_images_results = create_resized_image(we_vote_image)
         create_all_resized_images_results.append(create_resized_images_results)
-
     return create_all_resized_images_results
+
+
+def create_resized_image(we_vote_image):
+    """
+    Create resized images as per cached we_vote_image object
+    :param we_vote_image:
+    :return:
+    """
+
+    voter_we_vote_id = we_vote_image.voter_we_vote_id
+    candidate_we_vote_id = we_vote_image.candidate_we_vote_id
+    organization_we_vote_id = we_vote_image.organization_we_vote_id
+    google_civic_election_id = we_vote_image.google_civic_election_id
+    we_vote_parent_image_id = we_vote_image.id
+    twitter_id = we_vote_image.twitter_id
+    image_format = we_vote_image.we_vote_image_file_location.split(".")[-1]
+    create_resized_image_results = {
+        'voter_we_vote_id':                         voter_we_vote_id,
+        'candidate_we_vote_id':                     candidate_we_vote_id,
+        'organization_we_vote_id':                  organization_we_vote_id,
+        'cached_medium_twitter_profile_image':      False,
+        'cached_tiny_twitter_profile_image':        False,
+        'cached_medium_twitter_background_image':   False,
+        'cached_tiny_twitter_background_image':     False,
+        'cached_medium_twitter_banner_image':       False,
+        'cached_tiny_twitter_banner_image':         False
+    }
+
+    if we_vote_image.kind_of_image_twitter_profile:
+        twitter_image_url_https = we_vote_image.twitter_profile_image_url_https
+        # Check if medium or tiny image versions exist or not
+        medium_or_tiny_version_exists_results = check_medium_or_tiny_version_exists(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, twitter_image_url_https=twitter_image_url_https,
+            kind_of_image_twitter_profile=True)
+        if not medium_or_tiny_version_exists_results['medium_image_version_exists']:
+            # medium version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id, image_format=image_format,
+                kind_of_image_twitter_profile=True, kind_of_image_medium=True)
+            create_resized_image_results['cached_medium_twitter_profile_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_medium_twitter_profile_image'] = IMAGE_ALREADY_CACHED
+
+        if not medium_or_tiny_version_exists_results['tiny_image_version_exists']:
+            # tiny version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id, image_format=image_format,
+                kind_of_image_twitter_profile=True, kind_of_image_tiny=True)
+            create_resized_image_results['cached_tiny_twitter_profile_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_tiny_twitter_profile_image'] = IMAGE_ALREADY_CACHED
+
+    elif we_vote_image.kind_of_image_twitter_background:
+        twitter_image_url_https = we_vote_image.twitter_profile_background_image_url_https
+        # Check if medium or tiny image versions exist or not
+        medium_or_tiny_version_exists_results = check_medium_or_tiny_version_exists(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, twitter_image_url_https=twitter_image_url_https,
+            kind_of_image_twitter_background=True)
+        if not medium_or_tiny_version_exists_results['medium_image_version_exists']:
+            # medium version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id, image_format=image_format,
+                kind_of_image_twitter_background=True, kind_of_image_medium=True)
+            create_resized_image_results['cached_medium_twitter_background_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_medium_twitter_background_image'] = IMAGE_ALREADY_CACHED
+
+        if not medium_or_tiny_version_exists_results['tiny_image_version_exists']:
+            # tiny version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id, image_format=image_format,
+                kind_of_image_twitter_background=True, kind_of_image_tiny=True)
+            create_resized_image_results['cached_tiny_twitter_background_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_tiny_twitter_background_image'] = IMAGE_ALREADY_CACHED
+
+    elif we_vote_image.kind_of_image_twitter_banner:
+        twitter_image_url_https = we_vote_image.twitter_profile_banner_url_https
+        # Check if medium or tiny image versions exist or not
+        medium_or_tiny_version_exists_results = check_medium_or_tiny_version_exists(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, twitter_image_url_https=twitter_image_url_https,
+            kind_of_image_twitter_banner=True)
+        if not medium_or_tiny_version_exists_results['medium_image_version_exists']:
+            # medium version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id, image_format=image_format,
+                kind_of_image_twitter_banner=True, kind_of_image_medium=True)
+            create_resized_image_results['cached_medium_twitter_banner_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_medium_twitter_banner_image'] = IMAGE_ALREADY_CACHED
+
+        if not medium_or_tiny_version_exists_results['tiny_image_version_exists']:
+            # medium version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, twitter_image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, twitter_id=twitter_id, image_format=image_format,
+                kind_of_image_twitter_banner=True, kind_of_image_tiny=True)
+            create_resized_image_results['cached_tiny_twitter_banner_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_tiny_twitter_banner_image'] = IMAGE_ALREADY_CACHED
+
+    return create_resized_image_results
 
 
 def check_medium_or_tiny_version_exists(voter_we_vote_id=None, candidate_we_vote_id=None, organization_we_vote_id=None,
@@ -766,6 +790,8 @@ def check_medium_or_tiny_version_exists(voter_we_vote_id=None, candidate_we_vote
     """
     Check if medium or tiny image versions already exist or not
     :param voter_we_vote_id:
+    :param candidate_we_vote_id:
+    :param organization_we_vote_id:
     :param twitter_image_url_https:
     :param kind_of_image_twitter_profile:
     :param kind_of_image_twitter_background:
@@ -812,7 +838,9 @@ def cache_resized_image_locally(google_civic_election_id, twitter_image_url_http
                                 kind_of_image_tiny=False):
     """
     Resize the image as per image version and cache the same
-    :param we_vote_id:
+    :param voter_we_vote_id:
+    :param candidate_we_vote_id:
+    :param organization_we_vote_id:
     :param google_civic_election_id:
     :param twitter_image_url_https:
     :param we_vote_parent_image_id:
@@ -838,6 +866,7 @@ def cache_resized_image_locally(google_civic_election_id, twitter_image_url_http
     image_stored_locally = False
     image_stored_to_aws = False
     image_versions = []
+    we_vote_image_file_location = None
 
     we_vote_image_manager = WeVoteImageManager()
 

@@ -2699,3 +2699,77 @@ def retrieve_ballot_item_we_vote_ids_for_organizations_to_follow(voter_id,
         'ballot_item_we_vote_ids_list': ballot_item_we_vote_ids_list,
     }
     return results
+
+
+def update_all_position_details_from_candidate(candidate_campaign):
+    """
+    Update all position image urls PositionEntered and PositionForFriends from candidate details
+    :param candidate_campaign:
+    :return:
+    """
+    position_list_manager = PositionListManager()
+    position_manager = PositionManager()
+    update_all_position_image_urls_results = []
+
+    retrieve_public_positions = True
+    public_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        retrieve_public_positions, candidate_campaign.id, candidate_campaign.we_vote_id)
+    for position_object in public_position_list:
+        update_position_image_urls_results = position_manager.update_position_image_urls_from_candidate(
+            position_object, candidate_campaign)
+        update_all_position_image_urls_results.append(update_position_image_urls_results)
+
+    retrieve_public_positions = False
+    friends_position_list = position_list_manager.retrieve_all_positions_for_candidate_campaign(
+        retrieve_public_positions, candidate_campaign.id, candidate_campaign.we_vote_id,
+        retrieve_all_admin_override=True)
+    for position_object in friends_position_list:
+        update_position_image_urls_results = position_manager.update_position_image_urls_from_candidate(
+            position_object, candidate_campaign)
+        update_all_position_image_urls_results.append(update_position_image_urls_results)
+
+    return update_all_position_image_urls_results
+
+
+def update_position_entered_details_from_organization(organization):
+    """
+    Update all position image urls PositionEntered from organization details
+    :param organization:
+    :return:
+    """
+    position_list_manager = PositionListManager()
+    position_manager = PositionManager()
+    update_all_position_image_urls_results = []
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = PUBLIC_ONLY
+
+    public_position_list = position_list_manager.retrieve_all_positions_for_organization(
+        organization.id, organization.we_vote_id, stance_we_are_looking_for, friends_vs_public)
+    for position_object in public_position_list:
+        update_position_image_urls_results = position_manager.update_position_image_urls_from_organization(
+            position_object, organization)
+        update_all_position_image_urls_results.append(update_position_image_urls_results)
+
+    return update_all_position_image_urls_results
+
+
+def update_position_for_friends_details_from_voter(voter):
+    """
+    Update all position image urls PositionEntered from voter details
+    :param organization:
+    :return:
+    """
+    position_list_manager = PositionListManager()
+    position_manager = PositionManager()
+    update_all_position_image_urls_results = []
+    stance_we_are_looking_for = ANY_STANCE
+    friends_vs_public = FRIENDS_ONLY
+
+    friends_position_list = position_list_manager.retrieve_all_positions_for_voter(
+        voter.id, voter.we_vote_id, stance_we_are_looking_for, friends_vs_public)
+    for position_object in friends_position_list:
+        update_position_image_urls_results = position_manager.update_position_image_urls_from_voter(
+            position_object, voter)
+        update_all_position_image_urls_results.append(update_position_image_urls_results)
+
+    return update_all_position_image_urls_results
