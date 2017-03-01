@@ -379,13 +379,13 @@ class WeVoteImageManager(models.Model):
         else:
             return None
 
-    def retrieve_master_we_vote_image_from_url(self, voter_we_vote_id=None, candidate_we_vote_id=None,
-                                               organization_we_vote_id=None, twitter_profile_image_url_https=None,
-                                               twitter_profile_background_image_url_https=None,
-                                               twitter_profile_banner_url_https=None,
-                                               kind_of_image_medium=False, kind_of_image_tiny=False):
+    def retrieve_we_vote_image_from_url(self, voter_we_vote_id=None, candidate_we_vote_id=None,
+                                        organization_we_vote_id=None, twitter_profile_image_url_https=None,
+                                        twitter_profile_background_image_url_https=None,
+                                        twitter_profile_banner_url_https=None,
+                                        kind_of_image_medium=False, kind_of_image_tiny=False):
         """
-        Retrieve master we vote image from a url match
+        Retrieve  we vote image from a url match
         :param voter_we_vote_id:
         :param candidate_we_vote_id:
         :param organization_we_vote_id:

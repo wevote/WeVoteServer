@@ -617,7 +617,10 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_twitter_user_values_from_dict(self, voter, twitter_user_dict):
+    def save_twitter_user_values_from_dict(self, voter, twitter_user_dict,
+                                           cached_twitter_profile_image_url_https=None,
+                                           we_vote_hosted_profile_image_url_medium=None,
+                                           we_vote_hosted_profile_image_url_tiny=None):
         try:
             # 'id': 132728535,
             if 'id' in twitter_user_dict:
@@ -626,12 +629,22 @@ class VoterManager(BaseUserManager):
             # 'utc_offset': 32400,
             # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
-            if 'profile_image_url_https' in twitter_user_dict:
+            if cached_twitter_profile_image_url_https:
+                voter.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+            elif 'profile_image_url_https' in twitter_user_dict:
                 voter.twitter_profile_image_url_https = twitter_user_dict['profile_image_url_https']
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
             # 'screen_name': 'jaeeeee',
             if 'screen_name' in twitter_user_dict:
                 voter.twitter_screen_name = twitter_user_dict['screen_name']
+            if 'name' in twitter_user_dict:
+                voter.twitter_name = twitter_user_dict['name']
+            if we_vote_hosted_profile_image_url_medium:
+                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+            if we_vote_hosted_profile_image_url_tiny:
+                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
             # 'lang': 'en',
             # 'name': 'Jae Jung Chung',
             # 'url': 'http://www.carbonize.co.kr',
@@ -649,6 +662,34 @@ class VoterManager(BaseUserManager):
             'success':  success,
             'voter':    voter,
         }
+        return results
+
+    def update_voter_twitter_details(self, twitter_id, twitter_json,
+                                     cached_twitter_profile_image_url_https,
+                                     we_vote_hosted_profile_image_url_medium,
+                                     we_vote_hosted_profile_image_url_tiny):
+        """
+        Update existing voter entry with details retrieved from the Twitter API
+        :param twitter_id:
+        :param twitter_json:
+        :param cached_twitter_profile_image_url_https:
+        :param we_vote_hosted_profile_image_url_medium:
+        :param we_vote_hosted_profile_image_url_tiny:
+        :return:
+        """
+        voter_results = self.retrieve_voter_by_twitter_id(twitter_id)
+        voter = voter_results['voter']
+        if voter_results['voter_found']:
+            # Twitter user already exists so update twitter user details
+            results = self.save_twitter_user_values_from_dict(
+                voter, twitter_json, cached_twitter_profile_image_url_https, we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny)
+        else:
+            results = {
+                'success':  False,
+                'status':   'VOTER_NOT_FOUND',
+                'voter':    voter
+            }
         return results
 
     def update_voter_photos(self, voter_id, facebook_profile_image_url_https, facebook_photo_variable_exists):
@@ -902,6 +943,10 @@ class Voter(AbstractBaseUser):
     twitter_screen_name = models.CharField(verbose_name='twitter screen name / handle',
                                            max_length=255, null=True, unique=False)
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
+                                                              blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
+                                                            blank=True, null=True)
 
     twitter_request_token = models.TextField(verbose_name='twitter request token', null=True, blank=True)
     twitter_request_secret = models.TextField(verbose_name='twitter request secret', null=True, blank=True)
