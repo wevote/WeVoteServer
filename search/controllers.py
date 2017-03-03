@@ -43,7 +43,7 @@ def search_all_for_api(text_from_search_field, voter_device_id):
         }
         return results
 
-    # Get voter_id from the voter_device_id so we can know who is doing the starring
+    # Get voter_id from the voter_device_id so we can know who is doing the bookmarking
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         results = {

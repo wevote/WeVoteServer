@@ -21,8 +21,8 @@ class WeVoteTasks(TaskSet):
     @task(1)
     def homepage(self):
         voter_device_id = self.voter_device_id
-        response = self.client.get("/apis/v1/voterAllStarsStatusRetrieve/?voter_device_id=%s" %
-                                   voter_device_id, name="voterAllStarsStatusRetrieve")
+        response = self.client.get("/apis/v1/voterAllBookmarksStatusRetrieve/?voter_device_id=%s" %
+                                   voter_device_id, name="voterAllBookmarksStatusRetrieve")
         response = self.client.get("/apis/v1/voterRetrieve/?voter_device_id=%s" %
                                    voter_device_id, name="voterRetrieve")
         response = self.client.get("/apis/v1/voterAddressRetrieve/?voter_device_id=%s" %

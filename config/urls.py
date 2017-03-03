@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^apis/v1/', include('apis_v1.urls', namespace="apis_v1")),
 
     url(r'^b/', include('ballot.urls', namespace="ballot")),
+    url(r'^bookmark/', include('bookmark.urls', namespace="bookmark")),
     url(r'^c/', include('candidate.urls', namespace="candidate")),
     url(r'^e/', include('election.urls', namespace="election")),
     url(r'^follow/', include('follow.urls', namespace="follow")),

@@ -313,7 +313,7 @@ def positions_count_for_all_ballot_items_for_api(voter_device_id, google_civic_e
     We want to return a JSON file with the a list of the support and oppose counts from the orgs, friends and
     public figures the voter follows
     """
-    # Get voter_id from the voter_device_id so we can know whose stars to retrieve
+    # Get voter_id from the voter_device_id so we can know whose bookmarks to retrieve
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         json_data = {
@@ -488,7 +488,7 @@ def positions_count_for_one_ballot_item_for_api(voter_device_id, ballot_item_we_
     We want to return a JSON file with the a list of the support and oppose counts from the orgs, friends and
     public figures the voter follows
     """
-    # Get voter_id from the voter_device_id so we can know whose stars to retrieve
+    # Get voter_id from the voter_device_id so we can know whose bookmarks to retrieve
     results = is_voter_device_id_valid(voter_device_id)
     if not results['success']:
         json_data = {
