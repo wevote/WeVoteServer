@@ -80,6 +80,7 @@ INSTALLED_APPS = (
     'admin_tools',
     'apis_v1',
     'ballot',
+    'bookmark',
     'candidate',
     'config',
     'election',

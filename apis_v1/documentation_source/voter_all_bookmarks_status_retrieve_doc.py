@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/voter_all_stars_status_retrieve_doc.py
+# apis_v1/documentation_source/voter_all_bookmarks_status_retrieve_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def voter_all_stars_status_retrieve_doc_template_values(url_root):
+def voter_all_bookmarks_status_retrieve_doc_template_values(url_root):
     """
-    Show documentation about voterAllStarsStatusRetrieve
+    Show documentation about voterAllBookmarksStatusRetrieve
     """
     required_query_parameter_list = [
         {
@@ -39,19 +39,19 @@ def voter_all_stars_status_retrieve_doc_template_values(url_root):
     api_response = '{\n' \
                    '  "success": boolean,\n' \
                    '  "status": string,\n' \
-                   '  "star_list": list\n' \
+                   '  "bookmark_list": list\n' \
                    '   [\n' \
                    '     "ballot_item_we_vote_id": string,\n' \
-                   '     "star_on": boolean,\n' \
+                   '     "bookmark_on": boolean,\n' \
                    '   ],\n' \
                    '}'
 
     template_values = {
-        'api_name': 'voterAllStarsStatusRetrieve',
-        'api_slug': 'voterAllStarsStatusRetrieve',
+        'api_name': 'voterAllBookmarksStatusRetrieve',
+        'api_slug': 'voterAllBookmarksStatusRetrieve',
         'api_introduction':
-            "A list of the office, candidate, or measure star status for this voter.",
-        'try_now_link': 'apis_v1:voterAllStarsStatusRetrieveView',
+            "A list of the office, candidate, or measure bookmark status for this voter.",
+        'try_now_link': 'apis_v1:voterAllBookmarksStatusRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

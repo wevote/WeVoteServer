@@ -1,11 +1,11 @@
-# apis_v1/documentation_source/voter_star_off_save_doc.py
+# apis_v1/documentation_source/voter_bookmark_on_save_doc.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
 
-def voter_star_off_save_doc_template_values(url_root):
+def voter_bookmark_on_save_doc_template_values(url_root):
     """
-    Show documentation about voterStarOffSave
+    Show documentation about voterBookmarkOnSave
     """
     required_query_parameter_list = [
         {
@@ -21,7 +21,7 @@ def voter_star_off_save_doc_template_values(url_root):
         {
             'name':         'kind_of_ballot_item',
             'value':        'string',  # boolean, integer, long, string
-            'description':  'What is the type of ballot item for which we are saving the \'off\' status? '
+            'description':  'What is the type of ballot item for which we are saving the \'on\' status? '
                             '(kind_of_ballot_item is either "OFFICE", "CANDIDATE", "POLITICIAN" or "MEASURE")',
         },
         {
@@ -40,11 +40,6 @@ def voter_star_off_save_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
     ]
 
     potential_status_codes_list = [
@@ -57,15 +52,15 @@ def voter_star_off_save_doc_template_values(url_root):
             'description':  'Cannot proceed. Missing voter_id while trying to save.',
         },
         {
-            'code':         'STAR_OFF_OFFICE CREATE/UPDATE ITEM_STARRED',
+            'code':         'BOOKMARK_ON_OFFICE CREATE/UPDATE ITEM_BOOKMARKED',
             'description':  '',
         },
         {
-            'code':         'STAR_OFF_CANDIDATE CREATE/UPDATE ITEM_STARRED',
+            'code':         'BOOKMARK_ON_CANDIDATE CREATE/UPDATE ITEM_BOOKMARKED',
             'description':  '',
         },
         {
-            'code':         'STAR_OFF_MEASURE CREATE/UPDATE ITEM_STARRED',
+            'code':         'BOOKMARK_ON_MEASURE CREATE/UPDATE ITEM_BOOKMARKED',
             'description':  '',
         },
     ]
@@ -84,11 +79,11 @@ def voter_star_off_save_doc_template_values(url_root):
                    '}'
 
     template_values = {
-        'api_name': 'voterStarOffSave',
-        'api_slug': 'voterStarOffSave',
+        'api_name': 'voterBookmarkOnSave',
+        'api_slug': 'voterBookmarkOnSave',
         'api_introduction':
-            "Save or create private 'star off' state for the current voter for a measure, an office or candidate.",
-        'try_now_link': 'apis_v1:voterStarOffSaveView',
+            "Save or create private 'bookmark on' state for the current voter for a measure, an office or candidate.",
+        'try_now_link': 'apis_v1:voterBookmarkOnSaveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',

@@ -50,8 +50,8 @@ from ballot.models import OFFICE, CANDIDATE, MEASURE, VoterBallotSavedManager
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from search.controllers import search_all_for_api
-from star.controllers import voter_all_stars_status_retrieve_for_api, voter_star_off_save_for_api, \
-    voter_star_on_save_for_api, voter_star_status_retrieve_for_api
+from bookmark.controllers import voter_all_bookmarks_status_retrieve_for_api, voter_bookmark_off_save_for_api, \
+    voter_bookmark_on_save_for_api, voter_bookmark_status_retrieve_for_api
 from support_oppose_deciding.controllers import position_oppose_count_for_ballot_item_for_api, \
     position_support_count_for_ballot_item_for_api, \
     position_public_oppose_count_for_ballot_item_for_api, \
@@ -2350,9 +2350,9 @@ def voter_supporting_save_view(request):
                                          measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
-def voter_star_off_save_view(request):
+def voter_bookmark_off_save_view(request):
     """
-    Un-mark the star for a single measure, office or candidate for one voter (voterStarOffSave)
+    Un-mark the bookmark for a single measure, office or candidate for one voter (voterBookmarkOffSave)
     :param request:
     :return:
     """
@@ -2388,16 +2388,16 @@ def voter_star_off_save_view(request):
         candidate_we_vote_id = ''
         measure_id = 0
         measure_we_vote_id = ''
-    return voter_star_off_save_for_api(
+    return voter_bookmark_off_save_for_api(
         voter_device_id=voter_device_id,
         office_id=office_id, office_we_vote_id=office_we_vote_id,
         candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
-def voter_star_on_save_view(request):
+def voter_bookmark_on_save_view(request):
     """
-    Mark the star for a single measure, office or candidate for one voter (voterStarOnSave)
+    Mark the bookmark for a single measure, office or candidate for one voter (voterBookmarkOnSave)
     :param request:
     :return:
     """
@@ -2433,16 +2433,16 @@ def voter_star_on_save_view(request):
         candidate_we_vote_id = ''
         measure_id = 0
         measure_we_vote_id = ''
-    return voter_star_on_save_for_api(
+    return voter_bookmark_on_save_for_api(
         voter_device_id=voter_device_id,
         office_id=office_id, office_we_vote_id=office_we_vote_id,
         candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
-def voter_star_status_retrieve_view(request):
+def voter_bookmark_status_retrieve_view(request):
     """
-    Retrieve whether or not a star is marked for an office, candidate or measure based on unique identifier
+    Retrieve whether or not a bookmark is marked for an office, candidate or measure based on unique identifier
     :param request:
     :return:
     """
@@ -2478,21 +2478,21 @@ def voter_star_status_retrieve_view(request):
         candidate_we_vote_id = ''
         measure_id = 0
         measure_we_vote_id = ''
-    return voter_star_status_retrieve_for_api(
+    return voter_bookmark_status_retrieve_for_api(
         voter_device_id=voter_device_id,
         office_id=office_id, office_we_vote_id=office_we_vote_id,
         candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
         measure_id=measure_id, measure_we_vote_id=measure_we_vote_id)
 
 
-def voter_all_stars_status_retrieve_view(request):  # voterAllStarsStatusRetrieve
+def voter_all_bookmarks_status_retrieve_view(request):  # voterAllBookmarksStatusRetrieve
     """
-    A list of all of the stars that the voter has marked.
+    A list of all of the bookmarks that the voter has marked.
     :param request:
     :return:
     """
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-    return voter_all_stars_status_retrieve_for_api(
+    return voter_all_bookmarks_status_retrieve_for_api(
         voter_device_id=voter_device_id)
 
 

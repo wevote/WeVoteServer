@@ -350,7 +350,7 @@
 
     {###  ###}
     <tr>
-        <td colspan="3"><strong>Positions (Support, Oppose, Info Only), Stars and Like's</strong></td>
+        <td colspan="3"><strong>Positions (Support, Oppose, Info Only), Bookmarks and Like's</strong></td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionListForBallotItemDocs' %}">positionListForBallotItem</a></td>
@@ -425,9 +425,9 @@
         <td>Retrieve all support/oppose stances held by this voter in one list. For a list of positions with full data, use positionListForVoter.</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterAllStarsStatusRetrieveDocs' %}">voterAllStarsStatusRetrieve</a></td>
+        <td><a href="{% url 'apis_v1:voterAllBookmarksStatusRetrieveDocs' %}">voterAllBookmarksStatusRetrieve</a></td>
         <td></td>
-        <td>Retrieve all of the voter's stars.</td>
+        <td>Retrieve all of the voter's bookmarks.</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:voterPositionRetrieveDocs' %}">voterPositionRetrieve</a></td>
@@ -481,19 +481,19 @@
         <td>Save or update one voter's lack of opposition for one candidate or measure</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterStarOnSaveDocs' %}">voterStarOnSave</a></td>
+        <td><a href="{% url 'apis_v1:voterBookmarkOnSaveDocs' %}">voterBookmarkOnSave</a></td>
         <td></td>
-        <td>Save or create private 'star on' state for the current voter for a measure, an office or candidate.</td>
+        <td>Save or create private 'bookmark on' state for the current voter for a measure, an office or candidate.</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterStarOffSaveDocs' %}">voterStarOffSave</a></td>
+        <td><a href="{% url 'apis_v1:voterBookmarkOffSaveDocs' %}">voterBookmarkOffSave</a></td>
         <td></td>
-        <td>Save or create private 'star off' state for the current voter for a measure, an office or candidate.</td>
+        <td>Save or create private 'bookmark off' state for the current voter for a measure, an office or candidate.</td>
     </tr>
     <tr>
-        <td><a href="{% url 'apis_v1:voterStarStatusRetrieveDocs' %}">voterStarStatusRetrieve</a></td>
+        <td><a href="{% url 'apis_v1:voterBookmarkStatusRetrieveDocs' %}">voterBookmarkStatusRetrieve</a></td>
         <td></td>
-        <td>Has the voter starred this measure, office or candidate?</td>
+        <td>Has the voter bookmarked this measure, office or candidate?</td>
     </tr>
     <tr>
         <td><a href="{% url 'apis_v1:positionsSyncOutDocs' %}">positionsSyncOut</a></td>
