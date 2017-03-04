@@ -22,6 +22,8 @@
             <td>twitter_profile_image</td>
             <td>twitter_background_image</td>
             <td>twitter_banner_image</td>
+            <td>facebook_profile_image</td>
+            <td>facebook_background_image</td>
             <td></td>
         </tr>
 
@@ -35,6 +37,8 @@
             <td>{{ cache_images_for_a_voter.cached_twitter_profile_image }}</td>
             <td>{{ cache_images_for_a_voter.cached_twitter_background_image }}</td>
             <td>{{ cache_images_for_a_voter.cached_twitter_banner_image }}</td>
+            <td>{{ cache_images_for_a_voter.cached_facebook_profile_image }}</td>
+            <td>{{ cache_images_for_a_voter.cached_facebook_background_image }}</td>
             <td>
                 <a href="{% url 'image:create_resized_images_for_all_voters' cache_images_for_a_voter.voter_id %}">
                     Create resized images

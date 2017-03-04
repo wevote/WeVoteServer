@@ -16,18 +16,33 @@
         <tr>
             <td></td>
             <td>We Vote ID</td>
+            <td>large_twitter_profile_image</td>
             <td>medium_twitter_profile_image</td>
             <td>tiny_twitter_profile_image</td>
+            <td>large_twitter_background_image</td>
             <td>medium_twitter_background_image</td>
             <td>tiny_twitter_background_image</td>
+            <td>large_twitter_banner_image</td>
             <td>medium_twitter_banner_image</td>
             <td>tiny_twitter_banner_image</td>
+            <td>large_facebook_profile_image</td>
+            <td>medium_facebook_profile_image</td>
+            <td>tiny_facebook_profile_image</td>
+            <td>large_facebook_background_image</td>
+            <td>medium_facebook_background_image</td>
+            <td>tiny_facebook_background_image</td>
         </tr>
 
     {% for create_resized_images_for_a_voter in create_resized_images_for_all_voters %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ create_resized_images_for_a_voter.voter_we_vote_id }}</td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_large_twitter_profile_image %}
+                    {{ create_resized_images_for_a_voter.cached_large_twitter_profile_image }}
+                {% else %}{% endif %}
+            </td>
+
             <td>
                 {% if create_resized_images_for_a_voter.cached_medium_twitter_profile_image %}
                     {{ create_resized_images_for_a_voter.cached_medium_twitter_profile_image }}
@@ -39,6 +54,12 @@
                 {% else %}{% endif %}
             </td>
             <td>
+                {% if create_resized_images_for_a_voter.cached_large_twitter_background_image %}
+                    {{ create_resized_images_for_a_voter.cached_large_twitter_background_image }}
+                {% else %}{% endif %}
+            </td>
+
+            <td>
                 {% if create_resized_images_for_a_voter.cached_medium_twitter_background_image %}
                     {{ create_resized_images_for_a_voter.cached_medium_twitter_background_image }}
                 {% else %}{% endif %}
@@ -49,6 +70,12 @@
                 {% else %}{% endif %}
             </td>
             <td>
+                {% if create_resized_images_for_a_voter.cached_large_twitter_banner_image %}
+                    {{ create_resized_images_for_a_voter.cached_large_twitter_banner_image }}
+                {% else %}{% endif %}
+            </td>
+
+            <td>
                 {% if create_resized_images_for_a_voter.cached_medium_twitter_banner_image %}
                     {{ create_resized_images_for_a_voter.cached_medium_twitter_banner_image }}
                 {% else %}{% endif %}
@@ -58,6 +85,39 @@
                     {{ create_resized_images_for_a_voter.cached_tiny_twitter_banner_image }}
                 {% else %}{% endif %}
             </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_large_facebook_profile_image %}
+                    {{ create_resized_images_for_a_voter.cached_large_facebook_profile_image }}
+                {% else %}{% endif %}
+            </td>
+
+            <td>
+                {% if create_resized_images_for_a_voter.cached_medium_facebook_profile_image %}
+                    {{ create_resized_images_for_a_voter.cached_medium_facebook_profile_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_tiny_facebook_profile_image %}
+                    {{ create_resized_images_for_a_voter.cached_tiny_facebook_profile_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_large_facebook_background_image %}
+                    {{ create_resized_images_for_a_voter.cached_large_facebook_background_image }}
+                {% else %}{% endif %}
+            </td>
+
+            <td>
+                {% if create_resized_images_for_a_voter.cached_medium_facebook_background_image %}
+                    {{ create_resized_images_for_a_voter.cached_medium_facebook_background_image }}
+                {% else %}{% endif %}
+            </td>
+            <td>
+                {% if create_resized_images_for_a_voter.cached_tiny_facebook_background_image %}
+                    {{ create_resized_images_for_a_voter.cached_tiny_facebook_background_image }}
+                {% else %}{% endif %}
+            </td>
+
         </tr>
     {% endfor %}
 

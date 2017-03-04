@@ -83,6 +83,8 @@ class PositionEntered(models.Model):
     # We cache the url to an image for the candidate, measure or office for rapid display
     ballot_item_image_url_https = models.URLField(verbose_name='url of https image for candidate, measure or office',
                                                   blank=True, null=True)
+    ballot_item_image_url_https_large = models.URLField(verbose_name='url of https large version image for candidate,'
+                                                                     ' measure or office', blank=True, null=True)
     ballot_item_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for candidate,'
                                                                       ' measure or office', blank=True, null=True)
     ballot_item_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for candidate,'
@@ -96,6 +98,8 @@ class PositionEntered(models.Model):
     # We cache the url to an image for the org, voter, or public_figure for rapid display
     speaker_image_url_https = models.URLField(verbose_name='url of https image for org or person with position',
                                               blank=True, null=True)
+    speaker_image_url_https_large = models.URLField(verbose_name='url of https large version image for org or '
+                                                                 'person with position', blank=True, null=True)
     speaker_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for org or '
                                                                   'person with position', blank=True, null=True)
     speaker_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for org or '
@@ -418,6 +422,12 @@ class PositionForFriends(models.Model):
     ballot_item_image_url_https = models.URLField(
         verbose_name='url of https image for candidate, measure or office',
         blank=True, null=True)
+    ballot_item_image_url_https_large = models.URLField(verbose_name='url of https large version image for candidate,'
+                                                                     ' measure or office', blank=True, null=True)
+    ballot_item_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for candidate,'
+                                                                      ' measure or office', blank=True, null=True)
+    ballot_item_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for candidate,'
+                                                                    ' measure or office', blank=True, null=True)
     ballot_item_twitter_handle = models.CharField(
         verbose_name='twitter screen_name for candidate, measure, or office',
         max_length=255, null=True, unique=False)
@@ -428,6 +438,12 @@ class PositionForFriends(models.Model):
     # We cache the url to an image for the org, voter, or public_figure for rapid display
     speaker_image_url_https = models.URLField(verbose_name='url of https image for org or person with position',
                                               blank=True, null=True)
+    speaker_image_url_https_large = models.URLField(verbose_name='url of https large version image for org or '
+                                                                 'person with position', blank=True, null=True)
+    speaker_image_url_https_medium = models.URLField(verbose_name='url of https medium version image for org or '
+                                                                  'person with position', blank=True, null=True)
+    speaker_image_url_https_tiny = models.URLField(verbose_name='url of https tiny version image for org or '
+                                                                'person with position', blank=True, null=True)
     speaker_twitter_handle = models.CharField(verbose_name='twitter screen_name for org or person with position',
                                               max_length=255, null=True, unique=False)
 
@@ -3746,6 +3762,12 @@ class PositionManager(models.Model):
             position_object.ballot_item_image_url_https_medium = \
                 candidate_campaign.candidate_photo_url ()
             values_changed = True
+        if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_large) and \
+            position_object.ballot_item_image_url_https_large != \
+                candidate_campaign.we_vote_hosted_profile_image_url_large:
+            position_object.ballot_item_image_url_https_large = \
+                candidate_campaign.we_vote_hosted_profile_image_url_large
+            values_changed = True
         if positive_value_exists (candidate_campaign.we_vote_hosted_profile_image_url_medium) and \
             position_object.ballot_item_image_url_https_medium != \
                 candidate_campaign.we_vote_hosted_profile_image_url_medium:
@@ -3786,6 +3808,12 @@ class PositionManager(models.Model):
             position_object.speaker_image_url_https = \
                 organization.organization_photo_url()
             values_changed = True
+        if positive_value_exists(organization.we_vote_hosted_profile_image_url_large) and \
+            position_object.speaker_image_url_https_large != \
+                organization.we_vote_hosted_profile_image_url_large:
+            position_object.speaker_image_url_https_large = \
+                organization.we_vote_hosted_profile_image_url_large
+            values_changed = True
         if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium) and \
             position_object.speaker_image_url_https_medium != \
                 organization.we_vote_hosted_profile_image_url_medium:
@@ -3825,6 +3853,12 @@ class PositionManager(models.Model):
                 voter.voter_photo_url():
             position_object.speaker_image_url_https = \
                 voter.voter_photo_url()
+            values_changed = True
+        if positive_value_exists(voter.we_vote_hosted_profile_image_url_large) and \
+            position_object.speaker_image_url_https_large != \
+                voter.we_vote_hosted_profile_image_url_large:
+            position_object.speaker_image_url_https_large = \
+                voter.we_vote_hosted_profile_image_url_large
             values_changed = True
         if positive_value_exists(voter.we_vote_hosted_profile_image_url_medium) and \
             position_object.speaker_image_url_https_medium != \

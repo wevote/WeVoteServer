@@ -438,6 +438,8 @@ class CandidateCampaign(models.Model):
                                                        blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
+    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
+                                                             blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
@@ -521,7 +523,9 @@ class CandidateCampaign(models.Model):
         return self.twitter_url
 
     def twitter_profile_image_url_https_bigger(self):
-        if self.twitter_profile_image_url_https:
+        if self.we_vote_hosted_profile_image_url_large:
+            return self.we_vote_hosted_profile_image_url_large
+        elif self.twitter_profile_image_url_https:
             return self.twitter_profile_image_url_https.replace("_normal", "_bigger")
         else:
             return ''
@@ -992,6 +996,7 @@ class CandidateCampaignManager(models.Model):
     def update_candidate_twitter_details(self, candidate, twitter_json, cached_twitter_profile_image_url_https,
                                          cached_twitter_profile_background_image_url_https,
                                          cached_twitter_profile_banner_url_https,
+                                         we_vote_hosted_profile_image_url_large,
                                          we_vote_hosted_profile_image_url_medium,
                                          we_vote_hosted_profile_image_url_tiny):
         """
@@ -1002,19 +1007,19 @@ class CandidateCampaignManager(models.Model):
         values_changed = False
 
         if candidate:
-            if positive_value_exists(twitter_json['id']):
+            if 'id' in twitter_json and positive_value_exists(twitter_json['id']):
                 if convert_to_int(twitter_json['id']) != candidate.twitter_user_id:
                     candidate.twitter_user_id = convert_to_int(twitter_json['id'])
                     values_changed = True
-            if positive_value_exists(twitter_json['screen_name']):
+            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
                 if twitter_json['screen_name'] != candidate.candidate_twitter_handle:
                     candidate.candidate_twitter_handle = twitter_json['screen_name']
                     values_changed = True
-            if positive_value_exists(twitter_json['name']):
+            if 'name' in twitter_json and positive_value_exists(twitter_json['name']):
                 if twitter_json['name'] != candidate.twitter_name:
                     candidate.twitter_name = twitter_json['name']
                     values_changed = True
-            if positive_value_exists(twitter_json['followers_count']):
+            if 'followers_count' in twitter_json and positive_value_exists(twitter_json['followers_count']):
                 if convert_to_int(twitter_json['followers_count']) != candidate.twitter_followers_count:
                     candidate.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
                     values_changed = True
@@ -1022,7 +1027,8 @@ class CandidateCampaignManager(models.Model):
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 candidate.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 values_changed = True
-            elif positive_value_exists(twitter_json['profile_image_url_https']):
+            elif 'profile_image_url_https' in twitter_json and positive_value_exists(
+                    twitter_json['profile_image_url_https']):
                 if twitter_json['profile_image_url_https'] != candidate.twitter_profile_image_url_https:
                     candidate.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
                     values_changed = True
@@ -1038,12 +1044,16 @@ class CandidateCampaignManager(models.Model):
             if positive_value_exists(cached_twitter_profile_background_image_url_https):
                 candidate.twitter_profile_background_image_url_https = cached_twitter_profile_background_image_url_https
                 values_changed = True
-            elif positive_value_exists(twitter_json['profile_background_image_url_https']):
+            elif 'profile_background_image_url_https' in twitter_json and positive_value_exists(
+                    twitter_json['profile_background_image_url_https']):
                 if twitter_json['profile_background_image_url_https'] != \
                         candidate.twitter_profile_background_image_url_https:
                     candidate.twitter_profile_background_image_url_https = \
                         twitter_json['profile_background_image_url_https']
                     values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                candidate.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                values_changed=True
             if positive_value_exists(we_vote_hosted_profile_image_url_medium):
                 candidate.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
                 values_changed=True
@@ -1051,11 +1061,11 @@ class CandidateCampaignManager(models.Model):
                 candidate.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
-            if positive_value_exists(twitter_json['description']):
+            if 'description' in twitter_json and positive_value_exists(twitter_json['description']):
                 if twitter_json['description'] != candidate.twitter_description:
                     candidate.twitter_description = twitter_json['description']
                     values_changed = True
-            if positive_value_exists(twitter_json['location']):
+            if 'location' in twitter_json and positive_value_exists(twitter_json['location']):
                 if twitter_json['location'] != candidate.twitter_location:
                     candidate.twitter_location = twitter_json['location']
                     values_changed = True
@@ -1089,6 +1099,9 @@ class CandidateCampaignManager(models.Model):
             candidate.twitter_name = ''
             candidate.twitter_followers_count = 0
             candidate.twitter_profile_image_url_https = ''
+            candidate.we_vote_hosted_profile_image_url_large = ''
+            candidate.we_vote_hosted_profile_image_url_medium = ''
+            candidate.we_vote_hosted_profile_image_url_tiny = ''
             candidate.twitter_description = ''
             candidate.twitter_location = ''
             candidate.save()
