@@ -95,10 +95,12 @@
   "AWS_SECRET_ACCESS_KEY":          "",
   "AWS_REGION_NAME":                "us-west-2",
   "AWS_STORAGE_BUCKET_NAME":        "wevote-images",
-  "PROFILE_IMAGE_TINY_WIDTH":       "20",
-  "PROFILE_IMAGE_TINY_HEIGHT":      "20",
-  "PROFILE_IMAGE_MEDIUM_WIDTH":     "80",
-  "PROFILE_IMAGE_MEDIUM_HEIGHT":    "80",
+  "PROFILE_IMAGE_TINY_WIDTH":       "24",
+  "PROFILE_IMAGE_TINY_HEIGHT":      "24",
+  "PROFILE_IMAGE_MEDIUM_WIDTH":     "48",
+  "PROFILE_IMAGE_MEDIUM_HEIGHT":    "48",
+  "PROFILE_IMAGE_LARGE_WIDTH":      "200",
+  "PROFILE_IMAGE_LARGE_HEIGHT":     "200",
 
   "_comment":                       "End of json_environment_variables.json"
 }
