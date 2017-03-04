@@ -2756,7 +2756,7 @@ def update_position_entered_details_from_organization(organization):
 def update_position_for_friends_details_from_voter(voter):
     """
     Update all position image urls PositionEntered from voter details
-    :param organization:
+    :param voter:
     :return:
     """
     position_list_manager = PositionListManager()

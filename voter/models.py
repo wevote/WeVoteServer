@@ -619,6 +619,7 @@ class VoterManager(BaseUserManager):
 
     def save_twitter_user_values_from_dict(self, voter, twitter_user_dict,
                                            cached_twitter_profile_image_url_https=None,
+                                           we_vote_hosted_profile_image_url_large=None,
                                            we_vote_hosted_profile_image_url_medium=None,
                                            we_vote_hosted_profile_image_url_tiny=None):
         try:
@@ -639,6 +640,8 @@ class VoterManager(BaseUserManager):
                 voter.twitter_screen_name = twitter_user_dict['screen_name']
             if 'name' in twitter_user_dict:
                 voter.twitter_name = twitter_user_dict['name']
+            if we_vote_hosted_profile_image_url_large:
+                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
             if we_vote_hosted_profile_image_url_medium:
                 voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
             if we_vote_hosted_profile_image_url_tiny:
@@ -666,6 +669,7 @@ class VoterManager(BaseUserManager):
 
     def update_voter_twitter_details(self, twitter_id, twitter_json,
                                      cached_twitter_profile_image_url_https,
+                                     we_vote_hosted_profile_image_url_large,
                                      we_vote_hosted_profile_image_url_medium,
                                      we_vote_hosted_profile_image_url_tiny):
         """
@@ -673,6 +677,7 @@ class VoterManager(BaseUserManager):
         :param twitter_id:
         :param twitter_json:
         :param cached_twitter_profile_image_url_https:
+        :param we_vote_hosted_profile_image_url_large:
         :param we_vote_hosted_profile_image_url_medium:
         :param we_vote_hosted_profile_image_url_tiny:
         :return:
@@ -682,7 +687,8 @@ class VoterManager(BaseUserManager):
         if voter_results['voter_found']:
             # Twitter user already exists so update twitter user details
             results = self.save_twitter_user_values_from_dict(
-                voter, twitter_json, cached_twitter_profile_image_url_https, we_vote_hosted_profile_image_url_medium,
+                voter, twitter_json, cached_twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium,
                 we_vote_hosted_profile_image_url_tiny)
         else:
             results = {
@@ -943,6 +949,8 @@ class Voter(AbstractBaseUser):
     twitter_screen_name = models.CharField(verbose_name='twitter screen name / handle',
                                            max_length=255, null=True, unique=False)
     twitter_profile_image_url_https = models.URLField(verbose_name='url of logo from twitter', blank=True, null=True)
+    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
+                                                             blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',

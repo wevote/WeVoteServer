@@ -703,6 +703,7 @@ class OrganizationManager(models.Manager):
     def update_organization_twitter_details(self, organization, twitter_json, cached_twitter_profile_image_url_https,
                                             cached_twitter_profile_background_image_url_https,
                                             cached_twitter_profile_banner_url_https,
+                                            we_vote_hosted_profile_image_url_large,
                                             we_vote_hosted_profile_image_url_medium,
                                             we_vote_hosted_profile_image_url_tiny):
         """
@@ -714,21 +715,21 @@ class OrganizationManager(models.Manager):
 
         # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
         if organization:
-            if positive_value_exists(twitter_json['id']):
+            if 'id' in twitter_json and positive_value_exists(twitter_json['id']):
                 if convert_to_int(twitter_json['id']) != organization.twitter_user_id:
                     organization.twitter_user_id = convert_to_int(twitter_json['id'])
                     values_changed = True
-            if positive_value_exists(twitter_json['screen_name']):
+            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
                 incoming_twitter_screen_name = str(twitter_json['screen_name'])
                 organization_twitter_handle = str(organization.organization_twitter_handle)
                 if incoming_twitter_screen_name.lower() != organization_twitter_handle.lower():
                     organization.organization_twitter_handle = twitter_json['screen_name']
                     values_changed = True
-            if positive_value_exists(twitter_json['name']):
+            if 'name' in twitter_json and positive_value_exists(twitter_json['name']):
                 if twitter_json['name'] != organization.twitter_name:
                     organization.twitter_name = twitter_json['name']
                     values_changed = True
-            if positive_value_exists(twitter_json['followers_count']):
+            if 'followers_count' in twitter_json and positive_value_exists(twitter_json['followers_count']):
                 if convert_to_int(twitter_json['followers_count']) != organization.twitter_followers_count:
                     organization.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
                     values_changed = True
@@ -736,7 +737,8 @@ class OrganizationManager(models.Manager):
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 organization.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 values_changed = True
-            elif positive_value_exists(twitter_json['profile_image_url_https']):
+            elif 'profile_image_url_https' in twitter_json and positive_value_exists(
+                    twitter_json['profile_image_url_https']):
                 if twitter_json['profile_image_url_https'] != organization.twitter_profile_image_url_https:
                     organization.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
                     values_changed = True
@@ -750,26 +752,31 @@ class OrganizationManager(models.Manager):
                     values_changed = True
 
             if positive_value_exists(cached_twitter_profile_background_image_url_https):
-                organization.twitter_profile_background_image_url_https = cached_twitter_profile_background_image_url_https
+                organization.twitter_profile_background_image_url_https = \
+                    cached_twitter_profile_background_image_url_https
                 values_changed = True
-            elif positive_value_exists(twitter_json['profile_background_image_url_https']):
+            elif 'profile_background_image_url_https' in twitter_json and positive_value_exists(
+                    twitter_json['profile_background_image_url_https']):
                 if twitter_json['profile_background_image_url_https'] != \
                         organization.twitter_profile_background_image_url_https:
                     organization.twitter_profile_background_image_url_https = \
                         twitter_json['profile_background_image_url_https']
                     values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                organization.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                values_changed = True
             if positive_value_exists(we_vote_hosted_profile_image_url_medium):
                 organization.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
-                values_changed=True
+                values_changed = True
             if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
                 organization.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 values_changed = True
 
-            if positive_value_exists(twitter_json['description']):
+            if 'description' in twitter_json and positive_value_exists(twitter_json['description']):
                 if twitter_json['description'] != organization.twitter_description:
                     organization.twitter_description = twitter_json['description']
                     values_changed = True
-            if positive_value_exists(twitter_json['location']):
+            if 'location' in twitter_json and positive_value_exists(twitter_json['location']):
                 if twitter_json['location'] != organization.twitter_location:
                     organization.twitter_location = twitter_json['location']
                     values_changed = True
@@ -803,6 +810,9 @@ class OrganizationManager(models.Manager):
             organization.twitter_name = ''
             organization.twitter_followers_count = 0
             organization.twitter_profile_image_url_https = ''
+            organization.we_vote_hosted_profile_image_url_large = ''
+            organization.we_vote_hosted_profile_image_url_medium = ''
+            organization.we_vote_hosted_profile_image_url_tiny = ''
             organization.twitter_description = ''
             organization.twitter_location = ''
             organization.save()
@@ -1177,6 +1187,8 @@ class Organization(models.Model):
                                                        blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
+    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
+                                                              blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
@@ -1213,7 +1225,9 @@ class Organization(models.Model):
         return ''
 
     def twitter_profile_image_url_https_bigger(self):
-        if self.twitter_profile_image_url_https:
+        if self.we_vote_hosted_profile_image_url_large:
+            return self.we_vote_hosted_profile_image_url_large
+        elif self.twitter_profile_image_url_https:
             return self.twitter_profile_image_url_https.replace("_normal", "_bigger")
         else:
             return ''

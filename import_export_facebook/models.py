@@ -323,6 +323,47 @@ class FacebookManager(models.Model):
         }
         return results
 
+    def retrieve_facebook_auth_response_from_facebook_id(self, facebook_user_id):
+        """
+        Retrieve facebook auth response from facebook user id
+        :param facebook_user_id:
+        :return:
+        """
+        facebook_auth_response = FacebookAuthResponse()
+        facebook_auth_response_id = 0
+
+        try:
+            if positive_value_exists(facebook_user_id):
+                facebook_auth_response = FacebookAuthResponse.objects.get(
+                    facebook_user_id=facebook_user_id,
+                )
+                facebook_auth_response_id = facebook_auth_response.id
+                facebook_auth_response_found = True
+                success = True
+                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_FOUND_BY_FACEBOOK_USER_ID"
+            else:
+                facebook_auth_response_found = False
+                success = False
+                status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_VARIABLES_MISSING"
+        except FacebookAuthResponse.DoesNotExist:
+            facebook_auth_response_found = False
+            success = True
+            status = "RETRIEVE_FACEBOOK_AUTH_RESPONSE_NOT_FOUND"
+        except Exception as e:
+            facebook_auth_response_found = False
+            success = False
+            status = 'FAILED retrieve_facebook_auth_response'
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'facebook_auth_response_found': facebook_auth_response_found,
+            'facebook_auth_response_id':    facebook_auth_response_id,
+            'facebook_auth_response':       facebook_auth_response,
+        }
+        return results
+
+
     def fetch_facebook_id_from_voter_we_vote_id(self, voter_we_vote_id):
         facebook_user_id = 0
         facebook_results = self.retrieve_facebook_link_to_voter(facebook_user_id, voter_we_vote_id)
@@ -569,55 +610,35 @@ class FacebookManager(models.Model):
         }
         return results
 
-    def retrieve_facebook_user_list(self, facebook_id_of_me):
+    def retrieve_facebook_user_by_facebook_user_id(self, facebook_user_id):
         """
-        Reterive facebook user ids from FacebookUser table.
-        :param facebook_id_of_me:
+        Reterive facebook user from FacebookUser table.
+        :param facebook_user_id:
         :return:
         """
         status = ""
-        facebook_user_list = []
-
-        if not positive_value_exists(facebook_id_of_me):
-            success = False
-            status = 'RETRIEVE_FACEBOOK_USERS-MISSING_FACEBOOK_ID '
-            results = {
-                'success':                  success,
-                'status':                   status,
-                'facebook_user_list_found': False,
-                'facebook_user_list':       [],
-            }
-            return results
-
+        facebook_user = FacebookUser()
         try:
-            facebook_user_queryset = FacebookUser.objects.all()
-            facebook_user_queryset = facebook_user_queryset.filter(
-                facebook_id_of_me=facebook_id_of_me)
-            facebook_user_list = facebook_user_queryset
-
-            if len(facebook_user_list):
-                success = True
-                facebook_user_list_found = True
-                status += ' FACEBOOK_USER_LIST_RETRIEVED '
-            else:
-                success = True
-                facebook_user_list_found = False
-                status += ' NO_FACEBOOK_USER_LIST_RETRIEVED '
+            facebook_user = FacebookUser.objects.get(
+                facebook_user_id=facebook_user_id
+            )
+            success = True
+            facebook_user_found = True
+            status += ' FACEBOOK_USER_RETRIEVED '
         except FacebookUser.DoesNotExist:
             # No data found. Not a problem.
             success = True
-            facebook_user_list_found = False
-            status += ' NO_FACEBOOK_USER_LIST_RETRIEVED_DoesNotExist '
-            facebook_user_list = []
+            facebook_user_found = False
+            status += ' NO_FACEBOOK_USER_RETRIEVED_DoesNotExist '
         except Exception as e:
             success = False
-            facebook_user_list_found = False
-            status += ' FAILED retrieve_facebook_user_list FacebookUser '
+            facebook_user_found = False
+            status += ' FAILED retrieve_facebook_user FacebookUser '
 
         results = {
             'success':                     success,
             'status':                      status,
-            'facebook_user_list_found':    facebook_user_list_found,
-            'facebook_user_list':          facebook_user_list,
+            'facebook_user_found':          facebook_user_found,
+            'facebook_user':                facebook_user,
         }
         return results

@@ -101,6 +101,8 @@ class Politician(models.Model):
 
     politician_twitter_handle = models.CharField(
         verbose_name='politician twitter screen_name', max_length=255, null=True, unique=False)
+    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
+                                                             blank=True, null=True)
     we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
                                                               blank=True, null=True)
     we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
@@ -340,6 +342,11 @@ class PoliticianManager(models.Model):
             if positive_value_exists(candidate.candidate_twitter_handle) and \
                     candidate.candidate_twitter_handle != politician.politician_twitter_handle:
                 politician.politician_twitter_handle = candidate.candidate_twitter_handle
+                values_changed = True
+            if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large) and \
+                    candidate.we_vote_hosted_profile_image_url_large != \
+                    politician.we_vote_hosted_profile_image_url_large:
+                politician.we_vote_hosted_profile_image_url_large = candidate.we_vote_hosted_profile_image_url_large
                 values_changed = True
             if positive_value_exists(candidate.we_vote_hosted_profile_image_url_medium) and \
                     candidate.we_vote_hosted_profile_image_url_medium != \

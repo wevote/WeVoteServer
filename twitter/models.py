@@ -720,23 +720,23 @@ class TwitterUserManager(models.Model):
         if twitter_results['twitter_user_found']:
             # Twitter user already exists so update twitter user details
             twitter_user = twitter_results['twitter_user']
-            if positive_value_exists(twitter_json['id']):
+            if 'id' in twitter_json and positive_value_exists(twitter_json['id']):
                 if convert_to_int(twitter_json['id']) != twitter_user.twitter_id:
                     twitter_user.twitter_id = convert_to_int(twitter_json['id'])
                     values_changed = True
-            if positive_value_exists(twitter_json['screen_name']):
+            if 'screen_name' in twitter_json and positive_value_exists(twitter_json['screen_name']):
                 if twitter_json['screen_name'] != twitter_user.twitter_handle:
                     twitter_user.twitter_handle = twitter_json['screen_name']
                     values_changed = True
-            if positive_value_exists(twitter_json['name']):
+            if 'name' in twitter_json and positive_value_exists(twitter_json['name']):
                 if twitter_json['name'] != twitter_user.twitter_name:
                     twitter_user.twitter_name = twitter_json['name']
                     values_changed = True
-            if positive_value_exists(twitter_json['url']):
+            if 'url' in twitter_json and positive_value_exists(twitter_json['url']):
                 if twitter_json['url'] != twitter_user.twitter_url:
                     twitter_user.twitter_url = twitter_json['url']
                     values_changed = True
-            if positive_value_exists(twitter_json['followers_count']):
+            if 'followers_count' in twitter_json and positive_value_exists(twitter_json['followers_count']):
                 if convert_to_int(twitter_json['followers_count']) != twitter_user.twitter_followers_count:
                     twitter_user.twitter_followers_count = convert_to_int(twitter_json['followers_count'])
                     values_changed = True
@@ -744,7 +744,7 @@ class TwitterUserManager(models.Model):
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 twitter_user.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 values_changed = True
-            elif positive_value_exists(twitter_json['profile_image_url_https']):
+            elif 'profile_image_url_https' in twitter_json and positive_value_exists(twitter_json['profile_image_url_https']):
                 if twitter_json['profile_image_url_https'] != twitter_user.twitter_profile_image_url_https:
                     twitter_user.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
                     values_changed = True
@@ -761,18 +761,19 @@ class TwitterUserManager(models.Model):
                 twitter_user.twitter_profile_background_image_url_https = \
                     cached_twitter_profile_background_image_url_https
                 values_changed = True
-            elif positive_value_exists(twitter_json['profile_background_image_url_https']):
+            elif 'profile_background_image_url_https' in twitter_json and positive_value_exists(
+                    twitter_json['profile_background_image_url_https']):
                 if twitter_json['profile_background_image_url_https'] != \
                         twitter_user.twitter_profile_background_image_url_https:
                     twitter_user.twitter_profile_background_image_url_https = \
                         twitter_json['profile_background_image_url_https']
                     values_changed = True
 
-            if positive_value_exists(twitter_json['description']):
+            if 'description' in twitter_json and positive_value_exists(twitter_json['description']):
                 if twitter_json['description'] != twitter_user.twitter_description:
                     twitter_user.twitter_description = twitter_json['description']
                     values_changed = True
-            if positive_value_exists(twitter_json['location']):
+            if 'location' in twitter_json and positive_value_exists(twitter_json['location']):
                 if twitter_json['location'] != twitter_user.twitter_location:
                     twitter_user.twitter_location = twitter_json['location']
                     values_changed = True
