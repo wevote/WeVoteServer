@@ -3756,34 +3756,36 @@ class PositionManager(models.Model):
         :return:
         """
         values_changed = False
-        if positive_value_exists (candidate_campaign.candidate_photo_url ()) and \
-            position_object.ballot_item_image_url_https_medium != \
-                candidate_campaign.candidate_photo_url ():
-            position_object.ballot_item_image_url_https_medium = \
-                candidate_campaign.candidate_photo_url ()
+        if positive_value_exists(candidate_campaign.candidate_photo_url()) and \
+                position_object.ballot_item_image_url_https_medium != candidate_campaign.candidate_photo_url():
+            position_object.ballot_item_image_url_https_medium = candidate_campaign.candidate_photo_url()
             values_changed = True
         if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_large) and \
-            position_object.ballot_item_image_url_https_large != \
+                position_object.ballot_item_image_url_https_large != \
                 candidate_campaign.we_vote_hosted_profile_image_url_large:
             position_object.ballot_item_image_url_https_large = \
                 candidate_campaign.we_vote_hosted_profile_image_url_large
             values_changed = True
-        if positive_value_exists (candidate_campaign.we_vote_hosted_profile_image_url_medium) and \
+        if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_medium) and \
             position_object.ballot_item_image_url_https_medium != \
                 candidate_campaign.we_vote_hosted_profile_image_url_medium:
             position_object.ballot_item_image_url_https_medium = \
                 candidate_campaign.we_vote_hosted_profile_image_url_medium
             values_changed = True
-        if positive_value_exists (candidate_campaign.we_vote_hosted_profile_image_url_tiny) and \
-            position_object.ballot_item_image_url_https_tiny != \
+        if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_tiny) and \
+                position_object.ballot_item_image_url_https_tiny != \
                 candidate_campaign.we_vote_hosted_profile_image_url_tiny:
-            position_object.ballot_item_image_url_https_tiny = \
-                candidate_campaign.we_vote_hosted_profile_image_url_tiny
+            position_object.ballot_item_image_url_https_tiny = candidate_campaign.we_vote_hosted_profile_image_url_tiny
             values_changed = True
         if values_changed:
-            position_object.save()
-            success = True
-            status = "SAVED_POSITION_IMAGE_URLS"
+            try:
+                position_object.save()
+                success = True
+                status = "POSITION_OBJECT_SAVED"
+            except Exception as e:
+                success = False
+                status = 'POSITION_OBJECT_COULD_NOT_BE_SAVED'
+
         else:
             success = True
             status = "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS"
@@ -3803,33 +3805,29 @@ class PositionManager(models.Model):
         """
         values_changed = False
         if positive_value_exists(organization.organization_photo_url()) and \
-            position_object.speaker_image_url_https != \
-                organization.organization_photo_url():
-            position_object.speaker_image_url_https = \
-                organization.organization_photo_url()
+                position_object.speaker_image_url_https != organization.organization_photo_url():
+            position_object.speaker_image_url_https = organization.organization_photo_url()
             values_changed = True
         if positive_value_exists(organization.we_vote_hosted_profile_image_url_large) and \
-            position_object.speaker_image_url_https_large != \
-                organization.we_vote_hosted_profile_image_url_large:
-            position_object.speaker_image_url_https_large = \
-                organization.we_vote_hosted_profile_image_url_large
+                position_object.speaker_image_url_https_large != organization.we_vote_hosted_profile_image_url_large:
+            position_object.speaker_image_url_https_large = organization.we_vote_hosted_profile_image_url_large
             values_changed = True
         if positive_value_exists(organization.we_vote_hosted_profile_image_url_medium) and \
-            position_object.speaker_image_url_https_medium != \
-                organization.we_vote_hosted_profile_image_url_medium:
-            position_object.speaker_image_url_https_medium = \
-                organization.we_vote_hosted_profile_image_url_medium
+                position_object.speaker_image_url_https_medium != organization.we_vote_hosted_profile_image_url_medium:
+            position_object.speaker_image_url_https_medium = organization.we_vote_hosted_profile_image_url_medium
             values_changed = True
         if positive_value_exists(organization.we_vote_hosted_profile_image_url_tiny) and \
-            position_object.speaker_image_url_https_tiny != \
-                organization.we_vote_hosted_profile_image_url_tiny:
-            position_object.speaker_image_url_https_tiny = \
-                organization.we_vote_hosted_profile_image_url_tiny
+                position_object.speaker_image_url_https_tiny != organization.we_vote_hosted_profile_image_url_tiny:
+            position_object.speaker_image_url_https_tiny = organization.we_vote_hosted_profile_image_url_tiny
             values_changed = True
         if values_changed:
-            position_object.save()
-            success = True
-            status = "SAVED_POSITION_IMAGE_URLS"
+            try:
+                position_object.save()
+                success = True
+                status = "SAVED_POSITION_IMAGE_URLS_FROM_ORGANIZATION"
+            except Exception as e:
+                success = False
+                status = 'NOT_SAVED_POSITION_IMAGE_URLS_FROM_ORGANIZATION'
         else:
             success = True
             status = "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS"
@@ -3849,33 +3847,29 @@ class PositionManager(models.Model):
         """
         values_changed = False
         if positive_value_exists(voter.voter_photo_url()) and \
-            position_object.speaker_image_url_https != \
-                voter.voter_photo_url():
-            position_object.speaker_image_url_https = \
-                voter.voter_photo_url()
+                position_object.speaker_image_url_https != voter.voter_photo_url():
+            position_object.speaker_image_url_https = voter.voter_photo_url()
             values_changed = True
         if positive_value_exists(voter.we_vote_hosted_profile_image_url_large) and \
-            position_object.speaker_image_url_https_large != \
-                voter.we_vote_hosted_profile_image_url_large:
-            position_object.speaker_image_url_https_large = \
-                voter.we_vote_hosted_profile_image_url_large
+                position_object.speaker_image_url_https_large != voter.we_vote_hosted_profile_image_url_large:
+            position_object.speaker_image_url_https_large = voter.we_vote_hosted_profile_image_url_large
             values_changed = True
         if positive_value_exists(voter.we_vote_hosted_profile_image_url_medium) and \
-            position_object.speaker_image_url_https_medium != \
-                voter.we_vote_hosted_profile_image_url_medium:
-            position_object.speaker_image_url_https_medium = \
-                voter.we_vote_hosted_profile_image_url_medium
+                position_object.speaker_image_url_https_medium != voter.we_vote_hosted_profile_image_url_medium:
+            position_object.speaker_image_url_https_medium = voter.we_vote_hosted_profile_image_url_medium
             values_changed = True
         if positive_value_exists(voter.we_vote_hosted_profile_image_url_tiny) and \
-            position_object.speaker_image_url_https_tiny != \
-                voter.we_vote_hosted_profile_image_url_tiny:
-            position_object.speaker_image_url_https_tiny = \
-                voter.we_vote_hosted_profile_image_url_tiny
+                position_object.speaker_image_url_https_tiny != voter.we_vote_hosted_profile_image_url_tiny:
+            position_object.speaker_image_url_https_tiny = voter.we_vote_hosted_profile_image_url_tiny
             values_changed = True
         if values_changed:
-            position_object.save()
-            success = True
-            status = "SAVED_POSITION_IMAGE_URLS"
+            try:
+                position_object.save()
+                success = True
+                status = "SAVED_POSITION_IMAGE_URLS_FROM_VOTER"
+            except Exception as e:
+                success = False
+                status = 'NOT_SAVED_POSITION_IMAGE_URLS_FROM_VOTER'
         else:
             success = True
             status = "NO_CHANGES_SAVED_TO_POSITION_IMAGE_URLS"

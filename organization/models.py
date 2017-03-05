@@ -700,12 +700,13 @@ class OrganizationManager(models.Manager):
         }
         return results
 
-    def update_organization_twitter_details(self, organization, twitter_json, cached_twitter_profile_image_url_https,
-                                            cached_twitter_profile_background_image_url_https,
-                                            cached_twitter_profile_banner_url_https,
-                                            we_vote_hosted_profile_image_url_large,
-                                            we_vote_hosted_profile_image_url_medium,
-                                            we_vote_hosted_profile_image_url_tiny):
+    def update_organization_twitter_details(self, organization, twitter_json,
+                                            cached_twitter_profile_image_url_https=False,
+                                            cached_twitter_profile_background_image_url_https=False,
+                                            cached_twitter_profile_banner_url_https=False,
+                                            we_vote_hosted_profile_image_url_large=False,
+                                            we_vote_hosted_profile_image_url_medium=False,
+                                            we_vote_hosted_profile_image_url_tiny=False):
         """
         Update an organization entry with details retrieved from the Twitter API.
         """

@@ -2755,21 +2755,33 @@ def update_position_entered_details_from_organization(organization):
 
 def update_position_for_friends_details_from_voter(voter):
     """
-    Update all position image urls PositionEntered from voter details
+    Update all position image urls PositionForFriends from voter details
     :param voter:
     :return:
     """
     position_list_manager = PositionListManager()
     position_manager = PositionManager()
-    update_all_position_image_urls_results = []
     stance_we_are_looking_for = ANY_STANCE
     friends_vs_public = FRIENDS_ONLY
+    positions_updated_count = 0
+    positions_not_updated_count = 0
 
-    friends_position_list = position_list_manager.retrieve_all_positions_for_voter(
+    positions_for_voter_results = position_list_manager.retrieve_all_positions_for_voter(
         voter.id, voter.we_vote_id, stance_we_are_looking_for, friends_vs_public)
-    for position_object in friends_position_list:
-        update_position_image_urls_results = position_manager.update_position_image_urls_from_voter(
-            position_object, voter)
-        update_all_position_image_urls_results.append(update_position_image_urls_results)
 
-    return update_all_position_image_urls_results
+    if positions_for_voter_results['position_list_found']:
+        friends_position_list = positions_for_voter_results['position_list']
+        for position_object in friends_position_list:
+            update_position_image_urls_results = position_manager.update_position_image_urls_from_voter(
+                position_object, voter)
+            if update_position_image_urls_results['success']:
+                positions_updated_count += 1
+            else:
+                positions_not_updated_count += 1
+
+    results = {
+        'success':                      True,
+        'positions_updated_count':      positions_updated_count,
+        'positions_not_updated_count':  positions_not_updated_count,
+    }
+    return results
