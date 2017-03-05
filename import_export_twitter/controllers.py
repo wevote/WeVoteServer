@@ -195,8 +195,9 @@ def refresh_twitter_organization_details(organization):
     if not organization:
         status = "ORGANIZATION_TWITTER_DETAILS_NOT_RETRIEVED-ORG_MISSING"
         results = {
-            'success':                  False,
-            'status':                   status,
+            'success':      False,
+            'status':       status,
+            'organization': organization,
         }
         return results
 
@@ -218,7 +219,7 @@ def refresh_twitter_organization_details(organization):
                 if 'profile_banner_url' in results['twitter_json'] else None
             # caching refreshed new images to s3 aws
             cache_organization_images_results = migrate_latest_remote_image_urls_to_local_cache(
-                 organization.twitter_user_id, organization.organization_twitter_handle,
+                organization.twitter_user_id, organization.organization_twitter_handle,
                 twitter_profile_image_url_https, twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https, organization_id=organization.id,
                 organization_we_vote_id=organization.we_vote_id)
@@ -264,7 +265,8 @@ def refresh_twitter_organization_details(organization):
             if cache_organization_images_results['cached_twitter_background_image']:
                 cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
                     organization_we_vote_id=organization.we_vote_id,
-                    twitter_profile_background_image_url_https=twitter_profile_background_image_url_https, kind_of_image_original=True)
+                    twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                    kind_of_image_original=True)
                 if cached_we_vote_image_results['success']:
                     cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
                     cached_twitter_profile_background_image_url_https = cached_we_vote_image.we_vote_image_url
@@ -309,8 +311,9 @@ def refresh_twitter_organization_details(organization):
             status = "ORGANIZATION_TWITTER_DETAILS_CLEARED_FROM_DB"
 
     results = {
-        'success':                  True,
-        'status':                   status,
+        'success':      True,
+        'status':       status,
+        'organization': organization,
     }
     return results
 
@@ -479,25 +482,29 @@ def retrieve_twitter_data_for_all_organizations(state_code='', google_civic_elec
         # TODO DALE We should stop saving organization_twitter_handle without saving a TwitterLinkToOrganization
         if organization.organization_twitter_handle:
             retrieved_twitter_data = False
-            if first_retrieve_only:
+            if positive_value_exists(first_retrieve_only):
                 if not positive_value_exists(organization.twitter_followers_count):
-                    twitter_user_id = 0
-                    results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
-                    retrieved_twitter_data = results['success']
+                    refresh_results = refresh_twitter_organization_details(organization)
+                    # twitter_user_id = 0
+                    # results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
+                    retrieved_twitter_data = refresh_results['success']
+                    organization = refresh_results['organization']
                     number_of_twitter_accounts_queried += 1
             else:
-                twitter_user_id = 0
-                results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
-                retrieved_twitter_data = results['success']
+                refresh_results = refresh_twitter_organization_details(organization)
+                # twitter_user_id = 0
+                # results = retrieve_twitter_user_info(twitter_user_id, organization.organization_twitter_handle)
+                retrieved_twitter_data = refresh_results['success']
+                organization = refresh_results['organization']
                 number_of_twitter_accounts_queried += 1
 
             if retrieved_twitter_data:
                 number_of_organizations_updated += 1
-                save_results = organization_manager.update_organization_twitter_details(
-                    organization, results['twitter_json'])
+                # save_results = organization_manager.update_organization_twitter_details(
+                #     organization, results['twitter_json'])
 
-                if save_results['success']:
-                    results = update_social_media_statistics_in_other_tables(organization)
+                # if save_results['success']:
+                update_results = update_social_media_statistics_in_other_tables(organization)
 
     status = "ALL_ORGANIZATION_TWITTER_DATA_RETRIEVED"
     results = {

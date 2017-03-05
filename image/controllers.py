@@ -796,7 +796,10 @@ def create_resized_image(we_vote_image):
     we_vote_parent_image_id = we_vote_image.id
     twitter_id = we_vote_image.twitter_id
     facebook_user_id = we_vote_image.facebook_user_id
-    image_format = we_vote_image.we_vote_image_file_location.split(".")[-1]
+    if positive_value_exists(we_vote_image.we_vote_image_file_location):
+        image_format = we_vote_image.we_vote_image_file_location.split(".")[-1]
+    else:
+        image_format = ""
     create_resized_image_results = {
         'voter_we_vote_id':                         voter_we_vote_id,
         'candidate_we_vote_id':                     candidate_we_vote_id,
@@ -1353,9 +1356,9 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
 
     if not twitter_profile_image_url_https:
         cache_all_kind_of_images_results['cached_twitter_profile_image'] = TWITTER_URL_NOT_FOUND
-    elif not twitter_profile_background_image_url_https:
+    if not twitter_profile_background_image_url_https:
         cache_all_kind_of_images_results['cached_twitter_background_image'] = TWITTER_URL_NOT_FOUND
-    elif not twitter_profile_banner_url_https:
+    if not twitter_profile_banner_url_https:
         cache_all_kind_of_images_results['cached_twitter_banner_image'] = TWITTER_URL_NOT_FOUND
 
     if not positive_value_exists(twitter_id):
@@ -1376,13 +1379,15 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
             cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
                 candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
                 kind_of_image_twitter_profile=True, kind_of_image_original=True)
+            this_image_not_cached = True
             for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
                 # If image is already cached then no need to cache it again
                 if twitter_profile_image_url_https == cached_we_vote_image.twitter_profile_image_url_https:
-                    cache_all_kind_of_images_results['cached_twitter_profile_image'] = \
-                        IMAGE_ALREADY_CACHED
+                    cache_all_kind_of_images_results['cached_twitter_profile_image'] = IMAGE_ALREADY_CACHED
+                    this_image_not_cached = False
                     break
-            else:
+
+            if this_image_not_cached:
                 # Image is not cached so caching it
                 cache_image_locally_results = cache_image_locally(
                     google_civic_election_id, twitter_profile_image_url_https,
@@ -1403,14 +1408,16 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
             cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
                 candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
                 kind_of_image_twitter_background=True, kind_of_image_original=True)
+            this_image_not_cached = True
             for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
                 # If image is already cached then no need to cache it again
                 if twitter_profile_background_image_url_https == \
                         cached_we_vote_image.twitter_profile_background_image_url_https:
-                    cache_all_kind_of_images_results['cached_twitter_background_image'] = \
-                        IMAGE_ALREADY_CACHED
+                    cache_all_kind_of_images_results['cached_twitter_background_image'] = IMAGE_ALREADY_CACHED
+                    this_image_not_cached = False
                     break
-            else:
+
+            if this_image_not_cached:
                 # Image is not cached so caching it
                 cache_image_locally_results = cache_image_locally(
                     google_civic_election_id, twitter_profile_background_image_url_https,
@@ -1431,21 +1438,22 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
             cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
                 candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
                 kind_of_image_twitter_banner=True, kind_of_image_original=True)
+            this_image_not_cached = True
             for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
                 # If image is already cached then no need to cache it again
                 if twitter_profile_banner_url_https == cached_we_vote_image.twitter_profile_banner_url_https:
-                    cache_all_kind_of_images_results['cached_twitter_banner_image'] = \
-                        IMAGE_ALREADY_CACHED
+                    cache_all_kind_of_images_results['cached_twitter_banner_image'] = IMAGE_ALREADY_CACHED
+                    this_image_not_cached = False
                     break
-            else:
+
+            if this_image_not_cached:
                 # Image is not cached so caching it
                 cache_image_locally_results = cache_image_locally(
                     google_civic_election_id, twitter_profile_banner_url_https,
                     candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
                     twitter_id=twitter_id, twitter_screen_name=twitter_screen_name,
                     is_active_version=is_active_version, kind_of_image_twitter_banner=True, kind_of_image_original=True)
-                cache_all_kind_of_images_results['cached_twitter_banner_image'] = \
-                    cache_image_locally_results['success']
+                cache_all_kind_of_images_results['cached_twitter_banner_image'] = cache_image_locally_results['success']
                 # set active version False for other master images for same candidate/organization
                 set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
                     twitter_profile_banner_url_https=twitter_profile_banner_url_https,
