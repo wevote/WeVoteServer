@@ -375,7 +375,7 @@ class WeVoteImageManager(models.Model):
     def retrieve_we_vote_image_list_from_we_vote_id(self, voter_we_vote_id=None, candidate_we_vote_id=None,
                                                     organization_we_vote_id=None):
         """
-        Retrieve a voter's we vote image list as per we_vote_id
+        Retrieve a voter's, candidate's or organization's we vote image list from the we_vote_id
         :param voter_we_vote_id:
         :param candidate_we_vote_id:
         :param organization_we_vote_id:

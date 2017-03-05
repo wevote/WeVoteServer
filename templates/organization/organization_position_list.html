@@ -109,30 +109,42 @@
 
 
 {% if organization %}
-    {% if organization.wikipedia_thumbnail_url %}
-        <img src="{{ organization.wikipedia_thumbnail_url }}"><br />
-        Wikipedia Thumbnail<br />
+    {% if organization.we_vote_hosted_profile_image_url_tiny %}
+        we_vote_hosted_profile_image_url_tiny: {{ organization.we_vote_hosted_profile_image_url_tiny }}<br />
+        <img src="{{ organization.we_vote_hosted_profile_image_url_tiny }}"><br />
+        <br />
     {% endif %}
 
-    {% if organization.wikipedia_photo_url %}
-        <img src="{{ organization.wikipedia_photo_url }}" width="100px"><br />
-        Wikipedia Full size<br />
+    {% if organization.we_vote_hosted_profile_image_url_medium %}
+        we_vote_hosted_profile_image_url_medium: {{ organization.we_vote_hosted_profile_image_url_medium }}<br />
+        <img src="{{ organization.we_vote_hosted_profile_image_url_medium }}"><br />
+        <br />
     {% endif %}
 
-    {% if organization.twitter_profile_image_url_https_bigger %}
-        <img src="{{ organization.twitter_profile_image_url_https_bigger }}"><br />
-        Twitter Image (Bigger)<br />
-    {% endif %}
-
-    {% if organization.twitter_profile_image_url_https_original %}
-        <img src="{{ organization.twitter_profile_image_url_https_original }}"><br />
-        Twitter Image (Original)<br />
+    {% if organization.twitter_profile_image_url_https %}
+        twitter_profile_image_url_https: {{ organization.twitter_profile_image_url_https }}<br />
+        <img src="{{ organization.twitter_profile_image_url_https }}"><br />
+        <br />
     {% endif %}
 
     {% if organization.twitter_profile_banner_url_https %}
+        twitter_profile_banner_url_https: {{ organization.twitter_profile_banner_url_https }}<br />
         <img src="{{ organization.twitter_profile_banner_url_https }}"><br />
-        Twitter Banner<br />
+        <br />
     {% endif %}
+
+    {% if organization.wikipedia_thumbnail_url %}
+        Wikipedia Thumbnail<br />
+        <img src="{{ organization.wikipedia_thumbnail_url }}"><br />
+        <br />
+    {% endif %}
+
+    {% if organization.wikipedia_photo_url %}
+        Wikipedia Full size<br />
+        <img src="{{ organization.wikipedia_photo_url }}" width="100px"><br />
+        <br />
+    {% endif %}
+
 {% endif %}
 
 {% endblock %}
