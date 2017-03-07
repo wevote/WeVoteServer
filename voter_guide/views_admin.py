@@ -4,7 +4,6 @@
 
 from .controllers import voter_guides_import_from_master_server
 from .models import VoterGuide, VoterGuideListManager, VoterGuideManager
-from .serializers import VoterGuideSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -16,24 +15,43 @@ from election.models import Election, ElectionManager, TIME_SPAN_LIST
 from organization.models import Organization, OrganizationListManager
 from organization.views_admin import organization_edit_process_view
 from position.models import PositionEntered, PositionForFriends, PositionListManager
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
     STATE_CODE_MAP
-
+from django.http import HttpResponse
+import json
 
 # This page does not need to be protected.
-class VoterGuidesSyncOutView(APIView):
-    def get(self, request, format=None):
-        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+# class VoterGuidesSyncOutView(APIView):
+#     def get(self, request, format=None):
+def voter_guides_sync_out_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
+    try:
         voter_guide_list = VoterGuide.objects.all()
         if positive_value_exists(google_civic_election_id):
             voter_guide_list = voter_guide_list.filter(google_civic_election_id=google_civic_election_id)
 
-        serializer = VoterGuideSerializer(voter_guide_list, many=True)
-        return Response(serializer.data)
+        # serializer = VoterGuideSerializer(voter_guide_list, many=True)
+        # return Response(serializer.data)
+        voter_guide_list_dict = voter_guide_list.values('we_vote_id', 'display_name', 'google_civic_election_id',
+                                                        'image_url', 'last_updated', 'organization_we_vote_id',
+                                                        'owner_we_vote_id', 'public_figure_we_vote_id',
+                                                        'twitter_description', 'twitter_followers_count',
+                                                        'twitter_handle', 'vote_smart_time_span',
+                                                        'voter_guide_owner_type')
+        if voter_guide_list_dict:
+            voter_guide_list_list_json = list(voter_guide_list_dict)
+            return HttpResponse(json.dumps(voter_guide_list_list_json), content_type='application/json')
+    except Exception as e:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'VOTER_GUIDE_LIST_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 
 @login_required

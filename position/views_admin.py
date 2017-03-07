@@ -4,7 +4,6 @@
 
 from .controllers import positions_import_from_master_server
 from .models import ANY_STANCE, PositionEntered
-from .serializers import PositionSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign
 from django.core.urlresolvers import reverse
@@ -17,28 +16,55 @@ from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from position.models import PositionListManager
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
-
+from django.http import HttpResponse
+import json
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
 # NOTE: login_required() throws an error. Needs to be figured out if we ever want to secure this page.
-class PositionsSyncOutView(APIView):
-    def get(self, request, format=None):
-        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+# class PositionsSyncOutView(APIView):
+#     def get(self, request, format=None):
+def positions_sync_out_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
-        position_list_manager = PositionListManager()
-        public_only = True
-        position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
-                                                                                  public_only)
-        serializer = PositionSerializer(position_list, many=True)
-        return Response(serializer.data)
+    position_list_manager = PositionListManager()
+    public_only = True
+    position_list = position_list_manager.retrieve_all_positions_for_election(google_civic_election_id, ANY_STANCE,
+                                                                              public_only)
+    # serializer = PositionSerializer(position_list, many=True)
+    # return Response(serializer.data)
+
+    # convert datetime to str for date_entered and date_last_changed columns
+    position_list = position_list.extra(select={'date_entered_str': "to_char(date_entered, 'YYYY-MM-DD HH24:MI:SS')"})
+    position_list = position_list.extra(
+        select={'date_last_changed_str': "to_char(date_last_changed, 'YYYY-MM-DD HH24:MI:SS')"})
+
+    position_list_dict = position_list.values('we_vote_id', 'ballot_item_display_name', 'ballot_item_image_url_https',
+                                              'ballot_item_twitter_handle', 'speaker_display_name',
+                                              'speaker_image_url_https', 'speaker_twitter_handle', 'date_entered_str',
+                                              'date_last_changed_str', 'organization_we_vote_id', 'voter_we_vote_id',
+                                              'public_figure_we_vote_id', 'google_civic_election_id', 'state_code',
+                                              'vote_smart_rating_id', 'vote_smart_time_span', 'vote_smart_rating',
+                                              'vote_smart_rating_name', 'contest_office_we_vote_id',
+                                              'candidate_campaign_we_vote_id', 'google_civic_candidate_name',
+                                              'politician_we_vote_id', 'contest_measure_we_vote_id', 'stance',
+                                              'statement_text', 'statement_html', 'more_info_url', 'from_scraper',
+                                              'organization_certified', 'volunteer_certified', 'voter_entering_position',
+                                              'tweet_source_id', 'twitter_user_entered_position')
+    if position_list_dict:
+        position_list_json = list(position_list_dict)
+        return HttpResponse(json.dumps(position_list_json), content_type='application/json')
+    else:
+        json_data = {
+            'success': False,
+            'status': 'POSITION_LIST_MISSING'
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required

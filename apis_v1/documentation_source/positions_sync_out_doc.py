@@ -9,11 +9,6 @@ def positions_sync_out_doc_template_values(url_root):
     """
     required_query_parameter_list = [
         {
-            'name':         'format',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'Currently must be \'json\' to work.',
-        },
-        {
             'name':         'google_civic_election_id',
             'value':        'integer',  # boolean, integer, long, string
             'description':  'The election for which we want positions.',

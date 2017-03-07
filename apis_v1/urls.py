@@ -11,27 +11,27 @@ from django.conf.urls.static import static
 from django.conf.urls import url
 from . import views
 from . import views_docs
-from ballot.views_admin import BallotItemsSyncOutView, BallotReturnedSyncOutView
-from candidate.views_admin import CandidatesSyncOutView
-from election.views_admin import ElectionsSyncOutView
-from measure.views_admin import MeasuresSyncOutView
-from office.views_admin import OfficesSyncOutView
-from organization.views_admin import OrganizationsSyncOutView
-from polling_location.views_admin import PollingLocationsSyncOutView
-from position.views_admin import PositionsSyncOutView
-from voter_guide.views_admin import VoterGuidesSyncOutView
+from ballot.views_admin import ballot_items_sync_out_view, ballot_returned_sync_out_view
+from candidate.views_admin import candidates_sync_out_view
+from election.views_admin import elections_sync_out_view
+from measure.views_admin import measures_sync_out_view
+from office.views_admin import offices_sync_out_view
+from organization.views_admin import organizations_sync_out_view
+from polling_location.views_admin import polling_locations_sync_out_view
+from position.views_admin import positions_sync_out_view
+from voter_guide.views_admin import voter_guides_sync_out_view
 
 urlpatterns = [
     # Actual API Calls
     url(r'^ballotItemOptionsRetrieve/', views.ballot_item_options_retrieve_view, name='ballotItemOptionsRetrieveView'),
     url(r'^ballotItemRetrieve/', views.ballot_item_retrieve_view, name='ballotItemRetrieveView'),
-    url(r'^ballotItemsSyncOut/', BallotItemsSyncOutView.as_view(), name='ballotItemsSyncOutView'),
-    url(r'^ballotReturnedSyncOut/', BallotReturnedSyncOutView.as_view(), name='ballotReturnedSyncOutView'),
+    url(r'^ballotItemsSyncOut/', ballot_items_sync_out_view, name='ballotItemsSyncOutView'),
+    url(r'^ballotReturnedSyncOut/', ballot_returned_sync_out_view, name='ballotReturnedSyncOutView'),
     url(r'^candidateRetrieve/', views.candidate_retrieve_view, name='candidateRetrieveView'),
     url(r'^candidatesRetrieve/', views.candidates_retrieve_view, name='candidatesRetrieveView'),
-    url(r'^candidatesSyncOut/', CandidatesSyncOutView.as_view(), name='candidatesSyncOutView'),
+    url(r'^candidatesSyncOut/', candidates_sync_out_view, name='candidatesSyncOutView'),
     url(r'^deviceIdGenerate/$', views.device_id_generate_view, name='deviceIdGenerateView'),
-    url(r'^electionsSyncOut/', ElectionsSyncOutView.as_view(), name='electionsSyncOutView'),
+    url(r'^electionsSyncOut/', elections_sync_out_view, name='electionsSyncOutView'),
     url(r'^facebookDisconnect/', views.facebook_disconnect_view, name='facebookDisconnectView'),
     url(r'^facebookFriendsAction/', views.facebook_friends_action_view, name='facebookFriendsActionView'),
     url(r'^friendInvitationByEmailSend/',
@@ -43,23 +43,23 @@ urlpatterns = [
     url(r'^friendInviteResponse/', views.friend_invite_response_view, name='friendInviteResponseView'),
     url(r'^friendList/', views.friend_list_view, name='friendListView'),
     url(r'^measureRetrieve/', views.measure_retrieve_view, name='measureRetrieveView'),
-    url(r'^measuresSyncOut/', MeasuresSyncOutView.as_view(), name='measuresSyncOutView'),
+    url(r'^measuresSyncOut/', measures_sync_out_view, name='measuresSyncOutView'),
     url(r'^officeRetrieve/', views.office_retrieve_view, name='officeRetrieveView'),
-    url(r'^officesSyncOut/', OfficesSyncOutView.as_view(), name='officesSyncOutView'),
+    url(r'^officesSyncOut/', offices_sync_out_view, name='officesSyncOutView'),
     url(r'^organizationCount/', views.organization_count_view, name='organizationCountView'),
     url(r'^organizationFollow/', views.organization_follow_api_view, name='organizationFollowView'),
     url(r'^organizationFollowIgnore/', views.organization_follow_ignore_api_view, name='organizationFollowIgnoreView'),
     url(r'^organizationRetrieve/', views.organization_retrieve_view, name='organizationRetrieveView'),
     url(r'^organizationSave/', views.organization_save_view, name='organizationSaveView'),
     url(r'^organizationSearch/', views.organization_search_view, name='organizationSearchView'),
-    url(r'^organizationsSyncOut/', OrganizationsSyncOutView.as_view(), name='organizationsSyncOutView'),
+    url(r'^organizationsSyncOut/', organizations_sync_out_view, name='organizationsSyncOutView'),
     url(r'^organizationStopFollowing/',
         views.organization_stop_following_api_view, name='organizationStopFollowingView'),
     url(r'^organizationsFollowedRetrieve/',
         views.organizations_followed_retrieve_api_view, name='organizationsFollowedRetrieveView'),
     url(r'^organizationSuggestionTasks/',
         views.organization_suggestion_tasks_view, name='organizationSuggestionTasksView'),
-    url(r'^pollingLocationsSyncOut/', PollingLocationsSyncOutView.as_view(), name='pollingLocationsSyncOutView'),
+    url(r'^pollingLocationsSyncOut/', polling_locations_sync_out_view, name='pollingLocationsSyncOutView'),
     url(r'^positionsCountForAllBallotItems/',
         views.positions_count_for_all_ballot_items_view, name='positionsCountForAllBallotItemsView'),
     url(r'^positionsCountForOneBallotItem/',
@@ -78,7 +78,7 @@ urlpatterns = [
         views.position_public_support_count_for_ballot_item_view, name='positionPublicSupportCountForBallotItemView'),
     url(r'^positionRetrieve/', views.position_retrieve_view, name='positionRetrieveView'),
     url(r'^positionSave/', views.position_save_view, name='positionSaveView'),
-    url(r'^positionsSyncOut/', PositionsSyncOutView.as_view(), name='positionsSyncOutView'),
+    url(r'^positionsSyncOut/', positions_sync_out_view, name='positionsSyncOutView'),
     url(r'^positionSupportCountForBallotItem/',
         views.position_support_count_for_ballot_item_view, name='positionSupportCountForBallotItemView'),
     url(r'^quickInfoRetrieve/', views.quick_info_retrieve_view, name='quickInfoRetrieveView'),
@@ -119,7 +119,7 @@ urlpatterns = [
         views.voter_guides_followed_retrieve_view, name='voterGuidesFollowedRetrieveView'),
     url(r'^voterGuidesIgnoredRetrieve/',
         views.voter_guides_ignored_retrieve_view, name='voterGuidesIgnoredRetrieveView'),
-    url(r'^voterGuidesSyncOut/', VoterGuidesSyncOutView.as_view(), name='voterGuidesSyncOutView'),
+    url(r'^voterGuidesSyncOut/', voter_guides_sync_out_view, name='voterGuidesSyncOutView'),
     url(r'^voterGuidesToFollowRetrieve/',
         views.voter_guides_to_follow_retrieve_view, name='voterGuidesToFollowRetrieveView'),
     url(r'^voterLocationRetrieveFromIP/',

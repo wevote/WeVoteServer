@@ -19,13 +19,6 @@ def elections_sync_out_doc_template_values(url_root):
             'description':  'An 88 character unique identifier linked to a voter record on the server',
         },
     ]
-    optional_query_parameter_list = [
-        {
-            'name':         'format',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'Although optional, We Vote is built using the json value',
-        },
-    ]
 
     potential_status_codes_list = [
     ]
@@ -60,7 +53,6 @@ def elections_sync_out_doc_template_values(url_root):
         'url_root': url_root,
         'get_or_post': 'GET',
         'required_query_parameter_list': required_query_parameter_list,
-        'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,
         'api_response_notes':
             "NOTE: Success returns a single entry in a json list, "

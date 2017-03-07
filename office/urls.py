@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'^$', views_admin.office_list_view, name='office_list',),
     url(r'^delete/$', views_admin.office_delete_process_view, name='office_delete_process'),
     url(r'^edit_process/$', views_admin.office_edit_process_view, name='office_edit_process'),
-    url(r'^export/', views_admin.OfficesSyncOutView.as_view(), name='offices_export'),
+    # url(r'^export/', views_admin.OfficesSyncOutView.as_view(), name='offices_export'),
     url(r'^import/$',
         views_admin.offices_import_from_master_server_view, name='offices_import_from_master_server'),
     url(r'^new/$', views_admin.office_new_view, name='office_new'),

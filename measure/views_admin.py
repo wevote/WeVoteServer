@@ -5,7 +5,6 @@
 
 from .controllers import measures_import_from_master_server
 from .models import ContestMeasure
-from .serializers import ContestMeasureSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -17,29 +16,52 @@ from election.models import Election
 from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from position.models import OPPOSE, PositionListManager, SUPPORT
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
+from django.http import HttpResponse
+import json
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-class MeasuresSyncOutView(APIView):
-    def get(self, request, format=None):
-        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-        state_code = request.GET.get('state_code', '')
+# class MeasuresSyncOutView(APIView):
+#     def get(self, request, format=None):
+def measures_sync_out_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
 
+    try:
         contest_measure_list = ContestMeasure.objects.all()
         if positive_value_exists(google_civic_election_id):
             contest_measure_list = contest_measure_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
             contest_measure_list = contest_measure_list.filter(state_code__iexact=state_code)
+        # serializer = ContestMeasureSerializer(contest_measure_list, many=True)
+        # return Response(serializer.data)
+        contest_measure_list_dict = contest_measure_list.values('we_vote_id', 'maplight_id', 'vote_smart_id',
+                                                                'measure_title', 'measure_subtitle',
+                                                                'measure_text', 'measure_url',
+                                                                'google_civic_election_id', 'ocd_division_id',
+                                                                'primary_party', 'district_name',
+                                                                'district_scope', 'district_id', 'state_code',
+                                                                'wikipedia_page_id', 'wikipedia_page_title',
+                                                                'wikipedia_photo_url', 'ballotpedia_page_title',
+                                                                'ballotpedia_photo_url')
+        if contest_measure_list_dict:
+            contest_measure_list_json = list(contest_measure_list_dict)
+            return HttpResponse(json.dumps(contest_measure_list_json), content_type='application/json')
+    except Exception as e:
+        pass
 
-        serializer = ContestMeasureSerializer(contest_measure_list, many=True)
-        return Response(serializer.data)
+    json_data = {
+        'success': False,
+        'status': 'CONTEST_MEASURE_LIST_MISSING'
+    }
+
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 
 @login_required
