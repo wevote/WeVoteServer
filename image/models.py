@@ -130,6 +130,26 @@ class WeVoteImageManager(models.Model):
         }
         return results
 
+    def delete_we_vote_image(self, we_vote_image):
+        """
+        Delete we vote image entry from WeVoteImage table.
+        :param we_vote_image:
+        :return:
+        """
+        try:
+            we_vote_image.delete()
+            success = True
+            status = " WE_VOTE_IMAGE_DELETED"
+        except Exception as e:
+            success = False
+            status = "WE_VOTE_IMAGE_NOT_DELETED"
+
+        results = {
+            'success':  success,
+            'status':   status
+        }
+        return results
+
     def save_we_vote_image_facebook_info(self, we_vote_image, facebook_user_id, image_width, image_height,
                                          facebook_image_url_https, same_day_image_version, kind_of_image_facebook_profile,
                                          kind_of_image_facebook_background, image_url_valid=False):

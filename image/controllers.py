@@ -10,7 +10,7 @@ from import_export_twitter.functions import retrieve_twitter_user_info
 from .models import WeVoteImageManager, WeVoteImage
 from twitter.models import TwitterUserManager
 from voter.models import VoterManager, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
-from wevote_functions.functions import positive_value_exists
+from wevote_functions.functions import positive_value_exists, convert_to_int
 import requests
 import wevote_functions.admin
 
@@ -35,12 +35,12 @@ MASTER_IMAGE = "master"
 MEDIUM = "medium"
 TINY = "tiny"
 
-PROFILE_IMAGE_LARGE_WIDTH = get_environment_variable("PROFILE_IMAGE_LARGE_WIDTH")
-PROFILE_IMAGE_LARGE_HEIGHT = get_environment_variable("PROFILE_IMAGE_LARGE_HEIGHT")
-PROFILE_IMAGE_MEDIUM_WIDTH = get_environment_variable("PROFILE_IMAGE_MEDIUM_WIDTH")
-PROFILE_IMAGE_MEDIUM_HEIGHT = get_environment_variable("PROFILE_IMAGE_MEDIUM_HEIGHT")
-PROFILE_IMAGE_TINY_WIDTH = get_environment_variable("PROFILE_IMAGE_TINY_WIDTH")
-PROFILE_IMAGE_TINY_HEIGHT = get_environment_variable("PROFILE_IMAGE_TINY_HEIGHT")
+PROFILE_IMAGE_LARGE_WIDTH = convert_to_int(get_environment_variable("PROFILE_IMAGE_LARGE_WIDTH"))
+PROFILE_IMAGE_LARGE_HEIGHT = convert_to_int(get_environment_variable("PROFILE_IMAGE_LARGE_HEIGHT"))
+PROFILE_IMAGE_MEDIUM_WIDTH = convert_to_int(get_environment_variable("PROFILE_IMAGE_MEDIUM_WIDTH"))
+PROFILE_IMAGE_MEDIUM_HEIGHT = convert_to_int(get_environment_variable("PROFILE_IMAGE_MEDIUM_HEIGHT"))
+PROFILE_IMAGE_TINY_WIDTH = convert_to_int(get_environment_variable("PROFILE_IMAGE_TINY_WIDTH"))
+PROFILE_IMAGE_TINY_HEIGHT = convert_to_int(get_environment_variable("PROFILE_IMAGE_TINY_HEIGHT"))
 AWS_STORAGE_BUCKET_NAME = get_environment_variable("AWS_STORAGE_BUCKET_NAME")
 
 
@@ -381,6 +381,7 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
             'image_stored_locally':         image_stored_locally,
             'image_stored_to_aws':          image_stored_to_aws,
         }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
         return error_results
 
     image_url_valid = True
@@ -458,6 +459,7 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
                 'image_stored_locally':         False,
                 'image_stored_to_aws':          image_stored_to_aws,
             }
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image (we_vote_image)
             return error_results
 
         status += " IMAGE_STORED_LOCALLY"
@@ -474,6 +476,7 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
                 'image_stored_locally':         image_stored_locally,
                 'image_stored_to_aws':          False,
             }
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image (we_vote_image)
             return error_results
         we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
                             "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
@@ -483,6 +486,18 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
                                                                           we_vote_parent_image_id, is_active_version)
         status += " IMAGE_STORED_TO_AWS " + save_aws_info['status']
         success = save_aws_info['success']
+        if not success:
+            error_results = {
+                'success':                  success,
+                'status':                   status,
+                'we_vote_image_created':    we_vote_image_created,
+                'image_url_valid':          image_url_valid,
+                'image_stored_from_source': image_stored_from_source,
+                'image_stored_locally':     image_stored_locally,
+                'image_stored_to_aws':      image_stored_to_aws,
+            }
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image (we_vote_image)
+            return error_results
 
     else:
         error_results = {
@@ -494,6 +509,7 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
             'image_stored_locally':         image_stored_locally,
             'image_stored_to_aws':          image_stored_to_aws,
         }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
         return error_results
 
     results = {
@@ -1257,6 +1273,7 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
                 'resized_image_created':        resized_image_created,
                 'image_stored_to_aws':          image_stored_to_aws,
             }
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
             return error_results
 
         status += " IMAGE_STORED_LOCALLY"
@@ -1272,6 +1289,7 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
                 'resized_image_created':        False,
                 'image_stored_to_aws':          image_stored_to_aws,
             }
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
             return error_results
 
         status += " RESIZED_IMAGE_CREATED"
@@ -1282,11 +1300,12 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
                 'success':                      success,
                 'status':                       status + " IMAGE_NOT_STORED_TO_AWS",
                 'we_vote_image_created':        we_vote_image_created,
-                'resized_image_created':        resized_image_created,
                 'image_stored_from_source':     image_stored_from_source,
                 'image_stored_locally':         image_stored_locally,
+                'resized_image_created':        resized_image_created,
                 'image_stored_to_aws':          False,
             }
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
             return error_results
 
         we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
@@ -1297,6 +1316,18 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
                                                                           we_vote_parent_image_id, is_active_version)
         status += " IMAGE_STORED_TO_AWS " + save_aws_info['status']
         success = save_aws_info['success']
+        if not success:
+            error_results = {
+                'success':                  success,
+                'status':                   status,
+                'we_vote_image_created':    we_vote_image_created,
+                'image_stored_from_source': image_stored_from_source,
+                'image_stored_locally':     image_stored_locally,
+                'resized_image_created':    resized_image_created,
+                'image_stored_to_aws':      image_stored_to_aws,
+            }
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+            return error_results
 
     else:
         error_results = {
@@ -1308,6 +1339,7 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
             'resized_image_created':        resized_image_created,
             'image_stored_to_aws':          image_stored_to_aws,
         }
+        delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
         return error_results
 
     results = {
