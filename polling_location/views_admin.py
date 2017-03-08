@@ -4,7 +4,6 @@
 
 from .models import PollingLocation
 from .controllers import import_and_save_all_polling_locations_data, polling_locations_import_from_master_server
-from .serializers import PollingLocationSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -14,11 +13,11 @@ from django.contrib.messages import get_messages
 from django.shortcuts import render
 from exception.models import handle_record_found_more_than_one_exception, handle_record_not_found_exception, \
     handle_record_not_saved_exception
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from voter.models import voter_has_authority
 from wevote_functions.functions import convert_to_int, positive_value_exists
 import wevote_functions.admin
+from django.http import HttpResponse
+import json
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -85,16 +84,32 @@ STATE_LIST_IMPORT = {
 
 
 # This page does not need to be protected.
-class PollingLocationsSyncOutView(APIView):
-    def get(self, request, format=None):
-        state = request.GET.get('state', '')
+# class PollingLocationsSyncOutView(APIView):
+#     def get(self, request, format=None):
+def polling_locations_sync_out_view(request):
+    state = request.GET.get('state', '')
 
+    try:
         polling_location_list = PollingLocation.objects.all()
         if positive_value_exists(state):
             polling_location_list = polling_location_list.filter(state__iexact=state)
 
-        serializer = PollingLocationSerializer(polling_location_list, many=True)
-        return Response(serializer.data)
+        # serializer = PollingLocationSerializer(polling_location_list, many=True)
+        # return Response(serializer.data)
+        polling_location_list_dict = polling_location_list.values('we_vote_id', 'city', 'directions_text', 'line1',
+                                                                  'line2', 'location_name', 'polling_hours_text',
+                                                                  'polling_location_id', 'state', 'zip_long')
+        if polling_location_list_dict:
+            polling_location_list_json = list(polling_location_list_dict)
+            return HttpResponse(json.dumps(polling_location_list_json), content_type='application/json')
+    except Exception as e:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'POLLING_LOCATTION_LIST_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required

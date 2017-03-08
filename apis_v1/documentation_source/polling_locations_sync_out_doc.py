@@ -7,13 +7,6 @@ def polling_locations_sync_out_doc_template_values(url_root):
     """
     Show documentation about pollingLocationsSyncOut
     """
-    required_query_parameter_list = [
-        {
-            'name':         'format',
-            'value':        'string',  # boolean, integer, long, string
-            'description':  'Currently must be \'json\' to work.',
-        },
-    ]
     optional_query_parameter_list = [
         {
             'name':         'state',
@@ -50,7 +43,6 @@ def polling_locations_sync_out_doc_template_values(url_root):
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,
         'get_or_post': 'GET',
-        'required_query_parameter_list': required_query_parameter_list,
         'optional_query_parameter_list': optional_query_parameter_list,
         'api_response': api_response,
         'api_response_notes':

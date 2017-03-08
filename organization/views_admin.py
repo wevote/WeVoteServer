@@ -4,7 +4,6 @@
 
 from .controllers import organizations_import_from_master_server
 from .models import Organization
-from .serializers import OrganizationSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
 from django.db.models import Q
@@ -21,13 +20,13 @@ from measure.models import ContestMeasure, ContestMeasureList, ContestMeasureMan
 from organization.models import OrganizationListManager, OrganizationManager
 from position.models import PositionEntered, PositionManager, INFORMATION_ONLY, OPPOSE, \
     STILL_DECIDING, SUPPORT
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from voter.models import retrieve_voter_authority, voter_has_authority, VoterManager
 from voter_guide.models import VoterGuideManager
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, positive_value_exists, \
     STATE_CODE_MAP
+from django.http import HttpResponse
+import json
 
 
 ORGANIZATION_STANCE_CHOICES = (
@@ -41,18 +40,49 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-class OrganizationsSyncOutView(APIView):
-    def __str__(self):
-        return str("")
+# class OrganizationsSyncOutView(APIView):
+#     def __str__(self):
+#         return str("")
+#
+#     def get(self, request, format=None):
+def organizations_sync_out_view(request):
+    state_served_code = request.GET.get('state_served_code', '')
 
-    def get(self, request, format=None):
-        state_served_code = request.GET.get('state_served_code', '')
-
+    try:
         organization_list = Organization.objects.all()
         if positive_value_exists(state_served_code):
             organization_list = organization_list.filter(state_served_code__iexact=state_served_code)
-        serializer = OrganizationSerializer(organization_list, many=True, allow_null=True)
-        return Response(serializer.data)
+        # serializer = OrganizationSerializer(organization_list, many=True, allow_null=True)
+        # return Response(serializer.data)
+        organization_list_dict = organization_list.values('we_vote_id', 'organization_name', 'organization_type',
+                                                          'organization_description', 'state_served_code',
+                                                          'organization_website', 'organization_email',
+                                                          'organization_image', 'organization_twitter_handle',
+                                                          'twitter_user_id', 'twitter_followers_count',
+                                                          'twitter_description', 'twitter_location', 'twitter_name',
+                                                          'twitter_profile_image_url_https',
+                                                          'twitter_profile_background_image_url_https',
+                                                          'twitter_profile_banner_url_https', 'organization_facebook',
+                                                          'vote_smart_id', 'organization_contact_name',
+                                                          'organization_address', 'organization_city',
+                                                          'organization_state', 'organization_zip',
+                                                          'organization_phone1', 'organization_phone2',
+                                                          'organization_fax', 'wikipedia_page_title',
+                                                          'wikipedia_page_id', 'wikipedia_photo_url',
+                                                          'wikipedia_thumbnail_url', 'wikipedia_thumbnail_width',
+                                                          'wikipedia_thumbnail_height', 'ballotpedia_page_title',
+                                                          'ballotpedia_photo_url')
+        if organization_list_dict:
+            organization_list_json = list(organization_list_dict)
+            return HttpResponse(json.dumps(organization_list_json), content_type='application/json')
+    except Exception as e:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'ORGANIZATION_LIST_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required

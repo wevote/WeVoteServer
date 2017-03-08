@@ -560,24 +560,37 @@ def election_summary_view(request, election_local_id):
 
 
 # TODO Which of these two do we standardize on?
-class ElectionsSyncOutView(APIView):
-    """
-    Export raw voter data to JSON format
-    """
-    def get(self, request):  # Removed: , format=None
-        voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
-        results = elections_sync_out_list_for_api(voter_device_id)
+# class ElectionsSyncOutView(APIView):
+#     """
+#     Export raw voter data to JSON format
+#     """
+#     def get(self, request):  # Removed: , format=None
+def elections_sync_out_view(request):
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+    results = elections_sync_out_list_for_api(voter_device_id)
 
-        if 'success' not in results:
-            json_data = results['json_data']
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
-        elif not results['success']:
-            json_data = results['json_data']
-            return HttpResponse(json.dumps(json_data), content_type='application/json')
+    if 'success' not in results:
+        json_data = results['json_data']
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    elif not results['success']:
+        json_data = results['json_data']
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+    else:
+        election_list = results['election_list']
+        # serializer = ElectionSerializer(election_list, many=True)
+        # return Response(serializer.data)
+        election_list_dict = election_list.values('google_civic_election_id', 'election_name', 'election_day_text',
+                                                  'ocd_division_id', 'get_election_state')
+        if election_list_dict:
+            election_list_json = list(election_list_dict)
+            return HttpResponse(json.dumps(election_list_json), content_type='application/json')
         else:
-            election_list = results['election_list']
-            serializer = ElectionSerializer(election_list, many=True)
-            return Response(serializer.data)
+            json_data = {
+                'success': False,
+                'status': 'ELECTION_LIST_MISSING',
+                'voter_device_id': voter_device_id
+            }
+            return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 # This page does not need to be protected.
