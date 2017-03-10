@@ -11,7 +11,7 @@ from voter_guide.models import VoterGuideManager
 from .functions import retrieve_twitter_user_info
 from candidate.models import CandidateCampaignManager, CandidateCampaignListManager
 from config.base import get_environment_variable
-from image.controllers import migrate_latest_remote_image_urls_to_local_cache, create_resized_image
+from image.controllers import TWITTER, cache_original_and_resized_image
 from import_export_twitter.models import TwitterAuthManager
 from organization.controllers import move_organization_to_another_complete, \
     update_social_media_statistics_in_other_tables
@@ -64,12 +64,6 @@ def refresh_twitter_candidate_details(candidate_campaign):
     politician_manager = PoliticianManager()
     twitter_user_manager = TwitterUserManager()
     we_vote_image_manager = WeVoteImageManager()
-    cached_twitter_profile_image_url_https = None
-    cached_twitter_profile_background_image_url_https = None
-    cached_twitter_profile_banner_url_https = None
-    we_vote_hosted_profile_image_url_large = None
-    we_vote_hosted_profile_image_url_medium = None
-    we_vote_hosted_profile_image_url_tiny = None
 
     if not candidate_campaign:
         status = "TWITTER_CANDIDATE_DETAILS_NOT_RETRIEVED-CANDIDATE_MISSING"
@@ -94,67 +88,20 @@ def refresh_twitter_candidate_details(candidate_campaign):
                 if 'profile_background_image_url_https' in results['twitter_json'] else None
             twitter_profile_banner_url_https = results['twitter_json']['profile_banner_url'] \
                 if 'profile_banner_url' in results['twitter_json'] else None
-            # caching refreshed new images to s3 aws
-            cache_candidate_images_results = migrate_latest_remote_image_urls_to_local_cache(
-                candidate_campaign.twitter_user_id, candidate_campaign.candidate_twitter_handle,
-                twitter_profile_image_url_https, twitter_profile_background_image_url_https,
-                twitter_profile_banner_url_https, candidate_id=candidate_campaign.id,
-                candidate_we_vote_id=candidate_campaign.we_vote_id)
-
-            # retrieve refreshed cache url
-            if cache_candidate_images_results['cached_twitter_profile_image']:
-                cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                    candidate_we_vote_id=candidate_campaign.we_vote_id,
-                    twitter_profile_image_url_https=twitter_profile_image_url_https,
-                    kind_of_image_original=True)
-                if cached_we_vote_image_results['success']:
-                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
-                    cached_twitter_profile_image_url_https = cached_we_vote_image.we_vote_image_url
-
-                    # create resized image and cache it to s3
-                    create_resized_image_results = create_resized_image(cached_we_vote_image)
-                    # retrieve resized large/medium/tiny version url
-                    if create_resized_image_results['cached_large_twitter_profile_image']:
-                        cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                            candidate_we_vote_id=candidate_campaign.we_vote_id,
-                            twitter_profile_image_url_https=twitter_profile_image_url_https,
-                            kind_of_image_large=True)
-                        if cached_resized_we_vote_image_results['success']:
-                            cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
-                            we_vote_hosted_profile_image_url_large = cached_resized_we_vote_image.we_vote_image_url
-                    if create_resized_image_results['cached_medium_twitter_profile_image']:
-                        cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                            candidate_we_vote_id=candidate_campaign.we_vote_id,
-                            twitter_profile_image_url_https=twitter_profile_image_url_https,
-                            kind_of_image_medium=True)
-                        if cached_resized_we_vote_image_results['success']:
-                            cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
-                            we_vote_hosted_profile_image_url_medium = cached_resized_we_vote_image.we_vote_image_url
-                    if create_resized_image_results['cached_tiny_twitter_profile_image']:
-                        cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                            candidate_we_vote_id=candidate_campaign.we_vote_id,
-                            twitter_profile_image_url_https=twitter_profile_image_url_https,
-                            kind_of_image_tiny=True)
-                        if cached_resized_we_vote_image_results['success']:
-                            cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
-                            we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
-
-            if cache_candidate_images_results['cached_twitter_background_image']:
-                cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                    candidate_we_vote_id=candidate_campaign.we_vote_id,
-                    twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-                    kind_of_image_original=True)
-                if cached_we_vote_image_results['success']:
-                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
-                    cached_twitter_profile_background_image_url_https = cached_we_vote_image.we_vote_image_url
-            if cache_candidate_images_results['cached_twitter_banner_image']:
-                cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                    candidate_we_vote_id=candidate_campaign.we_vote_id,
-                    twitter_profile_banner_url_https=twitter_profile_banner_url_https,
-                    kind_of_image_original=True)
-                if cached_we_vote_image_results['success']:
-                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
-                    cached_twitter_profile_banner_url_https = cached_we_vote_image.we_vote_image_url
+            cache_results = cache_original_and_resized_image(
+                candidate_id=candidate_campaign.id, candidate_we_vote_id=candidate_campaign.we_vote_id,
+                twitter_id=candidate_campaign.twitter_user_id,
+                twitter_screen_name=candidate_campaign.candidate_twitter_handle,
+                twitter_profile_image_url_https=twitter_profile_image_url_https,
+                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                twitter_profile_banner_url_https=twitter_profile_banner_url_https, image_source=TWITTER)
+            cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+            cached_twitter_profile_background_image_url_https = \
+                cache_results['cached_twitter_profile_background_image_url_https']
+            cached_twitter_profile_banner_url_https = cache_results['cached_twitter_profile_banner_url_https']
+            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
 
             save_candidate_campaign_results = candidate_campaign_manager.update_candidate_twitter_details(
                 candidate_campaign, results['twitter_json'], cached_twitter_profile_image_url_https,
@@ -163,8 +110,10 @@ def refresh_twitter_candidate_details(candidate_campaign):
                 we_vote_hosted_profile_image_url_tiny)
             candidate_campaign = save_candidate_campaign_results['candidate']
             save_twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
-                candidate_campaign.twitter_user_id, results['twitter_json'], cached_twitter_profile_image_url_https,
-                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https)
+                results['twitter_json'], candidate_campaign.twitter_user_id, cached_twitter_profile_image_url_https,
+                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https,
+                we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny)
             # Need to update voter twitter details for the candidate in future
             save_politician_details_results = politician_manager.update_politician_details_from_candidate(
                 candidate_campaign)
@@ -217,67 +166,21 @@ def refresh_twitter_organization_details(organization):
                 if 'profile_background_image_url_https' in results['twitter_json'] else None
             twitter_profile_banner_url_https = results['twitter_json']['profile_banner_url'] \
                 if 'profile_banner_url' in results['twitter_json'] else None
-            # caching refreshed new images to s3 aws
-            cache_organization_images_results = migrate_latest_remote_image_urls_to_local_cache(
-                organization.twitter_user_id, organization.organization_twitter_handle,
-                twitter_profile_image_url_https, twitter_profile_background_image_url_https,
-                twitter_profile_banner_url_https, organization_id=organization.id,
-                organization_we_vote_id=organization.we_vote_id)
-
-            # retrieve refreshed cache url
-            if cache_organization_images_results['cached_twitter_profile_image']:
-                cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                    organization_we_vote_id=organization.we_vote_id,
-                    twitter_profile_image_url_https=twitter_profile_image_url_https,
-                    kind_of_image_original=True)
-                if cached_we_vote_image_results['success']:
-                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
-                    cached_twitter_profile_image_url_https = cached_we_vote_image.we_vote_image_url
-
-                    # create resized image and cache it to s3
-                    create_resized_image_results = create_resized_image(cached_we_vote_image)
-                    # retrieve resized large/medium/tiny version url
-                    if create_resized_image_results['cached_large_twitter_profile_image']:
-                        cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                            organization_we_vote_id=organization.we_vote_id,
-                            twitter_profile_image_url_https=twitter_profile_image_url_https,
-                            kind_of_image_large=True)
-                        if cached_resized_we_vote_image_results['success']:
-                            cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
-                            we_vote_hosted_profile_image_url_large = cached_resized_we_vote_image.we_vote_image_url
-                    if create_resized_image_results['cached_medium_twitter_profile_image']:
-                        cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                            organization_we_vote_id=organization.we_vote_id,
-                            twitter_profile_image_url_https=twitter_profile_image_url_https,
-                            kind_of_image_medium=True)
-                        if cached_resized_we_vote_image_results['success']:
-                            cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
-                            we_vote_hosted_profile_image_url_medium = cached_resized_we_vote_image.we_vote_image_url
-                    if create_resized_image_results['cached_tiny_twitter_profile_image']:
-                        cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                            organization_we_vote_id=organization.we_vote_id,
-                            twitter_profile_image_url_https=twitter_profile_image_url_https,
-                            kind_of_image_tiny=True)
-                        if cached_resized_we_vote_image_results['success']:
-                            cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
-                            we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
-
-            if cache_organization_images_results['cached_twitter_background_image']:
-                cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                    organization_we_vote_id=organization.we_vote_id,
-                    twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-                    kind_of_image_original=True)
-                if cached_we_vote_image_results['success']:
-                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
-                    cached_twitter_profile_background_image_url_https = cached_we_vote_image.we_vote_image_url
-            if cache_organization_images_results['cached_twitter_banner_image']:
-                cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
-                    organization_we_vote_id=organization.we_vote_id,
-                    twitter_profile_banner_url_https=twitter_profile_banner_url_https,
-                    kind_of_image_original=True)
-                if cached_we_vote_image_results['success']:
-                    cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
-                    cached_twitter_profile_banner_url_https = cached_we_vote_image.we_vote_image_url
+            # Cache original and resized images
+            cache_results = cache_original_and_resized_image(
+                organization_id=organization.id, organization_we_vote_id=organization.we_vote_id,
+                twitter_id=organization.twitter_user_id,
+                twitter_screen_name=organization.organization_twitter_handle,
+                twitter_profile_image_url_https=twitter_profile_image_url_https,
+                twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+                twitter_profile_banner_url_https=twitter_profile_banner_url_https, image_source=TWITTER)
+            cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+            cached_twitter_profile_background_image_url_https = \
+                cache_results['cached_twitter_profile_background_image_url_https']
+            cached_twitter_profile_banner_url_https = cache_results['cached_twitter_profile_banner_url_https']
+            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
 
             # If we didn't just generate image urls for tiny, medium or large, we want to retrieve them from the image
             # cache so we can store them in the organization table below in update_organization_twitter_details
@@ -324,8 +227,10 @@ def refresh_twitter_organization_details(organization):
 
                 # Make sure we have a TwitterUser
                 save_twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
-                    organization.twitter_user_id, results['twitter_json'], cached_twitter_profile_image_url_https,
-                    cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https)
+                    results['twitter_json'], organization.twitter_user_id, cached_twitter_profile_image_url_https,
+                    cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https,
+                    we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+                    we_vote_hosted_profile_image_url_tiny)
 
                 # If there is a voter with this Twitter id, then update the voter information in other tables
                 save_voter_twitter_details_results = voter_manager.update_voter_twitter_details(
@@ -1117,25 +1022,28 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     if not positive_value_exists(voter_id):
         success = False
         error_results = {
-            'success':                              success,
-            'status':                               "TWITTER_SIGN_IN_NO_VOTER",
-            'voter_device_id':                      voter_device_id,
-            'voter_we_vote_id':                     "",
-            'voter_has_data_to_preserve':           False,
-            'existing_twitter_account_found':       False,
-            'voter_we_vote_id_attached_to_twitter': "",
-            'twitter_sign_in_found':                False,
-            'twitter_sign_in_verified':             False,
-            'twitter_sign_in_failed':               True,
-            'twitter_secret_key':                   "",
-            'twitter_access_secret':                "",
-            'twitter_access_token':                 "",
-            'twitter_id':                           0,
-            'twitter_name':                         "",
-            'twitter_profile_image_url_https':      "",
-            'twitter_request_secret':               "",
-            'twitter_request_token':                "",
-            'twitter_screen_name':                  "",
+            'success':                                  success,
+            'status':                                   "TWITTER_SIGN_IN_NO_VOTER",
+            'voter_device_id':                          voter_device_id,
+            'voter_we_vote_id':                         "",
+            'voter_has_data_to_preserve':               False,
+            'existing_twitter_account_found':           False,
+            'voter_we_vote_id_attached_to_twitter':     "",
+            'twitter_sign_in_found':                    False,
+            'twitter_sign_in_verified':                 False,
+            'twitter_sign_in_failed':                   True,
+            'twitter_secret_key':                       "",
+            'twitter_access_secret':                    "",
+            'twitter_access_token':                     "",
+            'twitter_id':                               0,
+            'twitter_name':                             "",
+            'twitter_profile_image_url_https':          "",
+            'twitter_request_secret':                   "",
+            'twitter_request_token':                    "",
+            'twitter_screen_name':                      "",
+            'we_vote_hosted_profile_image_url_large':   "",
+            'we_vote_hosted_profile_image_url_medium':  "",
+            'we_vote_hosted_profile_image_url_tiny':    "",
         }
         return error_results
     voter = voter_results['voter']
@@ -1148,25 +1056,28 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     if not auth_response_results['twitter_auth_response_found']:
         success = False
         error_results = {
-            'success':                              success,
-            'status':                               status,
-            'voter_device_id':                      voter_device_id,
-            'voter_we_vote_id':                     voter_we_vote_id,
-            'voter_has_data_to_preserve':           False,
-            'existing_twitter_account_found':       False,
-            'voter_we_vote_id_attached_to_twitter': "",
-            'twitter_sign_in_found':                False,
-            'twitter_sign_in_verified':             False,
-            'twitter_sign_in_failed':               True,
-            'twitter_secret_key':                   "",
-            'twitter_access_secret':                "",
-            'twitter_access_token':                 "",
-            'twitter_id':                           0,
-            'twitter_name':                         "",
-            'twitter_profile_image_url_https':      "",
-            'twitter_request_secret':               "",
-            'twitter_request_token':                "",
-            'twitter_screen_name':                  "",
+            'success':                                  success,
+            'status':                                   status,
+            'voter_device_id':                          voter_device_id,
+            'voter_we_vote_id':                         voter_we_vote_id,
+            'voter_has_data_to_preserve':               False,
+            'existing_twitter_account_found':           False,
+            'voter_we_vote_id_attached_to_twitter':     "",
+            'twitter_sign_in_found':                    False,
+            'twitter_sign_in_verified':                 False,
+            'twitter_sign_in_failed':                   True,
+            'twitter_secret_key':                       "",
+            'twitter_access_secret':                    "",
+            'twitter_access_token':                     "",
+            'twitter_id':                               0,
+            'twitter_name':                             "",
+            'twitter_profile_image_url_https':          "",
+            'twitter_request_secret':                   "",
+            'twitter_request_token':                    "",
+            'twitter_screen_name':                      "",
+            'we_vote_hosted_profile_image_url_large':   "",
+            'we_vote_hosted_profile_image_url_medium':  "",
+            'we_vote_hosted_profile_image_url_tiny':    "",
         }
         return error_results
 
@@ -1176,25 +1087,28 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
     if not twitter_auth_response.twitter_id:
         success = False
         error_results = {
-            'success':                              success,
-            'status':                               status,
-            'voter_device_id':                      voter_device_id,
-            'voter_we_vote_id':                     voter_we_vote_id,
-            'voter_has_data_to_preserve':           False,
-            'existing_twitter_account_found':       False,
-            'voter_we_vote_id_attached_to_twitter': "",
-            'twitter_sign_in_found':                False,
-            'twitter_sign_in_verified':             False,
-            'twitter_sign_in_failed':               True,
-            'twitter_secret_key':                   "",
-            'twitter_access_secret':                "",
-            'twitter_access_token':                 "",
-            'twitter_id':                           0,
-            'twitter_name':                         "",
-            'twitter_profile_image_url_https':      "",
-            'twitter_request_secret':               "",
-            'twitter_request_token':                "",
-            'twitter_screen_name':                  "",
+            'success':                                  success,
+            'status':                                   status,
+            'voter_device_id':                          voter_device_id,
+            'voter_we_vote_id':                         voter_we_vote_id,
+            'voter_has_data_to_preserve':               False,
+            'existing_twitter_account_found':           False,
+            'voter_we_vote_id_attached_to_twitter':     "",
+            'twitter_sign_in_found':                    False,
+            'twitter_sign_in_verified':                 False,
+            'twitter_sign_in_failed':                   True,
+            'twitter_secret_key':                       "",
+            'twitter_access_secret':                    "",
+            'twitter_access_token':                     "",
+            'twitter_id':                               0,
+            'twitter_name':                             "",
+            'twitter_profile_image_url_https':          "",
+            'twitter_request_secret':                   "",
+            'twitter_request_token':                    "",
+            'twitter_screen_name':                      "",
+            'we_vote_hosted_profile_image_url_large':   "",
+            'we_vote_hosted_profile_image_url_medium':  "",
+            'we_vote_hosted_profile_image_url_tiny':    "",
         }
         return error_results
 
@@ -1228,6 +1142,38 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
                     # TODO DALE Remove all remaining voter.twitter_id values
                     pass
 
+    if positive_value_exists(voter_we_vote_id_attached_to_twitter):
+        voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_twitter
+    else:
+        voter_we_vote_id_for_cache = voter_we_vote_id
+    # Cache original and resized images
+    cache_results = cache_original_and_resized_image(
+        voter_we_vote_id=voter_we_vote_id_for_cache,
+        twitter_id=twitter_auth_response.twitter_id, twitter_screen_name=twitter_auth_response.twitter_screen_name,
+        twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,
+        image_source=TWITTER)
+    cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+    twitter_user_details_dict = {
+        'id':                       twitter_auth_response.twitter_id,
+        'name':                     twitter_auth_response.twitter_name,
+        'screen_name':              twitter_auth_response.twitter_screen_name,
+        'profile_image_url_https':  twitter_auth_response.twitter_profile_image_url_https,
+    }
+    twitter_user_results = twitter_user_manager.update_or_create_twitter_user(
+        twitter_user_details_dict, twitter_auth_response.twitter_id,
+        cached_twitter_profile_image_url_https=cached_twitter_profile_image_url_https,
+        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+    status += twitter_user_results['status']
+    if positive_value_exists(cached_twitter_profile_image_url_https):
+        twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+    else:
+        twitter_profile_image_url_https = twitter_auth_response.twitter_profile_image_url_https
+
     # Now that voter is signed in, reach out to twitter to get up to 5000 ids of other twitter users
     twitter_ids_i_follow_results = twitter_user_manager.retrieve_twitter_ids_i_follow_from_twitter(
         twitter_auth_response.twitter_id, twitter_auth_response.twitter_access_token,
@@ -1240,25 +1186,28 @@ def twitter_sign_in_retrieve_for_api(voter_device_id):  # twitterSignInRetrieve
         status += ' ' + twitter_who_i_follow_results['status']
 
     json_data = {
-        'success':                              success,
-        'status':                               status,
-        'voter_device_id':                      voter_device_id,
-        'voter_we_vote_id':                     voter_we_vote_id,
-        'voter_has_data_to_preserve':           voter_has_data_to_preserve,
-        'existing_twitter_account_found':       existing_twitter_account_found,
-        'voter_we_vote_id_attached_to_twitter': voter_we_vote_id_attached_to_twitter,
-        'twitter_sign_in_found':                auth_response_results['twitter_auth_response_found'],
-        'twitter_sign_in_verified':             twitter_sign_in_verified,
-        'twitter_sign_in_failed':               twitter_sign_in_failed,
-        'twitter_secret_key':                   twitter_secret_key,
-        'twitter_access_secret':                twitter_auth_response.twitter_access_secret,
-        'twitter_access_token':                 twitter_auth_response.twitter_access_token,
-        'twitter_id':                           twitter_auth_response.twitter_id,
-        'twitter_name':                         twitter_auth_response.twitter_name,
-        'twitter_profile_image_url_https':      twitter_auth_response.twitter_profile_image_url_https,
-        'twitter_request_secret':               twitter_auth_response.twitter_request_secret,
-        'twitter_request_token':                twitter_auth_response.twitter_request_token,
-        'twitter_screen_name':                  twitter_auth_response.twitter_screen_name,
+        'success':                                  success,
+        'status':                                   status,
+        'voter_device_id':                          voter_device_id,
+        'voter_we_vote_id':                         voter_we_vote_id,
+        'voter_has_data_to_preserve':               voter_has_data_to_preserve,
+        'existing_twitter_account_found':           existing_twitter_account_found,
+        'voter_we_vote_id_attached_to_twitter':     voter_we_vote_id_attached_to_twitter,
+        'twitter_sign_in_found':                    auth_response_results['twitter_auth_response_found'],
+        'twitter_sign_in_verified':                 twitter_sign_in_verified,
+        'twitter_sign_in_failed':                   twitter_sign_in_failed,
+        'twitter_secret_key':                       twitter_secret_key,
+        'twitter_access_secret':                    twitter_auth_response.twitter_access_secret,
+        'twitter_access_token':                     twitter_auth_response.twitter_access_token,
+        'twitter_id':                               twitter_auth_response.twitter_id,
+        'twitter_name':                             twitter_auth_response.twitter_name,
+        'twitter_profile_image_url_https':          twitter_profile_image_url_https,
+        'twitter_request_secret':                   twitter_auth_response.twitter_request_secret,
+        'twitter_request_token':                    twitter_auth_response.twitter_request_token,
+        'twitter_screen_name':                      twitter_auth_response.twitter_screen_name,
+        'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
     }
     return json_data
 

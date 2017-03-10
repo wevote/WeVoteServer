@@ -70,7 +70,9 @@ def organization_retrieve_doc_template_values(url_root):
                    '  "organization_website": string (website address),\n' \
                    '  "organization_email": string,\n' \
                    '  "organization_facebook": string,\n' \
-                   '  "organization_photo_url": string,\n' \
+                   '  "organization_photo_url_large": string,\n' \
+                   '  "organization_photo_url_medium": string,\n' \
+                   '  "organization_photo_url_tiny": string,\n' \
                    '  "organization_twitter_handle": string (twitter address),\n' \
                    '  "twitter_followers_count": integer,\n' \
                    '  "twitter_description": string,\n' \

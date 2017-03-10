@@ -93,7 +93,9 @@ def position_list_for_voter_doc_template_values(url_root):
                    '   (One of these: \'FRIENDS_ONLY\', \'PUBLIC_ONLY\', \'FRIENDS_AND_PUBLIC\'),\n' \
                    '  "voter_we_vote_id": string,\n' \
                    '  "voter_display_name": string,\n' \
-                   '  "voter_image_url_https": string,\n' \
+                   '  "voter_image_url_https_large": string,\n' \
+                   '  "voter_image_url_https_medium": string,\n' \
+                   '  "voter_image_url_https_tiny": string,\n' \
                    '  "google_civic_election_id": integer,\n' \
                    '  "state_code": string,\n' \
                    '  "position_list": list\n' \
@@ -103,7 +105,9 @@ def position_list_for_voter_doc_template_values(url_root):
                    '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
                    '     "ballot_item_id": integer,\n' \
-                   '     "ballot_item_image_url_https": string,\n' \
+                   '     "ballot_item_image_url_https_large": string,\n' \
+                   '     "ballot_item_image_url_https_medium": string,\n' \
+                   '     "ballot_item_image_url_https_tiny": string,\n' \
                    '     "ballot_item_twitter_handle": string,\n' \
                    '     "ballot_item_we_vote_id": string,\n' \
                    '     "ballot_item_political_party": string,\n' \

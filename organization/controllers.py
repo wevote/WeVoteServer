@@ -376,9 +376,12 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
                     organization.organization_email if positive_value_exists(organization.organization_email) else '',
                 'organization_facebook': organization.organization_facebook
                     if positive_value_exists(organization.organization_facebook) else '',
-                'organization_photo_url': organization.organization_photo_url()
-                    if positive_value_exists(organization.organization_photo_url()) else '',
-          }
+                'organization_photo_url_large': organization.we_vote_hosted_profile_image_url_large
+                    if positive_value_exists(organization.we_vote_hosted_profile_image_url_large)
+                    else organization.organization_photo_url(),
+                'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+                'organization_photo_url_tiny': organization.we_vote_hosted_profile_image_url_tiny,
+            }
             organizations_for_api.append(one_organization.copy())
             if positive_value_exists(maximum_number_to_retrieve):
                 number_added_to_list += 1
@@ -688,19 +691,21 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
     we_vote_id = organization_we_vote_id.strip().lower()
     if not positive_value_exists(organization_id) and not positive_value_exists(organization_we_vote_id):
         json_data = {
-            'status':                       "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING",
-            'success':                      False,
-            'organization_id':              organization_id,
-            'organization_we_vote_id':      organization_we_vote_id,
-            'organization_name':            '',
-            'organization_email':           '',
-            'organization_website':         '',
-            'organization_twitter_handle':  '',
-            'twitter_description':          '',
-            'twitter_followers_count':      '',
-            'facebook_id':                  0,
-            'organization_facebook':        '',
-            'organization_photo_url':       '',
+            'status':                           "ORGANIZATION_RETRIEVE_BOTH_IDS_MISSING",
+            'success':                          False,
+            'organization_id':                  organization_id,
+            'organization_we_vote_id':          organization_we_vote_id,
+            'organization_name':                '',
+            'organization_email':               '',
+            'organization_website':             '',
+            'organization_twitter_handle':      '',
+            'twitter_description':              '',
+            'twitter_followers_count':          '',
+            'facebook_id':                      0,
+            'organization_facebook':            '',
+            'organization_photo_url_large':     '',
+            'organization_photo_url_medium':    '',
+            'organization_photo_url_tiny':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -740,25 +745,30 @@ def organization_retrieve_for_api(organization_id, organization_we_vote_id):  # 
                 organization.organization_facebook if positive_value_exists(organization.organization_facebook) else '',
             'facebook_id':
                 organization.facebook_id if positive_value_exists(organization.facebook_id) else 0,
-            'organization_photo_url': organization.organization_photo_url()
-                if positive_value_exists(organization.organization_photo_url()) else '',
+            'organization_photo_url_large': organization.we_vote_hosted_profile_image_url_large
+                if positive_value_exists(organization.we_vote_hosted_profile_image_url_large)
+                else organization.organization_photo_url(),
+            'organization_photo_url_medium': organization.we_vote_hosted_profile_image_url_medium,
+            'organization_photo_url_tiny':  organization.we_vote_hosted_profile_image_url_tiny,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
         json_data = {
-            'status':                       results['status'],
-            'success':                      False,
-            'organization_id':              organization_id,
-            'organization_we_vote_id':      we_vote_id,
-            'organization_name':            '',
-            'organization_email':           '',
-            'organization_website':         '',
-            'organization_twitter_handle':  '',
-            'twitter_description':          '',
-            'twitter_followers_count':      '',
-            'organization_facebook':        '',
-            'facebook_id':                  0,
-            'organization_photo_url':       '',
+            'status':                           results['status'],
+            'success':                          False,
+            'organization_id':                  organization_id,
+            'organization_we_vote_id':          we_vote_id,
+            'organization_name':                '',
+            'organization_email':               '',
+            'organization_website':             '',
+            'organization_twitter_handle':      '',
+            'twitter_description':              '',
+            'twitter_followers_count':          '',
+            'organization_facebook':            '',
+            'facebook_id':                      0,
+            'organization_photo_url_large':     '',
+            'organization_photo_url_medium':    '',
+            'organization_photo_url_tiny':      '',
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 

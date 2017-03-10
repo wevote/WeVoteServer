@@ -1168,7 +1168,9 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
                 organization_website = ""
                 organization_email = ""
                 organization_facebook = ""
-                organization_image = voter.voter_photo_url()
+                organization_image = voter.we_vote_hosted_profile_image_url_large \
+                    if positive_value_exists(voter.we_vote_hosted_profile_image_url_large) \
+                    else voter.voter_photo_url()
                 organization_manager = OrganizationManager()
                 create_results = organization_manager.create_organization(
                     organization_name, organization_website, organization_twitter_handle,
@@ -1213,7 +1215,11 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'has_data_to_preserve':             voter.has_data_to_preserve(),
             'has_email_with_verified_ownership':    voter.has_email_with_verified_ownership(),
             'linked_organization_we_vote_id':   voter.linked_organization_we_vote_id,
-            'voter_photo_url':                  voter.voter_photo_url(),
+            'voter_photo_url_large':            voter.we_vote_hosted_profile_image_url_large
+                if positive_value_exists(voter.we_vote_hosted_profile_image_url_large)
+                else voter.voter_photo_url(),
+            'voter_photo_url_medium':           voter.we_vote_hosted_profile_image_url_medium,
+            'voter_photo_url_tiny':             voter.we_vote_hosted_profile_image_url_tiny
         }
         return json_data
 
@@ -1245,7 +1251,9 @@ def voter_retrieve_for_api(voter_device_id):  # voterRetrieve
             'has_data_to_preserve':             False,
             'has_email_with_verified_ownership':    False,
             'linked_organization_we_vote_id':   '',
-            'voter_photo_url':                  '',
+            'voter_photo_url_large':            '',
+            'voter_photo_url_medium':           '',
+            'voter_photo_url_tiny':             '',
         }
         return json_data
 

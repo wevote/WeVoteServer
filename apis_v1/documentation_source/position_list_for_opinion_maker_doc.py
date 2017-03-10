@@ -121,7 +121,9 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '  "opinion_maker_id": integer,\n' \
                    '  "opinion_maker_we_vote_id": string,\n' \
                    '  "opinion_maker_display_name": string,\n' \
-                   '  "opinion_maker_image_url_https": string,\n' \
+                   '  "opinion_maker_image_url_https_large": string,\n' \
+                   '  "opinion_maker_image_url_https_medium": string,\n' \
+                   '  "opinion_maker_image_url_https_tiny": string,\n' \
                    '  "is_following": boolean (Is this voter following this org/public_figure?),\n' \
                    '  "is_ignoring": boolean (Is this voter ignoring this org/public_figure?),\n' \
                    '  "position_list": list\n' \
@@ -129,7 +131,9 @@ def position_list_for_opinion_maker_doc_template_values(url_root):
                    '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
                    '     "ballot_item_id": integer,\n' \
-                   '     "ballot_item_image_url_https": string,\n' \
+                   '     "ballot_item_image_url_https_large": string,\n' \
+                   '     "ballot_item_image_url_https_medium": string,\n' \
+                   '     "ballot_item_image_url_https_tiny": string,\n' \
                    '     "ballot_item_twitter_handle": string,\n' \
                    '     "ballot_item_we_vote_id": string,\n' \
                    '     "ballot_item_political_party": string,\n' \

@@ -982,7 +982,11 @@ def friend_list_for_api(voter_device_id,
                 one_friend = {
                     "voter_we_vote_id":                 friend_voter.we_vote_id,
                     "voter_display_name":               friend_voter.get_full_name(),
-                    "voter_photo_url":                  friend_voter.voter_photo_url(),
+                    "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
+                         if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
+                         else friend_voter.voter_photo_url(),
+                    'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
+                    'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
                     "voter_email_address":              friend_voter.email,
                     "voter_twitter_handle":             friend_voter.twitter_screen_name,
                     "voter_twitter_description":        "",  # To be implemented
@@ -1012,7 +1016,11 @@ def friend_list_for_api(voter_device_id,
                     one_friend = {
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
                         "voter_display_name":               friend_voter.get_full_name(),
-                        "voter_photo_url":                  friend_voter.voter_photo_url(),
+                        "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
+                            if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
+                            else friend_voter.voter_photo_url(),
+                        'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
+                        'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
                         "voter_email_address":              friend_voter.email,
                         "voter_twitter_handle":             friend_voter.twitter_screen_name,
                         "voter_twitter_description":        "",  # To be implemented
@@ -1042,7 +1050,11 @@ def friend_list_for_api(voter_device_id,
                     one_friend = {
                         "voter_we_vote_id":                 friend_voter.we_vote_id,
                         "voter_display_name":               friend_voter.get_full_name(),
-                        "voter_photo_url":                  friend_voter.voter_photo_url(),
+                        "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
+                            if positive_value_exists(friend_voter.we_vote_hosted_profile_image_url_large)
+                            else friend_voter.voter_photo_url(),
+                        'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
+                        'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
                         "voter_email_address":              friend_voter.email,
                         "voter_twitter_handle":             friend_voter.twitter_screen_name,
                         "voter_twitter_description":        "",  # To be implemented
@@ -1079,7 +1091,11 @@ def friend_list_for_api(voter_device_id,
                         one_friend = {
                             "voter_we_vote_id":                 friend_voter.we_vote_id,
                             "voter_display_name":               friend_voter.get_full_name(),
-                            "voter_photo_url":                  friend_voter.voter_photo_url(),
+                            "voter_photo_url_large":            friend_voter.we_vote_hosted_profile_image_url_large
+                                if positive_value_exists (friend_voter.we_vote_hosted_profile_image_url_large)
+                                else friend_voter.voter_photo_url(),
+                            'voter_photo_url_medium':           friend_voter.we_vote_hosted_profile_image_url_medium,
+                            'voter_photo_url_tiny':             friend_voter.we_vote_hosted_profile_image_url_tiny,
                             "voter_email_address":              friend_voter.email,
                             "voter_twitter_handle":             friend_voter.twitter_screen_name,
                             "voter_twitter_description":        "",  # To be implemented
@@ -1096,7 +1112,9 @@ def friend_list_for_api(voter_device_id,
                             one_friend = {
                                 "voter_we_vote_id":                 "",
                                 "voter_display_name":               "",
-                                "voter_photo_url":                  "",
+                                "voter_photo_url_large":            "",
+                                'voter_photo_url_medium':           "",
+                                'voter_photo_url_tiny':             "",
                                 "voter_twitter_handle":             "",
                                 "voter_twitter_description":        "",  # To be implemented
                                 "voter_twitter_followers_count":    0,  # To be implemented
@@ -1117,7 +1135,11 @@ def friend_list_for_api(voter_device_id,
                 one_friend = {
                     "voter_we_vote_id":                 suggested_friend.we_vote_id,
                     "voter_display_name":               suggested_friend.get_full_name(),
-                    "voter_photo_url":                  suggested_friend.voter_photo_url(),
+                    "voter_photo_url_large":            suggested_friend.we_vote_hosted_profile_image_url_large
+                        if positive_value_exists(suggested_friend.we_vote_hosted_profile_image_url_large)
+                        else suggested_friend.voter_photo_url(),
+                    'voter_photo_url_medium':           suggested_friend.we_vote_hosted_profile_image_url_medium,
+                    'voter_photo_url_tiny':             suggested_friend.we_vote_hosted_profile_image_url_tiny,
                     "voter_email_address":              suggested_friend.email,
                     "voter_twitter_handle":             suggested_friend.twitter_screen_name,
                     "voter_twitter_description":        "",  # To be implemented

@@ -40,6 +40,12 @@ def twitter_identity_retrieve_doc_template_values(url_root):
                    ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
                    '  "twitter_photo_url": string, (ONLY RETURNED FOR kind_of_owner ==' \
                    ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
+                   '  "we_vote_hosted_profile_image_url_large": string, (ONLY RETURNED FOR kind_of_owner ==' \
+                   ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
+                   '  "we_vote_hosted_profile_image_url_medium": string, (ONLY RETURNED FOR kind_of_owner ==' \
+                   ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
+                   '  "we_vote_hosted_profile_image_url_tiny": string, (ONLY RETURNED FOR kind_of_owner ==' \
+                   ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
                    '  "twitter_user_website": string, (ONLY RETURNED FOR kind_of_owner ==' \
                    ' TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE)\n' \
                    '  "twitter_name": string, (ONLY RETURNED FOR kind_of_owner ==' \
