@@ -53,6 +53,9 @@ def twitter_sign_in_retrieve_doc_template_values(url_root):
                    '  "twitter_middle_name": string,\n' \
                    '  "twitter_last_name": string,\n' \
                    '  "twitter_profile_image_url_https": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_large": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_medium": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_tny": string,\n' \
                    '}'
 
     template_values = {

@@ -386,7 +386,11 @@ def candidate_retrieve_for_api(candidate_id, candidate_we_vote_id):  # candidate
             'id':                           candidate_campaign.id,
             'we_vote_id':                   candidate_campaign.we_vote_id,
             'ballot_item_display_name':     candidate_campaign.display_candidate_name(),
-            'candidate_photo_url':          candidate_campaign.candidate_photo_url(),
+            'candidate_photo_url_large':    candidate_campaign.we_vote_hosted_profile_image_url_large
+                if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_large)
+                else candidate_campaign.candidate_photo_url(),
+            'candidate_photo_url_medium':   candidate_campaign.we_vote_hosted_profile_image_url_medium,
+            'candidate_photo_url_tiny':     candidate_campaign.we_vote_hosted_profile_image_url_tiny,
             'order_on_ballot':              candidate_campaign.order_on_ballot,
             'google_civic_election_id':     candidate_campaign.google_civic_election_id,
             'maplight_id':                  candidate_campaign.maplight_id,
@@ -469,7 +473,11 @@ def candidates_retrieve_for_api(office_id, office_we_vote_id):
                 'id':                           candidate.id,
                 'we_vote_id':                   candidate.we_vote_id,
                 'ballot_item_display_name':     candidate.display_candidate_name(),
-                'candidate_photo_url':          candidate.candidate_photo_url(),
+                'candidate_photo_url_large':    candidate.we_vote_hosted_profile_image_url_large
+                    if positive_value_exists(candidate.we_vote_hosted_profile_image_url_large)
+                    else candidate.candidate_photo_url(),
+                'candidate_photo_url_medium':   candidate.we_vote_hosted_profile_image_url_medium,
+                'candidate_photo_url_tiny':     candidate.we_vote_hosted_profile_image_url_tiny,
                 'party':                        candidate.political_party_display(),
                 'order_on_ballot':              candidate.order_on_ballot,
                 'kind_of_ballot_item':          CANDIDATE,

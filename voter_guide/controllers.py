@@ -362,20 +362,24 @@ def voter_guides_to_follow_retrieve_for_api(voter_device_id,  # voterGuidesToFol
 
             position_found = False
             one_voter_guide = {
-                'we_vote_id': voter_guide.we_vote_id,
-                'google_civic_election_id': voter_guide.google_civic_election_id,
-                'time_span': voter_guide.vote_smart_time_span,
-                'voter_guide_display_name': voter_guide.voter_guide_display_name(),
-                'voter_guide_image_url': voter_guide.voter_guide_image_url(),
-                'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
-                'organization_we_vote_id': voter_guide.organization_we_vote_id,
-                'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
-                'twitter_description': voter_guide.twitter_description,
-                'twitter_followers_count': voter_guide.twitter_followers_count,
-                'twitter_handle': voter_guide.twitter_handle,
-                'owner_voter_id': voter_guide.owner_voter_id,
+                'we_vote_id':                   voter_guide.we_vote_id,
+                'google_civic_election_id':     voter_guide.google_civic_election_id,
+                'time_span':                    voter_guide.vote_smart_time_span,
+                'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
+                'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
+                    if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
+                    else voter_guide.voter_guide_image_url(),
+                'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
+                'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
+                'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
+                'organization_we_vote_id':      voter_guide.organization_we_vote_id,
+                'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
+                'twitter_description':          voter_guide.twitter_description,
+                'twitter_followers_count':      voter_guide.twitter_followers_count,
+                'twitter_handle':               voter_guide.twitter_handle,
+                'owner_voter_id':               voter_guide.owner_voter_id,
                 'ballot_item_we_vote_ids_this_org_supports': ballot_item_we_vote_ids_this_org_supports,
-                'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
+                'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             if positive_value_exists(ballot_item_we_vote_id):
                 if kind_of_ballot_item == CANDIDATE:
@@ -844,19 +848,23 @@ def voter_guides_followed_retrieve_for_api(voter_device_id, maximum_number_to_re
         number_added_to_list = 0
         for voter_guide in voter_guide_list:
             one_voter_guide = {
-                'we_vote_id': voter_guide.we_vote_id,
-                'google_civic_election_id': voter_guide.google_civic_election_id,
-                'time_span': voter_guide.vote_smart_time_span,
-                'voter_guide_display_name': voter_guide.voter_guide_display_name(),
-                'voter_guide_image_url': voter_guide.voter_guide_image_url(),
-                'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
-                'organization_we_vote_id': voter_guide.organization_we_vote_id,
-                'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
-                'twitter_description': voter_guide.twitter_description,
-                'twitter_followers_count': voter_guide.twitter_followers_count,
-                'twitter_handle': voter_guide.twitter_handle,
-                'owner_voter_id': voter_guide.owner_voter_id,
-                'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
+                'we_vote_id':                   voter_guide.we_vote_id,
+                'google_civic_election_id':     voter_guide.google_civic_election_id,
+                'time_span':                    voter_guide.vote_smart_time_span,
+                'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
+                'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
+                    if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
+                    else voter_guide.voter_guide_image_url(),
+                'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
+                'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
+                'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
+                'organization_we_vote_id':      voter_guide.organization_we_vote_id,
+                'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
+                'twitter_description':          voter_guide.twitter_description,
+                'twitter_followers_count':      voter_guide.twitter_followers_count,
+                'twitter_handle':               voter_guide.twitter_handle,
+                'owner_voter_id':               voter_guide.owner_voter_id,
+                'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             voter_guides.append(one_voter_guide.copy())
             if positive_value_exists(maximum_number_to_retrieve):
@@ -915,6 +923,7 @@ def retrieve_voter_guides_followed(voter_id):  # voterGuidesFollowedRetrieve
     }
     return results
 
+
 def voter_guides_ignored_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0):
     """
     Start with the organizations followed and return a list of voter_guides. voterGuidesIgnoredRetrieve
@@ -953,19 +962,23 @@ def voter_guides_ignored_retrieve_for_api(voter_device_id, maximum_number_to_ret
         number_added_to_list = 0
         for voter_guide in voter_guide_list:
             one_voter_guide = {
-                'we_vote_id': voter_guide.we_vote_id,
-                'google_civic_election_id': voter_guide.google_civic_election_id,
-                'time_span': voter_guide.vote_smart_time_span,
-                'voter_guide_display_name': voter_guide.voter_guide_display_name(),
-                'voter_guide_image_url': voter_guide.voter_guide_image_url(),
-                'voter_guide_owner_type': voter_guide.voter_guide_owner_type,
-                'organization_we_vote_id': voter_guide.organization_we_vote_id,
-                'public_figure_we_vote_id': voter_guide.public_figure_we_vote_id,
-                'twitter_description': voter_guide.twitter_description,
-                'twitter_followers_count': voter_guide.twitter_followers_count,
-                'twitter_handle': voter_guide.twitter_handle,
-                'owner_voter_id': voter_guide.owner_voter_id,
-                'last_updated': voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
+                'we_vote_id':                   voter_guide.we_vote_id,
+                'google_civic_election_id':     voter_guide.google_civic_election_id,
+                'time_span':                    voter_guide.vote_smart_time_span,
+                'voter_guide_display_name':     voter_guide.voter_guide_display_name(),
+                'voter_guide_image_url_large':  voter_guide.we_vote_hosted_profile_image_url_large
+                    if positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large)
+                    else voter_guide.voter_guide_image_url(),
+                'voter_guide_image_url_medium': voter_guide.we_vote_hosted_profile_image_url_medium,
+                'voter_guide_image_url_tiny':   voter_guide.we_vote_hosted_profile_image_url_tiny,
+                'voter_guide_owner_type':       voter_guide.voter_guide_owner_type,
+                'organization_we_vote_id':      voter_guide.organization_we_vote_id,
+                'public_figure_we_vote_id':     voter_guide.public_figure_we_vote_id,
+                'twitter_description':          voter_guide.twitter_description,
+                'twitter_followers_count':      voter_guide.twitter_followers_count,
+                'twitter_handle':               voter_guide.twitter_handle,
+                'owner_voter_id':               voter_guide.owner_voter_id,
+                'last_updated':                 voter_guide.last_updated.strftime('%Y-%m-%d %H:%M'),
             }
             voter_guides.append(one_voter_guide.copy())
             if positive_value_exists(maximum_number_to_retrieve):

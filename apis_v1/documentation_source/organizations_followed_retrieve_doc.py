@@ -62,7 +62,9 @@ def organizations_followed_retrieve_doc_template_values(url_root):
                    '     "twitter_followers_count": integer,\n' \
                    '     "organization_email": string,\n' \
                    '     "organization_facebook": string,\n' \
-                   '     "organization_photo_url": string,\n' \
+                   '     "organization_photo_url_large": string,\n' \
+                   '     "organization_photo_url_medium": string,\n' \
+                   '     "organization_photo_url_tiny": string,\n' \
                    '   ],\n' \
                    '}'
 

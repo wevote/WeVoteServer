@@ -1002,20 +1002,23 @@ def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     results = twitter_identity_retrieve_for_api(twitter_handle, voter_device_id)
     json_data = {
-        'status':                   results['status'],
-        'success':                  results['success'],
-        'twitter_handle':           results['twitter_handle'],
-        'owner_found':              results['owner_found'],
-        'kind_of_owner':            results['kind_of_owner'],
-        'owner_we_vote_id':         results['owner_we_vote_id'],
-        'owner_id':                 results['owner_id'],
-        'google_civic_election_id': results['google_civic_election_id'],
+        'status':                                   results['status'],
+        'success':                                  results['success'],
+        'twitter_handle':                           results['twitter_handle'],
+        'owner_found':                              results['owner_found'],
+        'kind_of_owner':                            results['kind_of_owner'],
+        'owner_we_vote_id':                         results['owner_we_vote_id'],
+        'owner_id':                                 results['owner_id'],
+        'google_civic_election_id':                 results['google_civic_election_id'],
         # These values only returned if kind_of_owner == TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE
-        'twitter_description':      results['twitter_description'],
-        'twitter_followers_count':  results['twitter_followers_count'],
-        'twitter_photo_url':        results['twitter_photo_url'],
-        'twitter_user_website':     results['twitter_user_website'],
-        'twitter_name':             results['twitter_name'],
+        'twitter_description':                      results['twitter_description'],
+        'twitter_followers_count':                  results['twitter_followers_count'],
+        'twitter_photo_url':                        results['twitter_photo_url'],
+        'we_vote_hosted_profile_image_url_large':   results['we_vote_hosted_profile_image_url_large'],
+        'we_vote_hosted_profile_image_url_medium':  results['we_vote_hosted_profile_image_url_medium'],
+        'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny'],
+        'twitter_user_website':                     results['twitter_user_website'],
+        'twitter_name':                             results['twitter_name'],
         }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1130,6 +1133,10 @@ def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
         'twitter_sign_in_verified':                 results['twitter_sign_in_verified'],
         'twitter_sign_in_failed':                   results['twitter_sign_in_failed'],
         'twitter_secret_key':                       results['twitter_secret_key'],
+        'twitter_profile_image_url_https':          results['twitter_profile_image_url_https'],
+        'we_vote_hosted_profile_image_url_large':   results['we_vote_hosted_profile_image_url_large'],
+        'we_vote_hosted_profile_image_url_medium':  results['we_vote_hosted_profile_image_url_medium'],
+        'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny'],
         # 'twitter_who_i_follow':                   results['twitter_who_i_follow'],
         # There are more values we currently aren't returning
     }
@@ -1736,6 +1743,12 @@ def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetriev
         'facebook_sign_in_failed':                  results['facebook_sign_in_failed'],
         'facebook_secret_key':                      results['facebook_secret_key'],
         'voter_has_data_to_preserve':               results['voter_has_data_to_preserve'],
+        'facebook_user_id':                         results['facebook_user_id'],
+        'facebook_profile_image_url_https':         results['facebook_profile_image_url_https'],
+        'we_vote_hosted_profile_image_url_large':   results['we_vote_hosted_profile_image_url_large'],
+        'we_vote_hosted_profile_image_url_medium':  results['we_vote_hosted_profile_image_url_medium'],
+        'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny']
+
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

@@ -53,6 +53,9 @@ def voter_facebook_sign_in_retrieve_doc_template_values(url_root):
                    '  "facebook_middle_name": string,\n' \
                    '  "facebook_last_name": string,\n' \
                    '  "facebook_profile_image_url_https": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_large": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_medium": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '}'
 
     template_values = {

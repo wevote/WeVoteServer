@@ -55,7 +55,9 @@ def voter_retrieve_doc_template_values(url_root):
                    '  "facebook_id": integer,\n' \
                    '  "facebook_email": string,\n' \
                    '  "facebook_profile_image_url_https": string,\n' \
-                   '  "voter_photo_url": string,\n' \
+                   '  "voter_photo_url_large": string,\n' \
+                   '  "voter_photo_url_medium": string,\n' \
+                   '  "voter_photo_url_tiny": string,\n' \
                    '  "twitter_screen_name": string,\n' \
                    '  "is_signed_in": boolean,\n' \
                    '  "signed_in_facebook": boolean,\n' \

@@ -97,6 +97,12 @@ class TwitterUser(models.Model):
                                                                  blank=True, null=True)
     twitter_profile_banner_url_https = models.URLField(verbose_name='profile banner image from twitter',
                                                        blank=True, null=True)
+    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
+                                                             blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
+                                                              blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
+                                                            blank=True, null=True)
     twitter_description = models.CharField(verbose_name="Text description of this organization from twitter.",
                                            max_length=255, null=True, blank=True)
 
@@ -384,7 +390,7 @@ class TwitterUserManager(models.Model):
         # If here, we want to reach out to Twitter to get info for this twitter_handle
         twitter_results = retrieve_twitter_user_info(twitter_user_id, twitter_handle)
         if twitter_results['twitter_handle_found']:
-            twitter_save_results = self.save_new_twitter_user_from_twitter_json(twitter_results['twitter_json'])
+            twitter_save_results = self.update_or_create_twitter_user(twitter_results['twitter_json'])
             if twitter_save_results['twitter_user_found']:
                 # If saved, pull the fresh results from the database and return
                 twitter_second_results = self.retrieve_twitter_user(twitter_user_id, twitter_handle)
@@ -629,7 +635,10 @@ class TwitterUserManager(models.Model):
 
     def save_new_twitter_user_from_twitter_json(self, twitter_json, cached_twitter_profile_image_url_https=None,
                                                 cached_twitter_profile_background_image_url_https=None,
-                                                cached_twitter_profile_banner_url_https=None):
+                                                cached_twitter_profile_banner_url_https=None,
+                                                we_vote_hosted_profile_image_url_large=None,
+                                                we_vote_hosted_profile_image_url_medium=None,
+                                                we_vote_hosted_profile_image_url_tiny=None):
 
         if 'screen_name' not in twitter_json:
             results = {
@@ -643,9 +652,9 @@ class TwitterUserManager(models.Model):
         try:
             # Create new twitter_user entry
             twitter_description = twitter_json['description'] if 'description' in twitter_json else ""
-            twitter_followers_count = twitter_json['followers_count'] if 'followers_count' in twitter_json else ""
+            twitter_followers_count = twitter_json['followers_count'] if 'followers_count' in twitter_json else 0
             twitter_handle = twitter_json['screen_name'] if 'screen_name' in twitter_json else ""
-            twitter_id = twitter_json['id'] if 'id' in twitter_json else ""
+            twitter_id = twitter_json['id'] if 'id' in twitter_json else None
             twitter_location = twitter_json['location'] if 'location' in twitter_json else ""
             twitter_name = twitter_json['name'] if 'name' in twitter_json else ""
 
@@ -681,6 +690,9 @@ class TwitterUserManager(models.Model):
                 twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
                 twitter_profile_banner_url_https=twitter_profile_banner_url_https,
                 twitter_profile_image_url_https=twitter_profile_image_url_https,
+                we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+                we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny,
                 twitter_url=twitter_url,
             )
             twitter_user_on_stage.save()
@@ -701,9 +713,12 @@ class TwitterUserManager(models.Model):
         }
         return results
 
-    def update_or_create_twitter_user(self, twitter_id, twitter_json, cached_twitter_profile_image_url_https,
-                                      cached_twitter_profile_background_image_url_https,
-                                      cached_twitter_profile_banner_url_https):
+    def update_or_create_twitter_user(self, twitter_json, twitter_id=None, cached_twitter_profile_image_url_https=None,
+                                      cached_twitter_profile_background_image_url_https=None,
+                                      cached_twitter_profile_banner_url_https=None,
+                                      we_vote_hosted_profile_image_url_large=None,
+                                      we_vote_hosted_profile_image_url_medium=None,
+                                      we_vote_hosted_profile_image_url_tiny=None):
         """
         Update a twitter user entry with details retrieved from the Twitter API or
         create a twitter user entry if not exists.
@@ -712,12 +727,16 @@ class TwitterUserManager(models.Model):
         :param cached_twitter_profile_image_url_https:
         :param cached_twitter_profile_background_image_url_https:
         :param cached_twitter_profile_banner_url_https:
+        :param we_vote_hosted_profile_image_url_large:
+        :param we_vote_hosted_profile_image_url_medium:
+        :param we_vote_hosted_profile_image_url_tiny
         :return:
         """
         values_changed = False
 
         twitter_results = self.retrieve_twitter_user(twitter_id)
-        if twitter_results['twitter_user_found']:
+        twitter_user_found = twitter_results['twitter_user_found']
+        if twitter_user_found:
             # Twitter user already exists so update twitter user details
             twitter_user = twitter_results['twitter_user']
             if 'id' in twitter_json and positive_value_exists(twitter_json['id']):
@@ -744,7 +763,8 @@ class TwitterUserManager(models.Model):
             if positive_value_exists(cached_twitter_profile_image_url_https):
                 twitter_user.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
                 values_changed = True
-            elif 'profile_image_url_https' in twitter_json and positive_value_exists(twitter_json['profile_image_url_https']):
+            elif 'profile_image_url_https' in twitter_json and \
+                    positive_value_exists(twitter_json['profile_image_url_https']):
                 if twitter_json['profile_image_url_https'] != twitter_user.twitter_profile_image_url_https:
                     twitter_user.twitter_profile_image_url_https = twitter_json['profile_image_url_https']
                     values_changed = True
@@ -768,6 +788,15 @@ class TwitterUserManager(models.Model):
                     twitter_user.twitter_profile_background_image_url_https = \
                         twitter_json['profile_background_image_url_https']
                     values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                twitter_user.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                twitter_user.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                twitter_user.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                values_changed = True
 
             if 'description' in twitter_json and positive_value_exists(twitter_json['description']):
                 if twitter_json['description'] != twitter_user.twitter_description:
@@ -786,9 +815,10 @@ class TwitterUserManager(models.Model):
                 success = True
                 status = "NO_CHANGES_SAVED_TO_USER_TWITTER_DETAILS"
             results = {
-                'success':          success,
-                'status':           status,
-                'twitter_user':     twitter_user,
+                'success':              success,
+                'status':               status,
+                'twitter_user_found':   twitter_user_found,
+                'twitter_user':         twitter_user,
             }
             return results
 
@@ -796,7 +826,9 @@ class TwitterUserManager(models.Model):
             # Twitter user does not exist so create new twitter user with latest twitter details
             twitter_save_results = self.save_new_twitter_user_from_twitter_json(
                 twitter_json, cached_twitter_profile_image_url_https,
-                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https)
+                cached_twitter_profile_background_image_url_https, cached_twitter_profile_banner_url_https,
+                we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny)
             return twitter_save_results
 
     def delete_twitter_user(self, twitter_id):
@@ -862,6 +894,7 @@ class TwitterWhoIFollow(models.Model):
     twitter_id_i_follow = models.BigIntegerField(verbose_name="twitter id of the friend", null=False, unique=False)
     # organization_found = models.BooleanField(verbose_name="organization found in twitterLinkToOrganization",
     #                                          default=False)
+
 
 class TwitterCursorState(models.Model):
     """
