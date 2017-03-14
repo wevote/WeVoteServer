@@ -25,6 +25,11 @@ Retrieve “WeVoteServer” into that folder:
 1. Change into your local WeVoteServer repository folder, and set up a remote for upstream:  
 `$ git remote add upstream git@github.com:wevote/WeVoteServer.git`  
 
+## Updating openssl on Mac
+
+This will ensure you will be able to test donations with the most up to date TLS1.2:
+
+ `brew install openssl`
 
 ## Installing Python 3 on Mac (See below for Ubuntu)
 
@@ -92,8 +97,14 @@ Now, whenever you start a new project, you can create a virtual environment for 
 
 Now, create a virtual environment within the project directory by typing:
 
-    virtualenv newenv
+    virtualenv newen
     
+## Continue with openssl update 
+
+After Python3 is installed, install pyopenssl and https clients:
+ 
+ `python3 -m pip install pyopenssl pyasn1 ndg-httpsclient`
+
 ## Installing Postgres
     
 Install the latest version of Postgres for your machine (see instructions further down on this page as well):

@@ -30,6 +30,9 @@ The mobile web front end application can be found in this repository: [WebApp](h
 
 [Read about working with WeVoteServer on a daily basis](README_WORKING_WITH_WE_VOTE_SERVER.md)
 
+If you need to test donations and have not updated your openssl and pyopenssl during install and setup, you will need
+[to update your local](README_DONATION_SETUP.md).
+
 ## Join Us
 Join our Google Group here to discuss the WeVoteServer application (creating a social ballot):
 https://groups.google.com/forum/#!forum/wevoteengineering

@@ -13,6 +13,7 @@ from ballot.controllers import ballot_item_options_retrieve_for_api, choose_elec
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
+from donate.controllers import donation_with_stripe_for_api
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
 from follow.controllers import organization_suggestion_tasks_for_api
@@ -72,7 +73,6 @@ from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_bool, convert_to_int, generate_voter_device_id, get_voter_device_id, \
     is_voter_device_id_valid, positive_value_exists
-
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -159,6 +159,37 @@ def device_id_generate_view(request):  # deviceIdGenerate
         'status': status,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def donation_with_stripe_view(request): #donationWithStripe
+    """
+    Make a charge with a stripe token
+    :type request: object
+    :param request:
+    :return:
+    """
+
+    token = request.POST.get('token')
+    # email = request.POST.get('email')
+
+    if positive_value_exists(token):
+        results = donation_with_stripe_for_api(token)
+
+        json_data = {
+            'status': results['status'],
+            'success': results['success'],
+            'charge_id': results['charge_id'],
+            'customer_id': results['customer_id']
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    else:
+        json_data = {
+            'status': "TOKEN_MISSING",
+            'success': False,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 
 def facebook_friends_action_view(request):  # facebookFriendsActions
