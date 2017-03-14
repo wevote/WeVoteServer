@@ -6,6 +6,7 @@ from follow.models import UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, UPDATE_S
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, UPDATE_SUGGESTIONS_ALL, \
     FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON_TWITTER, FOLLOW_SUGGESTIONS_FROM_FRIENDS, \
     FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW
+from image.controllers import cache_original_and_resized_image, TWITTER, FACEBOOK
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
     organization_stop_following, voter_count
 from ballot.controllers import ballot_item_options_retrieve_for_api, choose_election_from_existing_data, \
@@ -1748,7 +1749,6 @@ def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetriev
         'we_vote_hosted_profile_image_url_large':   results['we_vote_hosted_profile_image_url_large'],
         'we_vote_hosted_profile_image_url_medium':  results['we_vote_hosted_profile_image_url_medium'],
         'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny']
-
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -2624,8 +2624,10 @@ def voter_update_view(request):  # voterUpdate
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if voter_id < 0:
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
         json_data = {
             'status':                           "VOTER_NOT_FOUND_FROM_DEVICE_ID",
             'success':                          False,
@@ -2641,22 +2643,61 @@ def voter_update_view(request):  # voterUpdate
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 
+    voter = voter_results['voter']
+    we_vote_hosted_profile_image_url_large = None
+    we_vote_hosted_profile_image_url_medium = None
+    we_vote_hosted_profile_image_url_tiny = None
+
+    if twitter_profile_image_url_https:
+        # Cache original and resized images
+        cache_results = cache_original_and_resized_image(
+            voter_we_vote_id=voter.we_vote_id,
+            twitter_id=voter.twitter_id,
+            twitter_screen_name=voter.twitter_screen_name,
+            twitter_profile_image_url_https=twitter_profile_image_url_https,
+            image_source=TWITTER)
+        cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+        if positive_value_exists(cached_twitter_profile_image_url_https):
+            twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+
+    if facebook_profile_image_url_https:
+        # Cache original and resized images
+        cache_results = cache_original_and_resized_image(
+            voter_we_vote_id=voter.we_vote_id,
+            facebook_user_id=voter.facebook_id,
+            facebook_profile_image_url_https=facebook_profile_image_url_https,
+            image_source=FACEBOOK)
+        cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+        if positive_value_exists(cached_facebook_profile_image_url_https):
+            facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+
     # At this point, we have a valid voter
     voter_manager = VoterManager()
     results = voter_manager.update_voter(voter_id, facebook_email, facebook_profile_image_url_https,
-                                         first_name, middle_name, last_name, twitter_profile_image_url_https)
+                                         first_name, middle_name, last_name, twitter_profile_image_url_https,
+                                         we_vote_hosted_profile_image_url_large,
+                                         we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
 
     json_data = {
-        'status':                           results['status'],
-        'success':                          results['success'],
-        'voter_device_id':                  voter_device_id,
-        'facebook_email':                   facebook_email,
-        'facebook_profile_image_url_https': facebook_profile_image_url_https,
-        'first_name':                       first_name,
-        'middle_name':                      middle_name,
-        'last_name':                        last_name,
-        'twitter_profile_image_url_https':  twitter_profile_image_url_https,
-        'voter_updated':                    results['voter_updated'],
+        'status':                                   results['status'],
+        'success':                                  results['success'],
+        'voter_device_id':                          voter_device_id,
+        'facebook_email':                           facebook_email,
+        'facebook_profile_image_url_https':         facebook_profile_image_url_https,
+        'first_name':                               first_name,
+        'middle_name':                              middle_name,
+        'last_name':                                last_name,
+        'twitter_profile_image_url_https':          twitter_profile_image_url_https,
+        'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
+        'voter_updated':                            results['voter_updated'],
     }
 
     response = HttpResponse(json.dumps(json_data), content_type='application/json')

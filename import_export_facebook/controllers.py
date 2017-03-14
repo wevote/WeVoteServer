@@ -93,8 +93,22 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     facebook_account_created = True
     facebook_link_to_voter = link_results['facebook_link_to_voter']
 
+    # Cache original and resized images
+    cache_results = cache_original_and_resized_image(
+        voter_we_vote_id=voter.we_vote_id,
+        facebook_user_id=facebook_auth_response.facebook_user_id,
+        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        image_source=FACEBOOK)
+    cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
     # Update voter with Facebook info (not including email -- that is done below)
-    results = voter_manager.save_facebook_user_values(voter, facebook_auth_response)
+    results = voter_manager.save_facebook_user_values(
+        voter, facebook_auth_response, cached_facebook_profile_image_url_https, we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
+
     status += results['status'] + ", "
     success = results['success']
     voter = results['voter']
@@ -273,7 +287,7 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
                 facebook_user, cached_facebook_profile_image_url_https, cached_facebook_background_image_url_https,
                 we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
                 we_vote_hosted_profile_image_url_tiny)
-            status += facebook_user_update_results
+            status += facebook_user_update_results['status']
         for facebook_user_entry in facebook_users_list:
             facebook_user_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
                 facebook_user_entry['facebook_user_id'])
