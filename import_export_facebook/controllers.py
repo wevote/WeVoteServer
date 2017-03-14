@@ -7,6 +7,8 @@ from email_outbound.models import EmailManager
 from follow.controllers import move_follow_entries_to_another_voter
 from friend.controllers import move_friend_invitations_to_another_voter, move_friends_to_another_voter
 from friend.models import FriendManager
+from image.controllers import FACEBOOK, cache_original_and_resized_image
+from image.models import WeVoteImageManager
 from import_export_facebook.models import FacebookManager
 from organization.controllers import move_organization_to_another_complete
 from organization.models import OrganizationManager
@@ -91,8 +93,22 @@ def voter_facebook_save_to_current_account_for_api(voter_device_id):  # voterFac
     facebook_account_created = True
     facebook_link_to_voter = link_results['facebook_link_to_voter']
 
+    # Cache original and resized images
+    cache_results = cache_original_and_resized_image(
+        voter_we_vote_id=voter.we_vote_id,
+        facebook_user_id=facebook_auth_response.facebook_user_id,
+        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        image_source=FACEBOOK)
+    cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
     # Update voter with Facebook info (not including email -- that is done below)
-    results = voter_manager.save_facebook_user_values(voter, facebook_auth_response)
+    results = voter_manager.save_facebook_user_values(
+        voter, facebook_auth_response, cached_facebook_profile_image_url_https, we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
+
     status += results['status'] + ", "
     success = results['success']
     voter = results['voter']
@@ -195,7 +211,7 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
             'voter_device_id':                  voter_device_id,
             'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
             'facebook_suggested_friend_count':  facebook_suggested_friend_count,
-            'facebook_friend_suggested':        facebook_friend_suggested,
+            'facebook_friends_suggested':       facebook_friend_suggested,
         }
         return error_results
 
@@ -208,10 +224,11 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
             'voter_device_id':                  voter_device_id,
             'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
             'facebook_suggested_friend_count':  facebook_suggested_friend_count,
-            'facebook_friend_suggested':        facebook_friend_suggested,
+            'facebook_friends_suggested':       facebook_friend_suggested,
         }
         return error_results
 
+    we_vote_image_manager = WeVoteImageManager()
     facebook_friends_from_facebook_results = facebook_manager.retrieve_facebook_friends_from_facebook(voter_device_id)
     facebook_users_list = facebook_friends_from_facebook_results['facebook_users_list']
     status += facebook_friends_from_facebook_results['status']
@@ -219,9 +236,27 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
     if facebook_friends_from_facebook_results['facebook_friends_list_found']:
         # Update FacebookUser table with all users
         for facebook_user_entry in facebook_users_list:
-            facebook_user_update_results = facebook_manager.create_or_update_facebook_user(facebook_user_entry)
-            status += ' ' + facebook_user_update_results['status']
-            success = facebook_user_update_results['success']
+            facebook_user_id = facebook_user_entry['facebook_user_id']
+            facebook_user_name = facebook_user_entry['facebook_user_name']
+            facebook_user_first_name = facebook_user_entry['facebook_user_first_name']
+            facebook_user_middle_name = facebook_user_entry['facebook_user_middle_name']
+            facebook_user_last_name = facebook_user_entry['facebook_user_last_name']
+            facebook_user_location_id = facebook_user_entry['facebook_user_location_id']
+            facebook_user_location_name = facebook_user_entry['facebook_user_location_name']
+            facebook_user_gender = facebook_user_entry['facebook_user_gender']
+            facebook_user_birthday = facebook_user_entry['facebook_user_birthday']
+            facebook_user_cover_source = facebook_user_entry['facebook_user_cover_source']
+            facebook_user_profile_url_https = facebook_user_entry['facebook_user_profile_url_https']
+            facebook_user_about = facebook_user_entry['facebook_user_about']
+            facebook_user_is_verified = facebook_user_entry['facebook_user_is_verified']
+            facebook_user_friend_total_count = facebook_user_entry['facebook_user_friend_total_count']
+            facebook_user_results = facebook_manager.create_or_update_facebook_user(
+                facebook_user_id, facebook_user_first_name, facebook_user_middle_name, facebook_user_last_name,
+                facebook_user_name, facebook_user_location_id, facebook_user_location_name, facebook_user_gender,
+                facebook_user_birthday, facebook_user_cover_source, facebook_user_profile_url_https,
+                facebook_user_about, facebook_user_is_verified, facebook_user_friend_total_count)
+            status += ' ' + facebook_user_results['status']
+            success = facebook_user_results['success']
 
     # finding facebook_link_to_voter for all users and then updating SuggestedFriend table
     facebook_auth_response = auth_response_results['facebook_auth_response']
@@ -231,6 +266,28 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
     if my_facebook_link_to_voter_results['facebook_link_to_voter_found']:
         friend_manager = FriendManager()
         viewer_voter_we_vote_id = my_facebook_link_to_voter_results['facebook_link_to_voter'].voter_we_vote_id
+        # Update the facebook user with cached original and resized image urls
+        facebook_user_results = facebook_manager.retrieve_facebook_user_by_facebook_user_id(
+            facebook_auth_response.facebook_user_id)
+        if facebook_user_results['facebook_user_found']:
+            facebook_user = facebook_user_results['facebook_user']
+            # Cache original and resized images
+            cache_results = cache_original_and_resized_image(
+                voter_we_vote_id=viewer_voter_we_vote_id,
+                facebook_user_id=facebook_user.facebook_user_id,
+                facebook_profile_image_url_https=facebook_user.facebook_profile_image_url_https,
+                facebook_background_image_url_https=facebook_user.facebook_background_image_url_https,
+                image_source=FACEBOOK)
+            cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+            cached_facebook_background_image_url_https = cache_results['cached_facebook_background_image_url_https']
+            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+            facebook_user_update_results = facebook_manager.update_facebook_user_details(
+                facebook_user, cached_facebook_profile_image_url_https, cached_facebook_background_image_url_https,
+                we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+                we_vote_hosted_profile_image_url_tiny)
+            status += facebook_user_update_results['status']
         for facebook_user_entry in facebook_users_list:
             facebook_user_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
                 facebook_user_entry['facebook_user_id'])
@@ -340,6 +397,9 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             'facebook_middle_name':                     "",
             'facebook_last_name':                       "",
             'facebook_profile_image_url_https':         "",
+            'we_vote_hosted_profile_image_url_large':   "",
+            'we_vote_hosted_profile_image_url_medium':  "",
+            'we_vote_hosted_profile_image_url_tiny':    ""
         }
         return error_results
     voter = voter_results['voter']
@@ -372,6 +432,9 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             'facebook_middle_name':                     "",
             'facebook_last_name':                       "",
             'facebook_profile_image_url_https':         "",
+            'we_vote_hosted_profile_image_url_large':   "",
+            'we_vote_hosted_profile_image_url_medium':  "",
+            'we_vote_hosted_profile_image_url_tiny':    ""
         }
         return error_results
 
@@ -401,6 +464,9 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
             'facebook_middle_name':                     "",
             'facebook_last_name':                       "",
             'facebook_profile_image_url_https':         "",
+            'we_vote_hosted_profile_image_url_large':   "",
+            'we_vote_hosted_profile_image_url_medium':  "",
+            'we_vote_hosted_profile_image_url_tiny':    ""
         }
         return error_results
 
@@ -530,11 +596,40 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         else:
             voter_we_vote_id_attached_to_facebook_email = ""
 
-    if positive_value_exists(voter_we_vote_id_attached_to_facebook) or \
-            positive_value_exists(voter_we_vote_id_attached_to_facebook_email):
+    if positive_value_exists(voter_we_vote_id_attached_to_facebook):
         existing_facebook_account_found = True
+        voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_facebook
+    elif positive_value_exists(voter_we_vote_id_attached_to_facebook_email):
+        existing_facebook_account_found = True
+        voter_we_vote_id_for_cache = voter_we_vote_id_attached_to_facebook_email
     else:
         existing_facebook_account_found = False
+        voter_we_vote_id_for_cache = voter_we_vote_id
+
+    # Cache original and resized images
+    cache_results = cache_original_and_resized_image(
+        voter_we_vote_id=voter_we_vote_id_for_cache,
+        facebook_user_id=facebook_auth_response.facebook_user_id,
+        facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+        image_source=FACEBOOK)
+    cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+    we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+    we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+    we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
+    if positive_value_exists(cached_facebook_profile_image_url_https):
+        facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+    else:
+        facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
+
+    facebook_user_results = facebook_manager.create_or_update_facebook_user(
+        facebook_auth_response.facebook_user_id, facebook_auth_response.facebook_first_name,
+        facebook_auth_response.facebook_middle_name, facebook_auth_response.facebook_last_name,
+        facebook_user_profile_url_https=facebook_profile_image_url_https,
+        we_vote_hosted_profile_image_url_large=we_vote_hosted_profile_image_url_large,
+        we_vote_hosted_profile_image_url_medium=we_vote_hosted_profile_image_url_medium,
+        we_vote_hosted_profile_image_url_tiny=we_vote_hosted_profile_image_url_tiny)
+    status += facebook_user_results['status']
 
     json_data = {
         'success':                                  success,
@@ -556,7 +651,10 @@ def voter_facebook_sign_in_retrieve_for_api(voter_device_id):  # voterFacebookSi
         'facebook_first_name':                      facebook_auth_response.facebook_first_name,
         'facebook_middle_name':                     facebook_auth_response.facebook_middle_name,
         'facebook_last_name':                       facebook_auth_response.facebook_last_name,
-        'facebook_profile_image_url_https':         facebook_auth_response.facebook_profile_image_url_https,
+        'facebook_profile_image_url_https':         facebook_profile_image_url_https,
+        'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny
     }
     return json_data
 

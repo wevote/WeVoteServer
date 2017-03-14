@@ -106,7 +106,9 @@ def position_list_for_ballot_item_doc_template_values(url_root):
                    '     "position_we_vote_id": string,\n' \
                    '     "ballot_item_display_name": string (either measure name or candidate name),\n' \
                    '     "speaker_display_name": string,\n' \
-                   '     "speaker_image_url_https": string,\n' \
+                   '     "speaker_image_url_https_large": string,\n' \
+                   '     "speaker_image_url_https_medium": string,\n' \
+                   '     "speaker_image_url_https_tiny": string,\n' \
                    '     "speaker_twitter_handle": string,\n' \
                    '     "speaker_type": string, ' \
                    '      (One of these: \'ORGANIZATION\', \'VOTER\', \'PUBLIC_FIGURE\', \'UNKNOWN\',)\n' \

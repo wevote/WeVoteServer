@@ -404,19 +404,19 @@ class VoterGuideManager(models.Manager):
                         if voter_guide.image_url != organization.organization_photo_url():
                             voter_guide.image_url = organization.organization_photo_url()
                             values_changed = True
-                        if voter_guide.voter_guide_image_url_large != \
+                        if voter_guide.we_vote_hosted_profile_image_url_large != \
                                 organization.we_vote_hosted_profile_image_url_large:
-                            voter_guide.voter_guide_image_url_large = \
+                            voter_guide.we_vote_hosted_profile_image_url_large = \
                                 organization.we_vote_hosted_profile_image_url_large
                             values_changed = True
-                        if voter_guide.voter_guide_image_url_medium != \
+                        if voter_guide.we_vote_hosted_profile_image_url_medium != \
                                 organization.we_vote_hosted_profile_image_url_medium:
-                            voter_guide.voter_guide_image_url_medium = \
+                            voter_guide.we_vote_hosted_profile_image_url_medium = \
                                 organization.we_vote_hosted_profile_image_url_medium
                             values_changed = True
-                        if voter_guide.voter_guide_image_url_tiny != \
+                        if voter_guide.we_vote_hosted_profile_image_url_tiny != \
                                 organization.we_vote_hosted_profile_image_url_tiny:
-                            voter_guide.voter_guide_image_url_tiny = \
+                            voter_guide.we_vote_hosted_profile_image_url_tiny = \
                                 organization.we_vote_hosted_profile_image_url_tiny
                             values_changed = True
 
@@ -578,12 +578,12 @@ class VoterGuide(models.Model):
 
     image_url = models.URLField(verbose_name='image url of logo/photo associated with voter guide',
                                 blank=True, null=True)
-    voter_guide_image_url_large = models.URLField(verbose_name='large version image url of logo/photo associated '
-                                                               'with voter guide', blank=True, null=True)
-    voter_guide_image_url_medium = models.URLField(verbose_name='medium version image url of logo/photo associated '
-                                                                'with voter guide', blank=True, null=True)
-    voter_guide_image_url_tiny = models.URLField(verbose_name='tiny version image url of logo/photo associated '
-                                                              'with voter guide', blank=True, null=True)
+    we_vote_hosted_profile_image_url_large = models.URLField(
+        verbose_name='large version image url of logo/photo associated with voter guide', blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.URLField(
+        verbose_name='medium version image url of logo/photo associated with voter guide', blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.URLField(
+        verbose_name='tiny version image url of logo/photo associated with voter guide', blank=True, null=True)
 
     voter_guide_owner_type = models.CharField(
         verbose_name="is owner org, public figure, or voter?", max_length=1, choices=VOTER_GUIDE_TYPE_CHOICES,

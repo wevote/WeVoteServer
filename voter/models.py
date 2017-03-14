@@ -496,13 +496,26 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_facebook_user_values(self, voter, facebook_auth_response):
+    def save_facebook_user_values(self, voter, facebook_auth_response,
+                                  cached_facebook_profile_image_url_https=None,
+                                  we_vote_hosted_profile_image_url_large=None,
+                                  we_vote_hosted_profile_image_url_medium=None,
+                                  we_vote_hosted_profile_image_url_tiny=None):
         try:
             voter.facebook_id = facebook_auth_response.facebook_user_id
             voter.first_name = facebook_auth_response.facebook_first_name
             voter.middle_name = facebook_auth_response.facebook_middle_name
             voter.last_name = facebook_auth_response.facebook_last_name
-            voter.facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
+            if positive_value_exists(cached_facebook_profile_image_url_https):
+                voter.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+            else:
+                voter.facebook_profile_image_url_https = facebook_auth_response.facebook_profile_image_url_https
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
 
             voter.save()
             success = True
@@ -518,12 +531,20 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_twitter_user_values(self, voter, twitter_user_object):
+    def save_twitter_user_values(self, voter, twitter_user_object,
+                                 cached_twitter_profile_image_url_https=None,
+                                 we_vote_hosted_profile_image_url_large=None,
+                                 we_vote_hosted_profile_image_url_medium=None,
+                                 we_vote_hosted_profile_image_url_tiny=None):
         """
         This is used to store the cached values in the voter record after authentication.
         Please also see import_export_twitter/models.py TwitterAuthResponse->save_twitter_auth_values
         :param voter:
         :param twitter_user_object:
+        :param cached_twitter_profile_image_url_https:
+        :param we_vote_hosted_profile_image_url_large:
+        :param we_vote_hosted_profile_image_url_medium:
+        :param we_vote_hosted_profile_image_url_tiny:
         :return:
         """
         try:
@@ -536,9 +557,21 @@ class VoterManager(BaseUserManager):
             # 'utc_offset': 32400,
             # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
-            if hasattr(twitter_user_object, "profile_image_url_https") and \
+            if positive_value_exists(cached_twitter_profile_image_url_https):
+                voter.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+                voter_to_save = True
+            elif hasattr(twitter_user_object, "profile_image_url_https") and \
                     positive_value_exists(twitter_user_object.profile_image_url_https):
                 voter.twitter_profile_image_url_https = twitter_user_object.profile_image_url_https
+                voter_to_save = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                voter_to_save = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                voter_to_save = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
             # 'screen_name': 'jaeeeee',
@@ -566,13 +599,21 @@ class VoterManager(BaseUserManager):
         }
         return results
 
-    def save_twitter_user_values_from_twitter_auth_response(self, voter, twitter_auth_response):
+    def save_twitter_user_values_from_twitter_auth_response(self, voter, twitter_auth_response,
+                                                            cached_twitter_profile_image_url_https = None,
+                                                            we_vote_hosted_profile_image_url_large = None,
+                                                            we_vote_hosted_profile_image_url_medium = None,
+                                                            we_vote_hosted_profile_image_url_tiny = None):
         """
         This is used to store the cached values in the voter record from the twitter_auth_response object once
         voter agrees to a merge.
         NOTE 2016-10-21 Do NOT save TwitterAuthResponse values -- only photo and "soft" data
         :param voter:
         :param twitter_auth_response:
+        :param cached_twitter_profile_image_url_https:
+        :param we_vote_hosted_profile_image_url_large:
+        :param we_vote_hosted_profile_image_url_medium:
+        :param we_vote_hosted_profile_image_url_tiny:
         :return:
         """
         try:
@@ -585,9 +626,21 @@ class VoterManager(BaseUserManager):
             # 'utc_offset': 32400,
             # 'description': "Cars, Musics, Games, Electronics, toys, food, etc... I'm just a typical boy!",
             # 'profile_image_url': 'http://a1.twimg.com/profile_images/1213351752/_2_2__normal.jpg',
-            if hasattr(twitter_auth_response, "twitter_profile_image_url_https") and \
+            if positive_value_exists(cached_twitter_profile_image_url_https):
+                voter.twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+                voter_to_save = True
+            elif hasattr(twitter_auth_response, "twitter_profile_image_url_https") and \
                     positive_value_exists(twitter_auth_response.twitter_profile_image_url_https):
                 voter.twitter_profile_image_url_https = twitter_auth_response.twitter_profile_image_url_https
+                voter_to_save = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                voter_to_save = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                voter_to_save = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                 voter_to_save = True
             # 'profile_background_image_url': 'http://a2.twimg.com/a/1294785484/images/themes/theme15/bg.png',
             # 'screen_name': 'jaeeeee',
@@ -646,7 +699,6 @@ class VoterManager(BaseUserManager):
                 voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
             if we_vote_hosted_profile_image_url_tiny:
                 voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
-                values_changed = True
 
             # 'lang': 'en',
             # 'name': 'Jae Jung Chung',
@@ -730,7 +782,8 @@ class VoterManager(BaseUserManager):
 
     def update_voter(self, voter_id, facebook_email, facebook_profile_image_url_https,
                      first_name, middle_name, last_name,
-                     twitter_profile_image_url_https):
+                     twitter_profile_image_url_https, we_vote_hosted_profile_image_url_large=None,
+                     we_vote_hosted_profile_image_url_medium=None, we_vote_hosted_profile_image_url_tiny=None):
         voter_updated = False
         results = self.retrieve_voter(voter_id)
 
@@ -756,6 +809,15 @@ class VoterManager(BaseUserManager):
                     should_save_voter = True
                 if twitter_profile_image_url_https is not False:
                     voter.last_name = last_name
+                    should_save_voter = True
+                if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                    voter.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                    should_save_voter = True
+                if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                    voter.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                    should_save_voter = True
+                if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                    voter.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
                     should_save_voter = True
                 if should_save_voter:
                     voter.save()
@@ -1386,6 +1448,18 @@ def fetch_voter_we_vote_id_from_voter_id(voter_id):
         return voter.we_vote_id
     return ""
 
+def fetch_voter_we_vote_id_from_voter_device_link(voter_device_id):
+    voter_device_link_manager = VoterDeviceLinkManager()
+    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+    if results['voter_device_link_found']:
+        voter_device_link = results['voter_device_link']
+        voter_id = voter_device_link.voter_id
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_id(voter_id)
+        if results['voter_found']:
+            voter = results['voter']
+            return voter.we_vote_id
+        return ""
 
 def retrieve_voter_authority(request):
     voter_api_device_id = get_voter_api_device_id(request)

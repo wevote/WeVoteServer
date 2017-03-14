@@ -594,13 +594,15 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
     we_vote_id = position_we_vote_id.strip().lower()
     if not positive_value_exists(position_we_vote_id):
         json_data = {
-            'status':                   "POSITION_RETRIEVE_BOTH_IDS_MISSING",
-            'success':                  False,
-            'position_we_vote_id':      position_we_vote_id,
-            'ballot_item_display_name': '',
-            'speaker_display_name':     '',
-            'speaker_image_url_https':  '',
-            'speaker_twitter_handle':   '',
+            'status':                           "POSITION_RETRIEVE_BOTH_IDS_MISSING",
+            'success':                          False,
+            'position_we_vote_id':              position_we_vote_id,
+            'ballot_item_display_name':         '',
+            'speaker_display_name':             '',
+            'speaker_image_url_https_large':    '',
+            'speaker_image_url_https_medium':   '',
+            'speaker_image_url_https_tiny':     '',
+            'speaker_twitter_handle':           '',
             'is_support':                       False,
             'is_positive_rating':               False,
             'is_support_or_positive_rating':    False,
@@ -638,13 +640,17 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
     if results['position_found']:
         position = results['position']
         json_data = {
-            'success':                  True,
-            'status':                   results['status'],
-            'position_we_vote_id':      position.we_vote_id,
-            'ballot_item_display_name': position.ballot_item_display_name,
-            'speaker_display_name':     position.speaker_display_name,
-            'speaker_image_url_https':  position.speaker_image_url_https,
-            'speaker_twitter_handle':   position.speaker_twitter_handle,
+            'success':                          True,
+            'status':                           results['status'],
+            'position_we_vote_id':              position.we_vote_id,
+            'ballot_item_display_name':         position.ballot_item_display_name,
+            'speaker_display_name':             position.speaker_display_name,
+            'speaker_image_url_https_large':    position.speaker_image_url_https_large
+                if positive_value_exists(position.speaker_image_url_https_large)
+                else position.speaker_image_url_https,
+            'speaker_image_url_https_medium':   position.speaker_image_url_https_medium,
+            'speaker_image_url_https_tiny':     position.speaker_image_url_https_tiny,
+            'speaker_twitter_handle':           position.speaker_twitter_handle,
             'is_support':                       results['is_support'],
             'is_positive_rating':               results['is_positive_rating'],
             'is_support_or_positive_rating':    results['is_support_or_positive_rating'],
@@ -669,13 +675,15 @@ def position_retrieve_for_api(position_we_vote_id, voter_device_id):  # position
         return HttpResponse(json.dumps(json_data), content_type='application/json')
     else:
         json_data = {
-            'status':                   results['status'],
-            'success':                  results['success'],
-            'position_we_vote_id':      we_vote_id,
-            'ballot_item_display_name': '',
-            'speaker_display_name':     '',
-            'speaker_image_url_https':  '',
-            'speaker_twitter_handle':   '',
+            'status':                           results['status'],
+            'success':                          results['success'],
+            'position_we_vote_id':              we_vote_id,
+            'ballot_item_display_name':         '',
+            'speaker_display_name':             '',
+            'speaker_image_url_https_large':    '',
+            'speaker_image_url_https_medium':   '',
+            'speaker_image_url_https_tiny':     '',
+            'speaker_twitter_handle':           '',
             'is_support':                       False,
             'is_positive_rating':               False,
             'is_support_or_positive_rating':    False,
@@ -1207,7 +1215,11 @@ def position_list_for_ballot_item_for_api(voter_device_id, friends_vs_public,  #
                 'position_we_vote_id':              one_position.we_vote_id,
                 'ballot_item_display_name':         one_position.ballot_item_display_name,
                 'speaker_display_name':             speaker_display_name,
-                'speaker_image_url_https':          one_position.speaker_image_url_https,
+                'speaker_image_url_https_large':    one_position.speaker_image_url_https_large
+                    if positive_value_exists(one_position.speaker_image_url_https_large)
+                    else one_position.speaker_image_url_https,
+                'speaker_image_url_https_medium':   one_position.speaker_image_url_https_medium,
+                'speaker_image_url_https_tiny':     one_position.speaker_image_url_https_tiny,
                 'speaker_twitter_handle':           one_position.speaker_twitter_handle,
                 'speaker_type':                     speaker_type,
                 'speaker_id':                       speaker_id,
@@ -1256,7 +1268,9 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     is_following = False
     is_ignoring = False
     opinion_maker_display_name = ''
-    opinion_maker_image_url_https = ''
+    opinion_maker_image_url_https_large = ''
+    opinion_maker_image_url_https_medium = ''
+    opinion_maker_image_url_https_tiny = ''
     status = ''
     position_list_raw = []
 
@@ -1283,22 +1297,24 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     if not results['success']:
         position_list = []
         json_data = {
-            'status':                           'VALID_VOTER_DEVICE_ID_MISSING_OPINION_MAKER_POSITION_LIST',
-            'success':                          False,
-            'count':                            0,
-            'kind_of_opinion_maker':            kind_of_opinion_maker_text,
-            'opinion_maker_id':                 opinion_maker_id,
-            'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
-            'opinion_maker_display_name':       opinion_maker_display_name,
-            'opinion_maker_image_url_https':    opinion_maker_image_url_https,
-            'is_following':                     is_following,
-            'is_ignoring':                      is_ignoring,
-            'google_civic_election_id':         google_civic_election_id,
-            'state_code':                       state_code,
-            'position_list':                    position_list,
-            'filter_for_voter':                 filter_for_voter,
-            'filter_out_voter':                 filter_out_voter,
-            'friends_vs_public':                friends_vs_public,
+            'status':                               'VALID_VOTER_DEVICE_ID_MISSING_OPINION_MAKER_POSITION_LIST',
+            'success':                              False,
+            'count':                                0,
+            'kind_of_opinion_maker':                kind_of_opinion_maker_text,
+            'opinion_maker_id':                     opinion_maker_id,
+            'opinion_maker_we_vote_id':             opinion_maker_we_vote_id,
+            'opinion_maker_display_name':           opinion_maker_display_name,
+            'opinion_maker_image_url_https_large':  opinion_maker_image_url_https_large,
+            'opinion_maker_image_url_https_medium': opinion_maker_image_url_https_medium,
+            'opinion_maker_image_url_https_tiny':   opinion_maker_image_url_https_tiny,
+            'is_following':                         is_following,
+            'is_ignoring':                          is_ignoring,
+            'google_civic_election_id':             google_civic_election_id,
+            'state_code':                           state_code,
+            'position_list':                        position_list,
+            'filter_for_voter':                     filter_for_voter,
+            'filter_out_voter':                     filter_out_voter,
+            'friends_vs_public':                    friends_vs_public,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1306,22 +1322,24 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     if not positive_value_exists(voter_id):
         position_list = []
         json_data = {
-            'status':                           "VALID_VOTER_ID_MISSING_OPINION_MAKER_POSITION_LIST ",
-            'success':                          False,
-            'count':                            0,
-            'kind_of_opinion_maker':            kind_of_opinion_maker_text,
-            'opinion_maker_id':                 opinion_maker_id,
-            'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
-            'opinion_maker_display_name':       opinion_maker_display_name,
-            'opinion_maker_image_url_https':    opinion_maker_image_url_https,
-            'is_following':                     is_following,
-            'is_ignoring':                      is_ignoring,
-            'google_civic_election_id':         google_civic_election_id,
-            'state_code':                       state_code,
-            'position_list':                    position_list,
-            'filter_for_voter':                 filter_for_voter,
-            'filter_out_voter':                 filter_out_voter,
-            'friends_vs_public':                friends_vs_public,
+            'status':                               "VALID_VOTER_ID_MISSING_OPINION_MAKER_POSITION_LIST ",
+            'success':                              False,
+            'count':                                0,
+            'kind_of_opinion_maker':                kind_of_opinion_maker_text,
+            'opinion_maker_id':                     opinion_maker_id,
+            'opinion_maker_we_vote_id':             opinion_maker_we_vote_id,
+            'opinion_maker_display_name':           opinion_maker_display_name,
+            'opinion_maker_image_url_https_large':  opinion_maker_image_url_https_large,
+            'opinion_maker_image_url_https_medium': opinion_maker_image_url_https_medium,
+            'opinion_maker_image_url_https_tiny':   opinion_maker_image_url_https_tiny,
+            'is_following':                         is_following,
+            'is_ignoring':                          is_ignoring,
+            'google_civic_election_id':             google_civic_election_id,
+            'state_code':                           state_code,
+            'position_list':                        position_list,
+            'filter_for_voter':                     filter_for_voter,
+            'filter_out_voter':                     filter_out_voter,
+            'friends_vs_public':                    friends_vs_public,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1342,7 +1360,11 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
             opinion_maker_id = organization.id
             opinion_maker_we_vote_id = organization.we_vote_id
             opinion_maker_display_name = organization.organization_name
-            opinion_maker_image_url_https = organization.organization_photo_url()
+            opinion_maker_image_url_https_large = organization.we_vote_hosted_profile_image_url_large \
+                if positive_value_exists(organization.we_vote_hosted_profile_image_url_large) \
+                else organization.organization_photo_url()
+            opinion_maker_image_url_https_medium = organization.we_vote_hosted_profile_image_url_medium
+            opinion_maker_image_url_https_tiny = organization.we_vote_hosted_profile_image_url_tiny
             opinion_maker_found = True
 
             follow_organization_manager = FollowOrganizationManager()
@@ -1386,44 +1408,48 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     else:
         position_list = []
         json_data = {
-            'status':                           'POSITION_LIST_RETRIEVE_MISSING_OPINION_MAKER_ID',
-            'success':                          False,
-            'count':                            0,
-            'kind_of_opinion_maker':            kind_of_opinion_maker_text,
-            'opinion_maker_id':                 opinion_maker_id,
-            'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
-            'opinion_maker_display_name':       opinion_maker_display_name,
-            'opinion_maker_image_url_https':    opinion_maker_image_url_https,
-            'is_following':                     is_following,
-            'is_ignoring':                      is_ignoring,
-            'google_civic_election_id':         google_civic_election_id,
-            'state_code':                       state_code,
-            'position_list':                    position_list,
-            'filter_for_voter':                 filter_for_voter,
-            'filter_out_voter':                 filter_out_voter,
-            'friends_vs_public':                friends_vs_public,
+            'status':                               'POSITION_LIST_RETRIEVE_MISSING_OPINION_MAKER_ID',
+            'success':                              False,
+            'count':                                0,
+            'kind_of_opinion_maker':                kind_of_opinion_maker_text,
+            'opinion_maker_id':                     opinion_maker_id,
+            'opinion_maker_we_vote_id':             opinion_maker_we_vote_id,
+            'opinion_maker_display_name':           opinion_maker_display_name,
+            'opinion_maker_image_url_https_large':  opinion_maker_image_url_https_large,
+            'opinion_maker_image_url_https_medium': opinion_maker_image_url_https_medium,
+            'opinion_maker_image_url_https_tiny':   opinion_maker_image_url_https_tiny,
+            'is_following':                         is_following,
+            'is_ignoring':                          is_ignoring,
+            'google_civic_election_id':             google_civic_election_id,
+            'state_code':                           state_code,
+            'position_list':                        position_list,
+            'filter_for_voter':                     filter_for_voter,
+            'filter_out_voter':                     filter_out_voter,
+            'friends_vs_public':                    friends_vs_public,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     if not opinion_maker_found:
         position_list = []
         json_data = {
-            'status':                           'POSITION_LIST_RETRIEVE_OPINION_MAKER_NOT_FOUND',
-            'success':                          False,
-            'count':                            0,
-            'kind_of_opinion_maker':            kind_of_opinion_maker_text,
-            'opinion_maker_id':                 opinion_maker_id,
-            'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
-            'opinion_maker_display_name':       opinion_maker_display_name,
-            'opinion_maker_image_url_https':    opinion_maker_image_url_https,
-            'is_following':                     is_following,
-            'is_ignoring':                      is_ignoring,
-            'google_civic_election_id':         google_civic_election_id,
-            'state_code':                       state_code,
-            'position_list':                    position_list,
-            'filter_for_voter':                 filter_for_voter,
-            'filter_out_voter':                 filter_out_voter,
-            'friends_vs_public':                friends_vs_public,
+            'status':                               'POSITION_LIST_RETRIEVE_OPINION_MAKER_NOT_FOUND',
+            'success':                              False,
+            'count':                                0,
+            'kind_of_opinion_maker':                kind_of_opinion_maker_text,
+            'opinion_maker_id':                     opinion_maker_id,
+            'opinion_maker_we_vote_id':             opinion_maker_we_vote_id,
+            'opinion_maker_display_name':           opinion_maker_display_name,
+            'opinion_maker_image_url_https_large':  opinion_maker_image_url_https_large,
+            'opinion_maker_image_url_https_medium': opinion_maker_image_url_https_medium,
+            'opinion_maker_image_url_https_tiny':   opinion_maker_image_url_https_tiny,
+            'is_following':                         is_following,
+            'is_ignoring':                          is_ignoring,
+            'google_civic_election_id':             google_civic_election_id,
+            'state_code':                           state_code,
+            'position_list':                        position_list,
+            'filter_for_voter':                     filter_for_voter,
+            'filter_out_voter':                     filter_out_voter,
+            'friends_vs_public':                    friends_vs_public,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1472,35 +1498,39 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
                     or missing_office_information:
                 one_position = position_manager.refresh_cached_position_info(one_position, force_update)
             one_position_dict_for_api = {
-                'position_we_vote_id':          one_position.we_vote_id,
+                'position_we_vote_id':                  one_position.we_vote_id,
                 'ballot_item_display_name':
                     one_position.ballot_item_display_name
                     if positive_value_exists(one_position.ballot_item_display_name) else "",  # Candidate or Measure
-                'ballot_item_image_url_https':  one_position.ballot_item_image_url_https,
-                'ballot_item_twitter_handle':   one_position.ballot_item_twitter_handle,
-                'ballot_item_political_party':  one_position.political_party,
-                'kind_of_ballot_item':          kind_of_ballot_item,
-                'ballot_item_id':               ballot_item_id,
-                'ballot_item_we_vote_id':       ballot_item_we_vote_id,
-                'ballot_item_state_code':       one_position.state_code,
-                'contest_office_id':            one_position.contest_office_id,
-                'contest_office_we_vote_id':    one_position.contest_office_we_vote_id,
-                'contest_office_name':          one_position.contest_office_name,
-                'is_support':                       one_position.is_support(),
-                'is_positive_rating':               one_position.is_positive_rating(),
-                'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),
-                'is_oppose':                        one_position.is_oppose(),
-                'is_negative_rating':               one_position.is_negative_rating(),
-                'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
-                'is_information_only':              one_position.is_information_only(),
-                'is_public_position':           one_position.is_public_position,
-                'speaker_display_name':         one_position.speaker_display_name,  # Organization name
-                'vote_smart_rating':            one_position.vote_smart_rating,
-                'vote_smart_time_span':         one_position.vote_smart_time_span,
-                'google_civic_election_id':     one_position.google_civic_election_id,
-                'more_info_url':                one_position.more_info_url,
-                'statement_text':               one_position.statement_text,
-                'last_updated':                 one_position.last_updated(),
+                'ballot_item_image_url_https_large':    one_position.ballot_item_image_url_https_large
+                    if positive_value_exists(one_position.ballot_item_image_url_https_large)
+                    else one_position.ballot_item_image_url_https,
+                'ballot_item_image_url_https_medium':   one_position.ballot_item_image_url_https_medium,
+                'ballot_item_image_url_https_tiny':     one_position.ballot_item_image_url_https_tiny,
+                'ballot_item_twitter_handle':           one_position.ballot_item_twitter_handle,
+                'ballot_item_political_party':          one_position.political_party,
+                'kind_of_ballot_item':                  kind_of_ballot_item,
+                'ballot_item_id':                       ballot_item_id,
+                'ballot_item_we_vote_id':               ballot_item_we_vote_id,
+                'ballot_item_state_code':               one_position.state_code,
+                'contest_office_id':                    one_position.contest_office_id,
+                'contest_office_we_vote_id':            one_position.contest_office_we_vote_id,
+                'contest_office_name':                  one_position.contest_office_name,
+                'is_support':                           one_position.is_support(),
+                'is_positive_rating':                   one_position.is_positive_rating(),
+                'is_support_or_positive_rating':        one_position.is_support_or_positive_rating(),
+                'is_oppose':                            one_position.is_oppose(),
+                'is_negative_rating':                   one_position.is_negative_rating(),
+                'is_oppose_or_negative_rating':         one_position.is_oppose_or_negative_rating(),
+                'is_information_only':                  one_position.is_information_only(),
+                'is_public_position':                   one_position.is_public_position,
+                'speaker_display_name':                 one_position.speaker_display_name,  # Organization name
+                'vote_smart_rating':                    one_position.vote_smart_rating,
+                'vote_smart_time_span':                 one_position.vote_smart_time_span,
+                'google_civic_election_id':             one_position.google_civic_election_id,
+                'more_info_url':                        one_position.more_info_url,
+                'statement_text':                       one_position.statement_text,
+                'last_updated':                         one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
 
@@ -1526,22 +1556,24 @@ def position_list_for_opinion_maker_for_api(voter_device_id,  # positionListForO
     status += ' POSITION_LIST_FOR_OPINION_MAKER_SUCCEEDED'
     success = True
     json_data = {
-        'status':                           status,
-        'success':                          success,
-        'count':                            len(position_list),
-        'kind_of_opinion_maker':            kind_of_opinion_maker_text,
-        'opinion_maker_id':                 opinion_maker_id,
-        'opinion_maker_we_vote_id':         opinion_maker_we_vote_id,
-        'opinion_maker_display_name':       opinion_maker_display_name,
-        'opinion_maker_image_url_https':    opinion_maker_image_url_https,
-        'is_following':                     is_following,
-        'is_ignoring':                      is_ignoring,
-        'google_civic_election_id':         google_civic_election_id,
-        'state_code':                       state_code,
-        'position_list':                    sorted_position_list,
-        'filter_for_voter':                 filter_for_voter,
-        'filter_out_voter':                 filter_out_voter,
-        'friends_vs_public':                friends_vs_public,
+        'status':                               status,
+        'success':                              success,
+        'count':                                len(position_list),
+        'kind_of_opinion_maker':                kind_of_opinion_maker_text,
+        'opinion_maker_id':                     opinion_maker_id,
+        'opinion_maker_we_vote_id':             opinion_maker_we_vote_id,
+        'opinion_maker_display_name':           opinion_maker_display_name,
+        'opinion_maker_image_url_https_large':  opinion_maker_image_url_https_large,
+        'opinion_maker_image_url_https_medium': opinion_maker_image_url_https_medium,
+        'opinion_maker_image_url_https_tiny':   opinion_maker_image_url_https_tiny,
+        'is_following':                         is_following,
+        'is_ignoring':                          is_ignoring,
+        'google_civic_election_id':             google_civic_election_id,
+        'state_code':                           state_code,
+        'position_list':                        sorted_position_list,
+        'filter_for_voter':                     filter_for_voter,
+        'filter_out_voter':                     filter_out_voter,
+        'friends_vs_public':                    friends_vs_public,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1559,7 +1591,9 @@ def position_list_for_voter_for_api(voter_device_id,
     """
     voter_we_vote_id = ""
     voter_display_name = ''
-    voter_image_url_https = ''
+    voter_image_url_https_large = ''
+    voter_image_url_https_medium = ''
+    voter_image_url_https_tiny= ''
     status = ''
     position_list_raw = []
 
@@ -1580,7 +1614,9 @@ def position_list_for_voter_for_api(voter_device_id,
             'state_code':                       state_code,
             'voter_we_vote_id':                 voter_we_vote_id,
             'voter_display_name':               voter_display_name,
-            'voter_image_url_https':            voter_image_url_https,
+            'voter_image_url_https_large':      voter_image_url_https_large,
+            'voter_image_url_https_medium':     voter_image_url_https_medium,
+            'voter_image_url_https_tiny':       voter_image_url_https_tiny,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1601,11 +1637,19 @@ def position_list_for_voter_for_api(voter_device_id,
             'state_code':                       state_code,
             'voter_we_vote_id':                 voter_we_vote_id,
             'voter_display_name':               voter_display_name,
-            'voter_image_url_https':            voter_image_url_https,
+            'voter_image_url_https_large':      voter_image_url_https_large,
+            'voter_image_url_https_medium':     voter_image_url_https_medium,
+            'voter_image_url_https_tiny':       voter_image_url_https_tiny,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
     voter = voter_results['voter']
+    '''
+    voter_display_name = voter.first_name
+    voter_image_url_https_large = voter.we_vote_hosted_profile_image_url_large
+    voter_image_url_https_medium = voter.we_vote_hosted_profile_image_url_medium
+    voter_image_url_https_tiny = voter.we_vote_hosted_profile_image_url_tiny
+    '''
     position_list_manager = PositionListManager()
     if show_only_this_election:
         this_election_vs_others = THIS_ELECTION_ONLY
@@ -1662,31 +1706,36 @@ def position_list_for_voter_for_api(voter_device_id,
                     or missing_office_information:
                 one_position = position_manager.refresh_cached_position_info(one_position)
             one_position_dict_for_api = {
-                'position_we_vote_id':          one_position.we_vote_id,
-                'ballot_item_display_name':     one_position.ballot_item_display_name,  # Candidate name or Measure
-                'ballot_item_image_url_https':  one_position.ballot_item_image_url_https,
-                'ballot_item_twitter_handle':   one_position.ballot_item_twitter_handle,
-                'ballot_item_political_party':  one_position.political_party,
-                'ballot_item_state_code':       one_position.state_code,
-                'kind_of_ballot_item':          kind_of_ballot_item,
-                'ballot_item_id':               ballot_item_id,
-                'ballot_item_we_vote_id':       ballot_item_we_vote_id,
-                'contest_office_id':            one_position.contest_office_id,
-                'contest_office_we_vote_id':    one_position.contest_office_we_vote_id,
-                'contest_office_name':          one_position.contest_office_name,
-                'is_support':                       one_position.is_support(),
-                'is_positive_rating':               one_position.is_positive_rating(),
-                'is_support_or_positive_rating':    one_position.is_support_or_positive_rating(),
-                'is_oppose':                        one_position.is_oppose(),
-                'is_negative_rating':               one_position.is_negative_rating(),
-                'is_oppose_or_negative_rating':     one_position.is_oppose_or_negative_rating(),
-                'is_information_only':              one_position.is_information_only(),
-                'is_public_position':           one_position.is_public_position,
-                'speaker_display_name':         one_position.speaker_display_name,  # Voter name
-                'google_civic_election_id':     one_position.google_civic_election_id,
-                'more_info_url':                one_position.more_info_url,
-                'statement_text':               one_position.statement_text,
-                'last_updated':                 one_position.last_updated(),
+                'position_we_vote_id':                  one_position.we_vote_id,
+                'ballot_item_display_name':             one_position.ballot_item_display_name,  # Candidate name or
+                                                                                                # Measure
+                'ballot_item_image_url_https_large':    one_position.ballot_item_image_url_https_large
+                    if positive_value_exists(one_position.ballot_item_image_url_https_large)
+                    else one_position.ballot_item_image_url_https,
+                'ballot_item_image_url_https_medium':   one_position.ballot_item_image_url_https_medium,
+                'ballot_item_image_url_https_tiny':     one_position.ballot_item_image_url_https_tiny,
+                'ballot_item_twitter_handle':           one_position.ballot_item_twitter_handle,
+                'ballot_item_political_party':          one_position.political_party,
+                'ballot_item_state_code':               one_position.state_code,
+                'kind_of_ballot_item':                  kind_of_ballot_item,
+                'ballot_item_id':                       ballot_item_id,
+                'ballot_item_we_vote_id':               ballot_item_we_vote_id,
+                'contest_office_id':                    one_position.contest_office_id,
+                'contest_office_we_vote_id':            one_position.contest_office_we_vote_id,
+                'contest_office_name':                  one_position.contest_office_name,
+                'is_support':                           one_position.is_support(),
+                'is_positive_rating':                   one_position.is_positive_rating(),
+                'is_support_or_positive_rating':        one_position.is_support_or_positive_rating(),
+                'is_oppose':                            one_position.is_oppose(),
+                'is_negative_rating':                   one_position.is_negative_rating(),
+                'is_oppose_or_negative_rating':         one_position.is_oppose_or_negative_rating(),
+                'is_information_only':                  one_position.is_information_only(),
+                'is_public_position':                   one_position.is_public_position,
+                'speaker_display_name':                 one_position.speaker_display_name,  # Voter name
+                'google_civic_election_id':             one_position.google_civic_election_id,
+                'more_info_url':                        one_position.more_info_url,
+                'statement_text':                       one_position.statement_text,
+                'last_updated':                         one_position.last_updated(),
             }
             position_list.append(one_position_dict_for_api)
 
@@ -1704,7 +1753,10 @@ def position_list_for_voter_for_api(voter_device_id,
         'state_code':                       state_code,
         'voter_we_vote_id':                 voter_we_vote_id,
         'voter_display_name':               voter_display_name,
-        'voter_image_url_https':            voter_image_url_https,
+        'voter_image_url_https_large':      voter_image_url_https_large,
+        'voter_image_url_https_medium':     voter_image_url_https_medium,
+        'voter_image_url_https_tiny':       voter_image_url_https_tiny,
+        # 'voter_we_vote_id':                 voter.we_vote_id,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

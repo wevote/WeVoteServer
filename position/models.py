@@ -3757,8 +3757,8 @@ class PositionManager(models.Model):
         """
         values_changed = False
         if positive_value_exists(candidate_campaign.candidate_photo_url()) and \
-                position_object.ballot_item_image_url_https_medium != candidate_campaign.candidate_photo_url():
-            position_object.ballot_item_image_url_https_medium = candidate_campaign.candidate_photo_url()
+                position_object.ballot_item_image_url_https != candidate_campaign.candidate_photo_url():
+            position_object.ballot_item_image_url_https = candidate_campaign.candidate_photo_url()
             values_changed = True
         if positive_value_exists(candidate_campaign.we_vote_hosted_profile_image_url_large) and \
                 position_object.ballot_item_image_url_https_large != \

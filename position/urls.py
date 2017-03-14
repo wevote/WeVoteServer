@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^$', views_admin.position_list_view, name='position_list',),
     url(r'^delete/$', views_admin.position_delete_process_view, name='position_delete_process',),
     url(r'^edit_process/$', views_admin.position_edit_process_view, name='position_edit_process'),
-    url(r'^export/', views_admin.PositionsSyncOutView.as_view(), name='positions_export'),
+    # url(r'^export/', views_admin.PositionsSyncOutView.as_view(), name='positions_export'),
     url(r'^import/$',
         views_admin.positions_import_from_master_server_view, name='positions_import_from_master_server'),
     url(r'^new/$', views_admin.position_new_view, name='position_new',),

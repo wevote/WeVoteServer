@@ -6,7 +6,6 @@ from .controllers import candidates_import_from_master_server, candidates_import
     candidate_politician_match, find_duplicate_candidate, \
     retrieve_candidate_photos, retrieve_candidate_politician_match_options
 from .models import CandidateCampaign, CandidateCampaignListManager, CandidateCampaignManager
-from .serializers import CandidateCampaignSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from office.models import ContestOffice, ContestOfficeManager
 from django.db.models import Q
@@ -23,30 +22,58 @@ from import_export_vote_smart.models import VoteSmartRatingOneCandidate
 from import_export_vote_smart.votesmart_local import VotesmartApiError
 from politician.models import PoliticianManager
 from position.models import PositionEntered, PositionListManager
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, extract_twitter_handle_from_text_string, \
     positive_value_exists, STATE_CODE_MAP
+from django.http import HttpResponse
+import json
 
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-class CandidatesSyncOutView(APIView):
-    def get(self, request, format=None):
-        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-        state_code = request.GET.get('state_code', '')
+# class CandidatesSyncOutView(APIView):
+#     def get(self, request, format=None):
+def candidates_sync_out_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
 
+    try:
         candidate_list = CandidateCampaign.objects.all()
         if positive_value_exists(google_civic_election_id):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
             candidate_list = candidate_list.filter(state_code__iexact=state_code)
-        serializer = CandidateCampaignSerializer(candidate_list, many=True)
-        return Response(serializer.data)
+        # serializer = CandidateCampaignSerializer(candidate_list, many=True)
+        # return Response(serializer.data)
+
+        candidate_list_dict = candidate_list.values('we_vote_id', 'maplight_id', 'vote_smart_id',
+                                                    'contest_office_we_vote_id', 'politician_we_vote_id',
+                                                    'candidate_name', 'google_civic_candidate_name', 'party',
+                                                    'photo_url', 'photo_url_from_maplight',
+                                                    'photo_url_from_vote_smart', 'order_on_ballot',
+                                                    'google_civic_election_id', 'ocd_division_id', 'state_code',
+                                                    'candidate_url', 'facebook_url', 'twitter_url',
+                                                    'twitter_user_id', 'candidate_twitter_handle', 'twitter_name',
+                                                    'twitter_location', 'twitter_followers_count',
+                                                    'twitter_profile_image_url_https', 'twitter_description',
+                                                    'google_plus_url', 'youtube_url', 'candidate_email',
+                                                    'candidate_phone', 'wikipedia_page_id', 'wikipedia_page_title',
+                                                    'wikipedia_photo_url', 'ballotpedia_page_title',
+                                                    'ballotpedia_photo_url', 'ballot_guide_official_statement')
+        if candidate_list_dict:
+            candidate_list_json = list(candidate_list_dict)
+            return HttpResponse(json.dumps(candidate_list_json), content_type='application/json')
+    except Exception as e:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'CANDIDATE_LIST_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required

@@ -6,6 +6,7 @@ from follow.models import UPDATE_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW, UPDATE_S
     UPDATE_SUGGESTIONS_FROM_WHAT_FRIEND_FOLLOWS_ON_TWITTER, UPDATE_SUGGESTIONS_ALL, \
     FOLLOW_SUGGESTIONS_FROM_FRIENDS_ON_TWITTER, FOLLOW_SUGGESTIONS_FROM_FRIENDS, \
     FOLLOW_SUGGESTIONS_FROM_TWITTER_IDS_I_FOLLOW
+from image.controllers import cache_original_and_resized_image, TWITTER, FACEBOOK
 from .controllers import organization_count, organization_follow, organization_follow_ignore, \
     organization_stop_following, voter_count
 from ballot.controllers import ballot_item_options_retrieve_for_api, choose_election_from_existing_data, \
@@ -63,8 +64,8 @@ from twitter.controllers import twitter_identity_retrieve_for_api
 from urllib.parse import quote
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
-from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
-    VoterDeviceLink, VoterDeviceLinkManager, voter_has_authority, VoterManager
+from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
+    VoterAddress, VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, voter_has_authority, VoterManager
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_ignored_retrieve_for_api, \
@@ -170,10 +171,15 @@ def donation_with_stripe_view(request): #donationWithStripe
     """
 
     token = request.POST.get('token')
-    # email = request.POST.get('email')
+    # TODO add email - go over with Dale
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
 
     if positive_value_exists(token):
-        results = donation_with_stripe_for_api(token)
+        results = donation_with_stripe_for_api(token, voter_we_vote_id)
 
         json_data = {
             'status': results['status'],
@@ -1033,20 +1039,23 @@ def twitter_identity_retrieve_view(request):  # twitterIdentityRetrieve
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     results = twitter_identity_retrieve_for_api(twitter_handle, voter_device_id)
     json_data = {
-        'status':                   results['status'],
-        'success':                  results['success'],
-        'twitter_handle':           results['twitter_handle'],
-        'owner_found':              results['owner_found'],
-        'kind_of_owner':            results['kind_of_owner'],
-        'owner_we_vote_id':         results['owner_we_vote_id'],
-        'owner_id':                 results['owner_id'],
-        'google_civic_election_id': results['google_civic_election_id'],
+        'status':                                   results['status'],
+        'success':                                  results['success'],
+        'twitter_handle':                           results['twitter_handle'],
+        'owner_found':                              results['owner_found'],
+        'kind_of_owner':                            results['kind_of_owner'],
+        'owner_we_vote_id':                         results['owner_we_vote_id'],
+        'owner_id':                                 results['owner_id'],
+        'google_civic_election_id':                 results['google_civic_election_id'],
         # These values only returned if kind_of_owner == TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE
-        'twitter_description':      results['twitter_description'],
-        'twitter_followers_count':  results['twitter_followers_count'],
-        'twitter_photo_url':        results['twitter_photo_url'],
-        'twitter_user_website':     results['twitter_user_website'],
-        'twitter_name':             results['twitter_name'],
+        'twitter_description':                      results['twitter_description'],
+        'twitter_followers_count':                  results['twitter_followers_count'],
+        'twitter_photo_url':                        results['twitter_photo_url'],
+        'we_vote_hosted_profile_image_url_large':   results['we_vote_hosted_profile_image_url_large'],
+        'we_vote_hosted_profile_image_url_medium':  results['we_vote_hosted_profile_image_url_medium'],
+        'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny'],
+        'twitter_user_website':                     results['twitter_user_website'],
+        'twitter_name':                             results['twitter_name'],
         }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1161,6 +1170,10 @@ def twitter_sign_in_retrieve_view(request):  # twitterSignInRetrieve
         'twitter_sign_in_verified':                 results['twitter_sign_in_verified'],
         'twitter_sign_in_failed':                   results['twitter_sign_in_failed'],
         'twitter_secret_key':                       results['twitter_secret_key'],
+        'twitter_profile_image_url_https':          results['twitter_profile_image_url_https'],
+        'we_vote_hosted_profile_image_url_large':   results['we_vote_hosted_profile_image_url_large'],
+        'we_vote_hosted_profile_image_url_medium':  results['we_vote_hosted_profile_image_url_medium'],
+        'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny'],
         # 'twitter_who_i_follow':                   results['twitter_who_i_follow'],
         # There are more values we currently aren't returning
     }
@@ -1767,6 +1780,11 @@ def voter_facebook_sign_in_retrieve_view(request):  # voterFacebookSignInRetriev
         'facebook_sign_in_failed':                  results['facebook_sign_in_failed'],
         'facebook_secret_key':                      results['facebook_secret_key'],
         'voter_has_data_to_preserve':               results['voter_has_data_to_preserve'],
+        'facebook_user_id':                         results['facebook_user_id'],
+        'facebook_profile_image_url_https':         results['facebook_profile_image_url_https'],
+        'we_vote_hosted_profile_image_url_large':   results['we_vote_hosted_profile_image_url_large'],
+        'we_vote_hosted_profile_image_url_medium':  results['we_vote_hosted_profile_image_url_medium'],
+        'we_vote_hosted_profile_image_url_tiny':    results['we_vote_hosted_profile_image_url_tiny']
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -2642,8 +2660,10 @@ def voter_update_view(request):  # voterUpdate
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 
-    voter_id = fetch_voter_id_from_voter_device_link(voter_device_id)
-    if voter_id < 0:
+    voter_manager = VoterManager()
+    voter_results = voter_manager.retrieve_voter_from_voter_device_id(voter_device_id)
+    voter_id = voter_results['voter_id']
+    if not positive_value_exists(voter_id):
         json_data = {
             'status':                           "VOTER_NOT_FOUND_FROM_DEVICE_ID",
             'success':                          False,
@@ -2659,22 +2679,61 @@ def voter_update_view(request):  # voterUpdate
         response = HttpResponse(json.dumps(json_data), content_type='application/json')
         return response
 
+    voter = voter_results['voter']
+    we_vote_hosted_profile_image_url_large = None
+    we_vote_hosted_profile_image_url_medium = None
+    we_vote_hosted_profile_image_url_tiny = None
+
+    if twitter_profile_image_url_https:
+        # Cache original and resized images
+        cache_results = cache_original_and_resized_image(
+            voter_we_vote_id=voter.we_vote_id,
+            twitter_id=voter.twitter_id,
+            twitter_screen_name=voter.twitter_screen_name,
+            twitter_profile_image_url_https=twitter_profile_image_url_https,
+            image_source=TWITTER)
+        cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+        if positive_value_exists(cached_twitter_profile_image_url_https):
+            twitter_profile_image_url_https = cached_twitter_profile_image_url_https
+
+    if facebook_profile_image_url_https:
+        # Cache original and resized images
+        cache_results = cache_original_and_resized_image(
+            voter_we_vote_id=voter.we_vote_id,
+            facebook_user_id=voter.facebook_id,
+            facebook_profile_image_url_https=facebook_profile_image_url_https,
+            image_source=FACEBOOK)
+        cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+        if positive_value_exists(cached_facebook_profile_image_url_https):
+            facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+
     # At this point, we have a valid voter
     voter_manager = VoterManager()
     results = voter_manager.update_voter(voter_id, facebook_email, facebook_profile_image_url_https,
-                                         first_name, middle_name, last_name, twitter_profile_image_url_https)
+                                         first_name, middle_name, last_name, twitter_profile_image_url_https,
+                                         we_vote_hosted_profile_image_url_large,
+                                         we_vote_hosted_profile_image_url_medium, we_vote_hosted_profile_image_url_tiny)
 
     json_data = {
-        'status':                           results['status'],
-        'success':                          results['success'],
-        'voter_device_id':                  voter_device_id,
-        'facebook_email':                   facebook_email,
-        'facebook_profile_image_url_https': facebook_profile_image_url_https,
-        'first_name':                       first_name,
-        'middle_name':                      middle_name,
-        'last_name':                        last_name,
-        'twitter_profile_image_url_https':  twitter_profile_image_url_https,
-        'voter_updated':                    results['voter_updated'],
+        'status':                                   results['status'],
+        'success':                                  results['success'],
+        'voter_device_id':                          voter_device_id,
+        'facebook_email':                           facebook_email,
+        'facebook_profile_image_url_https':         facebook_profile_image_url_https,
+        'first_name':                               first_name,
+        'middle_name':                              middle_name,
+        'last_name':                                last_name,
+        'twitter_profile_image_url_https':          twitter_profile_image_url_https,
+        'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
+        'voter_updated':                            results['voter_updated'],
     }
 
     response = HttpResponse(json.dumps(json_data), content_type='application/json')

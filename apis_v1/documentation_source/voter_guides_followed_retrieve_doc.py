@@ -57,7 +57,12 @@ def voter_guides_followed_retrieve_doc_template_values(url_root):
                    '     "we_vote_id": string (We Vote ID of the voter guide),\n' \
                    '     "organization_we_vote_id": string (We Vote ID for the org that owns the voter guide),\n' \
                    '     "public_figure_we_vote_id": string (We Vote ID for the person that owns the voter guide),\n' \
-                   '     "voter_guide_image_url": string (We Vote ID for the person that owns the voter guide),\n' \
+                   '     "voter_guide_image_url_large": string ' \
+                   '(We Vote ID for the person that owns the voter guide),\n' \
+                   '     "voter_guide_image_url_medium": string ' \
+                   '(We Vote ID for the person that owns the voter guide),\n' \
+                   '     "voter_guide_image_url_tiny": string ' \
+                   '(We Vote ID for the person that owns the voter guide),\n' \
                    '     "last_updated": string (time in this format %Y-%m-%d %H:%M),\n' \
                    '     "google_civic_election_id": integer,\n' \
                    '     "twitter_description": string,\n' \

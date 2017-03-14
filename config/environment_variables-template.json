@@ -92,7 +92,6 @@
 
   "_comment":                       "stripe test secret key",
   "STRIPE_SECRET_KEY":              "sk_test_mbhNOVVcWquHnhlpanZW3q6A",
-  "STRIPE_URL":                     "https://api-tls12.stripe.com",
 
   "_comment":                       "Image server (Amazon Web Service AWS s3) settings",
   "AWS_ACCESS_KEY_ID":              "",

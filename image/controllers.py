@@ -16,6 +16,8 @@ import wevote_functions.admin
 
 logger = wevote_functions.admin.get_logger(__name__)
 HTTP_OK = 200
+TWITTER = "twitter"
+FACEBOOK = "facebook"
 FACEBOOK_USER_DOES_NOT_EXIST = "facebook user does not exist"
 FACEBOOK_URL_NOT_FOUND = "facebook url not found"
 TWITTER_USER_DOES_NOT_EXIST = "twitter user does not exist"
@@ -119,13 +121,16 @@ def migrate_remote_voter_image_urls_to_local_cache(voter_id):
         if kind_of_image == "kind_of_image_twitter_profile":
             twitter_user, twitter_profile_image_url_https = retrieve_twitter_image_url(
                 voter.twitter_id, kind_of_image_twitter_profile=True)
+            # get original image as by default twitter API return normal 48x48 image
+            twitter_profile_image_url_https = we_vote_image_manager.twitter_profile_image_url_https_original(
+                twitter_profile_image_url_https)
             # If twitter image url not found in TwitterUser table then reaching out to twitter and getting new image
             if not twitter_profile_image_url_https:
                 twitter_profile_image_url_https = retrieve_latest_twitter_image_url(
                     voter.twitter_id, voter.twitter_screen_name, kind_of_image_twitter_profile=True)
                 if not twitter_profile_image_url_https:
                     # new twitter profile image not found
-                    cache_all_kind_of_images_results['cached_twitter_background_image'] = \
+                    cache_all_kind_of_images_results['cached_twitter_profile_image'] = \
                         TWITTER_URL_NOT_FOUND
                     continue
                 is_active_version = True
@@ -1354,12 +1359,192 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
     return results
 
 
-def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_name,
+def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
+                                     twitter_profile_image_url_https=None,
+                                     twitter_profile_background_image_url_https=None,
+                                     twitter_profile_banner_url_https=None,
+                                     voter_id=None, voter_we_vote_id=None,
+                                     candidate_id=None, candidate_we_vote_id=None,
+                                     organization_id=None, organization_we_vote_id=None,
+                                     image_source=None, facebook_user_id=None,
+                                     facebook_profile_image_url_https=None,
+                                     facebook_background_image_url_https=None):
+    """
+    Cache orignial and resized images and return cached urls
+    :param twitter_id:
+    :param twitter_screen_name:
+    :param twitter_profile_image_url_https:
+    :param twitter_profile_background_image_url_https:
+    :param twitter_profile_banner_url_https:
+    :param voter_id:
+    :param voter_we_vote_id:
+    :param candidate_id:
+    :param candidate_we_vote_id:
+    :param organization_id:
+    :param organization_we_vote_id:
+    :param image_source:
+    :param facebook_user_id:
+    :param facebook_profile_image_url_https:
+    :param facebook_background_image_url_https:
+    :return:
+    """
+    cached_twitter_profile_image_url_https = None
+    cached_twitter_profile_background_image_url_https = None
+    cached_twitter_profile_banner_url_https = None
+    cached_facebook_profile_image_url_https = None
+    cached_facebook_background_image_url_https = None
+    we_vote_hosted_profile_image_url_large = None
+    we_vote_hosted_profile_image_url_medium = None
+    we_vote_hosted_profile_image_url_tiny = None
+
+    we_vote_image_manager = WeVoteImageManager()
+    # caching refreshed new images to s3 aws
+    cache_images_results = migrate_latest_remote_image_urls_to_local_cache(
+        voter_id=voter_id, voter_we_vote_id=voter_we_vote_id,
+        candidate_id=candidate_id, candidate_we_vote_id=candidate_we_vote_id,
+        organization_id=organization_id, organization_we_vote_id=organization_we_vote_id,
+        twitter_id=twitter_id, twitter_screen_name=twitter_screen_name,
+        twitter_profile_image_url_https=twitter_profile_image_url_https,
+        twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+        twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+        facebook_user_id=facebook_user_id, facebook_profile_image_url_https=facebook_profile_image_url_https,
+        facebook_background_image_url_https=facebook_background_image_url_https, image_source=image_source)
+
+    # retrieve refreshed cache url
+    if cache_images_results['cached_twitter_profile_image']:
+        cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id,
+            twitter_profile_image_url_https=twitter_profile_image_url_https,
+            kind_of_image_original=True)
+        if cached_we_vote_image_results['success']:
+            cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+            cached_twitter_profile_image_url_https = cached_we_vote_image.we_vote_image_url
+
+            # create resized image and cache it to s3
+            create_resized_image_results = create_resized_image(cached_we_vote_image)
+            # retrieve resized large/medium/tiny version url
+            if create_resized_image_results['cached_large_twitter_profile_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    twitter_profile_image_url_https=twitter_profile_image_url_https,
+                    kind_of_image_large=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_large = cached_resized_we_vote_image.we_vote_image_url
+            if create_resized_image_results['cached_medium_twitter_profile_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    twitter_profile_image_url_https=twitter_profile_image_url_https,
+                    kind_of_image_medium=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_medium = cached_resized_we_vote_image.we_vote_image_url
+            if create_resized_image_results['cached_tiny_twitter_profile_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    twitter_profile_image_url_https=twitter_profile_image_url_https,
+                    kind_of_image_tiny=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
+
+    if cache_images_results['cached_twitter_background_image']:
+        cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id,
+            twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
+            kind_of_image_original=True)
+        if cached_we_vote_image_results['success']:
+            cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+            cached_twitter_profile_background_image_url_https = cached_we_vote_image.we_vote_image_url
+    if cache_images_results['cached_twitter_banner_image']:
+        cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id,
+            twitter_profile_banner_url_https=twitter_profile_banner_url_https,
+            kind_of_image_original=True)
+        if cached_we_vote_image_results['success']:
+            cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+            cached_twitter_profile_banner_url_https = cached_we_vote_image.we_vote_image_url
+
+    if cache_images_results['cached_facebook_profile_image']:
+        cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id,
+            facebook_profile_image_url_https=facebook_profile_image_url_https,
+            kind_of_image_original=True)
+        if cached_we_vote_image_results['success']:
+            cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+            cached_facebook_profile_image_url_https = cached_we_vote_image.we_vote_image_url
+
+            # create resized image and cache it to s3
+            create_resized_image_results = create_resized_image(cached_we_vote_image)
+            # retrieve resized large/medium/tiny version url
+            if create_resized_image_results['cached_large_facebook_profile_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    facebook_profile_image_url_https=facebook_profile_image_url_https,
+                    kind_of_image_large=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_large = cached_resized_we_vote_image.we_vote_image_url
+            if create_resized_image_results['cached_medium_facebook_profile_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    facebook_profile_image_url_https=facebook_profile_image_url_https,
+                    kind_of_image_medium=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_medium = cached_resized_we_vote_image.we_vote_image_url
+            if create_resized_image_results['cached_tiny_facebook_profile_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    facebook_profile_image_url_https=facebook_profile_image_url_https,
+                    kind_of_image_tiny=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
+
+    if cache_images_results['cached_facebook_background_image']:
+        cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id,
+            facebook_background_image_url_https=facebook_background_image_url_https,
+            kind_of_image_original=True)
+        if cached_we_vote_image_results['success']:
+            cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+            cached_facebook_background_image_url_https = cached_we_vote_image.we_vote_image_url
+
+    results = {
+        'cached_twitter_profile_image_url_https':               cached_twitter_profile_image_url_https,
+        'cached_twitter_profile_background_image_url_https':    cached_twitter_profile_background_image_url_https,
+        'cached_twitter_profile_banner_url_https':              cached_twitter_profile_banner_url_https,
+        'cached_facebook_profile_image_url_https':              cached_facebook_profile_image_url_https,
+        'cached_facebook_background_image_url_https':           cached_facebook_background_image_url_https,
+        'we_vote_hosted_profile_image_url_large':               we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium':              we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny':                we_vote_hosted_profile_image_url_tiny
+    }
+    return  results
+
+
+def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_screen_name=None,
                                                     twitter_profile_image_url_https=None,
                                                     twitter_profile_background_image_url_https=None,
                                                     twitter_profile_banner_url_https=None,
+                                                    voter_id=None, voter_we_vote_id=None,
                                                     candidate_id=None, candidate_we_vote_id=None,
-                                                    organization_id=None, organization_we_vote_id=None):
+                                                    organization_id=None, organization_we_vote_id=None,
+                                                    image_source=None, facebook_user_id=None,
+                                                    facebook_profile_image_url_https=None,
+                                                    facebook_background_image_url_https=None):
     """
     Cache all kind of images locally for a candidate or an organization such as profile, background
     :param twitter_id:
@@ -1367,20 +1552,31 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
     :param twitter_profile_image_url_https:
     :param twitter_profile_background_image_url_https:
     :param twitter_profile_banner_url_https:
+    :param voter_id:
+    :param voter_we_vote_id:
     :param candidate_id:
     :param candidate_we_vote_id:
     :param organization_id:
     :param organization_we_vote_id:
+    :param image_source:
+    :param facebook_user_id:
+    :param facebook_profile_image_url_https:
+    :param facebook_background_image_url_https:
     :return:
     """
     cache_all_kind_of_images_results = {
+        'image_source':                     image_source,
+        'voter_id':                         voter_id,
+        'voter_we_vote_id':                 voter_we_vote_id,
         'candidate_id':                     candidate_id,
         'candidate_we_vote_id':             candidate_we_vote_id,
         'organization_id':                  organization_id,
         'organization_we_vote_id':          organization_we_vote_id,
         'cached_twitter_profile_image':     False,
         'cached_twitter_background_image':  False,
-        'cached_twitter_banner_image':      False
+        'cached_twitter_banner_image':      False,
+        'cached_facebook_profile_image':    False,
+        'cached_facebook_background_image': False
     }
     google_civic_election_id = 0
     is_active_version = True
@@ -1388,20 +1584,49 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
 
     if not twitter_profile_image_url_https:
         cache_all_kind_of_images_results['cached_twitter_profile_image'] = TWITTER_URL_NOT_FOUND
+    else:
+        twitter_profile_image_url_https = we_vote_image_manager.twitter_profile_image_url_https_original(
+            twitter_profile_image_url_https)
     if not twitter_profile_background_image_url_https:
         cache_all_kind_of_images_results['cached_twitter_background_image'] = TWITTER_URL_NOT_FOUND
     if not twitter_profile_banner_url_https:
         cache_all_kind_of_images_results['cached_twitter_banner_image'] = TWITTER_URL_NOT_FOUND
+    if not facebook_profile_image_url_https:
+        cache_all_kind_of_images_results['cached_facebook_profile_image'] = FACEBOOK_URL_NOT_FOUND
+    if not facebook_background_image_url_https:
+        cache_all_kind_of_images_results['cached_facebook_background_image'] = FACEBOOK_URL_NOT_FOUND
 
-    if not positive_value_exists(twitter_id):
+    if image_source is TWITTER and not positive_value_exists(twitter_id):
         cache_all_kind_of_images_results = {
+            'image_source':                     image_source,
+            'voter_id':                         voter_id,
+            'voter_we_vote_id':                 voter_we_vote_id,
             'candidate_id':                     candidate_id,
             'candidate_we_vote_id':             candidate_we_vote_id,
             'organization_id':                  organization_id,
             'organization_we_vote_id':          organization_we_vote_id,
             'cached_twitter_profile_image':     TWITTER_USER_DOES_NOT_EXIST,
             'cached_twitter_background_image':  TWITTER_USER_DOES_NOT_EXIST,
-            'cached_twitter_banner_image':      TWITTER_USER_DOES_NOT_EXIST
+            'cached_twitter_banner_image':      TWITTER_USER_DOES_NOT_EXIST,
+            'cached_facebook_profile_image':    False,
+            'cached_facebook_background_image': False
+        }
+        return cache_all_kind_of_images_results
+
+    if image_source is FACEBOOK and not positive_value_exists(facebook_user_id):
+        cache_all_kind_of_images_results = {
+            'image_source':                     image_source,
+            'voter_id':                         voter_id,
+            'voter_we_vote_id':                 voter_we_vote_id,
+            'candidate_id':                     candidate_id,
+            'candidate_we_vote_id':             candidate_we_vote_id,
+            'organization_id':                  organization_id,
+            'organization_we_vote_id':          organization_we_vote_id,
+            'cached_twitter_profile_image':     False,
+            'cached_twitter_background_image':  False,
+            'cached_twitter_banner_image':      False,
+            'cached_facebook_profile_image':    FACEBOOK_USER_DOES_NOT_EXIST,
+            'cached_facebook_background_image': FACEBOOK_USER_DOES_NOT_EXIST
         }
         return cache_all_kind_of_images_results
 
@@ -1409,7 +1634,8 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
         if kind_of_image == "kind_of_image_twitter_profile" and twitter_profile_image_url_https:
             # Get cached profile images and check if this image is already cached or not
             cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 kind_of_image_twitter_profile=True, kind_of_image_original=True)
             this_image_not_cached = True
             for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
@@ -1423,7 +1649,8 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
                 # Image is not cached so caching it
                 cache_image_locally_results = cache_image_locally(
                     google_civic_election_id, twitter_profile_image_url_https,
-                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
                     twitter_id=twitter_id, twitter_screen_name=twitter_screen_name,
                     is_active_version=is_active_version, kind_of_image_twitter_profile=True,
                     kind_of_image_original=True)
@@ -1431,14 +1658,15 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
                     cache_image_locally_results['success']
                 # set active version False for other master images for same candidate/organization
                 set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
-                    twitter_profile_image_url_https=twitter_profile_image_url_https,
+                    twitter_profile_image_url_https=twitter_profile_image_url_https, voter_we_vote_id=voter_we_vote_id,
                     candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
                     kind_of_image_twitter_profile=True)
 
         elif kind_of_image == "kind_of_image_twitter_background" and twitter_profile_background_image_url_https:
             # Get cached profile images and check if this image is already cached or not
             cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 kind_of_image_twitter_background=True, kind_of_image_original=True)
             this_image_not_cached = True
             for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
@@ -1453,7 +1681,8 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
                 # Image is not cached so caching it
                 cache_image_locally_results = cache_image_locally(
                     google_civic_election_id, twitter_profile_background_image_url_https,
-                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
                     twitter_id=twitter_id, twitter_screen_name=twitter_screen_name,
                     is_active_version=is_active_version, kind_of_image_twitter_background=True,
                     kind_of_image_original=True)
@@ -1462,13 +1691,14 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
                 # set active version False for other master images for same candidate/organization
                 set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
                     twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
-                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
-                    kind_of_image_twitter_background=True)
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id, kind_of_image_twitter_background=True)
 
         elif kind_of_image == "kind_of_image_twitter_banner" and twitter_profile_banner_url_https:
             # Get cached profile images and check if this image is already cached or not
             cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
-                candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
                 kind_of_image_twitter_banner=True, kind_of_image_original=True)
             this_image_not_cached = True
             for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
@@ -1482,14 +1712,75 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id, twitter_screen_n
                 # Image is not cached so caching it
                 cache_image_locally_results = cache_image_locally(
                     google_civic_election_id, twitter_profile_banner_url_https,
-                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
                     twitter_id=twitter_id, twitter_screen_name=twitter_screen_name,
                     is_active_version=is_active_version, kind_of_image_twitter_banner=True, kind_of_image_original=True)
                 cache_all_kind_of_images_results['cached_twitter_banner_image'] = cache_image_locally_results['success']
                 # set active version False for other master images for same candidate/organization
                 set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
                     twitter_profile_banner_url_https=twitter_profile_banner_url_https,
-                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
-                    kind_of_image_twitter_banner=True)
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id, kind_of_image_twitter_banner=True)
+
+        elif kind_of_image == "kind_of_image_facebook_profile" and facebook_profile_image_url_https:
+            # Get cached profile images and check if this image is already cached or not
+            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
+                kind_of_image_facebook_profile=True, kind_of_image_original=True)
+            this_image_not_cached = True
+            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
+                # If image is already cached then no need to cache it again
+                if facebook_profile_image_url_https == cached_we_vote_image.facebook_profile_image_url_https:
+                    cache_all_kind_of_images_results['cached_facebook_profile_image'] = IMAGE_ALREADY_CACHED
+                    this_image_not_cached = False
+                    break
+
+            if this_image_not_cached:
+                # Image is not cached so caching it
+                cache_image_locally_results = cache_image_locally(
+                    google_civic_election_id, facebook_profile_image_url_https,
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id, facebook_user_id=facebook_user_id,
+                    is_active_version=is_active_version, kind_of_image_facebook_profile=True,
+                    kind_of_image_original=True)
+                cache_all_kind_of_images_results['cached_facebook_profile_image'] = \
+                    cache_image_locally_results['success']
+                # set active version False for other master images for same candidate/organization
+                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
+                    facebook_profile_image_url_https=facebook_profile_image_url_https,
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id, kind_of_image_facebook_profile=True)
+
+        elif kind_of_image == "kind_of_image_facebook_background" and facebook_background_image_url_https:
+            # Get cached profile images and check if this image is already cached or not
+            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
+                kind_of_image_facebook_background=True, kind_of_image_original=True)
+            this_image_not_cached = True
+            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
+                # If image is already cached then no need to cache it again
+                if facebook_background_image_url_https == cached_we_vote_image.facebook_background_image_url_https:
+                    cache_all_kind_of_images_results['cached_facebook_background_image'] = IMAGE_ALREADY_CACHED
+                    this_image_not_cached = False
+                    break
+
+            if this_image_not_cached:
+                # Image is not cached so caching it
+                cache_image_locally_results = cache_image_locally(
+                    google_civic_election_id, facebook_background_image_url_https,
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id, facebook_user_id=facebook_user_id,
+                    is_active_version=is_active_version, kind_of_image_facebook_background=True,
+                    kind_of_image_original=True)
+                cache_all_kind_of_images_results['cached_facebook_background_image'] = \
+                    cache_image_locally_results['success']
+                # set active version False for other master images for same candidate/organization
+                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
+                    facebook_background_image_url_https=facebook_background_image_url_https,
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id, kind_of_image_facebook_background=True)
 
     return cache_all_kind_of_images_results

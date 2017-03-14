@@ -105,7 +105,15 @@ class FacebookUser(models.Model):
         verbose_name="User's birthday from Facebook", max_length=255, null=True, blank=True, unique=False)
     facebook_user_last_name = models.CharField(
         verbose_name="User's last_name from Facebook", max_length=255, null=True, blank=True, unique=False)
-    facebook_user_cover_source = models.URLField(verbose_name='url of cover image from facebook', blank=True, null=True)
+    facebook_background_image_url_https = models.URLField(verbose_name='url of cover image from facebook', blank=True, null=True)
+    facebook_profile_image_url_https = models.URLField(verbose_name='url of cover image from facebook',
+                                                      blank=True, null=True)
+    we_vote_hosted_profile_image_url_large = models.URLField(verbose_name='we vote hosted large image url',
+                                                             blank=True, null=True)
+    we_vote_hosted_profile_image_url_medium = models.URLField(verbose_name='we vote hosted medium image url',
+                                                              blank=True, null=True)
+    we_vote_hosted_profile_image_url_tiny = models.URLField(verbose_name='we vote hosted tiny image url',
+                                                            blank=True, null=True)
     facebook_user_about = models.CharField(
         verbose_name="User's About from Facebook", max_length=255, null=True, blank=True, unique=False)
     facebook_user_is_verified = models.BooleanField(
@@ -240,41 +248,69 @@ class FacebookManager(models.Model):
             }
         return results
 
-    def create_or_update_facebook_user(self, facebook_user_entry):
+    def create_or_update_facebook_user(self, facebook_user_id, facebook_user_first_name, facebook_user_middle_name,
+                                       facebook_user_last_name, facebook_user_name=None, facebook_user_location_id=None,
+                                       facebook_user_location_name=None, facebook_user_gender=None,
+                                       facebook_user_birthday=None, facebook_user_cover_source=None,
+                                       facebook_user_profile_url_https=None, facebook_user_about=None,
+                                       facebook_user_is_verified=False, facebook_user_friend_total_count=None,
+                                       we_vote_hosted_profile_image_url_large=None,
+                                       we_vote_hosted_profile_image_url_medium=None,
+                                       we_vote_hosted_profile_image_url_tiny=None):
         """
         We use this subroutine to create or update FacebookUser table with my friends details.
-        :param facebook_users:
+        :param facebook_user_id:
+        :param facebook_user_name:
+        :param facebook_user_first_name:
+        :param facebook_user_middle_name:
+        :param facebook_user_last_name:
+        :param facebook_user_location_id:
+        :param facebook_user_location_name:
+        :param facebook_user_gender:
+        :param facebook_user_birthday:
+        :param facebook_user_cover_source:
+        :param facebook_user_profile_url_https:
+        :param facebook_user_about:
+        :param facebook_user_is_verified:
+        :param facebook_user_friend_total_count:
+        :param we_vote_hosted_profile_image_url_large:
+        :param we_vote_hosted_profile_image_url_medium:
+        :param we_vote_hosted_profile_image_url_tiny
         :return:
         """
         facebook_user = FacebookUser()
         try:
             # for facebook_user_entry in facebook_users:
             facebook_user, created = FacebookUser.objects.update_or_create(
-                facebook_user_id=facebook_user_entry['facebook_user_id'],
+                facebook_user_id=facebook_user_id,
                 defaults={
-                    'facebook_user_id':                 facebook_user_entry['facebook_user_id'],
-                    'facebook_user_name':               facebook_user_entry['facebook_user_name'],
-                    'facebook_user_first_name':         facebook_user_entry['facebook_user_first_name'],
-                    'facebook_user_middle_name':        facebook_user_entry['facebook_user_middle_name'],
-                    'facebook_user_last_name':          facebook_user_entry['facebook_user_last_name'],
-                    'facebook_user_location_id':        facebook_user_entry['facebook_user_location_id'],
-                    'facebook_user_location_name':      facebook_user_entry['facebook_user_location_name'],
-                    'facebook_user_gender':             facebook_user_entry['facebook_user_gender'],
-                    'facebook_user_birthday':           facebook_user_entry['facebook_user_birthday'],
-                    'facebook_user_cover_source':       facebook_user_entry['facebook_user_cover_source'],
-                    'facebook_user_about':              facebook_user_entry['facebook_user_about'],
-                    'facebook_user_is_verified':        facebook_user_entry['facebook_user_is_verified'],
-                    'facebook_user_friend_total_count': facebook_user_entry['facebook_user_friend_total_count'],
+                    'facebook_user_id':                         facebook_user_id,
+                    'facebook_user_name':                       facebook_user_name,
+                    'facebook_user_first_name':                 facebook_user_first_name,
+                    'facebook_user_middle_name':                facebook_user_middle_name,
+                    'facebook_user_last_name':                  facebook_user_last_name,
+                    'facebook_user_location_id':                facebook_user_location_id,
+                    'facebook_user_location_name':              facebook_user_location_name,
+                    'facebook_user_gender':                     facebook_user_gender,
+                    'facebook_user_birthday':                   facebook_user_birthday,
+                    'facebook_background_image_url_https':      facebook_user_cover_source,
+                    'facebook_profile_image_url_https':         facebook_user_profile_url_https,
+                    'facebook_user_about':                      facebook_user_about,
+                    'facebook_user_is_verified':                facebook_user_is_verified,
+                    'facebook_user_friend_total_count':         facebook_user_friend_total_count,
+                    'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
+                    'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+                    'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny
                 }
             )
             facebook_user_saved = True
             success = True
-            status = "FACEBOOK_USERS_CREATED"
+            status = " FACEBOOK_USER_CREATED"
         except Exception as e:
             facebook_user_saved = False
             facebook_user = FacebookUser()
             success = False
-            status = "FACEBOOK_USERS_NOT_CREATED"
+            status = " FACEBOOK_USER_NOT_CREATED"
         results = {
             'success':              success,
             'status':               status,
@@ -282,6 +318,52 @@ class FacebookManager(models.Model):
             'facebook_user':        facebook_user,
             }
         return results
+
+    def update_facebook_user_details(self, facebook_user,
+                                     cached_facebook_profile_image_url_https=False,
+                                     cached_facebook_background_image_url_https=False,
+                                     we_vote_hosted_profile_image_url_large=False,
+                                     we_vote_hosted_profile_image_url_medium=False,
+                                     we_vote_hosted_profile_image_url_tiny=False):
+        """
+        Update an facebook user entry with cached image urls
+        """
+        success = False
+        status = "ENTERING_UPDATE_FACEBOOK_USER_DETAILS"
+        values_changed = False
+
+        if facebook_user:
+            if positive_value_exists(cached_facebook_profile_image_url_https):
+                facebook_user.facebook_profile_image_url_https = cached_facebook_profile_image_url_https
+                values_changed = True
+            if positive_value_exists(cached_facebook_background_image_url_https):
+                facebook_user.facebook_background_image_url_https = cached_facebook_background_image_url_https
+                values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_large):
+                facebook_user.we_vote_hosted_profile_image_url_large = we_vote_hosted_profile_image_url_large
+                values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_medium):
+                facebook_user.we_vote_hosted_profile_image_url_medium = we_vote_hosted_profile_image_url_medium
+                values_changed = True
+            if positive_value_exists(we_vote_hosted_profile_image_url_tiny):
+                facebook_user.we_vote_hosted_profile_image_url_tiny = we_vote_hosted_profile_image_url_tiny
+                values_changed = True
+
+            if values_changed:
+                facebook_user.save()
+                success = True
+                status = "SAVED_FACEBOOK_USER_DETAILS"
+            else:
+                success = True
+                status = "NO_CHANGES_SAVED_TO_FACBOOK_USER_DETAILS"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'facebook_user':             facebook_user,
+        }
+        return results
+
 
     def retrieve_facebook_auth_response(self, voter_device_id):
         """
@@ -475,6 +557,9 @@ class FacebookManager(models.Model):
         facebook_friend_dict['facebook_user_cover_source'] = (facebook_friend_api_details_entry.get('cover').get(
             'source') if 'cover' in facebook_friend_api_details_entry.keys() and facebook_friend_api_details_entry.get(
             'cover', {}).get('source', {}) else "")
+        facebook_friend_dict['facebook_user_profile_url_https'] = (facebook_friend_api_details_entry.get('picture').get(
+            'data').get('url') if 'picture' in facebook_friend_api_details_entry.keys() and
+            facebook_friend_api_details_entry.get('picture', {}).get('data', {}).get('url', {}) else "")
         facebook_friend_dict['facebook_user_about'] = (facebook_friend_api_details_entry.get('about')
                                                        if 'about' in facebook_friend_api_details_entry.keys() else "")
         facebook_friend_dict['facebook_user_is_verified'] = (facebook_friend_api_details_entry.get('is_verified')
@@ -494,8 +579,9 @@ class FacebookManager(models.Model):
         facebook_users_list = []
         # required fields need to be updated in FacebookUser table
         facebook_api_fields = "id, name, first_name, middle_name, last_name, location{id, name}, gender, birthday, " \
-                              "cover{source}, about, is_verified, friends{id, name, first_name, middle_name, " \
-                              "last_name, location{id, name}, gender, birthday, cover{source}, about, is_verified} "
+                              "cover{source}, picture.width(200).height(200){url}, about, is_verified, " \
+                              "friends{id, name, first_name, middle_name, last_name, location{id, name}, gender, " \
+                              "birthday, cover{source}, picture.width(200).height(200){url}, about, is_verified} "
         auth_response_results = self.retrieve_facebook_auth_response(voter_device_id)
         if not auth_response_results['facebook_auth_response_found']:
             error_results = {
@@ -510,7 +596,8 @@ class FacebookManager(models.Model):
         try:
             facebook_graph = facebook.GraphAPI(facebook_auth_response.facebook_access_token, version='2.7')
             facebook_friends_api_details = facebook_graph.get_connections(id=facebook_auth_response.facebook_user_id,
-                                                                 connection_name="friends", fields=facebook_api_fields)
+                                                                          connection_name="friends",
+                                                                          fields=facebook_api_fields)
 
             # graph.get_connections returns three dictionary keys i.e. data, paging, summary,
             # here data key contains list of friends with the given fields values and paging contains cursors positions
@@ -638,7 +725,7 @@ class FacebookManager(models.Model):
         results = {
             'success':                     success,
             'status':                      status,
-            'facebook_user_found':          facebook_user_found,
-            'facebook_user':                facebook_user,
+            'facebook_user_found':         facebook_user_found,
+            'facebook_user':               facebook_user,
         }
         return results

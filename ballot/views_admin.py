@@ -4,7 +4,6 @@
 
 from .controllers import ballot_items_import_from_master_server, ballot_returned_import_from_master_server
 from .models import BallotItem, BallotItemListManager, BallotItemManager, BallotReturned, BallotReturnedManager
-from .serializers import BallotItemSerializer, BallotReturnedSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaignListManager
 from config.base import get_environment_variable
@@ -19,12 +18,12 @@ from election.models import Election, ElectionManager
 from geopy.geocoders import get_geocoder_for_service
 from measure.models import ContestMeasure, ContestMeasureManager
 from polling_location.models import PollingLocation, PollingLocationManager
-from rest_framework.views import APIView
-from rest_framework.response import Response
 import time
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
+from django.http import HttpResponse
+import json
 
 GOOGLE_MAPS_API_KEY = get_environment_variable("GOOGLE_MAPS_API_KEY")
 
@@ -32,10 +31,12 @@ logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
-class BallotItemsSyncOutView(APIView):
-    def get(self, request, format=None):
-        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+# class BallotItemsSyncOutView(APIView):
+#     def get(self, request, format=None):
+def ballot_items_sync_out_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
+    try:
         ballot_item_list = BallotItem.objects.all()
         # We only want BallotItem values associated with polling locations
         ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
@@ -43,15 +44,33 @@ class BallotItemsSyncOutView(APIView):
         if positive_value_exists(google_civic_election_id):
             ballot_item_list = ballot_item_list.filter(google_civic_election_id=google_civic_election_id)
 
-        serializer = BallotItemSerializer(ballot_item_list, many=True)
-        return Response(serializer.data)
+        # serializer = BallotItemSerializer(ballot_item_list, many=True)
+        # return Response(serializer.data)
+        ballot_item_list_dict = ballot_item_list.values('ballot_item_display_name', 'contest_office_we_vote_id',
+                                                        'contest_measure_we_vote_id', 'google_ballot_placement',
+                                                        'google_civic_election_id', 'local_ballot_order',
+                                                        'measure_subtitle', 'polling_location_we_vote_id')
+        if ballot_item_list_dict:
+            ballot_item_list_json = list(ballot_item_list_dict)
+            return HttpResponse(json.dumps(ballot_item_list_json), content_type='application/json')
+    except Exception as e:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'BALLOT_ITEM_LIST_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 
 # This page does not need to be protected.
-class BallotReturnedSyncOutView(APIView):
-    def get(self, request, format=None):
-        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+# class BallotReturnedSyncOutView(APIView):
+#     def get(self, request, format=None):
+def ballot_returned_sync_out_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
 
+    try:
         ballot_returned_list = BallotReturned.objects.all()
         # We only want BallotReturned values associated with polling locations
         ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
@@ -59,8 +78,25 @@ class BallotReturnedSyncOutView(APIView):
         if positive_value_exists(google_civic_election_id):
             ballot_returned_list = ballot_returned_list.filter(google_civic_election_id=google_civic_election_id)
 
-        serializer = BallotReturnedSerializer(ballot_returned_list, many=True)
-        return Response(serializer.data)
+        # serializer = BallotReturnedSerializer(ballot_returned_list, many=True)
+        # return Response(serializer.data)
+        ballot_returned_list_dict = ballot_returned_list.values('election_date', 'election_description_text',
+                                                                'google_civic_election_id', 'latitude', 'longitude',
+                                                                'normalized_line1', 'normalized_line2',
+                                                                'normalized_city', 'normalized_state',
+                                                                'normalized_zip', 'polling_location_we_vote_id',
+                                                                'text_for_map_search')
+        if ballot_returned_list:
+            ballot_returned_list_json = list(ballot_returned_list_dict)
+            return HttpResponse(json.dumps(ballot_returned_list_json), content_type='application/json')
+    except Exception as e:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'BALLOT_RETURNED_LIST_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required

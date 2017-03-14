@@ -21,6 +21,9 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
     twitter_description = ''
     twitter_followers_count = ''
     twitter_photo_url = ''
+    we_vote_hosted_profile_image_url_large = ''
+    we_vote_hosted_profile_image_url_medium = ''
+    we_vote_hosted_profile_image_url_tiny = ''
     twitter_user_website = ''
     twitter_name = ''
 
@@ -79,6 +82,9 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
             twitter_description = one_organization.twitter_description
             twitter_followers_count = one_organization.twitter_followers_count
             twitter_photo_url = one_organization.twitter_profile_image_url_https
+            we_vote_hosted_profile_image_url_large = one_organization.we_vote_hosted_profile_image_url_large
+            we_vote_hosted_profile_image_url_medium = one_organization.we_vote_hosted_profile_image_url_medium
+            we_vote_hosted_profile_image_url_tiny = one_organization.we_vote_hosted_profile_image_url_tiny
             twitter_user_website = one_organization.organization_website
             twitter_name = one_organization.twitter_name
 
@@ -94,24 +100,30 @@ def twitter_identity_retrieve_for_api(twitter_handle, voter_device_id=''):
             twitter_description = twitter_user.twitter_description
             twitter_followers_count = twitter_user.twitter_followers_count
             twitter_photo_url = twitter_user.twitter_profile_image_url_https
+            we_vote_hosted_profile_image_url_large = twitter_user.we_vote_hosted_profile_image_url_large
+            we_vote_hosted_profile_image_url_medium = twitter_user.we_vote_hosted_profile_image_url_medium
+            we_vote_hosted_profile_image_url_tiny = twitter_user.we_vote_hosted_profile_image_url_tiny
             twitter_user_website = twitter_user.twitter_url
             twitter_name = twitter_user.twitter_name
             kind_of_owner = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
             status = "TWITTER_HANDLE_NOT_FOUND_IN_WE_VOTE"
 
     results = {
-        'status':                   status,
-        'success':                  success,
-        'twitter_handle':           twitter_handle,
-        'kind_of_owner':            kind_of_owner,
-        'owner_found':              owner_found,
-        'owner_we_vote_id':         owner_we_vote_id,
-        'owner_id':                 owner_id,
-        'google_civic_election_id': google_civic_election_id,
-        'twitter_description':      twitter_description,
-        'twitter_followers_count':  twitter_followers_count,
-        'twitter_photo_url':        twitter_photo_url,
-        'twitter_user_website':     twitter_user_website,
-        'twitter_name':             twitter_name,
+        'status':                                   status,
+        'success':                                  success,
+        'twitter_handle':                           twitter_handle,
+        'kind_of_owner':                            kind_of_owner,
+        'owner_found':                              owner_found,
+        'owner_we_vote_id':                         owner_we_vote_id,
+        'owner_id':                                 owner_id,
+        'google_civic_election_id':                 google_civic_election_id,
+        'twitter_description':                      twitter_description,
+        'twitter_followers_count':                  twitter_followers_count,
+        'twitter_photo_url':                        twitter_photo_url,
+        'we_vote_hosted_profile_image_url_large':   we_vote_hosted_profile_image_url_large,
+        'we_vote_hosted_profile_image_url_medium':  we_vote_hosted_profile_image_url_medium,
+        'we_vote_hosted_profile_image_url_tiny':    we_vote_hosted_profile_image_url_tiny,
+        'twitter_user_website':                     twitter_user_website,
+        'twitter_name':                             twitter_name,
     }
     return results

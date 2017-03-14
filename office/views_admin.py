@@ -4,7 +4,6 @@
 
 from .controllers import offices_import_from_master_server
 from .models import ContestOffice
-from .serializers import ContestOfficeSerializer
 from admin_tools.views import redirect_to_sign_in_page
 from candidate.models import CandidateCampaign, fetch_candidate_count_for_office
 from django.http import HttpResponseRedirect
@@ -18,30 +17,50 @@ from exception.models import handle_record_found_more_than_one_exception,\
     handle_record_not_found_exception, handle_record_not_saved_exception
 from office.models import ContestOfficeListManager
 from position.models import OPPOSE, PositionListManager, SUPPORT
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from voter.models import voter_has_authority
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists, STATE_CODE_MAP
-
+from django.http import HttpResponse
+import json
 
 logger = wevote_functions.admin.get_logger(__name__)
 
 
 # This page does not need to be protected.
 # NOTE: @login_required() throws an error. Needs to be figured out if we ever want to secure this page.
-class OfficesSyncOutView(APIView):
-    def get(self, request, format=None):
-        google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-        state_code = request.GET.get('state_code', '')
+# class OfficesSyncOutView(APIView):
+#     def get(self, request, format=None):
+def offices_sync_out_view(request):
+    google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
 
+    try:
         contest_office_list = ContestOffice.objects.all()
         if positive_value_exists(google_civic_election_id):
             contest_office_list = contest_office_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
             contest_office_list = contest_office_list.filter(state_code__iexact=state_code)
-        serializer = ContestOfficeSerializer(contest_office_list, many=True)
-        return Response(serializer.data)
+        # serializer = ContestOfficeSerializer(contest_office_list, many=True)
+        # return Response(serializer.data)
+        # get the data using values_list
+        contest_office_list_dict = contest_office_list.values('we_vote_id', 'office_name', 'google_civic_election_id',
+                                                              'ocd_division_id', 'maplight_id', 'ballotpedia_id',
+                                                              'wikipedia_id', 'number_voting_for', 'number_elected',
+                                                              'state_code', 'primary_party', 'district_name',
+                                                              'district_scope', 'district_id', 'contest_level0',
+                                                              'contest_level1', 'contest_level2',
+                                                              'electorate_specifications', 'special', 'state_code')
+        if contest_office_list_dict:
+            contest_office_list_json = list(contest_office_list_dict)
+            return HttpResponse(json.dumps(contest_office_list_json), content_type='application/json')
+    except ContestOffice.DoesNotExist:
+        pass
+
+    json_data = {
+        'success': False,
+        'status': 'CONTEST_OFFICE_MISSING'
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
 @login_required

@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^politician_match_this_election/', views_admin.candidate_politician_match_for_this_election_view,
         name='candidate_politician_match_for_this_election'),
     url(r'^edit_process/$', views_admin.candidate_edit_process_view, name='candidate_edit_process'),
-    url(r'^export/', views_admin.CandidatesSyncOutView.as_view(), name='candidates_export'),
+    # url(r'^export/', views_admin.CandidatesSyncOutView.as_view(), name='candidates_export'),
     url(r'^delete/', views_admin.candidate_delete_process_view, name='candidate_delete_process'),
     url(r'^politician_match/', views_admin.candidate_politician_match_view, name='candidate_politician_match'),
     url(r'^import/$',

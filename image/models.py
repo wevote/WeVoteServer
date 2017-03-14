@@ -290,7 +290,7 @@ class WeVoteImageManager(models.Model):
         }
         return results
 
-    def set_active_version_false_for_other_images(self, candidate_we_vote_id=None,
+    def set_active_version_false_for_other_images(self, voter_we_vote_id=None, candidate_we_vote_id=None,
                                                   organization_we_vote_id=None, twitter_profile_image_url_https=None,
                                                   twitter_profile_background_image_url_https=None,
                                                   twitter_profile_banner_url_https=None,
@@ -320,6 +320,7 @@ class WeVoteImageManager(models.Model):
         try:
             we_vote_image_list = WeVoteImage.objects.all()
             we_vote_image_list = we_vote_image_list.filter(
+                voter_we_vote_id=voter_we_vote_id,
                 candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
                 is_active_version=True, kind_of_image_twitter_profile=kind_of_image_twitter_profile,
                 kind_of_image_twitter_background=kind_of_image_twitter_background,

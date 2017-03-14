@@ -61,7 +61,9 @@ def friend_list_doc_template_values(url_root):
                    '   [\n' \
                    '     "voter_we_vote_id": string,\n' \
                    '     "voter_display_name": string,\n' \
-                   '     "voter_photo_url": string,\n' \
+                   '     "voter_photo_url_large": string,\n' \
+                   '     "voter_photo_url_medium": string,\n' \
+                   '     "voter_photo_url_tiny": string,\n' \
                    '     "voter_twitter_handle": string,\n' \
                    '     "voter_twitter_description": string,\n' \
                    '     "voter_twitter_followers_count": number,\n' \
