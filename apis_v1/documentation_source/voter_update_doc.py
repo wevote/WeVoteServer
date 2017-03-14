@@ -83,6 +83,9 @@ def voter_update_doc_template_values(url_root):
                    '  "voter_updated": boolean (did the voter address save happen?),\n' \
                    '  "facebook_profile_image_url_https": string,\n' \
                    '  "twitter_profile_image_url_https": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_large": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_medium": string,\n' \
+                   '  "we_vote_hosted_profile_image_url_tiny": string,\n' \
                    '}'
 
     template_values = {

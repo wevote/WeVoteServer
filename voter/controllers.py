@@ -1,7 +1,7 @@
 # voter/controllers.py
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
-
+from image.controllers import cache_original_and_resized_image, TWITTER, FACEBOOK
 from .models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, Voter, VoterAddressManager, \
     VoterDeviceLinkManager, VoterManager
 from django.http import HttpResponse
@@ -555,8 +555,22 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 }
                 return error_results
 
+        # Cache original and resized images
+        cache_results = cache_original_and_resized_image(
+            voter_we_vote_id=voter.we_vote_id,
+            facebook_user_id=facebook_auth_response.facebook_user_id,
+            facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
+            image_source=FACEBOOK)
+        cached_facebook_profile_image_url_https = cache_results['cached_facebook_profile_image_url_https']
+        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
         # Update the facebook photo
-        save_facebook_results = voter_manager.save_facebook_user_values(facebook_owner_voter, facebook_auth_response)
+        save_facebook_results = voter_manager.save_facebook_user_values(
+            facebook_owner_voter, facebook_auth_response, cached_facebook_profile_image_url_https,
+            we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny)
         status += " " + save_facebook_results['status']
         facebook_owner_voter = save_facebook_results['voter']
 
@@ -665,9 +679,23 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
                 }
                 return error_results
 
+        # Cache original and resized images
+        cache_results = cache_original_and_resized_image(
+            voter_we_vote_id=voter.we_vote_id,
+            twitter_id=twitter_auth_response.twitter_id,
+            twitter_screen_name=twitter_auth_response.twitter_screen_name,
+            twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,
+            image_source=TWITTER)
+        cached_twitter_profile_image_url_https = cache_results['cached_twitter_profile_image_url_https']
+        we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+        we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+        we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+
         # Update the Twitter photo
         save_twitter_results = voter_manager.save_twitter_user_values_from_twitter_auth_response(
-            twitter_owner_voter, twitter_auth_response)
+            twitter_owner_voter, twitter_auth_response, cached_twitter_profile_image_url_https,
+            we_vote_hosted_profile_image_url_large, we_vote_hosted_profile_image_url_medium,
+            we_vote_hosted_profile_image_url_tiny)
         status += " " + save_twitter_results['status']
         twitter_owner_voter = save_twitter_results['voter']
 
