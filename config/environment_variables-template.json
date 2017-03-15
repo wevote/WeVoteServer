@@ -90,6 +90,9 @@
   "_comment":                       "django secret key",
   "SECRET_KEY":                     "REALLYANYTHINGYOUWANT",
 
+  "_comment":                       "stripe test secret key",
+  "STRIPE_SECRET_KEY":              "",
+
   "_comment":                       "Image server (Amazon Web Service AWS s3) settings",
   "AWS_ACCESS_KEY_ID":              "",
   "AWS_SECRET_ACCESS_KEY":          "",

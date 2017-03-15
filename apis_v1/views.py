@@ -14,6 +14,7 @@ from ballot.controllers import ballot_item_options_retrieve_for_api, choose_elec
 from candidate.controllers import candidate_retrieve_for_api, candidates_retrieve_for_api
 from config.base import get_environment_variable
 from django.http import HttpResponse, HttpResponseRedirect
+from donate.controllers import donation_with_stripe_for_api
 from email_outbound.controllers import voter_email_address_save_for_api, voter_email_address_retrieve_for_api, \
     voter_email_address_sign_in_for_api, voter_email_address_verify_for_api
 from follow.controllers import organization_suggestion_tasks_for_api
@@ -63,8 +64,8 @@ from twitter.controllers import twitter_identity_retrieve_for_api
 from urllib.parse import quote
 from voter.controllers import voter_address_retrieve_for_api, voter_create_for_api, voter_merge_two_accounts_for_api, \
     voter_photo_save_for_api, voter_retrieve_for_api, voter_retrieve_list_for_api, voter_sign_out_for_api
-from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, VoterAddress, VoterAddressManager, \
-    VoterDeviceLink, VoterDeviceLinkManager, voter_has_authority, VoterManager
+from voter.models import BALLOT_ADDRESS, fetch_voter_id_from_voter_device_link, fetch_voter_we_vote_id_from_voter_device_link, \
+    VoterAddress, VoterAddressManager, VoterDeviceLink, VoterDeviceLinkManager, voter_has_authority, VoterManager
 from voter.serializers import VoterSerializer
 from voter_guide.controllers import voter_guide_possibility_retrieve_for_api, voter_guide_possibility_save_for_api, \
     voter_guides_followed_retrieve_for_api, voter_guides_ignored_retrieve_for_api, \
@@ -73,7 +74,6 @@ from voter_guide.models import ORGANIZATION, PUBLIC_FIGURE
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_bool, convert_to_int, generate_voter_device_id, get_voter_device_id, \
     is_voter_device_id_valid, positive_value_exists
-
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -160,6 +160,42 @@ def device_id_generate_view(request):  # deviceIdGenerate
         'status': status,
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+
+def donation_with_stripe_view(request): #donationWithStripe
+    """
+    Make a charge with a stripe token
+    :type request: object
+    :param request:
+    :return:
+    """
+
+    token = request.POST.get('token')
+    # TODO add email - go over with Dale
+
+    voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
+
+    if positive_value_exists(voter_device_id):
+        voter_we_vote_id = fetch_voter_we_vote_id_from_voter_device_link(voter_device_id)
+
+    if positive_value_exists(token):
+        results = donation_with_stripe_for_api(token, voter_we_vote_id)
+
+        json_data = {
+            'status': results['status'],
+            'success': results['success'],
+            'charge_id': results['charge_id'],
+            'customer_id': results['customer_id']
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+    else:
+        json_data = {
+            'status': "TOKEN_MISSING",
+            'success': False,
+        }
+        return HttpResponse(json.dumps(json_data), content_type='application/json')
+
 
 
 def facebook_friends_action_view(request):  # facebookFriendsActions

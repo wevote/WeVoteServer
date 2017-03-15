@@ -1448,6 +1448,18 @@ def fetch_voter_we_vote_id_from_voter_id(voter_id):
         return voter.we_vote_id
     return ""
 
+def fetch_voter_we_vote_id_from_voter_device_link(voter_device_id):
+    voter_device_link_manager = VoterDeviceLinkManager()
+    results = voter_device_link_manager.retrieve_voter_device_link_from_voter_device_id(voter_device_id)
+    if results['voter_device_link_found']:
+        voter_device_link = results['voter_device_link']
+        voter_id = voter_device_link.voter_id
+        voter_manager = VoterManager()
+        results = voter_manager.retrieve_voter_by_id(voter_id)
+        if results['voter_found']:
+            voter = results['voter']
+            return voter.we_vote_id
+        return ""
 
 def retrieve_voter_authority(request):
     voter_api_device_id = get_voter_api_device_id(request)

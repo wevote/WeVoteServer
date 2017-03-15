@@ -83,6 +83,7 @@ INSTALLED_APPS = (
     'bookmark',
     'candidate',
     'config',
+    'donate',
     'election',
     'email_outbound',
     'exception',
