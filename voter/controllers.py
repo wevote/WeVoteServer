@@ -1005,6 +1005,13 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
 
 def voter_photo_save_for_api(voter_device_id, facebook_profile_image_url_https, facebook_photo_variable_exists):
+    """
+    voterPhotoSave - this API is deprecated. Please do not extend.
+    :param voter_device_id:
+    :param facebook_profile_image_url_https:
+    :param facebook_photo_variable_exists:
+    :return:
+    """
     facebook_profile_image_url_https = facebook_profile_image_url_https.strip()
 
     device_id_results = is_voter_device_id_valid(voter_device_id)
