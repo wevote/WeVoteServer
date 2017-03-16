@@ -20,11 +20,13 @@ def organizations_followed_retrieve_doc_template_values(url_root):
         },
     ]
     optional_query_parameter_list = [
-        # {
-        #     'name':         '',
-        #     'value':        '',  # boolean, integer, long, string
-        #     'description':  '',
-        # },
+        {
+            'name':         'auto_followed_from_twitter_suggestion',
+            'value':        'boolean',  # boolean, integer, long, string
+            'description':  'True default retrieve auto followed organizations.'
+                            'If False, retrieve all organizations followed by voter'
+                            '(includes twitter auto followed organizations)',
+        },
     ]
 
     potential_status_codes_list = [
@@ -43,7 +45,7 @@ def organizations_followed_retrieve_doc_template_values(url_root):
     ]
 
     try_now_link_variables_dict = {
-        # 'organization_we_vote_id': 'wv85org1',
+        'auto_followed_from_twitter_suggestion': 'False',
     }
 
     # Changes made here should also be made in organizations_retrieve
@@ -72,7 +74,9 @@ def organizations_followed_retrieve_doc_template_values(url_root):
         'api_name': 'organizationsFollowedRetrieve',
         'api_slug': 'organizationsFollowedRetrieve',
         'api_introduction':
-            "",
+            "A list of all organizations followed by this voter includes automatically followed from twitter. "
+            "(Or show the organizations this voter is following automatically from twitter only "
+            "if auto_followed_from_twitter_suggestion is True.)",
         'try_now_link': 'apis_v1:organizationsFollowedRetrieveView',
         'try_now_link_variables_dict': try_now_link_variables_dict,
         'url_root': url_root,

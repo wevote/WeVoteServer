@@ -325,12 +325,14 @@ def organization_follow_all(voter_device_id, organization_id, organization_we_vo
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0):
+def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_retrieve=0,
+                                            auto_followed_from_twitter_suggestion=False):
     """
     Return a list of the organizations followed. See also voter_guides_followed_retrieve_for_api, which starts with
     organizations followed, but returns data as a list of voter guides.
     :param voter_device_id:
     :param maximum_number_to_retrieve:
+    :param auto_followed_from_twitter_suggestion:
     :return:
     """
     if not positive_value_exists(voter_device_id):
@@ -352,7 +354,7 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
-    results = retrieve_organizations_followed(voter_id)
+    results = retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggestion)
     status = results['status']
     organizations_for_api = []
     if results['organization_list_found']:
@@ -372,6 +374,9 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
                 'twitter_followers_count':
                     organization.twitter_followers_count if positive_value_exists(
                         organization.twitter_followers_count) else 0,
+                'twitter_description':
+                    organization.organization_description
+                    if positive_value_exists(organization.organization_description) else '',
                 'organization_email':
                     organization.organization_email if positive_value_exists(organization.organization_email) else '',
                 'organization_facebook': organization.organization_facebook
@@ -402,6 +407,7 @@ def organizations_followed_retrieve_for_api(voter_device_id, maximum_number_to_r
         'success': success,
         'voter_device_id': voter_device_id,
         'organization_list': organizations_for_api,
+        'auto_followed_from_twitter_suggestion': auto_followed_from_twitter_suggestion
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
@@ -1053,13 +1059,14 @@ def organization_search_for_api(organization_name, organization_twitter_handle, 
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-def retrieve_organizations_followed(voter_id):
+def retrieve_organizations_followed(voter_id, auto_followed_from_twitter_suggestion=False):
     organization_list_found = False
     organization_list = []
 
     follow_organization_list_manager = FollowOrganizationList()
     organization_ids_followed_by_voter = \
-        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(voter_id)
+        follow_organization_list_manager.retrieve_follow_organization_by_voter_id_simple_id_array(
+            voter_id, auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
 
     organization_list_manager = OrganizationListManager()
     results = organization_list_manager.retrieve_organizations_by_id_list(organization_ids_followed_by_voter)

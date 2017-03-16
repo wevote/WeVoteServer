@@ -367,7 +367,7 @@ class FollowOrganizationList(models.Model):
         follow_organization_list = self.retrieve_follow_organization_by_voter_id(voter_id)
         return len(follow_organization_list)
 
-    def retrieve_follow_organization_by_voter_id(self, voter_id):
+    def retrieve_follow_organization_by_voter_id(self, voter_id, auto_followed_from_twitter_suggestion=False):
         # Retrieve a list of follow_organization entries for this voter
         follow_organization_list_found = False
         following_status = FOLLOWING
@@ -376,6 +376,9 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = FollowOrganization.objects.all()
             follow_organization_list = follow_organization_list.filter(voter_id=voter_id)
             follow_organization_list = follow_organization_list.filter(following_status=following_status)
+            if auto_followed_from_twitter_suggestion:
+                follow_organization_list = follow_organization_list.filter(
+                    auto_followed_from_twitter_suggestion=auto_followed_from_twitter_suggestion)
             if len(follow_organization_list):
                 follow_organization_list_found = True
         except Exception as e:
@@ -407,10 +410,12 @@ class FollowOrganizationList(models.Model):
             follow_organization_list = {}
             return follow_organization_list
 
-    def retrieve_follow_organization_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False):
+    def retrieve_follow_organization_by_voter_id_simple_id_array(self, voter_id, return_we_vote_id=False,
+                                                                 auto_followed_from_twitter_suggestion=False):
         follow_organization_list_manager = FollowOrganizationList()
         follow_organization_list = \
-            follow_organization_list_manager.retrieve_follow_organization_by_voter_id(voter_id)
+            follow_organization_list_manager.retrieve_follow_organization_by_voter_id(
+                voter_id, auto_followed_from_twitter_suggestion)
         follow_organization_list_simple_array = []
         if len(follow_organization_list):
             for follow_organization in follow_organization_list:

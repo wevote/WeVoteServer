@@ -572,8 +572,11 @@ def organization_suggestion_tasks_view(request):
 def organizations_followed_retrieve_api_view(request):
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     maximum_number_to_retrieve = get_maximum_number_to_retrieve_from_request(request)
+    auto_followed_from_twitter_suggestion = request.GET.get('auto_followed_from_twitter_suggestion', False)
     return organizations_followed_retrieve_for_api(voter_device_id=voter_device_id,
-                                                   maximum_number_to_retrieve=maximum_number_to_retrieve)
+                                                   maximum_number_to_retrieve=maximum_number_to_retrieve,
+                                                   auto_followed_from_twitter_suggestion=
+                                                   auto_followed_from_twitter_suggestion)
 
 
 def get_maximum_number_to_retrieve_from_request(request):
