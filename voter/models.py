@@ -751,6 +751,13 @@ class VoterManager(BaseUserManager):
         return results
 
     def update_voter_photos(self, voter_id, facebook_profile_image_url_https, facebook_photo_variable_exists):
+        """
+        Used by voterPhotoSave - this function is deprecated. Please do not extend.
+        :param voter_id:
+        :param facebook_profile_image_url_https:
+        :param facebook_photo_variable_exists:
+        :return:
+        """
         results = self.retrieve_voter(voter_id)
 
         if results['voter_found']:
