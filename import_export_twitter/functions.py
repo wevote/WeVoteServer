@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from config.base import get_environment_variable
+from exception.models import handle_exception
 import tweepy
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
@@ -35,9 +36,10 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle):
         success = True
         status = 'TWITTER_RETRIEVE_SUCCESSFUL'
         twitter_handle_found = True
-    except tweepy.RateLimitError:
+    except tweepy.RateLimitError as rate_limit_error:
         success = False
         status = 'TWITTER_RATE_LIMIT_ERROR'
+        handle_exception(rate_limit_error, logger=logger, exception_message=status)
     except tweepy.error.TweepError as error_instance:
         success = False
         status = ''
@@ -45,6 +47,7 @@ def retrieve_twitter_user_info(twitter_user_id, twitter_handle):
         for error_dict in error_tuple:
             for one_error in error_dict:
                 status += '[' + one_error['message'] + '] '
+        handle_exception(error_instance, logger=logger, exception_message=status)
 
     results = {
         'status':               status,

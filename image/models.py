@@ -5,7 +5,8 @@
 from config.base import get_environment_variable
 from datetime import date
 from django.db import models
-from exception.models import handle_record_found_more_than_one_exception
+from exception.models import handle_record_found_more_than_one_exception, handle_exception, \
+    handle_record_not_saved_exception, handle_record_not_deleted_exception
 from PIL import Image
 from urllib.request import urlretrieve
 from urllib.error import HTTPError
@@ -121,6 +122,7 @@ class WeVoteImageManager(models.Model):
             we_vote_image_saved = False
             success = False
             status = "WE_VOTE_IMAGE_NOT_CREATED"
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'success':                      success,
@@ -143,6 +145,7 @@ class WeVoteImageManager(models.Model):
         except Exception as e:
             success = False
             status = "WE_VOTE_IMAGE_NOT_DELETED"
+            handle_record_not_deleted_exception(e, logger=logger, exception_message_optional=status)
 
         results = {
             'success':  success,
@@ -182,6 +185,7 @@ class WeVoteImageManager(models.Model):
         except Exception as e:
             status = "UNABLE_TO_SAVE_WE_VOE_IMAGE_FACEBOOK_INFO"
             success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
         results = {
             'status':           status,
@@ -207,6 +211,7 @@ class WeVoteImageManager(models.Model):
         except Exception as e:
             status = "UNABLE_TO_SAVE_WE_VOE_IMAGE_OTHER_SOURCE_INFO"
             success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
         results = {
             'status':           status,
@@ -251,6 +256,7 @@ class WeVoteImageManager(models.Model):
         except Exception as e:
             status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_TWITTER_INFO"
             success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
         results = {
             'status':           status,
@@ -282,6 +288,7 @@ class WeVoteImageManager(models.Model):
         except Exception as e:
             status = "UNABLE_TO_SAVE_WE_VOTE_IMAGE_AWS_INFO"
             success = False
+            handle_record_not_saved_exception(e, logger=logger, exception_message_optional=status)
 
         results = {
             'status':           status,
@@ -344,6 +351,7 @@ class WeVoteImageManager(models.Model):
         except Exception as e:
             status = "UNABLE_TO_SET_ACTIVE_VERSION_FALSE_FOR_OTHER_IMAGES"
             success = False
+            handle_exception(e, logger=logger, exception_message=status)
 
         results = {
             'status':   status,
@@ -430,6 +438,8 @@ class WeVoteImageManager(models.Model):
             status += " FAILED_TO RETRIEVE_CACHED_WE_VOTE_IMAGE_LIST "
             success = False
             we_vote_image_list_found = False
+            handle_exception(e, logger=logger, exception_message=status)
+
         results = {
             'success':                  success,
             'status':                   status,
@@ -493,6 +503,8 @@ class WeVoteImageManager(models.Model):
             success = False
         except WeVoteImage.DoesNotExist as e:
             success = True
+            exception_message = "retrieve_we_vote_image_from_url failed"
+            handle_exception(e, logger=logger, exception_message=exception_message)
 
         results = {
             'success':                  success,
@@ -538,20 +550,22 @@ class WeVoteImageManager(models.Model):
             if len(we_vote_image_list):
                 success = True
                 we_vote_image_list_found = True
-                status += ' CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+                status += ' CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED_FROM_URL '
             else:
                 success = True
                 we_vote_image_list_found = False
-                status += ' NO_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+                status += ' NO_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED_FROM_URL '
 
         except WeVoteImage.DoesNotExist as e:
             status += " WE_VOTE_IMAGE_DOES_NOT_EXIST "
             success = True
             we_vote_image_list_found = False
         except Exception as e:
-            status += " FAILED_TO RETRIEVE_CACHED_WE_VOTE_IMAGE_LIST "
+            status += " FAILED_TO RETRIEVE_CACHED_WE_VOTE_IMAGE_LIST_FROM_URL "
             success = False
             we_vote_image_list_found = False
+            handle_exception(e, logger=logger, exception_message=status)
+
         results = {
             'success':                  success,
             'status':                   status,
@@ -619,6 +633,8 @@ class WeVoteImageManager(models.Model):
             status += " FAILED_TO RETRIEVE_CACHED_WE_VOTE_IMAGE_LIST "
             success = False
             we_vote_image_list_found = False
+            handle_exception(e, logger=logger, exception_message=status)
+
         results = {
             'success':                  success,
             'status':                   status,
@@ -675,20 +691,22 @@ class WeVoteImageManager(models.Model):
             if len(we_vote_image_list):
                 success = True
                 we_vote_image_list_found = True
-                status += ' TODAY_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+                status += ' TODAYS_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
             else:
                 success = True
                 we_vote_image_list_found = False
-                status += ' NO_TODAY_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
+                status += ' NO_TODAYS_CACHED_WE_VOTE_IMAGE_LIST_RETRIEVED '
 
         except WeVoteImage.DoesNotExist as e:
             status += " WE_VOTE_IMAGE_DOES_NOT_EXIST "
             success = True
             we_vote_image_list_found = False
         except Exception as e:
-            status += " FAILED_TO RETRIEVE_TODAY_CACHED_WE_VOTE_IMAGE_LIST "
+            status += " FAILED_TO RETRIEVE_TODAYS_CACHED_WE_VOTE_IMAGE_LIST "
             success = False
             we_vote_image_list_found = False
+            handle_exception(e, logger=logger, exception_message=status)
+
         results = {
             'success':                  success,
             'status':                   status,
@@ -713,6 +731,8 @@ class WeVoteImageManager(models.Model):
             resized_image_created = True
         except Exception as e:
             resized_image_created = False
+            exception_message = "resize_we_vote_master_image failed"
+            handle_exception(e, logger=logger, exception_message=exception_message)
 
         return resized_image_created
 
@@ -729,8 +749,12 @@ class WeVoteImageManager(models.Model):
             image_stored = True
         except HTTPError as error:  # something wrong with url
             image_stored = False
+            exception_message = "store_image_locally failed because of http error"
+            handle_exception(error, logger=logger, exception_message=exception_message)
         except Exception as e:
             image_stored = False
+            exception_message = "store_image_locally failed"
+            handle_exception(e, logger=logger, exception_message=exception_message)
 
         return image_stored
 
@@ -753,6 +777,8 @@ class WeVoteImageManager(models.Model):
             image_stored_to_aws = True
         except Exception as e:
             image_stored_to_aws = False
+            exception_message = "store_image_to_aws failed"
+            handle_exception(e, logger=logger, exception_message=exception_message)
 
         return image_stored_to_aws
 
@@ -771,5 +797,7 @@ class WeVoteImageManager(models.Model):
             image_retrieved_from_aws = True
         except Exception as e:
             image_retrieved_from_aws = False
+            exception_message = "retrieve_image_from_aws failed"
+            handle_exception(e, logger=logger, exception_message=exception_message)
 
         return image_retrieved_from_aws
