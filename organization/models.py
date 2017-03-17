@@ -995,7 +995,7 @@ class OrganizationListManager(models.Manager):
             success = True
         except Exception as e:
             status = 'retrieve_organizations_by_id_list: Unable to retrieve organizations from db. ' \
-                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+                     '{error} [type: {error_type}]'.format(error=e, error_type=type(e))
             success = False
 
         results = {
