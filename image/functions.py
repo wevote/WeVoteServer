@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from exception.models import handle_exception
 from io import BytesIO
 from PIL import Image
 from urllib.request import Request, urlopen
@@ -27,6 +28,9 @@ def analyze_remote_url(image_url_https):
             image_url_valid = True
     except Exception as e:
         image_url_valid = False
+        exception_message = "analyze_remote_url: image url {image_url_https} is not valid."\
+            .format(image_url_https=image_url_https)
+        handle_exception(e, logger=logger, exception_message=exception_message)
 
     if image_url_valid:
         response = requests.get(image_url_https)
