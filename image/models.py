@@ -504,7 +504,6 @@ class WeVoteImageManager(models.Model):
         except WeVoteImage.DoesNotExist as e:
             success = True
             exception_message = "retrieve_we_vote_image_from_url failed"
-            handle_exception(e, logger=logger, exception_message=exception_message)
 
         results = {
             'success':                  success,
