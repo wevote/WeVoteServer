@@ -35,10 +35,12 @@ urlpatterns = [
     url(r'^bookmark/', include('bookmark.urls', namespace="bookmark")),
     url(r'^c/', include('candidate.urls', namespace="candidate")),
     url(r'^e/', include('election.urls', namespace="election")),
+    url(r'^electoral_district/', include('electoral_district.urls', namespace="electoral_district")),
     url(r'^follow/', include('follow.urls', namespace="follow")),
     url(r'^health/', views.health_view),  # A simple health check to make sure the site is running
     url(r'^image/', include ('image.urls', namespace="image")),
     url(r'^import_export_batches/', include('import_export_batches.urls', namespace="import_export_batches")),
+    url(r'^import_export_ctcl/', include('import_export_ctcl.urls', namespace="import_export_ctcl")),
     url(r'^import_export_google_civic/', include(
         'import_export_google_civic.urls', namespace="import_export_google_civic")),
     url(r'^import_export_maplight/', include('import_export_maplight.urls', namespace="import_export_maplight")),

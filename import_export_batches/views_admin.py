@@ -133,8 +133,17 @@ def batch_list_process_view(request):
 
         if positive_value_exists(import_batch_button):  # If the button was pressed...
             batch_manager = BatchManager()
-            results = batch_manager.create_batch(batch_uri, kind_of_batch, google_civic_election_id,
-                                                 organization_we_vote_id)
+
+            # check file type
+            filetype = batch_manager.find_file_type(batch_uri)
+            if "XML" in filetype:
+                # file is XML
+                # Retrieve the VIP data from XML
+                results = batch_manager.create_batch_vip_xml(batch_uri, kind_of_batch, google_civic_election_id,
+                                                    organization_we_vote_id)
+            else:
+                results = batch_manager.create_batch(batch_uri, kind_of_batch, google_civic_election_id,
+                                                     organization_we_vote_id)
             if results['batch_saved']:
                 messages.add_message(request, messages.INFO, 'Import batch for {election_name} election saved.'
                                                              ''.format(election_name=election.election_name))

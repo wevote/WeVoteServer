@@ -1,152 +1,197 @@
-<Candidate id="can1">
-    <BallotName>
-        <Text language="en">Dan Travieso</Text>
-    </BallotName>
+<?xml version="1.0" encoding="utf-8"?>
+<VipObject schemaVersion="5.1">
+    <Candidate id="can1">
+        <BallotName>
+            <Text language="en">Dan Travieso</Text>
+        </BallotName>
+        <ExternalIdentifiers>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>ctcl-uuid</OtherType>
+                <Value>196d0838-7fbf-43f8-82ec-6f865bef0b44</Value>
+            </ExternalIdentifier>
+        </ExternalIdentifiers>
+        <PartyId>par1</PartyId>
+        <PersonId>per774</PersonId>
+    </Candidate>
+    <CandidateContest id="cc1">
+        <BallotSelectionIds>cs1 cs2</BallotSelectionIds>
+        <ElectoralDistrictId>ed102785</ElectoralDistrictId>
+        <ExternalIdentifiers>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>ctcl-uuid</OtherType>
+                <Value>037da66d-7bf1-41c2-a2e4-32ea3075b33f</Value>
+            </ExternalIdentifier>
+        </ExternalIdentifiers>
+        <Name>NC State Senator</Name>
+        <NumberElected>1</NumberElected>
+        <OfficeIds>off1</OfficeIds>
+        <VotesAllowed>1</VotesAllowed>
+    </CandidateContest>
+    <CandidateSelection id="cs1">
+        <CandidateIds>can1</CandidateIds>
+    </CandidateSelection>
+    <ElectoralDistrict id="ed109">
+        <ExternalIdentifiers>
+            <ExternalIdentifier>
+                <Type>ocd-id</Type>
+                <Value>ocd-division/country:us/district:dc</Value>
+            </ExternalIdentifier>
+        </ExternalIdentifiers>
+        <Name>District of Columbia</Name>
+        <Type>state</Type>
+    </ElectoralDistrict>
+    <Office id="off1">
+        <Description>
+            <Text language="en">Member of the upper body of the state's legislative branch, which has the power to write and pass state laws</Text>
+        </Description>
+        <ElectoralDistrictId>ed102785</ElectoralDistrictId>
+        <ExternalIdentifiers>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>ctcl-uuid</OtherType>
+                <Value>91ea6483-0a01-41d9-b9a6-5de4fbbc8d39</Value>
+            </ExternalIdentifier>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>jurisdiction-name</OtherType>
+                <Value>North Carolina</Value>
+            </ExternalIdentifier>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>office-category</OtherType>
+                <Value>State Senator</Value>
+            </ExternalIdentifier>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>office-government-body</OtherType>
+                <Value>NC State Senate</Value>
+            </ExternalIdentifier>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>jurisdiction-ocd-id</OtherType>
+                <Value>ocd-division/country:us/state:nc</Value>
+            </ExternalIdentifier>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>office-level</OtherType>
+                <Value>administrativeArea1</Value>
+            </ExternalIdentifier>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>office-role</OtherType>
+                <Value>legislatorUpperBody</Value>
+            </ExternalIdentifier>
+        </ExternalIdentifiers>
+        <IsPartisan>true</IsPartisan>
+        <Name>
+            <Text language="en">NC State Senator</Text>
+        </Name>
+    </Office>
+    <Party id="par1">
+        <Abbreviation>R</Abbreviation>
+        <ExternalIdentifiers>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>ctcl-uuid</OtherType>
+                <Value>55f8b865-0148-40ae-894f-169472584e4e</Value>
+            </ExternalIdentifier>
+        </ExternalIdentifiers>
+        <Name label="Republican Party">
+            <Text language="en">Republican Party</Text>
+        </Name>
+    </Party>
+    <Person id="per1">
+        <ExternalIdentifiers>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>ctcl-uuid</OtherType>
+                <Value>52d4b1d7-0959-489d-8508-dc76e763775c</Value>
+            </ExternalIdentifier>
+        </ExternalIdentifiers>
+        <FirstName>Katie</FirstName>
+        <FullName>
+            <Text language="en">Katie McGinty</Text>
+        </FullName>
+        <LastName>McGinty</LastName>
+    </Person>
+    <BallotMeasureContest id="bmc5544">
+        <BallotSelectionIds>bms16018 bms16019</BallotSelectionIds>
+        <BallotSubTitle>
+            <Text language="en">Amending The Mandatory Judicial Retirement Age</Text>
+        </BallotSubTitle>
+        <BallotTitle>
+            <Text language="en">Proposed Constitutional Amendment 1</Text>
+        </BallotTitle>
+        <ElectoralDistrictId>ed143126</ElectoralDistrictId>
+        <ExternalIdentifiers>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>tag</OtherType>
+                <Value>Government Process</Value>
+            </ExternalIdentifier>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>tag</OtherType>
+                <Value>Courts</Value>
+            </ExternalIdentifier>
+            <ExternalIdentifier>
+                <Type>other</Type>
+                <OtherType>tag</OtherType>
+                <Value>Judges</Value>
+            </ExternalIdentifier>
+        </ExternalIdentifiers>
+        <Name>PA: Proposed Constitutional Amendment 1: Amending The Mandatory Judicial Retirement Age</Name>
+        <FullText>
+            <Text language="en">Shall the Pennsylvania Constitution be amended to require that justices of the Supreme Court, judges, and magisterial district judges be retired on the last day of the calendar year in which they attain the age of 75 years?</Text>
+        </FullText>
+    </BallotMeasureContest>
+    <BallotMeasureSelection id="bms16018">
+        <Selection>
+            <Text language="en">Yes</Text>
+        </Selection>
+    </BallotMeasureSelection>
+    <ElectoralDistrict id="ed202094">
+        <ExternalIdentifiers>
+            <ExternalIdentifier>
+                <Type>ocd-id</Type>
+                <Value>ocd-division/country:us/state:ia/county:cedar/place:fairfield</Value>
+          </ExternalIdentifier>
+        </ExternalIdentifiers>
+        <Name>Fairfield township</Name>
+        <Type>township</Type>
+    </ElectoralDistrict>
+    <ElectoralDistrict id="ed210645">
+        <ExternalIdentifiers>
+            <ExternalIdentifier>
+                <Type>ocd-id</Type>
+                <Value>ocd-division/country:us/state:ks/district_court:5/district:1</Value>
+            </ExternalIdentifier>
+        </ExternalIdentifiers>
+        <Name>KS Judicial District 5 Division 1</Name>
+        <Number>1</Number>
+        <Type>judicial</Type>
+    </ElectoralDistrict>
+     <ElectoralDistrict id="ed199153">
     <ExternalIdentifiers>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>ctcl-uuid</OtherType>
-            <Value>196d0838-7fbf-43f8-82ec-6f865bef0b44</Value>
-        </ExternalIdentifier>
+      <ExternalIdentifier>
+        <Type>ocd-id</Type>
+        <Value>ocd-division/country:us/state:or/place:grant_pass/ward:1</Value>
+      </ExternalIdentifier>
     </ExternalIdentifiers>
-    <PartyId>par1</PartyId>
-    <PersonId>per774</PersonId>
-</Candidate>
-<CandidateContest id="cc1">
-    <BallotSelectionIds>cs1 cs2</BallotSelectionIds>
-    <ElectoralDistrictId>ed102785</ElectoralDistrictId>
+    <Name>Grant Pass City Council Ward 1</Name>
+    <Number>1</Number>
+    <Type>ward</Type>
+  </ElectoralDistrict>
+  <ElectoralDistrict id="ed81339">
     <ExternalIdentifiers>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>ctcl-uuid</OtherType>
-            <Value>037da66d-7bf1-41c2-a2e4-32ea3075b33f</Value>
-        </ExternalIdentifier>
+      <ExternalIdentifier>
+        <Type>ocd-id</Type>
+        <Value>ocd-division/country:us/state:mn/county:blue_earth/place:butternut_valley</Value>
+      </ExternalIdentifier>
     </ExternalIdentifiers>
-    <Name>NC State Senator</Name>
-    <NumberElected>1</NumberElected>
-    <OfficeIds>off1</OfficeIds>
-    <VotesAllowed>1</VotesAllowed>
-</CandidateContest>
-<CandidateSelection id="cs1">
-    <CandidateIds>can1</CandidateIds>
-</CandidateSelection>
-<ElectoralDistrict id="ed109">
-    <ExternalIdentifiers>
-        <ExternalIdentifier>
-            <Type>ocd-id</Type>
-            <Value>ocd-division/country:us/district:dc</Value>
-        </ExternalIdentifier>
-    </ExternalIdentifiers>
-    <Name>District of Columbia</Name>
-    <Type>state</Type>
-</ElectoralDistrict>
-<Office id="off1">
-    <Description>
-        <Text language="en">Member of the upper body of the state's legislative branch, which has the power to write and pass state laws</Text>
-    </Description>
-    <ElectoralDistrictId>ed102785</ElectoralDistrictId>
-    <ExternalIdentifiers>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>ctcl-uuid</OtherType>
-            <Value>91ea6483-0a01-41d9-b9a6-5de4fbbc8d39</Value>
-        </ExternalIdentifier>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>jurisdiction-name</OtherType>
-            <Value>North Carolina</Value>
-        </ExternalIdentifier>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>office-category</OtherType>
-            <Value>State Senator</Value>
-        </ExternalIdentifier>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>office-government-body</OtherType>
-            <Value>NC State Senate</Value>
-        </ExternalIdentifier>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>jurisdiction-ocd-id</OtherType>
-            <Value>ocd-division/country:us/state:nc</Value>
-        </ExternalIdentifier>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>office-level</OtherType>
-            <Value>administrativeArea1</Value>
-        </ExternalIdentifier>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>office-role</OtherType>
-            <Value>legislatorUpperBody</Value>
-        </ExternalIdentifier>
-    </ExternalIdentifiers>
-    <IsPartisan>true</IsPartisan>
-    <Name>
-        <Text language="en">NC State Senator</Text>
-    </Name>
-</Office>
-<Party id="par1">
-    <Abbreviation>R</Abbreviation>
-    <ExternalIdentifiers>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>ctcl-uuid</OtherType>
-            <Value>55f8b865-0148-40ae-894f-169472584e4e</Value>
-        </ExternalIdentifier>
-    </ExternalIdentifiers>
-    <Name label="Republican Party">
-        <Text language="en">Republican Party</Text>
-    </Name>
-</Party>
-<Person id="per1">
-    <ExternalIdentifiers>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>ctcl-uuid</OtherType>
-            <Value>52d4b1d7-0959-489d-8508-dc76e763775c</Value>
-        </ExternalIdentifier>
-    </ExternalIdentifiers>
-    <FirstName>Katie</FirstName>
-    <FullName>
-        <Text language="en">Katie McGinty</Text>
-    </FullName>
-    <LastName>McGinty</LastName>
-</Person>
-<BallotMeasureContest id="bmc5544">
-    <BallotSelectionIds>bms16018 bms16019</BallotSelectionIds>
-    <BallotSubTitle>
-        <Text language="en">Amending The Mandatory Judicial Retirement Age</Text>
-    </BallotSubTitle>
-    <BallotTitle>
-        <Text language="en">Proposed Constitutional Amendment 1</Text>
-    </BallotTitle>
-    <ElectoralDistrictId>ed143126</ElectoralDistrictId>
-    <ExternalIdentifiers>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>tag</OtherType>
-            <Value>Government Process</Value>
-        </ExternalIdentifier>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>tag</OtherType>
-            <Value>Courts</Value>
-        </ExternalIdentifier>
-        <ExternalIdentifier>
-            <Type>other</Type>
-            <OtherType>tag</OtherType>
-            <Value>Judges</Value>
-        </ExternalIdentifier>
-    </ExternalIdentifiers>
-    <Name>PA: Proposed Constitutional Amendment 1: Amending The Mandatory Judicial Retirement Age</Name>
-    <FullText>
-        <Text language="en">Shall the Pennsylvania Constitution be amended to require that justices of the Supreme Court, judges, and magisterial district judges be retired on the last day of the calendar year in which they attain the age of 75 years?</Text>
-    </FullText>
-</BallotMeasureContest>
-<BallotMeasureSelection id="bms16018">
-    <Selection>
-        <Text language="en">Yes</Text>
-    </Selection>
-</BallotMeasureSelection>
+    <Name>Butternut Valley township</Name>
+    <Type>township</Type>
+  </ElectoralDistrict>
+</VipObject>
