@@ -464,7 +464,7 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
                 'image_stored_locally':         False,
                 'image_stored_to_aws':          image_stored_to_aws,
             }
-            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image (we_vote_image)
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
             return error_results
 
         status += " IMAGE_STORED_LOCALLY"
@@ -1108,11 +1108,14 @@ def check_resized_version_exists(voter_we_vote_id=None, candidate_we_vote_id=Non
 
     we_vote_image_list = we_vote_image_list_results['we_vote_image_list']
     for we_vote_image in we_vote_image_list:
-        if we_vote_image.kind_of_image_medium:
+        if we_vote_image.we_vote_image_url is None or we_vote_image.we_vote_image_url == "":
+            # if we_vote_image_url is empty then delete that entry
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+        elif we_vote_image.kind_of_image_medium:
             results['medium_image_version_exists'] = True
-        if we_vote_image.kind_of_image_tiny:
+        elif we_vote_image.kind_of_image_tiny:
             results['tiny_image_version_exists'] = True
-        if we_vote_image.kind_of_image_large:
+        elif we_vote_image.kind_of_image_large:
             results['large_image_version_exists'] = True
 
     return results
@@ -1316,9 +1319,25 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
         we_vote_image_url = "https://{bucket_name}.s3.amazonaws.com/{we_vote_image_file_location}" \
                             "".format(bucket_name=AWS_STORAGE_BUCKET_NAME,
                                       we_vote_image_file_location=we_vote_image_file_location)
-        save_aws_info = we_vote_image_manager.save_we_vote_image_aws_info(we_vote_image, we_vote_image_url,
+        # if we_vote_image_url is not empty then save we_vote_image_wes_info else delete we_vote_image entry
+        if we_vote_image_url is not None and we_vote_image_url != "":
+            save_aws_info = we_vote_image_manager.save_we_vote_image_aws_info(we_vote_image, we_vote_image_url,
                                                                           we_vote_image_file_location,
                                                                           we_vote_parent_image_id, is_active_version)
+        else:
+            status += " WE_VOTE_IMAGE_URL_IS_EMPTY"
+            error_results = {
+                'success':                  success,
+                'status':                   status,
+                'we_vote_image_created':    we_vote_image_created,
+                'image_stored_from_source': image_stored_from_source,
+                'image_stored_locally':     image_stored_locally,
+                'resized_image_created':    resized_image_created,
+                'image_stored_to_aws':      image_stored_to_aws,
+            }
+            delete_we_vote_image_results = we_vote_image_manager.delete_we_vote_image(we_vote_image)
+            return error_results
+
         status += " IMAGE_STORED_TO_AWS " + save_aws_info['status']
         success = save_aws_info['success']
         if not success:
@@ -1485,7 +1504,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
             create_resized_image_results = create_resized_image(cached_we_vote_image)
             # retrieve resized large/medium/tiny version url
             if create_resized_image_results['cached_large_facebook_profile_image']:
-                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
                     voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
                     organization_we_vote_id=organization_we_vote_id,
                     facebook_profile_image_url_https=facebook_profile_image_url_https,
@@ -1494,7 +1513,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
                     cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
                     we_vote_hosted_profile_image_url_large = cached_resized_we_vote_image.we_vote_image_url
             if create_resized_image_results['cached_medium_facebook_profile_image']:
-                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
                     voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
                     organization_we_vote_id=organization_we_vote_id,
                     facebook_profile_image_url_https=facebook_profile_image_url_https,
@@ -1503,7 +1522,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
                     cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
                     we_vote_hosted_profile_image_url_medium = cached_resized_we_vote_image.we_vote_image_url
             if create_resized_image_results['cached_tiny_facebook_profile_image']:
-                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
                     voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
                     organization_we_vote_id=organization_we_vote_id,
                     facebook_profile_image_url_https=facebook_profile_image_url_https,
@@ -1513,7 +1532,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
                     we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
 
     if cache_images_results['cached_facebook_background_image']:
-        cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url (
+        cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
             voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
             organization_we_vote_id=organization_we_vote_id,
             facebook_background_image_url_https=facebook_background_image_url_https,
