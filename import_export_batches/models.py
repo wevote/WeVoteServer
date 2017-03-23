@@ -12,6 +12,13 @@ import urllib.request
 from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
+import urllib
+import xmltodict
+import json
+import magic
+import os
+
+import xml.etree.ElementTree as ET
 
 KIND_OF_BATCH_CHOICES = (
     (MEASURE,           'Measure'),
@@ -445,6 +452,162 @@ class BatchManager(models.Model):
                 return getattr(one_batch_row, one_batch_row_attribute_name)
             index_number += 1
         return ""
+
+    def find_file_type(self, batch_uri):
+        # check for file extension
+        batch_uri = batch_uri.lower()
+        file_extension = batch_uri.split('.')
+        if 'xml' in file_extension:
+            filetype = 'XML'
+        elif 'json' in file_extension:
+            filetype = 'json'
+        elif 'csv' in file_extension:
+            filetype = 'csv'
+        else:
+            # if the filetype is neither xml, json nor csv, get the file type info from magic
+            file = urllib.request.urlopen(batch_uri)
+            filetype = magic.from_buffer(file.read())
+            file.close()
+
+        return filetype
+
+    def create_batch_vip_xml(self, batch_uri, kind_of_batch, google_civic_election_id, organization_we_vote_id):
+        # Retrieve from XML
+        request = urllib.request.urlopen(batch_uri)
+        # xml_data = request.read()
+        # xml_data = xmltodict.parse(xml_data)
+        # # xml_data_list_json = list(xml_data)
+        # structured_json = json.dumps(xml_data)
+
+        xml_tree = ET.parse(request)
+        request.close()
+        xml_root = xml_tree.getroot()
+
+        if xml_root:
+            if kind_of_batch == 'MEASURE':
+                return(self.store_measure_xml(batch_uri,google_civic_election_id, organization_we_vote_id, xml_root))
+
+    def store_measure_xml(self, batch_uri, google_civic_election_id, organization_we_vote_id, xml_root):
+        # Process BallotMeasureContest data
+        number_of_batch_rows = 0
+        first_line = True
+        success = False
+        status = ''
+        limit_for_testing = 5
+
+        # Look for BallotMeasureContest and create the batch_header first. BallotMeasureContest is the direct child node
+        # of VipObject
+        ballot_measure_xml_node = xml_root.findall('BallotMeasureContest')
+        # if ballot_measure_xml_node is not None:
+        for one_ballot_measure in ballot_measure_xml_node:
+            if number_of_batch_rows >= limit_for_testing:
+                break
+
+            # look for relevant child nodes under BallotMeasureContest: id, BallotTitle, BallotSubTitle,
+            # ElectoralDistrictId, other::ctcl-uid
+            ballot_measure_id = one_ballot_measure.attrib['id']
+
+            ballot_measure_subtitle = one_ballot_measure.find('BallotSubTitle/Text')
+            if ballot_measure_subtitle is not None:
+                ballot_measure_subtitle = ballot_measure_subtitle.text
+
+            ballot_measure_title = one_ballot_measure.find('BallotTitle')
+            if ballot_measure_title is not None:
+                ballot_measure_title = one_ballot_measure.find('BallotTitle/Text').text
+
+            electoral_district_id = one_ballot_measure.find('ElectoralDistrictId')
+            if electoral_district_id is not None:
+                electoral_district_id = electoral_district_id.text
+
+            ctcl_uuid = one_ballot_measure.find(
+                "./ExternalIdentifiers/ExternalIdentifier/[OtherType='ctcl-uuid']")
+            if ctcl_uuid is not None:
+                ctcl_uuid = one_ballot_measure.find(
+                    "./ExternalIdentifiers/ExternalIdentifier/[OtherType='ctcl-uuid']/Value").text
+
+            ballot_measure_name = one_ballot_measure.find('Name')
+            if ballot_measure_name is not None:
+                ballot_measure_name = ballot_measure_name.text
+
+            if first_line:
+                first_line = False
+                try:
+                    batch_header = BatchHeader.objects.create(
+                        batch_header_column_000='id',
+                        batch_header_column_001='BallotSubTitle',
+                        batch_header_column_002='BallotTitle',
+                        batch_header_column_003='ElectoralDistrictId',
+                        batch_header_column_004= 'other::ctcl-uuid',
+                        batch_header_column_005='Name',
+                    )
+                    batch_header_id = batch_header.id
+
+                    if positive_value_exists(batch_header_id):
+                        # Save an initial BatchHeaderMap
+                        batch_header_map = BatchHeaderMap.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_000='measure_batch_id',
+                            batch_header_map_001='measure_sub_title',
+                            batch_header_map_002='measure_title',
+                            batch_header_map_003='electoral_district_id',
+                            batch_header_map_004='measure_ctcl_uuid',
+                            batch_header_map_005='measure_name'
+                        )
+                        batch_header_map_id = batch_header_map.id
+                        status += " BATCH_HEADER_MAP_SAVED"
+
+                    if positive_value_exists(batch_header_id) and positive_value_exists(batch_header_map_id):
+                        # Now save the BatchDescription
+                        batch_name = "MEASURE " + google_civic_election_id
+                        batch_description_text = ""
+                        batch_description = BatchDescription.objects.create(
+                            batch_header_id=batch_header_id,
+                            batch_header_map_id=batch_header_map_id,
+                            batch_name=batch_name,
+                            batch_description_text=batch_description_text,
+                            google_civic_election_id=google_civic_election_id,
+                            kind_of_batch='MEASURE',
+                            organization_we_vote_id=organization_we_vote_id,
+                            source_uri=batch_uri,
+                        )
+                        status += " BATCH_DESCRIPTION_SAVED"
+                        success = True
+                except Exception as e:
+                    # Stop trying to save rows -- break out of the for loop
+                    batch_header_id = 0
+                    status += " EXCEPTION_BATCH_HEADER"
+                    break
+            if not positive_value_exists(batch_header_id):
+                break
+
+            # check for measure_id, title OR subtitle or name AND ctcl_uuid
+            if (positive_value_exists(ballot_measure_id) and ctcl_uuid is not None and \
+                    (ballot_measure_subtitle is not None or ballot_measure_title is not None or \
+                                 ballot_measure_name is not None)):
+
+                try:
+                    batch_row = BatchRow.objects.create(
+                        batch_header_id=batch_header_id,
+                        batch_row_000= ballot_measure_id,
+                        batch_row_001=ballot_measure_subtitle,
+                        batch_row_002=ballot_measure_title,
+                        batch_row_003=electoral_district_id,
+                        batch_row_004=ctcl_uuid,
+                        batch_row_005=ballot_measure_name
+                    )
+                    number_of_batch_rows += 1
+                except Exception as e:
+                    # Stop trying to save rows -- break out of the for loop
+                    status += " EXCEPTION_BATCH_ROW"
+                    break
+        results = {
+            'success': success,
+            'status': status,
+            'batch_header_id': batch_header_id,
+            'batch_saved': success,
+            'number_of_batch_rows': number_of_batch_rows,
+        }
+        return results
 
 
 class BatchDescription(models.Model):
