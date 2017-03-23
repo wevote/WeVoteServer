@@ -104,6 +104,12 @@ Now, create a virtual environment within the project directory by typing:
 After Python3 is installed, install pyopenssl and https clients:
  
  `python3 -m pip install pyopenssl pyasn1 ndg-httpsclient`
+ 
+## You will also need libmagic
+
+For mac:
+
+    brew install libmagic
 
 ## Installing Postgres
     

@@ -387,8 +387,7 @@ class VoterGuideManager(models.Manager):
         Update voter_guide entry with details retrieved from Twitter, Facebook, or ???
         """
         success = False
-        status = "ENTERING_UPDATE_VOTER_GUIDE_SOCIAL_MEDIA_STATISTICS"
-        values_changed = False
+        status = ""
         voter_guide = VoterGuide()
 
         if organization:
@@ -398,41 +397,67 @@ class VoterGuideManager(models.Manager):
                 if results['voter_guide_found']:
                     voter_guide = results['voter_guide']
                     if positive_value_exists(voter_guide.id):
-                        if voter_guide.twitter_followers_count != organization.twitter_followers_count:
-                            voter_guide.twitter_followers_count = organization.twitter_followers_count
-                            values_changed = True
-                        if voter_guide.image_url != organization.organization_photo_url():
-                            voter_guide.image_url = organization.organization_photo_url()
-                            values_changed = True
-                        if voter_guide.we_vote_hosted_profile_image_url_large != \
-                                organization.we_vote_hosted_profile_image_url_large:
-                            voter_guide.we_vote_hosted_profile_image_url_large = \
-                                organization.we_vote_hosted_profile_image_url_large
-                            values_changed = True
-                        if voter_guide.we_vote_hosted_profile_image_url_medium != \
-                                organization.we_vote_hosted_profile_image_url_medium:
-                            voter_guide.we_vote_hosted_profile_image_url_medium = \
-                                organization.we_vote_hosted_profile_image_url_medium
-                            values_changed = True
-                        if voter_guide.we_vote_hosted_profile_image_url_tiny != \
-                                organization.we_vote_hosted_profile_image_url_tiny:
-                            voter_guide.we_vote_hosted_profile_image_url_tiny = \
-                                organization.we_vote_hosted_profile_image_url_tiny
-                            values_changed = True
+                        refresh_results = self.refresh_one_voter_guide_from_organization(voter_guide, organization)
+                        if positive_value_exists(refresh_results['values_changed']):
+                            voter_guide = refresh_results['voter_guide']
+                            voter_guide.save()
+                            success = True
+                            status += " SAVED_ORG_TWITTER_DETAILS"
+                        else:
+                            success = True
+                            status = " NO_CHANGES_SAVED_TO_ORG_TWITTER_DETAILS"
 
-            if positive_value_exists(values_changed):
-                voter_guide.save()
-                success = True
-                status = "SAVED_ORG_TWITTER_DETAILS"
-            else:
-                success = True
-                status = "NO_CHANGES_SAVED_TO_ORG_TWITTER_DETAILS"
+                voter_guide_list_manager = VoterGuideListManager()
+                results = voter_guide_list_manager.retrieve_all_voter_guides_for_one_organization(
+                    organization.we_vote_id)
+                if positive_value_exists(results['voter_guide_list_found']):
+                    voter_guide_list = results['voter_guide_list']
+                    for voter_guide in voter_guide_list:
+                        if not positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_large) or \
+                                not positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_medium) or \
+                                not positive_value_exists(voter_guide.we_vote_hosted_profile_image_url_tiny):
+                            refresh_results = self.refresh_one_voter_guide_from_organization(voter_guide, organization)
+                            if positive_value_exists(refresh_results['values_changed']):
+                                voter_guide = refresh_results['voter_guide']
+                                voter_guide.save()
+                                success = True
+                                status += " SAVED_ORG_TWITTER_DETAILS-EARLIER VERSION"
 
         results = {
             'success':                  success,
             'status':                   status,
             'organization':             organization,
             'voter_guide':              voter_guide,
+        }
+        return results
+
+    def refresh_one_voter_guide_from_organization(self, voter_guide, organization):
+        values_changed = False
+        if voter_guide.twitter_followers_count != organization.twitter_followers_count:
+            voter_guide.twitter_followers_count = organization.twitter_followers_count
+            values_changed = True
+        if voter_guide.image_url != organization.organization_photo_url():
+            voter_guide.image_url = organization.organization_photo_url()
+            values_changed = True
+        if voter_guide.we_vote_hosted_profile_image_url_large != \
+                organization.we_vote_hosted_profile_image_url_large:
+            voter_guide.we_vote_hosted_profile_image_url_large = \
+                organization.we_vote_hosted_profile_image_url_large
+            values_changed = True
+        if voter_guide.we_vote_hosted_profile_image_url_medium != \
+                organization.we_vote_hosted_profile_image_url_medium:
+            voter_guide.we_vote_hosted_profile_image_url_medium = \
+                organization.we_vote_hosted_profile_image_url_medium
+            values_changed = True
+        if voter_guide.we_vote_hosted_profile_image_url_tiny != \
+                organization.we_vote_hosted_profile_image_url_tiny:
+            voter_guide.we_vote_hosted_profile_image_url_tiny = \
+                organization.we_vote_hosted_profile_image_url_tiny
+            values_changed = True
+
+        results = {
+            'values_changed':   values_changed,
+            'voter_guide':      voter_guide,
         }
         return results
 
@@ -774,6 +799,47 @@ class VoterGuideListManager(models.Model):
             'status':                       status,
             'voter_guide_list_found':       voter_guide_list_found,
             'voter_guide_list':             voter_guide_list_filtered,
+        }
+        return results
+
+    def retrieve_all_voter_guides_for_one_organization(self, organization_we_vote_id):
+        voter_guide_list = []
+        voter_guide_list_found = False
+
+        if not positive_value_exists(organization_we_vote_id):
+            status = 'NO_VOTER_GUIDES_FOUND_FOR_THIS_ORGANIZATION'
+            success = False
+            results = {
+                'success':                      success,
+                'status':                       status,
+                'voter_guide_list_found':       voter_guide_list_found,
+                'voter_guide_list':             voter_guide_list,
+            }
+            return results
+
+        try:
+            voter_guide_queryset = VoterGuide.objects.all()
+            voter_guide_queryset = voter_guide_queryset.filter(
+                organization_we_vote_id__iexact=organization_we_vote_id)
+            voter_guide_list = voter_guide_queryset
+
+            if len(voter_guide_list):
+                voter_guide_list_found = True
+                status = 'VOTER_GUIDES_FOUND_BY_ORGANIZATION_WE_VOTE_ID'
+            else:
+                status = 'NO_VOTER_GUIDES_FOUND_BY_ORGANIZATION_WE_VOTE_ID'
+            success = True
+        except Exception as e:
+            handle_record_not_found_exception(e, logger=logger)
+            status = 'retrieve_all_voter_guides_for_one_organization: Unable to retrieve voter guides from db. ' \
+                     '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e))
+            success = False
+
+        results = {
+            'success':                      success,
+            'status':                       status,
+            'voter_guide_list_found':       voter_guide_list_found,
+            'voter_guide_list':             voter_guide_list,
         }
         return results
 
