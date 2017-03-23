@@ -152,7 +152,7 @@
     </table>
 
     <p>
-        <a href="{% url 'candidate:candidates_export' %}?format=json" target="_blank" >Export Candidates</a><br />
+        <a href="{% url 'apis_v1:candidatesSyncOutView' %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}&candidate_search={{ candidate_search }}" target="_blank" >Export Candidates</a><br />
     </p>
 
     <p></p>

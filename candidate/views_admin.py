@@ -39,6 +39,7 @@ logger = wevote_functions.admin.get_logger(__name__)
 def candidates_sync_out_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
+    candidate_search = request.GET.get('candidate_search', '')
 
     try:
         candidate_list = CandidateCampaign.objects.all()
@@ -46,8 +47,32 @@ def candidates_sync_out_view(request):
             candidate_list = candidate_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(state_code):
             candidate_list = candidate_list.filter(state_code__iexact=state_code)
-        # serializer = CandidateCampaignSerializer(candidate_list, many=True)
-        # return Response(serializer.data)
+        filters = []
+        if positive_value_exists(candidate_search):
+            new_filter = Q(candidate_name__icontains=candidate_search)
+            filters.append(new_filter)
+
+            new_filter = Q(candidate_twitter_handle__icontains=candidate_search)
+            filters.append(new_filter)
+
+            new_filter = Q(candidate_url__icontains=candidate_search)
+            filters.append(new_filter)
+
+            new_filter = Q(party__icontains=candidate_search)
+            filters.append(new_filter)
+
+            new_filter = Q(we_vote_id__icontains=candidate_search)
+            filters.append(new_filter)
+
+            # Add the first query
+            if len(filters):
+                final_filters = filters.pop()
+
+                # ...and "OR" the remaining items in the list
+                for item in filters:
+                    final_filters |= item
+
+                candidate_list = candidate_list.filter(final_filters)
 
         candidate_list_dict = candidate_list.values('we_vote_id', 'maplight_id', 'vote_smart_id',
                                                     'contest_office_we_vote_id', 'politician_we_vote_id',
