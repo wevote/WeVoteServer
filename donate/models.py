@@ -14,6 +14,7 @@ CURRENCY_CHOICES = ((CURRENCY_USD, 'usd'),
                     (CURRENCY_CAD, 'cad'))
 # Stripes currency support https://support.stripe.com/questions/which-currencies-does-stripe-support
 
+
 class DonateLinkToVoter(models.Model):
     """
     This is a generated table with customer ID's created when a stripe donation is made for the first time
@@ -83,6 +84,8 @@ class DonationFromVoter(models.Model):
                                           unique=False, null=False, blank=False)
     voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=255, unique=False, null=False,
                                         blank=False)
+    # normalized_email_address = models.EmailField(verbose_name='email address', max_length=255, null=False, blank=False,
+    #                                              unique=False)
     donation_amount = models.PositiveIntegerField(verbose_name="donation amount", default=0, null=False)
     donation_date_time = models.DateTimeField(verbose_name="donation timestamp", auto_now=False, auto_now_add=True)
     stripe_card_id = models.CharField(verbose_name="stripe unique credit card id", max_length=255, unique=False,
@@ -117,3 +120,65 @@ class DonationLog(models.Model):
                                                   auto_now_add=True)
     action_result_date_time = models.DateTimeField(verbose_name="action result timestamp", auto_now=False,
                                                    auto_now_add=True)
+
+
+class DonationManager(models.Model):
+
+    def create_donate_link_to_voter(self, stripe_customer_id, voter_we_vote_id):
+
+        new_customer_id_created = False
+
+        # if not voter_we_vote_id:
+        #     success = False
+        #     status = 'MISSING_VOTER_WE_VOTE_ID'
+        # else:
+        try:
+            new_customer_id_created = DonateLinkToVoter.objects.create(
+                stripe_customer_id=stripe_customer_id, voter_we_vote_id=voter_we_vote_id)
+            success = True
+            status = 'STRIPE_CUSTOMER_ID_SAVED'
+        except:
+            success = False
+            status = 'STRIPE_CUSTOMER_ID_NOT_SAVED'
+
+        saved_results = {
+            'success': success,
+            'status': status,
+            'new_stripe_customer_id': new_customer_id_created
+        }
+        return saved_results
+
+    def create_donation_from_voter(self, stripe_customer_id, voter_we_vote_id, donation_amount, normalized_email_address,
+                                   donation_date_time, charge_id, charge_processed_successfully):
+
+        new_donation_from_voter_created = False
+        stripe_card_id = 'tbd'
+        charge_to_be_processed = False
+        charge_cancel_request = False
+        charge_failed_requires_voter_action = False
+        charge_refunded = False
+
+        try:
+            new_donation_from_voter_created = DonationFromVoter.objects.create(stripe_customer_id=stripe_customer_id,
+                                               voter_we_vote_id=voter_we_vote_id,
+                                               # normalized_email_address=normalized_email_address,
+                                               donation_amount=donation_amount, donation_date_time=donation_date_time,
+                                               stripe_card_id=stripe_card_id, charge_id=charge_id,
+                                               charge_to_be_processed=charge_to_be_processed,
+                                               charge_processed_successfully=charge_processed_successfully,
+                                               charge_cancel_request=charge_cancel_request,
+                                               charge_failed_requires_voter_action=charge_failed_requires_voter_action,
+                                               charge_refunded=charge_refunded)
+
+            success = True
+            status = 'STRIPE_DONATION_FROM_VOTER_SAVED'
+        except:
+            success = False
+            status = 'STRIPE_DONATION_FROM_VOTER_NOT_SAVED'
+
+        saved_donation = {
+            'success': success,
+            'status': status,
+            'new_stripe_donation': new_donation_from_voter_created
+        }
+        return saved_donation
