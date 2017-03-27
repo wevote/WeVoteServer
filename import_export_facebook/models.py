@@ -5,7 +5,7 @@
 from django.core.validators import RegexValidator
 from django.db import models
 from email_outbound.models import SEND_STATUS_CHOICES, TO_BE_PROCESSED
-from wevote_functions.functions import generate_random_string, positive_value_exists
+from wevote_functions.functions import generate_random_string, positive_value_exists, convert_to_int
 import facebook
 
 FRIEND_INVITATION_FACEBOOK_TEMPLATE = 'FRIEND_INVITATION_FACEBOOK_TEMPLATE'
@@ -576,7 +576,8 @@ class FacebookManager(models.Model):
         success = False
         status = ''
         facebook_friends_list_found = False
-        facebook_users_list = []
+        facebook_suggested_friends_list = []
+        facebook_friends_list = []
         # required fields need to be updated in FacebookUser table
         facebook_api_fields = "id, name, first_name, middle_name, last_name, location{id, name}, gender, birthday, " \
                               "cover{source}, picture.width(200).height(200){url}, about, is_verified, " \
@@ -585,10 +586,11 @@ class FacebookManager(models.Model):
         auth_response_results = self.retrieve_facebook_auth_response(voter_device_id)
         if not auth_response_results['facebook_auth_response_found']:
             error_results = {
-                'status':                       "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
-                'success':                      success,
-                'facebook_friends_list_found':  facebook_friends_list_found,
-                'facebook_users_list':          facebook_users_list,
+                'status':                           "FACEBOOK_AUTH_RESPONSE_NOT_FOUND",
+                'success':                          success,
+                'facebook_friends_list_found':      facebook_friends_list_found,
+                'facebook_suggested_friends_list':  facebook_suggested_friends_list,
+                'facebook_friends_list':            facebook_friends_list,
             }
             return error_results
 
@@ -614,7 +616,8 @@ class FacebookManager(models.Model):
                     facebook_friend_api_details_entry.get('friends').get('summary').get('total_count')
                     if facebook_friend_api_details_entry.get('friends', {}).get('summary', {}).get('total_count', {})
                     else None)
-                facebook_users_list.append(facebook_friend_dict)
+                if facebook_friend_dict not in facebook_friends_list:
+                    facebook_friends_list.append(facebook_friend_dict)
                 facebook_friends_saved_results = self.create_or_update_facebook_friends_of_me(
                     facebook_auth_response.facebook_user_id, facebook_friend_dict.get('facebook_user_id'))
                 status += ' ' + facebook_friends_saved_results['status']
@@ -626,7 +629,9 @@ class FacebookManager(models.Model):
                         facebook_friends_friend_dict = self.extract_facebook_details_data(
                             facebook_friends_friend_details_entry)
                         facebook_friends_friend_dict['facebook_user_friend_total_count'] = None
-                        facebook_users_list.append(facebook_friends_friend_dict)
+                        if facebook_friends_friend_dict not in facebook_suggested_friends_list:
+                            facebook_suggested_friends_list.append(facebook_friends_friend_dict)
+
 
             success = True
             status += " " + "FACEBOOK_FRIENDS_LIST_FOUND"
@@ -637,10 +642,11 @@ class FacebookManager(models.Model):
             facebook_friends_list_found = False
 
         results = {
-            'success':                      success,
-            'status':                       status,
-            'facebook_friends_list_found':  facebook_friends_list_found,
-            'facebook_users_list':          facebook_users_list,
+            'success':                          success,
+            'status':                           status,
+            'facebook_friends_list_found':      facebook_friends_list_found,
+            'facebook_suggested_friends_list':  facebook_suggested_friends_list,
+            'facebook_friends_list':            facebook_friends_list,
         }
         return results
 
@@ -729,3 +735,17 @@ class FacebookManager(models.Model):
             'facebook_user':               facebook_user,
         }
         return results
+
+    def remove_my_facebook_entry_from_suggested_friends_list(self, facebook_suggested_friends_list, facebook_id_of_me):
+        """
+        Facebook graph API method for friends friend return own user entry thats why removing it from
+        suggested friend list
+        :param facebook_suggested_friends_list:
+        :param facebook_id_of_me:
+        :return:
+        """
+        for facebook_user_entry in facebook_suggested_friends_list:
+            if convert_to_int(facebook_user_entry['facebook_user_id']) == facebook_id_of_me:
+                facebook_suggested_friends_list.remove(facebook_user_entry)
+        return facebook_suggested_friends_list
+

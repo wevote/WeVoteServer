@@ -212,7 +212,8 @@ def facebook_friends_action_view(request):  # facebookFriendsActions
         'voter_device_id':                  voter_device_id,
         'facebook_friend_suggestion_found': results['facebook_friend_suggestion_found'],
         'facebook_suggested_friend_count':  results['facebook_suggested_friend_count'],
-        'facebook_friends_suggested':       results['facebook_friends_suggested'],
+        'facebook_suggested_friends_list':  results['facebook_suggested_friends_list'],
+        'facebook_friends_list':            results['facebook_friends_list']
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

@@ -7,7 +7,7 @@ from datetime import date
 from django.db import models
 from exception.models import handle_record_found_more_than_one_exception, handle_exception, \
     handle_record_not_saved_exception, handle_record_not_deleted_exception
-from PIL import Image
+from PIL import Image, ImageOps
 from urllib.request import urlretrieve
 from urllib.error import HTTPError
 from wevote_functions.functions import convert_to_int, positive_value_exists
@@ -725,7 +725,8 @@ class WeVoteImageManager(models.Model):
         try:
             image_local_path = "/tmp/" + image_local_path
             image = Image.open(image_local_path)
-            image = image.resize((image_width, image_height), Image.ANTIALIAS)
+            # image = image.resize((image_width, image_height), Image.ANTIALIAS)
+            image = ImageOps.fit(image, (image_width, image_height), Image.ANTIALIAS, centering=(0.5, 0.5))
             image.save(image_local_path)
             resized_image_created = True
         except Exception as e:
