@@ -186,7 +186,7 @@ def donation_with_stripe_view(request): #donationWithStripe
         print('view voter_we_vote_id is missing')
 
     if positive_value_exists(token):
-        results = donation_with_stripe_for_api(token, email, donation_amount, monthly_donation, voter_we_vote_id)
+        results = donation_with_stripe_for_api(request, token, email, donation_amount, monthly_donation, voter_we_vote_id)
 
         json_data = {
             'status': results['status'],
@@ -194,7 +194,10 @@ def donation_with_stripe_view(request): #donationWithStripe
             'charge_id': results['charge_id'],
             'customer_id': results['customer_id'],
             'saved_stripe_customer_id': results['saved_stripe_customer_id'],
-            'saved_stripe_donation': results['saved_stripe_donation']
+            'saved_stripe_donation': results['saved_stripe_donation'],
+            'saved_donation_in_log': results['donation_entry_saved'],
+            'monthly_donation': monthly_donation,
+            'monthly_donation_plan_id': results['monthly_donation_plan_id']
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
