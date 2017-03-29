@@ -6,12 +6,11 @@
 from config.base import get_environment_variable
 from datetime import datetime
 from donate.models import DonationManager
-import json
 import stripe
-from wevote_functions.functions import positive_value_exists
 from wevote_functions.functions import get_ip_from_headers, positive_value_exists
 
 stripe.api_key = get_environment_variable("STRIPE_SECRET_KEY")
+
 
 # TODO set up currency option in webapp
 def donation_with_stripe_for_api(request, token, email, donation_amount, monthly_donation, voter_we_vote_id):
@@ -24,10 +23,11 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     donation_date_time = datetime.today()
     charge_id = ''
     stripe_customer_id = ''
-    recurring_donation_saved = ''
+    subscription_saved = 'NOT_APPLICABLE'
     status = ''
-    # for testing purposes, voter_we_vote_id can't be an empty string (due to model properties)
-    voter_we_vote_id = 'test5'
+    charge_processed_successfully = bool
+    # TODO remove test voter_we_vote_id
+    voter_we_vote_id = 'test7'
 
     ip_address = get_ip_from_headers(request)
 
@@ -38,6 +38,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         results = donation_manager.retrieve_stripe_customer_id(voter_we_vote_id)
         if results['success']:
             stripe_customer_id = results['stripe_customer_id']
+            saved_stripe_customer_id = "STRIPE_CUSTOMER_ID_ALREADY_EXISTS"
         else:
             customer = stripe.Customer.create(
                 source=token,
@@ -49,19 +50,13 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             charge_processed_successfully = True
 
         if positive_value_exists(monthly_donation):
-            donation_plan_id_query = donation_manager.retrieve_or_create_recurring_donation_plan(donation_amount)
-            if donation_plan_id_query['success']:
-                status = donation_plan_id_query['status']
-            else:
-                status = donation_plan_id_query['status']
-
-            #     recurring_donation = donation_manager.create_recurring_donation(stripe_customer_id, voter_we_vote_id,
-            #                                                                 donation_amount, donation_date_time)
-            # # recurring_donation_saved = recurring_donation['recurring_donation_plan_id']
-            # recurring_donation_saved = recurring_donation['status']
-            # print("recurring_donation_saved in controller " + recurring_donation_saved)
-            # status = recurring_donation['status']
-            # success = recurring_donation['success']
+            recurring_donation = donation_manager.create_recurring_donation(stripe_customer_id, voter_we_vote_id,
+                                                                            donation_amount, donation_date_time)
+            recurring_donation_saved = recurring_donation['recurring_donation_plan_id']
+            recurring_donation_saved = recurring_donation['status']
+            subscription_saved = recurring_donation['voter_subscription_saved']
+            status = recurring_donation['status']
+            success = recurring_donation['success']
         else:
             charge = stripe.Charge.create(
                 amount=donation_amount,
@@ -73,7 +68,6 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             charge_id = charge.id
 
     except stripe.error.CardError as e:
-        # Since it's a decline, stripe.error.CardError will be caught
         body = e.json_body
         err = body['error']
         status = "STATUS_IS_%s_AND_ERROR_IS_%s" % e.http_status, err['type']
@@ -110,7 +104,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         'saved_stripe_donation': saved_stripe_donation,
         'donation_entry_saved': donation_entry_saved,
         'monthly_donation': monthly_donation,
-        'monthly_donation_plan_id': recurring_donation_saved
+        'subscription': subscription_saved
 
     }
 

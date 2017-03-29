@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from exception.models import handle_exception, handle_record_found_more_than_one_exception
+from exception.models import handle_record_found_more_than_one_exception
 import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists
 import stripe
@@ -20,6 +20,7 @@ CURRENCY_CHOICES = ((CURRENCY_USD, 'usd'),
                     (CURRENCY_CAD, 'cad'))
 
 # Stripes currency support https://support.stripe.com/questions/which-currencies-does-stripe-support
+
 
 class DonateLinkToVoter(models.Model):
     """
@@ -38,7 +39,7 @@ class DonationPlanDefinition(models.Model):
     This is a generated table with admin created donation plans that users can subscribe to (recurring donations)
     """
     donation_plan_id = models.CharField(verbose_name="unique recurring donation plan id", default="", max_length=255,
-                                          null=False, blank=False)
+                                        null=False, blank=False)
     plan_name = models.CharField(verbose_name="donation plan name", max_length=255, null=False, blank=False)
     # Don't think this is necessary, based on how recurring donation options are setup in webapp
     # plan_name_visible_to_voter = models.CharField(verbose_name="plan name visible to user", max_length=255,
@@ -63,7 +64,7 @@ class DonationSubscription(models.Model):
     voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", unique=True, null=False, max_length=255,
                                         blank=False)
     donation_plan_id = models.CharField(verbose_name="unique recurring donation plan id", default="", max_length=255,
-                                          null=False, blank=False)
+                                        null=False, blank=False)
     start_date_time = models.DateField(verbose_name="subscription start date", auto_now=False, auto_now_add=True)
 
 
@@ -169,15 +170,17 @@ class DonationManager(models.Model):
 
         try:
             new_donation_from_voter_created = DonationFromVoter.objects.create(stripe_customer_id=stripe_customer_id,
-                                               voter_we_vote_id=voter_we_vote_id,
-                                               normalized_email_address=email,
-                                               donation_amount=donation_amount, donation_date_time=donation_date_time,
-                                               stripe_card_id=stripe_card_id, charge_id=charge_id,
-                                               charge_to_be_processed=charge_to_be_processed,
-                                               charge_processed_successfully=charge_processed_successfully,
-                                               charge_cancel_request=charge_cancel_request,
-                                               charge_failed_requires_voter_action=charge_failed_requires_voter_action,
-                                               charge_refunded=charge_refunded)
+                                                                               voter_we_vote_id=voter_we_vote_id,
+                                                                               normalized_email_address=email,
+                                                                               donation_amount=donation_amount,
+                                                                               donation_date_time=donation_date_time,
+                                                                               stripe_card_id=stripe_card_id,
+                                                                               charge_id=charge_id,
+                                                                               charge_to_be_processed=charge_to_be_processed,
+                                                                               charge_processed_successfully=charge_processed_successfully,
+                                                                               charge_cancel_request=charge_cancel_request,
+                                                                               charge_failed_requires_voter_action=charge_failed_requires_voter_action,
+                                                                               charge_refunded=charge_refunded)
 
             success = True
             status = 'STRIPE_DONATION_FROM_VOTER_SAVED'
@@ -244,28 +247,28 @@ class DonationManager(models.Model):
         }
         return saved_results
 
-    def create_stripe_plan(self, donation_plan_id, donation_amount):
-
-        plan = stripe.Plan.create(
-            amount=donation_amount,
-            interval="month",
-            currency="usd",
-            name=donation_plan_id,
-            id=donation_plan_id,
-        )
-        print("model plan.id " + plan.id)
-        if positive_value_exists(plan.id):
-            success = True
-            status = 'SUBSCRIPTION_PLAN_CREATED_IN_STRIPE'
-        else:
-            success = False
-            status = 'SUBSCRIPTION_PLAN_NOT_CREATED_IN_STRIPE'
-
-        results = {
-            'success': success,
-            'status': status,
-        }
-        return results
+    # def create_stripe_plan(self, donation_plan_id, donation_amount):
+    #
+    #     plan = stripe.Plan.create(
+    #         amount=donation_amount,
+    #         interval="month",
+    #         currency="usd",
+    #         name=donation_plan_id,
+    #         id=donation_plan_id,
+    #     )
+    #     print("model plan.id " + plan.id)
+    #     if positive_value_exists(plan.id):
+    #         success = True
+    #         status = 'SUBSCRIPTION_PLAN_CREATED_IN_STRIPE'
+    #     else:
+    #         success = False
+    #         status = 'SUBSCRIPTION_PLAN_NOT_CREATED_IN_STRIPE'
+    #
+    #     results = {
+    #         'success': success,
+    #         'status': status,
+    #     }
+    #     return results
 
     def retrieve_or_create_recurring_donation_plan(self, donation_amount):
 
@@ -281,19 +284,19 @@ class DonationManager(models.Model):
             # the donation plan needs to exist in two places: our stripe account and our database
             # plans can be created here or in our stripe account dashboard
             donation_plan_query, is_new = DonationPlanDefinition.objects.get_or_create(donation_plan_id=donation_plan_id,
-                                                                         plan_name=donation_plan_id,
-                                                                         base_cost=donation_amount,
-                                                                         billing_interval=billing_interval,
-                                                                         currency=currency,
-                                                                    donation_plan_is_active=donation_plan_is_active)
-            if not is_new:
-                # if a donation plan is found, do nothing - no need to update
-                success = True
-                status += 'DONATION_PLAN_ALREADY_EXISTS_IN_DATABASE '
-            else:
-                # if not found, we've added it to our database
+                                                                                       plan_name=donation_plan_id,
+                                                                                       base_cost=donation_amount,
+                                                                                       billing_interval=billing_interval,
+                                                                                       currency=currency,
+                                                                                       donation_plan_is_active=donation_plan_is_active)
+            if is_new:
+                # if a donation plan is not found, we've added it to our database
                 success = True
                 status += 'SUBSCRIPTION_PLAN_CREATED_IN_DATABASE '
+            else:
+                # if it is found, do nothing - no need to update
+                success = True
+                status += 'DONATION_PLAN_ALREADY_EXISTS_IN_DATABASE '
 
             plan_id_query = stripe.Plan.retrieve(donation_plan_id)
             if positive_value_exists(plan_id_query.id):
@@ -332,14 +335,35 @@ class DonationManager(models.Model):
         }
         return results
 
+    def create_subscription_entry(self, stripe_customer_id, voter_we_vote_id, donation_plan_id, start_date_time):
+
+        new_donation_subscription_entry = False
+        try:
+            new_donation_subscription_entry = DonationSubscription.objects.create(stripe_customer_id=stripe_customer_id,
+                                                                                  voter_we_vote_id=voter_we_vote_id,
+                                                                                  donation_plan_id=donation_plan_id,
+                                                                                  start_date_time=start_date_time)
+            success = True
+            status = 'NEW_SUBSCRIPTION_ENTRY_SAVED'
+        except:
+            success = False
+            status = 'NEW_SUBSCRIPTION_ENTRY_NOT_SAVED'
+        #     datatable is currently set up to allow one subscription entry per customer_id and voter_we_vote_id
+
+        saved_results = {
+            'success': success,
+            'status': status,
+            'donation_entry_saved': new_donation_subscription_entry
+        }
+        return saved_results
+
     def create_recurring_donation(self, stripe_customer_id, voter_we_vote_id, donation_amount, start_date_time):
 
-        status = ''
+        subscription_entry = object
         success = False
         donation_plan_id = "monthly-" + str(donation_amount)
 
         donation_plan_id_query = self.retrieve_or_create_recurring_donation_plan(donation_amount)
-        print("donation_plan_query " + donation_plan_id_query['status'])
         if donation_plan_id_query['success']:
             status = donation_plan_id_query['status']
 
@@ -349,18 +373,14 @@ class DonationManager(models.Model):
                     plan=donation_plan_id
                 )
                 success = True
-                status += "RECURRING_DONATION_SETUP_SUCCESSFUL"
+                status += "USER_SUCCESSFULLY_SUBSCRIBED_TO_PLAN"
+                subscription_entry = self.create_subscription_entry(stripe_customer_id, voter_we_vote_id, donation_plan_id, start_date_time)
+
             except stripe.error.StripeError as e:
                 body = e.json_body
                 err = body['error']
                 status = "STATUS_IS_{}_AND_ERROR_IS_{}".format(e.http_status, err['type'])
                 print("Type is: {}".format(err['type']))
-
-            # then need to save the plan in DonationSubscription
-            # new_donation_subscription_entry = DonationSubscription.objects.create(stripe_customer_id=stripe_customer_id,
-            #                                                                       voter_we_vote_id=voter_we_vote_id,
-            #                                                                       donation_plan_id=donation_plan_id,
-            #                                                                       start_date_time=start_date_time)
 
         else:
             status = donation_plan_id_query['status']
@@ -369,6 +389,7 @@ class DonationManager(models.Model):
             'success': success,
             'status': status,
             'recurring_donation_plan_id': donation_plan_id,
+            'voter_subscription_saved': subscription_entry['status']
         }
         return results
 

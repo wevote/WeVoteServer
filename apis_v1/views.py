@@ -197,7 +197,8 @@ def donation_with_stripe_view(request): #donationWithStripe
             'saved_stripe_donation': results['saved_stripe_donation'],
             'saved_donation_in_log': results['donation_entry_saved'],
             'monthly_donation': monthly_donation,
-            'monthly_donation_plan_id': results['monthly_donation_plan_id']
+            'subscription': results['subscription']
+
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')
 
