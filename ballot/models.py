@@ -49,6 +49,7 @@ class BallotItem(models.Model):
     google_civic_election_id = models.CharField(verbose_name="google civic election id", max_length=20, null=False)
     google_civic_election_id_new = models.PositiveIntegerField(
         verbose_name="google civic election id", default=0, null=False)
+    state_code = models.CharField(verbose_name="state the ballot item is related to", max_length=2, null=True)
 
     google_ballot_placement = models.BigIntegerField(
         verbose_name="the order this item should appear on the ballot", null=True, blank=True, unique=False)

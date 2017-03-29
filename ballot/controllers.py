@@ -30,7 +30,7 @@ BALLOT_ITEMS_SYNC_URL = get_environment_variable("BALLOT_ITEMS_SYNC_URL")
 BALLOT_RETURNED_SYNC_URL = get_environment_variable("BALLOT_RETURNED_SYNC_URL")
 
 
-def ballot_items_import_from_master_server(request, google_civic_election_id):
+def ballot_items_import_from_master_server(request, google_civic_election_id, state_code):
     """
     Get the json data, and either create new entries or update existing
     :return:
@@ -40,8 +40,8 @@ def ballot_items_import_from_master_server(request, google_civic_election_id):
     logger.info("Loading Ballot Items from We Vote Master servers")
     request = requests.get(BALLOT_ITEMS_SYNC_URL, params={
         "key":                      WE_VOTE_API_KEY,  # This comes from an environment variable
-        "format":                   'json',
         "google_civic_election_id": google_civic_election_id,
+        "state_code":               state_code,
     })
     try:
         structured_json = json.loads(request.text)

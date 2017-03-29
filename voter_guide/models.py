@@ -1210,7 +1210,7 @@ class VoterGuidePossibilityManager(models.Manager):
                 }
                 voter_guide_possibility_on_stage, new_voter_guide_possibility_created = \
                     VoterGuidePossibility.objects.update_or_create(
-                        voter_guide_possibility_url__exact=voter_guide_possibility_url,
+                        voter_guide_possibility_url__iexact=voter_guide_possibility_url,
                         defaults=updated_values)
                 success = True
                 if new_voter_guide_possibility_created:

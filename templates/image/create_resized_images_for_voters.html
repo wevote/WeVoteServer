@@ -1,4 +1,4 @@
-{# templates/image/create_resized_images_for_all_voters.html #}
+{# templates/image/create_resized_images_for_voters.html #}
 {% extends "template_base.html" %}
 
 {% block title %}
@@ -11,7 +11,11 @@
 <br />
 <h1>Created resized images for all voters</h1>
 
-{% if create_resized_images_for_all_voters %}
+{% if voter_id_signed_in %}
+<a href="{% url 'image:images_for_one_voter' voter_id_signed_in %}" target="_blank">See images</a>
+{% endif %}
+
+{% if create_resized_images_for_voters %}
     <table border="1" cellpadding="10">
         <tr>
             <td></td>
@@ -33,7 +37,7 @@
             <td>tiny_facebook_background_image</td>
         </tr>
 
-    {% for create_resized_images_for_a_voter in create_resized_images_for_all_voters %}
+    {% for create_resized_images_for_a_voter in create_resized_images_for_voters %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ create_resized_images_for_a_voter.voter_we_vote_id }}</td>

@@ -20,6 +20,7 @@
         <tr>
             <td></td>
             <td>ID</td>
+            <td>&nbsp;</td>
             <td>We Vote ID</td>
             <td>You</td>
             <td>Voter Table</td>
@@ -38,6 +39,7 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ voter.id }}</td>
+            <td>{% if voter.we_vote_hosted_profile_image_url_tiny %}<img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}" />{% endif %}</td>
             <td>
                 {{ voter.get_full_name|default_if_none:"" }}
                 <a href="{% url 'voter:voter_edit' voter.id %}" target="_blank">
@@ -59,6 +61,7 @@
                 fb: {{ voter.fb_username|default_if_none:"" }},
                 {{ voter.facebook_id|default_if_none:"" }}
             {% endif %}
+            <a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See images</a>
             </td>
             <!-- FacebookLinkToVoter //-->
             <td>

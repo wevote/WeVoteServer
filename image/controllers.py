@@ -2,12 +2,13 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from .functions import analyze_remote_url
+from .models import WeVoteImageManager, WeVoteImage
 from ballot.controllers import choose_election_from_existing_data
 from config.base import get_environment_variable
+from django.db.models import Q
 from import_export_facebook.models import FacebookManager
-from .functions import analyze_remote_url
 from import_export_twitter.functions import retrieve_twitter_user_info
-from .models import WeVoteImageManager, WeVoteImage
 from twitter.models import TwitterUserManager
 from voter.models import VoterManager, VoterDeviceLinkManager, VoterAddressManager, VoterAddress, Voter
 from wevote_functions.functions import positive_value_exists, convert_to_int
@@ -52,8 +53,27 @@ def cache_all_kind_of_images_locally_for_all_voters():
     :return:
     """
     cache_images_locally_for_all_voters_results = []
+
     voter_list = Voter.objects.all()
-    voter_list = voter_list[:200]
+
+    # If there is a value in twitter_id OR facebook_id, return the voter
+    image_filters = []
+    new_filter = Q(twitter_id__isnull=False)
+    image_filters.append(new_filter)
+    new_filter = Q(facebook_id__isnull=False)
+    image_filters.append(new_filter)
+
+    # Add the first query
+    final_filters = image_filters.pop()
+
+    # ...and "OR" the remaining items in the list
+    for item in image_filters:
+        final_filters |= item
+
+    voter_list = voter_list.filter(final_filters)
+    voter_list = voter_list.order_by('-is_admin', '-is_verified_volunteer', 'facebook_email', 'twitter_screen_name',
+                                     'last_name', 'first_name')
+    voter_list = voter_list[:200]  # Limit to 200 for now
 
     for voter in voter_list:
         cache_images_for_a_voter_results = migrate_remote_voter_image_urls_to_local_cache(voter.id)
@@ -109,6 +129,7 @@ def migrate_remote_voter_image_urls_to_local_cache(voter_id):
         cache_all_kind_of_images_results = {
             'voter_id':                         voter_id,
             'voter_we_vote_id':                 voter.we_vote_id,
+            'voter_object':                     voter,
             'cached_twitter_profile_image':     TWITTER_USER_DOES_NOT_EXIST,
             'cached_twitter_background_image':  TWITTER_USER_DOES_NOT_EXIST,
             'cached_twitter_banner_image':      TWITTER_USER_DOES_NOT_EXIST,
@@ -233,7 +254,7 @@ def migrate_remote_voter_image_urls_to_local_cache(voter_id):
         elif kind_of_image == "kind_of_image_facebook_profile":
             facebook_profile_image_url_https = retrieve_facebook_image_url(
                 voter.facebook_id, kind_of_image_facebook_profile=True)
-            # If facebook image url not found then reaching out to facebook and getting new image
+            # If facebook image url not found locally then reach out to facebook and getting new image
             if not facebook_profile_image_url_https:
                 # TODO need to find a way to get latest image
                 cache_all_kind_of_images_results['cached_facebook_profile_image'] = \
@@ -550,7 +571,7 @@ def retrieve_facebook_image_url(facebook_user_id, kind_of_image_facebook_profile
     elif kind_of_image_facebook_background:
         facebook_user_results = facebook_manager.retrieve_facebook_user_by_facebook_user_id(facebook_user_id)
         if facebook_user_results['facebook_user_found']:
-            facebook_image_url = facebook_user_results['facebook_user'].facebook_user_cover_source
+            facebook_image_url = facebook_user_results['facebook_user'].facebook_background_image_url_https
 
     return facebook_image_url
 
@@ -773,9 +794,9 @@ def check_source_image_active(analyze_source_images_results, kind_of_image_twitt
     return is_active_version
 
 
-def create_resized_images_for_all_voters(voter_id):
+def create_resized_images_for_voters(voter_id):
     """
-    Create resized images if does not exist for all voters or specific to voter_id
+    Create resized images that do not exist for all voters or specific voter_id
     :param voter_id:
     :return:
     """
@@ -784,7 +805,7 @@ def create_resized_images_for_all_voters(voter_id):
     voter_manager = VoterManager()
     we_vote_image_manager = WeVoteImageManager()
 
-    if voter_id:
+    if positive_value_exists(voter_id):
         # if voter_id is defined then create resized images for that voter only
         voter_results = voter_manager.retrieve_voter_by_id(voter_id)
         if voter_results['success']:
@@ -801,6 +822,29 @@ def create_resized_images_for_all_voters(voter_id):
         create_resized_images_results = create_resized_image(we_vote_image)
         create_all_resized_images_results.append(create_resized_images_results)
     return create_all_resized_images_results
+
+
+def show_all_images_for_one_voter(voter_id):
+    """
+    Show all resized images for one voter
+    :param voter_id:
+    :return:
+    """
+    we_vote_image_list = []
+    voter_manager = VoterManager()
+    we_vote_image_manager = WeVoteImageManager()
+
+    if voter_id:
+        # if voter_id is defined then create resized images for that voter only
+        voter_results = voter_manager.retrieve_voter_by_id(voter_id)
+        if voter_results['success']:
+            voter_we_vote_id = voter_results['voter'].we_vote_id
+            we_vote_image_list_results = we_vote_image_manager.\
+                retrieve_we_vote_image_list_from_we_vote_id(voter_we_vote_id)
+            we_vote_image_list_query = we_vote_image_list_results['we_vote_image_list']
+            we_vote_image_list = list(we_vote_image_list_query)
+
+    return we_vote_image_list
 
 
 def create_resized_image(we_vote_image):
