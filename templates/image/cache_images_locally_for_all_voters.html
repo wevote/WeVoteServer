@@ -9,7 +9,7 @@
 {%  block content %}
 <a href="{% url 'voter:voter_list' %}">< Back to Voters</a><br />
 <br />
-<a href="{% url 'image:create_resized_images_for_all_voters' 0 %}">Create resized images for all voters</a>
+<a href="{% url 'image:create_resized_images_for_voters' 0 %}">Create resized images for all voters</a>
 <br />
 <h1>Cached images for all voters</h1>
 
@@ -33,15 +33,17 @@
             <td>
                 {% if cache_images_for_a_voter.voter_id == voter_id_signed_in %}*ME*{% else %}{% endif %}
             </td>
-            <td>{{ cache_images_for_a_voter.voter_we_vote_id }}</td>
-            <td>{{ cache_images_for_a_voter.cached_twitter_profile_image }}</td>
+            <td>{{ cache_images_for_a_voter.voter_we_vote_id }}
+                {{ cache_images_for_a_voter.voter_object.we_vote_hosted_profile_image_url_medium|default_if_none:"" }}</td>
+            <td>{{ cache_images_for_a_voter.voter_object.twitter_profile_image_url_https|default_if_none:""}}
+                {{ cache_images_for_a_voter.cached_twitter_profile_image }}</td>
             <td>{{ cache_images_for_a_voter.cached_twitter_background_image }}</td>
             <td>{{ cache_images_for_a_voter.cached_twitter_banner_image }}</td>
             <td>{{ cache_images_for_a_voter.cached_facebook_profile_image }}</td>
             <td>{{ cache_images_for_a_voter.cached_facebook_background_image }}</td>
             <td>
-                <a href="{% url 'image:create_resized_images_for_all_voters' cache_images_for_a_voter.voter_id %}">
-                    Create resized images
+                <a href="{% url 'image:images_for_one_voter' cache_images_for_a_voter.voter_id %}">
+                    See images for one voter
                 </a>
             </td>
         </tr>

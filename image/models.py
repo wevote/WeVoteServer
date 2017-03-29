@@ -69,6 +69,32 @@ class WeVoteImage(models.Model):
     kind_of_image_medium = models.BooleanField(verbose_name="is image size medium", default=False)
     kind_of_image_tiny = models.BooleanField(verbose_name="is image size tiny", default=False)
 
+    def display_kind_of_image(self):
+        if self.kind_of_image_twitter_profile:
+            return "twitter_profile"
+        elif self.kind_of_image_twitter_background:
+            return "twitter_background"
+        elif self.kind_of_image_twitter_banner:
+            return "twitter_banner"
+        elif self.kind_of_image_facebook_profile:
+            return "facebook_profile"
+        elif self.kind_of_image_facebook_background:
+            return "facebook_background"
+        elif self.kind_of_image_original:
+            return "original"
+        return ""
+
+    def display_image_size(self):
+        if self.kind_of_image_original:
+            return "original"
+        elif self.kind_of_image_large:
+            return "large"
+        elif self.kind_of_image_medium:
+            return "medium"
+        elif self.kind_of_image_tiny:
+            return "tiny"
+        return ""
+
 
 class WeVoteImageManager(models.Model):
 

@@ -445,7 +445,6 @@ class FacebookManager(models.Model):
         }
         return results
 
-
     def fetch_facebook_id_from_voter_we_vote_id(self, voter_we_vote_id):
         facebook_user_id = 0
         facebook_results = self.retrieve_facebook_link_to_voter(facebook_user_id, voter_we_vote_id)
@@ -554,9 +553,10 @@ class FacebookManager(models.Model):
         facebook_friend_dict['facebook_user_birthday'] = (facebook_friend_api_details_entry.get('birthday')
                                                           if 'birthday' in facebook_friend_api_details_entry.keys()
                                                           else "")
-        facebook_friend_dict['facebook_user_cover_source'] = (facebook_friend_api_details_entry.get('cover').get(
-            'source') if 'cover' in facebook_friend_api_details_entry.keys() and facebook_friend_api_details_entry.get(
-            'cover', {}).get('source', {}) else "")
+        facebook_friend_dict['facebook_background_image_url_https'] = \
+            (facebook_friend_api_details_entry.get('cover').get('source')
+             if 'cover' in facebook_friend_api_details_entry.keys() and
+                facebook_friend_api_details_entry.get('cover', {}).get('source', {}) else "")
         facebook_friend_dict['facebook_user_profile_url_https'] = (facebook_friend_api_details_entry.get('picture').get(
             'data').get('url') if 'picture' in facebook_friend_api_details_entry.keys() and
             facebook_friend_api_details_entry.get('picture', {}).get('data', {}).get('url', {}) else "")

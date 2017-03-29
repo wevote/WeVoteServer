@@ -263,6 +263,7 @@ class CandidateCampaignListManager(models.Model):
 
             # We want to find candidates with *any* of these values
             if positive_value_exists(google_civic_candidate_name):
+                # We intentionally use case sensitive matching here
                 new_filter = Q(google_civic_candidate_name__exact=google_civic_candidate_name)
                 filters.append(new_filter)
             elif positive_value_exists(candidate_name):

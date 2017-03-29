@@ -13,13 +13,17 @@ def ballot_items_sync_out_doc_template_values(url_root):
             'value':        'integer',  # boolean, integer, long, string
             'description':  'Limit the ballot_items retrieved to those for this google_civic_election_id.',
         },
+        {
+            'name':         'state_code',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The us state the ballot item is for. '
+        },
     ]
 
     potential_status_codes_list = [
     ]
 
     try_now_link_variables_dict = {
-        'format': 'json',
     }
 
     api_response = '[{\n' \
@@ -29,6 +33,7 @@ def ballot_items_sync_out_doc_template_values(url_root):
                    '  "contest_measure_we_vote_id": string,\n' \
                    '  "google_ballot_placement": string,\n' \
                    '  "google_civic_election_id": string,\n' \
+                   '  "state_code": string,\n' \
                    '  "local_ballot_order": string,\n' \
                    '  "measure_subtitle": string,\n' \
                    '  "polling_location_we_vote_id": string,\n' \
@@ -36,7 +41,7 @@ def ballot_items_sync_out_doc_template_values(url_root):
 
     template_values = {
         'api_name': 'ballotItemsSyncOut',
-        'api_slug': 'ballotItemsSyncOut/?format=json',
+        'api_slug': 'ballotItemsSyncOut',
         'api_introduction':
             "",
         'try_now_link': 'apis_v1:ballotItemsSyncOutView',

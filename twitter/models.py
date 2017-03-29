@@ -3,12 +3,11 @@
 # -*- coding: UTF-8 -*-
 
 # See also WeVoteServer/import_export_twitter/models.py for the code that interfaces with twitter (or other) servers
-import tweepy
-from django.db import models
-
 from config.base import get_environment_variable
+from django.db import models
 from exception.models import handle_record_found_more_than_one_exception
 from import_export_twitter.functions import retrieve_twitter_user_info
+import tweepy
 from wevote_functions.functions import convert_to_int, generate_random_string, positive_value_exists
 import wevote_functions.admin
 
@@ -18,6 +17,7 @@ TWITTER_FRIENDS_IDS_MAX_LIMIT = 5000
 TWITTER_API_NAME_FRIENDS_ID = "friends_ids"
 
 logger = wevote_functions.admin.get_logger(__name__)
+
 
 class TwitterLinkToOrganization(models.Model):
     """
