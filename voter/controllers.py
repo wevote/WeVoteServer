@@ -557,7 +557,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
         # Cache original and resized images
         cache_results = cache_original_and_resized_image(
-            voter_we_vote_id=voter.we_vote_id,
+            voter_we_vote_id=facebook_owner_voter.we_vote_id,
             facebook_user_id=facebook_auth_response.facebook_user_id,
             facebook_profile_image_url_https=facebook_auth_response.facebook_profile_image_url_https,
             image_source=FACEBOOK)
@@ -681,7 +681,7 @@ def voter_merge_two_accounts_for_api(  # voterMergeTwoAccounts
 
         # Cache original and resized images
         cache_results = cache_original_and_resized_image(
-            voter_we_vote_id=voter.we_vote_id,
+            voter_we_vote_id=twitter_owner_voter.we_vote_id,
             twitter_id=twitter_auth_response.twitter_id,
             twitter_screen_name=twitter_auth_response.twitter_screen_name,
             twitter_profile_image_url_https=twitter_auth_response.twitter_profile_image_url_https,
