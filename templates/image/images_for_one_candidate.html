@@ -1,22 +1,16 @@
-{# templates/image/images_for_one_voter.html #}
+{# templates/image/images_for_one_candidate.html #}
 {% extends "template_base.html" %}
 
 {% block title %}
-    {% if voter_id %}{{ voter_id }} voter_id
-    {% else %}No Voter Found{% endif %}
+    {% if candidate_we_vote_id %}{{ candidate_we_vote_id }} candidate_we_vote_id
+    {% else %}No Candidate Found {% endif %}
 {% endblock %}
 
 {%  block content %}
-<a href="{% url 'admin_tools:data_cleanup_voter_list_analysis' %}">
-    < Back to Voter List Analysis</a><br />
+<h1>Images for One Candidate</h1>
 
-<a href="{% url 'image:cache_images_locally_for_all_voters' %}">< Back to Cache images locally for all voters</a>
-<br />
-<h1>Images for One Voter</h1>
 
-<a href="{% url 'image:create_resized_images_for_voters' voter_id %}" target="_blank">Create resized images for this voter</a><br />
-
-{% if images_for_one_voter %}
+{% if images_for_one_candidate %}
     <table border="1" cellpadding="10">
         <tr>
             <td></td>
@@ -26,10 +20,10 @@
             <td>we_vote_image_url</td>
         </tr>
 
-    {% for one_image_row in images_for_one_voter %}
+    {% for one_image_row in images_for_one_candidate %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ one_image_row.voter_we_vote_id }}</td>
+            <td>{{ one_image_row.candidate_we_vote_id }}</td>
             <td>{{ one_image_row.display_kind_of_image }} / {{ one_image_row.display_image_size }}</td>
             <td>{% if one_image_row.display_image_size != "original" %}
                 {# Don't show image if too big #}
@@ -46,7 +40,7 @@
 
     </table>
 {% else %}
-    <p>(no voter images found)</p>
+    <p>(no candidate images found)</p>
 {% endif %}
 <br />
 

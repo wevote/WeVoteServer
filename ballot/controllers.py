@@ -946,18 +946,20 @@ def voter_ballot_items_retrieve_for_one_election_for_api(voter_device_id, voter_
     return results
 
 
-def ballot_item_options_retrieve_for_api(google_civic_election_id=0):
+def ballot_item_options_retrieve_for_api(google_civic_election_id=0, state_code=''):
     """
     This function returns a normalized list of candidates and measures so we can pre-populate form fields.
     Not specific to one voter.
     :param google_civic_election_id:
+    :param state_code:
     :return:
     """
 
     status = ""
     try:
         candidate_list_object = CandidateCampaignListManager()
-        results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(google_civic_election_id)
+        results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
+                                                                                      state_code)
         candidate_success = results['success']
         status += results['status']
         candidate_list = results['candidate_list_light']
@@ -970,7 +972,7 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id=0):
 
     try:
         office_list_object = ContestOfficeListManager()
-        results = office_list_object.retrieve_all_offices_for_upcoming_election(google_civic_election_id)
+        results = office_list_object.retrieve_all_offices_for_upcoming_election(google_civic_election_id, state_code)
         office_success = results['success']
         status += ' ' + results['status']
         office_list = results['office_list_light']
@@ -983,7 +985,7 @@ def ballot_item_options_retrieve_for_api(google_civic_election_id=0):
 
     try:
         measure_list_object = ContestMeasureList()
-        results = measure_list_object.retrieve_all_measures_for_upcoming_election(google_civic_election_id)
+        results = measure_list_object.retrieve_all_measures_for_upcoming_election(google_civic_election_id, state_code)
         measure_success = results['success']
         status += ' ' + results['status']
         measure_list = results['measure_list_light']

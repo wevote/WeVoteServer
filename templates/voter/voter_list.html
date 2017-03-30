@@ -25,7 +25,7 @@
             <td>Where</td>
             <td>FB?</td>
             <td>Tw? (OLD)</td>
-            <td>TwitterLinkToVoter</td>
+{#            <td>TwitterLinkToVoter</td> 2017-3-29 Not working#}
             <td>Email</td>
             <td>Admin</td>
             <td>Verified Volunteer</td>
@@ -60,12 +60,12 @@
             {% else %}{% endif %}
             </td>
             <!-- TwitterLinkToVoter //-->
-            <td>
-            {% if voter.twitter_id_from_link_to_voter %}
-                @{{ voter.twitter_screen_name_from_link_to_voter }}<br />
-                {{ voter.twitter_id_from_link_to_voter }}
-            {% endif %}
-            </td>
+{#            <td> 2017-3-29 Not working#}
+{#            {% if voter.twitter_id_from_link_to_voter %}#}
+{#                @{{ voter.twitter_screen_name_from_link_to_voter }}<br />#}
+{#                {{ voter.twitter_id_from_link_to_voter }}#}
+{#            {% endif %}#}
+{#            </td>#}
             <!-- Email //-->
             <td>
             {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
@@ -80,7 +80,7 @@
             </td>
             <!-- See images //-->
             <td>
-                <a href="{% url 'image:images_for_one_voter' voter.id %}">See images</a>
+                <a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See images</a>
             </td>
         </tr>
     {% endfor %}

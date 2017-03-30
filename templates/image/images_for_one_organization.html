@@ -2,8 +2,8 @@
 {% extends "template_base.html" %}
 
 {% block title %}
-    {% if voter_id %}{{ voter_id }} voter_id
-    {% else %}No Voter Found{% endif %}
+    {% if voter_id %}{{ voter_id }}
+    {% else %}No Voter Found {% endif %}voter_id
 {% endblock %}
 
 {%  block content %}
@@ -46,7 +46,7 @@
 
     </table>
 {% else %}
-    <p>(no voter images found)</p>
+    <p>(no voters found)</p>
 {% endif %}
 <br />
 

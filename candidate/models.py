@@ -72,7 +72,7 @@ class CandidateCampaignListManager(models.Model):
         }
         return results
 
-    def retrieve_all_candidates_for_upcoming_election(self, google_civic_election_id=0,
+    def retrieve_all_candidates_for_upcoming_election(self, google_civic_election_id=0, state_code='',
                                                       return_list_of_objects=False):
         candidate_list_objects = []
         candidate_list_light = []
@@ -85,6 +85,8 @@ class CandidateCampaignListManager(models.Model):
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
+            if positive_value_exists(state_code):
+                candidate_queryset = candidate_queryset.filter(state_code__iexact=state_code)
             candidate_queryset = candidate_queryset.order_by("candidate_name")
             if positive_value_exists(google_civic_election_id):
                 candidate_list_objects = candidate_queryset

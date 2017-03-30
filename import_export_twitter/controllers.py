@@ -457,7 +457,7 @@ def retrieve_twitter_data_for_all_organizations(state_code='', google_civic_elec
     return results
 
 
-def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_election_id=0):
+def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_election_id=0, state_code=''):
     facebook_pages_found = 0
     twitter_handles_found = 0
     force_retrieve = False
@@ -467,7 +467,7 @@ def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_ele
     candidate_manager = CandidateCampaignManager()
     candidate_list_manager = CandidateCampaignListManager()
     return_list_of_objects = True
-    results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
+    results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(google_civic_election_id, state_code,
                                                                                    return_list_of_objects)
     status += results['status']
     if results['success']:
@@ -507,7 +507,7 @@ def scrape_and_save_social_media_for_candidates_in_one_election(google_civic_ele
     return results
 
 
-def refresh_twitter_candidate_details_for_election(google_civic_election_id):
+def refresh_twitter_candidate_details_for_election(google_civic_election_id, state_code):
     twitter_handles_added = 0
     profiles_refreshed_with_twitter_data = 0
 
@@ -516,7 +516,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id):
     candidate_list_manager = CandidateCampaignListManager()
     return_list_of_objects = True
     candidates_results = candidate_list_manager.retrieve_all_candidates_for_upcoming_election(
-        google_civic_election_id, return_list_of_objects)
+        google_civic_election_id, state_code, return_list_of_objects)
     if candidates_results['candidate_list_found']:
         candidate_list = candidates_results['candidate_list_objects']
 
@@ -542,7 +542,7 @@ def refresh_twitter_candidate_details_for_election(google_civic_election_id):
     return results
 
 
-def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_id=0):
+def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_id=0, state_code=''):
     twitter_handles_transferred = 0
     status = ""
     google_civic_election_id = convert_to_int(google_civic_election_id)
@@ -550,6 +550,7 @@ def transfer_candidate_twitter_handles_from_google_civic(google_civic_election_i
     candidate_list_object = CandidateCampaignListManager()
     return_list_of_objects = True
     results = candidate_list_object.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
+                                                                                  state_code,
                                                                                   return_list_of_objects)
     status += results['status']
     if results['success']:

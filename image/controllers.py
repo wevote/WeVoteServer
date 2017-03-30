@@ -5,6 +5,7 @@
 from .functions import analyze_remote_url
 from .models import WeVoteImageManager, WeVoteImage
 from ballot.controllers import choose_election_from_existing_data
+from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
 from django.db.models import Q
 from import_export_facebook.models import FacebookManager
@@ -864,7 +865,29 @@ def create_resized_images_for_voters(voter_id):
     return create_all_resized_images_results
 
 
-def show_all_images_for_one_voter(voter_id):
+def retrieve_all_images_for_one_candidate(candidate_we_vote_id):
+    """
+    Show all resized images for one candidate
+    :param candidate_we_vote_id:
+    :return:
+    """
+    we_vote_image_list = []
+    candidate_manager = CandidateCampaignManager()
+    we_vote_image_manager = WeVoteImageManager()
+
+    if positive_value_exists(candidate_we_vote_id):
+        # if candidate_we_vote_id is defined then show resized images for that candidate only
+        candidate_results = candidate_manager.retrieve_candidate_campaign_from_we_vote_id(candidate_we_vote_id)
+        if candidate_results['candidate_campaign_found']:
+            we_vote_image_list_results = we_vote_image_manager.\
+                retrieve_we_vote_image_list_from_we_vote_id(None, candidate_we_vote_id)
+            we_vote_image_list_query = we_vote_image_list_results['we_vote_image_list']
+            we_vote_image_list = list(we_vote_image_list_query)
+
+    return we_vote_image_list
+
+
+def retrieve_all_images_for_one_voter(voter_id):
     """
     Show all resized images for one voter
     :param voter_id:
@@ -875,7 +898,7 @@ def show_all_images_for_one_voter(voter_id):
     we_vote_image_manager = WeVoteImageManager()
 
     if voter_id:
-        # if voter_id is defined then create resized images for that voter only
+        # if voter_id is defined then show resized images for that voter only
         voter_results = voter_manager.retrieve_voter_by_id(voter_id)
         if voter_results['success']:
             voter_we_vote_id = voter_results['voter'].we_vote_id
