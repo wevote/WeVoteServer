@@ -3,7 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .controllers import cache_all_kind_of_images_locally_for_all_voters, create_resized_images_for_voters, \
-    show_all_images_for_one_voter
+    retrieve_all_images_for_one_candidate, retrieve_all_images_for_one_voter
 from admin_tools.views import redirect_to_sign_in_page
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages import get_messages
@@ -62,10 +62,26 @@ def images_for_one_voter_view(request, voter_id):
 
     voter_id = convert_to_int(voter_id)
     messages_on_stage = get_messages(request)
-    we_vote_image_list = show_all_images_for_one_voter(voter_id)
+    we_vote_image_list = retrieve_all_images_for_one_voter(voter_id)
     template_values = {
         'messages_on_stage':    messages_on_stage,
         'images_for_one_voter': we_vote_image_list,
         'voter_id':             voter_id
     }
     return render(request, 'image/images_for_one_voter.html', template_values)
+
+
+@login_required
+def images_for_one_candidate_view(request, candidate_we_vote_id):
+    authority_required = {'admin'}  # admin, verified_volunteer
+    if not voter_has_authority(request, authority_required):
+        return redirect_to_sign_in_page(request, authority_required)
+
+    messages_on_stage = get_messages(request)
+    we_vote_image_list = retrieve_all_images_for_one_candidate(candidate_we_vote_id)
+    template_values = {
+        'messages_on_stage':        messages_on_stage,
+        'images_for_one_candidate': we_vote_image_list,
+        'candidate_we_vote_id':     candidate_we_vote_id
+    }
+    return render(request, 'image/images_for_one_candidate.html', template_values)

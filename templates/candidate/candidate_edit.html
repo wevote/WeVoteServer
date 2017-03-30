@@ -176,7 +176,7 @@
 
 <br />
 {% if candidate %}
-<a href="{% url 'candidate:candidate_retrieve_photos' candidate.id %}">Retrieve photos</a><br />
+<a href="{% url 'candidate:candidate_retrieve_photos' candidate.id %}">Retrieve photos (from Twitter, Vote Smart - TODO work in progress)</a>, <a href="{% url 'image:images_for_one_candidate' candidate.we_vote_id %}" target="_blank">See images (in new window)</a><br />
     {% if candidate.candidate_photo_url %}
     <img src='{{ candidate.candidate_photo_url }}' />
     {% endif %}

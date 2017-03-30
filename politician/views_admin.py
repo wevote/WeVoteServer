@@ -47,7 +47,7 @@ class PoliticiansSyncOutView(APIView):
 
         politician_list = Politician.objects.all()
         if positive_value_exists(state_code):
-            politician_list = politician_list.filter(state_code=state_code)
+            politician_list = politician_list.filter(state_code__iexact=state_code)
 
         serializer = PoliticianSerializer(politician_list, many=True)
         return Response(serializer.data)
@@ -91,7 +91,7 @@ def politician_list_view(request):
     try:
         politician_list = Politician.objects.all()
         if positive_value_exists(state_code):
-            politician_list = politician_list.filter(state_code=state_code)
+            politician_list = politician_list.filter(state_code__iexact=state_code)
 
         filters = []
         if positive_value_exists(politician_search):

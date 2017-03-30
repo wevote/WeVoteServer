@@ -26,6 +26,11 @@ def ballot_item_options_retrieve_doc_template_values(url_root):
             'description':  'The unique identifier for a particular election. If NOT provided, we instead use the '
                             'google_civic_election_id for the person who is signed in.',
         },
+        {
+            'name':         'state_code',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'The us state we want ballot item options for. '
+        },
     ]
 
     potential_status_codes_list = [

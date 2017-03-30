@@ -231,8 +231,10 @@ def refresh_twitter_candidate_details_for_election_view(request, election_id):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = convert_to_int(election_id)
+    state_code = request.GET.get('state_code', '')
 
-    results = refresh_twitter_candidate_details_for_election(google_civic_election_id=google_civic_election_id)
+    results = refresh_twitter_candidate_details_for_election(google_civic_election_id=google_civic_election_id,
+                                                             state_code=state_code)
 
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])
@@ -246,7 +248,8 @@ def refresh_twitter_candidate_details_for_election_view(request, election_id):
                                 profiles_refreshed_with_twitter_data=profiles_refreshed_with_twitter_data))
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
-                                '?google_civic_election_id=' + election_id)
+                                '?google_civic_election_id=' + election_id +
+                                '&state_code=' + str(state_code))
 
 
 @login_required
@@ -256,9 +259,10 @@ def transfer_candidate_twitter_handles_from_google_civic_view(request):
         return redirect_to_sign_in_page(request, authority_required)
 
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
+    state_code = request.GET.get('state_code', '')
 
     results = transfer_candidate_twitter_handles_from_google_civic(
-        google_civic_election_id=google_civic_election_id)
+        google_civic_election_id=google_civic_election_id, state_code=state_code)
 
     if not results['success']:
         messages.add_message(request, messages.INFO, results['status'])
@@ -269,4 +273,6 @@ def transfer_candidate_twitter_handles_from_google_civic_view(request):
                                  twitter_handles_transferred=twitter_handles_transferred))
 
     return HttpResponseRedirect(reverse('candidate:candidate_list', args=()) +
-                                '?google_civic_election_id=' + str(google_civic_election_id))
+                                '?google_civic_election_id=' + str(google_civic_election_id) +
+                                '&state_code=' + str(state_code)
+                                )
