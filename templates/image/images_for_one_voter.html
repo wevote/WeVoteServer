@@ -14,7 +14,7 @@
 <br />
 <h1>Images for One Voter</h1>
 
-<a href="{% url 'image:create_resized_images_for_voters' voter_id %}" target="_blank">Create resized images for this voter</a><br />
+<a href="{% url 'image:create_resized_images_for_voters' voter_id %}" target="_blank">Cache original and resized images for this voter</a><br />
 
 {% if images_for_one_voter %}
     <table border="1" cellpadding="10">
