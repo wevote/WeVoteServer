@@ -2,6 +2,7 @@
 # Brought to you by We Vote. Be good.
 # -*- coding: UTF-8 -*-
 
+from image.controllers import cache_original_and_resized_image, VOTE_SMART
 from .models import VoteSmartApiCounterManager, VoteSmartCandidate, VoteSmartCandidateManager, \
     vote_smart_candidate_object_filter, VoteSmartCandidateBio, vote_smart_candidate_bio_object_filter, \
     VoteSmartCategory, vote_smart_category_filter, \
@@ -136,7 +137,7 @@ def retrieve_candidate_photo_from_vote_smart(we_vote_candidate, force_retrieve=F
     vote_smart_candidate_id = we_vote_candidate.vote_smart_id
     vote_smart_candidate_photo_exists = False
     vote_smart_candidate_photo_just_retrieved = False
-
+    force_retrieve = True
     # Has this candidate been linked to a Vote Smart candidate? If not, error out
     if not positive_value_exists(vote_smart_candidate_id):
         status += 'VOTE_SMART_CANDIDATE_ID_REQUIRED '
@@ -184,7 +185,21 @@ def retrieve_candidate_photo_from_vote_smart(we_vote_candidate, force_retrieve=F
         if results['vote_smart_candidate_bio_found']:
             status += 'VOTE_SMART_CANDIDATE_BIO_MATCHED '
             vote_smart_candidate_bio = results['vote_smart_candidate_bio']
-            we_vote_candidate.photo_url_from_vote_smart = vote_smart_candidate_bio.photo
+            cache_results = cache_original_and_resized_image(
+                candidate_id=we_vote_candidate.id, candidate_we_vote_id=we_vote_candidate.we_vote_id,
+                vote_smart_id=we_vote_candidate.vote_smart_id,
+                vote_smart_image_url_https=vote_smart_candidate_bio.photo,
+                image_source=VOTE_SMART)
+            cached_vote_smart_image_url_https = cache_results['cached_vote_smart_image_url_https']
+            # TODO Need to ask Dale do we need to update other tables such as voteSmartCandidateBio with updated aws url
+            # and where to store resized vote smart images because candidate table have resized twitter images.
+            we_vote_hosted_profile_image_url_large = cache_results['we_vote_hosted_profile_image_url_large']
+            we_vote_hosted_profile_image_url_medium = cache_results['we_vote_hosted_profile_image_url_medium']
+            we_vote_hosted_profile_image_url_tiny = cache_results['we_vote_hosted_profile_image_url_tiny']
+            if cached_vote_smart_image_url_https:
+                we_vote_candidate.photo_url_from_vote_smart = cached_vote_smart_image_url_https
+            else:
+                we_vote_candidate.photo_url_from_vote_smart = vote_smart_candidate_bio.photo
             we_vote_candidate.save()
             # If here, we were able to match this candidate from the We Vote database to a candidate
             # from the Vote Smart database

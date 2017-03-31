@@ -3,7 +3,9 @@
 # -*- coding: UTF-8 -*-
 
 from .functions import analyze_remote_url
-from .models import WeVoteImageManager, WeVoteImage
+from .models import WeVoteImageManager, WeVoteImage, FACEBOOK_PROFILE_IMAGE_NAME, FACEBOOK_BACKGROUND_IMAGE_NAME, \
+    TWITTER_PROFILE_IMAGE_NAME, TWITTER_BACKGROUND_IMAGE_NAME, TWITTER_BANNER_IMAGE_NAME, MAPLIGHT_IMAGE_NAME, \
+    VOTE_SMART_IMAGE_NAME, MASTER_IMAGE
 from ballot.controllers import choose_election_from_existing_data
 from candidate.models import CandidateCampaignManager
 from config.base import get_environment_variable
@@ -20,6 +22,10 @@ logger = wevote_functions.admin.get_logger(__name__)
 HTTP_OK = 200
 TWITTER = "twitter"
 FACEBOOK = "facebook"
+MAPLIGHT = "maplight"
+VOTE_SMART = "vote_smart"
+MAPLIGHT_URL_NOT_FOUND = "maplight url not found"
+VOTE_SMART_URL_NOT_FOUND = "votesmart url not found"
 FACEBOOK_USER_DOES_NOT_EXIST = "facebook user does not exist"
 FACEBOOK_URL_NOT_FOUND = "facebook url not found"
 TWITTER_USER_DOES_NOT_EXIST = "twitter user does not exist"
@@ -27,17 +33,7 @@ TWITTER_URL_NOT_FOUND = "twitter url not found"
 IMAGE_ALREADY_CACHED = "image already cached"
 ALL_KIND_OF_IMAGE = ['kind_of_image_twitter_profile', 'kind_of_image_twitter_background',
                      'kind_of_image_twitter_banner', 'kind_of_image_facebook_profile',
-                     'kind_of_image_facebook_background']
-
-# naming convention stored at aws
-FACEBOOK_PROFILE_IMAGE_NAME = "facebook_profile_image"
-FACEBOOK_BACKGROUND_IMAGE_NAME = "facebook_background_image"
-TWITTER_PROFILE_IMAGE_NAME = "twitter_profile_image"
-TWITTER_BACKGROUND_IMAGE_NAME = "twitter_background_image"
-TWITTER_BANNER_IMAGE_NAME = "twitter_banner_image"
-MASTER_IMAGE = "master"
-MEDIUM = "medium"
-TINY = "tiny"
+                     'kind_of_image_facebook_background', 'kind_of_image_maplight', 'kind_of_image_vote_smart']
 
 PROFILE_IMAGE_LARGE_WIDTH = convert_to_int(get_environment_variable("PROFILE_IMAGE_LARGE_WIDTH"))
 PROFILE_IMAGE_LARGE_HEIGHT = convert_to_int(get_environment_variable("PROFILE_IMAGE_LARGE_HEIGHT"))
@@ -343,10 +339,12 @@ def migrate_remote_voter_image_urls_to_local_cache(voter_id):
 def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote_id=None,
                         candidate_we_vote_id=None, organization_we_vote_id=None,
                         twitter_id=None, twitter_screen_name=None,
-                        facebook_user_id=None, other_source=None, other_source_profile_image_url=None,
+                        facebook_user_id=None, other_source=None, maplight_id=None, vote_smart_id=None,
+                        other_source_profile_image_url=None,
                         is_active_version=False, kind_of_image_twitter_profile=False,
                         kind_of_image_twitter_background=False, kind_of_image_twitter_banner=False,
                         kind_of_image_facebook_profile=False, kind_of_image_facebook_background=False,
+                        kind_of_image_maplight=False, kind_of_image_vote_smart=False,
                         kind_of_image_original=False, kind_of_image_large=False,
                         kind_of_image_medium=False, kind_of_image_tiny=False):
     """
@@ -361,12 +359,16 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
     :param facebook_user_id:
     :param other_source:                        # can be MapLight or VoteSmart
     :param other_source_profile_image_url:      # TODO need to find a way to get this
+    :param maplight_id:
+    :param vote_smart_id:
     :param is_active_version:
     :param kind_of_image_twitter_profile:
     :param kind_of_image_twitter_background:
     :param kind_of_image_twitter_banner:
     :param kind_of_image_facebook_profile:
     :param kind_of_image_facebook_background:
+    :param kind_of_image_maplight:
+    :param kind_of_image_vote_smart:
     :param kind_of_image_original:
     :param kind_of_image_large:
     :param kind_of_image_medium:
@@ -390,8 +392,8 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
     create_we_vote_image_results = we_vote_image_manager.create_we_vote_image(
         google_civic_election_id, voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
         kind_of_image_twitter_profile, kind_of_image_twitter_background, kind_of_image_twitter_banner,
-        kind_of_image_facebook_profile, kind_of_image_facebook_background,
-        kind_of_image_original, kind_of_image_large, kind_of_image_medium, kind_of_image_tiny)
+        kind_of_image_facebook_profile, kind_of_image_facebook_background, kind_of_image_maplight,
+        kind_of_image_vote_smart, kind_of_image_original, kind_of_image_large, kind_of_image_medium, kind_of_image_tiny)
     status += create_we_vote_image_results['status']
     if not create_we_vote_image_results['we_vote_image_saved']:
         error_results = {
@@ -416,12 +418,13 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
 
     # Image url validation and get source image properties
     analyze_source_images_results = analyze_source_images(twitter_id, twitter_screen_name,
-                                                          facebook_user_id, image_url_https,
+                                                          facebook_user_id, maplight_id, vote_smart_id, image_url_https,
                                                           kind_of_image_twitter_profile,
                                                           kind_of_image_twitter_background,
                                                           kind_of_image_twitter_banner,
                                                           kind_of_image_facebook_profile,
-                                                          kind_of_image_facebook_background)
+                                                          kind_of_image_facebook_background, kind_of_image_maplight,
+                                                          kind_of_image_vote_smart)
 
     if not analyze_source_images_results['analyze_image_url_results']['image_url_valid']:
         error_results = {
@@ -443,7 +446,7 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
     cached_todays_we_vote_image_list_results = we_vote_image_manager.retrieve_todays_cached_we_vote_image_list(
         voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id, kind_of_image_twitter_profile,
         kind_of_image_twitter_background, kind_of_image_twitter_banner, kind_of_image_facebook_profile,
-        kind_of_image_facebook_background, kind_of_image_original)
+        kind_of_image_facebook_background, kind_of_image_maplight, kind_of_image_vote_smart, kind_of_image_original)
     for cached_we_vote_image in cached_todays_we_vote_image_list_results['we_vote_image_list']:
         if cached_we_vote_image.same_day_image_version:
             image_versions.append(cached_we_vote_image.same_day_image_version)
@@ -466,6 +469,16 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
             analyze_source_images_results['analyze_image_url_results']['image_height'],
             image_url_https, same_day_image_version, kind_of_image_twitter_profile,
             kind_of_image_twitter_background, kind_of_image_twitter_banner, image_url_valid)
+    elif kind_of_image_maplight:
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_maplight_info(
+            we_vote_image, maplight_id, analyze_source_images_results['analyze_image_url_results']['image_width'],
+            analyze_source_images_results['analyze_image_url_results']['image_height'],
+            image_url_https, same_day_image_version, kind_of_image_maplight, image_url_valid)
+    elif kind_of_image_vote_smart:
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_vote_smart_info(
+            we_vote_image, vote_smart_id, analyze_source_images_results['analyze_image_url_results']['image_width'],
+            analyze_source_images_results['analyze_image_url_results']['image_height'],
+            image_url_https, same_day_image_version, kind_of_image_vote_smart, image_url_valid)
 
     status += " " + save_source_info_results['status']
     if save_source_info_results['success']:
@@ -497,7 +510,8 @@ def cache_image_locally(google_civic_election_id, image_url_https, voter_we_vote
             is_active_version = check_source_image_active(analyze_source_images_results, kind_of_image_twitter_profile,
                                                           kind_of_image_twitter_background,
                                                           kind_of_image_twitter_banner, kind_of_image_facebook_profile,
-                                                          kind_of_image_facebook_background)
+                                                          kind_of_image_facebook_background, kind_of_image_maplight,
+                                                          kind_of_image_vote_smart)
         image_stored_locally = we_vote_image_manager.store_image_locally(
             analyze_source_images_results['image_url_https'], we_vote_image_file_name)
 
@@ -682,21 +696,25 @@ def retrieve_latest_twitter_image_url(twitter_id, twitter_screen_name, kind_of_i
     return latest_twitter_image_url
 
 
-def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, image_url_https,
-                          kind_of_image_twitter_profile, kind_of_image_twitter_background,
+def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, maplight_id, vote_smart_id,
+                          image_url_https, kind_of_image_twitter_profile, kind_of_image_twitter_background,
                           kind_of_image_twitter_banner, kind_of_image_facebook_profile,
-                          kind_of_image_facebook_background):
+                          kind_of_image_facebook_background, kind_of_image_maplight, kind_of_image_vote_smart):
     """
     Checking twitter user images if url is valid and getting image properties
     :param twitter_id:
     :param twitter_screen_name:
     :param facebook_user_id:
+    :param maplight_id:
+    :param vote_smart_id:
     :param image_url_https:
     :param kind_of_image_twitter_profile:
     :param kind_of_image_twitter_background:
     :param kind_of_image_twitter_banner:
     :param kind_of_image_facebook_profile:
     :param kind_of_image_facebook_background:
+    :param kind_of_image_maplight:
+    :param kind_of_image_vote_smart:
     :return:
     """
     image_type = None
@@ -714,6 +732,8 @@ def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, ima
                     'twitter_id':                   twitter_id,
                     'twitter_screen_name':          twitter_screen_name,
                     'facebook_user_id':             facebook_user_id,
+                    'maplight_id':                  maplight_id,
+                    'vote_smart_id':                vote_smart_id,
                     'image_url_https':              image_url_https,
                     'image_type':                   image_type,
                     'analyze_image_url_results':    analyze_image_url_results
@@ -735,6 +755,8 @@ def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, ima
                     'twitter_id':                   twitter_id,
                     'twitter_screen_name':          twitter_screen_name,
                     'facebook_user_id':             facebook_user_id,
+                    'maplight_id':                  maplight_id,
+                    'vote_smart_id':                vote_smart_id,
                     'image_url_https':              image_url_https,
                     'image_type':                   image_type,
                     'analyze_image_url_results':    analyze_image_url_results
@@ -756,6 +778,8 @@ def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, ima
                     'twitter_id':                   twitter_id,
                     'twitter_screen_name':          twitter_screen_name,
                     'facebook_user_id':             facebook_user_id,
+                    'maplight_id':                  maplight_id,
+                    'vote_smart_id':                vote_smart_id,
                     'image_url_https':              image_url_https,
                     'image_type':                   image_type,
                     'analyze_image_url_results':    analyze_image_url_results
@@ -768,18 +792,50 @@ def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, ima
     elif kind_of_image_facebook_profile:
         image_type = FACEBOOK_PROFILE_IMAGE_NAME
         if not analyze_image_url_results['image_url_valid']:
-            # TODO image url is broken so reaching out to facebook and getting new image
-            pass
+            get_url = "https://graph.facebook.com/v2.7/{facebook_user_id}/picture?width=200&height=200"\
+                                  .format(facebook_user_id=facebook_user_id)
+            response = requests.get(get_url)
+            if response.status_code == HTTP_OK:
+                # new facebook profile image url found
+                image_url_https = response.url
+                if not image_url_https:
+                    # new facebook image url not found
+                    error_results = {
+                        'twitter_id':                   twitter_id,
+                        'twitter_screen_name':          twitter_screen_name,
+                        'facebook_user_id':             facebook_user_id,
+                        'maplight_id':                  maplight_id,
+                        'vote_smart_id':                vote_smart_id,
+                        'image_url_https':              image_url_https,
+                        'image_type':                   image_type,
+                        'analyze_image_url_results':    analyze_image_url_results
+                    }
+                    return error_results
+                # new facebook image url found
+                analyze_image_url_results = analyze_remote_url(image_url_https)
+
     elif kind_of_image_facebook_background:
         image_type = FACEBOOK_BACKGROUND_IMAGE_NAME
         if not analyze_image_url_results['image_url_valid']:
             # TODO image url is broken so reaching out to facebook and getting new image
+            pass
+    elif kind_of_image_maplight:
+        image_type = MAPLIGHT_IMAGE_NAME
+        if not analyze_image_url_results['image_url_valid']:
+            # TODO image url is broken so reaching out to maplight and getting new image
+            pass
+    elif kind_of_image_vote_smart:
+        image_type = VOTE_SMART_IMAGE_NAME
+        if not analyze_image_url_results['image_url_valid']:
+            # TODO image url is broken so reaching out to vote smart and getting new image
             pass
 
     results = {
         'twitter_id':                   twitter_id,
         'twitter_screen_name':          twitter_screen_name,
         'facebook_user_id':             facebook_user_id,
+        'maplight_id':                  maplight_id,
+        'vote_smart_id':                vote_smart_id,
         'image_url_https':              image_url_https,
         'image_type':                   image_type,
         'analyze_image_url_results':    analyze_image_url_results
@@ -789,7 +845,8 @@ def analyze_source_images(twitter_id, twitter_screen_name, facebook_user_id, ima
 
 def check_source_image_active(analyze_source_images_results, kind_of_image_twitter_profile,
                               kind_of_image_twitter_background, kind_of_image_twitter_banner,
-                              kind_of_image_facebook_profile, kind_of_image_facebook_background):
+                              kind_of_image_facebook_profile, kind_of_image_facebook_background,
+                              kind_of_image_maplight, kind_of_image_vote_smart):
     """
     Check if this source image is latest image or old one
     :param analyze_source_images_results:
@@ -798,6 +855,8 @@ def check_source_image_active(analyze_source_images_results, kind_of_image_twitt
     :param kind_of_image_twitter_banner:
     :param kind_of_image_facebook_profile:
     :param kind_of_image_facebook_background:
+    :param kind_of_image_maplight:
+    :param kind_of_image_vote_smart:
     :return:
     """
     is_active_version = False
@@ -831,32 +890,23 @@ def check_source_image_active(analyze_source_images_results, kind_of_image_twitt
     elif kind_of_image_facebook_background:
         # TODO need to find if this facebook image is active or not
         is_active_version = True
+    elif kind_of_image_maplight:
+        # TODO need to find if this maplight image is active or not
+        is_active_version = True
+    elif kind_of_image_vote_smart:
+        # TODO need to find if this vote smart image is active or not
+        is_active_version = True
 
     return is_active_version
 
 
-def create_resized_images_for_voters(voter_id):
+def create_resized_images_for_all_voters():
     """
-    Create resized images that do not exist for all voters or specific voter_id
-    :param voter_id:
+    Create resized images for all voters
     :return:
     """
     create_all_resized_images_results = []
-    we_vote_image_list = []
-    voter_manager = VoterManager()
-    we_vote_image_manager = WeVoteImageManager()
-
-    if positive_value_exists(voter_id):
-        # if voter_id is defined then create resized images for that voter only
-        voter_results = voter_manager.retrieve_voter_by_id(voter_id)
-        if voter_results['success']:
-            voter_we_vote_id = voter_results['voter'].we_vote_id
-            we_vote_image_list_results = we_vote_image_manager.\
-                retrieve_we_vote_image_list_from_we_vote_id(voter_we_vote_id)
-            we_vote_image_list = we_vote_image_list_results['we_vote_image_list']
-    else:
-        # voter_id is not defined then create resized images for all voters
-        we_vote_image_list = WeVoteImage.objects.all()
+    we_vote_image_list = WeVoteImage.objects.all()
 
     for we_vote_image in we_vote_image_list:
         # Iterate through all cached images
@@ -885,6 +935,33 @@ def retrieve_all_images_for_one_candidate(candidate_we_vote_id):
             we_vote_image_list = list(we_vote_image_list_query)
 
     return we_vote_image_list
+
+
+def cache_and_create_resized_images_for_voter(voter_id):
+    """
+    Create resized images for specific voter_id
+    :param voter_id:
+    :return:
+    """
+    create_all_resized_images_results = []
+    voter_manager = VoterManager()
+    we_vote_image_manager = WeVoteImageManager()
+
+    # cache original image
+    cache_images_for_a_voter_results = migrate_remote_voter_image_urls_to_local_cache(voter_id)
+
+    # create resized images for that voter only
+    voter_results = voter_manager.retrieve_voter_by_id(voter_id)
+    if voter_results['success']:
+        voter_we_vote_id = voter_results['voter'].we_vote_id
+        we_vote_image_list_results = we_vote_image_manager.\
+            retrieve_we_vote_image_list_from_we_vote_id(voter_we_vote_id)
+        for we_vote_image in we_vote_image_list_results['we_vote_image_list']:
+            # Iterate through all cached images
+            create_resized_images_results = create_resized_image(we_vote_image)
+            create_resized_images_results.update(cache_images_for_a_voter_results)
+            create_all_resized_images_results.append(create_resized_images_results)
+        return create_all_resized_images_results
 
 
 def retrieve_all_images_for_one_voter(voter_id):
@@ -924,6 +1001,8 @@ def create_resized_image(we_vote_image):
     we_vote_parent_image_id = we_vote_image.id
     twitter_id = we_vote_image.twitter_id
     facebook_user_id = we_vote_image.facebook_user_id
+    maplight_id = we_vote_image.maplight_id
+    vote_smart_id = we_vote_image.vote_smart_id
     if positive_value_exists(we_vote_image.we_vote_image_file_location):
         image_format = we_vote_image.we_vote_image_file_location.split(".")[-1]
     else:
@@ -946,7 +1025,13 @@ def create_resized_image(we_vote_image):
         'cached_tiny_twitter_background_image':     False,
         'cached_large_twitter_banner_image':        False,
         'cached_medium_twitter_banner_image':       False,
-        'cached_tiny_twitter_banner_image':         False
+        'cached_tiny_twitter_banner_image':         False,
+        'cached_large_maplight_image':              False,
+        'cached_medium_maplight_image':             False,
+        'cached_tiny_maplight_image':               False,
+        'cached_large_vote_smart_image':            False,
+        'cached_medium_vote_smart_image':           False,
+        'cached_tiny_vote_smart_image':             False,
     }
 
     if we_vote_image.kind_of_image_twitter_profile:
@@ -1164,13 +1249,100 @@ def create_resized_image(we_vote_image):
         else:
             create_resized_image_results['cached_tiny_facebook_background_image'] = IMAGE_ALREADY_CACHED
         '''
+    elif we_vote_image.kind_of_image_maplight:
+        image_url_https = we_vote_image.maplight_image_url_https
+        # Check if medium or tiny image versions exist or not
+        resized_version_exists_results = check_resized_version_exists(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, image_url_https=image_url_https,
+            kind_of_image_maplight=True)
+        if not resized_version_exists_results['large_image_version_exists']:
+            # medium version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, maplight_id=maplight_id, image_format=image_format,
+                kind_of_image_maplight=True, kind_of_image_large=True)
+            create_resized_image_results['cached_large_maplight_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_large_maplight_image'] = IMAGE_ALREADY_CACHED
+
+        if not resized_version_exists_results['medium_image_version_exists']:
+            # medium version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, maplight_id=maplight_id, image_format=image_format,
+                kind_of_image_maplight=True, kind_of_image_medium=True)
+            create_resized_image_results['cached_medium_maplight_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_medium_maplight_image'] = IMAGE_ALREADY_CACHED
+
+        if not resized_version_exists_results['tiny_image_version_exists']:
+            # tiny version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, maplight_id=twitter_id, image_format=image_format,
+                kind_of_image_maplight=True, kind_of_image_tiny=True)
+            create_resized_image_results['cached_tiny_maplight_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_tiny_maplight_image'] = IMAGE_ALREADY_CACHED
+
+    elif we_vote_image.kind_of_image_vote_smart:
+        image_url_https = we_vote_image.vote_smart_image_url_https
+        # Check if medium or tiny image versions exist or not
+        resized_version_exists_results = check_resized_version_exists(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id, image_url_https=image_url_https,
+            kind_of_image_vote_smart=True)
+        if not resized_version_exists_results['large_image_version_exists']:
+            # medium version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, vote_smart_id=vote_smart_id, image_format=image_format,
+                kind_of_image_vote_smart=True, kind_of_image_large=True)
+            create_resized_image_results['cached_large_vote_smart_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_large_vote_smart_image'] = IMAGE_ALREADY_CACHED
+
+        if not resized_version_exists_results['medium_image_version_exists']:
+            # medium version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, vote_smart_id=vote_smart_id, image_format=image_format,
+                kind_of_image_vote_smart=True, kind_of_image_medium=True)
+            create_resized_image_results['cached_medium_vote_smart_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_medium_vote_smart_image'] = IMAGE_ALREADY_CACHED
+
+        if not resized_version_exists_results['tiny_image_version_exists']:
+            # tiny version does not exist so resize image and cache it
+            cache_resized_image_locally_results = cache_resized_image_locally(
+                google_civic_election_id, image_url_https, we_vote_parent_image_id,
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id, vote_smart_id=vote_smart_id, image_format=image_format,
+                kind_of_image_vote_smart=True, kind_of_image_tiny=True)
+            create_resized_image_results['cached_tiny_vote_smart_image'] = \
+                cache_resized_image_locally_results['success']
+        else:
+            create_resized_image_results['cached_tiny_vote_smart_image'] = IMAGE_ALREADY_CACHED
+
     return create_resized_image_results
 
 
 def check_resized_version_exists(voter_we_vote_id=None, candidate_we_vote_id=None, organization_we_vote_id=None,
                                  image_url_https=None, kind_of_image_twitter_profile=False,
                                  kind_of_image_twitter_background=False, kind_of_image_twitter_banner=False,
-                                 kind_of_image_facebook_profile=False, kind_of_image_facebook_background=False):
+                                 kind_of_image_facebook_profile=False, kind_of_image_facebook_background=False,
+                                 kind_of_image_maplight=False, kind_of_image_vote_smart=False):
     """
     Check if medium or tiny image versions already exist or not
     :param voter_we_vote_id:
@@ -1181,7 +1353,9 @@ def check_resized_version_exists(voter_we_vote_id=None, candidate_we_vote_id=Non
     :param kind_of_image_twitter_background:
     :param kind_of_image_twitter_banner:
     :param kind_of_image_facebook_profile:
-    :param kind_of_image_facebook_background
+    :param kind_of_image_facebook_background:
+    :param kind_of_image_maplight:
+    :param kind_of_image_vote_smart:
     :return:
     """
     results = {
@@ -1212,6 +1386,14 @@ def check_resized_version_exists(voter_we_vote_id=None, candidate_we_vote_id=Non
         we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
             voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
             facebook_background_image_url_https=image_url_https)
+    elif kind_of_image_maplight:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            maplight_image_url_https=image_url_https)
+    elif kind_of_image_vote_smart:
+        we_vote_image_list_results = we_vote_image_manager.retrieve_we_vote_image_list_from_url(
+            voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
+            vote_smart_image_url_https=image_url_https)
 
     we_vote_image_list = we_vote_image_list_results['we_vote_image_list']
     for we_vote_image in we_vote_image_list:
@@ -1232,9 +1414,11 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
                                 voter_we_vote_id=None, candidate_we_vote_id=None, organization_we_vote_id=None,
                                 twitter_id=None, image_format=None,
                                 facebook_user_id=None, other_source=None, other_source_profile_image_url=None,
+                                maplight_id=None, vote_smart_id=None,
                                 is_active_version=False, kind_of_image_twitter_profile=False,
                                 kind_of_image_twitter_background=False, kind_of_image_twitter_banner=False,
                                 kind_of_image_facebook_profile=False, kind_of_image_facebook_background=False,
+                                kind_of_image_maplight=False, kind_of_image_vote_smart=False,
                                 kind_of_image_original=False, kind_of_image_large=False, kind_of_image_medium=False,
                                 kind_of_image_tiny=False):
     """
@@ -1250,12 +1434,16 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
     :param facebook_user_id:
     :param other_source:                        # can be MapLight or VoteSmart
     :param other_source_profile_image_url:      # TODO need to find a way to get this
+    :param maplight_id:
+    :param vote_smart_id:
     :param is_active_version:
     :param kind_of_image_twitter_profile:
     :param kind_of_image_twitter_background:
     :param kind_of_image_twitter_banner:
     :param kind_of_image_facebook_profile:
     :param kind_of_image_facebook_background:
+    :param kind_of_image_maplight:
+    :param kind_of_image_vote_smart:
     :param kind_of_image_original:
     :param kind_of_image_large:
     :param kind_of_image_medium:
@@ -1278,8 +1466,8 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
     create_we_vote_image_results = we_vote_image_manager.create_we_vote_image(
         google_civic_election_id, voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
         kind_of_image_twitter_profile, kind_of_image_twitter_background, kind_of_image_twitter_banner,
-        kind_of_image_facebook_profile, kind_of_image_facebook_background,
-        kind_of_image_original, kind_of_image_large, kind_of_image_medium, kind_of_image_tiny)
+        kind_of_image_facebook_profile, kind_of_image_facebook_background, kind_of_image_maplight,
+        kind_of_image_vote_smart, kind_of_image_original, kind_of_image_large, kind_of_image_medium, kind_of_image_tiny)
     status += create_we_vote_image_results['status']
     if not create_we_vote_image_results['we_vote_image_saved']:
         error_results = {
@@ -1325,6 +1513,10 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
         image_type = FACEBOOK_PROFILE_IMAGE_NAME
     elif kind_of_image_facebook_background:
         image_type = FACEBOOK_BACKGROUND_IMAGE_NAME
+    elif kind_of_image_maplight:
+        image_type = MAPLIGHT_IMAGE_NAME
+    elif kind_of_image_vote_smart:
+        image_type = VOTE_SMART_IMAGE_NAME
     else:
         image_type = ''
 
@@ -1333,6 +1525,7 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
         voter_we_vote_id, candidate_we_vote_id, organization_we_vote_id,
         kind_of_image_twitter_profile, kind_of_image_twitter_background, kind_of_image_twitter_banner,
         kind_of_image_facebook_profile, kind_of_image_facebook_background,
+        kind_of_image_maplight, kind_of_image_vote_smart,
         kind_of_image_original, kind_of_image_large, kind_of_image_medium, kind_of_image_tiny)
     for cached_we_vote_image in cached_todays_we_vote_image_list_results['we_vote_image_list']:
         if cached_we_vote_image.same_day_image_version:
@@ -1353,6 +1546,16 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
         save_source_info_results = we_vote_image_manager.save_we_vote_image_twitter_info(
             we_vote_image, twitter_id, image_width, image_height, image_url_https, same_day_image_version,
             kind_of_image_twitter_profile, kind_of_image_twitter_background, kind_of_image_twitter_banner)
+    elif kind_of_image_maplight:
+        # image url is valid so store source image of maplight to WeVoteImage
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_maplight_info(
+            we_vote_image, maplight_id, image_width, image_height, image_url_https, same_day_image_version,
+            kind_of_image_maplight)
+    elif kind_of_image_vote_smart:
+        # image url is valid so store source image of maplight to WeVoteImage
+        save_source_info_results = we_vote_image_manager.save_we_vote_image_vote_smart_info(
+            we_vote_image, vote_smart_id, image_width, image_height, image_url_https, same_day_image_version,
+            kind_of_image_vote_smart)
 
     status += " " + save_source_info_results['status']
     if save_source_info_results['success']:
@@ -1393,7 +1596,7 @@ def cache_resized_image_locally(google_civic_election_id, image_url_https, we_vo
 
         status += " IMAGE_STORED_LOCALLY"
         resized_image_created = we_vote_image_manager.resize_we_vote_master_image(
-            we_vote_image_file_name, image_width, image_height)
+            we_vote_image_file_name, image_width, image_height, image_type)
         if not resized_image_created:
             error_results = {
                 'success':                      success,
@@ -1494,7 +1697,9 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
                                      organization_id=None, organization_we_vote_id=None,
                                      image_source=None, facebook_user_id=None,
                                      facebook_profile_image_url_https=None,
-                                     facebook_background_image_url_https=None):
+                                     facebook_background_image_url_https=None,
+                                     maplight_id=None, vote_smart_id=None,
+                                     maplight_image_url_https=None, vote_smart_image_url_https=None):
     """
     Cache orignial and resized images and return cached urls
     :param twitter_id:
@@ -1512,6 +1717,10 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
     :param facebook_user_id:
     :param facebook_profile_image_url_https:
     :param facebook_background_image_url_https:
+    :param maplight_id:
+    :param maplight_image_url_https:
+    :param vote_smart_id:
+    :param vote_smart_image_url_https:
     :return:
     """
     cached_twitter_profile_image_url_https = None
@@ -1519,6 +1728,8 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
     cached_twitter_profile_banner_url_https = None
     cached_facebook_profile_image_url_https = None
     cached_facebook_background_image_url_https = None
+    cached_maplight_image_url_https = None
+    cached_vote_smart_image_url_https = None
     we_vote_hosted_profile_image_url_large = None
     we_vote_hosted_profile_image_url_medium = None
     we_vote_hosted_profile_image_url_tiny = None
@@ -1534,7 +1745,9 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
         twitter_profile_background_image_url_https=twitter_profile_background_image_url_https,
         twitter_profile_banner_url_https=twitter_profile_banner_url_https,
         facebook_user_id=facebook_user_id, facebook_profile_image_url_https=facebook_profile_image_url_https,
-        facebook_background_image_url_https=facebook_background_image_url_https, image_source=image_source)
+        facebook_background_image_url_https=facebook_background_image_url_https, image_source=image_source,
+        maplight_id=maplight_id, maplight_image_url_https=maplight_image_url_https,
+        vote_smart_id=vote_smart_id, vote_smart_image_url_https=vote_smart_image_url_https)
 
     # retrieve refreshed cache url
     if cache_images_results['cached_twitter_profile_image']:
@@ -1648,12 +1861,98 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
             cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
             cached_facebook_background_image_url_https = cached_we_vote_image.we_vote_image_url
 
+    # retrieve refreshed cache url
+    if cache_images_results['cached_maplight_image']:
+        cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id,
+            maplight_image_url_https=maplight_image_url_https,
+            kind_of_image_original=True)
+        if cached_we_vote_image_results['success']:
+            cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+            cached_maplight_image_url_https = cached_we_vote_image.we_vote_image_url
+
+            # create resized image and cache it to s3
+            create_resized_image_results = create_resized_image(cached_we_vote_image)
+            # retrieve resized large/medium/tiny version url
+            if create_resized_image_results['cached_large_maplight_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    maplight_image_url_https=maplight_image_url_https,
+                    kind_of_image_large=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_large = cached_resized_we_vote_image.we_vote_image_url
+            if create_resized_image_results['cached_medium_maplight_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    maplight_image_url_https=maplight_image_url_https,
+                    kind_of_image_medium=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_medium = cached_resized_we_vote_image.we_vote_image_url
+            if create_resized_image_results['cached_tiny_maplight_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    maplight_image_url_https=maplight_image_url_https,
+                    kind_of_image_tiny=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
+
+    # retrieve refreshed cache url
+    if cache_images_results['cached_vote_smart_image']:
+        cached_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+            voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+            organization_we_vote_id=organization_we_vote_id,
+            vote_smart_image_url_https=vote_smart_image_url_https,
+            kind_of_image_original=True)
+        if cached_we_vote_image_results['success']:
+            cached_we_vote_image = cached_we_vote_image_results['we_vote_image']
+            cached_vote_smart_image_url_https = cached_we_vote_image.we_vote_image_url
+
+            # create resized image and cache it to s3
+            create_resized_image_results = create_resized_image(cached_we_vote_image)
+            # retrieve resized large/medium/tiny version url
+            if create_resized_image_results['cached_large_vote_smart_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    vote_smart_image_url_https=vote_smart_image_url_https,
+                    kind_of_image_large=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_large = cached_resized_we_vote_image.we_vote_image_url
+            if create_resized_image_results['cached_medium_vote_smart_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    vote_smart_image_url_https=vote_smart_image_url_https,
+                    kind_of_image_medium=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_medium = cached_resized_we_vote_image.we_vote_image_url
+            if create_resized_image_results['cached_tiny_vote_smart_image']:
+                cached_resized_we_vote_image_results = we_vote_image_manager.retrieve_we_vote_image_from_url(
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    vote_smart_image_url_https=vote_smart_image_url_https,
+                    kind_of_image_tiny=True)
+                if cached_resized_we_vote_image_results['success']:
+                    cached_resized_we_vote_image = cached_resized_we_vote_image_results['we_vote_image']
+                    we_vote_hosted_profile_image_url_tiny = cached_resized_we_vote_image.we_vote_image_url
+
     results = {
         'cached_twitter_profile_image_url_https':               cached_twitter_profile_image_url_https,
         'cached_twitter_profile_background_image_url_https':    cached_twitter_profile_background_image_url_https,
         'cached_twitter_profile_banner_url_https':              cached_twitter_profile_banner_url_https,
         'cached_facebook_profile_image_url_https':              cached_facebook_profile_image_url_https,
         'cached_facebook_background_image_url_https':           cached_facebook_background_image_url_https,
+        'cached_maplight_image_url_https':                      cached_maplight_image_url_https,
+        'cached_vote_smart_image_url_https':                    cached_vote_smart_image_url_https,
         'we_vote_hosted_profile_image_url_large':               we_vote_hosted_profile_image_url_large,
         'we_vote_hosted_profile_image_url_medium':              we_vote_hosted_profile_image_url_medium,
         'we_vote_hosted_profile_image_url_tiny':                we_vote_hosted_profile_image_url_tiny
@@ -1670,7 +1969,9 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_scr
                                                     organization_id=None, organization_we_vote_id=None,
                                                     image_source=None, facebook_user_id=None,
                                                     facebook_profile_image_url_https=None,
-                                                    facebook_background_image_url_https=None):
+                                                    facebook_background_image_url_https=None,
+                                                    maplight_id=None, vote_smart_id=None,
+                                                    maplight_image_url_https=None, vote_smart_image_url_https=None):
     """
     Cache all kind of images locally for a candidate or an organization such as profile, background
     :param twitter_id:
@@ -1688,6 +1989,10 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_scr
     :param facebook_user_id:
     :param facebook_profile_image_url_https:
     :param facebook_background_image_url_https:
+    :param maplight_id:
+    :param maplight_image_url_https:
+    :param vote_smart_id:
+    :param vote_smart_image_url_https:
     :return:
     """
     cache_all_kind_of_images_results = {
@@ -1702,7 +2007,9 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_scr
         'cached_twitter_background_image':  False,
         'cached_twitter_banner_image':      False,
         'cached_facebook_profile_image':    False,
-        'cached_facebook_background_image': False
+        'cached_facebook_background_image': False,
+        'cached_maplight_image':            False,
+        'cached_vote_smart_image':          False,
     }
     google_civic_election_id = 0
     is_active_version = True
@@ -1721,6 +2028,10 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_scr
         cache_all_kind_of_images_results['cached_facebook_profile_image'] = FACEBOOK_URL_NOT_FOUND
     if not facebook_background_image_url_https:
         cache_all_kind_of_images_results['cached_facebook_background_image'] = FACEBOOK_URL_NOT_FOUND
+    if not maplight_image_url_https:
+        cache_all_kind_of_images_results['cached_maplight_image'] = MAPLIGHT_URL_NOT_FOUND
+    if not vote_smart_image_url_https:
+        cache_all_kind_of_images_results['cached_vote_smart_image'] = VOTE_SMART_URL_NOT_FOUND
 
     if image_source is TWITTER and not positive_value_exists(twitter_id):
         cache_all_kind_of_images_results = {
@@ -1735,7 +2046,9 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_scr
             'cached_twitter_background_image':  TWITTER_USER_DOES_NOT_EXIST,
             'cached_twitter_banner_image':      TWITTER_USER_DOES_NOT_EXIST,
             'cached_facebook_profile_image':    False,
-            'cached_facebook_background_image': False
+            'cached_facebook_background_image': False,
+            'cached_maplight_image':            False,
+            'cached_vote_smart_image':          False
         }
         return cache_all_kind_of_images_results
 
@@ -1752,7 +2065,9 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_scr
             'cached_twitter_background_image':  False,
             'cached_twitter_banner_image':      False,
             'cached_facebook_profile_image':    FACEBOOK_USER_DOES_NOT_EXIST,
-            'cached_facebook_background_image': FACEBOOK_USER_DOES_NOT_EXIST
+            'cached_facebook_background_image': FACEBOOK_USER_DOES_NOT_EXIST,
+            'cached_maplight_image':            False,
+            'cached_vote_smart_image':          False
         }
         return cache_all_kind_of_images_results
 
@@ -1913,5 +2228,69 @@ def migrate_latest_remote_image_urls_to_local_cache(twitter_id=None, twitter_scr
                     facebook_background_image_url_https=facebook_background_image_url_https,
                     voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
                     organization_we_vote_id=organization_we_vote_id, kind_of_image_facebook_background=True)
+
+        elif kind_of_image == "kind_of_image_maplight" and maplight_image_url_https:
+            # Get cached profile images and check if this image is already cached or not
+            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
+                kind_of_image_maplight=True, kind_of_image_original=True)
+            this_image_not_cached = True
+            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
+                # If image is already cached then no need to cache it again
+                if maplight_image_url_https == cached_we_vote_image.maplight_image_url_https or \
+                        maplight_image_url_https == cached_we_vote_image.we_vote_image_url:
+                    cache_all_kind_of_images_results['cached_maplight_image'] = IMAGE_ALREADY_CACHED
+                    this_image_not_cached = False
+                    break
+
+            if this_image_not_cached:
+                # Image is not cached so caching it
+                cache_image_locally_results = cache_image_locally(
+                    google_civic_election_id, maplight_image_url_https,
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    maplight_id=maplight_id,
+                    is_active_version=is_active_version, kind_of_image_maplight=True,
+                    kind_of_image_original=True)
+                cache_all_kind_of_images_results['cached_maplight_image'] = \
+                    cache_image_locally_results['success']
+                # set active version False for other master images for same candidate/organization
+                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
+                    maplight_image_url_https=maplight_image_url_https, voter_we_vote_id=voter_we_vote_id,
+                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+                    kind_of_image_maplight=True)
+
+        elif kind_of_image == "kind_of_image_vote_smart" and vote_smart_image_url_https:
+            # Get cached profile images and check if this image is already cached or not
+            cached_we_vote_image_list_results = we_vote_image_manager.retrieve_cached_we_vote_image_list(
+                voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                organization_we_vote_id=organization_we_vote_id,
+                kind_of_image_vote_smart=True, kind_of_image_original=True)
+            this_image_not_cached = True
+            for cached_we_vote_image in cached_we_vote_image_list_results['we_vote_image_list']:
+                # If image is already cached then no need to cache it again
+                if vote_smart_image_url_https == cached_we_vote_image.vote_smart_image_url_https or \
+                        vote_smart_image_url_https == cached_we_vote_image.we_vote_image_url:
+                    cache_all_kind_of_images_results['cached_vote_smart_image'] = IMAGE_ALREADY_CACHED
+                    this_image_not_cached = False
+                    break
+
+            if this_image_not_cached:
+                # Image is not cached so caching it
+                cache_image_locally_results = cache_image_locally(
+                    google_civic_election_id, vote_smart_image_url_https,
+                    voter_we_vote_id=voter_we_vote_id, candidate_we_vote_id=candidate_we_vote_id,
+                    organization_we_vote_id=organization_we_vote_id,
+                    vote_smart_id=vote_smart_id,
+                    is_active_version=is_active_version, kind_of_image_vote_smart=True,
+                    kind_of_image_original=True)
+                cache_all_kind_of_images_results['cached_vote_smart_image'] = \
+                    cache_image_locally_results['success']
+                # set active version False for other master images for same candidate/organization
+                set_active_version_false_results = we_vote_image_manager.set_active_version_false_for_other_images(
+                    vote_smart_image_url_https=vote_smart_image_url_https, voter_we_vote_id=voter_we_vote_id,
+                    candidate_we_vote_id=candidate_we_vote_id, organization_we_vote_id=organization_we_vote_id,
+                    kind_of_image_vote_smart=True)
 
     return cache_all_kind_of_images_results
