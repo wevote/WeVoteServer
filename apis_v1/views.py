@@ -171,12 +171,10 @@ def donation_with_stripe_view(request): #donationWithStripe
     :return:
     """
 
-    token = request.POST.get('token')
-    email = request.POST.get('email')
-    donation_amount = request.POST.get('donation_amount')
-    monthly_donation = request.POST.get('monthly_donation')
-
-    # TODO add email - go over with Dale
+    token = request.GET.get('token', '')
+    email = request.GET.get('email', '')
+    donation_amount = request.GET.get('donation_amount', 0)
+    monthly_donation = positive_value_exists(request.GET.get('monthly_donation', False))
 
     voter_device_id = get_voter_device_id(request)  # We standardize how we take in the voter_device_id
     voter_we_vote_id = ''
@@ -194,9 +192,8 @@ def donation_with_stripe_view(request): #donationWithStripe
             'success': results['success'],
             'charge_id': results['charge_id'],
             'customer_id': results['customer_id'],
-            'saved_stripe_customer_id': results['saved_stripe_customer_id'],
-            'saved_stripe_donation': results['saved_stripe_donation'],
             'saved_donation_in_log': results['donation_entry_saved'],
+            'saved_stripe_donation': results['saved_stripe_donation'],
             'monthly_donation': monthly_donation,
             'subscription': results['subscription']
 
@@ -205,7 +202,7 @@ def donation_with_stripe_view(request): #donationWithStripe
 
     else:
         json_data = {
-            'status': "TOKEN_MISSING",
+            'status': "TOKEN_IS_MISSING",
             'success': False,
         }
         return HttpResponse(json.dumps(json_data), content_type='application/json')

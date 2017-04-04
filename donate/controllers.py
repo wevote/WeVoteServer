@@ -26,8 +26,6 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     subscription_saved = 'NOT_APPLICABLE'
     status = ''
     charge_processed_successfully = bool
-    # TODO remove test voter_we_vote_id
-    voter_we_vote_id = 'test7'
 
     ip_address = get_ip_from_headers(request)
 
@@ -38,7 +36,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         results = donation_manager.retrieve_stripe_customer_id(voter_we_vote_id)
         if results['success']:
             stripe_customer_id = results['stripe_customer_id']
-            saved_stripe_customer_id = "STRIPE_CUSTOMER_ID_ALREADY_EXISTS"
+            status += "STRIPE_CUSTOMER_ID_ALREADY_EXISTS "
         else:
             customer = stripe.Customer.create(
                 source=token,
@@ -46,16 +44,16 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
             )
             stripe_customer_id = customer.id
             saved_results = donation_manager.create_donate_link_to_voter(stripe_customer_id, voter_we_vote_id)
-            saved_stripe_customer_id = saved_results['success']
+            status += saved_results['status']
             charge_processed_successfully = True
 
         if positive_value_exists(monthly_donation):
             recurring_donation = donation_manager.create_recurring_donation(stripe_customer_id, voter_we_vote_id,
                                                                             donation_amount, donation_date_time)
-            recurring_donation_saved = recurring_donation['recurring_donation_plan_id']
-            recurring_donation_saved = recurring_donation['status']
+            # recurring_donation_saved = recurring_donation['recurring_donation_plan_id']
+            # recurring_donation_saved = recurring_donation['status']
             subscription_saved = recurring_donation['voter_subscription_saved']
-            status = recurring_donation['status']
+            status += recurring_donation['status']
             success = recurring_donation['success']
         else:
             charge = stripe.Charge.create(
@@ -80,29 +78,28 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         # Something else happened, completely unrelated to Stripe
         status += "A_NON_STRIPE_ERROR_OCCURRED"
 
-    if positive_value_exists(charge_id):
-        saved_donation = donation_manager.create_donation_from_voter(stripe_customer_id, voter_we_vote_id,
-                                                                     donation_amount, email,
-                                                                     donation_date_time, charge_id,
-                                                                     charge_processed_successfully)
-        saved_stripe_donation = saved_donation['success']
-        action_taken = 'VOTER_SUBMITTED_DONATION'
-        action_taken_date_time = donation_date_time
-        result_taken = 'DONATION_PROCESSED_SUCCESSFULLY'
-        result_taken_date_time = donation_date_time
+    saved_donation = donation_manager.create_donation_from_voter(stripe_customer_id, voter_we_vote_id,
+                                                                 donation_amount, email,
+                                                                 donation_date_time, charge_id,
+                                                                 charge_processed_successfully)
+    saved_stripe_donation = saved_donation['success']
+    action_taken = 'VOTER_SUBMITTED_DONATION'
+    action_taken_date_time = donation_date_time
+    result_taken = 'DONATION_PROCESSED_SUCCESSFULLY'
+    result_taken_date_time = donation_date_time
 
-        saved_entry = donation_manager.create_donation_log_entry(ip_address, stripe_customer_id, voter_we_vote_id,
-                                                                 charge_id, action_taken, action_taken_date_time,
-                                                                 result_taken, result_taken_date_time)
-        donation_entry_saved = saved_entry['success']
+    saved_entry = donation_manager.create_donation_log_entry(ip_address, stripe_customer_id, voter_we_vote_id,
+                                                             charge_id, action_taken, action_taken_date_time,
+                                                             result_taken, result_taken_date_time)
+    donation_entry_saved = saved_entry['success']
+
     results = {
         'status': status,
         'success': success,
         'charge_id': charge_id,
         'customer_id': stripe_customer_id,
-        'saved_stripe_customer_id': saved_stripe_customer_id,
-        'saved_stripe_donation': saved_stripe_donation,
         'donation_entry_saved': donation_entry_saved,
+        'saved_stripe_donation': saved_stripe_donation,
         'monthly_donation': monthly_donation,
         'subscription': subscription_saved
 

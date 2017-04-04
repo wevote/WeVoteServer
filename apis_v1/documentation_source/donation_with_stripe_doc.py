@@ -14,6 +14,11 @@ def donation_with_stripe_doc_template_values(url_root):
             'description':  'The unique key provided to any organization using the WeVoteServer APIs',
         },
         {
+            'name':         'voter_device_id',
+            'value':        'string',  # boolean, integer, long, string
+            'description':  'An 88 character unique identifier linked to a voter record on the server',
+        },
+        {
             'name':         'token',
             'value':        'string',  # boolean, integer, long, string
             'description':  'A unique identifier linked to a stripe payment made on the client side',

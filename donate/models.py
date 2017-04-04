@@ -60,8 +60,8 @@ class DonationSubscription(models.Model):
     This is a generated table with all users who are making recurring donations
     """
     stripe_customer_id = models.CharField(verbose_name="stripe unique customer id", max_length=255,
-                                          unique=True, null=False, blank=False)
-    voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", unique=True, null=False, max_length=255,
+                                          unique=False, null=False, blank=False)
+    voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", unique=False, null=False, max_length=255,
                                         blank=False)
     donation_plan_id = models.CharField(verbose_name="unique recurring donation plan id", default="", max_length=255,
                                         null=False, blank=False)
@@ -99,7 +99,7 @@ class DonationFromVoter(models.Model):
     stripe_card_id = models.CharField(verbose_name="stripe unique credit card id", max_length=255, unique=False,
                                       null=False, blank=False)
     charge_id = models.CharField(verbose_name="unique charge id per specific donation", max_length=255, default="",
-                                 null=False, blank=False)
+                                 null=True, blank=True)
     charge_to_be_processed = models.BooleanField(verbose_name="charge needs to be processed", default=False,
                                                  blank=False)
     charge_processed_successfully = models.BooleanField(verbose_name="donation completed successfully", default=False,
@@ -123,7 +123,7 @@ class DonationLog(models.Model):
     voter_we_vote_id = models.CharField(verbose_name="unique we vote user id", max_length=255, unique=False, null=False,
                                         blank=False)
     charge_id = models.CharField(verbose_name="unique charge id per specific donation", max_length=255, default="",
-                                 null=False, blank=False)
+                                 null=True, blank=True)
     action_taken = models.CharField(verbose_name="action taken", max_length=255, default="", null=True, blank=True)
     action_result = models.CharField(verbose_name="action result", max_length=255, default="", null=True, blank=True)
     action_taken_date_time = models.DateTimeField(verbose_name="action taken timestamp", auto_now=False,
@@ -146,10 +146,10 @@ class DonationManager(models.Model):
                 new_customer_id_created = DonateLinkToVoter.objects.create(
                     stripe_customer_id=stripe_customer_id, voter_we_vote_id=voter_we_vote_id)
                 success = True
-                status = 'STRIPE_CUSTOMER_ID_SAVED'
+                status = 'STRIPE_CUSTOMER_ID_SAVED '
             except:
                 success = False
-                status = 'STRIPE_CUSTOMER_ID_NOT_SAVED'
+                status = 'STRIPE_CUSTOMER_ID_NOT_SAVED '
 
         saved_results = {
             'success': success,
@@ -247,29 +247,6 @@ class DonationManager(models.Model):
         }
         return saved_results
 
-    # def create_stripe_plan(self, donation_plan_id, donation_amount):
-    #
-    #     plan = stripe.Plan.create(
-    #         amount=donation_amount,
-    #         interval="month",
-    #         currency="usd",
-    #         name=donation_plan_id,
-    #         id=donation_plan_id,
-    #     )
-    #     print("model plan.id " + plan.id)
-    #     if positive_value_exists(plan.id):
-    #         success = True
-    #         status = 'SUBSCRIPTION_PLAN_CREATED_IN_STRIPE'
-    #     else:
-    #         success = False
-    #         status = 'SUBSCRIPTION_PLAN_NOT_CREATED_IN_STRIPE'
-    #
-    #     results = {
-    #         'success': success,
-    #         'status': status,
-    #     }
-    #     return results
-
     def retrieve_or_create_recurring_donation_plan(self, donation_amount):
 
         donation_plan_id = "monthly-" + str(donation_amount)
@@ -345,10 +322,13 @@ class DonationManager(models.Model):
                                                                                   start_date_time=start_date_time)
             success = True
             status = 'NEW_SUBSCRIPTION_ENTRY_SAVED'
+        # except Exception as e:
+        #     handle_exception(e, logger=logger)
+        #     status = 'FAILED_NEW_SUBSCRIPTION_ENTRY_SAVE' \
+        #              '{error} [type: {error_type}]'.format(error=e.message, error_type=type(e)
         except:
             success = False
             status = 'NEW_SUBSCRIPTION_ENTRY_NOT_SAVED'
-        #     datatable is currently set up to allow one subscription entry per customer_id and voter_we_vote_id
 
         saved_results = {
             'success': success,
