@@ -35,20 +35,23 @@ logger = wevote_functions.admin.get_logger(__name__)
 #     def get(self, request, format=None):
 def ballot_items_sync_out_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
+    state_code = request.GET.get('state_code', '')
 
     try:
         ballot_item_list = BallotItem.objects.all()
         # We only want BallotItem values associated with polling locations
         ballot_item_list = ballot_item_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
-            polling_location_we_vote_id__exact='')
+            polling_location_we_vote_id__iexact='')
         if positive_value_exists(google_civic_election_id):
             ballot_item_list = ballot_item_list.filter(google_civic_election_id=google_civic_election_id)
+        if positive_value_exists(state_code):
+            ballot_item_list = ballot_item_list.filter(state_code__iexact=state_code)
 
         # serializer = BallotItemSerializer(ballot_item_list, many=True)
         # return Response(serializer.data)
         ballot_item_list_dict = ballot_item_list.values('ballot_item_display_name', 'contest_office_we_vote_id',
                                                         'contest_measure_we_vote_id', 'google_ballot_placement',
-                                                        'google_civic_election_id', 'local_ballot_order',
+                                                        'google_civic_election_id', 'state_code', 'local_ballot_order',
                                                         'measure_subtitle', 'polling_location_we_vote_id')
         if ballot_item_list_dict:
             ballot_item_list_json = list(ballot_item_list_dict)
@@ -63,7 +66,6 @@ def ballot_items_sync_out_view(request):
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 
 
-
 # This page does not need to be protected.
 # class BallotReturnedSyncOutView(APIView):
 #     def get(self, request, format=None):
@@ -74,7 +76,7 @@ def ballot_returned_sync_out_view(request):
         ballot_returned_list = BallotReturned.objects.all()
         # We only want BallotReturned values associated with polling locations
         ballot_returned_list = ballot_returned_list.exclude(polling_location_we_vote_id__isnull=True).exclude(
-            polling_location_we_vote_id__exact='')
+            polling_location_we_vote_id__iexact='')
         if positive_value_exists(google_civic_election_id):
             ballot_returned_list = ballot_returned_list.filter(google_civic_election_id=google_civic_election_id)
 
@@ -104,7 +106,7 @@ def ballot_items_import_from_master_server_view(request):
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
     state_code = request.GET.get('state_code', '')
 
-    results = ballot_items_import_from_master_server(request, google_civic_election_id)
+    results = ballot_items_import_from_master_server(request, google_civic_election_id, state_code)
 
     if not results['success']:
         messages.add_message(request, messages.ERROR, results['status'])

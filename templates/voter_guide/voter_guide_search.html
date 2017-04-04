@@ -29,7 +29,7 @@
             <td>{% if possible_organization.organization_website %}
                 <a href="{{ possible_organization.organization_website }}" target="_blank">{{ possible_organization.organization_website }}</a>
             {% endif %}</td>
-            <td><a href="{% url 'organization:organization_position_new' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}">
+            <td><a href="{% url 'organization:organization_position_new' possible_organization.organization_id %}?google_civic_election_id={{ google_civic_election_id }}&state_code={{ state_code }}">
                 Enter Position</a></td>
         </tr>
     {% endfor %}

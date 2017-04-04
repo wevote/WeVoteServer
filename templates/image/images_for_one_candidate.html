@@ -1,0 +1,47 @@
+{# templates/image/images_for_one_candidate.html #}
+{% extends "template_base.html" %}
+
+{% block title %}
+    {% if candidate_we_vote_id %}{{ candidate_we_vote_id }} candidate_we_vote_id
+    {% else %}No Candidate Found {% endif %}
+{% endblock %}
+
+{%  block content %}
+<h1>Images for One Candidate</h1>
+
+
+{% if images_for_one_candidate %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <td></td>
+            <td>We Vote ID</td>
+            <td>display_kind_of_image</td>
+            <td>&nbsp;</td>
+            <td>we_vote_image_url</td>
+        </tr>
+
+    {% for one_image_row in images_for_one_candidate %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ one_image_row.candidate_we_vote_id }}</td>
+            <td>{{ one_image_row.display_kind_of_image }} / {{ one_image_row.display_image_size }}</td>
+            <td>{% if one_image_row.display_image_size != "original" %}
+                {# Don't show image if too big #}
+                {% endif %}
+                <img src="{{ one_image_row.we_vote_image_url }}" />
+            </td>
+            <td>
+                {% if one_image_row.we_vote_image_url %}
+                    {{ one_image_row.we_vote_image_url }}
+                {% else %}{% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+
+    </table>
+{% else %}
+    <p>(no candidate images found)</p>
+{% endif %}
+<br />
+
+{% endblock %}

@@ -199,7 +199,8 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
     """
     status = ''
     success = False
-    facebook_friend_suggested = ''
+    facebook_suggested_friends_list = []
+    facebook_friends_list = []
     facebook_friend_suggestion_found = False
     facebook_suggested_friend_count = 0
     # Get voter_id from the voter_device_id
@@ -211,7 +212,8 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
             'voter_device_id':                  voter_device_id,
             'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
             'facebook_suggested_friend_count':  facebook_suggested_friend_count,
-            'facebook_friends_suggested':       facebook_friend_suggested,
+            'facebook_suggested_friends_list':  facebook_suggested_friends_list,
+            'facebook_friends_list':            facebook_friends_list
         }
         return error_results
 
@@ -224,13 +226,16 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
             'voter_device_id':                  voter_device_id,
             'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
             'facebook_suggested_friend_count':  facebook_suggested_friend_count,
-            'facebook_friends_suggested':       facebook_friend_suggested,
+            'facebook_suggested_friends_list':  facebook_suggested_friends_list,
+            'facebook_friends_list':            facebook_friends_list
         }
         return error_results
 
     we_vote_image_manager = WeVoteImageManager()
     facebook_friends_from_facebook_results = facebook_manager.retrieve_facebook_friends_from_facebook(voter_device_id)
-    facebook_users_list = facebook_friends_from_facebook_results['facebook_users_list']
+    facebook_suggested_friends_list = facebook_friends_from_facebook_results['facebook_suggested_friends_list']
+    facebook_friends_list = facebook_friends_from_facebook_results['facebook_friends_list']
+    facebook_users_list = facebook_friends_list + facebook_suggested_friends_list
     status += facebook_friends_from_facebook_results['status']
     success = facebook_friends_from_facebook_results['success']
     if facebook_friends_from_facebook_results['facebook_friends_list_found']:
@@ -260,6 +265,8 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
 
     # finding facebook_link_to_voter for all users and then updating SuggestedFriend table
     facebook_auth_response = auth_response_results['facebook_auth_response']
+    facebook_suggested_friends_list = facebook_manager.remove_my_facebook_entry_from_suggested_friends_list(
+        facebook_suggested_friends_list, facebook_auth_response.facebook_user_id)
     my_facebook_link_to_voter_results = facebook_manager.retrieve_facebook_link_to_voter(
         facebook_auth_response.facebook_user_id)
     status += ' ' + my_facebook_link_to_voter_results['status']
@@ -312,7 +319,8 @@ def facebook_friends_action_for_api(voter_device_id):   # facebookFriendsAction
         'voter_device_id':                  voter_device_id,
         'facebook_friend_suggestion_found': facebook_friend_suggestion_found,
         'facebook_suggested_friend_count':  facebook_suggested_friend_count,
-        'facebook_friends_suggested':       facebook_users_list,
+        'facebook_suggested_friends_list':  facebook_suggested_friends_list,
+        'facebook_friends_list':            facebook_friends_list
     }
     return results
 

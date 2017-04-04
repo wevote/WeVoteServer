@@ -504,6 +504,7 @@ def organization_position_new_view(request, organization_id):
     google_civic_election_id = request.GET.get('google_civic_election_id', 0)
     candidate_we_vote_id = request.GET.get('candidate_we_vote_id', False)
     measure_we_vote_id = request.GET.get('measure_we_vote_id', False)
+    state_code = request.GET.get('state_code', '')
 
     # Take in some incoming values
     candidate_and_measure_not_found = request.GET.get('candidate_and_measure_not_found', False)
@@ -551,14 +552,16 @@ def organization_position_new_view(request, organization_id):
     # Prepare a drop down of candidates competing in this election
     candidate_campaign_list = CandidateCampaignListManager()
     candidate_campaigns_for_this_election_list = []
-    results = candidate_campaign_list.retrieve_all_candidates_for_upcoming_election(google_civic_election_id, True)
+    results = candidate_campaign_list.retrieve_all_candidates_for_upcoming_election(google_civic_election_id,
+                                                                                    state_code, True)
     if results['candidate_list_found']:
         candidate_campaigns_for_this_election_list = results['candidate_list_objects']
 
     # Prepare a drop down of measures in this election
     contest_measure_list = ContestMeasureList()
     contest_measures_for_this_election_list = []
-    results = contest_measure_list.retrieve_all_measures_for_upcoming_election(google_civic_election_id, True)
+    results = contest_measure_list.retrieve_all_measures_for_upcoming_election(google_civic_election_id,
+                                                                               state_code, True)
     if results['measure_list_found']:
         contest_measures_for_this_election_list = results['measure_list_objects']
 
@@ -589,6 +592,7 @@ def organization_position_new_view(request, organization_id):
             'stance_selected':                              stance,
             'election_list':                                election_list,
             'google_civic_election_id':                     google_civic_election_id,
+            'state_code':                                   state_code,
             'organization_position_list':                   organization_position_list,
             'voter_authority':                              authority_results,
             # Incoming values from error state
@@ -784,6 +788,7 @@ def organization_position_edit_process_view(request):
                 return HttpResponseRedirect(
                     reverse('organization:organization_position_edit', args=([organization_id], [position_we_vote_id])) +
                     "?google_civic_election_id=" + str(google_civic_election_id) +
+                    "&state_code=" + str(state_code) +
                     "&stance=" + stance +
                     "&statement_text=" + statement_text +
                     "&more_info_url=" + more_info_url +
@@ -793,6 +798,7 @@ def organization_position_edit_process_view(request):
                 return HttpResponseRedirect(
                     reverse('organization:organization_position_new', args=([organization_id])) +
                     "?google_civic_election_id=" + str(google_civic_election_id) +
+                    "&state_code=" + str(state_code) +
                     "&stance=" + stance +
                     "&statement_text=" + statement_text +
                     "&more_info_url=" + more_info_url +

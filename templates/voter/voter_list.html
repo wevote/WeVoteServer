@@ -19,20 +19,23 @@
         <tr>
             <td></td>
             <td>ID</td>
+            <td>&nbsp;</td>
             <td>We Vote ID</td>
             <td>You</td>
             <td>Where</td>
             <td>FB?</td>
             <td>Tw? (OLD)</td>
-            <td>TwitterLinkToVoter</td>
+{#            <td>TwitterLinkToVoter</td> 2017-3-29 Not working#}
             <td>Email</td>
             <td>Admin</td>
             <td>Verified Volunteer</td>
+            <td>Voter Images</td>
         </tr>
     {% for voter in voter_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ voter.id }}</td>
+            <td>{% if voter.we_vote_hosted_profile_image_url_tiny %}<img src="{{ voter.we_vote_hosted_profile_image_url_tiny }}" />{% endif %}</td>
             <td>
                 {{ voter.get_full_name|default_if_none:"" }}
                 <a href="{% url 'voter:voter_edit' voter.id %}">
@@ -57,12 +60,12 @@
             {% else %}{% endif %}
             </td>
             <!-- TwitterLinkToVoter //-->
-            <td>
-            {% if voter.twitter_id_from_link_to_voter %}
-                @{{ voter.twitter_screen_name_from_link_to_voter }}<br />
-                {{ voter.twitter_id_from_link_to_voter }}
-            {% endif %}
-            </td>
+{#            <td> 2017-3-29 Not working#}
+{#            {% if voter.twitter_id_from_link_to_voter %}#}
+{#                @{{ voter.twitter_screen_name_from_link_to_voter }}<br />#}
+{#                {{ voter.twitter_id_from_link_to_voter }}#}
+{#            {% endif %}#}
+{#            </td>#}
             <!-- Email //-->
             <td>
             {% if voter.email %}{{ voter.email }}{% else %}{% endif %}
@@ -74,6 +77,10 @@
             <!-- Is verified volunteer? //-->
             <td>
             {% if voter.is_verified_volunteer %}Y{% else %}{% endif %}
+            </td>
+            <!-- See images //-->
+            <td>
+                <a href="{% url 'image:images_for_one_voter' voter.id %}" target="_blank">See images</a>
             </td>
         </tr>
     {% endfor %}

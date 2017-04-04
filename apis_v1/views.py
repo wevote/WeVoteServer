@@ -82,13 +82,14 @@ WE_VOTE_SERVER_ROOT_URL = get_environment_variable("WE_VOTE_SERVER_ROOT_URL")
 
 def ballot_item_options_retrieve_view(request):  # ballotItemOptionsRetrieve
     google_civic_election_id = convert_to_int(request.GET.get('google_civic_election_id', 0))
-    results = ballot_item_options_retrieve_for_api(google_civic_election_id)
+    state_code = request.GET.get('state_code', '')
+    results = ballot_item_options_retrieve_for_api(google_civic_election_id, state_code)
     response = HttpResponse(json.dumps(results['json_data']), content_type='application/json')
     return response
 
 
 def ballot_item_retrieve_view(request):  # ballotItemRetrieve
-    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', "")
+    kind_of_ballot_item = request.GET.get('kind_of_ballot_item', '')
     ballot_item_id = request.GET.get('ballot_item_id', 0)
     ballot_item_we_vote_id = request.GET.get('ballot_item_we_vote_id', None)
 
@@ -225,7 +226,8 @@ def facebook_friends_action_view(request):  # facebookFriendsActions
         'voter_device_id':                  voter_device_id,
         'facebook_friend_suggestion_found': results['facebook_friend_suggestion_found'],
         'facebook_suggested_friend_count':  results['facebook_suggested_friend_count'],
-        'facebook_friends_suggested':       results['facebook_friends_suggested'],
+        'facebook_suggested_friends_list':  results['facebook_suggested_friends_list'],
+        'facebook_friends_list':            results['facebook_friends_list']
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
 

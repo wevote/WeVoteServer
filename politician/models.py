@@ -322,7 +322,7 @@ class PoliticianManager(models.Model):
                 if convert_to_political_party_constant(candidate.party) != politician.political_party:
                     politician.political_party = convert_to_political_party_constant(candidate.party)
                     values_changed = True
-            if positive_value_exists(candidate.vote_smart_id) and candidate.voter_smart_id != politician.vote_smart_id:
+            if positive_value_exists(candidate.vote_smart_id) and candidate.vote_smart_id != politician.vote_smart_id:
                 politician.vote_smart_id = candidate.vote_smart_id
                 values_changed = True
             if positive_value_exists(candidate.maplight_id) and candidate.maplight_id != politician.maplight_id:

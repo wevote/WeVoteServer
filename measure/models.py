@@ -425,7 +425,7 @@ class ContestMeasureList(models.Model):
     def __unicode__(self):
         return "ContestMeasureList"
 
-    def retrieve_all_measures_for_upcoming_election(self, google_civic_election_id=0,
+    def retrieve_all_measures_for_upcoming_election(self, google_civic_election_id=0, state_code='',
                                                     return_list_of_objects=False):
         measure_list_objects = []
         measure_list_light = []
@@ -438,6 +438,8 @@ class ContestMeasureList(models.Model):
             else:
                 # TODO Limit this search to upcoming_elections only
                 pass
+            if positive_value_exists(state_code):
+                measure_queryset = measure_queryset.filter(state_code__iexact=state_code)
             measure_queryset = measure_queryset.order_by("measure_title")
             # We never expect more than 300 measures for one election
             measure_list_objects = measure_queryset[:300]
