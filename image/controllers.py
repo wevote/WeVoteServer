@@ -1701,7 +1701,7 @@ def cache_original_and_resized_image(twitter_id=None, twitter_screen_name=None,
                                      maplight_id=None, vote_smart_id=None,
                                      maplight_image_url_https=None, vote_smart_image_url_https=None):
     """
-    Cache orignial and resized images and return cached urls
+    Cache original and re-sized images and return cached urls
     :param twitter_id:
     :param twitter_screen_name:
     :param twitter_profile_image_url_https:
