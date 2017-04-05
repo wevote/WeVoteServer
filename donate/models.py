@@ -130,6 +130,7 @@ class DonationLog(models.Model):
                                                   auto_now_add=True)
     action_result_date_time = models.DateTimeField(verbose_name="action result timestamp", auto_now=False,
                                                    auto_now_add=True)
+    error_text_description = models.TextField(verbose_name="message describing error in detail", null=True, blank=True)
 
 
 class DonationManager(models.Model):
@@ -223,20 +224,24 @@ class DonationManager(models.Model):
         return results
 
     def create_donation_log_entry(self, ip_address, stripe_customer_id, voter_we_vote_id, charge_id, action_taken,
-                                  action_taken_date_time, action_result, action_result_date_time):
+                                  action_taken_date_time, action_result, action_result_date_time,
+                                  error_text_description):
 
         new_donation_entry_created = False
         # action_taken should be VOTER_SUBMITTED_DONATION, VOTER_CANCELED_DONATION or CANCEL_REQUEST_SUBMITTED
         # action_result should be CANCEL_REQUEST_FAILED, CANCEL_REQUEST_SUCCEEDED or DONATION_PROCESSED_SUCCESSFULLY
+        action_taken = action_taken[:75]
+        action_result = action_result[:75]
 
         try:
             new_donation_entry_created = DonationLog.objects.create(
                 ip_address=ip_address, stripe_customer_id=stripe_customer_id, voter_we_vote_id=voter_we_vote_id,
                 charge_id=charge_id, action_taken=action_taken, action_taken_date_time=action_taken_date_time,
-                action_result=action_result, action_result_date_time=action_result_date_time)
+                action_result=action_result, action_result_date_time=action_result_date_time,
+                error_text_description=error_text_description)
             success = True
             status = 'DONATION_LOG_ENTRY_SAVED'
-        except:
+        except Exception as e:
             success = False
             status = 'DONATION_LOG_ENTRY_NOT_SAVED'
 
