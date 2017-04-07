@@ -21,7 +21,9 @@
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
         Organization</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}">
-        Position</a>
+        Position</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}">
+        Politician</a>
 
 {% else %}
     <h1>
@@ -35,6 +37,8 @@
         Process Organization Data
     {% elif kind_of_batch == "POSITION" %}
         Process Position Data
+    {% elif kind_of_batch == "POLITICIAN" %}
+        Process Politician Data
     {% else %}
         Kind of data not recognized: Please STOP
     {% endif %}
@@ -78,6 +82,14 @@
             {% if batch_header_map.batch_header_map_003 %}<th>{{ batch_header_map.batch_header_map_003 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_004 %}<th>{{ batch_header_map.batch_header_map_004 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_005 %}<th>{{ batch_header_map.batch_header_map_005 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_006 %}<th>{{ batch_header_map.batch_header_map_006 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_007 %}<th>{{ batch_header_map.batch_header_map_007 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_008 %}<th>{{ batch_header_map.batch_header_map_008 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_009 %}<th>{{ batch_header_map.batch_header_map_009 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_0010 %}<th>{{ batch_header_map.batch_header_map_010 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_011 %}<th>{{ batch_header_map.batch_header_map_011 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_012 %}<th>{{ batch_header_map.batch_header_map_012 }}</th>{% endif %}
+            {% if batch_header_map.batch_header_map_013 %}<th>{{ batch_header_map.batch_header_map_013 }}</th>{% endif %}
         </tr>
     {% for one_batch_row in batch_row_list %}
         <tr>
@@ -87,6 +99,14 @@
             {% if batch_header_map.batch_header_map_003 %}<td>{{ one_batch_row.batch_row_003 }}</td>{% endif %}
             {% if batch_header_map.batch_header_map_004 %}<td>{{ one_batch_row.batch_row_004 }}</td>{% endif %}
             {% if batch_header_map.batch_header_map_005 %}<td>{{ one_batch_row.batch_row_005 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_006 %}<td>{{ one_batch_row.batch_row_006 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_007 %}<td>{{ one_batch_row.batch_row_007 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_008 %}<td>{{ one_batch_row.batch_row_008 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_009 %}<td>{{ one_batch_row.batch_row_009 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_010 %}<td>{{ one_batch_row.batch_row_010 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_011 %}<td>{{ one_batch_row.batch_row_011 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_012 %}<td>{{ one_batch_row.batch_row_012 }}</td>{% endif %}
+            {% if batch_header_map.batch_header_map_013 %}<td>{{ one_batch_row.batch_row_013 }}</td>{% endif %}
         </tr>
         {% if one_batch_row.batch_row_action_exists %}
         <tr>

@@ -36,10 +36,11 @@ def import_ctcl_from_xml_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    # import_maplight_from_json(request)
-    #
-    import_ctcl_from_xml(request)
+    results = import_ctcl_from_xml(request)
 
-    messages.add_message(request, messages.INFO, 'CTCL sample data imported.')
+    if not results['success']:
+        messages.add_message(request, messages.ERROR, results['status'])
+    else:
+        messages.add_message(request, messages.INFO, 'CTCL sample data imported.')
 
-    return HttpResponseRedirect(reverse('admin_tools:admin_home', args=()))
+    return HttpResponseRedirect(reverse('import_export_ctcl:import_export_ctcl_index', args=()))

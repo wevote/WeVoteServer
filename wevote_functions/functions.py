@@ -89,6 +89,9 @@ PEACE_AND_FREEDOM = 'PEACE_AND_FREEDOM'
 REFORM = 'REFORM'
 REPUBLICAN = 'REPUBLICAN'
 
+LANGUAGE_CODE_ENGLISH = 'en'
+LANGUAGE_CODE_SPANISH = 'es'
+
 
 class LocalSwitch(object):
     def __init__(self, value):
