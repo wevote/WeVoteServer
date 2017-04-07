@@ -3,10 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from django.db import models
-from exception.models import handle_record_found_more_than_one_exception,\
-    handle_record_not_found_exception, handle_record_not_saved_exception
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_electoral_district_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -57,11 +54,11 @@ ELECTORAL_DISTRICT_TYPE_CHOICES = (
     (ELECTORAL_DISTRICT_TYPE_OTHER, 'other'),
 )
 
+
 class ElectoralDistrict(models.Model):
     # The unique ID of this electoral_district. (Provided by CTCL).
     # TODO ctcl_id_temp is unique for each data file, however it may not be unique across different data feeds
-    ctcl_id_temp = models.CharField(verbose_name="temporary ctcl id",
-                                                max_length=255, null=True, unique=True)
+    ctcl_id_temp = models.CharField(verbose_name="temporary ctcl id", max_length=255, null=True, unique=True)
     we_vote_id = models.CharField(verbose_name="google civic election id", max_length=32, null=True, unique=True)
     # Make unique=True after data is migrated
     # required fields as per VIP specification for ElectoralDistrict are name and type, rest of the fields are optional
@@ -72,7 +69,7 @@ class ElectoralDistrict(models.Model):
                                                default=ELECTORAL_DISTRICT_TYPE_STATE, blank=False, null=False)
 
     electoral_district_number = models.PositiveIntegerField(verbose_name="electoral district number", blank=True,
-                                                 null=True)
+                                                            null=True)
     electoral_district_other_type = models.CharField(verbose_name="Allows for cataloging a new DistrictType option "
                                                                   "when Type is specified as other", null=True,
                                                      blank=True, max_length=255)
@@ -80,8 +77,9 @@ class ElectoralDistrict(models.Model):
     ocd_id_external_id = models.CharField(verbose_name="ocd id external identifier", max_length=255, blank=True,
                                           null=True)
     # for now we are only handling ocd_id from the various ExternalIdentifier nodes. Refer to this link for details
-    # http://vip-specification.readthedocs.io/en/release/built_rst/xml/enumerations/identifier_type.html#multi-xml-identifier-type
-    # fips_external_id = models.CharField(verbose_name="fips external identifier", max_length=255, blank=True, null=True)
+    # http://vip-specification.readthedocs.io/en/release/built_rst/xml/enumerations/identifier_type.html
+    # #multi-xml-identifier-type
+    # fips_external_id = models.CharField(verbose_name="fips external id", max_length=255, blank=True, null=True)
     # local_level_external_id = models.CharField(verbose_name="local level external identifier", max_length=255,
     #                                            blank=True, null=True)
     # national_level_external_id = models.CharField(verbose_name="national level external identifier", max_length=255,
@@ -140,6 +138,8 @@ class ElectoralDistrict(models.Model):
 #                                   max_length=255, null=True, blank=True)
 #     value = models.CharField(verbose_name='value of the external identifier', null=False, blank=False, max_length=255)
 #
+
+
 class ElectoralDistrictManager(models.Model):
 
     def update_or_create_electoral_district(self, ctcl_id_temp, electoral_district_name,

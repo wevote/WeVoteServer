@@ -21,7 +21,9 @@
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=ORGANIZATION&google_civic_election_id={{ google_civic_election_id }}">
         Organization</a> -
     <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POSITION&google_civic_election_id={{ google_civic_election_id }}">
-        Position</a>
+        Position</a> -
+    <a href="{% url 'import_export_batches:batch_list' %}?kind_of_batch=POLITICIAN&google_civic_election_id={{ google_civic_election_id }}">
+        Politician</a>
 
 {% else %}
     <h1>
@@ -35,6 +37,8 @@
         Import Organization Data in Bulk
     {% elif kind_of_batch == "POSITION" %}
         Import Position Data in Bulk
+    {% elif kind_of_batch == "POLITICIAN" %}
+        Import Politician Data in Bulk
     {% else %}
         Kind of data not recognized: Please STOP
     {% endif %}

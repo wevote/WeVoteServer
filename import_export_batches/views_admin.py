@@ -4,7 +4,7 @@
 
 from .models import BatchDescription, BatchHeaderMap, BatchManager, BatchRow
 from admin_tools.views import redirect_to_sign_in_page
-from ballot.models import MEASURE, OFFICE, CANDIDATE
+from ballot.models import MEASURE, OFFICE, CANDIDATE, POLITICIAN
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.messages import get_messages
@@ -57,7 +57,7 @@ def batch_list_view(request):
     messages_on_stage = get_messages(request)
     batch_list_found = False
     try:
-        batch_list = BatchDescription.objects.order_by('-google_civic_election_id')
+        batch_list = BatchDescription.objects.order_by('-batch_header_id')
         if positive_value_exists(google_civic_election_id):
             batch_list = batch_list.filter(google_civic_election_id=google_civic_election_id)
         if positive_value_exists(kind_of_batch):
@@ -112,7 +112,7 @@ def batch_list_process_view(request):
 
     batch_uri_encoded = urlquote(batch_uri) if positive_value_exists(batch_uri) else ""
 
-    if kind_of_batch not in (MEASURE, OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION):
+    if kind_of_batch not in (MEASURE, OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION, POLITICIAN):
         messages.add_message(request, messages.ERROR, 'The kind_of_batch is required for a batch import.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?google_civic_election_id=" + str(google_civic_election_id) +
@@ -136,11 +136,11 @@ def batch_list_process_view(request):
 
             # check file type
             filetype = batch_manager.find_file_type(batch_uri)
-            if "XML" in filetype:
+            if "xml" in filetype:
                 # file is XML
                 # Retrieve the VIP data from XML
                 results = batch_manager.create_batch_vip_xml(batch_uri, kind_of_batch, google_civic_election_id,
-                                                    organization_we_vote_id)
+                                                             organization_we_vote_id)
             else:
                 results = batch_manager.create_batch(batch_uri, kind_of_batch, google_civic_election_id,
                                                      organization_we_vote_id)

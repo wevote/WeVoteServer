@@ -317,3 +317,13 @@ def fetch_next_we_vote_id_electoral_district_integer():
     we_vote_settings_manager.save_setting('we_vote_id_electoral_district_integer',
                                           we_vote_id_electoral_district_integer)
     return we_vote_id_electoral_district_integer
+
+def fetch_next_we_vote_id_party_integer():
+    we_vote_settings_manager = WeVoteSettingsManager()
+    we_vote_id_party_integer = \
+        we_vote_settings_manager.fetch_setting('we_vote_id_party_integer')
+    we_vote_id_party_integer = convert_to_int(we_vote_id_party_integer)
+    we_vote_id_party_integer += 1
+    we_vote_settings_manager.save_setting('we_vote_id_party_integer',
+                                          we_vote_id_party_integer)
+    return we_vote_id_party_integer
