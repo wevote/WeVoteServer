@@ -130,7 +130,9 @@ class DonationLog(models.Model):
                                                   auto_now_add=True)
     action_result_date_time = models.DateTimeField(verbose_name="action result timestamp", auto_now=False,
                                                    auto_now_add=True)
-    error_text_description = models.TextField(verbose_name="message describing error in detail", null=True, blank=True)
+    error_text_description = models.TextField(verbose_name="internal message describing error in detail", null=True,
+                                              blank=True)
+    error_message_for_voter = models.TextField(verbose_name="detailed message shown to voter", null=True, blank=True)
 
 
 class DonationManager(models.Model):
@@ -377,4 +379,37 @@ class DonationManager(models.Model):
             'voter_subscription_saved': subscription_entry['status']
         }
         return results
+
+    def retrieve_stripe_card_error_message(self, error_type):
+
+        card_error_message = {
+            'approve_with_id': 'The transaction cannot be authorized. Please try again or contact your bank.',
+            'card_not_supported': 'Your card does not support this type of purchase. Contact your bank for more information.',
+            'card_velocity_exceeded': 'You have exceeded the balance or credit limit available on your card.',
+            'currency_not_supported': 'Your card does not support the specified currency.',
+            'duplicate_transaction': 'This transaction has been declined because a transaction with identical amount and credit card information was submitted very recently.',
+            'fraudulent': 'This transaction has been flagged as potentially fraudulent. Contact your bank for more information.',
+            'incorrect_number':	'Your card number is incorrect. Please enter the correct number and try again.',
+            'incorrect_pin': 'Your pin is incorrect. Please enter the correct number and try again.',
+            'incorrect_zip': 'Your ZIP/postal code is incorrect. Please enter the correct number and try again.',
+            'insufficient_funds': 'Your card has insufficient funds to complete this transaction.',
+            'invalid_account': 'Your card, or account the card is connected to, is invalid. Contact your bank for more information.',
+            'invalid_amount': 'The payment amount exceeds the amount that is allowed. Contact your bank for more information.',
+            'invalid_cvc': 'Your CVC number is incorrect. Please enter the correct number and try again.',
+            'invalid_expiry_year': 'The expiration year is invalid. Please enter the correct number and try again.',
+            'invalid_number': 'Your card number is incorrect. Please enter the correct number and try again.',
+            'invalid_pin': 'Your pin is incorrect. Please enter the correct number and try again.',
+            'issuer_not_available': 'The payment cannot be authorized. Please try again or contact your bank.',
+            'new_account_information_available': 'Your card, or account the card is connected to, is invalid. Contact your bank for more information.',
+            'withdrawal_count_limit_exceeded': 'You have exceeded the balance or credit limit on your card. Please try another payment method.',
+            'pin_try_exceeded':	'The allowable number of PIN tries has been exceeded. Please try again later or use another payment method.',
+            'processing_error':	'An error occurred while processing the card. Please try again.'
+        }
+
+        voter_card_error_message = card_error_message.get(error_type, default=None)
+        if voter_card_error_message is None:
+            voter_card_error_message = 'Your card has been declined for an unknown reason. Contact your bank for more information.'
+
+        return voter_card_error_message
+
 

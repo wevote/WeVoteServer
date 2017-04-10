@@ -30,6 +30,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     status = ''
     charge_processed_successfully = bool
     error_text_description = ''
+    error_message = ''
 
     ip_address = get_ip_from_headers(request)
 
@@ -114,11 +115,14 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     except stripe.error.CardError as e:
         body = e.json_body
         error_from_json = body['error']
-        donation_status = " STRIPE_STATUS_IS: {http_status} STRIPE_ERROR_IS: {error_type} " \
+        donation_http_status = e.http_status
+        error_type = error_from_json['type']
+        donation_status = " STRIPE_STATUS_IS: {http_status} STRIPE_CARD_ERROR_IS: {error_type} " \
                           "STRIPE_MESSAGE_IS: {error_message} " \
                           "".format(http_status=e.http_status, error_type=error_from_json['type'],
                                     error_message=error_from_json['message'])
         status += donation_status
+        error_message = translate_stripe_error_to_voter_explanation_text(donation_http_status, error_type)
         error_text_description = donation_status
     except stripe.error.StripeError as e:
         body = e.json_body
@@ -145,6 +149,7 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         result_taken, result_taken_date_time, error_text_description)
     donation_entry_saved = donation_log_results['success']
 
+
     results = {
         'status': status,
         'success': success,
@@ -153,8 +158,20 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
         'donation_entry_saved': donation_entry_saved,
         'saved_stripe_donation': saved_stripe_donation,
         'monthly_donation': monthly_donation,
-        'subscription': subscription_saved
+        'subscription': subscription_saved,
+        'error_message_for_voter': error_message
 
     }
 
     return results
+
+
+def translate_stripe_error_to_voter_explanation_text(donation_http_status, error_type):
+    generic_voter_error_message = 'Your payment was unsuccessful. Please try again later.'
+
+    if donation_http_status == '402':
+        error_message_for_voter = DonationManager.retrieve_stripe_card_error_message(error_type)
+    else:
+        error_message_for_voter = generic_voter_error_message
+
+    return error_message_for_voter
