@@ -115,14 +115,12 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     except stripe.error.CardError as e:
         body = e.json_body
         error_from_json = body['error']
-        donation_http_status = e.http_status
-        error_type = error_from_json['type']
         donation_status = " STRIPE_STATUS_IS: {http_status} STRIPE_CARD_ERROR_IS: {error_type} " \
                           "STRIPE_MESSAGE_IS: {error_message} " \
                           "".format(http_status=e.http_status, error_type=error_from_json['type'],
                                     error_message=error_from_json['message'])
         status += donation_status
-        error_message = translate_stripe_error_to_voter_explanation_text(donation_http_status, error_type)
+        error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
         error_text_description = donation_status
     except stripe.error.StripeError as e:
         body = e.json_body
@@ -132,12 +130,14 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
                           "".format(http_status=e.http_status, error_type=error_from_json['type'],
                                     error_message=error_from_json['message'])
         status += donation_status
+        error_message = translate_stripe_error_to_voter_explanation_text(e.http_status, error_from_json['type'])
         error_text_description = donation_status
         print(donation_status)
     except Exception:
         # Something else happened, completely unrelated to Stripe
         donation_status = "A_NON_STRIPE_ERROR_OCCURRED "
         status += donation_status
+        error_message = 'Your payment was unsuccessful. Please try again later.'
 
     result_taken = donation_status  # TODO: Update this to match "action_result" below
     result_taken_date_time = donation_date_time
@@ -146,9 +146,8 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
     # action_result should be CANCEL_REQUEST_FAILED, CANCEL_REQUEST_SUCCEEDED or DONATION_PROCESSED_SUCCESSFULLY
     donation_log_results = donation_manager.create_donation_log_entry(
         ip_address, stripe_customer_id, voter_we_vote_id, charge_id, action_taken, action_taken_date_time,
-        result_taken, result_taken_date_time, error_text_description)
+        result_taken, result_taken_date_time, error_text_description, error_message)
     donation_entry_saved = donation_log_results['success']
-
 
     results = {
         'status': status,
@@ -167,10 +166,11 @@ def donation_with_stripe_for_api(request, token, email, donation_amount, monthly
 
 
 def translate_stripe_error_to_voter_explanation_text(donation_http_status, error_type):
+    donation_manager = DonationManager()
     generic_voter_error_message = 'Your payment was unsuccessful. Please try again later.'
 
-    if donation_http_status == '402':
-        error_message_for_voter = DonationManager.retrieve_stripe_card_error_message(error_type)
+    if donation_http_status == 402:
+        error_message_for_voter = donation_manager.retrieve_stripe_card_error_message(error_type)
     else:
         error_message_for_voter = generic_voter_error_message
 
