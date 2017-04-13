@@ -130,7 +130,10 @@ class DonationLog(models.Model):
                                                   auto_now_add=True)
     action_result_date_time = models.DateTimeField(verbose_name="action result timestamp", auto_now=False,
                                                    auto_now_add=True)
-    error_text_description = models.TextField(verbose_name="message describing error in detail", null=True, blank=True)
+    error_text_description = models.TextField(verbose_name="internal message describing error in detail", null=True,
+                                              blank=True)
+    error_message_for_voter = models.TextField(verbose_name="detailed card error message shown to voter", null=True,
+                                               blank=True)
 
 
 class DonationManager(models.Model):
@@ -225,7 +228,7 @@ class DonationManager(models.Model):
 
     def create_donation_log_entry(self, ip_address, stripe_customer_id, voter_we_vote_id, charge_id, action_taken,
                                   action_taken_date_time, action_result, action_result_date_time,
-                                  error_text_description):
+                                  error_text_description, error_message_for_voter):
 
         new_donation_entry_created = False
         # action_taken should be VOTER_SUBMITTED_DONATION, VOTER_CANCELED_DONATION or CANCEL_REQUEST_SUBMITTED
@@ -238,7 +241,7 @@ class DonationManager(models.Model):
                 ip_address=ip_address, stripe_customer_id=stripe_customer_id, voter_we_vote_id=voter_we_vote_id,
                 charge_id=charge_id, action_taken=action_taken, action_taken_date_time=action_taken_date_time,
                 action_result=action_result, action_result_date_time=action_result_date_time,
-                error_text_description=error_text_description)
+                error_text_description=error_text_description, error_message_for_voter=error_message_for_voter)
             success = True
             status = 'DONATION_LOG_ENTRY_SAVED'
         except Exception as e:
@@ -377,4 +380,48 @@ class DonationManager(models.Model):
             'voter_subscription_saved': subscription_entry['status']
         }
         return results
+
+    def retrieve_stripe_card_error_message(self, error_type):
+        voter_card_error_message = 'Your card has been declined for an unknown reason. Contact your bank for more' \
+                                               ' information.'
+
+        card_error_message = {
+            'approve_with_id': 'The transaction cannot be authorized. Please try again or contact your bank.',
+            'card_not_supported': 'Your card does not support this type of purchase. Contact your bank for more '
+                                  'information.',
+            'card_velocity_exceeded': 'You have exceeded the balance or credit limit available on your card.',
+            'currency_not_supported': 'Your card does not support the specified currency.',
+            'duplicate_transaction': 'This transaction has been declined because a transaction with identical amount '
+                                     'and credit card information was submitted very recently.',
+            'fraudulent': 'This transaction has been flagged as potentially fraudulent. Contact your bank for more '
+                          'information.',
+            'incorrect_number':	'Your card number is incorrect. Please enter the correct number and try again.',
+            'incorrect_pin': 'Your pin is incorrect. Please enter the correct number and try again.',
+            'incorrect_zip': 'Your ZIP/postal code is incorrect. Please enter the correct number and try again.',
+            'insufficient_funds': 'Your card has insufficient funds to complete this transaction.',
+            'invalid_account': 'Your card, or account the card is connected to, is invalid. Contact your bank for more'
+                               ' information.',
+            'invalid_amount': 'The payment amount exceeds the amount that is allowed. Contact your bank for more '
+                              'information.',
+            'invalid_cvc': 'Your CVC number is incorrect. Please enter the correct number and try again.',
+            'invalid_expiry_year': 'The expiration year is invalid. Please enter the correct number and try again.',
+            'invalid_number': 'Your card number is incorrect. Please enter the correct number and try again.',
+            'invalid_pin': 'Your pin is incorrect. Please enter the correct number and try again.',
+            'issuer_not_available': 'The payment cannot be authorized. Please try again or contact your bank.',
+            'new_account_information_available': 'Your card, or account the card is connected to, is invalid. Contact '
+                                                 'your bank for more information.',
+            'withdrawal_count_limit_exceeded': 'You have exceeded the balance or credit limit on your card. Please try '
+                                               'another payment method.',
+            'pin_try_exceeded':	'The allowable number of PIN tries has been exceeded. Please try again later or use '
+                                   'another payment method.',
+            'processing_error':	'An error occurred while processing the card. Please try again.'
+        }
+
+        for error in card_error_message:
+            if error == error_type:
+                voter_card_error_message = card_error_message[error]
+                break
+                # Any other error types that are not in this dict will use the generic voter_card_error_message
+
+        return voter_card_error_message
 
