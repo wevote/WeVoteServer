@@ -290,123 +290,6 @@ class BatchManager(models.Model):
         }
         return results
 
-    def create_batch_row_actions(self, batch_header_id):
-        """
-        Cycle through all BatchRow entries for this batch_header_id and move the values we can find into
-        the BatchRowActionYYY table so we can review it before importing it
-        :param batch_header_id:
-        :return:
-        """
-        success = False
-        status = ""
-        number_of_batch_actions_created = 0
-        kind_of_batch = ""
-
-        if not positive_value_exists(batch_header_id):
-            status = "CREATE_BATCH_ROW_ACTIONS-BATCH_HEADER_ID_MISSING"
-            results = {
-                'success': success,
-                'status': status,
-                'batch_header_id': batch_header_id,
-                'kind_of_batch': kind_of_batch,
-                'batch_actions_created': success,
-                'number_of_batch_actions_created': number_of_batch_actions_created,
-            }
-            return results
-
-        try:
-            batch_description = BatchDescription.objects.get(batch_header_id=batch_header_id)
-            batch_description_found = True
-        except BatchDescription.DoesNotExist:
-            # This is fine
-            batch_description = BatchDescription()
-            batch_description_found = False
-
-        if batch_description_found:
-            kind_of_batch = batch_description.kind_of_batch
-
-            try:
-                batch_header_map = BatchHeaderMap.objects.get(batch_header_id=batch_header_id)
-                batch_header_map_found = True
-            except BatchHeaderMap.DoesNotExist:
-                # This is fine
-                batch_header_map = BatchHeaderMap()
-                batch_header_map_found = False
-
-        if batch_header_map_found:
-            batch_row_list_found = False
-            try:
-                batch_row_list = BatchRow.objects.order_by('id')
-                batch_row_list = batch_row_list.filter(batch_header_id=batch_header_id)
-                if len(batch_row_list):
-                    batch_row_list_found = True
-            except BatchDescription.DoesNotExist:
-                # This is fine
-                batch_row_list = []
-                batch_row_list_found = False
-                pass
-
-        if batch_description_found and batch_header_map_found and batch_row_list_found:
-            for one_batch_row in batch_row_list:
-                if kind_of_batch == ORGANIZATION_WORD:
-                    # Does a BatchRowActionOrganization entry already exist?
-                    existing_results = self.retrieve_batch_row_action_organization(batch_header_id, one_batch_row.id)
-                    if existing_results['batch_row_action_found']:
-                        batch_row_action_organization = existing_results['batch_row_action_organization']
-                    else:
-                        # If a BatchRowActionOrganization entry does not exist, create one
-                        new_results = self.create_batch_row_action_organization(batch_description, batch_header_map,
-                                                                                one_batch_row)
-                        if new_results['batch_row_action_created']:
-                            batch_row_action_organization = new_results['batch_row_action_organization']
-                            number_of_batch_actions_created += 1
-                        else:
-                            # Move on to the next batch_row
-                            continue
-                    # Now check for warnings (like "this is a duplicate"). If warnings are found,
-                    # add the warning to batch_row_action_organization entry
-                    # batch_row_action_organization.kind_of_action = "TEST"
-                    batch_row_action_organization.save()
-
-        results = {
-            'success':                          success,
-            'status':                           status,
-            'batch_header_id':                  batch_header_id,
-            'kind_of_batch':                    kind_of_batch,
-            'batch_actions_created':            success,
-            'number_of_batch_actions_created':  number_of_batch_actions_created,
-        }
-        return results
-
-    def create_batch_row_action_organization(self, batch_description, batch_header_map, one_batch_row):
-        # Find the column in the incoming batch_row with the header == organization_name
-        organization_name = self.retrieve_value_from_batch_row("organization_name", batch_header_map, one_batch_row)
-        # Find the column in the incoming batch_row with the header == state_code
-        state_served_code = self.retrieve_value_from_batch_row("state_code", batch_header_map, one_batch_row)
-
-        try:
-            batch_row_action_organization = BatchRowActionOrganization.objects.create(
-                batch_header_id=batch_description.batch_header_id,
-                batch_row_id=one_batch_row.id,
-                state_served_code=state_served_code,
-                organization_name=organization_name,
-            )
-            batch_row_action_created = True
-            success = True
-            status = "BATCH_ROW_ACTION_ORGANIZATION_CREATED"
-        except Exception as e:
-            batch_row_action_created = False
-            batch_row_action_organization = BatchRowActionOrganization()
-            success = False
-            status = "BATCH_ROW_ACTION_ORGANIZATION_NOT_CREATED"
-
-        results = {
-            'success':                          success,
-            'status':                           status,
-            'batch_row_action_created':         batch_row_action_created,
-            'batch_row_action_organization':    batch_row_action_organization,
-        }
-        return results
 
     def retrieve_batch_row_action_organization(self, batch_header_id, batch_row_id):
         try:
@@ -433,6 +316,34 @@ class BatchManager(models.Model):
             'batch_row_action_organization':    batch_row_action_organization,
         }
         return results
+
+
+    def retrieve_batch_row_action_measure(self, batch_header_id, batch_row_id):
+        try:
+            batch_row_action_measure = BatchRowActionMeasure.objects.get(batch_header_id=batch_header_id,
+                                                                         batch_row_id=batch_row_id)
+            batch_row_action_found = True
+            success = True
+            status = "BATCH_ROW_ACTION_MEASURE_RETRIEVED"
+        except BatchDescription.DoesNotExist:
+            batch_row_action_measure = BatchRowActionMeasure()
+            batch_row_action_found = False
+            success = True
+            status = "BATCH_ROW_ACTION_MEASURE_NOT_FOUND"
+        except Exception as e:
+            batch_row_action_measure = BatchRowActionMeasure()
+            batch_row_action_found = False
+            success = False
+            status = "BATCH_ROW_ACTION_MEASURE_RETRIEVE_ERROR"
+
+        results = {
+            'success':                          success,
+            'status':                           status,
+            'batch_row_action_found':           batch_row_action_found,
+            'batch_row_action_measure':    batch_row_action_measure,
+        }
+        return results
+
 
     def retrieve_value_from_batch_row(self, batch_header_name_we_want, batch_header_map, one_batch_row):
         index_number = 0
@@ -1382,7 +1293,7 @@ class BatchRowActionMeasure(models.Model):
     The definition of the action for importing one Measure.
     """
     batch_header_id = models.PositiveIntegerField(verbose_name="unique id of header row", unique=False, null=False)
-    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=False, null=False)
+    batch_row_id = models.PositiveIntegerField(verbose_name="unique id of batch row", unique=True, null=False)
     kind_of_action = models.CharField(max_length=16, choices=KIND_OF_ACTION_CHOICES, default=TO_BE_DETERMINED)
 
     # Fields from ContestMeasure
@@ -1432,6 +1343,7 @@ class BatchRowActionMeasure(models.Model):
     ballotpedia_page_title = models.CharField(
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
 
 
 class BatchRowActionOffice(models.Model):

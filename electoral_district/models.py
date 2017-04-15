@@ -4,6 +4,7 @@
 
 from django.db import models
 import wevote_functions.admin
+from wevote_functions.functions import positive_value_exists, extract_state_from_ocd_division_id
 from wevote_settings.models import fetch_next_we_vote_id_electoral_district_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -76,6 +77,8 @@ class ElectoralDistrict(models.Model):
 
     ocd_id_external_id = models.CharField(verbose_name="ocd id external identifier", max_length=255, blank=True,
                                           null=True)
+
+    state_code = models.CharField(verbose_name="state code", max_length=3, blank=True, null=True)
     # for now we are only handling ocd_id from the various ExternalIdentifier nodes. Refer to this link for details
     # http://vip-specification.readthedocs.io/en/release/built_rst/xml/enumerations/identifier_type.html
     # #multi-xml-identifier-type
@@ -144,7 +147,7 @@ class ElectoralDistrictManager(models.Model):
 
     def update_or_create_electoral_district(self, ctcl_id_temp, electoral_district_name,
                                             electoral_district_type, electoral_district_number=0,
-                                            electoral_district_other_type='', ocd_id_external_id=0):
+                                            electoral_district_other_type='', ocd_id_external_id=0, state_code=''):
         """
         Either update or create an electoral district entry.
         """
@@ -168,13 +171,15 @@ class ElectoralDistrictManager(models.Model):
                 'electoral_district_number': electoral_district_number,
                 'electoral_district_other_type': electoral_district_other_type,
                 'ocd_id_external_id': ocd_id_external_id,
+                'state_code': state_code
             }
-            new_electoral_district_created = ElectoralDistrict.objects.update_or_create(
+            new_electoral_district, created = ElectoralDistrict.objects.update_or_create(
                 ctcl_id_temp=ctcl_id_temp,
-                electoral_district_name=electoral_district_name, defaults=updated_values)
-            if new_electoral_district_created or len(new_electoral_district_created):
+                    electoral_district_name=electoral_district_name, defaults=updated_values)
+            if new_electoral_district or len(new_electoral_district):
                 success = True
                 status = 'ELECTORAL_DISTRICT_SAVED'
+                # TODO check if we need to return created or actual object in results, new_electoral_district_created. Similarly check in Party app for new_party_created
             else:
                 success = False
                 status = 'MULTIPLE_MATCHING_ELECTORAL_DISTRICTS_FOUND'
@@ -183,11 +188,23 @@ class ElectoralDistrictManager(models.Model):
             'success':                  success,
             'status':                   status,
             'MultipleObjectsReturned':  exception_multiple_object_returned,
-            'new_electoral_district_created':     new_electoral_district_created,
+            'new_electoral_district_created':     created,
         }
         return results
 
-    # def retrieve_electoral_district_from_ctcl_id_temp(self, ctcl_id_temp=0):
+
+    def fetch_state_code(self):
+        if positive_value_exists(self.state_code):
+            return self.state_code
+        else:
+            # # Pull this from ocdDivisionId
+            # if positive_value_exists(self.ocd_id_external_id):
+            #     ocd_division_id = self.ocd_id_external_id
+            #     return extract_state_from_ocd_division_id(ocd_division_id)
+            # else:
+            return ''
+
+            # def retrieve_electoral_district_from_ctcl_id_temp(self, ctcl_id_temp=0):
     #     """
     #     Retrieve electoral district based on ctcl_id_temp
     #     :return:

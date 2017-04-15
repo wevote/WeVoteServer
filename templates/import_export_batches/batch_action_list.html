@@ -44,7 +44,7 @@
     {% endif %}
     : {{ batch_description.batch_name }}
     </h1>
-    <form action="{% url "import_export_batches:batch_action_list_process" %}" method="post" class="form-horizontal">
+    <form action="{% url "import_export_batches:batch_action_list_process" %}" method="get" class="form-horizontal">
         {% csrf_token %}
         <input type="hidden" name="kind_of_batch" value="{{ kind_of_batch }}">
         <input type="hidden" name="batch_header_id" value="{{ batch_header_id }}">
@@ -90,6 +90,7 @@
             {% if batch_header_map.batch_header_map_011 %}<th>{{ batch_header_map.batch_header_map_011 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_012 %}<th>{{ batch_header_map.batch_header_map_012 }}</th>{% endif %}
             {% if batch_header_map.batch_header_map_013 %}<th>{{ batch_header_map.batch_header_map_013 }}</th>{% endif %}
+            <th>&nbsp;</th>
         </tr>
     {% for one_batch_row in batch_row_list %}
         <tr>
@@ -107,6 +108,9 @@
             {% if batch_header_map.batch_header_map_011 %}<td>{{ one_batch_row.batch_row_011 }}</td>{% endif %}
             {% if batch_header_map.batch_header_map_012 %}<td>{{ one_batch_row.batch_row_012 }}</td>{% endif %}
             {% if batch_header_map.batch_header_map_013 %}<td>{{ one_batch_row.batch_row_013 }}</td>{% endif %}
+            {% if not one_batch_row.batch_row_action_exists %}<td>    <a href="{% url 'import_export_batches:batch_action_list_process' %}?batch_header_id={{ batch_header_id }}&batch_row_id={{ one_batch_row.id }}">
+        Analyze</a>
+</td>{% endif %}
         </tr>
         {% if one_batch_row.batch_row_action_exists %}
         <tr>
@@ -127,11 +131,28 @@
                     <td></td>
                     <td></td>
                 </tr>
+                {% elif one_batch_row.kind_of_batch == "MEASURE" %}
+            {# ### MEASURE### #}
+                <tr>
+                    <th></th>
+                    <th>measure_title</th>
+                    <th>measure_subtitle</th>
+                    <th>state_code</th>
+                    <th>ALERTS</th>
+                    <th>ACTIONS</th>
+                </tr>
+                <tr>
+                    <td>analysis:</td>
+                    <td>{{ one_batch_row.batch_row_action.measure_title}}</td>
+                    <td>{{ one_batch_row.batch_row_action.measure_subtitle}}</td>
+                    <td>{{ one_batch_row.batch_row_action.state_code }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
             {% endif %}
             </table></td>
         </tr>
-        {% endif %}
-    {% endfor %}
+        {% endif %}{% endfor %}
     </table>
 
     <p></p>

@@ -4,7 +4,7 @@
 
 from .models import ElectoralDistrict, ElectoralDistrictManager
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, convert_to_int
+from wevote_functions.functions import positive_value_exists, convert_to_int, extract_state_from_ocd_division_id
 import xml.etree.ElementTree as ElementTree
 from exception.models import handle_exception
 
@@ -88,7 +88,15 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
             # look for value of 'ocd-id type value under ExternalIdentifier
             ocd_id_external_id = one_electoral_district.find(
                 "./ExternalIdentifiers/ExternalIdentifier/[Type='ocd-id']/Value").text
-            # defaults = {
+
+        # Pull state_code from ocdDivisionId
+        if positive_value_exists(ocd_id_external_id):
+            # ocd_division_id = ocd_id_external_id
+            state_code = extract_state_from_ocd_division_id(ocd_id_external_id)
+        else:
+            state_code = ''
+
+                            # defaults = {
             #     'electoral_district_number': electoral_district_number,
             #     'electoral_district_other_type': electoral_district_other_type,
             #     'ocd_id_external_id': ocd_id_external_id
@@ -124,7 +132,7 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
                         electoral_district_name,
                         electoral_district_type,
                         electoral_district_number,
-                        electoral_district_other_type, ocd_id_external_id)
+                        electoral_district_other_type, ocd_id_external_id, state_code)
                     if not results:
                         electoral_district_not_processed += 1
                         success = False
@@ -155,6 +163,18 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
     }
 
     return electoral_district_results
+
+
+def retrieve_state_code(ctcl_id_temp):
+    electoral_district_item = ''
+    try:
+        electoral_district_query = ElectoralDistrict.objects.order_by('id')
+        if electoral_district_query:
+            electoral_district_item = electoral_district_query.filter(ctcl_id_temp=ctcl_id_temp)
+    except ElectoralDistrict.DoesNotExist:
+        pass
+
+    return electoral_district_item
 
 
 def get_electoral_district_number(self):
