@@ -8,8 +8,8 @@
 
 NOTE: We are running Django version 1.8
 
-NOTE: WeVoteServer is built for Python 3.4. It currently still works with Python version 2.7.6.
-(tests still have issues with Python 3.4, but everything else works)
+NOTE: WeVoteServer is built for Python 3. It currently still works with Python version 2.7.6.
+(tests still have issues with Python 2.7.6, but everything else works)
 
 ## Clone WeVoteServer from github
 
@@ -62,6 +62,10 @@ Now activate this new virtual environment for WeVoteServer:
     $ cd /Users/<YOUR NAME HERE>/PythonProjects/WeVoteServer/
     $ source /Users/<YOUR NAME HERE>/PythonEnvironments/WeVoteServer3.5/bin/activate
     $ export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"
+    
+If you need to upgrade your Python version later (Macintosh), this command does it:
+
+    $ virtualenv3 -p /Library/Frameworks/Python.framework/Versions/3.6/bin/python3 WeVoteServer3.6.1
     
 ## Installing Python 3 on Ubuntu
 
