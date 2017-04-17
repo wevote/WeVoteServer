@@ -4,7 +4,7 @@
 
 from django.db import models
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, extract_state_from_ocd_division_id
+from wevote_functions.functions import positive_value_exists
 from wevote_settings.models import fetch_next_we_vote_id_electoral_district_integer, fetch_site_unique_id_prefix
 
 logger = wevote_functions.admin.get_logger(__name__)
@@ -152,7 +152,7 @@ class ElectoralDistrictManager(models.Model):
         Either update or create an electoral district entry.
         """
         exception_multiple_object_returned = False
-        new_electoral_district_created = False
+        created = False
 
         # ctcl_id_temp, electoral_district_name and electoral_district_type are required fields for
         # electoral_district. electoral_district_type is set to ELECTORAL_DISTRICT_TYPE_STATE as default value
@@ -165,6 +165,7 @@ class ElectoralDistrictManager(models.Model):
             success = False
             status = 'MISSING_ELECTORAL_DISTRICT_NAME'
         else:
+            # TODO Bulk update_or_create. check if bulk_create handles update as well
             updated_values = {
                 # The rest of the values
                 'electoral_district_type': electoral_district_type,
@@ -174,12 +175,10 @@ class ElectoralDistrictManager(models.Model):
                 'state_code': state_code
             }
             new_electoral_district, created = ElectoralDistrict.objects.update_or_create(
-                ctcl_id_temp=ctcl_id_temp,
-                    electoral_district_name=electoral_district_name, defaults=updated_values)
+                ctcl_id_temp=ctcl_id_temp, electoral_district_name=electoral_district_name, defaults=updated_values)
             if new_electoral_district or len(new_electoral_district):
                 success = True
                 status = 'ELECTORAL_DISTRICT_SAVED'
-                # TODO check if we need to return created or actual object in results, new_electoral_district_created. Similarly check in Party app for new_party_created
             else:
                 success = False
                 status = 'MULTIPLE_MATCHING_ELECTORAL_DISTRICTS_FOUND'
@@ -192,56 +191,8 @@ class ElectoralDistrictManager(models.Model):
         }
         return results
 
-
     def fetch_state_code(self):
         if positive_value_exists(self.state_code):
             return self.state_code
         else:
-            # # Pull this from ocdDivisionId
-            # if positive_value_exists(self.ocd_id_external_id):
-            #     ocd_division_id = self.ocd_id_external_id
-            #     return extract_state_from_ocd_division_id(ocd_division_id)
-            # else:
             return ''
-
-            # def retrieve_electoral_district_from_ctcl_id_temp(self, ctcl_id_temp=0):
-    #     """
-    #     Retrieve electoral district based on ctcl_id_temp
-    #     :return:
-    #     """
-    #     electoral_district_list_found = False
-    #     electoral_district_list = []
-    #
-    #     if positive_value_exists(ctcl_id_temp):
-    #         # retrieve electoral district details based on ctcl_id_temp
-    #             electoral_district_list = ElectoralDistrict.objects.all()
-    #             electoral_district_list = electoral_district_list.filter(ctcl_id_temp=ctcl_id_temp)
-    #             if len(electoral_district_list):
-    #                 electoral_district_list_found = True
-    #
-    #     if electoral_district_list_found:
-    #         results = {
-    #             'status': "ELECTORAL_DISTRICT_ITEMS_FOUND",
-    #             'success': True,
-    #             'electoral_district_list': electoral_district_list,
-    #         }
-    #         return results
-    #     else:
-    #         results = {
-    #             'status': "ELECTORAL_DISTRICT_ITEMS_NOT_FOUND",
-    #             'success': True,
-    #             'electoral_district_list': [],
-    #         }
-    #         return results
-
-# class ElectoralDistrictExternalIdentifiersLink(models.Model):
-#     """
-#     A link between ElectoralDistricts & ExternalIdentifiers.
-#     """
-#     # id = models.CharField(verbose_name="unique id for Electoral District external identifiers", null=False,
-#     #                       blank=False, unique=True)
-#     electoral_district_id = models.ForeignKey(ElectoralDistrict, related_name='%(app_label)s_%(class)s_related',
-#                                               null=True, blank=True)
-#     # external_identifier_id = models.ForeignKey(ExternalIdentifier, related_name='external id row id', null=True,
-#     #                                            blank=True)
-

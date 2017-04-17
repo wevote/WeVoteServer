@@ -7,6 +7,7 @@ import wevote_functions.admin
 from wevote_functions.functions import positive_value_exists, convert_to_int, extract_state_from_ocd_division_id
 import xml.etree.ElementTree as ElementTree
 from exception.models import handle_exception
+from exception.models import handle_record_found_more_than_one_exception
 
 logger = wevote_functions.admin.get_logger(__name__)
 
@@ -96,7 +97,7 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
         else:
             state_code = ''
 
-                            # defaults = {
+            # defaults = {
             #     'electoral_district_number': electoral_district_number,
             #     'electoral_district_other_type': electoral_district_other_type,
             #     'ocd_id_external_id': ocd_id_external_id
@@ -165,16 +166,41 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
     return electoral_district_results
 
 
-def retrieve_state_code(ctcl_id_temp):
-    electoral_district_item = ''
-    try:
-        electoral_district_query = ElectoralDistrict.objects.order_by('id')
-        if electoral_district_query:
-            electoral_district_item = electoral_district_query.filter(ctcl_id_temp=ctcl_id_temp)
-    except ElectoralDistrict.DoesNotExist:
-        pass
+def retrieve_electoral_district(ctcl_id_temp):
+    results = ''
+    state_code = ''
+    state_code_found = False
+    electoral_district_found = False
 
-    return electoral_district_item
+    try:
+        electoral_district_query = ElectoralDistrict.objects.all()
+        electoral_district_item = electoral_district_query.get(ctcl_id_temp=ctcl_id_temp)
+        electoral_district_found = True
+        state_code = electoral_district_item.state_code
+        if positive_value_exists(state_code):
+            state_code_found = True
+
+    except ElectoralDistrict.MultipleObjectsReturned as e:
+        electoral_district_item = ElectoralDistrict()
+        handle_record_found_more_than_one_exception(e, logger)
+
+        status = "ERROR_MORE_THAN_ONE_ELECTORAL_DISTRICT_FOUND"
+
+        success = False
+    except ElectoralDistrict.DoesNotExist:
+        electoral_district_item = ElectoralDistrict()
+        pass
+    # TODO check for DC state pattern to return 'special' state code
+    # return electoral_district_item
+
+    results = {
+        'electoral_district_found': electoral_district_found,
+        'state_code_found': state_code_found,
+        'electoral_district': electoral_district_item,
+        'state_code': state_code
+    }
+
+    return results
 
 
 def get_electoral_district_number(self):

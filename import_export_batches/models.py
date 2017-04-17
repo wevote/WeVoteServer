@@ -1344,6 +1344,7 @@ class BatchRowActionMeasure(models.Model):
         verbose_name="Page title on Ballotpedia", max_length=255, null=True, blank=True)
     ballotpedia_photo_url = models.URLField(verbose_name='url of ballotpedia logo', blank=True, null=True)
     ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    status = models.CharField(verbose_name="Batch Row Action Status", max_length=80, null=True, blank=True)
 
 
 class BatchRowActionOffice(models.Model):

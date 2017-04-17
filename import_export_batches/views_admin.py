@@ -274,6 +274,12 @@ def batch_action_list_process_view(request):
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch))
 
+    messages.add_message(request, messages.INFO, 'Batch Actions:'
+                                                 'Batch kind:{kind_of_batch}, '
+                                                 'Created:{created} '
+                                                 ''.format(kind_of_batch=kind_of_batch,
+                                                           created=results['number_of_batch_actions_created']))
+
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
                                 "&batch_header_id=" + str(batch_header_id))
