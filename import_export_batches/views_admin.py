@@ -3,6 +3,7 @@
 # -*- coding: UTF-8 -*-
 
 from .models import BatchDescription, BatchHeaderMap, BatchManager, BatchRow
+from .controllers import create_batch_row_actions
 from admin_tools.views import redirect_to_sign_in_page
 from ballot.models import MEASURE, OFFICE, CANDIDATE, POLITICIAN
 from django.contrib.auth.decorators import login_required
@@ -207,14 +208,25 @@ def batch_action_list_view(request):
     batch_manager = BatchManager()
     if batch_list_found:
         for one_batch_row in batch_row_list:
-            existing_results = batch_manager.retrieve_batch_row_action_organization(batch_header_id, one_batch_row.id)
-            if existing_results['batch_row_action_found']:
-                one_batch_row.batch_row_action = existing_results['batch_row_action_organization']
-                one_batch_row.kind_of_batch = ORGANIZATION_WORD
-                one_batch_row.batch_row_action_exists = True
-            else:
-                one_batch_row.batch_row_action_exists = False
-            modified_batch_row_list.append(one_batch_row)
+            if kind_of_batch == ORGANIZATION_WORD:
+                existing_results = batch_manager.retrieve_batch_row_action_organization(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_organization']
+                    one_batch_row.kind_of_batch = ORGANIZATION_WORD
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+            elif kind_of_batch == MEASURE:
+                existing_results = batch_manager.retrieve_batch_row_action_measure(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_measure']
+                    one_batch_row.kind_of_batch = MEASURE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
+
 
     election_list = Election.objects.order_by('-election_day_text')
     messages_on_stage = get_messages(request)
@@ -243,21 +255,30 @@ def batch_action_list_process_view(request):
     if not voter_has_authority(request, authority_required):
         return redirect_to_sign_in_page(request, authority_required)
 
-    batch_header_id = convert_to_int(request.POST.get('batch_header_id', 0))
-    kind_of_batch = request.POST.get('kind_of_batch', '')
-    create_actions_button = request.POST.get('create_actions_button', '')
+    batch_header_id = convert_to_int(request.GET.get('batch_header_id', 0))
+    batch_row_id = convert_to_int(request.GET.get('batch_row_id', 0))
+    kind_of_batch = request.GET.get('kind_of_batch', '')
+    create_actions_button = request.GET.get('create_actions_button', '')
 
-    if create_actions_button in (MEASURE, OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION):
+    # if create_actions_button in (MEASURE, OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION, POLITICIAN):
         # Analyze the data based on the kind of data
-        batch_manager = BatchManager()
-        results = batch_manager.create_batch_row_actions(batch_header_id)
-        if results['batch_actions_created']:
-            pass
+        # batch_manager = BatchManager()
+        # results = batch_manager.create_batch_row_actions(batch_header_id)
+    results = create_batch_row_actions(batch_header_id, batch_row_id)
+        # if results['batch_actions_created']:
+        #     pass
 
+    kind_of_batch = results['kind_of_batch']
     if not positive_value_exists(batch_header_id):
         messages.add_message(request, messages.ERROR, 'Batch_header_id required.')
         return HttpResponseRedirect(reverse('import_export_batches:batch_list', args=()) +
                                     "?kind_of_batch=" + str(kind_of_batch))
+
+    messages.add_message(request, messages.INFO, 'Batch Actions:'
+                                                 'Batch kind:{kind_of_batch}, '
+                                                 'Created:{created} '
+                                                 ''.format(kind_of_batch=kind_of_batch,
+                                                           created=results['number_of_batch_actions_created']))
 
     return HttpResponseRedirect(reverse('import_export_batches:batch_action_list', args=()) +
                                 "?kind_of_batch=" + str(kind_of_batch) +
