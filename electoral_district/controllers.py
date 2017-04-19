@@ -4,7 +4,8 @@
 
 from .models import ElectoralDistrict, ElectoralDistrictManager
 import wevote_functions.admin
-from wevote_functions.functions import positive_value_exists, convert_to_int, extract_state_from_ocd_division_id
+from wevote_functions.functions import positive_value_exists, convert_to_int, extract_state_from_ocd_division_id, \
+    extract_district_from_ocd_division_id
 import xml.etree.ElementTree as ElementTree
 from exception.models import handle_exception
 from exception.models import handle_record_found_more_than_one_exception
@@ -29,7 +30,7 @@ def electoral_districts_import_from_sample_file(filename):
         # Look for ElectoralDistrict and create the Master table first. ElectoralDistrict is the direct child node
         # of vipObject
         electoral_district_item_list = xml_root.findall('ElectoralDistrict')
-        number_of_electoral_districts = len(electoral_district_item_list)
+        # number_of_electoral_districts = len(electoral_district_item_list)
 
     return electoral_district_import_from_xml_data(electoral_district_item_list)
 
@@ -94,14 +95,24 @@ def electoral_district_import_from_xml_data(electoral_district_xml_data):
         if positive_value_exists(ocd_id_external_id):
             # ocd_division_id = ocd_id_external_id
             state_code = extract_state_from_ocd_division_id(ocd_id_external_id)
+            if not positive_value_exists(state_code):
+                district_code = extract_district_from_ocd_division_id(ocd_id_external_id)
+                district_code.lower()
+                # check if it is District of Columbia (DC). DC doesn't have state substring in ocd_id
+                if district_code == 'dc':
+                    state_code = 'dc'
         else:
             state_code = ''
-
             # defaults = {
             #     'electoral_district_number': electoral_district_number,
             #     'electoral_district_other_type': electoral_district_other_type,
             #     'ocd_id_external_id': ocd_id_external_id
             # }
+
+        # Always store state_code in lower case
+        if state_code:
+            state_code = state_code.lower()
+
         # Make sure we have the minimum required variables
         if not positive_value_exists(ctcl_id_temp) or not positive_value_exists(electoral_district_name):
             electoral_district_not_processed += 1
@@ -186,18 +197,16 @@ def retrieve_electoral_district(ctcl_id_temp):
 
         status = "ERROR_MORE_THAN_ONE_ELECTORAL_DISTRICT_FOUND"
 
-        success = False
     except ElectoralDistrict.DoesNotExist:
         electoral_district_item = ElectoralDistrict()
         pass
-    # TODO check for DC state pattern to return 'special' state code
-    # return electoral_district_item
 
+    # return electoral_district_item
     results = {
         'electoral_district_found': electoral_district_found,
-        'state_code_found': state_code_found,
-        'electoral_district': electoral_district_item,
-        'state_code': state_code
+        'state_code_found':         state_code_found,
+        'electoral_district':       electoral_district_item,
+        'state_code':               state_code
     }
 
     return results

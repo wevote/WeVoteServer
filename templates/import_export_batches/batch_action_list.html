@@ -149,6 +149,22 @@
                     <td></td>
                     <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
                 </tr>
+                {% elif one_batch_row.kind_of_batch == "OFFICE" %}
+            {# ### OFFICE### #}
+                <tr>
+                    <th></th>
+                    <th>office_name</th>
+                    <th>state_code</th>
+                    <th>ALERTS</th>
+                    <th>ACTIONS</th>
+                </tr>
+                <tr>
+                    <td>analysis:</td>
+                    <td>{{ one_batch_row.batch_row_action.office_name}}</td>
+                    <td>{{ one_batch_row.batch_row_action.state_code }}</td>
+                    <td></td>
+                    <td>{{ one_batch_row.batch_row_action.kind_of_action }}</td>
+                </tr>
             {% endif %}
             </table></td>
         </tr>

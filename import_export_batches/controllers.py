@@ -13,8 +13,9 @@ from voter_guide.models import ORGANIZATION_WORD
 import wevote_functions.admin
 from wevote_functions.functions import convert_to_int, positive_value_exists
 from .models import BatchManager, BatchDescription, BatchHeaderMap, BatchRow, BatchRowActionOrganization, \
-    BatchRowActionMeasure
+    BatchRowActionMeasure, BatchRowActionOffice
 from measure.models import ContestMeasure
+from office.models import ContestOffice
 from electoral_district.controllers import retrieve_electoral_district
 from exception.models import handle_exception
 
@@ -28,6 +29,7 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
     Cycle through all BatchRow entries for this batch_header_id and move the values we can find into
     the BatchRowActionYYY table so we can review it before importing it
     :param batch_header_id:
+    :param batch_row_id:
     :return:
     """
     success = False
@@ -107,14 +109,22 @@ def create_batch_row_actions(batch_header_id, batch_row_id):
                 batch_row_action_organization.save()
 
             elif kind_of_batch == MEASURE:
-                results = create_batch_row_action_measure(batch_header_id, batch_description, batch_header_map,
-                                                          one_batch_row)
+                results = create_batch_row_action_measure(batch_description, batch_header_map, one_batch_row)
 
                 if results['new_action_measure_created']:
                     # for now, do not handle batch_row_action_measure data
                     # batch_row_action_measure = results['batch_row_action_measure']
                     number_of_batch_actions_created += 1
                     success = True
+            elif kind_of_batch == OFFICE:
+                results = create_batch_row_action_office(batch_description, batch_header_map, one_batch_row)
+
+                if results['new_action_office_created']:
+                    # for now, do not handle batch_row_action_office data
+                    # batch_row_action_office = results['batch_row_action_office']
+                    number_of_batch_actions_created += 1
+                    success = True
+
                 # Now check for warnings (like "this is a duplicate"). If warnings are found,
                 # add the warning to batch_row_action_measure entry
                 # batch_row_action_measure.kind_of_action = "TEST"
@@ -165,10 +175,9 @@ def create_batch_row_action_organization(batch_description, batch_header_map, on
     return results
 
 
-def create_batch_row_action_measure(batch_header_id, batch_description, batch_header_map, one_batch_row):
+def create_batch_row_action_measure(batch_description, batch_header_map, one_batch_row):
     """
     Handle batch_row for measure type
-    :param batch_header_id:
     :param batch_description:
     :param batch_header_map:
     :param one_batch_row:
@@ -178,7 +187,7 @@ def create_batch_row_action_measure(batch_header_id, batch_description, batch_he
 
     new_action_measure_created = False
     state_code = ''
-    batch_row_action_measure_status =  ''
+    batch_row_action_measure_status = ''
 
     # Find the column in the incoming batch_row with the header == measure_title
     measure_title = batch_manager.retrieve_value_from_batch_row("measure_title", batch_header_map, one_batch_row)
@@ -187,11 +196,11 @@ def create_batch_row_action_measure(batch_header_id, batch_description, batch_he
                                                                         one_batch_row)
     google_civic_election_id = str(batch_description.google_civic_election_id)
 
-    state_code_results = retrieve_electoral_district(electoral_district_id)
-    if state_code_results['electoral_district_found']:
-        if state_code_results['state_code_found']:
-            state_code = state_code_results['state_code']
-            # state_code = state_code_results.values_list('state_code', flat=True).get()
+    results = retrieve_electoral_district(electoral_district_id)
+    if results['electoral_district_found']:
+        if results['state_code_found']:
+            state_code = results['state_code']
+            # state_code = results.values_list('state_code', flat=True).get()
     else:
         # state_code = ''
         batch_row_action_measure_status = 'ELECTORAL_DISTRICT_NOT_FOUND'
@@ -208,7 +217,7 @@ def create_batch_row_action_measure(batch_header_id, batch_description, batch_he
     contest_measure = ContestMeasure()
     # These three parameters are needed to look up in Contest Measure table for a match
     if positive_value_exists(measure_title) and positive_value_exists(state_code) and \
-        positive_value_exists(google_civic_election_id):
+            positive_value_exists(google_civic_election_id):
         try:
             contest_measure_query = ContestMeasure.objects.order_by('id')
             contest_measure_item_list = contest_measure_query.filter(measure_title__iexact=measure_title,
@@ -217,10 +226,10 @@ def create_batch_row_action_measure(batch_header_id, batch_description, batch_he
 
             if contest_measure_item_list or len(contest_measure_item_list):
                 # entry exists
-                status = 'BATCH_ROW_ACTION_MEASURE_RETRIEVED'
-                batch_row_action_found = True
-                new_action_measure_created = False
-                success = True
+                batch_row_action_measure_status = 'BATCH_ROW_ACTION_MEASURE_RETRIEVED'
+                # batch_row_action_found = True
+                # new_action_measure_created = False
+                # success = True
                 batch_row_action_measure = contest_measure_item_list
                 # if a single entry matches, update that entry
                 if len(contest_measure_item_list) == 1:
@@ -232,10 +241,10 @@ def create_batch_row_action_measure(batch_header_id, batch_description, batch_he
                 kind_of_action = 'CREATE'
         except ContestMeasure.DoesNotExist:
             batch_row_action_measure = BatchRowActionMeasure()
-            batch_row_action_found = False
-            success = True
-            status = "BATCH_ROW_ACTION_MEASURE_NOT_FOUND"
-            kind_of_action  = 'TBD'
+            # batch_row_action_found = False
+            # success = True
+            batch_row_action_measure_status = "BATCH_ROW_ACTION_MEASURE_NOT_FOUND"
+            kind_of_action = 'TBD'
     else:
         kind_of_action = 'TBD'
         batch_row_action_measure_status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_MEASURE_CREATE"
@@ -271,6 +280,114 @@ def create_batch_row_action_measure(batch_header_id, batch_description, batch_he
         'status': status,
         'new_action_measure_created': new_action_measure_created,
         'batch_row_action_measure': batch_row_action_measure,
+    }
+    return results
+
+
+def create_batch_row_action_office(batch_description, batch_header_map, one_batch_row):
+    """
+    Handle batch_row for office type
+    :param batch_description:
+    :param batch_header_map:
+    :param one_batch_row:
+    :return:
+    """
+    batch_manager = BatchManager()
+
+    new_action_office_created = False
+    state_code = ''
+    batch_row_action_office_status = ''
+
+    # Find the column in the incoming batch_row with the header == office_name
+    office_name = batch_manager.retrieve_value_from_batch_row("office_name", batch_header_map, one_batch_row)
+    # Find the column in the incoming batch_row with the header == state_code
+    electoral_district_id = batch_manager.retrieve_value_from_batch_row("electoral_district_id", batch_header_map,
+                                                                        one_batch_row)
+    google_civic_election_id = str(batch_description.google_civic_election_id)
+    results = retrieve_electoral_district(electoral_district_id)
+    if results['electoral_district_found']:
+        if results['state_code_found']:
+            state_code = results['state_code']
+    else:
+        # state_code = ''
+        batch_row_action_office_status = 'ELECTORAL_DISTRICT_NOT_FOUND'
+        kind_of_action = 'TBD'
+
+    ctcl_uuid = batch_manager.retrieve_value_from_batch_row("office_ctcl_uuid", batch_header_map, one_batch_row)
+
+    office_description = batch_manager.retrieve_value_from_batch_row("office_description", batch_header_map,
+                                                                     one_batch_row)
+    office_is_partisan = batch_manager.retrieve_value_from_batch_row("office_is_partisan", batch_header_map,
+                                                                     one_batch_row)
+
+    # Look up ContestOffice to see if an entry exists
+    # contest_office = ContestOffice()
+    # These three parameters are needed to look up in ContestOffice table for a match
+    if positive_value_exists(office_name) and positive_value_exists(state_code) and \
+            positive_value_exists(google_civic_election_id):
+        try:
+            contest_office_query = ContestOffice.objects.all()
+            contest_office_query = contest_office_query.filter(office_name__iexact=office_name,
+                                                               state_code__iexact=state_code,
+                                                               google_civic_election_id=google_civic_election_id)
+
+            contest_office_item_list = list(contest_office_query)
+            if len(contest_office_item_list):
+                # entry exists
+                batch_row_action_office_status = 'BATCH_ROW_ACTION_OFFICE_RETRIEVED'
+                batch_row_action_found = True
+                new_action_office_created = False
+                # success = True
+                # if a single entry matches, update that entry
+                if len(contest_office_item_list) == 1:
+                    kind_of_action = 'ADD_TO_EXISTING'
+                else:
+                    # more than one entry found with a match in ContestOffice
+                    kind_of_action = 'DO_NOT_PROCESS'
+            else:
+                kind_of_action = 'CREATE'
+        except ContestOffice.DoesNotExist:
+            batch_row_action_office = BatchRowActionOffice()
+            batch_row_action_found = False
+            # success = True
+            batch_row_action_office_status = "BATCH_ROW_ACTION_OFFICE_NOT_FOUND"
+            kind_of_action = 'TBD'
+    else:
+        kind_of_action = 'TBD'
+        batch_row_action_office_status = "INSUFFICIENT_DATA_FOR_BATCH_ROW_ACTION_OFFICE_CREATE"
+    # Create a new entry in BatchRowActionOffice
+    try:
+        updated_values = {
+            'office_name': office_name,
+            'state_code': state_code,
+            'office_description': office_description,
+            'ctcl_uuid': ctcl_uuid,
+            'office_is_partisan': office_is_partisan,
+            'kind_of_action': kind_of_action,
+            'google_civic_election_id': google_civic_election_id,
+            'status': batch_row_action_office_status
+        }
+
+        batch_row_action_office, new_action_office_created = BatchRowActionOffice.objects.update_or_create(
+            batch_header_id=batch_description.batch_header_id, batch_row_id=one_batch_row.id,
+            defaults=updated_values)
+        # new_action_office_created = True
+        success = True
+        status = "BATCH_ROW_ACTION_OFFICE_CREATED"
+
+    except Exception as e:
+        batch_row_action_office = BatchRowActionOffice()
+        batch_row_action_found = False
+        success = False
+        new_action_office_created = False
+        status = "BATCH_ROW_ACTION_OFFICE_RETRIEVE_ERROR"
+        handle_exception(e, logger=logger, exception_message=status)
+
+    results = {
+        'success': success,
+        'status': status,
+        'new_action_office_created': new_action_office_created,
+        'batch_row_action_office': batch_row_action_office,
     }
     return results
 

@@ -239,6 +239,32 @@ def extract_state_from_ocd_division_id(ocd_division_id):
     return fields['state']
 
 
+def extract_district_from_ocd_division_id(ocd_division_id):
+    # Pull this from ocdDivisionId
+    pieces = [piece.split(':', 1) for piece in ocd_division_id.split('/')]
+    fields = {}
+
+    # if it included the ocd-division bit, pop it off
+    if pieces[0] == ['ocd-division']:
+        pieces.pop(0)
+
+    if pieces[0][0] != 'country':
+        # raise ValueError('OCD id must start with country')
+        return ''
+    fields['country'] = pieces[0][1]
+
+    if len(pieces) < 2:
+        return ''
+
+    if pieces[1][0] != 'district':
+        # raise ValueError('Expecting state from OCD, and district not found')
+        return ''
+
+    fields['district'] = pieces[1][1]
+
+    return fields['district']
+
+
 def extract_zip5_from_zip9(zip9):
     zip5_text = zip9[0:5]
     if len(zip5_text) == 5:
