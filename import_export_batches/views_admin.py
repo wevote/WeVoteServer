@@ -209,7 +209,8 @@ def batch_action_list_view(request):
     if batch_list_found:
         for one_batch_row in batch_row_list:
             if kind_of_batch == ORGANIZATION_WORD:
-                existing_results = batch_manager.retrieve_batch_row_action_organization(batch_header_id, one_batch_row.id)
+                existing_results = batch_manager.retrieve_batch_row_action_organization(batch_header_id,
+                                                                                        one_batch_row.id)
                 if existing_results['batch_row_action_found']:
                     one_batch_row.batch_row_action = existing_results['batch_row_action_organization']
                     one_batch_row.kind_of_batch = ORGANIZATION_WORD
@@ -226,7 +227,15 @@ def batch_action_list_view(request):
                 else:
                     one_batch_row.batch_row_action_exists = False
                 modified_batch_row_list.append(one_batch_row)
-
+            elif kind_of_batch == OFFICE:
+                existing_results = batch_manager.retrieve_batch_row_action_office(batch_header_id, one_batch_row.id)
+                if existing_results['batch_row_action_found']:
+                    one_batch_row.batch_row_action = existing_results['batch_row_action_office']
+                    one_batch_row.kind_of_batch = OFFICE
+                    one_batch_row.batch_row_action_exists = True
+                else:
+                    one_batch_row.batch_row_action_exists = False
+                modified_batch_row_list.append(one_batch_row)
 
     election_list = Election.objects.order_by('-election_day_text')
     messages_on_stage = get_messages(request)
@@ -261,12 +270,12 @@ def batch_action_list_process_view(request):
     create_actions_button = request.GET.get('create_actions_button', '')
 
     # if create_actions_button in (MEASURE, OFFICE, CANDIDATE, ORGANIZATION_WORD, POSITION, POLITICIAN):
-        # Analyze the data based on the kind of data
-        # batch_manager = BatchManager()
-        # results = batch_manager.create_batch_row_actions(batch_header_id)
+    # Analyze the data based on the kind of data
+    # batch_manager = BatchManager()
+    # results = batch_manager.create_batch_row_actions(batch_header_id)
     results = create_batch_row_actions(batch_header_id, batch_row_id)
-        # if results['batch_actions_created']:
-        #     pass
+    # if results['batch_actions_created']:
+    #     pass
 
     kind_of_batch = results['kind_of_batch']
     if not positive_value_exists(batch_header_id):

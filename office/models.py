@@ -80,6 +80,9 @@ class ContestOffice(models.Model):
                                                  max_length=255, null=True, blank=True)
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    office_description = models.CharField(verbose_name="office description", max_length=255, null=True, blank=True)
+    office_is_partisan = models.BooleanField(verbose_name="office is_partisan", default=False)
 
     def get_office_state(self):
         if positive_value_exists(self.state_code):

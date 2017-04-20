@@ -17,7 +17,7 @@ import urllib
 from exception.models import handle_exception
 import magic
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 
 KIND_OF_BATCH_CHOICES = (
     (MEASURE,           'Measure'),
@@ -290,7 +290,6 @@ class BatchManager(models.Model):
         }
         return results
 
-
     def retrieve_batch_row_action_organization(self, batch_header_id, batch_row_id):
         try:
             batch_row_action_organization = BatchRowActionOrganization.objects.get(batch_header_id=batch_header_id,
@@ -316,7 +315,6 @@ class BatchManager(models.Model):
             'batch_row_action_organization':    batch_row_action_organization,
         }
         return results
-
 
     def retrieve_batch_row_action_measure(self, batch_header_id, batch_row_id):
         try:
@@ -344,6 +342,38 @@ class BatchManager(models.Model):
         }
         return results
 
+    def retrieve_batch_row_action_office(self, batch_header_id, batch_row_id):
+        """
+        Retrieves data from BatchRowActionOffice table
+        :param batch_header_id:
+        :param batch_row_id:
+        :return:
+        """
+
+        try:
+            batch_row_action_office = BatchRowActionOffice.objects.get(batch_header_id=batch_header_id,
+                                                                       batch_row_id=batch_row_id)
+            batch_row_action_found = True
+            success = True
+            status = "BATCH_ROW_ACTION_OFFICE_RETRIEVED"
+        except BatchDescription.DoesNotExist:
+            batch_row_action_office = BatchRowActionOffice()
+            batch_row_action_found = False
+            success = True
+            status = "BATCH_ROW_ACTION_OFFICE_NOT_FOUND"
+        except Exception as e:
+            batch_row_action_office = BatchRowActionOffice()
+            batch_row_action_found = False
+            success = False
+            status = "BATCH_ROW_ACTION_OFFICE_RETRIEVE_ERROR"
+
+        results = {
+            'success':                  success,
+            'status':                   status,
+            'batch_row_action_found':   batch_row_action_found,
+            'batch_row_action_office':  batch_row_action_office,
+        }
+        return results
 
     def retrieve_value_from_batch_row(self, batch_header_name_we_want, batch_header_map, one_batch_row):
         index_number = 0
@@ -405,7 +435,7 @@ class BatchManager(models.Model):
         # # xml_data_list_json = list(xml_data)
         # structured_json = json.dumps(xml_data)
 
-        xml_tree = ET.parse(request)
+        xml_tree = ElementTree.parse(request)
         request.close()
         xml_root = xml_tree.getroot()
 
@@ -717,7 +747,6 @@ class BatchManager(models.Model):
         success = False
         status = ''
         limit_for_testing = 5
-
 
         # Get party names and their corresponding party ids
         party_details_list = retrieve_all_party_names_and_ids_api()
@@ -1417,6 +1446,10 @@ class BatchRowActionOffice(models.Model):
                                                  max_length=255, null=True, blank=True)
     # "Yes" or "No" depending on whether this a contest being held outside the normal election cycle.
     special = models.CharField(verbose_name="google civic primary party", max_length=255, null=True, blank=True)
+    ctcl_uuid = models.CharField(verbose_name="ctcl uuid", max_length=80, null=True, blank=True)
+    office_description = models.CharField(verbose_name="office description", max_length=255, null=True, blank=True)
+    office_is_partisan = models.BooleanField(verbose_name='office is_partisan', default=False)
+    status = models.CharField(verbose_name="Batch Row Action Office Status", max_length=80, null=True, blank=True)
 
 
 class BatchRowActionCandidate(models.Model):
