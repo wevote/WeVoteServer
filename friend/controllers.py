@@ -405,8 +405,8 @@ def friend_invitation_by_email_send_for_api(voter_device_id, email_address_array
             "sender_network_details":       sender_network_details,
             "recipient_name":               recipient_name,
             "recipient_voter_email":        recipient_voter_email,
-            "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/requests",
-            "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/requests/" + invitation_secret_key,
+            "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/more/network",
+            "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/" + invitation_secret_key,
             "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
             "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
         }
@@ -815,8 +815,8 @@ def friend_invitation_by_we_vote_id_send_for_api(voter_device_id, other_voter_we
                 "sender_network_details":       sender_network_details,
                 "recipient_name":               recipient_name,
                 "recipient_voter_email":        recipient_voter_email,
-                "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/requests",
-                "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/requests/" + invitation_secret_key,
+                "see_all_friend_requests_url":  WEB_APP_ROOT_URL + "/more/network",
+                "confirm_friend_request_url":   WEB_APP_ROOT_URL + "/more/network/" + invitation_secret_key,
                 "recipient_unsubscribe_url":    WEB_APP_ROOT_URL + "/unsubscribe?email_key=1234",
                 "email_open_url":               WE_VOTE_SERVER_ROOT_URL + "/apis/v1/emailOpen?email_key=1234",
             }
